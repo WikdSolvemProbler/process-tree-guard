@@ -22,7 +22,7 @@ name: ci
 
 on:
   push:
-    branches: [main, arm64-build]
+    branches: [main]
   pull_request:
 
 permissions:
