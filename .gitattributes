@@ -1,0 +1,2 @@
+# The Python test harness is test code; count the product by its Rust.
+*.py linguist-detectable=false
