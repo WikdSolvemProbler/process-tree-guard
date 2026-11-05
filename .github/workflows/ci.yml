@@ -8,6 +8,9 @@
 #         Linux. It compiles every target and executes none of them.
 # build:  release build of the programs for x86_64-pc-windows-msvc on Windows, then the
 #         library unit tests, then an artifact that holds the four programs.
+# build-arm64: release build of the programs for aarch64-pc-windows-msvc on a Windows 11 Arm64
+#         hosted runner, then the library unit tests run natively on Arm64, then an artifact
+#         that holds the four programs.
 # minimum-rust: the same check with the toolchain named by rust-version in Cargo.toml.
 #
 # The integration test suite (tests/guard.rs and the other files in tests/) is NOT run
@@ -19,7 +22,7 @@ name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [main, arm64-build]
   pull_request:
 
 permissions:
@@ -126,5 +129,43 @@ jobs:
             target/x86_64-pc-windows-msvc/release/process-tree-guard-deadline.exe
             target/x86_64-pc-windows-msvc/release/process-tree-guard-gate.exe
             target/x86_64-pc-windows-msvc/release/process-tree-guard-contain.exe
+          if-no-files-found: error
+          retention-days: 30
+
+  build-arm64:
+    name: build (aarch64-pc-windows-msvc)
+    runs-on: windows-11-arm
+    timeout-minutes: 45
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the Rust toolchain and the target
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustup target add aarch64-pc-windows-msvc
+          rustc --version
+          cargo --version
+
+      - name: Build, release
+        run: cargo build --release --locked --target aarch64-pc-windows-msvc --all-targets
+
+      # Native on Arm64. The library unit tests only; the integration suite is not run here.
+      - name: Test the library, release
+        run: cargo test --release --locked --lib --target aarch64-pc-windows-msvc
+
+      - name: Upload the programs
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: process-tree-guard-aarch64-pc-windows-msvc
+          path: |
+            target/aarch64-pc-windows-msvc/release/process-tree-guard.exe
+            target/aarch64-pc-windows-msvc/release/process-tree-guard-deadline.exe
+            target/aarch64-pc-windows-msvc/release/process-tree-guard-gate.exe
+            target/aarch64-pc-windows-msvc/release/process-tree-guard-contain.exe
           if-no-files-found: error
           retention-days: 30
