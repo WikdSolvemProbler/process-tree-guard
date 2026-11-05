@@ -88,8 +88,13 @@ try {
     $unpacked = Join-Path $work "unpacked"
     Expand-Archive -Path $zip -DestinationPath $unpacked
     $from = (Get-ChildItem $unpacked -Directory | Select-Object -First 1).FullName
+    # Every file in the zip against the SHA256SUMS the zip carries (the zip itself was checked above).
+    $inner = @{}
+    foreach ($line in Get-Content (Join-Path $from "SHA256SUMS")) {
+        if ($line -match '^([0-9a-f]{64})\s+(\S+)$') { $inner[$Matches[2]] = $Matches[1] }
+    }
     foreach ($file in Get-ChildItem $from -File | Where-Object { $_.Name -ne "SHA256SUMS" }) {
-        if ($expected[$file.Name] -ne (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLower()) {
+        if ($inner[$file.Name] -ne (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLower()) {
             throw "Checksum mismatch for $($file.Name); nothing was installed."
         }
     }
