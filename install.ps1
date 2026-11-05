@@ -7,9 +7,11 @@
 #
 # What it does, in order, and nothing is installed when any check fails:
 # 1. Reads the machine: 64-bit Windows on x86-64 runs the programs natively; Windows on Arm64
-#    runs them through its built-in x64 emulation; 32-bit Windows is refused.
+#    runs the native aarch64 programs when the release has them and otherwise the x86-64
+#    programs through its built-in x64 emulation; 32-bit Windows is refused.
 # 2. Downloads the latest release zip (or the version in $env:PTG_VERSION, for example 0.5.0)
-#    and checks the zip and every file in it against the release's SHA256SUMS.
+#    and checks the zip and every file in it against the release's SHA256SUMS. The build
+#    that was chosen is printed.
 # 3. Installs the documented install layout under %LOCALAPPDATA%\Programs\process-tree-guard:
 #    bin\ holds the full program and its automatic copy, libexec\ holds the roles and the
 #    deadline role's automatic copy, and POLICY.md stands at the root, one folder above both.
@@ -28,6 +30,7 @@ function Write-Json($value, $path) {
 }
 $repo = "WikdSolvemProbler/process-tree-guard"
 $target = "x86_64-pc-windows-msvc"
+$native = "aarch64-pc-windows-msvc"
 $root = if ($env:PTG_ROOT) { $env:PTG_ROOT } else { Join-Path $env:LOCALAPPDATA "Programs\process-tree-guard" }
 $bin = Join-Path $root "bin"
 $libexec = Join-Path $root "libexec"
@@ -38,7 +41,7 @@ $arch = $env:PROCESSOR_ARCHITEW6432
 if (-not $arch) { $arch = $env:PROCESSOR_ARCHITECTURE }
 switch ($arch) {
     "AMD64" { Write-Host "Machine: Windows x86-64; the programs run natively." }
-    "ARM64" { Write-Host "Machine: Windows on Arm64; the x86-64 programs run through Windows x64 emulation." }
+    "ARM64" { Write-Host "Machine: Windows on Arm64."; $onArm64 = $true }
     default { throw "Unsupported processor architecture: $arch." }
 }
 
@@ -51,6 +54,17 @@ if ($env:PTG_VERSION) {
 }
 $version = $release.tag_name.TrimStart("v")
 $zipName = "process-tree-guard-$version-$target.zip"
+if ($onArm64) {
+    $nativeName = "process-tree-guard-$version-$native.zip"
+    if ($release.assets | Where-Object { $_.name -eq $nativeName }) {
+        $zipName = $nativeName
+        Write-Host "Build chosen: aarch64-pc-windows-msvc, native Arm64 programs."
+    } else {
+        Write-Host "Build chosen: x86_64-pc-windows-msvc; this release has no aarch64 zip, so the programs run through Windows x64 emulation."
+    }
+} elseif ($arch -eq "AMD64") {
+    Write-Host "Build chosen: x86_64-pc-windows-msvc, native x86-64 programs."
+}
 $zipAsset = $release.assets | Where-Object { $_.name -eq $zipName }
 $sumAsset = $release.assets | Where-Object { $_.name -eq "SHA256SUMS" }
 if (-not $zipAsset -or -not $sumAsset) { throw "Release v$version has no $zipName with SHA256SUMS." }
