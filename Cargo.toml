@@ -40,6 +40,10 @@ path = "src/bin/process-tree-guard-gate.rs"
 name = "process-tree-guard-contain"
 path = "src/bin/process-tree-guard-contain.rs"
 
+[[bin]]
+name = "ptg"
+path = "src/bin/ptg.rs"
+
 # The test helper executable. It is built only for a test run, which turns the feature on
 # through the development dependency below; `cargo build` and `cargo install` do not build it.
 [[bin]]

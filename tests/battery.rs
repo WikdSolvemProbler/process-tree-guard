@@ -545,7 +545,7 @@ fn b104_to_b116_hook_mode_fails_closed() {
     checks.finish();
 }
 
-// ------------------------------------------------ 15. hook mode under both names
+// ------------------------------------------------ 15. hook mode under every name
 
 /// A private folder holding the guard under `name`; returns it with the executable's path.
 fn named_install(name: &str) -> (TempDir, String) {
@@ -566,14 +566,15 @@ fn envelope_at(path: &str) -> String {
 }
 
 #[test]
-fn b117_to_b118_hook_accepts_either_name_in_its_own_folder() {
+fn b117_to_b118_hook_accepts_any_name_in_its_own_folder() {
     let _serial = serial();
     let mut checks = Checks::new("hook names");
     for name in NAMES {
         let (dir, exe) = named_install(name);
-        let other = NAMES.iter().find(|n| **n != name).copied().unwrap();
-        let other_exe = text(&dir.join(&format!("{}.exe", other)));
-        for (label, path) in [("its own path", exe.as_str()), ("the other name beside it", other_exe.as_str())] {
+        let others: Vec<String> = NAMES.iter().filter(|n| **n != name).map(|other| text(&dir.join(&format!("{}.exe", other)))).collect();
+        let mut paths = vec![("its own path", exe.as_str())];
+        paths.extend(others.iter().map(|other_exe| ("another name beside it", other_exe.as_str())));
+        for (label, path) in paths {
             let good = envelope_at(path);
             let result = hook_as(&exe, "pretooluse", pre(&good).as_bytes());
             checks.check("B117", &format!("{}: pretooluse allows {}", name, label),
@@ -604,6 +605,10 @@ fn b119_hook_denies_other_paths_and_lookalikes() {
             ("the same name in another folder", envelope_at(&text(&stray_dir.join(&format!("{}.exe", name))))),
             ("the automatic copy of the 2.0 name", envelope_at(&text(&dir.join("process-tree-guard-auto.exe")))),
             ("the automatic copy of the 1.x name", envelope_at(&text(&dir.join("process-guard-auto.exe")))),
+            ("the automatic copy of the short name", envelope_at(&text(&dir.join("ptg-auto.exe")))),
+            ("the short name in capitals", envelope_at(&text(&dir.join("PTG.EXE")))),
+            ("a name that only starts like the short name", envelope_at(&text(&dir.join("ptg2.exe")))),
+            ("a name that only ends like the short name", envelope_at(&text(&dir.join("xptg.exe")))),
             ("the 1.x name in capitals", envelope_at(&text(&dir.join("PROCESS-GUARD.EXE")))),
             ("the 2.0 name in capitals", envelope_at(&text(&dir.join("PROCESS-TREE-GUARD.EXE")))),
             ("a name that only starts like the 2.0 name", envelope_at(&text(&dir.join("process-tree-guard2.exe")))),
@@ -681,6 +686,8 @@ fn b123_gate_allows_envelopes_of_the_programs_that_enforce_a_deadline() {
             ("the full command", tree.exe(ROLES[0])),
             ("the 1.x name beside the full command", text(&tree.bin.join("process-guard.exe"))),
             ("the 1.x name beside the gate", text(&tree.libexec.join("process-guard.exe"))),
+            ("the short name beside the full command", text(&tree.bin.join("ptg.exe"))),
+            ("the short name beside the gate", text(&tree.libexec.join("ptg.exe"))),
             ("the full command beside the gate", text(&tree.libexec.join("process-tree-guard.exe"))),
             ("the deadline role beside the full command", text(&tree.bin.join("process-tree-guard-deadline.exe"))),
         ];
@@ -704,6 +711,7 @@ fn b123_gate_allows_envelopes_of_the_programs_that_enforce_a_deadline() {
         let allowed = [
             ("the full command in bin", text(&tree.bin.join("process-tree-guard.exe"))),
             ("the 1.x name in bin", text(&tree.bin.join("process-guard.exe"))),
+            ("the short name in bin", text(&tree.bin.join("ptg.exe"))),
             ("the deadline role in bin", text(&tree.bin.join("process-tree-guard-deadline.exe"))),
             ("the deadline role beside it", text(&tree.root.join(folder).join("process-tree-guard-deadline.exe"))),
         ];
@@ -909,7 +917,7 @@ fn b128_the_hook_role_keeps_the_gates_rules_under_another_file_name() {
     let _serial = serial();
     let mut checks = Checks::new("renamed gate");
     for layout in LAYOUTS {
-        for renamed in ["hookgate", "process-guard"] {
+        for renamed in ["hookgate", "process-guard", "ptg"] {
             let tree = Tree::new(layout, "br-");
             let copy = copy_role(&tree.libexec, ROLES[2], renamed);
             let label = format!("the hook role as {}.exe in the {}", renamed, layout.name());

@@ -23,6 +23,8 @@ This page teaches the programs and roles of process-tree-guard: the four program
 
 Install the full program when you need one program. Install a role when a host needs only that role.
 
+`ptg` is the short name of the full program. A copy of `process-tree-guard.exe` named `ptg.exe` has the full role and behaves exactly as `process-tree-guard.exe`. The role belongs to the program itself and the file name only selects automatic mode, so the copy needs no other change.
+
 [↑ Back to Contents](#contents)
 
 ## Choose a program
@@ -43,7 +45,7 @@ Write the gate as `process-tree-guard-gate VENDOR`. Do not write `process-tree-g
 
 Copy a program to a name that ends in `-auto`. That copy selects automatic mode in the full program and in the deadline role. The gate has no automatic mode of its own. The gate rewrites to the automatic copy of the deadline role. The contain role has no automatic mode under any name.
 
-The earlier names `process-guard` and `process-guard-auto` are accepted as aliases. A role keeps its rules under any file name. The gate keeps the gate rules when a user copies it to another name.
+The earlier names `process-guard` and `process-guard-auto` are accepted as aliases. The short names `ptg` and `ptg-auto` are the names of the full program in the same way: `ptg-auto.exe` behaves exactly as `process-tree-guard-auto.exe`, and a hook installed as `ptg.exe` rewrites to the `ptg-auto.exe` beside it. A role keeps its rules under any file name. The gate keeps the gate rules when a user copies it to another name.
 
 [↑ Back to Contents](#contents)
 

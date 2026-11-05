@@ -19,8 +19,8 @@ pub fn antigravity_wrapped(wrapper: &str, command: &str) -> String {
 
 /// True when `command` is exactly the wrapper form `<wrapper> --command-b64 BASE64`
 /// with a payload that decodes to a valid command, or a valid guard envelope. The
-/// wrapper is either name's automatic copy beside `exe`, and the envelope names
-/// either name of the executable. Nothing else counts: trailing text, other
+/// wrapper is any name's automatic copy beside `exe`, and the envelope names
+/// any name of the executable. Nothing else counts: trailing text, other
 /// separators, another path or a path in another case are wrapped again.
 /// The guarded check against a path set computed once by the caller
 /// (see `path_set`).

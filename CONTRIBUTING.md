@@ -28,7 +28,7 @@ The library and the programs build with the Rust version that `rust-version` in 
 - No new dependencies. The guard uses only the Rust standard library and direct Windows system calls. Every line of code that runs is in this repository. No dependency has a source that a reviewer must also trust or read.
 - A change in behaviour comes with a test. A new check gets the next identifier in its series (`G`, `U`, `B` or `A`). The check gets a row in `tests/PARITY.md`.
 - Tests take every program from the binaries cargo built in the run (`CARGO_BIN_EXE_*`). Tests never take a program by a file name in the build folder. A stale file left there is never picked up.
-- Tests do not depend on the file name of the built guard. They copy it to the names they need (`process-tree-guard` and the earlier name `process-guard`, accepted as an alias, each with an `-auto` copy where the check needs one) in a temporary folder.
+- Tests do not depend on the file name of the built guard. They copy it to the names they need (`process-tree-guard`, the earlier name `process-guard`, accepted as an alias, and the short name `ptg`, each with an `-auto` copy where the check needs one) in a temporary folder.
 - The README is updated when a flag, exit code, guarantee or limit changes.
 - No test shows a prompt to the person who runs the suite.
 - A run over the default cap (`--max-extension` over 21600) in a test says `--authenticate console` on the same line. The run has a standard input that is null, a pipe or a file. Check G93 scans the test sources for one that does not. The helpers that start a guard refuse a cap that a test builds when it runs.

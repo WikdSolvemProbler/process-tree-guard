@@ -27,6 +27,8 @@ This page is the complete command reference for process-tree-guard. Every comman
 
 `SECONDS` is a finite number. `SECONDS` is greater than zero. `SECONDS` is at most 86400.
 
+`ptg` is the short name of the full program: every form above that runs in the full program runs the same way under `ptg.exe`, and `ptg-auto.exe` is the automatic copy of `ptg.exe`. The examples on this page use `process-tree-guard`.
+
 [↑ Back to Contents](#contents)
 
 ## Options

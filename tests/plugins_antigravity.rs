@@ -607,10 +607,10 @@ fn a19_to_a21_session_start_context() {
     checks.finish();
 }
 
-// ------------------------------------------- the two program names (A26 to A32)
+// ------------------------------------------- the three program names (A26 to A32)
 
-fn other_name(name: &str) -> &'static str {
-    NAMES.iter().find(|n| **n != name).copied().expect("two names")
+fn other_names(name: &str) -> Vec<&'static str> {
+    NAMES.iter().copied().filter(|n| *n != name).collect()
 }
 
 /// The decision for `original` as the hook of `install` returns it.
@@ -622,7 +622,8 @@ fn decide(label: &str, session: &mut Session, original: &str) -> Json {
 fn a26_a28_name_families() {
     let mut checks = Checks::new("antigravity program names");
     for name in NAMES {
-        let other = other_name(name);
+        let others = other_names(name);
+        let other = others[0];
         let install = make_install_as("agn-", name, true);
         let mut s = Session::new(&install);
 
@@ -631,7 +632,7 @@ fn a26_a28_name_families() {
         let d = decide("A26", &mut s, command);
         let line = command_line(&d).unwrap_or("");
         checks.check("A26", &format!("{}: the rewrite names {}-auto.exe", name, name),
-            decision(&d) == Some("allow") && line == s.wrapped(command) && line.contains(&format!("/{}-auto.exe ", name)) && !line.contains(&format!("/{}-auto.exe ", other)),
+            decision(&d) == Some("allow") && line == s.wrapped(command) && line.contains(&format!("/{}-auto.exe ", name)) && others.iter().all(|other| !line.contains(&format!("/{}-auto.exe ", other))),
             line);
 
         // A27: both names' wrapper forms and envelopes pass through unchanged; near misses are wrapped again.
@@ -642,20 +643,23 @@ fn a26_a28_name_families() {
         let other_exe = format!("{}/{}.exe", bin, other);
         let mut passes = true;
         let mut detail = String::new();
-        for line in [
+        let mut unchanged = vec![
             format!("{} --command-b64 {}", own_wrapper, b64),
-            format!("{} --command-b64 {}", other_wrapper, b64),
-            format!("  {} --command-b64 {}\n", other_wrapper, b64),
             format!("{} --timeout 60 --shell powershell --command-b64 {}", install.hook, b64),
-            format!("& {} --timeout 0.5 --shell bash --command-b64 {}", other_exe, b64),
-        ] {
+        ];
+        for other in &others {
+            unchanged.push(format!("{}/{}-auto.exe --command-b64 {}", bin, other, b64));
+            unchanged.push(format!("  {}/{}-auto.exe --command-b64 {}\n", bin, other, b64));
+            unchanged.push(format!("& {}/{}.exe --timeout 0.5 --shell bash --command-b64 {}", bin, other, b64));
+        }
+        for line in unchanged {
             let d = decide("A27", &mut s, &line);
             if decision(&d) != Some("allow") || d.get("overwrite").is_some() {
                 passes = false;
                 detail = line;
             }
         }
-        checks.check("A27", &format!("{}: both names' wrapper forms and envelopes pass through unchanged", name), passes, detail);
+        checks.check("A27", &format!("{}: every name's wrapper forms and envelopes pass through unchanged", name), passes, detail);
         let mut rewrapped = true;
         let mut detail = String::new();
         for line in [
@@ -859,9 +863,11 @@ fn a34_gate_pass_through_and_near_misses() {
             format!("  {}\n", wrapped(&wrapper)),
             wrapped(&format!("{}/process-tree-guard-auto.exe", folder)),
             wrapped(&format!("{}/process-guard-auto.exe", folder)),
+            wrapped(&format!("{}/ptg-auto.exe", folder)),
             format!("{} --timeout 60 --shell powershell --command-b64 {}", deadline, b64),
             format!("& {} --timeout 0.5 --shell bash --command-b64 {}", front, b64),
             format!("{} --timeout 86400 --shell cmd --command-b64 {}", posix(&text(&tree.bin.join("process-guard.exe"))), b64),
+            format!("{} --timeout 86400 --shell cmd --command-b64 {}", posix(&text(&tree.bin.join("ptg.exe"))), b64),
         ] {
             let (_, d) = gate_decision(&gate, &line);
             if decision(&d) != Some("allow") || d.get("overwrite").is_some() {
@@ -1044,8 +1050,8 @@ fn a39_the_rules_follow_the_role_under_the_other_programs_file_names() {
     for layout in LAYOUTS {
         let tree = plain_tree(layout, "agr-");
         let wrapper = posix(&tree.exe("process-tree-guard-deadline-auto"));
-        // The hook role under two other file names, one of them a name of the full command.
-        for renamed in ["hookgate", "process-guard"] {
+        // The hook role under other file names, two of them names of the full command.
+        for renamed in ["hookgate", "process-guard", "ptg"] {
             let copy = posix(&copy_role(&tree.libexec, ROLES[2], renamed));
             let label = format!("the hook role as {}.exe in the {}", renamed, layout.name());
             let (out, d) = gate_decision(&copy, "echo hi");

@@ -534,7 +534,7 @@ pub(crate) fn envelope_path_specs<'a>(exe: &'a str, role: Role) -> EnvelopePaths
         }
         for folder_index in 0..folder_total {
             let folder = &folders[folder_index];
-            for name in [NAMES[0], NAMES[1], DEADLINE] {
+            for name in NAMES.into_iter().chain([DEADLINE]) {
                 let mut segs = [""; 5];
                 let mut n = 0usize;
                 // The folder's own segments come first.
@@ -555,7 +555,9 @@ pub(crate) fn envelope_path_specs<'a>(exe: &'a str, role: Role) -> EnvelopePaths
     }
     add(&mut specs, [exe, "", "", "", ""], 1);
     if let Some((dir, own)) = family(exe) {
-        add(&mut specs, [dir, "/", NAMES[1 - own], ".exe", ""], 4);
+        for name in others(own) {
+            add(&mut specs, [dir, "/", name, ".exe", ""], 4);
+        }
     }
     specs
 }

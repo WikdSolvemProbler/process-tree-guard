@@ -244,7 +244,7 @@ pub fn powershell_auto(role: Role) -> i32 {
         None => return powershell_deny("the location of the process guard is unknown."),
     };
     // Pass through unchanged only what is already exactly guarded: this hook's
-    // own wrapping (with either name's wrapper), or a valid envelope. Anything
+    // own wrapping (with any name's wrapper), or a valid envelope. Anything
     // else, including a command that merely starts with a guard path, is wrapped
     // again (a double guard is harmless).
     // The prefix is matched in segments, in place: building it as a

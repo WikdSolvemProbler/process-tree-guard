@@ -17,6 +17,8 @@
 <a href="https://cerebralvalley.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/cerebralvalley-dark.png"><img src="assets/sponsors/cerebralvalley-light.png" alt="Cerebral Valley logo" height="38"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.meta.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/meta-dark.svg"><img src="assets/sponsors/meta-light.svg" alt="Meta logo" height="18"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.baseten.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/baseten-dark.png"><img src="assets/sponsors/baseten-light.png" alt="Baseten logo" height="24"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://fireworks.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/fireworks-dark.svg"><img src="assets/sponsors/fireworks-light.svg" alt="Fireworks AI logo" height="16"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://modal.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/modal-dark.svg"><img src="assets/sponsors/modal-light.svg" alt="Modal logo" height="18"></picture></a>
 </p>
 
+<p align="center"><a href="https://github.com/WikdSolvemProbler/process-tree-guard/releases/download/v0.5.0/process-tree-guard-launch-1080p60.mp4"><img src="assets/readme/launch-poster.png" alt="Watch the launch film" width="720"></a><br><sub><a href="https://github.com/WikdSolvemProbler/process-tree-guard/releases/download/v0.5.0/process-tree-guard-launch-1080p60.mp4">Watch the launch film (3:27)</a></sub></p>
+
 **Every command ends on time, and nothing it started is left behind.**
 
 process-tree-guard (ptg for short) runs one command under one finite, stated deadline on Windows. At the deadline, it ends the command and every process the command started. It is written in Rust, uses no third-party crates, and is licensed under Apache 2.0. Version 0.5.0 is the first public release.
@@ -58,13 +60,19 @@ At the deadline, the guard closes the job and Windows ends every process in it.
 
 ## Quick start
 
-**1. Get the programs.** Download the x86-64 Windows release from the releases page of this repository. Check each program against the Secure Hash Algorithm 256 (SHA-256) list in `SHA256SUMS`:
+**1. Install.** One line in PowerShell installs the latest release for your machine (native x86-64; Windows on Arm64 uses the native build when the release has one, otherwise x86-64 under emulation), checks every file against the release checksums, sets up automatic mode and adds the programs to your PATH:
+
+```powershell
+irm https://raw.githubusercontent.com/WikdSolvemProbler/process-tree-guard/main/install.ps1 | iex
+```
+
+It also writes hook settings with your machine's paths for the coding agents it finds. To install by hand instead, download the x86-64 Windows release from the releases page of this repository. Check each program against the Secure Hash Algorithm 256 (SHA-256) list in `SHA256SUMS`:
 
 ```powershell
 (Get-FileHash .\process-tree-guard.exe -Algorithm SHA256).Hash
 ```
 
-Put the programs and `POLICY.md` in one of the two layouts on [Policy File and Layout](wiki/Policy-File-and-Layout.md). Or [build from source](#build-from-source).
+Put the programs and `POLICY.md` in one of the two layouts on [Policy File and Layout](wiki/Policy-File-and-Layout.md). Or [build from source](#build-from-source). `ptg` is the short name of the full program: a copy of `process-tree-guard.exe` named `ptg.exe` behaves exactly as `process-tree-guard.exe`, and `ptg-auto.exe` as `process-tree-guard-auto.exe`.
 
 **2. Run a command under a deadline.**
 
@@ -160,7 +168,7 @@ No gap stands between creation and placement. No descendant can leave the job by
 | `process-tree-guard-gate` | Gate | A hook host needs only the hook answer. The gate never runs a command. |
 | `process-tree-guard-contain` | Contain | A command must run inside an enclosing [extendable run](wiki/Extendable-Runs.md) and ask that run for its deadline. |
 
-A copy of the full program or the deadline role whose name ends in `-auto` runs in automatic mode. The earlier names `process-guard` and `process-guard-auto` are accepted as aliases. [Programs and Roles](wiki/Programs-and-Roles.md) has the details and the library entry points.
+A copy of the full program or the deadline role whose name ends in `-auto` runs in automatic mode. The earlier names `process-guard` and `process-guard-auto` are accepted as aliases, and `ptg` and `ptg-auto` are the short names of the full program. [Programs and Roles](wiki/Programs-and-Roles.md) has the details and the library entry points.
 
 [↑ Back to Contents](#contents)
 

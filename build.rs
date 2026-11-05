@@ -20,11 +20,12 @@ const PRODUCT_NAME: &str = "Process Tree Guard";
 const COPYRIGHT: &str = "Copyright 2026 Peter Shiller";
 
 /// The programs, each with the description Task Manager shows.
-pub const PROGRAMS: [(&str, &str); 4] = [
+pub const PROGRAMS: [(&str, &str); 5] = [
     ("process-tree-guard", "Process Tree Guard"),
     ("process-tree-guard-deadline", "Process Tree Guard: Deadline"),
     ("process-tree-guard-gate", "Process Tree Guard: Gate"),
     ("process-tree-guard-contain", "Process Tree Guard: Contain"),
+    ("ptg", "Process Tree Guard"),
 ];
 
 /// US English with the Unicode code page, as the key of the one string table.

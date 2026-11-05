@@ -29,12 +29,12 @@ pub(crate) const FOUND_ABOVE: &str = "found above the guard: ";
 pub(crate) const JOB_KILLS: &str = "the job the guard is in kills its processes when it closes";
 
 /// The file names, in lower case, of the programs of the guard that run a command: the full
-/// command, the deadline role and the contain role, the name of the guard installed under the earlier name, and the
-/// copies that are the automatic wrapper. Any other file name that ends in -auto is one too (see
+/// command, the deadline role and the contain role, the name of the guard installed under the earlier name, the short
+/// name of the full command, and the copies that are the automatic wrapper. Any other file name that ends in -auto is one too (see
 /// `is_automatic_copy`).
-pub(super) const GUARD_PROGRAMS: [&str; 7] = [
-    "process-tree-guard.exe", "process-guard.exe", "process-tree-guard-deadline.exe", "process-tree-guard-contain.exe",
-    "process-tree-guard-auto.exe", "process-guard-auto.exe", "process-tree-guard-deadline-auto.exe",
+pub(super) const GUARD_PROGRAMS: [&str; 9] = [
+    "process-tree-guard.exe", "process-guard.exe", "ptg.exe", "process-tree-guard-deadline.exe", "process-tree-guard-contain.exe",
+    "process-tree-guard-auto.exe", "process-guard-auto.exe", "ptg-auto.exe", "process-tree-guard-deadline-auto.exe",
 ];
 
 // ----------------------------------------------------------------- the decision

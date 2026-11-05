@@ -48,9 +48,9 @@ An install with the gate as its hook and no full program in `bin` uses a stated 
 
 ## Envelope rules by role
 
-An envelope is a command line that already names the guard in the valid form. The full program accepts an envelope that names the full program in the same folder. The full program also accepts the earlier name `process-guard.exe` in the same folder.
+An envelope is a command line that already names the guard in the valid form. The full program accepts an envelope that names the full program in the same folder. The full program also accepts the earlier name `process-guard.exe` and the short name `ptg.exe` in the same folder.
 
-The gate accepts an envelope that names a deadline program in the gate folder. The valid names are `process-tree-guard.exe`, `process-guard.exe`, and `process-tree-guard-deadline.exe`. When the gate folder is `libexec`, the gate also accepts those names in the `bin` folder beside it. The gate never accepts the gate itself. A role keeps its rules under any file name.
+The gate accepts an envelope that names a deadline program in the gate folder. The valid names are `process-tree-guard.exe`, `process-guard.exe`, `ptg.exe`, and `process-tree-guard-deadline.exe`. When the gate folder is `libexec`, the gate also accepts those names in the `bin` folder beside it. The gate never accepts the gate itself. A role keeps its rules under any file name.
 
 [↑ Back to Contents](#contents)
 

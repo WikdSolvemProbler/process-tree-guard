@@ -79,9 +79,10 @@ fn built(recorded: &str) -> PathBuf {
     exe.parent().and_then(Path::parent).expect("test executable folder").join(name)
 }
 
-/// The two program names of the guard: the current name, and the earlier name kept as an
-/// accepted alias. Each also has an automatic copy, the same name with `-auto`.
-pub const NAMES: [&str; 2] = ["process-tree-guard", "process-guard"];
+/// The three program names of the guard: the current name, the earlier name kept as an
+/// accepted alias, and the short name of the full role. Each also has an automatic copy, the
+/// same name with `-auto`.
+pub const NAMES: [&str; 3] = ["process-tree-guard", "process-guard", "ptg"];
 
 /// Put this test process in a job of its own with no limit, nested in the job it is in already. The guard refuses an exception
 /// above the cap to a run that sits in a job that kills its processes when it closes, because every job of a guard does; cargo
@@ -391,7 +392,7 @@ pub fn guard_options<'a, 'b>(args: &'b [&'a str]) -> &'b [&'a str] {
 fn nested_guard<'a, 'b>(args: &'b [&'a str]) -> Option<&'b [&'a str]> {
     let rest = args.get(guard_options(args).len() + 1..)?;
     let name = std::path::Path::new(rest.first()?).file_stem()?.to_string_lossy().to_ascii_lowercase();
-    (name.starts_with("process-tree-guard") || name.starts_with("process-guard")).then(|| &rest[1..])
+    (name.starts_with("process-tree-guard") || name.starts_with("process-guard") || name == "ptg" || name == "ptg-auto").then(|| &rest[1..])
 }
 
 /// True when `args` hold a `--max-extension` (or `--max-extension=`) that is over the default cap and within the largest cap,
@@ -482,9 +483,9 @@ pub fn variable_set(name: &str) -> bool {
 /// The file names (lower case) of the programs of the guard that run a command. A guard started by one of them is a run that
 /// another guard started, and is refused when it asks for a cap over the default before anything is shown. Any other file name
 /// whose stem ends in -auto counts too, because that ending selects automatic mode (the tests that need one name it themselves).
-pub const GUARD_PROGRAMS: [&str; 7] = [
-    "process-tree-guard.exe", "process-guard.exe", "process-tree-guard-deadline.exe", "process-tree-guard-contain.exe",
-    "process-tree-guard-auto.exe", "process-guard-auto.exe", "process-tree-guard-deadline-auto.exe",
+pub const GUARD_PROGRAMS: [&str; 9] = [
+    "process-tree-guard.exe", "process-guard.exe", "ptg.exe", "process-tree-guard-deadline.exe", "process-tree-guard-contain.exe",
+    "process-tree-guard-auto.exe", "process-guard-auto.exe", "ptg-auto.exe", "process-tree-guard-deadline-auto.exe",
 ];
 
 /// The start of the reason a run over the cap is refused for when a guard started it.

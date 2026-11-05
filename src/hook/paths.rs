@@ -5,15 +5,20 @@
 
 use super::*;
 
-/// The two names of the one executable, the current name first. `process-guard` is the
-/// earlier name, an accepted alias; each name also has an automatic copy, the
-/// same name with `-auto` added.
-pub(crate) const NAMES: [&str; 2] = ["process-tree-guard", "process-guard"];
+/// The three names of the one executable, the current name first. `process-guard` is the
+/// earlier name, an accepted alias, and `ptg` is the short name of the full role; each
+/// name also has an automatic copy, the same name with `-auto` added.
+pub(crate) const NAMES: [&str; 3] = ["process-tree-guard", "process-guard", "ptg"];
+
+/// The names in NAMES other than the one at `own`, in NAMES order.
+pub(crate) fn others(own: usize) -> impl Iterator<Item = &'static str> {
+    NAMES.iter().enumerate().filter(move |(index, _)| *index != own).map(|(_, name)| *name)
+}
 
 /// The folder of `exe` and the index in NAMES of its program name, when it has one.
 pub(crate) fn family(exe: &str) -> Option<(&str, usize)> {
     let (dir, file) = exe.rsplit_once('/')?;
-    // The stem, compared in place: both names are plain ASCII, so a
+    // The stem, compared in place: every name is plain ASCII, so a
     // case-insensitive comparison needs no lowered copy of the file
     // name. The byte offset is a character boundary exactly when the
     // suffix can match (the four suffix bytes are ASCII), and `get`
@@ -43,7 +48,7 @@ pub(crate) fn gate_envelope_paths(exe: &str, dir: &str) -> Vec<String> {
     }
     let mut paths = Vec::new();
     for folder in &folders {
-        for name in [NAMES[0], NAMES[1], DEADLINE] {
+        for name in NAMES.into_iter().chain([DEADLINE]) {
             paths.push(format!("{}/{}.exe", folder, name));
         }
     }
@@ -53,7 +58,7 @@ pub(crate) fn gate_envelope_paths(exe: &str, dir: &str) -> Vec<String> {
 }
 
 /// The paths a guard envelope may name when this executable is `exe`: `exe` itself
-/// and, when it is installed under one of the two names, the other name in the
+/// and, when it is installed under one of the three names, the other names in the
 /// same folder; for the hook role, see `gate_envelope_paths`. The other file need
 /// not exist; a command that names a missing program only fails to run.
 #[cfg(test)]
@@ -63,15 +68,15 @@ pub(crate) fn envelope_paths(exe: &str, role: Role) -> Vec<String> {
     }
     let mut paths = vec![exe.to_string()];
     if let Some((dir, own)) = family(exe) {
-        paths.push(format!("{}/{}.exe", dir, NAMES[1 - own]));
+        paths.extend(others(own).map(|name| format!("{}/{}.exe", dir, name)));
     }
     paths
 }
 
 /// The automatic wrapper paths beside `exe`: the wrapper of its own name first,
-/// then the other name's. An executable under any other name keeps the earlier
+/// then the other names'. An executable under any other name keeps the earlier
 /// behaviour: only `process-guard-auto.exe`. The hook role's own wrapper is
-/// `process-tree-guard-deadline-auto.exe` in its folder, then the two names'
+/// `process-tree-guard-deadline-auto.exe` in its folder, then the three names'
 /// wrappers there. None when `exe` has no folder. The whole-string
 /// form of `wrapper_specs`: production decisions hold the segment
 /// form in their path set, and this form stays for its tests.
@@ -80,10 +85,10 @@ pub fn wrapper_paths(exe: &str, role: Role) -> Option<Vec<String>> {
     let (dir, _) = exe.rsplit_once('/')?;
     let auto = |name: &str| format!("{}/{}-auto.exe", dir, name);
     if role == Role::Gate {
-        return Some(vec![auto(DEADLINE), auto(NAMES[0]), auto(NAMES[1])]);
+        return Some([auto(DEADLINE)].into_iter().chain(NAMES.into_iter().map(auto)).collect());
     }
     Some(match family(exe) {
-        Some((_, own)) => vec![auto(NAMES[own]), auto(NAMES[1 - own])],
+        Some((_, own)) => [auto(NAMES[own])].into_iter().chain(others(own).map(auto)).collect(),
         None => vec![auto(NAMES[1])],
     })
 }
@@ -101,19 +106,19 @@ pub(crate) struct WrapperSpec<'a> {
 }
 
 /// The wrapper specs of one executable, in fixed storage: there are
-/// never more than three (the hook role's three names), so the list a
+/// never more than four (the hook role's deadline name and the three names), so the list a
 /// decision holds needs no heap vector — the vector form allocated
 /// once for every call of a rewriting vendor, for a count the role
 /// already bounds. The form mirrors `EnvelopePaths`: specs stand in
 /// `list[..count]`, in the order they were added.
 pub(crate) struct WrapperSet<'a> {
-    pub(crate) list: [WrapperSpec<'a>; 3],
+    pub(crate) list: [WrapperSpec<'a>; 4],
     pub(crate) count: usize,
 }
 
 impl<'a> WrapperSet<'a> {
     pub(crate) fn empty() -> Self {
-        WrapperSet { list: [WrapperSpec { dir: "", name: "" }; 3], count: 0 }
+        WrapperSet { list: [WrapperSpec { dir: "", name: "" }; 4], count: 0 }
     }
     pub(crate) fn push(&mut self, spec: WrapperSpec<'a>) {
         if self.count < self.list.len() {
@@ -131,8 +136,8 @@ impl<'a> WrapperSet<'a> {
 
 /// The same wrappers `wrapper_paths` builds as strings, spelled as
 /// segments, in the same order: the hook role's deadline name first,
-/// then the two names; otherwise the executable's own name then the
-/// other, or the earlier name alone when the executable matches no
+/// then the three names; otherwise the executable's own name then the
+/// others, or the earlier name alone when the executable matches no
 /// family. The no-folder case yields an empty list, where
 /// `wrapper_paths` yields None.
 pub(crate) fn wrapper_specs<'a>(exe: &'a str, role: Role) -> WrapperSet<'a> {
@@ -143,14 +148,17 @@ pub(crate) fn wrapper_specs<'a>(exe: &'a str, role: Role) -> WrapperSet<'a> {
     };
     if role == Role::Gate {
         specs.push(WrapperSpec { dir, name: DEADLINE });
-        specs.push(WrapperSpec { dir, name: NAMES[0] });
-        specs.push(WrapperSpec { dir, name: NAMES[1] });
+        for name in NAMES {
+            specs.push(WrapperSpec { dir, name });
+        }
         return specs;
     }
     match family(exe) {
         Some((_, own)) => {
             specs.push(WrapperSpec { dir, name: NAMES[own] });
-            specs.push(WrapperSpec { dir, name: NAMES[1 - own] });
+            for name in others(own) {
+                specs.push(WrapperSpec { dir, name });
+            }
         }
         None => specs.push(WrapperSpec { dir, name: NAMES[1] }),
     }

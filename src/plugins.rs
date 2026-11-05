@@ -16,14 +16,15 @@
 //! UTF-8 with no NUL. Anything else is denied with exit code 2, which is how a
 //! host hook blocks a tool call; this is the one place the guard uses exit 2 on purpose.
 //!
-//! The executable has two names, `process-tree-guard` and the earlier alias
-//! `process-guard`, kept as an alias. When it is installed under either
-//! name, the envelope may name either name in the same folder, and the automatic
-//! wrapper is the one of the executable's own name.
+//! The executable has three names: `process-tree-guard`, the earlier alias
+//! `process-guard`, kept as an alias, and `ptg`, the short name of the full
+//! role. When it is installed under any of them, the envelope may name any of
+//! the three in the same folder, and the automatic wrapper is the one of the
+//! executable's own name.
 //!
 //! The hook role, `process-tree-guard-gate`, runs the same modes. It never runs a
 //! command itself, so an envelope never names it: the envelope names a program
-//! that enforces the deadline (`process-tree-guard`, `process-guard` or
+//! that enforces the deadline (`process-tree-guard`, `process-guard`, `ptg` or
 //! `process-tree-guard-deadline`) in the gate's own folder or, when the gate is
 //! in a folder named `libexec` (in any letter case), in the `bin` folder beside it. Its automatic
 //! wrapper is `process-tree-guard-deadline-auto` in its own folder. Every path is
@@ -282,19 +283,29 @@ mod tests {
 
     const TREE_EXE: &str = "C:/Tools/process-tree-guard/bin/process-tree-guard.exe";
     const TREE_WRAPPER: &str = "C:/Tools/process-tree-guard/bin/process-tree-guard-auto.exe";
+    const SHORT_EXE: &str = "C:/Tools/process-tree-guard/bin/ptg.exe";
+    const SHORT_WRAPPER: &str = "C:/Tools/process-tree-guard/bin/ptg-auto.exe";
 
     #[test]
-    fn both_names_are_one_family() {
-        assert_eq!(wrapper_paths(EXE), Some(vec![WRAPPER.to_string(), TREE_WRAPPER.to_string()]));
-        assert_eq!(wrapper_paths(TREE_EXE), Some(vec![TREE_WRAPPER.to_string(), WRAPPER.to_string()]));
+    fn all_three_names_are_one_family() {
+        assert_eq!(wrapper_paths(EXE), Some(vec![WRAPPER.to_string(), TREE_WRAPPER.to_string(), SHORT_WRAPPER.to_string()]));
+        assert_eq!(wrapper_paths(TREE_EXE), Some(vec![TREE_WRAPPER.to_string(), WRAPPER.to_string(), SHORT_WRAPPER.to_string()]));
+        assert_eq!(wrapper_paths(SHORT_EXE), Some(vec![SHORT_WRAPPER.to_string(), TREE_WRAPPER.to_string(), WRAPPER.to_string()]));
         // Another name keeps the earlier name's wrapper alone; a path without a folder has no wrapper.
         assert_eq!(wrapper_paths("C:/Tools/pg/bin/other.exe"), Some(vec!["C:/Tools/pg/bin/process-guard-auto.exe".to_string()]));
         assert_eq!(wrapper_paths("process-guard.exe"), None);
-        assert_eq!(envelope_paths(EXE), vec![EXE.to_string(), TREE_EXE.to_string()]);
-        assert_eq!(envelope_paths(TREE_EXE), vec![TREE_EXE.to_string(), EXE.to_string()]);
+        assert_eq!(envelope_paths(EXE), vec![EXE.to_string(), TREE_EXE.to_string(), SHORT_EXE.to_string()]);
+        assert_eq!(envelope_paths(TREE_EXE), vec![TREE_EXE.to_string(), EXE.to_string(), SHORT_EXE.to_string()]);
+        assert_eq!(envelope_paths(SHORT_EXE), vec![SHORT_EXE.to_string(), TREE_EXE.to_string(), EXE.to_string()]);
         assert_eq!(envelope_paths("C:/Tools/pg/bin/other.exe"), vec!["C:/Tools/pg/bin/other.exe".to_string()]);
         // The automatic copies are not envelope names.
         assert_eq!(envelope_paths(WRAPPER).len(), 1);
+        assert_eq!(envelope_paths(SHORT_WRAPPER).len(), 1);
+        // A name that only starts or ends like the short name is not a name of the program.
+        for other in ["C:/Tools/pg/bin/ptg2.exe", "C:/Tools/pg/bin/xptg.exe", "C:/Tools/pg/bin/PTG.EXE.bak"] {
+            assert_eq!(envelope_paths(other).len(), 1, "{}", other);
+        }
+        assert_eq!(envelope_paths("C:/Tools/pg/bin/PTG.EXE").len(), 3);
     }
 
     #[test]
@@ -330,13 +341,15 @@ mod tests {
         assert_eq!(paths, [
             "C:/Tools/ptg/libexec/process-tree-guard.exe",
             "C:/Tools/ptg/libexec/process-guard.exe",
+            "C:/Tools/ptg/libexec/ptg.exe",
             "C:/Tools/ptg/libexec/process-tree-guard-deadline.exe",
             "C:/Tools/ptg/bin/process-tree-guard.exe",
             "C:/Tools/ptg/bin/process-guard.exe",
+            "C:/Tools/ptg/bin/ptg.exe",
             "C:/Tools/ptg/bin/process-tree-guard-deadline.exe",
         ]);
         // Flat layout: its own folder only.
-        assert_eq!(envelope_paths(FLAT_GATE_EXE).len(), 3);
+        assert_eq!(envelope_paths(FLAT_GATE_EXE).len(), 4);
         assert!(envelope_paths(FLAT_GATE_EXE).iter().all(|p| p.starts_with("C:/Tools/ptg/bin/")));
         for exe in [GATE_EXE, FLAT_GATE_EXE] {
             assert!(!envelope_paths(exe).contains(&exe.to_string()));
@@ -345,8 +358,11 @@ mod tests {
         let b64 = "ZWNobyBPSw==";
         let line = |path: &str| format!("{} --timeout 60 --shell bash --command-b64 {}", path, b64);
         assert!(valid_envelope(&line("C:/Tools/ptg/bin/process-tree-guard.exe"), GATE_EXE));
+        assert!(valid_envelope(&line("C:/Tools/ptg/bin/ptg.exe"), GATE_EXE));
         assert!(valid_envelope(&line("C:/Tools/ptg/libexec/process-tree-guard-deadline.exe"), GATE_EXE));
         for bad in [
+            "C:/Tools/ptg/bin/ptg-auto.exe",
+            "C:/Tools/ptg/bin/PTG.EXE",
             "C:/Tools/ptg/bin/process-tree-guard-auto.exe",
             "C:/Tools/ptg/other/process-tree-guard.exe",
             "C:/Tools/ptg/bin/PROCESS-TREE-GUARD.EXE",
@@ -362,14 +378,14 @@ mod tests {
         // the rest of the path is kept as the gate was started.
         for folder in ["LIBEXEC", "LibExec", "Libexec"] {
             let gate = format!("C:/Tools/ptg/{}/process-tree-guard-gate.exe", folder);
-            assert_eq!(envelope_paths(&gate).len(), 6, "{}", gate);
+            assert_eq!(envelope_paths(&gate).len(), 8, "{}", gate);
             assert!(valid_envelope(&line("C:/Tools/ptg/bin/process-tree-guard.exe"), &gate), "{}", gate);
             assert!(valid_envelope(&line(&format!("C:/Tools/ptg/{}/process-tree-guard-deadline.exe", folder)), &gate), "{}", gate);
         }
         // A folder that only contains or starts or ends with the word is not libexec.
         for folder in ["libexec2", "xlibexec", "my-libexec", "libexe", "libexec "] {
             let gate = format!("C:/Tools/ptg/{}/process-tree-guard-gate.exe", folder);
-            assert_eq!(envelope_paths(&gate).len(), 3, "{}", gate);
+            assert_eq!(envelope_paths(&gate).len(), 4, "{}", gate);
             assert!(!valid_envelope(&line("C:/Tools/ptg/bin/process-tree-guard.exe"), &gate), "{}", gate);
         }
         // Another file name keeps its own path only, as before.
@@ -385,6 +401,7 @@ mod tests {
         for renamed in [
             "C:/Tools/ptg/libexec/hookgate.exe",
             "C:/Tools/ptg/libexec/process-guard.exe",
+            "C:/Tools/ptg/libexec/ptg.exe",
             "C:/Tools/ptg/libexec/process-tree-guard-deadline.exe",
             "C:/Tools/ptg/libexec/process-tree-guard-gate-auto.exe",
         ] {
@@ -401,8 +418,8 @@ mod tests {
         assert!(!super::valid_envelope(&line(cased), cased, Role::Gate));
         assert!(super::valid_envelope(&line("C:/Tools/ptg/bin/process-tree-guard.exe"), cased, Role::Gate));
         // The deadline role's path is among the others, and only the hook role's own path leaves the list.
-        assert_eq!(super::envelope_paths("C:/Tools/ptg/libexec/process-tree-guard-deadline.exe", Role::Gate).len(), 5);
-        assert_eq!(super::envelope_paths("C:/Tools/ptg/libexec/hookgate.exe", Role::Gate).len(), 6);
+        assert_eq!(super::envelope_paths("C:/Tools/ptg/libexec/process-tree-guard-deadline.exe", Role::Gate).len(), 7);
+        assert_eq!(super::envelope_paths("C:/Tools/ptg/libexec/hookgate.exe", Role::Gate).len(), 8);
         // A program that is not the hook role keeps the rules of its name, even under the hook role's file name.
         assert_eq!(super::envelope_paths(GATE_EXE, Role::Full), vec![GATE_EXE.to_string()]);
         assert!(super::valid_envelope(&line(GATE_EXE), GATE_EXE, Role::Full));
@@ -434,13 +451,14 @@ mod tests {
             "C:/Tools/ptg/libexec/process-tree-guard-deadline-auto.exe".to_string(),
             "C:/Tools/ptg/libexec/process-tree-guard-auto.exe".to_string(),
             "C:/Tools/ptg/libexec/process-guard-auto.exe".to_string(),
+            "C:/Tools/ptg/libexec/ptg-auto.exe".to_string(),
         ]));
         let own = "C:/Tools/ptg/libexec/process-tree-guard-deadline-auto.exe";
         let input = call(&quote("echo hi"));
         let d = parse_json(&antigravity_decision(&path_set(GATE_EXE), Some(&input), true)).expect("one JSON object");
         let line = d.get("overwrite").and_then(|o| o.get("CommandLine")).and_then(Json::as_str).unwrap();
         assert_eq!(line, antigravity_wrapped(own, "echo hi"));
-        // The wrapper forms of all three families pass through unchanged.
+        // The wrapper forms of all the names pass through unchanged.
         for wrapper in wrapper_paths(GATE_EXE).unwrap() {
             let input = call(&quote(&antigravity_wrapped(&wrapper, "echo hi")));
             let d = parse_json(&antigravity_decision(&path_set(GATE_EXE), Some(&input), true)).unwrap();
@@ -454,13 +472,13 @@ mod tests {
     }
 
     #[test]
-    fn antigravity_guarded_accepts_both_names_wrappers_and_envelopes() {
+    fn antigravity_guarded_accepts_all_names_wrappers_and_envelopes() {
         let b64 = "ZWNobyBPSw==";
-        for exe in [EXE, TREE_EXE] {
-            for wrapper in [WRAPPER, TREE_WRAPPER] {
+        for exe in [EXE, TREE_EXE, SHORT_EXE] {
+            for wrapper in [WRAPPER, TREE_WRAPPER, SHORT_WRAPPER] {
                 assert!(antigravity_guarded(&format!("{} --command-b64 {}", wrapper, b64), exe), "{} {}", exe, wrapper);
             }
-            for path in [EXE, TREE_EXE] {
+            for path in [EXE, TREE_EXE, SHORT_EXE] {
                 assert!(antigravity_guarded(&format!("{} --timeout 60 --shell powershell --command-b64 {}", path, b64), exe), "{} {}", exe, path);
             }
             for bad in [
@@ -480,20 +498,24 @@ mod tests {
             let input = call(&quote(original));
             parse_json(&antigravity_decision(&path_set(exe), Some(&input), true)).expect("one JSON object")
         };
-        for (exe, wrapper) in [(EXE, WRAPPER), (TREE_EXE, TREE_WRAPPER)] {
+        for (exe, wrapper) in [(EXE, WRAPPER), (TREE_EXE, TREE_WRAPPER), (SHORT_EXE, SHORT_WRAPPER)] {
             let d = decide_for(exe, "echo hi");
             let line = d.get("overwrite").and_then(|o| o.get("CommandLine")).and_then(Json::as_str).unwrap();
             assert_eq!(line, antigravity_wrapped(wrapper, "echo hi"));
-            // The other name's wrapper passes through unchanged.
-            let other = if wrapper == WRAPPER { TREE_WRAPPER } else { WRAPPER };
-            let d = decide_for(exe, &antigravity_wrapped(other, "echo hi"));
-            assert_eq!(d.get("decision").and_then(Json::as_str), Some("allow"));
-            assert!(d.get("overwrite").is_none());
+            // The other names' wrappers pass through unchanged.
+            for other in [WRAPPER, TREE_WRAPPER, SHORT_WRAPPER].into_iter().filter(|other| *other != wrapper) {
+                let d = decide_for(exe, &antigravity_wrapped(other, "echo hi"));
+                assert_eq!(d.get("decision").and_then(Json::as_str), Some("allow"));
+                assert!(d.get("overwrite").is_none());
+            }
         }
         // A missing wrapper is reported by its own name.
         let missing = parse_json(&antigravity_decision(&path_set(TREE_EXE), Some(&call("\"echo hi\"")), false)).unwrap();
         assert_eq!(missing.get("decision").and_then(Json::as_str), Some("deny"));
         assert!(missing.get("reason").and_then(Json::as_str).map_or(false, |r| r.contains("process-tree-guard-auto.exe")));
+        let missing = parse_json(&antigravity_decision(&path_set(SHORT_EXE), Some(&call("\"echo hi\"")), false)).unwrap();
+        assert_eq!(missing.get("decision").and_then(Json::as_str), Some("deny"));
+        assert!(missing.get("reason").and_then(Json::as_str).map_or(false, |r| r.contains("ptg-auto.exe") && !r.contains("process-tree-guard-auto.exe") && !r.contains("process-guard-auto.exe")));
     }
 
     fn call(command_json: &str) -> String {

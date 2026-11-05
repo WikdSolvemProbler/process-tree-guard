@@ -211,11 +211,11 @@ fn u10_to_u13_errors_return_125() {
     checks.finish();
 }
 
-// ------------------------------------------- the two program names (U14 to U18)
+// ------------------------------------------- the three program names (U14 to U18)
 
 #[test]
 fn u14_to_u16_both_automatic_names() {
-    let mut checks = Checks::new("both automatic names");
+    let mut checks = Checks::new("every automatic name");
     for name in NAMES {
         let (_dir, auto) = auto_copy_of(name);
 
@@ -279,27 +279,29 @@ fn u17_deadline_variables_are_read_in_order() {
         let result = sleeper_with(&tree_auto, env);
         checks.check("U17", &format!("{}-auto: {}", NAMES[0], name), result.code == *expected, format!("exit {} {}", result.code, result.err().trim()));
     }
-    // The earlier automatic name reads the same order; the deadline cases are enough to show it.
-    let (_old_dir, old_auto) = auto_copy_of(NAMES[1]);
-    for (name, env, expected) in cases.iter().filter(|case| case.2 == 124) {
-        let result = sleeper_with(&old_auto, env);
-        checks.check("U17", &format!("{}-auto: {}", NAMES[1], name), result.code == *expected, format!("exit {} {}", result.code, result.err().trim()));
+    // The earlier and the short automatic names read the same order; the deadline cases are enough to show it.
+    for other in &NAMES[1..] {
+        let (_other_dir, other_auto) = auto_copy_of(other);
+        for (name, env, expected) in cases.iter().filter(|case| case.2 == 124) {
+            let result = sleeper_with(&other_auto, env);
+            checks.check("U17", &format!("{}-auto: {}", other, name), result.code == *expected, format!("exit {} {}", result.code, result.err().trim()));
+        }
     }
     checks.finish();
 }
 
 #[test]
-fn u18_powershell_hook_under_both_names() {
-    let mut checks = Checks::new("PowerShell hook under both names");
+fn u18_powershell_hook_under_every_name() {
+    let mut checks = Checks::new("PowerShell hook under every name");
     for name in NAMES {
-        let other = NAMES.iter().find(|n| **n != name).copied().unwrap();
+        let others: Vec<&str> = NAMES.iter().copied().filter(|n| *n != name).collect();
         let dir = TempDir::new("u18-");
         let bin = dir.join("bin");
         std::fs::create_dir_all(&bin).unwrap();
         let hook_exe = copy_guard(&bin, name);
         let auto_posix = posix(&copy_guard(&bin, &format!("{}-auto", name)));
-        let other_auto_posix = posix(&text(&bin.join(format!("{}-auto.exe", other))));
-        let other_exe_posix = posix(&text(&bin.join(format!("{}.exe", other))));
+        let other_auto_posixes: Vec<String> = others.iter().map(|other| posix(&text(&bin.join(format!("{}-auto.exe", other))))).collect();
+        let other_exe_posixes: Vec<String> = others.iter().map(|other| posix(&text(&bin.join(format!("{}.exe", other))))).collect();
         let run_hook = |command_json: &str| {
             let mut command = Command::new(&hook_exe);
             command.args(["hook", "powershell-auto"]);
@@ -322,14 +324,21 @@ fn u18_powershell_hook_under_both_names() {
             command.starts_with(&format!("& '{}'", auto_posix)) && ran.code == 9 && ran.out().contains("42"),
             format!("{} -> exit {} {}", command, ran.code, ran.out().trim()));
 
-        // Its own wrapping, the other name's wrapping and an envelope of either name pass through unchanged.
+        // Its own wrapping, the other names' wrapping and an envelope of any name pass through unchanged.
         let b64 = base64(b"echo OK");
         let own_wrapped = command.clone();
-        let other_wrapped = own_wrapped.replacen(&auto_posix, &other_auto_posix, 1);
-        let envelope_other = format!("{} --timeout 60 --shell powershell --command-b64 {}", other_exe_posix, b64);
-        let envelope_own = format!("{} --timeout 60 --shell powershell --command-b64 {}", posix(&hook_exe), b64);
-        let all_pass = [own_wrapped, other_wrapped, envelope_other, envelope_own].iter().all(|c| passes(&run_hook(&json_quote(c))));
-        checks.check("U18", &format!("{}: both names' wrappers and envelopes pass through unchanged", name), all_pass, "");
+        let mut unchanged = vec![
+            own_wrapped.clone(),
+            format!("{} --timeout 60 --shell powershell --command-b64 {}", posix(&hook_exe), b64),
+        ];
+        for other_auto_posix in &other_auto_posixes {
+            unchanged.push(own_wrapped.replacen(&auto_posix, other_auto_posix, 1));
+        }
+        for other_exe_posix in &other_exe_posixes {
+            unchanged.push(format!("{} --timeout 60 --shell powershell --command-b64 {}", other_exe_posix, b64));
+        }
+        let all_pass = unchanged.iter().all(|c| passes(&run_hook(&json_quote(c))));
+        checks.check("U18", &format!("{}: every name's wrappers and envelopes pass through unchanged", name), all_pass, "");
 
         // A near miss (the wrapper path in capitals) is wrapped again.
         let near = run_hook(&json_quote(&format!("& '{}' --shell powershell --command-b64 {}; exit $LASTEXITCODE", auto_posix.to_uppercase(), b64)));
@@ -437,8 +446,10 @@ fn u21_gate_powershell_hook_rewrites_to_the_deadline_wrapper_beside_it() {
             command.clone(),
             wrapped(&format!("{}/process-tree-guard-auto.exe", folder)),
             wrapped(&format!("{}/process-guard-auto.exe", folder)),
+            wrapped(&format!("{}/ptg-auto.exe", folder)),
             format!("{} --timeout 60 --shell powershell --command-b64 {}", deadline, b64),
             format!("{} --timeout 60 --shell powershell --command-b64 {}", front, b64),
+            format!("{}/ptg.exe --timeout 60 --shell powershell --command-b64 {}", folder, b64),
         ];
         let all_pass = passing.iter().all(|c| passes(&run_hook(&json_quote(c))));
         checks.check("U21", &format!("{}: its wrapper, the full command's wrappers and envelopes of the enforcing programs pass through unchanged", label), all_pass, "");

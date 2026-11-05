@@ -20,6 +20,7 @@ Running commands:
 - Ends the tree when the owner process exits: the process that started the guard, or, in automatic mode, any live ancestor.
 - Runs shell text given as Base64 encoded 8-bit Unicode Transformation Format (UTF-8) text in `powershell`, `bash` or `cmd` with `--shell` and `--command-b64`.
 - Automatic mode, through the `auto` subcommand or a copy whose name ends in `-auto`, with a default deadline of 7200 seconds, set by `PROCESS_TREE_GUARD_AUTO_TIMEOUT`.
+- `ptg` is the short name of the full program: `ptg.exe` is a copy of `process-tree-guard.exe`, and `ptg-auto.exe` of `process-tree-guard-auto.exe`, each behaving exactly as the program it copies.
 
 Extendable runs:
 

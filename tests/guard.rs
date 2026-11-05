@@ -455,8 +455,9 @@ fn g40_the_resource_bytes_the_build_script_writes_are_read_by_windows() {
     let version = env!("CARGO_PKG_VERSION");
     let prerelease = !env!("CARGO_PKG_VERSION_PRE").is_empty();
     let programs = build_script::PROGRAMS;
-    checks.check("G40", "the build script lists exactly the four programs and their descriptions",
-        programs.iter().map(|p| p.0).eq(ROLES.iter().copied()) && programs.iter().map(|p| p.1).eq(DESCRIPTIONS), format!("{:?}", programs));
+    checks.check("G40", "the build script lists exactly the four role programs and the short name ptg, with their descriptions",
+        programs.iter().map(|p| p.0).eq(ROLES.iter().copied().chain(["ptg"]))
+            && programs.iter().map(|p| p.1).eq(DESCRIPTIONS.iter().copied().chain(["Process Tree Guard"])), format!("{:?}", programs));
     for (name, description) in programs {
         let data = build_script::version_info(description, &format!("{}.exe", name), version, version_numbers(), prerelease);
         let res = build_script::res_file(&data);
@@ -3081,9 +3082,9 @@ fn g99_a_guard_under_any_program_of_the_guard_is_refused_by_name() {
     let inner = [guard(), "--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "5", "--", testkit(), "mark", marker_text.as_str(), "20"];
     // The program that is the file name, and the role it is a copy of. The contain role runs only inside an extendable run, where
     // a guard under it is refused as nested before anything else (G91), so its name is checked by the unit tests of the module.
-    let programs: [(&str, &str); 6] = [
-        ("process-tree-guard", ROLES[0]), ("process-guard", ROLES[0]), ("process-tree-guard-deadline", ROLES[1]),
-        ("process-tree-guard-auto", ROLES[0]), ("process-guard-auto", ROLES[0]), ("process-tree-guard-deadline-auto", ROLES[1]),
+    let programs: [(&str, &str); 8] = [
+        ("process-tree-guard", ROLES[0]), ("process-guard", ROLES[0]), ("ptg", ROLES[0]), ("process-tree-guard-deadline", ROLES[1]),
+        ("process-tree-guard-auto", ROLES[0]), ("process-guard-auto", ROLES[0]), ("ptg-auto", ROLES[0]), ("process-tree-guard-deadline-auto", ROLES[1]),
     ];
     assert!(programs.iter().all(|(name, _)| GUARD_PROGRAMS.contains(&format!("{}.exe", name).as_str())) && GUARD_PROGRAMS.len() == programs.len() + 1);
     for (name, role_name) in programs {

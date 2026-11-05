@@ -588,8 +588,8 @@
 
     #[test]
     fn a_run_that_another_guard_started_is_refused_before_any_prompt_and_says_so() {
-        let names = ["process-tree-guard.exe", "process-guard.exe", "process-tree-guard-deadline.exe", "process-tree-guard-contain.exe",
-            "process-tree-guard-auto.exe", "process-guard-auto.exe", "process-tree-guard-deadline-auto.exe"];
+        let names = ["process-tree-guard.exe", "process-guard.exe", "ptg.exe", "process-tree-guard-deadline.exe", "process-tree-guard-contain.exe",
+            "process-tree-guard-auto.exe", "process-guard-auto.exe", "ptg-auto.exe", "process-tree-guard-deadline-auto.exe"];
         for name in names {
             for image in [format!("C:\\Program Files\\Guard\\{}", name), format!("c:/tools/{}", name.to_ascii_uppercase()), name.to_string()] {
                 let chain = vec!["C:\\Windows\\System32\\cmd.exe".to_string(), image.clone(), "C:\\Windows\\explorer.exe".to_string()];

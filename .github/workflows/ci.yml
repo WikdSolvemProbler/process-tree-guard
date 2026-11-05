@@ -129,6 +129,7 @@ jobs:
             target/x86_64-pc-windows-msvc/release/process-tree-guard-deadline.exe
             target/x86_64-pc-windows-msvc/release/process-tree-guard-gate.exe
             target/x86_64-pc-windows-msvc/release/process-tree-guard-contain.exe
+            target/x86_64-pc-windows-msvc/release/ptg.exe
           if-no-files-found: error
           retention-days: 30
 
@@ -167,5 +168,6 @@ jobs:
             target/aarch64-pc-windows-msvc/release/process-tree-guard-deadline.exe
             target/aarch64-pc-windows-msvc/release/process-tree-guard-gate.exe
             target/aarch64-pc-windows-msvc/release/process-tree-guard-contain.exe
+            target/aarch64-pc-windows-msvc/release/ptg.exe
           if-no-files-found: error
           retention-days: 30

@@ -13,7 +13,7 @@ This folder holds three of the four role programs. Each file is a thin start lin
 
 **Does not belong here:** Role logic. Logic lives in the library and in `dispatch.rs`.
 
-The full role starts at `src/main.rs`. This folder holds the deadline, gate, and contain roles.
+The full role starts at `src/main.rs`. This folder holds the deadline, gate, and contain roles, and `ptg.rs`, the start line of `ptg`, the short name of the full role, so that `cargo install` installs it.
 
 **Next:** The [src README](../README.md) states the source layout.
 

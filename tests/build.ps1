@@ -135,6 +135,8 @@ foreach ($name in @("process-tree-guard.exe", "process-tree-guard-deadline.exe",
     if (-not (Test-Path $src)) { throw "expected build product missing: $src" }
     Copy-Item $src (Join-Path $stage $name) -Force
 }
+# ptg.exe is the short name of the full program: a copy of the same image; no separate build is needed.
+Copy-Item (Join-Path $stage "process-tree-guard.exe") (Join-Path $stage "ptg.exe") -Force
 
 if ($Competitors -ne "") {
     $dest = Join-Path $stage "competitors"
