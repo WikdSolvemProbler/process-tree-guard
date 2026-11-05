@@ -1,7 +1,5 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright 2026 Peter Shiller -->
-# process-tree-guard
-
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/readme/banner-dark.svg"><img src="assets/readme/banner-light.svg" alt="process-tree-guard: every command ends on time, and nothing it started is left behind" width="100%"></picture></p>
 
 <p align="center">
@@ -11,7 +9,6 @@
 <img src="https://img.shields.io/badge/platform-Windows-0078D4" alt="Platform: Windows">
 <img src="https://img.shields.io/badge/rust-1.88%2B-B7410E" alt="Rust 1.88 or later">
 <img src="https://img.shields.io/badge/third--party%20crates-0-brightgreen" alt="Third-party crates: 0">
-<img src="https://img.shields.io/badge/built%20at-Meta%20Global%20AI%20Developer%20Hackathon-0467DF" alt="Built at the Meta Global AI Developer Hackathon">
 </p>
 
 **Every command ends on time, and nothing it started is left behind.**
