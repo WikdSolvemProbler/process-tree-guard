@@ -11,6 +11,22 @@
 <img src="https://img.shields.io/badge/third--party%20crates-0-brightgreen" alt="Third-party crates: 0">
 </p>
 
+<p align="center">process-tree-guard was built at the Meta Global AI Developer Hackathon, sponsored by Cerebral Valley, Meta, Baseten, Fireworks AI and Modal. We thank them for their support.</p>
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center"><a href="https://cerebralvalley.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/cerebralvalley-dark.png"><img src="assets/sponsors/cerebralvalley-light.png" alt="Cerebral Valley logo" height="64"></picture></a></td>
+    <td align="center"><a href="https://www.meta.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/meta-dark.svg"><img src="assets/sponsors/meta-light.svg" alt="Meta logo" height="32"></picture></a></td>
+    <td align="center"><a href="https://www.baseten.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/baseten-dark.png"><img src="assets/sponsors/baseten-light.png" alt="Baseten logo" height="40"></picture></a></td>
+    <td align="center"><a href="https://fireworks.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/fireworks-dark.svg"><img src="assets/sponsors/fireworks-light.svg" alt="Fireworks AI logo" height="28"></picture></a></td>
+    <td align="center"><a href="https://modal.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/modal-dark.svg"><img src="assets/sponsors/modal-light.svg" alt="Modal logo" height="32"></picture></a></td>
+  </tr>
+</table>
+
+</div>
+
 **Every command ends on time, and nothing it started is left behind.**
 
 process-tree-guard (ptg for short) runs one command under one finite, stated deadline on Windows. At the deadline, it ends the command and every process the command started. It is written in Rust, uses no third-party crates, and is licensed under Apache 2.0. Version 0.5.0 is the first public release.
@@ -33,7 +49,6 @@ process-tree-guard --timeout 60 -- npm test
 - [Build from source](#build-from-source)
 - [Results](#results)
 - [Documentation](#documentation)
-- [Sponsors](#sponsors)
 - [License](#license)
 
 ## The problem
@@ -341,22 +356,6 @@ The test suite and the campaign record stand under [tests/](tests/README.md). [T
 | [Architecture](wiki/Architecture.md) | [Dependency Graph](wiki/Dependency-Graph.md), [Decision Records](wiki/Decision-Records.md), [Glossary](wiki/Glossary.md) |
 
 The [wiki Home](wiki/Home.md) page maps the full set. [CONTRIBUTING.md](CONTRIBUTING.md) states how to contribute. [CHANGELOG.md](CHANGELOG.md) records each version.
-
-[↑ Back to Contents](#contents)
-
-## Sponsors
-
-process-tree-guard was built at the Meta Global AI Developer Hackathon, sponsored by Cerebral Valley, Meta, Baseten, Fireworks AI and Modal. We thank them for their support.
-
-<table>
-  <tr>
-    <td align="center"><a href="https://cerebralvalley.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/cerebralvalley-dark.png"><img src="assets/sponsors/cerebralvalley-light.png" alt="Cerebral Valley logo" height="64"></picture></a></td>
-    <td align="center"><a href="https://www.meta.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/meta-dark.svg"><img src="assets/sponsors/meta-light.svg" alt="Meta logo" height="32"></picture></a></td>
-    <td align="center"><a href="https://www.baseten.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/baseten-dark.png"><img src="assets/sponsors/baseten-light.png" alt="Baseten logo" height="40"></picture></a></td>
-    <td align="center"><a href="https://fireworks.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/fireworks-dark.svg"><img src="assets/sponsors/fireworks-light.svg" alt="Fireworks AI logo" height="28"></picture></a></td>
-    <td align="center"><a href="https://modal.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/modal-dark.svg"><img src="assets/sponsors/modal-light.svg" alt="Modal logo" height="32"></picture></a></td>
-  </tr>
-</table>
 
 [↑ Back to Contents](#contents)
 
