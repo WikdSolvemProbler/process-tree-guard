@@ -878,6 +878,7 @@ Each row gives one approved word and its one meaning. Each row gives the words t
 | mended | Repaired. | — |
 | merge | To combine two sets or two branches into one. | — |
 | message | A unit of text or data that one part sends to another. | — |
+| meta | Meta, the maker of a host product. | — |
 | method | A stated way of doing a thing. | — |
 | mib | MiB, the mebibyte unit, in artefact text. | — |
 | microsoft | Microsoft, the company that makes Windows. | — |
@@ -898,6 +899,7 @@ Each row gives one approved word and its one meaning. Each row gives the words t
 | msvc | MSVC, the Microsoft build toolchain name in artefact text. | — |
 | multiply | To make a stated thing exist in many places. | — |
 | multiset | A set in which the count of each item is part of the fact. | — |
+| muse | Muse Code, a host product from Meta. | — |
 | must | To be required to. | — |
 | mutated | Changed in a stated way as a test case. | — |
 | name | A word that identifies a thing. | — |

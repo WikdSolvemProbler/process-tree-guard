@@ -13,7 +13,7 @@ This folder holds one wiring example for each hook vendor. Each example shows a 
 
 **Does not belong here:** Adapter code. Adapter code lives in `src/plugins/`.
 
-Each vendor folder holds `hooks.json` for the full role and `hooks-gate.json` for the gate role.
+The `muse-code` folder is named for a host, because Meta Muse Code uses the `pretooluse` vendor. Each vendor folder holds `hooks.json` for the full role and `hooks-gate.json` for the gate role.
 
 **Next:** The [src/plugins README](../src/plugins/README.md) states the adapter side of each vendor.
 

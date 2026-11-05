@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell|exec_command|Bash|bash|powershell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Tools/process-tree-guard/libexec/process-tree-guard-gate.exe pretooluse",
+            "commandWindows": "C:/Tools/process-tree-guard/libexec/process-tree-guard-gate.exe pretooluse",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

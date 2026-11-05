@@ -841,6 +841,7 @@ memory	noun	The fast storage that a running program uses.	—
 mended	adjective	Repaired.	—
 merge	verb	To combine two sets or two branches into one.	—
 message	noun	A unit of text or data that one part sends to another.	—
+meta	name	Meta, the maker of a host product.	—
 method	noun	A stated way of doing a thing.	—
 mib	name	MiB, the mebibyte unit, in artefact text.	—
 microsoft	noun (name)	Microsoft, the company that makes Windows.	—
@@ -861,6 +862,7 @@ movement	noun	The act of moving a thing from one place to another.	—
 msvc	name	MSVC, the Microsoft build toolchain name in artefact text.	—
 multiply	verb	To make a stated thing exist in many places.	—
 multiset	noun	A set in which the count of each item is part of the fact.	—
+muse	name	Muse Code, a host product from Meta.	—
 must	verb	To be required to.	—
 mutated	adjective	Changed in a stated way as a test case.	—
 name	noun	A word that identifies a thing.	—

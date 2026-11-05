@@ -25,10 +25,13 @@ This page guides hook integrations: an integrator wires a host to process-tree-g
 | Cursor | `cursor-context` | Context event | Context | The answer prints the installed policy file. |
 | Antigravity | `antigravity` | `run_command` call | Rewrite | The answer rewrites the call to the automatic wrapper, or denies. |
 | Antigravity | `antigravity-context` | Context event | Context | The answer prints the installed policy file. |
+| Meta Muse Code | `pretooluse` | `shell` and `exec_command` calls | Check | Allow gives an empty object. Deny gives exit code 2 and the reason on standard error. |
 
 A kind predicts the code shape. Check reads a payload and answers allow or deny. Rewrite reads a payload and answers with a rewritten command or a denial. Context prints the installed policy and reads no payload.
 
 Codex is a named place as a wiring example. No `integrations/codex/` folder exists at this version. The missing pieces are the wiring example, its tests, and a host fact from the host documentation. The `pretooluse` row and its tests serve Codex today.
+
+Meta Muse Code uses the `pretooluse` vendor with no code change. Its payload carries the command in `tool_input.command` or `tool_input.cmd`, and its host blocks a call on exit code 2 with text on standard error. The wiring is in [integrations/muse-code/](../integrations/muse-code/README.md), which lists each host fact. The integration follows the documented protocol. It has not yet been run against Meta Muse Code. The host skips a hook for a payload over 256 KiB, so a command of that size runs with no check.
 
 [↑ Back to Contents](#contents)
 
@@ -46,7 +49,7 @@ A check vendor allows one form of command and denies every other command. The al
 
 ## Wire a host in four steps
 
-Step 1. Copy the example folder for your vendor from [integrations/](../integrations/README.md). The folders are [integrations/pretooluse/](../integrations/pretooluse/README.md), [integrations/cursor/](../integrations/cursor/README.md), [integrations/antigravity/](../integrations/antigravity/README.md), and [integrations/powershell-auto/](../integrations/powershell-auto/README.md).
+Step 1. Copy the example folder for your vendor from [integrations/](../integrations/README.md). The folders are [integrations/pretooluse/](../integrations/pretooluse/README.md), [integrations/cursor/](../integrations/cursor/README.md), [integrations/antigravity/](../integrations/antigravity/README.md), [integrations/muse-code/](../integrations/muse-code/README.md), and [integrations/powershell-auto/](../integrations/powershell-auto/README.md).
 
 Step 2. Place `hooks.json` in the host configuration home. Place `hooks-gate.json` in that home when you use the gate role.
 

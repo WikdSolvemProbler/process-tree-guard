@@ -18,7 +18,7 @@
 #    Short names (ptg.exe and ptg-auto.exe) are installed beside the full program when the
 #    release carries ptg.exe.
 # 4. Adds bin\ to the user's PATH (skipped when $env:PTG_NO_PATH is set; $env:PTG_ROOT moves the install).
-# 5. Finds the coding agents on this machine (Claude Code, Cursor, Codex, Antigravity) and
+# 5. Finds the coding agents on this machine (Claude Code, Cursor, Codex, Antigravity, Meta Muse Code) and
 #    writes each one's hook configuration, with this machine's paths, to hooks\ under the
 #    install folder. It does not edit any agent's own settings; it prints where to merge each file.
 
@@ -159,6 +159,16 @@ try {
         }
         Write-Json ($antigravity) (Join-Path $hooks "antigravity.json")
         $found += "Antigravity: merge hooks\antigravity.json into your Antigravity hook settings"
+    }
+    $museHomes = @(Join-Path $home_ ".config\muse")
+    if ($env:XDG_CONFIG_HOME) { $museHomes += Join-Path $env:XDG_CONFIG_HOME "muse" }
+    $museHome = $museHomes | Where-Object { Test-Path $_ } | Select-Object -First 1
+    if ($museHome) {
+        $muse = [ordered]@{ schema_version = 1; hooks = @{ PreToolUse = @(
+            @{ matcher = "shell|exec_command|Bash|bash|powershell"; hooks = @(@{ type = "command"; command = "$exe hook pretooluse"; commandWindows = "$exe hook pretooluse"; timeout = 10 }) }
+        ) } }
+        Write-Json ($muse) (Join-Path $hooks "muse-code.json")
+        $found += "Meta Muse Code: merge hooks\muse-code.json into $museHome\settings.json (keep schema_version 1)"
     }
     if ($found.Count -gt 0) {
         Write-Host "Coding agents found. Hook files with this machine's paths are in $hooks :"

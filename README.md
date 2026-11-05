@@ -183,6 +183,7 @@ An agent host can call the guard before each shell tool call. A check vendor all
 | Codex | `pretooluse` | Check |
 | Cursor | `cursor`, `cursor-context` | Check, Context |
 | Antigravity | `antigravity`, `antigravity-context` | Rewrite, Context |
+| Meta Muse Code | `pretooluse` | Check |
 
 A minimal Claude Code wiring, from [integrations/pretooluse/hooks.json](integrations/pretooluse/hooks.json):
 
@@ -205,7 +206,7 @@ A minimal Claude Code wiring, from [integrations/pretooluse/hooks.json](integrat
 }
 ```
 
-Hook answers fail closed: a malformed payload is a denial. No Codex wiring folder exists at this version; the `pretooluse` vendor and its tests serve Codex. Every folder under [integrations/](integrations/README.md) holds a full-role and a gate-role example. [Hook Integrations](wiki/Hook-Integrations.md) gives the four wiring steps.
+Hook answers fail closed: a malformed payload is a denial. No Codex wiring folder exists at this version; the `pretooluse` vendor and its tests serve Codex. The Meta Muse Code wiring in [integrations/muse-code/](integrations/muse-code/README.md) follows the documented protocol and has not yet been run against Meta Muse Code. Every folder under [integrations/](integrations/README.md) holds a full-role and a gate-role example. [Hook Integrations](wiki/Hook-Integrations.md) gives the four wiring steps.
 
 [↑ Back to Contents](#contents)
 
