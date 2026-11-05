@@ -12,7 +12,7 @@ repository = "https://github.com/WikdSolvemProbler/process-tree-guard"
 readme = "README.md"
 keywords = ["process", "deadline", "process-tree", "windows", "job-object"]
 categories = ["command-line-utilities"]
-publish = false
+include = ["/src/**/*.rs", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/NOTICE", "/POLICY.md", "/tests/support/testkit.rs"]
 build = "build.rs"
 autobins = false
 
@@ -63,3 +63,7 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
+
+[package.metadata.docs.rs]
+default-target = "x86_64-pc-windows-msvc"
+targets = ["x86_64-pc-windows-msvc", "aarch64-pc-windows-msvc"]
