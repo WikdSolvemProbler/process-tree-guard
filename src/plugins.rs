@@ -619,6 +619,15 @@ mod tests {
         super::scan_verdict(input, cursor, &super::LazyPaths::fixed(exe, role_of(exe)))
     }
 
+    /// A PreToolUse payload with the field set Meta Muse Code sends: the
+    /// common fields, `tool_name`, and `tool_input` holding the command under `key`.
+    fn muse_payload(tool: &str, key: &str, command: &str) -> String {
+        format!(
+            "{{\"cwd\":\"C:/work\",\"hook_event_name\":\"PreToolUse\",\"model\":\"m\",\"permission_mode\":\"default\",\"session_id\":\"s\",\"tool_input\":{{{}:{}}},\"tool_name\":{},\"tool_use_id\":\"t\",\"transcript_path\":null,\"turn_id\":\"u\"}}",
+            quote(key), quote(command), quote(tool)
+        )
+    }
+
     #[test]
     fn streaming_verdict_matches_the_parsed_verdict() {
         let good = format!("{} --timeout 60 --shell powershell --command-b64 ZWNobyBPSw==", EXE);
@@ -638,6 +647,9 @@ mod tests {
             "{\"tool_input\":{}}".into(),
             format!("{{\"other\":{{\"command\":{}}}}}", quote(&good)),
             format!("{{\"extra\":{{\"deep\":[[[[\"x\"]]]]}},\"tool_input\":{{\"command\":{}}}}}", quote(&good)),
+            muse_payload("shell", "command", &good),
+            muse_payload("exec_command", "cmd", &good),
+            muse_payload("shell", "command", "echo no"),
             "{}".into(),
             "[]".into(),
             "null".into(),
@@ -671,6 +683,13 @@ mod tests {
                 }
             }
         }
+        // The payload of a host that sends a shell command with the full set of
+        // common fields (`shell` with `command`, `exec_command` with `cmd`) is
+        // read like any other PreToolUse payload: the envelope passes, a plain
+        // command does not.
+        assert!(scanned(muse_payload("shell", "command", &good).as_bytes(), false, EXE));
+        assert!(scanned(muse_payload("exec_command", "cmd", &good).as_bytes(), false, EXE));
+        assert!(!scanned(muse_payload("shell", "command", "echo no").as_bytes(), false, EXE));
         // Invalid UTF-8 denies, as a failed whole-string read denies.
         assert!(!scanned(&[b'{', 0xff, b'}'], false, EXE));
         assert!(!scanned(b"{\"a\":\"\xc3\"}", false, EXE));
