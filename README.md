@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright 2026 Peter Shiller -->
-https://github.com/user-attachments/assets/4e7be2a6-afee-4b76-95e8-2c68b6b6193a
+https://github.com/user-attachments/assets/12ba45cd-4738-4d60-bd16-fb7294d9e57f
 
 <p align="center">
 <a href="https://github.com/WikdSolvemProbler/process-tree-guard/actions/workflows/ci.yml"><img src="https://github.com/WikdSolvemProbler/process-tree-guard/actions/workflows/ci.yml/badge.svg" alt="Continuous integration status"></a>
@@ -17,7 +17,7 @@ https://github.com/user-attachments/assets/4e7be2a6-afee-4b76-95e8-2c68b6b6193a
 <a href="https://cerebralvalley.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/cerebralvalley-dark.png"><img src="assets/sponsors/cerebralvalley-light.png" alt="Cerebral Valley logo" height="38"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.meta.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/meta-dark.svg"><img src="assets/sponsors/meta-light.svg" alt="Meta logo" height="18"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.baseten.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/baseten-dark.png"><img src="assets/sponsors/baseten-light.png" alt="Baseten logo" height="24"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://fireworks.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/fireworks-dark.svg"><img src="assets/sponsors/fireworks-light.svg" alt="Fireworks AI logo" height="16"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://modal.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/modal-dark.svg"><img src="assets/sponsors/modal-light.svg" alt="Modal logo" height="18"></picture></a>
 </p>
 
-<p align="center"><sub>The launch film, 3:27. <a href="https://github.com/WikdSolvemProbler/process-tree-guard/releases/download/v0.5.0/process-tree-guard-launch-1080p60.mp4">Download it in 1080p</a>.</sub></p>
+<p align="center"><sub>The launch film, 3:33. <a href="https://github.com/WikdSolvemProbler/process-tree-guard/releases/download/v0.5.0/process-tree-guard-launch-1080p60.mp4">Download it in 1080p</a>.</sub></p>
 
 **Every command ends on time, and nothing it started is left behind.**
 
