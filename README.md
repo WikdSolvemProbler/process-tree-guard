@@ -60,13 +60,24 @@ At the deadline, the guard closes the job and Windows ends every process in it.
 
 ## Quick start
 
-**1. Install.** One line in PowerShell installs the latest release for your machine (native x86-64; Windows on Arm64 uses the native build when the release has one, otherwise x86-64 under emulation), checks every file against the release checksums, sets up automatic mode and adds the programs to your PATH:
+**1. Install.** The installer picks the release for your machine (native x86-64; Windows on Arm64 uses the native build when the release has one, otherwise x86-64 under emulation), checks every file against the release checksums, sets up automatic mode, adds the programs to your PATH and writes hook settings with your machine's paths for the coding agents it finds.
+
+Download the installer, read it if you like, then run it:
+
+```powershell
+irm https://raw.githubusercontent.com/WikdSolvemProbler/process-tree-guard/main/install.ps1 -OutFile install.ps1
+.\install.ps1
+```
+
+Or in one line. Warning: some antivirus tools flag a downloaded script piped straight into PowerShell; use the two steps above if yours does.
 
 ```powershell
 irm https://raw.githubusercontent.com/WikdSolvemProbler/process-tree-guard/main/install.ps1 | iex
 ```
 
-It also writes hook settings with your machine's paths for the coding agents it finds. To install by hand instead, download the x86-64 Windows release from the releases page of this repository. Check each program against the Secure Hash Algorithm 256 (SHA-256) list in `SHA256SUMS`:
+With Rust installed, `cargo install process-tree-guard` builds and installs the programs, `ptg` included, from [crates.io](https://crates.io/crates/process-tree-guard).
+
+To install by hand instead, download the x86-64 or Arm64 Windows release from the releases page of this repository. Check each program against the Secure Hash Algorithm 256 (SHA-256) list in `SHA256SUMS`:
 
 ```powershell
 (Get-FileHash .\process-tree-guard.exe -Algorithm SHA256).Hash
