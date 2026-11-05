@@ -1,0 +1,55 @@
+{
+  "seed": 20261029,
+  "corpus_cases": 357,
+  "categories": {
+    "directed": 51,
+    "directed-cursor": 9,
+    "fuzz": 110,
+    "mutation": 90,
+    "structure": 43,
+    "timeout-token": 29,
+    "window-crossed-100000": 1,
+    "window-invalid-utf8": 6,
+    "window-plain-100000-before": 1,
+    "window-plain-100000-key": 1,
+    "window-plain-100000-watched": 1,
+    "window-plain-16380-before": 1,
+    "window-plain-16380-key": 1,
+    "window-plain-16380-watched": 1,
+    "window-plain-16384-before": 1,
+    "window-plain-16384-key": 1,
+    "window-plain-16384-watched": 1,
+    "window-plain-16385-before": 1,
+    "window-plain-16385-key": 1,
+    "window-plain-16385-watched": 1,
+    "window-plain-32768-before": 1,
+    "window-plain-32768-key": 1,
+    "window-plain-32768-watched": 1,
+    "window-straddle-before": 1,
+    "window-straddle-key": 1,
+    "window-straddle-watched": 1
+  },
+  "max_payload_bytes": 113041,
+  "payloads_sha256": "b16c3e7bfb7f858582233e222e09e7fb3be84c21348f9dc671caf6073da318ab",
+  "payloads_sha256_serialization": "SHA-256 over the corpus in generation order: for each case, the payload length as an 8-byte big-endian unsigned integer, followed by the payload bytes; no category, index or separator bytes, and no trailing bytes.",
+  "reference_verdicts_canonical_layout": {
+    "full/pretooluse": {
+      "allow": 57,
+      "deny": 300
+    },
+    "full/cursor": {
+      "allow": 8,
+      "deny": 349
+    },
+    "gate/pretooluse": {
+      "allow": 60,
+      "deny": 297
+    },
+    "gate/cursor": {
+      "allow": 8,
+      "deny": 349
+    }
+  },
+  "guard_side_comparisons_per_windows_run": 1453,
+  "note": "Reference-side record from the Linux tier: the seeded generator in tests/scanner_reference.py reproduces this corpus byte for byte. Guard-side comparisons are the Windows-tier differential tests' count: every case x 2 roles x 2 vendors, plus the window-edge subset once more."
+}

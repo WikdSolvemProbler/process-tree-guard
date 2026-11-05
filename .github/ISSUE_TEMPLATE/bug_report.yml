@@ -1,0 +1,56 @@
+name: Bug report
+description: A run that did not end, ended the wrong processes, or returned the wrong exit code.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for the report. A bug here is anything that breaks the promise that every command ends on time and nothing it started is left behind.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release you ran, for example 0.5.0.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and architecture
+      description: For example Windows 11 24H2, x86-64.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command line
+      description: The exact command, including every option.
+      render: powershell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: The exit code, any PROCESS_ lines on standard error, and which processes were still running afterwards.
+    validations:
+      required: true
+  - type: dropdown
+    id: host
+    attributes:
+      label: Where the command ran
+      options:
+        - A terminal
+        - Claude Code
+        - Codex
+        - Cursor
+        - Antigravity
+        - Continuous integration
+        - Other
+    validations:
+      required: true

@@ -1,0 +1,1 @@
+{"hooks":{"beforeShellExecution":[{"command":"C:/Tools/process-tree-guard/libexec/process-tree-guard-gate.exe cursor","failClosed":true,"timeout":10}],"sessionStart":[{"command":"C:/Tools/process-tree-guard/libexec/process-tree-guard-gate.exe cursor-context"}]},"version":1}

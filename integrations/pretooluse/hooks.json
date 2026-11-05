@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Tools/process-tree-guard/bin/process-tree-guard.exe hook pretooluse",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

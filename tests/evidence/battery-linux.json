@@ -1,0 +1,127 @@
+[
+  {
+    "case": "a",
+    "title": "job-handle signalled-when-empty teardown wait vs Sleep(10) poll \u2014 battery decides adoption",
+    "verdict": "BLOCKED-WINDOWS",
+    "conditions": [
+      {
+        "condition": "baseline poll located in source",
+        "status": "evidenced",
+        "detail": "baseline located: src/engine/wait.rs, function wait_until_empty, line 481: Sleep(10) sits inside wait_until_empty, which terminate_and_wait calls at line 448; terminate_and_wait polls active_processes with Sleep(10) between polls inside the 5,000 ms teardown budget"
+      },
+      {
+        "condition": "verdict equivalence + latency + budget",
+        "status": "windows",
+        "detail": "equivalence runs: for tree sizes 0/1/2/64/65 members and a member that never dies, the signalled wait and the poll must return the same (empty, remainder) verdicts, both proofs racing the same job (one job per trial, terminated once, both waits armed on it), the signalled wait's latency to proof may exceed the poll's by at most one poll tick (10 ms, the Sleep(10) granularity) per trial \u2014 a sub-tick difference is noise, not a latency loss \u2014 and the single 5,000 ms budget must bind the wait exactly as it binds the poll: requires Windows; the driver battery/drivers/case_a.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "no lost wakeup at the emptying race",
+        "status": "windows",
+        "detail": "race runs: a job that empties between the non-empty check and the wait's start must still wake the wait (no lost signal), across 1,000 repetitions with randomised emptying delays: requires Windows; the driver battery/drivers/case_a.py executes these runs and is not run on linux"
+      }
+    ],
+    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+  },
+  {
+    "case": "l",
+    "title": "environment block via GetEnvironmentStringsW on extendable starts \u2014 vars_os differential",
+    "verdict": "BLOCKED-WINDOWS",
+    "conditions": [
+      {
+        "condition": "vars_os baseline located in source",
+        "status": "evidenced",
+        "detail": "baseline located: src/engine/environment.rs, function environment_block, line 72: environment_block builds from vars_os; the GetEnvironmentStringsW form is absent from environment_block"
+      },
+      {
+        "condition": "byte-level differential over the fixture set",
+        "status": "windows",
+        "detail": "vars_os differential: for each fixture environment in the fixture set (empty, empty-value, equals-in-value, drive-entries, duplicate-case, unicode-and-case, channel-entry, five-hundred-entries \u2014 the named shapes in fixtures/env-fixtures.json plus the 500-entry case generated deterministically by battery/env_fixtures.py), the block built from GetEnvironmentStringsW and the block built from vars_os must be byte-identical after the documented sort, or every difference must be a named, lossless, adoption-blocking-or-accepted entry in the case report; adoption requires losslessness, preserved skip-all matching, =C: parsing, and stable-sort/one-entry semantics. The vars_os side is produced by executing the tree's actual builder (a Rust helper compiled with the tree's src/engine/environment.rs included, its environment_block run in a process whose environment is the fixture), the GetEnvironmentStringsW side is read unfiltered (every entry the enumeration yields, not only names a fixture names), and the two enumerations themselves are compared, so a divergence in a non-fixture entry is decidable; the one case matcher is the tree's eq_ignore_ascii_case semantics, implemented identically on both sides. Each fixture is judged in two forms: as-is, and with the channel entry set \u2014 the set operation actually performed on both sides, every existing case-variant of the channel name skipped and replaced; a fixture a real Windows environment cannot represent (duplicate case-folded names) is judged at the list level, never installed where it would collapse: requires Windows; the driver battery/drivers/case_l.py executes these runs and is not run on linux"
+      }
+    ],
+    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+  },
+  {
+    "case": "m",
+    "title": "pseudo-handle constants at the four counted fetch sites \u2014 battery decides adoption; per-site audit is part of the case",
+    "verdict": "BLOCKED-WINDOWS",
+    "conditions": [
+      {
+        "condition": "per-site comparison audit (source)",
+        "status": "evidenced",
+        "detail": "per-site comparison audit: all four counted fetch sites located inside their enclosing functions \u2014 hardening process fetch: src/cli_process/harden.rs, function harden_self, line 213; handle consumers: deny_acl (line 214), SetSecurityInfo (line 215); hardening thread fetch: src/cli_process/harden.rs, function harden_self, line 220; handle consumers: harden_thread (line 220); owner facts self fetch: src/engine/owners.rs, function watched_owner_handles, line 481; handle consumers: use (line 482), started_at (line 483), use (line 488), parent_process_id_on (line 489), direct_owner_chain (line 508); exit path process fetch: src/diagnostics.rs, function cli_exit, line 336; handle consumers: TerminateProcess (line 336). Each site's consumer set is enumerated above and must be re-read at adoption time: (HANDLE)-1 collides numerically with INVALID_HANDLE_VALUE, so every consumer of each replaced handle must be shown not to test the value against INVALID_HANDLE_VALUE"
+      },
+      {
+        "condition": "per-site A/B behaviour on Windows",
+        "status": "windows",
+        "detail": "per-site A/B: build with the constant substituted at one site at a time and run the guard's own Windows test files (guard, auto, antigravity, battery parity checks) plus the hook verdict path; adoption per site requires the full set green with that site substituted and no consumer treating the constant as an invalid handle: requires Windows; the driver battery/drivers/case_m.py executes these runs and is not run on linux"
+      }
+    ],
+    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+  },
+  {
+    "case": "n",
+    "title": "lazy console verdicts \u2014 adoption gated on before/after verdict equality across the Console::finish cycle",
+    "verdict": "BLOCKED-WINDOWS",
+    "conditions": [
+      {
+        "condition": "verdict surface located in source",
+        "status": "evidenced",
+        "detail": "verdict consumers located: src/cli_process.rs, function Console::finish, line 173: Console::finish performs the FreeConsole (line 208) / AttachConsole (line 212) cycle; the cli_process handle slots and the Console::finish cycle are the before/after comparison surface"
+      },
+      {
+        "condition": "verdict equality across the finish cycle",
+        "status": "windows",
+        "detail": "before/after verdict equality: for every combination of standard handles (console / pipe / file / closed) x every role program x runs with and without post-finish output pending, the set of console verdicts consulted and their values under lazy probing must equal those under eager probing, across the whole Console::finish FreeConsole/AttachConsole cycle. Role cells evidence this with verdict-shaped records \u2014 each role's full decision output bytes plus exit code plus the consulted verdict values, paired across the pending dimension, never exit codes alone; pending output is really produced on the role's own handles and every held byte count is measured (pending-pattern bytes counted in the drained stream or in the producer's write record), never assigned from the pending label; the gate runs a guarded payload through a named vendor whose verdict can vary, and the contain role runs inside a real enclosing extendable run (a contain cell that cannot run in that shape is BLOCKED-ERROR, never a pairing). Adoption is gated on full equality; on any inequality the fallback is to pin, before Console::finish, only the verdicts with pending post-finish output \u2014 the battery must then evidence that the fallback preserves equality on the failing cells: requires Windows; the driver battery/drivers/case_n.py executes these runs and is not run on linux"
+      }
+    ],
+    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+  },
+  {
+    "case": "o",
+    "title": "IOCP teardown proof \u2014 six-item burden plus the forged-packet case, under the binding conditions",
+    "verdict": "BLOCKED-WINDOWS",
+    "conditions": [
+      {
+        "condition": "extendable precedent located in source",
+        "status": "evidenced",
+        "detail": "the extendable path's existing completion-port association is the in-tree precedent the case compares against: src/extend/server.rs, function Extension::start, line 72, CreateIoCompletionPort at line 124; the plain teardown branch carries no association today"
+      },
+      {
+        "condition": "zero-packet delivery, including the already-empty-at-association case",
+        "status": "windows",
+        "detail": "a job that empties before association, at association, and after association must each deliver the proof exactly once: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "packet-stream composition (honest dependence census)",
+        "status": "windows",
+        "detail": "exit packets queue ahead of the zero packet; the dequeue count for trees of 1/64/65/300 members is recorded as the dependence, not claimed as a fixed count: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "the never-dies budget case",
+        "status": "windows",
+        "detail": "a member that never dies consumes the single 5,000 ms budget through recomputed remainders and returns the same (empty=false, remainder) contract as the poll: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "fallback invariance",
+        "status": "windows",
+        "detail": "association failure at each injectable point falls back to the current poll proof with identical verdicts, the two verdicts being independent observations \u2014 the fallback behaviour with the port absent, and a separate poll run over a separately created identical job state \u2014 never two readings of one record: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "port close / disassociation effects",
+        "status": "windows",
+        "detail": "the port's CloseHandle is paid (minimum honest count is 5, not 4): every call in the teardown sequence has its return value checked (disassociation additionally confirmed by an association-state query), the count is the number of confirmed operations in the observed sequence so a failed call changes the count and the verdict, no handle leaks across 10,000 returning library calls, and disassociation leaves no consumer of the port: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "non-inheritance",
+        "status": "windows",
+        "detail": "the port handle is never inherited by the child or any descendant: the checking child is spawned with handle inheritance enabled and the port handle offered through the inheritance path, the port itself created non-inheritable \u2014 the record states the creation attributes used, and a deliberately inheritable control handle offered through the same spawn must be reported inherited, proving the trial can see inheritance: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      },
+      {
+        "condition": "forged-packet case (binding conditions)",
+        "status": "windows",
+        "detail": "a packet forged or posted by a same-user foreign process must not fake the proof: the packet is wake-only, the verdict comes only from an authoritative job query at the decision instant, and no reply field may influence the verdict \u2014 the case posts forged packets of every shape the port accepts and requires the verdict to track the job query, never the packet: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
+      }
+    ],
+    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+  }
+]

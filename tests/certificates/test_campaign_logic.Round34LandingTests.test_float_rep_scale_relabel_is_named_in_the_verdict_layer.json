@@ -1,0 +1,33 @@
+{
+  "certification_statement": "UNCERTIFIED: no valid tree SHA was supplied to this run (the --tree-sha argument and the PTG_TREE_SHA environment variable were both absent or not a full commit SHA), so this record certifies nothing. It is a run record only.",
+  "certified": false,
+  "detail": null,
+  "name": "test_float_rep_scale_relabel_is_named_in_the_verdict_layer",
+  "outcome": "pass",
+  "run_date_utc": "2026-11-04T19:51:00Z",
+  "run_id": "run-20261104T195100Z-no-sha",
+  "schema": "ptg-test-certificate/1",
+  "test": "test_campaign_logic.Round34LandingTests.test_float_rep_scale_relabel_is_named_in_the_verdict_layer",
+  "tested_against": [
+    {
+      "arm": "nuewframe",
+      "binary": "timeout.exe",
+      "sha256": "765a364afd529c10b58b7cfa1cd9f13cf955e7a053f1e4a2d467038f064d16e9",
+      "version": "1.0.0"
+    },
+    {
+      "arm": "processkit",
+      "binary": "processkit-cli.exe",
+      "sha256": "a79542cfe449f6916921845c2d7e02ea425c496c1a12d6359f7ca6b5f75141bb",
+      "version": "0.3.4"
+    },
+    {
+      "arm": "sysprims",
+      "binary": "sysprims.exe",
+      "sha256": "0a3144a6ca7b2df7ee382bbbac85d89f5ed75ee2643e1036356a8eaa4d490867",
+      "version": "0.2.4"
+    }
+  ],
+  "tier_label": null,
+  "tree_sha": null
+}

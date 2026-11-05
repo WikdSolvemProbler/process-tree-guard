@@ -1,0 +1,13 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 Peter Shiller */
+/* Link colors: internal links are red; external links are blue.
+   Internal = a link within the same file (every href^="#" link: the
+   Contents links and the back-to-contents links). External = every
+   other link. Honest fallback: on github.com, in both the repo and
+   the wiki, inline styles are sanitized away and this rule cannot be
+   enforced today. It is a documented convention that binds in full
+   on the first self-rendered surface the project adopts, and it is
+   never faked. */
+/* Internal links: in-page anchors. External links: all others. */
+a[href^="#"] { color: #C0392B; }   /* red   — internal */
+a:not([href^="#"]) { color: #1A5276; } /* blue — external */

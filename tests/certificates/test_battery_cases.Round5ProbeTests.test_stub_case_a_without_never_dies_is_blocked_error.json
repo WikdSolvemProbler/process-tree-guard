@@ -1,0 +1,14 @@
+{
+  "certification_statement": "UNCERTIFIED: no valid tree SHA was supplied to this run (the --tree-sha argument and the PTG_TREE_SHA environment variable were both absent or not a full commit SHA), so this record certifies nothing. It is a run record only.",
+  "certified": false,
+  "detail": null,
+  "name": "test_stub_case_a_without_never_dies_is_blocked_error",
+  "outcome": "pass",
+  "run_date_utc": "2026-11-04T19:51:00Z",
+  "run_id": "run-20261104T195100Z-no-sha",
+  "schema": "ptg-test-certificate/1",
+  "test": "test_battery_cases.Round5ProbeTests.test_stub_case_a_without_never_dies_is_blocked_error",
+  "tested_against": null,
+  "tier_label": null,
+  "tree_sha": null
+}

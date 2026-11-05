@@ -1,0 +1,367 @@
+{
+  "source": "Section 2 of the guard tree's MEASUREMENT.md (the census), vendored into this package as data so the counted-ops totals the campaign report decomposes against can be recounted from this package itself. Step texts, call names, call counts and row counts are transcribed exactly as that section's tables state them, in that section's order.",
+  "hook_path": {
+    "section": "2.1 The hook verdict path",
+    "total_label": "Total, allow",
+    "steps": [
+      {
+        "step": "Hardening (`cli_process::enter` → `harden_self` → `deny_acl`, for the process object and the thread object)",
+        "calls": [
+          {
+            "name": "GetCurrentProcess",
+            "count": 1
+          },
+          {
+            "name": "GetCurrentThread",
+            "count": 1
+          },
+          {
+            "name": "GetSecurityInfo",
+            "count": 2
+          },
+          {
+            "name": "LocalFree",
+            "count": 2
+          },
+          {
+            "name": "SetSecurityInfo",
+            "count": 2
+          }
+        ],
+        "count": 8
+      },
+      {
+        "step": "Console probes of the standard handles (`cli_process::probed_handle`, once per handle per invocation: each handle is probed at its own first use and kept in its own slot)",
+        "calls": [
+          {
+            "name": "GetStdHandle",
+            "count": 2
+          },
+          {
+            "name": "GetConsoleMode",
+            "count": 2
+          }
+        ],
+        "count": 4
+      },
+      {
+        "step": "The executable's own spelling (`hook::stack_self_path`)",
+        "calls": [
+          {
+            "name": "GetModuleFileNameW",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Standard input handle (`cli_process::standard_input`; the handle and the console verdict are the ones its slot cached, so neither a second fetch nor a second probe)",
+        "calls": [],
+        "count": 0
+      },
+      {
+        "step": "Payload reads (`hook::Scanner` over the raw standard input)",
+        "calls": [
+          {
+            "name": "ReadFile",
+            "count": 2
+          }
+        ],
+        "count": 2,
+        "note": "The Calls column states `ReadFile` per window fill and gives no numeric multiplier; the Count column states 2 at this size (see below) for the counted ordinary route (the payload is L bytes with 0 < L <= 16384). The vendored count for ReadFile is that Count-column figure, 2."
+      },
+      {
+        "step": "The decision line (`cli_process::write_stdout_line`, byte form; its handle is the cached one above)",
+        "calls": [
+          {
+            "name": "WriteFile",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Process exit (`diagnostics::cli_exit`)",
+        "calls": [
+          {
+            "name": "GetCurrentProcess",
+            "count": 1
+          },
+          {
+            "name": "TerminateProcess",
+            "count": 1
+          }
+        ],
+        "count": 2
+      }
+    ],
+    "total": 18
+  },
+  "plain_path": {
+    "section": "2.2 The plain run path",
+    "total_label": "Total, fixed core",
+    "steps": [
+      {
+        "step": "Entry hardening (`diagnostics::cli_exit` → `cli_process::enter` → `harden_self` → `deny_acl`, for the process object and the thread object; the same row §2.1 counts for the hook route)",
+        "calls": [
+          {
+            "name": "GetCurrentProcess",
+            "count": 1
+          },
+          {
+            "name": "GetCurrentThread",
+            "count": 1
+          },
+          {
+            "name": "GetSecurityInfo",
+            "count": 2
+          },
+          {
+            "name": "LocalFree",
+            "count": 2
+          },
+          {
+            "name": "SetSecurityInfo",
+            "count": 2
+          }
+        ],
+        "count": 8
+      },
+      {
+        "step": "Automatic-name check (`lib::entry_full` / `lib::entry_deadline` → `auto_by_name`, the stack form; the contain and gate entries make no such check)",
+        "calls": [
+          {
+            "name": "GetModuleFileNameW",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Job setup (`engine::run_job_core`)",
+        "calls": [
+          {
+            "name": "CreateJobObjectW",
+            "count": 1
+          },
+          {
+            "name": "SetInformationJobObject",
+            "count": 1
+          }
+        ],
+        "count": 2
+      },
+      {
+        "step": "Standard handles (the handle loop in `run_job_core`; on a process-owning invocation the three handles are read back from their per-handle slots — each slot's one probe is paid at its first read here, and no `GetStdHandle` is paid a second time for any of them. The current-process pseudo-handle only the returning-library branch duplicates with is fetched on that branch's first duplication and kept for its later ones, so this route pays no fetch for it)",
+        "calls": [
+          {
+            "name": "GetStdHandle",
+            "count": 3
+          },
+          {
+            "name": "GetConsoleMode",
+            "count": 3
+          },
+          {
+            "name": "SetHandleInformation",
+            "count": 3
+          }
+        ],
+        "count": 9
+      },
+      {
+        "step": "Owner, the parent only (`engine::watched_owner_handles` and `engine::parent_process_id_on` in `src/engine/owners.rs`; the one pseudo-handle fetch serves both the creation-time read of this process and the parent query through it)",
+        "calls": [
+          {
+            "name": "GetCurrentProcess",
+            "count": 1
+          },
+          {
+            "name": "GetProcessTimes",
+            "count": 2
+          },
+          {
+            "name": "NtQueryInformationProcess",
+            "count": 1
+          },
+          {
+            "name": "OpenProcess",
+            "count": 1
+          }
+        ],
+        "count": 5
+      },
+      {
+        "step": "Console probe (`cli_process::Console::probe`)",
+        "calls": [
+          {
+            "name": "CreateFileW",
+            "count": 1
+          }
+        ],
+        "count": 1,
+        "note": "The Calls column gives CreateFileW 1 on the ordinary route and notes 2 when CONIN$ fails; the vendored count is the ordinary-route figure the Count column states, 1."
+      },
+      {
+        "step": "Creation attributes (`engine::JobAttributeList::new`, stack storage)",
+        "calls": [
+          {
+            "name": "InitializeProcThreadAttributeList",
+            "count": 1
+          },
+          {
+            "name": "UpdateProcThreadAttribute",
+            "count": 2
+          }
+        ],
+        "count": 3
+      },
+      {
+        "step": "Deadline anchor (`engine::fixed_deadline`)",
+        "calls": [
+          {
+            "name": "GetTickCount64",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Spawn (`run_job_core`)",
+        "calls": [
+          {
+            "name": "CreateProcessW",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Pre-resume check (`engine::poll_before_resume` and the deadline read in `fixed_pre_resume_with`, `src/engine/wait.rs`)",
+        "calls": [
+          {
+            "name": "WaitForMultipleObjects",
+            "count": 1
+          },
+          {
+            "name": "GetTickCount64",
+            "count": 1
+          }
+        ],
+        "count": 2
+      },
+      {
+        "step": "Resume (`run_job_core`)",
+        "calls": [
+          {
+            "name": "ResumeThread",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Wait, first plain pass, the child exits in it (`engine::wait_with_deadline_observed`)",
+        "calls": [
+          {
+            "name": "GetTickCount64",
+            "count": 1
+          },
+          {
+            "name": "WaitForMultipleObjects",
+            "count": 1
+          }
+        ],
+        "count": 2
+      },
+      {
+        "step": "Exit code (`run_job_core`)",
+        "calls": [
+          {
+            "name": "GetExitCodeProcess",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Teardown, the job already empty (`engine::terminate_and_wait` → `active_processes`)",
+        "calls": [
+          {
+            "name": "QueryInformationJobObject",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Console finish, fixed part (`cli_process::Console::finish`)",
+        "calls": [
+          {
+            "name": "GetSystemWindowsDirectoryW",
+            "count": 1
+          },
+          {
+            "name": "FlushConsoleInputBuffer",
+            "count": 1
+          },
+          {
+            "name": "GetConsoleProcessList",
+            "count": 1
+          },
+          {
+            "name": "FreeConsole",
+            "count": 1
+          }
+        ],
+        "count": 4
+      },
+      {
+        "step": "Console finish, first walk level (`cli_process::Console::finish` → `boundary`, on the first owner; the walk examines at least this one level on every run that reaches the finish, and the ordinary route's first owner is a boundary, so it breaks there)",
+        "calls": [
+          {
+            "name": "QueryFullProcessImageNameW",
+            "count": 1
+          }
+        ],
+        "count": 1
+      },
+      {
+        "step": "Process exit (`diagnostics::cli_exit`)",
+        "calls": [
+          {
+            "name": "GetCurrentProcess",
+            "count": 1
+          },
+          {
+            "name": "TerminateProcess",
+            "count": 1
+          }
+        ],
+        "count": 2
+      }
+    ],
+    "total": 45
+  },
+  "subtotal_run_core": {
+    "definition": "The subtotal from job setup to process exit, as the prose after the plain-path table in section 2.2 states it: the plain path's steps from Job setup through Process exit, excluding Entry hardening and the Automatic-name check.",
+    "steps": [
+      "Job setup (`engine::run_job_core`)",
+      "Standard handles (the handle loop in `run_job_core`; on a process-owning invocation the three handles are read back from their per-handle slots — each slot's one probe is paid at its first read here, and no `GetStdHandle` is paid a second time for any of them. The current-process pseudo-handle only the returning-library branch duplicates with is fetched on that branch's first duplication and kept for its later ones, so this route pays no fetch for it)",
+      "Owner, the parent only (`engine::watched_owner_handles` and `engine::parent_process_id_on` in `src/engine/owners.rs`; the one pseudo-handle fetch serves both the creation-time read of this process and the parent query through it)",
+      "Console probe (`cli_process::Console::probe`)",
+      "Creation attributes (`engine::JobAttributeList::new`, stack storage)",
+      "Deadline anchor (`engine::fixed_deadline`)",
+      "Spawn (`run_job_core`)",
+      "Pre-resume check (`engine::poll_before_resume` and the deadline read in `fixed_pre_resume_with`, `src/engine/wait.rs`)",
+      "Resume (`run_job_core`)",
+      "Wait, first plain pass, the child exits in it (`engine::wait_with_deadline_observed`)",
+      "Exit code (`run_job_core`)",
+      "Teardown, the job already empty (`engine::terminate_and_wait` → `active_processes`)",
+      "Console finish, fixed part (`cli_process::Console::finish`)",
+      "Console finish, first walk level (`cli_process::Console::finish` → `boundary`, on the first owner; the walk examines at least this one level on every run that reaches the finish, and the ordinary route's first owner is a boundary, so it breaks there)",
+      "Process exit (`diagnostics::cli_exit`)"
+    ],
+    "total": 36
+  }
+}

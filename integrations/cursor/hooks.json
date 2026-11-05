@@ -1,0 +1,1 @@
+{"hooks":{"beforeShellExecution":[{"command":"C:/Tools/process-tree-guard/bin/process-tree-guard.exe hook cursor","failClosed":true,"timeout":10}],"sessionStart":[{"command":"C:/Tools/process-tree-guard/bin/process-tree-guard.exe hook cursor-context"}]},"version":1}

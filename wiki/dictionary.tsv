@@ -1,0 +1,1755 @@
+word	part of speech	meaning	do-not-use
+adapter	noun (term)	The code in plugins/ that speaks one vendor protocol.	plugin; handler
+anchor	noun (term)	A fixed point that a criterion serves and that a reader reads the criterion by.	reference point
+backend	noun (term)	The declaration module and mechanisms for one operating system.	port; platform
+battery	noun (term)	The suite's five decision cases, each ending in PASS or FAIL.	test set
+campaign	noun (term)	One full configured measurement run of the suite.	run (for this); session
+cap	noun (term)	The largest value that a rule allows.	limit; ceiling
+carriage	noun (term)	A wrapper inside a value from the construction of that value.	storage
+census	noun (term)	The counting that tests reach, file by file, channel by channel.	audit; profile
+chase	noun (term)	The bounded following of a name through aliases and re-exports.	resolution (for this computation)
+check	noun (term, hook kind)	A hook kind that reads a payload and answers allow or deny.	kind (alone, for this)
+checksum	noun (term)	A SHA-256 value that a user compares against a file before first use.	hash (alone, for this value)
+command	noun (term)	The program and its arguments that a run executes.	job; task; workload
+context	noun (term, hook kind)	A hook kind that prints the installed policy and reads no payload.	kind (alone, for this)
+counted-ops census	noun phrase (term)	The counted list of named external calls on a run path.	census (alone, for this list)
+deadline	noun (term)	The fixed future time at which a run ends.	timeout (as the concept noun); limit; expiry
+declaration	noun (term)	A name that the platform module states for a platform mechanism or its data.	definition (for this)
+demotion	noun (term)	Removal of a document into history, where it stays readable.	deletion (for this act)
+end	verb (term)	To stop a process so that the process cannot run again, by the close of the job.	kill; terminate; stop (for this act)
+envelope	noun (term)	A command line that already names the guard in the valid form.	wrapper (for this form)
+family	noun (term)	The set of vendors or tests that share one decision computation.	group; class (for this set)
+fixture	noun (term)	Data that a test reads as given, whose exact state is part of the test condition.	sample (for this)
+floor	noun (term)	The time that two minimal tools agree on under one harness on one machine.	baseline (for this value)
+guard	noun (term)	The program and library as a whole, the thing that keeps the promise.	tool; utility; app; wrapper (for the product)
+hold	noun (term)	An approved extension of the deadline of a run, recorded in the log.	extension (for one granted instance)
+host	noun (term)	A program that calls the guard through a hook.	vendor (for a program); client
+job handle	noun phrase (term)	The Windows handle that names a job object in a call.	—
+job object	noun phrase (term)	The Windows object that holds the processes of a run.	group; container (for this mechanism)
+keeper	noun (term)	A named check, at a named step, whose failure blocks the claim that the check keeps.	review (alone, for this)
+kill on close	noun phrase (term)	The job object flag that ends every process in the job when the last job handle closes.	—
+manifest	noun (term)	The one JSON file that names judged homes, tools/layout.json.	config; index (for this file)
+mint	noun (term)	The closed set of names from which reach is judged.	source set
+named place	noun phrase (term)	A folder that holds only a README that states a tier and a revival condition.	stub; placeholder (for this)
+owner	noun (term)	A process whose exit ends a run.	parent (for this role)
+payload	noun (term)	The data that a host sends to a hook on standard input.	input; request; body (for this)
+payload step	noun phrase (term)	A step on a Result or Option value that passes the held value onward.	—
+pin	noun (term)	A recorded SHA-256 value, or a recorded set, that a supplied artefact must match exactly.	lock; freeze (for this)
+pin-match	noun (term)	The check that the tree matches a recorded pin.	verification (alone, for this check)
+platform mechanism	noun phrase (term)	A capability that only one operating system provides, in the terms of that system.	feature (for this)
+policy file	noun phrase (term)	POLICY.md as the program reads it at run time.	config (for this file)
+process tree	noun phrase (term)	A process and every process that starts from it, at any depth.	process group; children (for the whole set)
+professor test	noun phrase (term)	The shape test of anchor A1: a professor, shown the shape alone, can call that shape perfect.	—
+pure file	noun phrase (term)	A production file with a census count of zero on every channel.	clean file
+pure set	noun phrase (term)	The set of pure files, pinned by name, with its one pinned exception inside the definition.	—
+reach	noun (term)	The fact that code uses a declaration, or uses a thing that itself uses a declaration in one step.	dependence (for this fact)
+refusal	noun (term)	A named, recorded stop by a check that cannot prove its claim.	error; failure (for this act)
+revival	noun (term)	The named event that makes a held item live: a named place becomes a backend, a non-execution runs, or the full census computation is restored from history and run.	TODO; future work (for this)
+rewrite	noun (term, hook kind)	A hook kind that reads a payload and answers with a rewritten command or a denial.	kind (alone, for this)
+ring	noun (term)	The closed list of payload steps that the census reads, with its named exclusions.	list (alone, for this)
+role	noun (term)	One of the four program forms: full, deadline, gate, or contain.	mode (for a program form)
+run	noun (term)	One guarded execution of one command.	job; session; invocation (for a run)
+selector	noun (term)	The one function that chooses among a closed set of texts by role.	dispatcher; picker (for this)
+staging	noun (term)	The build step that copies verified binaries into the suite's build folder.	copy step
+standing loss	noun phrase (term)	A campaign loss that stands in the report until its cause is repaired.	failure (for this recorded loss)
+suite	noun (term)	The test and benchmark package that ships at suite/.	test pack
+sys	noun (term)	The one folder that holds the backends.	platform folder
+tier	noun (term)	The evidence level of a claim: proven, type-checked only, or theory.	level; status (for this)
+unevaluated	adjective (term)	A dimension state: not exercised, therefore not passed and not failed.	skipped; unknown (for this state)
+vendor	noun (term)	One hook protocol, named by its vendor string.	host (for a protocol); format (for the protocol itself)
+verdict	noun (term)	The allow-or-deny answer that a hook gives.	decision (for the hook answer)
+wrapper	noun (term)	A function or a method outside the backend module that itself reaches a platform mechanism.	helper (for this)
+body	noun (amendment)	A body of code: the statements inside one function or module.	payload (for this)
+client	noun (amendment)	The client part of an extendable run: the code that asks the server for a hold.	host (for this part)
+container	noun (amendment)	A value that holds another value (a Result or an Option), or a machine boundary that holds processes as a class.	job object (for this)
+extension	noun (amendment)	The mechanism that grants holds; one granted instance is a hold.	hold (for the mechanism)
+group	noun (amendment)	A process group: the Unix mechanism, named only as a contrast to a process tree or a job object.	process tree; job object (for this)
+input	noun (amendment)	The standard input stream as a channel name.	payload (for this)
+level	noun (amendment)	A depth or rank in a structure, such as a heading level.	tier (for this)
+limit	noun (amendment)	A stated boundary of what the guard guarantees or of what a rule states.	deadline; cap (for this)
+mode	noun (amendment)	A form of operation inside a role, such as automatic mode.	role (for this)
+parent	noun (amendment)	A process or file that another process or file directly comes from, as a fact of birth or structure.	owner (for this fact)
+platform	noun (amendment)	An operating system environment as a class, such as a Windows platform.	backend (for this)
+plugin	noun (amendment)	The whole four-part artefact of one integration: adapter, wiring, examples, and tests.	adapter (for the whole artefact)
+request	noun (amendment)	A message that asks the guard or the extend server for a hold.	payload (for this)
+session	noun (amendment)	A signed-in user's interactive logon period on a machine, or a host's working period.	run (for this)
+status	noun (amendment)	The recorded state of a run, a campaign, or a check.	tier (for this)
+task	noun (amendment)	A unit of work that a system or a host names, such as a scheduled task or Task Manager's list.	command (for this)
+tool	noun (amendment)	A named function that a host offers, such as a Bash tool; never a name for the guard.	guard (for this)
+workload	noun (amendment)	A Visual Studio component set that an installer selects, such as the C++ workload.	command (for this)
+process group	noun phrase (term)	The Unix mechanism that holds a process and the processes it starts as one group, named only as a contrast to a process tree or a job object.	process tree; job object (for this)
+helper	noun (amendment)	A small unit of support code in the tests or the suite.	wrapper (for this)
+launcher	noun (term)	The process that starts a run directly.	—
+token	noun (term)	A system object that states the identity and the rights of a process.	credential (for this object)
+arm	noun (term)	One side of a campaign: one tool under measurement, with its stated configuration.	—
+free	adjective (amendment)	With a census count of zero, in the phrase reach-free.	—
+a	determiner	One, any single.	—
+aarch	name	The processor architecture name in artefact text.	—
+able	adjective	In a state that permits a stated act.	—
+about	preposition	Concerning a subject.	—
+above	preposition	Higher than, or earlier in a text.	—
+absence	noun	The state of not being present.	—
+absolute	adjective	Not measured against another value.	—
+accept	verb	To take a thing as valid.	—
+acceptance	noun	The act of taking a thing as given, without a check.	—
+accepted	adjective	Taken as valid.	—
+access	noun	The right or the means to read or to change a stated thing.	—
+accident	noun	An event that happens without a stated plan.	—
+account	noun	A user's identity record on a machine or service.	—
+across	preposition	From one side to the other of.	—
+act	noun	A thing done.	—
+action	noun	A step that a program or a person does.	—
+activated	adjective	Made active.	—
+active	adjective	In operation now.	—
+ad	noun	In artefact names: a directory service name part.	—
+adapt	verb	To change a thing so that it fits a new use.	—
+add	verb	To put one thing with another, or to increase a count.	—
+address	noun	A value that names a place in memory.	—
+adjust	verb	To change a value by a small amount to reach a target.	—
+administrator	noun	A user or role with full control of a machine.	—
+adoption	noun	The act of taking a stated thing into use.	—
+advance	adverb	Before the stated time or step.	—
+adversarial	adjective	Done by a hostile party that tries to break a rule.	—
+after	preposition	Later than.	—
+afterwards	adverb	At a later time.	—
+again	adverb	One more time.	—
+against	preposition	In opposition to, or in contact with.	—
+agent	noun	An automated program that acts for a person.	—
+agree	verb	To have the same answer or value.	—
+agreement	noun	A state in which two computations or parties give the same answer.	—
+ahead	adverb	In front, or in the future.	—
+alias	noun	Another name for the same thing.	—
+alike	adverb	In the same way, for both of two named things.	—
+alive	adjective	Living, or still running.	—
+all	determiner	Every one of a set.	—
+allocations	noun	Amounts of a resource that a system gives out.	—
+allow	verb	To permit an action.	—
+alone	adjective	By itself, with nothing else.	—
+already	adverb	Before the time in question.	—
+also	adverb	In addition.	—
+alternative	noun	Another possible choice.	—
+always	adverb	At every time.	—
+among	preposition	Inside a set, taken as a group.	—
+ampersand	noun	The & character.	—
+an	determiner	One, any single, before a vowel sound.	—
+ancestor	noun	A process or item that an item comes from, at any distance.	—
+and	conjunction	Joins two words or clauses as one set.	—
+another	determiner	One more, or a different one.	—
+answer	noun	A reply that a check or a person gives.	—
+anti	adjective	Prefix form in artefact words: against.	—
+antigravity	name	Google Antigravity, a host product.	—
+any	determiner	One or more, without a stated limit.	—
+anything	pronoun	Any thing at all.	—
+apache	name	Apache, in the licence name Apache-2.0.	—
+apart	adverb	Away from each other, as separate things.	—
+api	name	API, the interface that one program offers to another, in artefact text.	—
+appear	verb	To become visible or to seem to be.	—
+append	verb	To add a thing at the end of a file or a record.	—
+applicability	noun	The state of applying to a stated case.	—
+applicable	adjective	Applying to the stated case.	—
+applied	adjective	Put into effect for a stated case.	—
+apply	verb	To put a rule or a value into effect.	—
+approach	noun	A stated way of reaching a result.	—
+approval	noun	Formal permission for a stated act.	—
+approve	verb	To give formal permission.	—
+approximate	adjective	Near a stated value, but not exact.	—
+architecture	noun	The stated arrangement of a system's parts.	—
+are	verb	Plural present form of be.	—
+area	noun	A part of a surface, a subject, or a record.	—
+argue	verb	To give reasons for or against a claim.	—
+argument	noun	A set of reasons for a claim, or a value given to a command.	—
+around	preposition	On all sides of, or near a value.	—
+arrive	verb	To reach a stated place or state.	—
+arrives	verb	Reaches a place or a state.	—
+artefact	noun	A file or object that a process produces.	—
+as	conjunction	In the role of, or at the same time.	—
+asd	name	ASD, in the name ASD-STE100.	—
+ask	verb	To put a question, or to make a request by a defined call.	—
+assert	verb	To state a fact that a test then holds.	—
+assertion	noun	A statement that a test holds as true.	—
+assignment	noun	The act of placing a thing into a stated set at a stated time.	—
+at	preposition	At a place, a time, or a value.	—
+attempt	noun	An act that tries to reach a result.	—
+attribute	noun	A named property in a list that a call gives to a system.	—
+audience	noun	The set of parties that read a stated thing.	—
+audit	noun	An examination of records against a rule.	—
+auth	name	The auth folder name in the tree.	—
+author	noun	A person who writes a stated text or computation.	—
+authoritative	adjective	Carrying the stated right to give the final answer.	—
+authority	noun	The right to give the final answer on a stated question.	—
+auto	adjective	Short form in artefact names for the automatic role.	—
+automatic	adjective	Done by a rule without a person choosing each time.	manual (for this)
+availability	noun	The state of being present and ready for use.	—
+available	adjective	Present and ready for use.	—
+away	adverb	To a distance, or absent.	—
+axes	noun	Plural of axis.	—
+axis	noun	A line of organization along which items are placed.	—
+azure	name	Microsoft Azure, a service name in examples.	—
+back	adverb	To an earlier place, or the rear part.	—
+background	noun	Work that runs without a screen or a person's attention.	—
+backlog	noun	A set of records that waits to be written or read.	—
+backstop	noun	A second means that holds a result when the first means fails.	—
+banned	adjective	Not permitted.	—
+bar	verb	To forbid a stated act or claim.	—
+bare	adjective	With nothing added.	—
+base	noun	The form from which other forms come.	—
+bash	name	Bash, a shell program.	—
+basic	adjective	Plain and necessary, with nothing extra.	—
+be	verb	To exist, or to have a stated quality.	—
+bear	verb	To carry a stated load.	—
+because	conjunction	For the reason that.	—
+become	verb	To come to be in a stated state.	—
+been	verb	Past participle of be.	—
+before	preposition	Earlier than.	—
+begins	verb	Starts.	—
+behaviour	noun	The way a program acts under stated conditions.	behavior (spelling variant)
+behind	preposition	At the back of.	—
+believe	verb	To take a stated fact as true.	—
+belong	verb	To be in the correct place or set.	—
+below	preposition	Lower than, or later in a text.	—
+benchmark	noun	A measurement run that compares speed or cost.	—
+beside	preposition	At the side of.	—
+between	preposition	In the space that separates two things.	—
+bin	noun	The folder that holds built programs, in artefact names.	—
+binaries	noun	Built program files.	—
+binary	noun	A built program file, in artefact use.	—
+bind	verb	To tie a name or a shape to a stated thing.	—
+birth	noun	The coming into being of a thing.	—
+bit	noun	A small piece, or the smallest unit of data.	—
+blame	verb	To hold a party at fault for a stated claim or act.	—
+bleed	verb	To cross a boundary slowly and without permission, in the stated metaphor.	—
+block	verb	To stop a thing from passing or from completing.	—
+blue	adjective	The color that this set uses for external links.	—
+bookkeeping	noun	Record work that keeps counts and lists correct.	—
+border	noun	The line at which one area of rule meets another.	—
+born	adjective	Created at a stated step or time.	—
+borrow	verb	To take and use a thing with the duty to give the same form back.	—
+both	determiner	The two of a pair.	—
+bound	noun	A stated limit that a derivation or a search may not pass.	—
+boundary	noun	The line that separates two areas of rule.	—
+brackets	noun	The paired marks [ ] or ( ) around a text.	—
+branch	noun	A line of development in a repository.	—
+breadth	noun	The full width of a subject that a check covers.	—
+breakaway	noun	A process start that leaves the job that holds the parent.	—
+breaks	verb	Ends a rule, or stops working.	—
+broken	adjective	Not working as the stated rule requires.	—
+buffer	noun	A held area of data that waits for use.	—
+build	verb	To make a program from its source.	—
+built	adjective	Made from source.	—
+busy	adjective	In use, or full of work.	—
+but	conjunction	Joins a contrast.	—
+by	preposition	Through the action of, or next to.	—
+byte	noun	One unit of data of eight bits.	—
+bytes	noun	Units of data, eight bits each.	—
+cache	noun	A stored copy of a result, kept for a later read.	—
+call	verb	To invoke a function or a program.	—
+callable	adjective	Able to be invoked as a function.	—
+came	verb	Past form of come.	—
+camera	noun	A device that records images, named in host examples.	—
+can	verb	To be able to.	—
+cancel	verb	To stop a planned action before it completes.	—
+cannot	verb	To be unable to.	—
+canonical	adjective	In the one stated form that a record must take.	—
+capability	noun	A thing that a system can do.	—
+captioned	adjective	Given a text label on a screen.	—
+card	noun	A small physical or on-screen credential item.	—
+cargo	name	Cargo, the Rust build program.	—
+carried	adjective	Held inside a value, or moved as part of a set.	—
+carry	verb	To hold a thing inside a value, or to move a result forward.	—
+case	noun	One stated condition or example in a set.	—
+cease	verb	To come to an end of a stated act.	—
+cell	noun	One box in a table, or one slot in a campaign plan.	—
+central	adjective	Main, at the heart of a stated subject.	—
+certificate	noun	A signed record that binds a name to a key.	—
+certified	adjective	Stated as passed by a stated check.	—
+certify	verb	To state formally that a check passed.	—
+chain	noun	A series of linked steps or names.	—
+change	verb	To make a thing different.	—
+changelog	noun	The version record file of the project.	—
+channel	noun	A named route by which one thing can reach another.	—
+characters	noun	Letters, digits, and marks in a text.	—
+cheap	adjective	Lower in cost than another stated thing.	—
+child	noun	A process that one process starts directly.	—
+choice	noun	A thing that a person or a computation picks from a set.	—
+choke	verb	To block a flow at a narrow point, in the stated metaphor.	—
+choose	verb	To pick one from a set.	—
+circular	adjective	Using a thing to prove itself.	—
+citation	noun	A reference to a stated record or text.	—
+claim	noun	A statement that its maker holds as true.	—
+class	noun	A set of things with a shared form.	—
+classify	verb	To place a thing in a stated class.	—
+claude	name	Claude Code, a host product, in artefact names.	—
+clause	noun	One numbered part of a stated rule or hold.	—
+clean	adjective	Free of failures, or free of reach in the stated check.	—
+clear	adjective	Plain to read, or with nothing in the way.	—
+click	noun	A press of a pointer button on a screen item.	—
+clipped	adjective	Cut short at a stated bound.	—
+clips	verb	Cuts short, or fastens.	—
+clock	noun	The machine's measure of passing time.	—
+close	verb	To shut a handle, a file, or a window.	—
+closure	noun	The act that ends a phase when its conditions are green.	—
+code	noun	The source text of a program.	—
+codec	noun	The part that encodes and decodes one format.	—
+codex	name	Codex, a host product, in artefact names.	—
+collect	verb	To gather a stated thing as a recorded result.	—
+collection	noun	The act of gathering a stated thing as a recorded result.	—
+collective	adjective	Shared by a whole set, taken as one.	—
+colors	noun	The hues that a page uses for its links.	—
+com	name	The company suffix in a web address, in artefact text.	—
+come	verb	To arrive.	—
+commit	noun	A recorded change set in a repository.	—
+company	noun	The organization that owns a product.	—
+compare	verb	To examine two things for sameness or difference.	—
+comparison	noun	The act of examining two things for sameness or difference.	—
+competent	adjective	Able to do the work correctly.	—
+competitor	noun	A rival product in a benchmark.	—
+compiler	noun	The program that turns source into a built program.	—
+compiles	verb	Turns source into a built program.	—
+complete	adjective	With every part present.	—
+completeness	noun	The state of having every part accounted for.	—
+completion	noun	The end of a work, or the state of being complete.	—
+computation	noun	A calculation that a program does.	—
+compute	verb	To work out a value by stated steps.	—
+concatenation	noun	The joining of texts in order as one text.	—
+concept	noun	An idea that a text defines and uses.	—
+concern	verb	To be about a stated subject.	—
+condition	noun	A stated fact that must hold for a rule to apply.	—
+conditional	noun	A statement in code that chooses by a condition.	—
+conditionals	noun	Statements that choose by a condition.	—
+configuration	noun	The set of values that control a program, as data.	—
+confirm	verb	To state that a fact holds, after a check.	—
+conformance	noun	The state of meeting a stated standard's rules.	—
+conformant	adjective	Meeting the stated rules of a standard or a list.	—
+consent	noun	A person's agreement, given for a stated act.	—
+consequence	noun	A result that follows from a stated fact.	—
+console	noun	The text window or device session that a program writes to.	—
+consolidation	noun	The act of bringing several homes or forms into one.	—
+constant	noun	A value in code that does not change.	—
+construction	noun	The way a thing is built.	—
+consumer	noun	A part that reads and uses a stated result.	—
+consumes	verb	Uses up a resource.	—
+contain	verb	To hold a thing inside a boundary.	—
+containment	noun	The act of holding a process inside a boundary.	—
+content	noun	The text or data that a file holds.	—
+continuous	adjective	Without a break.	—
+contract	noun	A stated set of terms that two sides hold to.	—
+contrast	noun	A stated difference between two things, shown by placing them together.	—
+contribute	verb	To offer a change to a project.	—
+contributions	noun	Changes that people offer to a project.	—
+contributor	noun	A person who offers changes to a project.	—
+control	noun	A means to direct or to hold a thing within bounds.	—
+convenience	noun	Ease of use, taken as a reason for a choice.	—
+convention	noun	An agreed way of writing or placing a thing.	—
+converge	verb	To come to the same stated state from different starts.	—
+converse	noun	The reverse statement of a stated rule.	—
+conversion	noun	The act of changing a record from one form to another.	—
+convert	verb	To change a record from one form to another.	—
+convict	verb	To prove a stated party at fault by evidence.	—
+cool	adjective	In artefact prose, a stated quality of a host feature.	—
+copied	adjective	Made as an exact second form.	—
+copy	noun	An exact second form of a thing.	—
+copyright	noun	The legal right that an author holds in a work.	—
+core	noun	The central part of a system.	—
+corpus	noun	A set of texts or cases that a check reads as its body.	—
+correct	adjective	True to the rule or the fact.	—
+cost	noun	What a run spends: time, work, or money.	—
+could	verb	Past or possible form of can.	—
+count	verb	To find the number of a set.	—
+courtesy	noun	A polite act that a rule does not require.	—
+cover	verb	To include a subject in a check, or to place over.	—
+coverage	noun	The breadth of a subject that a check or a record holds.	—
+cpu	name	CPU, the central processor, in artefact text.	—
+crafted	adjective	Made by hand for a stated purpose, case by case.	—
+crash	noun	A sudden end of a program on a fault it cannot hold.	—
+crate	noun	A Rust package of source that builds as one unit.	—
+create	verb	To make a new thing.	—
+creation	noun	The act of making a new process or file.	—
+credential	noun	A secret or token that proves an identity.	—
+criteria	noun	The stated tests that a decision must pass.	—
+criterion	noun	One stated test that a decision must pass.	—
+cross	verb	To go from one side of a boundary to the other.	—
+ctrl	name	The Control key, in artefact names.	—
+curate	verb	To choose by hand what a set holds.	—
+curation	noun	The act of choosing by hand what a set holds.	—
+current	adjective	Of the present time or version.	—
+cursor	name	Cursor, a host product and editor.	—
+cyrillic	name	The Cyrillic script, in artefact text.	—
+data	noun	Information that a program reads or writes.	—
+dataset	noun	A set of data that a run reads or offers as one body.	—
+dead	adjective	Not able to be reached or used, of a path or a code form.	—
+decide	verb	To choose after consideration.	—
+decision	noun	A choice with its reason.	verdict (for this)
+declare	verb	To state a name or a fact formally.	—
+decompose	verb	To split a thing into its stated parts.	—
+decomposition	noun	The act of splitting a thing into its stated parts.	—
+deep	adjective	Going far down in a stated structure.	—
+default	noun	The value a program uses when no value is given.	—
+defect	noun	A fault in an artefact against its rule.	—
+defective	adjective	With a fault against its rule.	—
+defence	noun	A protection against an attack.	defense (spelling variant)
+defend	verb	To argue or to act in support of a stated thing.	—
+deferred	adjective	Done at a later stated point, not at the start.	—
+define	verb	To state the meaning of a word or the form of a thing.	—
+defines	verb	States the meaning of.	—
+definition	noun	The statement of what a word or a shape means.	—
+delete	verb	To remove a file or a record.	—
+delta	noun	A stated difference between two counts or states.	—
+demote	verb	To move a thing to a lower stated place.	—
+denial	noun	An answer that refuses an action.	—
+denied	adjective	Refused by a stated rule.	—
+denotation	noun	The thing that a name stands for.	—
+denote	verb	To stand for a stated thing, of a name.	—
+deny	verb	To refuse an action.	—
+depend	verb	To need a thing in order to work.	—
+dependency	noun	A thing that a program needs in order to work.	—
+depth	noun	How deep a structure goes.	—
+derivation	noun	The steps that produce a result from stated facts.	—
+derived	adjective	Produced by stated steps from other facts.	—
+descendant	noun	A process that comes from an ancestor at any depth.	—
+describe	verb	To state in words what a thing is or does.	—
+description	noun	A short text that states what a thing is.	—
+descriptor	noun	A value that names an open resource to the system.	—
+design	noun	The argued shape of an artefact.	—
+desktop	noun	The machine's main screen area, or the machine on a desk.	—
+destroy	verb	To end a thing so that it cannot be used again.	—
+destroys	verb	Ends a thing so that it cannot be used again.	—
+destruction	noun	The act of ending a thing so that it cannot be used again.	—
+detect	verb	To find a stated change or condition by a check.	—
+detection	noun	The act of finding a stated condition.	—
+developer	noun	A person who writes programs.	—
+development	noun	The work of writing and changing programs.	—
+deviation	noun	A stated measure of how far values stand from a central value.	—
+device	noun	A physical part of a machine, or a whole machine.	—
+diagnostics	noun	The output that a program writes to explain its state.	—
+dialog	noun	A small window that asks a person for an answer.	—
+dict	noun	Short artefact form for a dictionary value in code examples.	—
+dictionary	noun	The file or page that lists approved words and meanings.	—
+did	verb	Past form of do.	—
+die	verb	To stop running and not return.	—
+diff	noun	A stated record of the changes between two forms of a text.	—
+difference	noun	The way two things are not the same.	—
+different	adjective	Not the same.	—
+differential	adjective	That compares two forms of the same thing to find a difference.	—
+differs	verb	Is not the same.	—
+digit	noun	One written sign of a number, 0 to 9.	—
+dimension	noun	One stated axis of a campaign or a measure, with its own state.	—
+dims	verb	Makes a screen less bright in a stated display act.	—
+direct	adjective	In a straight line, with no step between.	—
+direction	noun	The way in which a proof or a movement goes.	—
+directory	noun	A folder on disk.	folder (same meaning; folder is the form this set uses in prose)
+disable	verb	To turn a function off.	—
+disagree	verb	To give a different answer from another stated party.	—
+discipline	noun	A stated way of working that a check holds.	—
+disconnect	verb	To end a connection.	—
+discover	verb	To find a thing that exists but was not known.	—
+discoverable	adjective	Able to be found by a stated read or search.	—
+discovery	noun	The act of finding what exists.	—
+dispatch	verb	To send a call to the part that handles it.	—
+display	noun	The screen output of a machine.	—
+dispose	verb	To place a thing in its final stated home.	—
+disposition	noun	A stated ruling on what is done with a stated item.	—
+distance	noun	How far apart two things are.	—
+distinct	adjective	Separate and not the same, of two or more things.	—
+diverge	verb	To come to different answers or states over time.	—
+divergence	noun	A point at which two forms give different answers.	—
+do	verb	To perform an action.	—
+docs	noun	The documentation set, or its folder.	—
+document	noun	A file of text that states facts or rules.	—
+documentation	noun	The set of texts that teach a product.	—
+domain	noun	An area of rule or of names.	—
+door	noun	The entry page or file that a reader starts from, in the stated metaphor.	—
+double	adjective	Twice as much, or in two copies.	—
+doubt	noun	A stated uncertainty about a claim.	—
+down	adverb	Toward a lower place or state.	—
+dr	name	DR, the letters that start a decision record identifier, in artefact text.	—
+drawn	adjective	Laid out in the stated form.	—
+draws	verb	Pulls a conclusion from facts, or makes a line.	—
+dressed	adjective	Presented as a stated thing that it is not.	—
+drift	verb	To move slowly away from a stated state without a stated act.	—
+drive	noun	A disk device, or a storage area with a letter.	—
+drop	verb	To let a thing fall from a stated set, or to give it up.	—
+dropdown	noun	A page part that opens to show more text.	—
+duplicate	adjective	An exact second copy of a thing.	—
+duty	noun	A stated thing that a party must do.	—
+each	determiner	Every one, taken one by one.	—
+earlier	adjective	Of a time or form before the stated one.	—
+early	adjective	Before the expected time.	—
+earn	verb	To gain a place by meeting a stated test.	—
+earns	verb	Gains a place by meeting a stated test.	—
+easy	adjective	Simple to do or to state.	—
+echo	verb	To write back the characters that a person types.	—
+edge	noun	The border line of an area or a case.	—
+edit	verb	To change a text.	—
+edition	noun	One stated version of a standard or a text.	—
+editor	noun	A program that a person uses to change text.	—
+eight	number	The number 8.	—
+either	determiner	One or the other of a pair.	—
+else	adverb	Otherwise, or in another case.	—
+embedder	noun	A program that holds another program inside itself.	—
+empty	adjective	With nothing inside.	—
+enclosing	adjective	Around a thing on all sides.	—
+encoded	adjective	Written in a stated code form.	—
+encoding	noun	The form in which text or data is written as bytes.	—
+enforcement	noun	The act of making a rule hold.	—
+engine	noun	The module that runs the central work of the guard.	—
+english	noun	The language of this documentation set.	—
+enough	adjective	As much as a stated need requires.	—
+enter	verb	To go into a place or a state, or to type a value.	—
+entry	noun	One item in a list, a table, or a record.	—
+enumerate	verb	To list every item of a set in order.	—
+enumeration	noun	A list of every item of a set, in order.	—
+environment	noun	The set of values that a system gives a process at its start.	—
+equal	adjective	The same in value or in form.	—
+equality	noun	The state of being the same in value or in form.	—
+equals	verb	Is the same in value as.	—
+equivalence	noun	The state of two forms holding the same value or effect.	—
+erase	verb	To remove a record so that no trace of it stands.	—
+error	noun	A fault state that a program reports.	refusal (for this)
+esc	noun	The Escape key, in artefact names.	—
+esc	name	The Escape key name, counted here as a name.	—
+escape	verb	To leave a boundary by a route the rule did not state.	—
+establish	verb	To set a fact in record by a stated run or check.	—
+established	adjective	Set up and proven over time.	—
+estimate	verb	To work out a value from stated measures, not by a direct count.	—
+estimator	noun	The stated computation that works out a value from stated measures.	—
+event	noun	A thing that happens at a stated time.	—
+ever	adverb	At any time.	—
+every	determiner	All of a set, without exception.	—
+evidence	noun	Records that show a fact.	—
+exact	adjective	Precisely the stated value, with no difference.	—
+example	noun	One case that shows a rule.	—
+exceeds	verb	Is more than a stated bound.	—
+except	preposition	Not including.	—
+exception	noun	A stated case that a rule does not bind.	—
+exclude	verb	To leave a stated thing out of a set.	—
+exclusion	noun	A stated case that a list leaves out, with its reason.	—
+executable	noun	A built program file that a machine can run.	—
+execute	verb	To run a stated program or step.	—
+executes	verb	Runs a program or a command.	—
+executing	adjective	Running now.	—
+execution	noun	The act of running a program.	—
+exercise	verb	To put a function to real use in a test.	—
+exhaustion	noun	The state in which a bounded search has used all its stated bound.	—
+exist	verb	To be present as a stated thing.	—
+existence	noun	The state of being present.	—
+exists	verb	Is present.	—
+exit	noun	The end of a process, or the code it returns.	—
+expect	verb	To look for a stated thing as the likely result.	—
+expected	adjective	Stated in advance as the result that must come.	—
+explain	verb	To state the reason for a stated thing in words.	—
+explicit	adjective	Stated in full, with nothing left to be guessed.	—
+export	noun	Data that a program writes out for another program.	—
+extend	verb	To make a thing longer or larger.	—
+extendable	adjective	Able to be made longer by a stated mechanism.	—
+external	adjective	Outside the boundary in question.	—
+extra	adjective	More than the stated set.	—
+extract	verb	To take a stated file or value out of a set.	—
+extraction	noun	The act of taking a stated thing out of a set.	—
+extreme	adjective	At the far end of a stated range.	—
+fabricate	verb	To make a stated signal or record that is not true.	—
+fabrication	noun	A stated thing made to look true when it is not.	—
+facade	noun	An outer form that hides a second structure behind it.	—
+face	noun	The public form of a thing.	—
+fact	noun	A statement that is true and can be checked.	—
+fail	verb	To not meet a stated test.	—
+failure	noun	The state of not meeting a stated test.	standing loss (for a recorded campaign loss)
+fake	adjective	Made to look true when it is not.	—
+fallback	noun	A second route that a program takes when the first route fails.	—
+false	adjective	Not true.	—
+far	adverb	At a great distance.	—
+fast	adjective	Taking little time, of a stated path.	—
+fault	noun	A stated defect in a record or a form.	—
+feature	noun	A stated capability of a product.	platform mechanism (for this, in seam prose)
+feed	verb	To supply a stated thing to a computation or a record.	—
+feeling	noun	A sense that a thing is so, with no stated measure.	—
+fell	verb	Past form of fall: came down by a stated amount.	—
+fence	noun	A stated boundary in the record, in the stated metaphor.	—
+fetch	verb	To get a stated value or object from the system.	—
+field	noun	One named part of a record or a form.	—
+fifth	adjective	One of five equal parts, or the item after the fourth.	—
+file	noun	A named unit of data on disk.	—
+filename	noun	The name of a file, with its stated form.	—
+fill	verb	To put a value into every stated place.	—
+final	adjective	Last, after which nothing in the set changes.	—
+find	verb	To discover a thing that exists.	—
+findable	adjective	Able to be found by a reader or a check.	—
+finding	noun	A stated result of a review or a check.	—
+finds	verb	Discovers a thing that exists.	—
+fingerprint	noun	A short value that identifies a key or a file.	—
+finish	verb	To complete a work.	—
+finite	adjective	With a stated end.	—
+first	adjective	Before all others.	—
+fit	verb	To be of the right size or shape for a stated place.	—
+five	number	The number 5.	—
+fix	noun	A change that cures a defect.	—
+flag	noun	A named option on a command line, or a stated bit in an object.	—
+flat	adjective	In one level, with no folders inside.	—
+focus	noun	The screen item that receives typed input.	—
+fold	verb	To place a whole tree into another stated home, part by part.	—
+folder	noun	A container on disk that holds files.	directory (for this, in prose)
+follow	verb	To come after, or to obey a stated rule.	—
+footnote	noun	A note at the foot of a page or a record.	—
+for	preposition	Intended for, or because of.	—
+force	verb	To make a stated thing happen by a stated link or rule.	—
+foreign	adjective	From outside the stated system or party.	—
+forged	adjective	Made to look true when it is not, of a packet or a record.	—
+fork	noun	A point where a rule gives two stated routes.	—
+form	noun	The shape or the spelling of a thing.	—
+formulation	noun	One stated form in which a computation is written.	—
+forward	adverb	In the direction in which a proof or a text goes.	—
+found	adjective	Discovered to exist.	—
+four	number	The number 4.	—
+free	verb	To release a stated object so that the system can use it again.	—
+fresh	adjective	New to a stated work, with no earlier part in it.	—
+from	preposition	Starting at.	—
+front	noun	The forward part, or the first screen a reader sees.	—
+full	adjective	With every part present, or at the stated maximum.	—
+fully	adverb	Completely.	—
+function	noun	A named unit of code that takes values and can return a value.	—
+future	noun	The time after now.	—
+gain	verb	To get a stated thing as a result.	—
+gap	noun	A stated place where a required item is absent.	—
+gate	noun	The role or check that allows or denies at a boundary.	—
+gave	verb	Past form of give.	—
+general	adjective	True for a whole class, not one case.	—
+generated	adjective	Produced by a program from stated inputs.	—
+generator	noun	A program that produces a stated file from stated inputs.	—
+generic	adjective	True for any type in a stated class.	—
+get	verb	To obtain a value.	—
+git	name	Git, the version control program.	—
+github	name	GitHub, the service that hosts the repository.	—
+give	verb	To hand a value to a receiver.	—
+given	adjective	Stated as a fact to start from.	—
+glance	noun	A quick look.	—
+glob	noun	A pattern that supplies every matching name at once, in an import or a re-export.	—
+glossary	noun	The page that lists the approved words and their meanings.	—
+gnu	name	GNU, in artefact names such as the windows-gnu target.	—
+go	verb	To move or to proceed.	—
+gone	adjective	No longer present.	—
+google	name	Google, a company name in artefact text.	—
+govern	verb	To be the stated rule that holds over a subject.	—
+graceful	adjective	Done in an orderly stated step, not by a sudden end.	—
+grant	verb	To give a permission or a hold formally.	—
+granular	adjective	Stated at the grain of one file.	—
+graph	noun	The page or data that shows how parts connect.	—
+greater	adjective	Larger in value.	—
+green	adjective	Passed, in the stated test sense.	—
+grew	verb	Past form of grow.	—
+grow	verb	To become larger, or to add stated code over time.	—
+guarantee	noun	A promise that a product states and keeps.	—
+guess	verb	To state a thing without a stated check of it.	—
+guides	noun	Texts that teach a reader step by step.	—
+had	verb	Past form of have.	—
+half	noun	One of two equal parts of a thing.	—
+halt	verb	To bring a stated computation to an end.	—
+hand	noun	A person's hand, or the act of giving control.	—
+handle	noun	A value that names an open object to the system.	—
+hang	verb	To wait without progress and without an end.	—
+happens	verb	Takes place.	—
+hard	adjective	Difficult to do or to find.	—
+hardened	adjective	Made harder to attack by a stated work.	—
+hardening	noun	The work that makes a process harder to attack.	—
+hardens	verb	Makes a process harder to attack.	—
+harness	noun	The test program that runs cases and records results.	—
+has	verb	Holds or possesses.	—
+hash	noun	A short fixed-length value that a function computes from data.	checksum (for a SHA-256 file value)
+have	verb	To hold or possess.	—
+head	noun	The top part, or the latest commit of a branch.	—
+headline	adjective	Stated as the main number or claim.	—
+held	adjective	Held inside a value, or kept by a named check.	—
+hello	noun	The greeting ceremony in artefact names for the sign-in check.	—
+help	noun	Text that states how to use a program.	—
+helpers	noun	Small units of code that support a main unit.	wrapper (for a seam wrapper)
+here	adverb	At this place.	—
+hidden	adjective	Kept from view by a stated form.	—
+hides	verb	Keeps a thing from view.	—
+historical	adjective	Of a past version or a past state.	—
+history	noun	The recorded past of a thing, kept in commit history.	—
+hole	noun	A stated place where a required part is absent.	—
+home	noun	The folder or page that a thing belongs to.	—
+honest	adjective	Stating only what the evidence holds.	—
+honesty	noun	The quality of stating only what the evidence holds.	—
+hook	noun	A defined point where a host calls the guard.	—
+hop	noun	One step in a following chain, or one link between pages.	—
+hostile	adjective	Trying to break a rule or to harm.	—
+hours	noun	Units of time, 60 minutes each.	—
+how	adverb	In what way.	—
+hundred	number	The number 100, used for a count in the hundreds.	—
+identical	adjective	The same in every stated byte or part.	—
+identification	noun	The act or the record that names who a person is.	—
+identifier	noun	A value that names one thing in a set.	—
+identity	noun	The stated nature of a product that makes it itself.	—
+if	conjunction	In the case that.	—
+image	noun	The built form of a program as the linker writes it.	—
+immediate	adjective	At once, with no wait.	—
+impl	name	Short artefact form for an implementation in code names.	—
+implausible	adjective	Not able to be believed under the stated rules.	—
+implement	verb	To build a stated step or form so that it runs.	—
+implicit	adjective	Present without being stated.	—
+implied	adjective	Present in effect, but not stated.	—
+import	noun	A statement that brings a name into a module.	—
+impossible	adjective	Not able to happen or to be done.	—
+in	preposition	Inside, or during.	—
+incomplete	adjective	With a stated part absent.	—
+inconsistency	noun	A state in which two computations give different answers on one fact.	—
+incorporation	noun	The act of folding a stated file or tree into another repository.	—
+incorrect	adjective	Not correct.	—
+independent	adjective	Not depending on another stated thing.	—
+index	noun	A list that points to the parts of a set.	manifest (for the layout file)
+indirection	noun	A route that reaches a thing through another thing.	—
+indistinguishable	adjective	Not able to be told apart from a stated thing.	—
+inert	adjective	Having no effect on a stated result.	—
+inflate	verb	To make a count larger than the stated facts give.	—
+influence	verb	To change a stated result by a stated field or act.	—
+information	noun	Facts that a stated act gives to a reader.	—
+inheritance	noun	The rule by which a type takes the members of another type.	—
+initialiser	noun	The expression that gives a value at its definition.	initializer (spelling variant)
+inline	adjective	Written in place, inside another item.	—
+inside	preposition	In the interior of.	—
+inspect	verb	To look at a stated thing closely by a check.	—
+install	verb	To put a program on a machine in its working place.	—
+instance	noun	One stated case of a thing.	—
+instant	noun	One stated moment in a run.	—
+instead	adverb	In place of another thing.	—
+instruction	noun	One stated action that a reader or a program must do.	—
+instrument	noun	A tool of the work: a program that checks or measures.	—
+integration	noun	The whole connection between the guard and one host.	—
+integrator	noun	A person or program that connects two systems.	—
+intent	noun	The stated purpose that a check or a text carries.	—
+intention	noun	A stated plan to do a stated act.	—
+interactive	adjective	With a person able to answer during the run.	—
+interface	noun	The stated surface at which two parties meet.	—
+intermediate	adjective	Between the start and the final form.	—
+internal	adjective	Inside the boundary in question.	—
+into	preposition	To the interior of.	—
+intree	adjective	In the tree: of the tests that live in the tree itself.	—
+inventory	noun	A stated list of every item in a set.	—
+io	name	IO, input and output, in artefact text.	—
+is	verb	Third person present form of be.	—
+issue	noun	A reported problem, or a point in question.	—
+it	pronoun	The thing just named.	—
+item	noun	One thing in a list or a set.	—
+itself	pronoun	The same thing, with no other actor.	—
+iv	name	The Roman numeral 4, in artefact text such as a gate item label.	—
+joined	adjective	Connected into a set or a network.	—
+joins	verb	Connects into a set.	—
+json	noun	The data format of the manifest and the payloads, in artefact use.	—
+judge	verb	To give a stated answer on a claim by a stated check.	—
+judged	adjective	Examined by a named check against a stated rule.	—
+judgement	noun	A stated answer given on a claim after a check.	—
+keep	verb	To hold a thing in its state.	—
+kept	adjective	Held in its state.	—
+key	noun	A named field in the manifest, or a cryptographic secret, or a keyboard button.	—
+keyboard	noun	The physical keys that a person types on.	—
+kind	noun	A stated class of a thing.	—
+knew	verb	Past form of know.	—
+know	verb	To have a stated fact in record or in mind.	—
+known	adjective	Identified and recorded.	—
+knows	verb	Has a fact in record.	—
+lab	noun	The repository or work area in artefact names.	—
+label	noun	A short name placed on a thing.	—
+landed	verb	Past form of land: placed a change into the tree.	—
+landing	noun	The act that places a change into the tree.	—
+language	noun	A system of words, or a programming language.	—
+laptop	noun	A portable computer.	—
+large	adjective	Great in size or in number.	—
+largest	adjective	Greatest in value in a set.	—
+last	adjective	After all others.	—
+later	adverb	At a time after.	—
+latest	adjective	Most recent.	—
+latin	name	The Latin script, in artefact text.	—
+launch	verb	To start a program or a run.	—
+layered	adjective	Placed in levels, one over another.	—
+layout	noun	The arrangement of files and folders in a tree.	—
+lazily	adverb	At first use only, not at the start.	—
+leading	adjective	At the front.	—
+leaf	noun	The last item in a branch of a structure.	—
+leak	noun	A loss of a stated resource with no stated bound.	—
+learn	verb	To gain knowledge from a text or a run.	—
+leave	verb	To go away from, or to let a thing stay.	—
+ledger	noun	A stated record that lists items and their rulings.	—
+left	adjective	On the side that is west when a person faces north; also, remaining.	—
+less	adjective	Smaller in amount.	—
+let	verb	To permit.	—
+letters	noun	Characters of an alphabet.	—
+library	noun	A set of code that other code calls.	—
+licence	noun	The legal permission to use a work.	license (spelling variant, for this)
+license	noun	The legal permission to use a work, in artefact spellings.	licence (for this, in prose)
+life	noun	The time during which a process or a record exists.	—
+lifetime	noun	The full time during which a thing exists.	—
+like	preposition	Similar to.	—
+line	noun	One row of text in a file.	—
+link	noun	A page element that takes a reader to another place.	—
+lint	noun	The check program that holds the documentation rules.	—
+linux	name	Linux, an operating system.	—
+list	noun	A set of items written in order.	ring (for the census ring)
+literal	noun	A stated path or value written in full, not by a name.	—
+live	adjective	Running now, or in real use.	—
+load	noun	The work that a machine carries, or the act of reading data in.	—
+local	adjective	On this machine, not remote.	—
+location	noun	The place where a thing is.	—
+lock	noun	A control that gives one holder at a time the right to proceed.	—
+lockout	noun	A state in which sign-in is refused after failed attempts.	—
+log	noun	The record that a program writes as it runs.	—
+logic	noun	The rules by which a computation decides.	—
+logon	noun	The act of signing in to a machine.	—
+long	adjective	Of great length or time.	—
+look	verb	To examine with the eyes or by a check.	—
+loose	adjective	Not exact in stated form.	—
+loosely	adverb	In a form that is not exact.	—
+lose	verb	To stop having a stated thing.	—
+loss	noun	A campaign cell that the checker counts against the guard.	—
+lost	adjective	Not held any more, after a stated act.	—
+loud	adjective	Stated in a way that no reader can miss.	—
+loudly	adverb	In a way that no reader can miss.	—
+low	adjective	Below the stated value, of a count.	—
+mac	name	Mac, a computer that runs macOS, in artefact text.	—
+machine	noun	A computer.	—
+machinery	noun	Standing parts that a path carries for its work.	—
+macos	name	macOS, an operating system.	—
+macro	noun	A code form that expands into other code at build time.	—
+made	adjective	Built or produced.	—
+main	adjective	Chief, the one that carries the work.	—
+make	verb	To build or to cause.	—
+malformed	adjective	Not in the required form.	—
+management	noun	The work of controlling a system or a service.	—
+manager	noun	A program or a person that controls a set.	—
+mandatory	adjective	Required by a rule.	—
+manual	adjective	Done by a person, or the book that teaches a system.	—
+manufacture	verb	To make a stated thing by a stated process.	—
+many	determiner	A large number of.	—
+map	noun	A table that states which item goes with which item.	—
+marker	noun	A stated sign that shows a place or a state.	—
+match	verb	To be the same as a stated pattern or value.	—
+matrix	noun	A table of cells that shows two sets against each other.	—
+matter	noun	A subject under consideration, or the substance of a text.	—
+maximized	adjective	Made as large as the screen allows.	—
+may	verb	To be permitted to, or to be possible.	—
+mean	verb	To have a stated thing as its meaning or its result.	—
+meaning	noun	What a word or a statement states.	—
+means	verb	States as its meaning, or makes possible.	—
+measure	verb	To find a size, a time, or a count by a stated method.	—
+measurement	noun	The act or the result of measuring.	—
+mechanical	adjective	Done by a program from stated rules, with no judgement.	—
+mechanism	noun	A stated means by which a system does a thing.	—
+median	noun	The middle value of a stated set of numbers.	—
+mediated	adjective	Passed through a stated middle part.	—
+meet	verb	To come to a stated thing, in fact or in a check.	—
+member	noun	One item or party in a stated set.	—
+membership	noun	The state of being in a stated set, or the set itself.	—
+memory	noun	The fast storage that a running program uses.	—
+mended	adjective	Repaired.	—
+merge	verb	To combine two sets or two branches into one.	—
+message	noun	A unit of text or data that one part sends to another.	—
+method	noun	A stated way of doing a thing.	—
+mib	name	MiB, the mebibyte unit, in artefact text.	—
+microsoft	noun (name)	Microsoft, the company that makes Windows.	—
+mingw	name	MinGW-w64, a build toolchain name in artefact text.	—
+minimal	adjective	The smallest that a stated purpose allows.	—
+minimum	adjective	Smallest that a rule allows.	—
+minute	noun	A unit of time, 60 seconds.	—
+missed	adjective	Not reached or not recorded.	—
+missing	adjective	Absent where a rule needs a thing present.	—
+mixed	adjective	Made of two or more stated kinds together.	—
+model	noun	A described form that other things follow.	—
+module	noun	One file or one stated unit of code.	—
+moment	noun	A short time, or one stated point in a run.	—
+more	adjective	Larger in amount.	—
+most	adjective	Greatest in amount.	—
+move	verb	To change the place of a thing.	—
+movement	noun	The act of moving a thing from one place to another.	—
+msvc	name	MSVC, the Microsoft build toolchain name in artefact text.	—
+multiply	verb	To make a stated thing exist in many places.	—
+multiset	noun	A set in which the count of each item is part of the fact.	—
+must	verb	To be required to.	—
+mutated	adjective	Changed in a stated way as a test case.	—
+name	noun	A word that identifies a thing.	—
+narrow	adjective	Small in stated breadth.	—
+native	adjective	Belonging to the system itself, not added.	—
+nearest	adjective	Closest in distance or in a stated order.	—
+need	verb	To require a thing.	—
+negative	adjective	Of a control case that must give the stated failing answer.	—
+neither	determiner	Not one and not the other of a pair.	—
+nest	verb	To place one axis or thing inside another of the same kind.	—
+nested	adjective	Placed inside another thing of the same kind.	—
+network	noun	A set of connected machines.	—
+neutral	adjective	Neither for nor against a stated claim.	—
+never	adverb	At no time.	—
+new	adjective	Made or found for the first time.	—
+next	adjective	Immediately after the present one.	—
+no	determiner	Not any.	—
+nobody	pronoun	No person.	—
+noise	noun	Variation in a measure that no stated fact explains.	—
+noisy	adjective	With much variation that no stated fact explains.	—
+non	adjective	Prefix form in artefact words: not.	—
+none	pronoun	Not any of a set.	—
+nor	conjunction	And not.	—
+normal	adjective	In the usual state.	—
+not	adverb	Makes a statement negative.	—
+note	noun	A short recorded statement.	—
+nothing	pronoun	No thing.	—
+notice	noun	A written statement that a program gives a user.	—
+noun	noun	A word that names a person, a place, or a thing.	—
+now	adverb	At the present time.	—
+nowhere	adverb	At no place.	—
+null	adjective	With no value, in data.	—
+number	noun	A value that counts or measures.	—
+numeric	adjective	Stated as a number.	—
+object	noun	A thing that a system creates and names, such as a job object.	—
+occurrence	noun	One time that a thing appears.	—
+of	preposition	Belonging to, or from a set.	—
+off	adverb	In the stopped state, or away from.	—
+offers	verb	Gives a choice or a capability.	—
+old	adjective	Of an earlier stated time or form.	—
+on	preposition	Atop, or in the operating state.	—
+once	adverb	One time only.	—
+one	number	The number 1.	—
+onward	adverb	Toward a later point.	—
+open	adjective	Not closed, or available to read.	—
+operating	adjective	In the phrase operating system: the base software of a machine.	—
+operation	noun	One stated act that a system performs.	—
+option	noun	One choice in a set that a command or a person can take.	—
+optional	adjective	Present only when a stated caller asks for it.	—
+or	conjunction	Joins alternatives.	—
+order	noun	The sequence in which items stand.	—
+org	noun	Short artefact form for the organization area of the record.	—
+organization	noun	The arrangement of parts, or the body that owns a work.	—
+organize	verb	To place items under a stated axis or order.	—
+origin	noun	The place or value from which a thing comes.	—
+original	adjective	First, before any change.	—
+other	adjective	Different from the one named.	—
+otherwise	adverb	In another case.	—
+out	adverb	Outside, or into the open.	—
+outcome	noun	The result of a stated act or check.	—
+outlive	verb	To exist longer than another thing.	—
+output	noun	What a program writes out.	—
+outside	preposition	Beyond a boundary.	—
+over	preposition	Above, or more than.	—
+own	adjective	Belonging to the subject itself.	—
+package	noun	A set of files that ships as one unit.	—
+packet	noun	A stated unit of data that one part sends to another.	—
+page	noun	One document in the wiki set, or one screen of text.	—
+paid	verb	Past form of pay.	—
+pair	noun	Two stated things that a rule joins as one.	—
+pairs	noun	Two items that a rule joins.	—
+panic	noun	A state in which a program stops at once on a fault it cannot hold.	—
+papers	noun	Working documents of a stated work.	—
+parameter	noun	A value that controls a computation, in code.	—
+parse	verb	To read a text into its stated parts.	—
+part	noun	A piece of a whole.	—
+partial	adjective	Of one part only, not the whole.	—
+party	noun	A person or body in an agreement or an attack.	—
+pass	verb	To meet a stated test, or to hand a value onward.	—
+password	noun	A secret word or phrase that proves an identity.	—
+past	noun	The time before now.	—
+path	noun	The name of a file's place, with its folders.	—
+pay	verb	To give a stated cost for a thing.	—
+per	preposition	For each one.	—
+perfect	adjective	With no defect against the stated test.	—
+permanent	adjective	Lasting, not removed by a later step in the set.	—
+person	noun	A human being.	—
+personal	adjective	Belonging to one person.	—
+peter	name	Peter Shiller, the author named in the copyright line.	—
+phase	noun	One stated stage of a work.	—
+phrase	noun	A group of words that acts as one term.	—
+picked	adjective	Chosen.	—
+pieces	noun	Small parts of a whole.	—
+pipe	noun	A channel that carries one program's output to another's input.	—
+place	noun	A stated location.	—
+placeholder	noun	A stated token that a later step replaces with a value.	named place (for a folder)
+placement	noun	The act of putting a thing in its place.	—
+plain	adjective	Simple and clear, with nothing hidden.	—
+plan	noun	A stated set of cells, steps, or acts that a work follows.	—
+planted	adjective	Placed on purpose as a test defect.	—
+plausible	adjective	Able to be believed under the stated rules.	—
+plus	preposition	With a stated thing added.	—
+point	noun	A stated item in an argument, or a place.	—
+pointer	noun	A value that names the place of a stated thing.	—
+policy	noun	The installed policy text that the guard prints and enforces.	policy file (for the file as data)
+populated	adjective	Holding the stated files or items.	—
+popup	noun	A small window that appears over a screen.	—
+portable	adjective	Able to be carried to another stated system.	—
+position	noun	The place that a thing holds.	—
+possible	adjective	Able to happen under the stated rules.	—
+powerful	adjective	With great capability.	—
+powershell	name	PowerShell, a shell program.	—
+pre	adjective	Prefix form in artefact words: before.	—
+precision	noun	The stated fineness of a measure or a claim.	—
+predate	verb	To stand at a time before a stated thing.	—
+predicate	noun	A stated condition that a claim must meet, as a whole.	—
+predicted	adjective	Stated in advance as the expected result.	—
+predicts	verb	States in advance what a reader or a rule expects.	—
+preference	noun	A choice made for taste, not by a stated rule.	—
+premise	noun	A stated fact that an argument takes as its start.	—
+prerequisites	noun	Things that must be present before a step starts.	—
+presence	noun	The state of being present.	—
+present	adjective	Here now.	—
+preservation	noun	The act of keeping a stated thing in its form for later reading.	—
+preserve	verb	To keep a stated thing in its form.	—
+preserved	adjective	Kept in its form for later reading.	—
+press	verb	To push a key or a button.	—
+pretooluse	name	The PreToolUse hook event name in artefact text.	—
+prevent	verb	To keep a stated act from happening.	—
+price	noun	The cost of a thing, or a stated value in a record.	—
+principal	noun	The main person or process in a stated rule.	—
+principle	noun	A first rule from which other rules come.	—
+print	verb	To write a text to a screen or a stream.	—
+private	adjective	Not open to others.	—
+problem	noun	A stated difficulty that a work must answer.	—
+procedure	noun	A stated series of steps for one task.	—
+proceed	verb	To go forward in a stated order of steps.	—
+process	noun	One running instance of a program.	—
+process	noun	One running instance of a program.	—
+processor	noun	The part of a machine that runs computations.	—
+producer	noun	A part that writes stated records or values.	—
+product	noun	The artefact that a project ships.	—
+production	adjective	In real use, or of the shipped source set.	—
+professor	noun	A teacher at the stated level, in the anchor's test.	—
+program	noun	A set of instructions that a machine runs.	—
+project	noun	A stated body of work with one goal.	—
+promise	noun	A statement that a maker holds as a duty.	—
+prompt	noun	A window or a line that asks a person for a value.	—
+pronoun	noun	A word that stands for a named thing.	—
+proof	noun	Evidence that shows a claim is true.	—
+proper	adjective	In the phrase proper noun: naming one stated person or place.	—
+property	noun	A stated quality of a thing.	—
+proportion	noun	A part stated against the whole.	—
+propose	verb	To state a thing for a stated decision.	—
+prose	noun	Written text that is not code, not a table of data, and not a heading.	—
+protected	adjective	Kept safe by a stated means.	—
+protection	noun	The means that keeps a thing safe.	—
+protects	verb	Keeps a thing safe.	—
+protocol	noun	The stated rules by which two parties exchange data.	—
+provably	adverb	In a way that a stated proof holds.	—
+prove	verb	To show a claim is true by evidence.	—
+proven	adjective	Shown true by evidence at the stated tier.	—
+provenance	noun	The stated origin of a file or a fact.	—
+provides	verb	Gives a capability or a value.	—
+pseudo	adjective	In artefact names: not a real instance, a stated stand-in.	—
+ptg	name	PTG, short form of the product name in PTG-STE-1.	—
+public	adjective	Open to all readers.	—
+pull	verb	To fetch changes from a repository.	—
+pure	adjective	With a census count of zero, or with nothing mixed in.	—
+purity	noun	The state of having no stated reach or mixture.	—
+purpose	noun	The reason for which a thing exists.	—
+put	verb	To place a thing.	—
+python	name	Python, a programming language named in suite prose.	—
+qualification	noun	A stated limit that keeps a claim at its true breadth.	—
+quartile	noun	One of the four equal parts into which a set of values is split, used as a range.	—
+query	noun	A stated call that asks a system for a fact.	—
+question	noun	A sentence that asks for an answer.	—
+queue	noun	A line of items that wait for service in order.	—
+quota	noun	A stated count that a party keeps by hand as a target.	—
+race	noun	A fault in which two acts reach a shared state in either order.	—
+raise	verb	To make a stated error state occur.	—
+ran	verb	Past form of run.	—
+random	adjective	Chosen with no stated pattern.	—
+range	noun	The stated breadth between the smallest and the largest value.	—
+rate	noun	A stated amount per unit of time or of work.	—
+raw	adjective	In its first form, not yet worked on.	—
+re	adjective	Prefix form in artefact words: again, or back.	—
+read	verb	To take in a text or a value.	—
+readability	noun	The quality of being easy to read correctly.	—
+reader	noun	A person or a part that reads a stated text or home.	—
+readme	noun	A README file: the sign of a folder, or the door of a repo.	—
+real	adjective	Existing in fact, not in name only.	—
+reason	noun	The stated cause or ground for a thing.	—
+rebind	verb	To bind a name to a value again.	—
+rebuild	noun	The act of building a stated product again.	—
+receiver	noun	The part that receives a value or a call.	—
+receives	verb	Takes in a value or a call.	—
+recent	adjective	Of a time just before now.	—
+reclaim	verb	To take a stated resource back for later use.	—
+recognition	noun	The act of identifying a person or a thing.	—
+recompute	verb	To calculate a value again from its facts.	—
+record	noun	A written statement that a run or a work keeps.	—
+recovery	noun	A stated surface or act that brings a thing back after a fault.	—
+red	adjective	The color that this set uses for internal links.	—
+reduce	verb	To make a stated claim or value smaller in breadth.	—
+reducible	adjective	Able to be made smaller in stated breadth.	—
+reduction	noun	The act of making a stated claim smaller in breadth.	—
+reference	noun	A pointer to another text or value.	—
+refresh	verb	To state a stated record again from a fresh run.	—
+refuse	verb	To decline to do a stated act.	—
+regenerate	verb	To produce a generated file again from its inputs.	—
+registered	adjective	Recorded in a stated list in advance.	—
+regression	noun	A stated test set that holds earlier behaviour against a change.	—
+relation	noun	A stated connection between two things.	—
+release	noun	A stated version that a project ships.	—
+remain	verb	To stay in a stated place or state.	—
+remote	adjective	On another machine, reached over a network.	—
+removal	noun	The act of taking a stated thing away.	—
+remove	verb	To take a stated thing away.	—
+removes	verb	Takes a thing away.	—
+rename	noun	The act of giving a stated thing a new name.	—
+render	verb	To show a stated thing in a stated state as a result.	—
+renew	verb	To extend a credential or a right for a new period.	—
+renewal	noun	The act of extending a credential for a new period.	—
+reopens	verb	Opens again.	—
+reorganized	adjective	Placed again under a new arrangement.	—
+repair	verb	To fix a defect.	—
+repeat	verb	To do a thing again.	—
+replace	verb	To put a thing in the place of another.	—
+replacement	noun	A thing that takes the place of another.	—
+repo	noun	Short form for a repository.	—
+report	noun	A written statement of results or facts.	—
+repository	noun	The stored history and files of a project.	—
+require	verb	To need a stated thing by rule.	—
+required	adjective	Needed by a rule.	—
+requirement	noun	A stated thing that a rule needs.	—
+resident	adjective	Staying in place across many stated runs, of a process.	—
+resolution	noun	The act of finding the target of a name.	chase (for the census computation)
+resolve	verb	To come to a stated final state or answer.	—
+resource	noun	A thing that a run uses: time, memory, a handle, or a file.	—
+rest	noun	The remaining part of a set.	—
+restore	verb	To bring a thing back to a stated state.	—
+restructure	verb	To change the arrangement of parts.	—
+result	noun	What an act or a computation produces.	—
+resumes	verb	Starts again after a pause.	—
+retired	adjective	Taken out of use at a stated step.	—
+retirement	noun	The act of taking a stated thing out of use.	—
+retried	verb	Past form of retry: done again after a failure.	—
+return	verb	To give a value back to a caller.	—
+reuse	verb	To use a thing again.	—
+reuses	verb	Uses a thing again.	—
+reversal	noun	An act that undoes a stated decision.	—
+review	noun	An examination of an artefact against its rules.	keeper (for a blocking check)
+revives	verb	Makes a held item live again.	—
+rewritten	adjective	Written again in a new form.	—
+right	adjective	Correct, or the side that is east when a person faces north.	—
+rigour	noun	Strict care in a stated method.	—
+risk	noun	The stated chance of a stated wrong result.	—
+root	noun	The top folder of a tree, or the base of a structure.	—
+round	noun	One complete cycle of a stated operation.	—
+route	noun	A stated path by which a thing reaches a target.	—
+row	noun	One horizontal line in a table or a file.	—
+rule	noun	A stated requirement that a check can hold.	—
+runners	noun	Programs that run tests or campaigns.	—
+runtime	noun	The time at which a program runs, in the phrase runtime product data.	—
+rust	name	Rust, the programming language of the guard.	—
+safe	adjective	Not able to cause the stated harm.	—
+same	adjective	Identical in the stated respect.	—
+sanity	noun	A stated check that a work still stands on its stated facts.	—
+satisfied	adjective	Met in full, of a stated condition.	—
+saving	noun	A stated cost that a change does not pay.	—
+say	verb	To state in words.	—
+scale	noun	The size of a test population, or a measure's range.	—
+scan	noun	An examination of each item in a set.	—
+scheduled	adjective	Set to run at a stated time by a scheduler.	—
+scheduler	noun	The system part that starts programs at stated times.	—
+schema	noun	A stated form that data must take.	—
+scheme	noun	A stated way of naming or of placing things.	—
+school	noun	An institution of teaching, in examples.	—
+scope	noun	The stated set that a rule or a check covers.	—
+screen	noun	The display surface of a machine.	—
+script	noun	A file of commands that a program runs in order.	—
+scrolling	noun	The act of moving text on a screen.	—
+seam	noun	The boundary at which a body of code meets the platform.	—
+search	noun	An act that looks for a stated item in a set.	—
+seat	noun	A stated place in a capacity count, in examples.	—
+second	adjective	After the first, or a unit of time.	—
+secret	noun	A value that only stated parties may know.	—
+section	noun	One stated part of a document under one heading.	—
+secure	adjective	Protected against stated attacks.	—
+security	noun	The protection of a system against stated attacks.	—
+see	verb	To notice or to read.	—
+seen	adjective	Noticed or read.	—
+select	verb	To choose one from a set.	—
+selection	noun	The act of choosing, or the part chosen.	—
+self	adjective	Prefix form in artefact words: the thing itself.	—
+sends	verb	Causes a value to go to a receiver.	—
+sensitivity	noun	The quality of a check that lets it detect a stated change.	—
+sent	adjective	Given to a receiver.	—
+sentence	noun	A group of words that states one complete thought.	—
+sentinel	noun	A stated rule or record that marks a missing stated thing.	—
+separate	adjective	Not joined to another thing.	—
+sequence	noun	A stated order of steps or events.	—
+series	noun	A set of items in a stated order.	—
+serve	verb	To give a stated service to a caller.	—
+server	noun	A process that answers stated requests across many runs.	—
+service	noun	A program that runs in the background and answers callers.	—
+set	noun	A collection of items, or the act of placing a value.	—
+settle	verb	To reach a final state that no later step changes.	—
+several	determiner	More than two, but not many.	—
+shape	noun	The arrangement of parts that a reader can see.	—
+share	verb	To give a part to others, or to hold in common.	—
+shed	verb	To lose a stated part, such as size or code.	—
+shedding	noun	The measured loss of size or code from a program.	—
+shell	noun	The program that reads commands and starts programs.	—
+shiller	name	Shiller, part of the author name in the copyright line.	—
+ship	verb	To place a product into its final tree or release.	—
+shipment	noun	The act of shipping a stated product, or the set shipped.	—
+short	adjective	Of small length or time.	—
+shot	noun	One single run, in the phrase one-shot.	—
+should	verb	To be the correct act under a stated rule.	—
+show	verb	To make a thing visible.	—
+shown	adjective	Made visible.	—
+sibling	noun	An item at the same level next to another item.	—
+side	noun	One face of a boundary, or one party of a pair.	—
+sidebar	noun	The navigation part at the side of a wiki page.	—
+sign	noun	A stated mark, or the folder README as a folder's sign.	—
+signal	noun	A stated message that a system sends to a process.	—
+silence	noun	A review result with no open objection, in artefact prose.	—
+silent	adjective	With no output and no open objection.	—
+silicon	noun	The material of chips, in the platform axis sense.	—
+simplified	adjective	Made simpler under stated rules.	—
+since	conjunction	From a stated past time.	—
+single	adjective	One only, taken alone.	—
+singly	adverb	One at a time, taken alone.	—
+sit	verb	To be placed.	—
+six	number	The number 6.	—
+size	noun	How large a thing is.	—
+sketch	verb	To draw a stated shape in first form.	—
+skipped	adjective	Not run, with the reason stated.	unevaluated (for a dimension state)
+slots	noun	Stated places in a campaign plan that runs fill.	—
+small	adjective	Of little size.	—
+smart	adjective	With stated automatic functions, in artefact names.	—
+so	adverb	To that degree, or therefore.	—
+soak	noun	A long stated run under load, as a campaign surface.	—
+some	determiner	An stated but not counted amount.	—
+someone	pronoun	An unnamed person.	—
+soon	adverb	At a near time.	—
+sort	verb	To place items in a stated order.	—
+sound	adjective	In a state that a stated check accepts.	—
+source	noun	The origin of a value, or the code before a build.	—
+span	noun	In artefact text: a code span, the text between two backtick marks.	—
+spawn	verb	To start a new process from a running one.	—
+speaks	verb	Uses a stated protocol.	—
+specific	adjective	Stated for one named case, not for a class.	—
+specification	noun	A text that states what a thing must do.	—
+speed	noun	How fast a thing runs.	—
+spelled	adjective	Written with stated letters.	—
+spelling	noun	The letters that a word is written with.	—
+spent	verb	Past form of spend: used up.	—
+split	verb	To divide a set into stated parts.	—
+spread	noun	The stated breadth of a set of values around a central value.	—
+square	adjective	With four equal sides, in the phrase square brackets.	—
+src	name	The src folder name in the tree.	—
+ssh	name	SSH, a remote sign-in protocol name in artefact text.	—
+stable	adjective	Not changing under stated conditions.	—
+stage	noun	One step in a stated series.	—
+stale	adjective	Older than the fact it states.	—
+stand	verb	To be in a stated state or place.	—
+standard	adjective	In the stated common form, such as standard input.	—
+start	verb	To begin a run or an act.	—
+state	noun	The condition of a thing at a stated time.	—
+statement	noun	A sentence that states a fact or a rule.	—
+static	adjective	Done from a stated text alone, with no run, of a check.	—
+station	noun	The interactive display seat of a session, in artefact prose.	—
+stay	verb	To remain in a place or a state.	—
+ste	name	STE, in the name PTG-STE-1.	—
+step	noun	One stated act in a series.	—
+stig	name	STIG, a security configuration standard name in artefact text.	—
+still	adverb	Continuing in the same state.	—
+stood	verb	Past form of stand.	—
+store	verb	To keep a value for later use.	—
+stream	noun	A flow of data in one direction.	—
+strength	noun	The power of a protection or a rule.	—
+string	noun	A sequence of characters.	—
+structural	adjective	Of the stated structure of a thing.	—
+structure	noun	The stated arrangement of the parts of a thing.	—
+studio	name	Visual Studio, a build product name in artefact text.	—
+style	noun	The stated manner of writing or presenting.	—
+subcommand	noun	A named command inside a program's command set.	—
+subfolder	noun	A folder inside another folder.	—
+subject	noun	The thing that a text is about.	—
+subset	noun	A set that is part of a larger set.	—
+substitute	noun	A thing that takes the place of another for a stated use.	—
+substitution	noun	The act of putting one stated thing in the place of another.	—
+subsystem	noun	A stated part of a system with its own rules.	—
+success	noun	The state of meeting a stated goal.	—
+successful	adjective	Having met the stated test.	—
+such	determiner	Of the stated kind.	—
+summarizes	verb	States the main facts of a text in short form.	—
+summary	noun	A short statement of the main facts.	—
+summoning	noun	The act of calling a stated window or program forward.	—
+supply	verb	To give a stated thing to a stated receiver.	—
+support	noun	Help that a product gives its users, or a stated capability.	—
+suppress	verb	To keep a stated refusal or fact from standing.	—
+sure	adjective	Certain.	—
+surface	noun	The part of a thing that others can see or call.	—
+surroundings	noun	The things around a stated place.	—
+survive	verb	To stay in a stated state through a stated test.	—
+survives	verb	Remains after a stated event.	—
+suspend	verb	To pause a process or a work for a stated time.	—
+symbol	noun	A stated name that a computation adds or reads.	—
+synchronous	adjective	Done at once, in the same stated act, with no queue.	—
+synonym	noun	A word with the same stated meaning as another word.	—
+sysinternals	name	Sysinternals, a program set name in examples.	—
+system	noun	A set of parts that work as one whole.	—
+tab	noun	A control that selects one page of a set, or the Tab key.	—
+table	noun	A set of rows and columns that states facts.	—
+take	verb	To get hold of a thing.	—
+taken	adjective	Got hold of.	—
+talk	verb	To exchange statements, in the stated metaphor.	—
+target	noun	The thing that an act aims at.	—
+teaches	verb	Gives knowledge of a subject.	—
+teaching	noun	The work of giving knowledge.	—
+teardown	noun	The act that ends and removes a test setup.	—
+technical	adjective	Of the stated engineering subject.	—
+tell	verb	To work out a stated fact from stated signs.	—
+tells	verb	States a fact to a reader.	—
+temporary	adjective	For a short time only.	—
+ten	number	The number 10.	—
+term	noun	A word or phrase with one stated meaning.	—
+terminal	noun	The window or device that shows a session's text.	—
+test	noun	A check that runs and records a result.	—
+text	noun	Written words.	—
+than	conjunction	Used in comparisons.	—
+that	determiner	The stated one.	—
+the	determiner	The stated one, already named.	—
+their	pronoun	Belonging to them.	—
+them	pronoun	The stated ones, as object.	—
+then	adverb	At that time, or next in order.	—
+theory	noun	A stated claim that no run has proven yet.	—
+there	adverb	At that place.	—
+therefore	adverb	For that reason.	—
+these	determiner	The stated ones near at hand.	—
+they	pronoun	The stated ones, as subject.	—
+thin	adjective	With little between the parts, in the stated metaphor.	—
+things	noun	Objects or matters.	—
+third	adjective	After the second.	—
+this	determiner	The stated one near at hand.	—
+those	determiner	The stated ones at a distance.	—
+thousand	number	The number 1,000, used for a count in the thousands.	—
+thread	noun	One line of execution inside a process.	—
+three	number	The number 3.	—
+through	preposition	From one side to the other, by way of.	—
+tie	noun	A stated connection that two records must agree on.	—
+tiers	noun	Plural of tier.	—
+tile	noun	One window unit in a stated display arrangement.	—
+time	noun	The measure of duration, or one occasion.	—
+timing	noun	The stated times at which acts happen.	—
+title	noun	The name at the head of a page or a window.	—
+to	preposition	Toward a place, a state, or a receiver.	—
+today	adverb	On this day.	—
+together	adverb	In one place or at one time, as one set.	—
+too	adverb	In addition, or more than enough.	—
+took	verb	Past form of take.	—
+toolchain	noun	The set of programs that builds a product.	—
+top	noun	The highest part.	—
+total	noun	The sum of a set of values.	—
+touch	noun	Contact by a finger on a screen, or a small change.	—
+toward	preposition	In the direction of.	—
+tpm	name	TPM, the Trusted Platform Module, in artefact text.	—
+trace	noun	A recorded series of steps or events.	—
+track	verb	To keep a stated value in record as it changes.	—
+trait	noun	A stated set of functions that a type provides, in Rust.	—
+travel	verb	To go with a stated thing to another place.	—
+treat	verb	To act toward a thing in a stated way.	—
+tree	noun	The structure of processes, folders, or data with one root.	—
+trial	noun	One stated run of a stated test.	—
+trick	noun	A stated act that makes a result look other than it is.	—
+tried	adjective	Attempted.	—
+triplication	noun	The state of one stated thing standing in three homes.	—
+true	adjective	In agreement with the fact.	—
+truncation	noun	The act of cutting a text at a stated length.	—
+trust	noun	The stated reliance on a party or a record.	—
+truth	noun	The stated fact of a matter, in full.	—
+try	verb	To attempt an act.	—
+turn	verb	To change state, or to take one's stated place in order.	—
+twelfth	adjective	The item after the eleventh in a stated order.	—
+twice	adverb	Two times.	—
+two	number	The number 2.	—
+type	noun	A stated class of data or of thing.	—
+unanswered	adjective	With no answer given.	—
+unavailable	adjective	Not present for a stated use.	—
+unbounded	adjective	With no stated bound.	—
+unchanged	adjective	Not changed.	—
+unclassifiable	adjective	Not able to be placed in a stated class.	—
+unconverted	adjective	Not yet changed from a record into its stated final form.	—
+undecided	adjective	With no ruling yet given.	—
+undefined	adjective	With no stated definition.	—
+under	preposition	Below, or subject to a rule.	—
+understand	verb	To know the meaning of a thing.	—
+unfreed	adjective	Not released after a stated fetch, of a system object.	—
+unguarded	adjective	Without the guard's protection.	—
+unhardened	adjective	Not made harder to attack by the stated work.	—
+unit	noun	One stated item in a set or a measure.	—
+unity	noun	The state of being one stated whole.	—
+universal	adjective	True for every case in a stated class.	—
+universality	noun	The quality of being true for every platform in the stated argument.	—
+unix	name	Unix, an operating system family.	—
+unjudged	adjective	Not yet examined by a stated check or review.	—
+unless	conjunction	Except in the case that.	—
+unlock	verb	To open a lock with a stated credential.	—
+unmoved	adjective	Not changed in place, of a stated tree.	—
+unnamed	adjective	With no stated name given.	—
+unpack	verb	To take the parts out of a package.	—
+unpinned	adjective	Not held to a stated recorded value.	—
+unplanned	adjective	With no cell in the stated plan.	—
+unpriced	adjective	With no stated cost or breadth given.	—
+unprotected	adjective	Without a stated protection.	—
+unprotects	verb	Removes a stated protection.	—
+unproven	adjective	Not shown true by evidence yet.	—
+unstated	adjective	Not stated in a stated record.	—
+until	preposition	Up to a stated time.	—
+up	adverb	Toward a higher place or state.	—
+updated	adjective	Changed to the current form.	—
+usability	noun	The quality of a stated surface that lets a user do the stated work.	—
+usage	noun	The stated way a command is called, or the amount of use.	—
+use	verb	To employ a thing for its purpose.	utilize (for this)
+user	noun	A person who uses a machine or the guard.	—
+utf	noun	In artefact names: the Unicode text encoding family.	—
+utf	name	UTF, the Unicode encoding family name in artefact text.	—
+valid	adjective	In the required form, or true under a stated rule.	—
+validation	noun	The act of checking a stated thing against its form.	—
+value	noun	A stated amount, setting, or piece of data.	—
+variable	noun	A named value that can change, in code.	—
+variance	noun	The stated difference that a test measures.	—
+variant	noun	One stated form of a type or a case.	—
+varies	verb	Changes between cases.	—
+variety	noun	A range of different forms, in the rule against synonyms for variety.	—
+vary	verb	To change between stated cases.	—
+verbatim	adverb	In the exact stated words or form.	—
+verification	noun	The act of checking a thing against its rule.	—
+verified	adjective	Checked and found true.	—
+verify	verb	To check a thing against its rule.	—
+version	noun	One stated state of a product, with its number.	—
+view	noun	A presented form of data, or the act of seeing.	—
+virtual	adjective	Made by software to act as a physical thing.	—
+visibility	noun	The stated right of a name to be seen from another module.	—
+visible	adjective	Able to be seen.	—
+visual	adjective	Of sight, in artefact names.	—
+vocabulary	noun	The set of approved words for a subject.	—
+voice	noun	The stated form of a sentence: active or passive.	—
+void	verb	To make a stated claim have no force.	—
+wait	verb	To stay until a stated event.	—
+waitable	adjective	Able to be waited on by a stated call, of a system object.	—
+wake	verb	To make a stated process run again for a stated signal.	—
+wall	noun	In the phrase wall clock: real passing time.	—
+warmup	noun	The stated first runs of a campaign that do not count.	—
+warning	noun	A statement that names a risk.	—
+warrant	noun	The stated ground that makes a stated act right.	—
+wart	noun	A stated small defect that a record names and keeps.	—
+was	verb	Past form of be.	—
+watched	adjective	Under observation by a stated check.	—
+watcher	noun	A program or a part that observes a stated set.	—
+watches	verb	Observes a stated set.	—
+way	noun	A stated method or route.	—
+weak	adjective	Not strong against a stated test.	—
+weakened	adjective	Made weaker against a stated test.	—
+weight	noun	The burden of a stated thing, as its size.	—
+welcome	adjective	Giving a stated greeting to new arrivals.	—
+well	adverb	In a good or correct way.	—
+were	verb	Past plural form of be.	—
+what	pronoun	The thing that.	—
+whatever	pronoun	Any stated thing, no matter which.	—
+when	adverb	At the time that.	—
+where	adverb	At the place that.	—
+whether	conjunction	If it is the case that, or not.	—
+which	determiner	The stated one from a set.	—
+while	conjunction	During the time that.	—
+whitespace	noun	Space and tab characters in a text.	—
+who	pronoun	The person that.	—
+whoever	pronoun	Any person that.	—
+whole	adjective	The complete set.	—
+whose	pronoun	Belonging to whom.	—
+why	adverb	For what reason.	—
+wide	adjective	Great in stated breadth.	—
+widen	verb	To make a stated thing broader.	—
+width	noun	How wide a thing is.	—
+wiki	noun	The staged documentation set that ships in the wiki folder.	—
+will	verb	The future form: at a stated later time.	—
+win	verb	To prevail in a stated argument or test.	—
+window	noun	A rectangular screen area that holds one session or program.	—
+windows	name	Windows, an operating system.	—
+winrm	name	WinRM, a Windows remote service name in artefact text.	—
+wire	verb	To connect a part by stated configuration.	—
+with	preposition	Together with, or by means of.	—
+within	preposition	Inside a stated bound.	—
+without	preposition	Not having.	—
+wmi	name	WMI, a Windows management service name in artefact text.	—
+word	noun	A stated unit of language with one form.	—
+work	noun	An act or a product of effort.	—
+workflow	noun	A stated series of steps that a system runs.	—
+world	noun	The stated system or setting in which a thing stands.	—
+worse	adjective	Less good against a stated measure.	—
+would	verb	Conditional form of will: in the stated case.	—
+wrapped	adjective	Placed inside another command or value.	—
+wraps	verb	Places a thing inside another command or value.	—
+write	verb	To put words or data into a file or a stream.	—
+written	adjective	Put into text.	—
+wrong	adjective	Not correct.	—
+wsl	name	WSL, the Windows subsystem for Linux, in artefact text.	—
+yes	adverb	The affirmative answer.	—
+you	pronoun	The reader.	—
+your	pronoun	Belonging to the reader.	—
+zero	number	The number 0.	—
+abort	verb	To stop a run at once as an infrastructure failure, with no result claimed.	—
+absent	adjective	Not present at the place a read or a check names.	—
+accessibility	noun	The interactive fitness of a product, one class of dimension (8).	—
+actual	adjective	The value or state that stands in fact, not the stated one alone.	—
+actually	adverb	In fact, as the mechanism itself does.	—
+adjacent	adjective	Standing next to a named thing, with nothing between.	—
+admission	noun (term)	The pass before a run that verifies every named presence and identity.	—
+admitted	adjective	Let in by an admission pass that verified the stated conditions.	—
+adopt	verb	To take a decided item into the product or the record as standing.	—
+aggregate	noun	The final combined statement of a run over all its stages.	—
+anew	adverb	Again, as a new act of the same kind.	—
+artifact	noun	An object that a run or a package produces and keeps.	—
+assign	verb	To put a stated label or value on a thing by the stated act.	—
+automate	verb	To make an act run by a program, with no person acting in it.	—
+await	verb	To stand ready for a named later act or value.	—
+backing	noun	The live store that stands behind a value a read presents.	—
+baseline	noun (amendment)	The unloaded side of a pricing pair or of a context pair.	—
+basis	noun	The stated ground that a claim or a verdict rests on.	—
+behave	verb	To act in the way a thing's construction makes it act.	—
+beyond	preposition	Past a named point, set, or bound.	—
+boolean	adjective (term)	Of the two-value true/false type, in artefact and record text.	—
+bracket	noun	A stated pair of bounds that a value stands inside.	—
+bullet	noun	One item line of a list, with its headword or its first words.	—
+bundle	noun (term)	The preserved set of competitor binaries and their run-manifest.	—
+candidacy	noun (term)	The standing of a candidate that one settlement question admitted.	—
+candidate	noun (term)	A capture held pending beside a slot's retained entry, on deferred terms.	—
+capture	noun (term)	The single traversal a read performs over a value, with its tokens.	—
+captureless	adjective (term)	Standing with no capture taken, as the persistence path stands.	—
+catch	verb	To stop a wrong value or binary at a stated gate before it is used.	—
+caught	verb	Past form of catch: stopped at the stated gate before use.	—
+charge	verb	To assign a condition or a duty to a named case or step.	—
+checkout	noun	A copy of a repo tree taken at a stated state, in artefact text.	—
+classification	noun	The class that a check or a census assigns to a thing.	—
+cli	name	CLI, the command-line interface short form, in artefact text.	—
+companion	noun	A value that stands beside another value and is held with it.	—
+comparative	adjective	Judged against another arm or value, not against a constant alone.	—
+compatibility	noun	Fitness with other systems and forms, one class of dimension (7).	—
+component	noun	One named part of a stated whole, as one part of a dimension.	—
+concrete	adjective	In the exact form a consumer can use, not a stated form alone.	—
+concurrency	noun	Many runs or acts standing in flight at the same time, dimension (4).	—
+configure	verb	To set the values a run reads, in the configuration that names them.	—
+confirmation	noun	A stated check that a performed act in fact stands as performed.	—
+consistency	noun	The state of two records that agree where they state the same thing.	—
+construct	verb	To build a value or a record in the form its rule states.	—
+consult	verb	To read a stated record or value as the ground of a decision.	—
+consume	verb	To use up a value or a traversal so that it cannot be used again.	—
+continue	verb	To go on to the next stated stage or step after a stated event.	—
+contradict	verb	To state the opposite of a stated record, so the two cannot both stand.	—
+coordinate	noun	One stated position in a record that a check can name and recompute.	—
+correctness	noun	The state of being correct against the stated standard, dimension (1).	—
+counterexample	noun	One case that proves a claim false by standing against it.	—
+custom	adjective	Made by the owner for one use, not a standard form.	—
+defer	verb	To hold a verdict for a later read that can decide it.	—
+degrade	verb	To make a verification weaker in a named way, never silently.	—
+delegate	verb	To hand an act to another object that performs it in the same shape.	—
+deliver	verb	To hand a stated thing over in its stated form, as a package is delivered.	—
+derive	verb	To reach a value or a class by a stated chain from its source.	—
+detached	adjective	Separated, for the DETACHED console context of a run.	—
+deterministic	adjective	Always giving the same result from the same stated inputs.	—
+digest	verb	To take the checksum of a stream or a file as its record.	—
+disagreement	noun	A stated difference between a value and the source it is held against.	—
+dispersion	noun (term)	The spread of the paired differences of a price, in its stated form.	—
+displace	verb	To take the place of a standing thing, which then no longer stands.	—
+distinction	noun	The stated difference that keeps two kinds of thing apart.	—
+dominate	verb	To stand over every other stated case, so its state decides the whole.	—
+drain	verb	To empty a source by taking values from it until none are left.	—
+driver	noun	The program that runs one case or one family and records its evidence.	—
+elapsed	adjective	Passed, for a stated time between two named points of a run.	—
+element	noun	One member of a stated set or one part of a stated structure.	—
+elsewhere	adverb	At another stated place or on another stated machine.	—
+emit	verb	To put bytes or a record out on a stated stream or into a stated file.	—
+enable	verb	To make a stated act or path able to run, by a stated setting.	—
+energy	noun	The power a run uses, one cost class of dimension (3).	—
+enforce	verb	To hold a rule by a check that fails when the rule is breached.	—
+evaluate	verb	To judge a stated thing against its stated rule and record the state.	—
+expensive	adjective	Costing much of a stated resource, as the priced class of items does.	—
+expiry	noun (amendment)	The end of a thing's standing by time or by count alone.	—
+factory	noun (term)	A mapping whose accesses produce the value they return over one source.	—
+fallen	verb	Past form of fall: moved down to a stated lower place or state.	—
+fate	noun	One of the stated ways a pending thing can end.	—
+figure	noun	A stated number that a check holds against its source.	—
+flight	noun (amendment)	Used only in the compound pre-flight: the admission pass before a run.	—
+formalize	verb	To put a stated check or rule into its exact recorded form.	—
+freeze	noun (amendment)	The campaign gate that asks a win or a tie on each gate dimension in each context.	—
+further	adverb	To a greater distance in a stated chain, order, or argument.	—
+gauntlet	name	The gauntlet, the working form of the guard binary, in artefact text.	—
+good	adjective	Correct and fit against the stated standard, as a known-good record is.	—
+grace	noun (term)	The stated wait after a deadline before a kill act, in a competitor's form.	—
+grandchild	noun	The process that a child process itself spawns, in a kill tree.	—
+headroom	noun	The stated space between a measured spread and the bound over it.	—
+however	adverb	In whatever way or case, without exception for that case.	—
+huge	adjective	Far beyond the size or value that the stated rule expects.	—
+id	name	An identifier value, in artefact and record text.	—
+identify	verb	To name the exact thing a value or a class is, by its evidence.	—
+include	verb	To hold a thing inside a stated set, list, or total.	—
+infer	verb	To reach a value by reasoning from a stated value, not by reading it.	—
+infra	name	Short form of infrastructure in the classification infra-failure, in artefact text.	—
+infrastructure	noun	The harness and machine support a run stands on, not the arm under test.	—
+inherit	verb	To receive a handle or a state from a parent process by the stated path.	—
+insensitive	adjective	Not distinct by the stated distinction; for names, not distinct by letter case.	—
+insert	verb	To put a thing into a stated place inside a structure or a chain.	—
+installation	noun	The putting of a product onto a machine, one class of dimension (7).	—
+instrumentation	noun (term)	The measuring that a runner performs on each call it makes.	—
+intact	adjective	Whole and unchanged against the standard it is judged against.	—
+integer	noun	A whole number with no fraction, as a type a stamp can hold.	—
+integrity	noun	The state of data that stands whole and unchanged, dimension (5).	—
+intend	verb	To state a thing as the target or the plan of an act.	—
+interim	noun (term)	The value a read serves while its verdict is deferred.	—
+interleave	verb	To run two stated sets in an alternating order, step by step.	—
+interquartile	adjective (term)	Between the first and third quartiles, for the range of a dispersion.	—
+iterable	noun (term)	A value that a traversal can pass over, in the suite's mechanism.	—
+iterator	noun (term)	The object that performs one traversal over a value.	—
+laid	verb	Past form of lay: put in place in the stated order or form.	—
+lapse	verb	To end by time or by count alone, with no deciding act.	—
+latency	noun (term)	The time between a stated start and its stated end, in a run.	—
+lay	verb	To put a thing in a stated place or order.	—
+length	noun	The stated size of a stream, a file, or a text, in its unit.	—
+likewise	adverb	In the same way, for the second of two stated cases alike.	—
+mapping	noun (term)	A value that presents a stated value at each access a read makes.	—
+mark	verb	To name a thing as standing in a stated state, in its record.	—
+materialization	noun (term)	The one read that turns a stated value into its concrete token list.	—
+materialize	verb	To perform the one read that turns a stated value into its token list.	—
+maximum	noun	The greatest value in a stated set of values.	—
+memo	noun (term)	The one product a minting factory keeps and returns across accesses.	—
+memoize	verb	To keep the first product of an access and return that product again.	—
+merely	adverb	Only, and nothing more than the stated thing.	—
+metadata	noun	Data that states the shape of a record or of a probe, not its values.	—
+mirror	verb	To copy a stated record into a second home in the same form.	—
+mismatch	noun (term)	A stated difference between a value and the value its rule expects.	—
+monetary	adjective	Of money, for the cost class of dimension (3).	—
+moot	verb	To make a pending question stop standing, by removing its ground.	—
+ms	name	The millisecond unit short form, in artefact and record text.	—
+namespace	noun (term)	The one folder of one campaign run, holding that run's records.	—
+naturally	adverb	By the thing's own course, with no act of the harness on it.	—
+neighbour	noun	The field, label, container, element, or artifact adjacent to one already held.	—
+newline	noun	The one line-ending character a stream or a file adds at a line's end.	—
+notwithstanding	preposition	Without exception for the stated thing, which does not change the rule.	—
+observation	noun	One recorded reading of a run, in the form its record states.	—
+observe	verb	To read and record a stated thing as evidence, in its stated form.	—
+ok	name	The outcome word ok, in artefact and record text.	—
+operational	adjective	Of the way a thing runs and is run, in its stated meanings.	—
+operator	noun	The person who runs a stated command or answers a stated prompt.	—
+oppose	verb	To stand against a stated thing, as a stated value stands against a reading.	—
+override	noun (term)	A named value that wins over a default value for one run.	—
+parity	noun (term)	The agreement of two stated counts or forms of the same checks.	—
+passage	noun	One complete going-over of a value by an iterator.	—
+patch	verb	To change a supplied binary or record in place, which the build never does.	—
+pattern	noun	A stated shape that bytes or values match or fail to match.	—
+pend	verb	To stand pending, with no decision taken yet.	—
+pending	adjective	Held beside a standing thing, with no decision taken on it yet.	—
+perform	verb	To carry out a stated act, in full, as its rule states.	—
+permit	verb	To allow a stated act or form under a stated rule.	—
+persistence	noun (term)	The standing of an object across following reads that return it.	—
+pid	name	A process identifier value, in artefact and record text.	—
+pool	verb	To join stated values into one set, which the report never does across contexts.	—
+port	noun (amendment)	A Windows port object, or its handle, in suite and artefact text.	—
+portability	noun	Fitness to move to another system, one class of dimension (7).	—
+previously	adverb	At an earlier stated point in the same chain or record.	—
+prior	adjective	Standing before the stated point in the same chain or record.	—
+probe	noun (term)	A program or a step that reads a named fact and records it.	—
+processkit	name	ProcessKit CLI, the competitor program, in artefact text.	—
+produce	verb	To make a value at an access, over a source, rather than retrieve it.	—
+profile	noun (amendment)	The eight-dimension evaluation set of SPEC_Benchmark, with a state per dimension.	—
+prolonged	adjective	Run for a long stated time, for the operation class of dimension (5).	—
+propagate	verb	To carry a value or a code onward through a stated chain unchanged.	—
+provisional	adjective (term)	Stated before the final act, and updated as that act completes.	—
+qualify	verb	To meet the stated conditions that let an entry count in a rule.	—
+quality	noun	The fitness of output against its standard, one class of dimension (1).	—
+quantity	noun	A stated amount that a check can hold and recompute.	—
+rather	adverb	In place of the other stated case, or by the stated preference.	—
+readable	adjective	Able to be read again by every consumer, in the stated form.	—
+reading	noun	One recorded value from a probe or a decider, in its stated form.	—
+recomputation	noun (term)	The discipline of deriving a stated figure again from its source.	—
+reconstruct	verb	To build a value again from a stated form, in place of reading it.	—
+recount	verb	To count a stated total again from its source, as the census does.	—
+recreate	verb	To make a thing again in the same form, by a new act.	—
+redirect	verb	To send a stream to a stated file or device in place of its default.	—
+refute	verb (term)	To prove a case or a claim false by its executed evidence.	—
+regular	adjective	Of the ordinary stated form, as a regular file is an ordinary file.	—
+reliability	noun	The state of running without failure over time, dimension (5).	—
+remainder	noun	The part of a stated whole that a stated act does not cover.	—
+remedy	noun	The stated act that cures a named missing or wrong condition.	—
+rep	noun (term)	One repetition of a slot in a campaign run, counted by the plan.	—
+reportable	adjective	Able to be reported from its records, from the moment they exist.	—
+resistance	noun	The state of standing against a stated attack or input, dimension (6).	—
+restart	verb	To begin a traversal or a run again from its first point.	—
+restatement	noun	A stated figure or text that stands again in a second place.	—
+retain	verb	To keep a standing thing in its place across later acts.	—
+retire	verb	To end the standing of a thing by a stated act, in the open.	—
+retrieve	verb	To take a stored thing from the place it stands, unchanged.	—
+retry	verb	To attempt a stated act again after a stated failure.	—
+rival	noun	A competitor arm in a comparison, in the suite's text.	—
+runner	noun (term)	The campaign program that executes one slot as one outer lifetime.	—
+rustup	name	Rustup, the Rust toolchain installer, in artefact text.	—
+scratch	noun (term)	A stated empty working folder made for one run or one shape.	—
+seed	verb	To set the recorded value that a stated order is shuffled under.	—
+sense	noun	One stated meaning of a word that carries more than one meaning.	—
+settlement	noun (term)	The decision that a pending candidate is storing or is minting.	—
+sha	name	SHA, the checksum family name, in artefact text as SHA-256.	—
+shuffle	verb	To put a stated order into a new order under a recorded seed.	—
+site	noun	One place in code or in a package where a stated act is performed.	—
+skip	verb (term)	To not execute a test or a slot, with its reason recorded.	—
+sleep	verb	To wait without acting for a stated time, as a workload sleeps.	—
+slot	noun (term)	One planned unit of a campaign run, of one kind, arm, path, and context.	—
+spec	name	Short form of a specification's name, in artefact text as SPEC_Benchmark.	—
+stamp	noun (term)	One of the values a construction puts on every record of its shape.	—
+startup	noun	The start of a program or a run, as one measured class of dimension (2).	—
+stderr	name	The standard error stream, in artefact text.	—
+stdin	name	The standard input stream, in artefact text.	—
+stdout	name	The standard output stream, in artefact text.	—
+storage	noun (amendment)	Data kept on a machine, as one cost class of dimension (3).	—
+stub	noun (amendment)	A logic-exercise program of the suite that stands in for an arm or a probe.	—
+succeed	verb	To stand next after a stated thing, in its place, by the stated rule.	—
+sum	verb	To add stated values into one total.	—
+survival	noun	The state of a process that still lives after the act that ends it.	—
+survivor	noun (term)	A process of a killed tree that still lives after the kill act.	—
+sysprims	name	Sysprims, the competitor program, in artefact text.	—
+systematic	adjective	Standing in every stated case of a class, not in one case alone.	—
+template	noun	A stated form with named places that a run fills with its values.	—
+testkit	name	The test helper program of the guard tree, in artefact text.	—
+throughput	noun	The amount of stated work in a stated time, dimension (2).	—
+tick	noun (term)	The smallest time step of the harness clock that a reading can state.	—
+toolset	noun	The stated set of compiler programs that a build uses, as the MSVC toolset.	—
+totality	noun (term)	The rule that the holds and consumers never raise on the values they judge.	—
+traversal	noun (term)	One passage over a value by an iterator, with its identity and reach.	—
+unanchored	adjective	Standing with no verifiable anchor for a checker to read against.	—
+uncertainty	noun	The stated spread that stands beside a measured price or value.	—
+unchecked	adjective	Not read by a check, as a survival that no probe answered for.	—
+unconfirmed	adjective	Performed but not confirmed by the stated confirmation record.	—
+undecidable	adjective	Not able to be decided by the evidence a mechanism may take.	—
+unhashable	adjective	Not able to be hashed, as a value a consumer cannot key on.	—
+unicode	name	Unicode, the character standard, in artefact text.	—
+unimplemented	adjective	Not built, as a stated step or branch that stands named and unbuilt.	—
+unmarked	adjective	Standing with no mark recorded on it, in the stated sense.	—
+unmet	adjective	Not met, as a gate whose stated condition did not stand.	—
+unremarked	adjective	Passed with no remark recorded, where a remark was owed.	—
+unsettled	adjective	Not decided by a settlement, and no longer pending a verdict.	—
+unverifiable	adjective	Named as not able to be verified, in the open, never silently passed.	—
+verifiable	adjective	Able to be verified against a stated anchor or source.	—
+very	adverb	The exact one stated, as the entry's very object is the exact object.	—
+veto	noun	A stated lack or failure that blocks a whole result by itself.	—
+violation	noun	A stated breach of a rule that a check names, in place of passing it.	—
+vswhere	name	Vswhere, the Visual Studio locator program, in artefact text.	—
+wherever	adverb	At every place that the stated condition stands.	—
+yield	verb	To give a token or a value at a step of a traversal or an access.	—
+classified	adjective	Assigned to a stated class by its evidence, as a slot record is.	—
+evaluation	noun	The judging of a stated thing against its stated rule, with its state.	—
+flow	noun	A stated path of acts or values from its start to its end.	—
+ordinary	adjective	Of the common stated form, as the ordinary factory is the common form.	—
+overwrite	verb	To write over a stated record in its own place, ending the first form.	—
+pathext	name	PATHEXT, the Windows path-extension variable, in artefact text.	—
+supplied	verb	Past form of supply: given as a stated input to a run or a build.	—
+unexplained	adjective	With no stated reason in the record that carries the thing.	—
+withheld	adjective	Held back and not given to the check or case that names it.	—
+wrote	verb	Past form of write: put into a file or a stream at a stated time.	—
+header	noun	The first stated part of a file, a record, or an impl block.	—
+implementation	noun	One stated form that carries out a rule, a trait, or a design.	—
+struct	noun (term)	A stated data structure of the backend, with its named fields.	—
+aliveness	noun (term)	The state of a process that still lives, as a poll reads it.	—
+attach	verb	To join a stated channel or structure to a stated thing.	—
+connect	verb	To join one stated endpoint to another so that data can pass.	—
+duplication	noun	The making of a second copy of a stated thing, as a stated cost.	—
+examine	verb	To read a stated thing closely against its stated rule.	—
+exchange	noun	A stated passing of data in both directions over one channel.	—
+invocation	noun (amendment)	One single calling of a program or of a function, as a count unit.	—
+least	adjective	The smallest in a stated set, by the stated measure.	—
+loop	noun	A stated set of steps that runs again until its condition ends it.	—
+overlapped	adjective	Standing over the same stated span as another act, in the overlapped form.	—
+owe	verb	To still have a stated act or result to give, as a campaign is owed.	—
+poll	noun (term)	One reading of a stated state that may have changed, as a wait polls.	—
+post	verb	To put a stated result or value into its stated place for a reader.	—
+reset	verb	To put a stated value or event back to its first stated state.	—
+resume	verb	To go on with a stated act from the point where it stood.	—
+setup	noun	The stated acts that stand in place before a stated main act.	—
+stack	noun	The stated memory form that holds a call's own values, as stack storage.	—
+stop	noun (amendment)	The stop event of an extendable run, one of its two named events.	—
+walk	verb	To pass over every member of a stated set in its stated order.	—

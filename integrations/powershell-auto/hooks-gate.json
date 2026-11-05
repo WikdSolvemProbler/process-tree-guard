@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Tools/process-tree-guard/libexec/process-tree-guard-gate.exe powershell-auto",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

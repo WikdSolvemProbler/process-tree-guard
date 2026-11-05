@@ -1,0 +1,14 @@
+{
+  "certification_statement": "UNCERTIFIED: no valid tree SHA was supplied to this run (the --tree-sha argument and the PTG_TREE_SHA environment variable were both absent or not a full commit SHA), so this record certifies nothing. It is a run record only.",
+  "certified": false,
+  "detail": null,
+  "name": "test_corpus_is_deterministic_and_below_the_cap",
+  "outcome": "pass",
+  "run_date_utc": "2026-11-04T19:51:00Z",
+  "run_id": "run-20261104T195100Z-no-sha",
+  "schema": "ptg-test-certificate/1",
+  "test": "test_scanner_differential.CorpusTests.test_corpus_is_deterministic_and_below_the_cap",
+  "tested_against": null,
+  "tier_label": null,
+  "tree_sha": null
+}

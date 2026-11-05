@@ -1,0 +1,22 @@
+name: Feature request
+description: A new capability, platform or integration.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to do, and what stops you today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+    validations:
+      required: true
+  - type: textarea
+    id: promise
+    attributes:
+      label: Effect on the promise
+      description: How the change keeps every command ending on time with nothing left behind. A change that weakens the promise on any platform needs a reason here.

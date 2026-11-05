@@ -1,0 +1,130 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Peter Shiller
+#
+# Continuous integration for process-tree-guard.
+#
+# check:  type and borrow check of the library, the programs and the test code on four
+#         Windows targets, in debug and release, with warnings denied. The check runs on
+#         Linux. It compiles every target and executes none of them.
+# build:  release build of the programs for x86_64-pc-windows-msvc on Windows, then the
+#         library unit tests, then an artifact that holds the four programs.
+# minimum-rust: the same check with the toolchain named by rust-version in Cargo.toml.
+#
+# The integration test suite (tests/guard.rs and the other files in tests/) is NOT run
+# here. It needs Git Bash paths and an interactive desktop session, which a hosted runner
+# does not provide. Run it with `cargo test --release` on a Windows machine that has
+# Git Bash; CONTRIBUTING.md states how.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  CARGO_NET_RETRY: "5"
+
+jobs:
+  check:
+    name: check (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-pc-windows-msvc
+          - aarch64-pc-windows-msvc
+          - i686-pc-windows-msvc
+          - x86_64-pc-windows-gnu
+    env:
+      RUSTFLAGS: "-D warnings"
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the Rust toolchain and the target
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustup target add "${{ matrix.target }}"
+          rustc --version
+          cargo --version
+
+      - name: Check, debug
+        run: cargo check --locked --all-targets --target "${{ matrix.target }}"
+
+      - name: Check, release
+        run: cargo check --release --locked --all-targets --target "${{ matrix.target }}"
+
+  minimum-rust:
+    name: minimum-rust (rust-version from Cargo.toml)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the declared minimum toolchain and the target
+        run: |
+          version="$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' Cargo.toml)"
+          test -n "$version"
+          rustup toolchain install "$version" --profile minimal --no-self-update
+          rustup default "$version"
+          rustup target add x86_64-pc-windows-msvc
+          rustc --version
+
+      - name: Check, release
+        run: cargo check --release --locked --all-targets --target x86_64-pc-windows-msvc
+
+  build:
+    name: build (x86_64-pc-windows-msvc)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the Rust toolchain and the target
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustup default stable
+          rustup target add x86_64-pc-windows-msvc
+          rustc --version
+          cargo --version
+
+      - name: Build, release
+        run: cargo build --release --locked --target x86_64-pc-windows-msvc --all-targets
+
+      # The library unit tests only; the integration suite is not run here (see the top of this file).
+      - name: Test the library, release
+        run: cargo test --release --locked --lib
+
+      - name: Upload the programs
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: process-tree-guard-x86_64-pc-windows-msvc
+          path: |
+            target/x86_64-pc-windows-msvc/release/process-tree-guard.exe
+            target/x86_64-pc-windows-msvc/release/process-tree-guard-deadline.exe
+            target/x86_64-pc-windows-msvc/release/process-tree-guard-gate.exe
+            target/x86_64-pc-windows-msvc/release/process-tree-guard-contain.exe
+          if-no-files-found: error
+          retention-days: 30

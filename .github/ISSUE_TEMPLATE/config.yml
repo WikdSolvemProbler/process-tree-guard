@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/WikdSolvemProbler/process-tree-guard/security/advisories/new
+    about: Report a way for a process to escape the tree or outlive its deadline privately, as SECURITY.md describes.
+  - name: Questions and ideas
+    url: https://github.com/WikdSolvemProbler/process-tree-guard/discussions
+    about: Ask a question or share how you use process-tree-guard.
