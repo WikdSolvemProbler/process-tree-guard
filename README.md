@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright 2026 Peter Shiller -->
-https://github.com/user-attachments/assets/fcf61e20-d4d4-4551-ac1b-d752f17e7503
+https://github.com/user-attachments/assets/97ea5b4e-de99-4103-be05-85c0119a12b1
 
 <p align="center">
 <a href="https://github.com/WikdSolvemProbler/process-tree-guard/actions/workflows/ci.yml"><img src="https://github.com/WikdSolvemProbler/process-tree-guard/actions/workflows/ci.yml/badge.svg" alt="Continuous integration status"></a>
