@@ -1,5 +1,3 @@
-
-https://github.com/user-attachments/assets/93af2ef0-5706-4f71-be7e-0d6600134bf3
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright 2026 Peter Shiller -->
 https://github.com/user-attachments/assets/75f0b39f-7a90-404f-a13f-a710abbe12a4
