@@ -11,21 +11,11 @@
 <img src="https://img.shields.io/badge/third--party%20crates-0-brightgreen" alt="Third-party crates: 0">
 </p>
 
-<p align="center">process-tree-guard was built at the Meta Global AI Developer Hackathon, sponsored by Cerebral Valley, Meta, Baseten, Fireworks AI and Modal. We thank them for their support.</p>
+<p align="center"><sub>Built at the Meta Global AI Developer Hackathon, sponsored by Cerebral Valley, Meta, Baseten, Fireworks AI and Modal. We thank them for their support.</sub></p>
 
-<div align="center">
-
-<table>
-  <tr>
-    <td align="center"><a href="https://cerebralvalley.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/cerebralvalley-dark.png"><img src="assets/sponsors/cerebralvalley-light.png" alt="Cerebral Valley logo" height="64"></picture></a></td>
-    <td align="center"><a href="https://www.meta.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/meta-dark.svg"><img src="assets/sponsors/meta-light.svg" alt="Meta logo" height="32"></picture></a></td>
-    <td align="center"><a href="https://www.baseten.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/baseten-dark.png"><img src="assets/sponsors/baseten-light.png" alt="Baseten logo" height="40"></picture></a></td>
-    <td align="center"><a href="https://fireworks.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/fireworks-dark.svg"><img src="assets/sponsors/fireworks-light.svg" alt="Fireworks AI logo" height="28"></picture></a></td>
-    <td align="center"><a href="https://modal.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/modal-dark.svg"><img src="assets/sponsors/modal-light.svg" alt="Modal logo" height="32"></picture></a></td>
-  </tr>
-</table>
-
-</div>
+<p align="center">
+<a href="https://cerebralvalley.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/cerebralvalley-dark.png"><img src="assets/sponsors/cerebralvalley-light.png" alt="Cerebral Valley logo" height="30"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.meta.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/meta-dark.svg"><img src="assets/sponsors/meta-light.svg" alt="Meta logo" height="18"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.baseten.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/baseten-dark.png"><img src="assets/sponsors/baseten-light.png" alt="Baseten logo" height="20"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://fireworks.ai"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/fireworks-dark.svg"><img src="assets/sponsors/fireworks-light.svg" alt="Fireworks AI logo" height="16"></picture></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://modal.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/sponsors/modal-dark.svg"><img src="assets/sponsors/modal-light.svg" alt="Modal logo" height="18"></picture></a>
+</p>
 
 **Every command ends on time, and nothing it started is left behind.**
 
