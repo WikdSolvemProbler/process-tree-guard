@@ -1674,9 +1674,11 @@ def malformed_argv_presents(argv, shape):
     if shape == "nonexistent-program":
         return "ptg-no-such-program-9f3b.exe" in argv
     if shape == "malformed-timeout":
-        return "not-a-timeout" in argv
+        return any("not-a-timeout" + suffix in argv
+                   for suffix in ("", "s", "ms"))
     if shape == "out-of-range-timeout":
-        return "999999999" in argv or "999999999000" in argv
+        return any(token in argv for token in (
+            "999999999", "999999999s", "999999999000", "999999999000ms"))
     if shape == "empty-command":
         return "" in argv[1:]
     if shape == "over-long-argument":

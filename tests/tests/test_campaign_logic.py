@@ -109,8 +109,8 @@ def measured(arm, ms, path="fast", context="NO_WINDOW", rep=0, outcome="ok",
         # round-31 F2 pins 125 for the designated arm's
         # contract-pinned shapes only, which is exactly the code
         # this fixture's designated records carry.
-        exit_code = 124 if path in ("kill", "scale") else \
-            125 if path == "malformed" else 0
+        exit_code = 125 if path == "malformed" else \
+            arms_mod.expected_exit(arm, path)
     # Construction truth (round-25 alignment, logged in the
     # round-25 landing record): the runner writes argv (the
     # executed argument vector, a non-empty list of string
@@ -14141,8 +14141,8 @@ class Round36LandingTests(unittest.TestCase):
         # were named 0/8 — (6) PASS, campaign COMPLETE. Now
         # the budget anchors to the PLAN (the shipped
         # configuration's templates expanded by the
-        # construction itself: guard 7, processkit 6,
-        # nuewframe 5, sysprims 6), which no population of
+        # construction itself: guard 7, processkit 11,
+        # nuewframe 6, sysprims 6), which no population of
         # records can move: the victims are named 8/8 in
         # both constructions, and the genuine fixture is
         # named by nothing.
@@ -14150,7 +14150,7 @@ class Round36LandingTests(unittest.TestCase):
         self.assertEqual(
             {arm: report_mod._plan_fast_argv_length(arm)
              for arm in plan_mod.PRODUCT_ARMS},
-            {"guard": 7, "processkit": 6, "nuewframe": 5,
+            {"guard": 7, "processkit": 11, "nuewframe": 6,
              "sysprims": 6})
         junk = ["extra-junk-token", "--not-a-shape-flag",
                 "plain-second-argument"]

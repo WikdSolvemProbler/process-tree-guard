@@ -10,10 +10,9 @@ the placeholders {timeout_s}, {timeout_ms}, {child} and {child_args}
 are substituted per slot. {child} expands to the child program path
 and {child_args} to its argument list, spliced in place.
 
-The templates below are confirmed against the preserved bundle
-binaries: the bundle's campaign ran exactly these binaries (the
-ones pinned by SHA-256 in the configuration's competitor
-identities), and these are those binaries' invocation shapes. A
+The templates below use the pinned binaries' documented command
+interfaces, verified against the staged executables on Windows.
+ProcessKit requires a unique event log for each invocation. A
 binary that does not match its pin is not the as-found competitor
 and is refused at staging — there is no operator-confirmation
 path to certifying with a substitute. The report records the
@@ -75,31 +74,26 @@ def _fmt_seconds(value):
     return ("%g" % value)
 
 
-# Invocation shapes confirmed against the preserved bundle
-# binaries — the bundle's campaign ran exactly these binaries
-# (see module docstring).
+# Invocation shapes verified against the pinned Windows binaries.
 DEFAULT_TEMPLATES = {
-    # The guard: full command, --timeout SECONDS -- CHILD ARGS...
     "guard": {
         "fast": ["{timeout_flag}", "{timeout_s}", "--", "{child}", "{child_args}"],
         "kill": ["{timeout_flag}", "{timeout_s}", "--", "{child}", "{child_args}"],
     },
-    # ProcessKit CLI: a timeout subcommand taking seconds, then the command.
-    "processkit": {
-        "fast": ["timeout", "{timeout_s}", "{child}", "{child_args}"],
-        "kill": ["timeout", "{timeout_s}", "{child}", "{child_args}"],
-    },
-    # nuewframe/timeout: timeout SECONDS COMMAND... (duration in seconds).
     "nuewframe": {
-        "fast": ["{timeout_s}", "{child}", "{child_args}"],
-        "kill": ["{timeout_s}", "{child}", "{child_args}"],
+        "fast": ["{timeout_s}s", "--", "{child}", "{child_args}"],
+        "kill": ["{timeout_s}s", "--", "{child}", "{child_args}"],
     },
-    # sysprims: a run-with-timeout invocation taking milliseconds.
+    "processkit": {
+        "fast": ["run", "--timeout", "{timeout_s}s", "--jsonl", "{event_log}", "--inherit-stdin", "--", "{child}", "{child_args}"],
+        "kill": ["run", "--timeout", "{timeout_s}s", "--jsonl", "{event_log}", "--", "{child}", "{child_args}"],
+    },
     "sysprims": {
-        "fast": ["timeout", "{timeout_ms}", "{child}", "{child_args}"],
-        "kill": ["timeout", "{timeout_ms}", "{child}", "{child_args}"],
+        "fast": ["timeout", "{timeout_ms}ms", "{child}", "{child_args}"],
+        "kill": ["timeout", "{timeout_ms}ms", "{child}", "{child_args}"],
     },
 }
+
 
 # The guard's timeout flag is not a template placeholder; it is a
 # literal the guard template carries under a private key so the flag
@@ -1398,18 +1392,15 @@ def resolve_template(arm, path, config):
 # slots: the child's code, propagated — the shipped fast child
 # (testkit "relay 0", the output workload) and the stub fast
 # children exit 0, so the propagated code is 0. Kill slots: the arm's documented timeout code. The guard's
-# timeout code is 124. The competitors' entries state the same
-# timeout-code convention and, like their templates, are confirmed
-# against the preserved bundle binaries (the bundle's campaign
-# ran exactly these binaries); a per-arm "expected_exit" entry in
-# the configuration overrides
+# timeout code is 124. ProcessKit reserves 106 for the runner's
+# own timeout. The configuration's per-arm "expected_exit" entry overrides
 # this table. A slot whose exit code differs is classified
 # "exit-mismatch", distinctly from infrastructure failure, and is
 # excluded from every median.
 EXPECTED_FAST_EXIT = 0
 EXPECTED_KILL_EXITS = {
     "guard": 124,
-    "processkit": 124,
+    "processkit": 106,
     "nuewframe": 124,
     "sysprims": 124,
 }

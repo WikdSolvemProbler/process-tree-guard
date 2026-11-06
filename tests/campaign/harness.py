@@ -172,6 +172,8 @@ COMPETITOR_ARMS = ("processkit", "nuewframe", "sysprims")
 # incomplete — which exits 0 and carries its verdict in
 # campaign_status / the report's STATUS line (see module docstring).
 EXIT_ADMISSION_FAILURE = 4
+EXIT_SLOT_CLEANUP_FAILURE = 5
+WINDOWS_SLOT_ISOLATION = "windows-job-drain-after-observation"
 
 CAMPAIGN_STATUS_COMPLETE = "complete"
 CAMPAIGN_STATUS_INCOMPLETE = "incomplete"
@@ -2269,6 +2271,32 @@ def _manifest_count_problems(meta):
     return problems
 
 
+def _slot_job_drained(receipt):
+    return (
+        isinstance(receipt, dict)
+        and type(receipt.get("active_before")) is int
+        and receipt["active_before"] >= 0
+        and receipt.get("terminated") is bool(receipt["active_before"])
+        and type(receipt.get("active_after")) is int
+        and receipt["active_after"] == 0
+    )
+
+
+def _slot_isolation_problems(meta, records):
+    declared = meta.get("slot_isolation")
+    has_receipts = any(isinstance(record, dict) and "slot_job" in record
+                       for record in records)
+    if declared is None and not has_receipts:
+        return []
+    if declared != WINDOWS_SLOT_ISOLATION:
+        return ["run.json has no matching Windows slot isolation declaration"]
+    return [
+        f"observation {index} lacks a successful slot Job drain receipt"
+        for index, record in enumerate(records, 1)
+        if not isinstance(record, dict) or not _slot_job_drained(record.get("slot_job"))
+    ]
+
+
 def check_run_package(run_dir):
     """Verify a run package's order evidence: run.json's recorded
     seed must reproduce the recorded order, and the observations'
@@ -2354,6 +2382,7 @@ def check_run_package(run_dir):
         records = _read_records(run_dir)
     except (OSError, ValueError) as error:
         return problems + [f"observations.jsonl unreadable: {error}"]
+    problems.extend(_slot_isolation_problems(meta, records))
     # Record shape: a malformed-but-parseable observation record
     # is a package defect the checker names; the recomputations
     # below index the fields it validates, so on any shape defect
@@ -3002,6 +3031,8 @@ def cmd_run(args):
             return EXIT_ADMISSION_FAILURE
     run_id = args.run_id or new_run_id(seed)
     run_dir = namespace_run_dir(args.out, run_id)
+    config["_windows_slot_jobs"] = sys.platform == "win32" and not reduced
+    config["_processkit_event_dir"] = os.path.join(run_dir, "processkit-events")
     env = environment_record()
     decisions = report_mod.decisions_from_config(config)
     meta = {
@@ -3016,6 +3047,8 @@ def cmd_run(args):
         "python": env["python"],
         "config_sha256": config_sha256,
         "config_path": os.path.abspath(args.config),
+        "slot_isolation": (WINDOWS_SLOT_ISOLATION
+                           if config["_windows_slot_jobs"] else None),
         "profile_dimension_decisions": decisions,
         "fingerprints": {},
         "arm_versions": {},
@@ -3044,6 +3077,12 @@ def cmd_run(args):
             sink.flush()
             meta["slots_run"] = len(records)
             _write_run_json(run_dir, meta, indent=None)
+            if config["_windows_slot_jobs"]:
+                isolation = record.get("slot_job", {})
+                if not _slot_job_drained(isolation):
+                    print(f"slot Job did not prove cleanup: {isolation}",
+                          file=sys.stderr)
+                    return EXIT_SLOT_CLEANUP_FAILURE
     fps = fingerprints(config)
     versions = arm_versions(config)
     mismatches = identity_mismatches(config, fps, versions)
@@ -3271,6 +3310,7 @@ def cmd_report(args):
         extra_losses.append(
             "run.json manifest missing: the campaign's completeness "
             "cannot be certified from observations alone")
+    extra_losses.extend(_slot_isolation_problems(meta, records))
     if meta.get("provisional"):
         extra_losses.append(
             f"campaign stopped before completion: run.json is "

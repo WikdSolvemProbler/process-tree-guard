@@ -563,7 +563,27 @@ def descendants_alive(config, descendant_pids):
 
 
 def run_slot(slot, config):
-    """Execute one slot; return its observation record."""
+    """Execute one slot and settle its isolation before returning."""
+    job = None
+    event_dir = None
+    event_root = config.get("_processkit_event_dir")
+    try:
+        if config.get("_windows_slot_jobs"):
+            from windows_slot_job import SlotJob
+            job = SlotJob()
+        if slot.arm == "processkit":
+            if event_root is not None:
+                os.makedirs(event_root, exist_ok=True)
+            event_dir = tempfile.mkdtemp(prefix="slot-", dir=event_root)
+        return _run_slot(slot, config, job, event_dir)
+    finally:
+        if job is not None:
+            job.close()
+        if event_dir and event_root is None:
+            shutil.rmtree(event_dir, ignore_errors=True)
+
+
+def _run_slot(slot, config, job, event_dir):
     start = time.perf_counter_ns()
     record = {
         "kind": slot.kind, "arm": slot.arm, "path": slot.path,
@@ -580,6 +600,7 @@ def run_slot(slot, config):
         "output_stdout_len": None, "output_stderr_len": None,
         "output_stdout_match": None, "output_stderr_match": None,
     }
+    proc = None
     marker = None
     marker_dir = None
     out_path = err_path = in_path = None
@@ -632,6 +653,10 @@ def run_slot(slot, config):
             argv = [exe] + expand_template(
                 resolve_template(slot.arm, slot.path, config),
                 timeout_s, child, child_args)
+        if event_dir:
+            event_log = os.path.abspath(os.path.join(event_dir, "events.jsonl"))
+            argv = [event_log if token == "{event_log}" else token
+                    for token in argv]
         record["argv"] = argv
         if slot.path == "fast":
             # Output observation: per-slot regular files for both
@@ -665,10 +690,9 @@ def run_slot(slot, config):
                 "stdin": subprocess.DEVNULL,
             }
         try:
-            proc = subprocess.Popen(
-                argv, creationflags=creation_flags(slot.context),
-                **popen_streams,
-            )
+            launch = job.launch if job is not None else subprocess.Popen
+            proc = launch(argv, creationflags=creation_flags(slot.context),
+                          **popen_streams)
         except (OSError, UnicodeEncodeError) as error:
             # UnicodeEncodeError is the presentation limit of a
             # non-Unicode shape on a platform whose exec encoding
@@ -718,11 +742,12 @@ def run_slot(slot, config):
                 record["outcome"] = "infra-failure"
                 record["detail"] = (
                     f"slot exceeded its {SLOT_DEADLINE_S:g} s harness deadline")
-                try:
-                    proc.kill()
-                    proc.wait(timeout=5.0)
-                except (OSError, subprocess.TimeoutExpired):
-                    record["detail"] += "; harness cleanup kill did not reap the arm"
+                if job is None:
+                    try:
+                        proc.kill()
+                        proc.wait(timeout=5.0)
+                    except (OSError, subprocess.TimeoutExpired):
+                        record["detail"] += "; harness cleanup kill did not reap the arm"
             if sys.platform == "win32":
                 cpu_ms, peak_bytes, note = _windows_resource_fields(proc)
                 record["cpu_ms"] = cpu_ms
@@ -938,6 +963,21 @@ def run_slot(slot, config):
         record["elapsed_ms"] = (time.perf_counter_ns() - start) / 1e6
         return record
     finally:
+        if job is not None:
+            try:
+                # Job accounting may still include the arm after its
+                # process handle signals. Only the pre-drain survivor
+                # probe contributes a candidate survival verdict.
+                record["slot_job"] = job.drain()
+            except (OSError, TimeoutError) as error:
+                record["slot_job"] = {"error": str(error)}
+                record["outcome"] = "infra-failure"
+                detail = record.get("detail")
+                cleanup_error = f"slot Job did not prove cleanup: {error}"
+                record["detail"] = f"{detail}; {cleanup_error}" if detail else cleanup_error
+            finally:
+                if proc is not None:
+                    proc.close()
         for handle in (out_handle, err_handle, in_handle):
             if handle is not None:
                 try:

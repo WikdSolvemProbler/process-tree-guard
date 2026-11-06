@@ -128,7 +128,7 @@ def fixture_record(arm, ms, path="fast", context="NO_WINDOW", rep=0,
               # contract-pinned shapes, so a fixture claiming a
               # complete campaign cannot carry an acceptance (0)
               # there; competitor records at 125 are observations.
-              "exit_code": 124 if path == "kill" else
+              "exit_code": arms_mod.expected_exit(arm, "kill") if path == "kill" else
               125 if path == "malformed" else 0,
               "survivor": False if path == "kill" else None,
               # Construction truth (round-25 alignment): the
@@ -189,7 +189,7 @@ def fixture_record(arm, ms, path="fast", context="NO_WINDOW", rep=0,
         owed = plan_mod.expected_descendants(record["variant"])
         record["descendant_pids"] = [
             6000 + rep * 100 + index for index in range(owed)]
-        record["exit_code"] = 124
+        record["exit_code"] = arms_mod.expected_exit(arm, "scale")
     if path == "fast" and outcome == "ok":
         record["output_stdout_sha256"] = STDOUT_SHA
         record["output_stderr_sha256"] = STDERR_SHA

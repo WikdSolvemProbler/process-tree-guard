@@ -211,11 +211,12 @@ Every case ends in PASS or FAIL.
 Each case's evidence records stand in `results\battery\`.
 The evidence records hold commands, exit codes, and raw outputs.
 Every case record in `results\battery\battery.json` names the tree it audited.
-The competitor argument templates stand in `campaign.json`.
-The expected exits stand in `campaign.json` as well.
-Both are confirmed against the preserved bundle binaries.
-The bundle's campaign ran exactly those binaries.
-The report records the templates in use.
+The competitor argument templates and native exit codes are in `campaign.json`.
+The Windows staging checks use the pinned bundle binaries. The run records the templates and each executed argument vector.
+ProcessKit 0.3.4 requires `run --timeout`, a separate JSONL event log per slot, and `--inherit-stdin` for the relay workload. Its timeout status is 106.
+nuewframe 1.0.0 requires a unit-bearing duration and `--`. SysPrims 0.2.4 treats bare durations as seconds, so its template uses an explicit `ms` suffix. Its default diagnostics remain in the measured output.
+
+A full Windows run starts each arm in a private Job. The harness records the arm's exit and checks for survivors before draining that Job outside the timing interval. Each row records the cleanup result. A Job that cannot be proven empty stops the run before the next slot. Required ProcessKit event logs are retained in the run namespace.
 A binary that does not match its pin is not the as-found competitor.
 Staging refuses such a binary.
 No operator-confirmation path certifies a run with a substitute binary.
