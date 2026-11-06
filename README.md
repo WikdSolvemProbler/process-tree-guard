@@ -310,7 +310,7 @@ Each platform claim carries its evidence tier. Proven means execution evidence. 
 | Target | Tier | State |
 |---|---|---|
 | Windows x86-64, Microsoft Visual C++ (MSVC) | Proven backend | The release target. Execution evidence for the final version comes from the release test run. |
-| Windows aarch64, MSVC | Type-and-borrow | `cargo check` passes with zero warnings. Not a release target. |
+| Windows aarch64, MSVC | Release and native execution | Windows 11 ARM64 passed 286 library tests and six shared integration tests. The remaining native integration cases, including desktop tests, are pending. [CI evidence](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/42184000755/job/127779907330) |
 | Windows i686, MSVC | Type-and-borrow | `cargo check` passes with zero warnings. Not a release target. |
 | Windows x86-64, GNU toolchain | Type-and-borrow | `cargo check` passes with zero warnings. The build carries no version resource. Not a release target. |
 | Linux | Theory | No backend exists. A build for a Linux target is refused. |
