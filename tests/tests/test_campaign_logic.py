@@ -4630,7 +4630,9 @@ class CampaignOutcomeContractTests(unittest.TestCase):
         # performed — dimension (8) completes only when its
         # artifact records an exercised prompt class.
         import harness as harness_mod
-        self.enterContext(collected_usability_artifact())
+        contexts = contextlib.ExitStack()
+        self.addCleanup(contexts.close)
+        contexts.enter_context(collected_usability_artifact())
         decisions = self.shipped_decisions()
         outcome = harness_mod.campaign_outcome(
             complete_records(), FULL_COUNTS, decisions=decisions)
@@ -4680,7 +4682,9 @@ class CampaignOutcomeContractTests(unittest.TestCase):
         # with the manual usability check performed, as in the
         # completeness proof above.)
         import harness as harness_mod
-        self.enterContext(collected_usability_artifact())
+        contexts = contextlib.ExitStack()
+        self.addCleanup(contexts.close)
+        contexts.enter_context(collected_usability_artifact())
         decisions = self.shipped_decisions()
         control = harness_mod.campaign_outcome(
             complete_records(), FULL_COUNTS, decisions=decisions)
@@ -5368,7 +5372,9 @@ class RecordConsistencyTests(unittest.TestCase):
             if loss.startswith("record inconsistency")]
 
     def test_unmodified_fixture_is_consistent_and_completes(self):
-        self.enterContext(collected_usability_artifact())
+        contexts = contextlib.ExitStack()
+        self.addCleanup(contexts.close)
+        contexts.enter_context(collected_usability_artifact())
         recs = complete_records()
         self.assertEqual(report_mod.record_consistency_losses(recs), [])
         self.assertEqual(report_mod.standing_losses(recs, FULL_COUNTS),
@@ -6266,7 +6272,9 @@ class RecordConsistencyTests(unittest.TestCase):
         # problem stands against it) and the re-rendered
         # report does not complete.
         import harness as harness_mod
-        self.enterContext(collected_usability_artifact())
+        contexts = contextlib.ExitStack()
+        self.addCleanup(contexts.close)
+        contexts.enter_context(collected_usability_artifact())
         with tempfile.TemporaryDirectory() as tmp:
             ns = self.output_package(tmp, complete_records())
             problems = harness_mod.check_run_package(ns)

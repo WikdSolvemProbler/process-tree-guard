@@ -80,23 +80,19 @@ def fixture_fast_argv(arm):
         list(spec.get("args", [])))
 
 
-def output_config(tmp, fast_modes=None):
+def output_config(fast_modes=None):
     """A stub-tier campaign configuration whose fast child is the
     relay output workload, with the expected bytes named as
     configuration data. fast_modes maps an arm to the stub mode
     its fast template uses (default "arm-fast": a faithful arm);
     the negative controls name "arm-fast-mute" (suppresses the
     child's output) or "arm-fast-garble" (alters its stdout)."""
-    exe = os.path.join(tmp, "stub-arm")
-    with open(exe, "w", encoding="utf-8") as handle:
-        handle.write(f'#!/bin/sh\nexec {sys.executable} {STUB} "$@"\n')
-    os.chmod(exe, 0o755)
     fast_modes = fast_modes or {}
     config = {
-        "arms": {arm: {"executable": exe, "templates": {
-            "fast": [fast_modes.get(arm, "arm-fast"), "{timeout_s}",
+        "arms": {arm: {"executable": sys.executable, "templates": {
+            "fast": [STUB, fast_modes.get(arm, "arm-fast"), "{timeout_s}",
                      "--", "{child}", "{child_args}"],
-            "kill": ["arm-kill-tree", "{timeout_s}", "--",
+            "kill": [STUB, "arm-kill-tree", "{timeout_s}", "--",
                      "{child}", "{child_args}"],
         }} for arm in plan_mod.PRODUCT_ARMS},
         "children": {
@@ -271,78 +267,71 @@ class OutputCaptureTests(unittest.TestCase):
     configuration's expected bytes."""
 
     def test_fast_slot_records_matching_output_observation(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            config = output_config(tmp)
-            rec = run_slot(Slot("measured", "guard", "fast",
-                                "NO_WINDOW", 0), config)
-            self.assertEqual(rec["outcome"], "ok")
-            self.assertEqual(rec["exit_code"], 0)
-            self.assertEqual(rec["output_stdout_sha256"], STDOUT_SHA)
-            self.assertEqual(rec["output_stderr_sha256"], STDERR_SHA)
-            self.assertEqual(rec["output_stdout_len"],
-                             len(EXPECTED_STDOUT))
-            self.assertEqual(rec["output_stderr_len"],
-                             len(EXPECTED_STDERR))
-            self.assertTrue(rec["output_stdout_match"])
-            self.assertTrue(rec["output_stderr_match"])
+        config = output_config()
+        rec = run_slot(Slot("measured", "guard", "fast",
+                            "NO_WINDOW", 0), config)
+        self.assertEqual(rec["outcome"], "ok")
+        self.assertEqual(rec["exit_code"], 0)
+        self.assertEqual(rec["output_stdout_sha256"], STDOUT_SHA)
+        self.assertEqual(rec["output_stderr_sha256"], STDERR_SHA)
+        self.assertEqual(rec["output_stdout_len"],
+                         len(EXPECTED_STDOUT))
+        self.assertEqual(rec["output_stderr_len"],
+                         len(EXPECTED_STDERR))
+        self.assertTrue(rec["output_stdout_match"])
+        self.assertTrue(rec["output_stderr_match"])
 
     def test_mute_arm_is_output_mismatch_with_the_expected_exit_code(self):
         # The negative control: the arm returns the expected exit
         # code (0) but suppresses both of the child's streams.
         # It must not be classified fully correct.
-        with tempfile.TemporaryDirectory() as tmp:
-            config = output_config(
-                tmp, fast_modes={"processkit": "arm-fast-mute"})
-            rec = run_slot(Slot("measured", "processkit", "fast",
-                                "NO_WINDOW", 0), config)
-            self.assertEqual(rec["exit_code"], 0)
-            self.assertEqual(rec["outcome"], "output-mismatch")
-            self.assertFalse(rec["output_stdout_match"])
-            self.assertFalse(rec["output_stderr_match"])
-            self.assertEqual(rec["output_stdout_sha256"], EMPTY_SHA)
-            self.assertIn("output did not match", rec["detail"])
+        config = output_config(fast_modes={"processkit": "arm-fast-mute"})
+        rec = run_slot(Slot("measured", "processkit", "fast",
+                            "NO_WINDOW", 0), config)
+        self.assertEqual(rec["exit_code"], 0)
+        self.assertEqual(rec["outcome"], "output-mismatch")
+        self.assertFalse(rec["output_stdout_match"])
+        self.assertFalse(rec["output_stderr_match"])
+        self.assertEqual(rec["output_stdout_sha256"], EMPTY_SHA)
+        self.assertIn("output did not match", rec["detail"])
 
     def test_garble_arm_alters_stdout_and_is_output_mismatch(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            config = output_config(
-                tmp, fast_modes={"sysprims": "arm-fast-garble"})
-            rec = run_slot(Slot("measured", "sysprims", "fast",
-                                "NO_WINDOW", 0), config)
-            self.assertEqual(rec["exit_code"], 0)
-            self.assertEqual(rec["outcome"], "output-mismatch")
-            self.assertFalse(rec["output_stdout_match"])
-            self.assertTrue(rec["output_stderr_match"])
+        config = output_config(fast_modes={"sysprims": "arm-fast-garble"})
+        rec = run_slot(Slot("measured", "sysprims", "fast",
+                            "NO_WINDOW", 0), config)
+        self.assertEqual(rec["exit_code"], 0)
+        self.assertEqual(rec["outcome"], "output-mismatch")
+        self.assertFalse(rec["output_stdout_match"])
+        self.assertTrue(rec["output_stderr_match"])
 
     def test_kill_slot_carries_no_output_observation(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            config = output_config(tmp)
-            rec = run_slot(Slot("measured", "guard", "kill",
-                                "NO_WINDOW", 0), config)
-            self.assertEqual(rec["outcome"], "ok")
-            for field in ("output_stdout_sha256",
-                          "output_stderr_sha256",
-                          "output_stdout_len", "output_stderr_len",
-                          "output_stdout_match",
-                          "output_stderr_match"):
-                self.assertIsNone(rec[field], field)
+        config = output_config()
+        rec = run_slot(Slot("measured", "guard", "kill",
+                            "NO_WINDOW", 0), config)
+        self.assertEqual(rec["outcome"], "ok")
+        for field in ("output_stdout_sha256",
+                      "output_stderr_sha256",
+                      "output_stdout_len", "output_stderr_len",
+                      "output_stdout_match",
+                      "output_stderr_match"):
+            self.assertIsNone(rec[field], field)
 
     def test_floor_slots_carry_the_observation_their_child_defines(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            config = output_config(tmp)
-            direct = run_slot(Slot("control", "floor-direct", "fast",
-                                   "NO_WINDOW", 0), config)
-            self.assertEqual(direct["outcome"], "ok")
-            self.assertTrue(direct["output_stdout_match"])
-            self.assertTrue(direct["output_stderr_match"])
-            # The floor-spawn child names no expected bytes: its
-            # (empty) streams are digested, with no verdict.
-            spawn = run_slot(Slot("control", "floor-spawn", "fast",
-                                  "NO_WINDOW", 0), config)
-            self.assertEqual(spawn["outcome"], "ok")
-            self.assertEqual(spawn["output_stdout_sha256"], EMPTY_SHA)
-            self.assertEqual(spawn["output_stderr_sha256"], EMPTY_SHA)
-            self.assertIsNone(spawn["output_stdout_match"])
-            self.assertIsNone(spawn["output_stderr_match"])
+        config = output_config()
+        direct = run_slot(Slot("control", "floor-direct", "fast",
+                               "NO_WINDOW", 0), config)
+        self.assertEqual(direct["outcome"], "ok")
+        self.assertTrue(direct["output_stdout_match"])
+        self.assertTrue(direct["output_stderr_match"])
+        # The floor-spawn child names no expected bytes: its
+        # (empty) streams are digested, with no verdict.
+        spawn = run_slot(Slot("control", "floor-spawn", "fast",
+                              "NO_WINDOW", 0), config)
+        self.assertEqual(spawn["outcome"], "ok")
+        self.assertEqual(spawn["output_stdout_sha256"], EMPTY_SHA)
+        self.assertEqual(spawn["output_stderr_sha256"], EMPTY_SHA)
+        self.assertIsNone(spawn["output_stdout_match"])
+        self.assertIsNone(spawn["output_stderr_match"])
 
 
 class OutputGateTests(unittest.TestCase):
@@ -354,7 +343,9 @@ class OutputGateTests(unittest.TestCase):
         # Round-27 F2: the completeness premise carries the
         # manual usability check performed (dimension (8)
         # completes only on its artifact's recorded evidence).
-        self.enterContext(collected_usability_artifact())
+        contexts = contextlib.ExitStack()
+        self.addCleanup(contexts.close)
+        contexts.enter_context(collected_usability_artifact())
         recs = complete_fixture()
         for context in plan_mod.CONTEXTS:
             entry = gate_entry(recs, "output correctness", context)
@@ -440,7 +431,9 @@ class OutputGateTests(unittest.TestCase):
         # the slot is a loss for the competitor, not for the
         # campaign, and dimension (1) still rests on the guard's
         # three observed components.
-        self.enterContext(collected_usability_artifact())
+        contexts = contextlib.ExitStack()
+        self.addCleanup(contexts.close)
+        contexts.enter_context(collected_usability_artifact())
         outcome = harness_mod.campaign_outcome(
             recs, FULL_COUNTS, decisions=shipped_decisions())
         self.assertEqual(outcome["campaign_status"], "complete")

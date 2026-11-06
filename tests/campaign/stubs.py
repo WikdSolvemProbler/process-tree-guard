@@ -86,6 +86,10 @@ def _publish(path, text):
 
 
 def _pid_alive(pid):
+    if sys.platform == "win32":
+        from probe import pid_alive_windows
+
+        return pid_alive_windows(pid)
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -93,6 +97,26 @@ def _pid_alive(pid):
     except PermissionError:
         return True
     return True
+
+
+def _windows_tree_kill(argv, timeout):
+    from windows_slot_job import SlotJob
+
+    job = SlotJob()
+    try:
+        proc = job.launch(argv, subprocess.CREATE_NO_WINDOW,
+                          stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
+        try:
+            try:
+                code = proc.wait(timeout)
+            except subprocess.TimeoutExpired:
+                code = 124
+            job.drain()
+            return code
+        finally:
+            proc.close()
+    finally:
+        job.close()
 
 
 def main(argv):
@@ -105,8 +129,8 @@ def main(argv):
         data = sys.stdin.buffer.read()
         sys.stdout.buffer.write(data + b"\n")
         sys.stdout.buffer.flush()
-        sys.stderr.write("error-stream\n")
-        sys.stderr.flush()
+        sys.stderr.buffer.write(b"error-stream\n")
+        sys.stderr.buffer.flush()
         return int(rest[0])
     if mode == "sleep":
         time.sleep(float(rest[0]))
@@ -172,6 +196,8 @@ def main(argv):
         timeout = float(rest[0])
         child = rest[2:]
         if mode == "arm-kill-tree":
+            if sys.platform == "win32":
+                return _windows_tree_kill(child, timeout)
             proc = subprocess.Popen(child, start_new_session=True)
         else:
             proc = subprocess.Popen(child)
