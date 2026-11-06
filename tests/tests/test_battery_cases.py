@@ -22,8 +22,10 @@ import battery as battery_mod  # noqa: E402
 import env_fixtures  # noqa: E402
 
 TREE = os.path.normpath(os.path.join(HERE, "..", ".."))
-CTX = {"tree": TREE, "platform": sys.platform}
-REPORTS = {case.ident: case.run(CTX) for case in battery_mod.CASES}
+# Source-audit tests replay the driver-blocked tier on every host. Native
+# theory probes run explicitly through battery.py, outside test discovery.
+AUDIT_CONTEXT = {"tree": TREE, "platform": sys.platform, "driver_mode": "blocked"}
+REPORTS = {case.ident: case.run(AUDIT_CONTEXT) for case in battery_mod.CASES}
 
 
 def conditions(ident):
@@ -47,13 +49,9 @@ class BatteryShapeTests(unittest.TestCase):
             rep = case.run(ctx)
             self.assertEqual(rep["verdict"], "BLOCKED-ERROR",
                              case.ident)
-        # On this machine's plain run, off Windows every case is
-        # BLOCKED-WINDOWS; on Windows the plain run is judged by
-        # its driver runs, exercised by the driver-tier tests.
-        if sys.platform != "win32":
-            for ident, rep in REPORTS.items():
-                self.assertEqual(rep["verdict"], "BLOCKED-WINDOWS",
-                                 ident)
+        # The source-audit tier cannot establish a native driver pass.
+        for ident, rep in REPORTS.items():
+            self.assertEqual(rep["verdict"], "BLOCKED-WINDOWS", ident)
 
     def test_no_case_fails_on_its_audit_parts(self):
         for ident, rep in REPORTS.items():
@@ -178,7 +176,7 @@ def scratch_tree(mutate=None):
 
 def run_case(ident, tree):
     case = {c.ident: c for c in battery_mod.CASES}[ident]
-    ctx = {"tree": tree, "platform": sys.platform}
+    ctx = {**AUDIT_CONTEXT, "tree": tree}
     return {c["condition"]: c for c in case.run(ctx)["conditions"]}
 
 
@@ -968,7 +966,9 @@ class RecordedBatteryEvidenceTests(unittest.TestCase):
                                "battery-linux.json"),
                   encoding="utf-8") as handle:
             recorded = json.load(handle)
-        fresh = [REPORTS[case.ident] for case in battery_mod.CASES]
+        # Replay the recorded Linux tier even when this suite runs on Windows.
+        linux_context = {**AUDIT_CONTEXT, "platform": "linux"}
+        fresh = [case.run(linux_context) for case in battery_mod.CASES]
         # Each record names the folder it audited ("tree"), which
         # is where the record was made, not something the audits
         # found: it must equal the folder audited now, and every
