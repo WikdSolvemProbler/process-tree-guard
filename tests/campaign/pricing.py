@@ -262,6 +262,30 @@ def _read_guard_record(path):
         return None
 
 
+def _complete_guard_elapsed(receipt, launcher_exit, outer_elapsed_ms):
+    """Return the guard's lifetime only for a complete, consistent receipt."""
+    if receipt is None:
+        return None
+    start = receipt.get("start_ns")
+    end = receipt.get("end_ns")
+    elapsed = receipt.get("elapsed_ms")
+    exit_code = receipt.get("exit_code")
+    if (type(start) is not int or type(end) is not int
+            or not 0 <= start <= end
+            or not _is_pid_form(receipt.get("pid"))
+            or type(exit_code) is not int
+            or not _is_plausible_time(elapsed) or elapsed > outer_elapsed_ms):
+        return None
+    # On POSIX the Python launcher passes the child's status to sys.exit.
+    # A signal status remains negative in the receipt and wraps in wait().
+    reported_exit = exit_code & 0xFF if os.name == "posix" else exit_code
+    duration = end - start
+    if (reported_exit != launcher_exit or not _is_finite_number(duration)
+            or elapsed != duration / 1e6):
+        return None
+    return elapsed
+
+
 def _guard_launcher_main(argv):
     """The recording launcher: `pricing.py guard-launcher
     RECORD_PATH -- COMMAND...`. Spawns COMMAND (the guard run),
@@ -381,19 +405,19 @@ def _time_guard_run(config, context, child=None, child_args=None,
     if guard_record_path is not None:
         record["outer_elapsed_ms"] = outer_elapsed_ms
         guard_record = _read_guard_record(guard_record_path)
-        if guard_record is None \
-                or guard_record.get("elapsed_ms") is None:
+        elapsed = _complete_guard_elapsed(
+            guard_record, record["exit_code"], outer_elapsed_ms)
+        if elapsed is None:
             record["outcome"] = "infra-failure"
             record["detail"] = (
-                "guard-process timing record missing: the "
-                "recording launcher — the loaded shape's one "
-                "intermediate level — did not run the guard, so "
-                "the guard's own lifetime was not measured")
+                "guard-process timing record missing or inconsistent: "
+                "the recording launcher did not prove the guard's own "
+                "lifetime and exit for this run")
             record["elapsed_ms"] = outer_elapsed_ms
             return record
-        record["guard_pid"] = guard_record.get("pid")
-        record["elapsed_ms"] = guard_record["elapsed_ms"]
-        guard_exit = guard_record.get("exit_code", record["exit_code"])
+        record["guard_pid"] = guard_record["pid"]
+        record["elapsed_ms"] = elapsed
+        guard_exit = guard_record["exit_code"]
         expected = expected_exit("guard", "fast", config)
         if expected is not None and guard_exit != expected:
             record["outcome"] = "exit-mismatch"
@@ -530,6 +554,11 @@ def run_pricing_probes(config, guard_fingerprint, reduced=False,
             for rep in range(reps):
                 for shape, kwargs in shapes:
                     kwargs = dict(kwargs)
+                    if "guard_record_path" in kwargs:
+                        # An incomplete launch must never read a prior run's
+                        # final receipt or race its late atomic replacement.
+                        base, extension = os.path.splitext(kwargs["guard_record_path"])
+                        kwargs["guard_record_path"] = f"{base}-{rep}{extension}"
                     probe_count = kwargs.pop("probe_count", None)
                     intended_path = kwargs.pop("intended_path", None)
                     inserted_levels = kwargs.pop("inserted_levels", None)

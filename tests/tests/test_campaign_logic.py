@@ -5113,6 +5113,25 @@ class OwnerVerificationTimingTests(unittest.TestCase):
             self.assertEqual(shapes["loaded"]["inserted_levels"], 1)
             self.assertNotIn("launcher", shapes["loaded"])
             self.assertNotIn("cmd", assembled["loaded"])
+
+            # The loaded price must use the same guard child's inner
+            # timestamps. Comparing both clocks on this one launch
+            # avoids attributing scheduler differences to clock selection.
+            loaded_kwargs = {
+                key: value for key, value in shapes["loaded"].items()
+                if key != "inserted_levels"
+            }
+            timed = pricing_mod._time_guard_run(config, **loaded_kwargs)
+            receipt = pricing_mod._read_guard_record(
+                loaded_kwargs["guard_record_path"])
+            self.assertEqual(timed["outcome"], "ok", timed)
+            self.assertIsNotNone(receipt)
+            self.assertEqual(timed["guard_pid"], receipt["pid"])
+            self.assertEqual(timed["exit_code"], receipt["exit_code"])
+            inner_ms = (receipt["end_ns"] - receipt["start_ns"]) / 1e6
+            self.assertEqual(timed["elapsed_ms"], inner_ms)
+            self.assertGreater(timed["outer_elapsed_ms"], inner_ms)
+
             guard_fp = arms_mod.fingerprint(exe)
             records = pricing_mod.run_pricing_probes(
                 config, guard_fp, reduced=True,
@@ -5331,10 +5350,20 @@ class OwnerVerificationTimingTests(unittest.TestCase):
     def test_refusing_launcher_is_infra_failure_never_a_price(self):
         import pricing as pricing_mod
         with tempfile.TemporaryDirectory() as tmp:
+            pricing_import = (
+                "import sys\n"
+                f"sys.path.insert(0, {CAMPAIGN!r})\n"
+                "import pricing\n")
             refusing = self.write_launcher(
                 tmp, "refusing-launcher.py", "import sys\nsys.exit(97)\n")
+            contradictory_exit = self.write_launcher(
+                tmp, "contradictory-exit-launcher.py",
+                pricing_import +
+                "pricing._guard_launcher_main(sys.argv[1:])\n"
+                "sys.exit(97)\n")
             for launcher in ([sys.executable, refusing],
-                             [os.path.join(tmp, "absent-launcher")]):
+                             [os.path.join(tmp, "absent-launcher")],
+                             [sys.executable, contradictory_exit]):
                 records = self.owner_records(
                     pricing_mod, tmp, launcher, reduced=True)
                 loaded = [r for r in records if r["shape"] == "loaded"]
@@ -5346,6 +5375,27 @@ class OwnerVerificationTimingTests(unittest.TestCase):
                 self.assertTrue(
                     evidence is None
                     or "owner verification" not in evidence["items"])
+
+            marker = os.path.join(tmp, "launcher-ran")
+            first_only = self.write_launcher(
+                tmp, "first-only-launcher.py",
+                pricing_import +
+                "try:\n"
+                f"    open({marker!r}, 'x').close()\n"
+                "except FileExistsError:\n"
+                "    sys.exit(0)\n"
+                "sys.exit(pricing._guard_launcher_main(sys.argv[1:]))\n")
+            records = self.owner_records(
+                pricing_mod, tmp, [sys.executable, first_only], reduced=True)
+            loaded = [r for r in records if r["shape"] == "loaded"]
+            self.assertGreater(len(loaded), 1)
+            self.assertEqual(loaded[0]["outcome"], "ok", loaded[0])
+            for record in loaded[1:]:
+                self.assertEqual(record["outcome"], "infra-failure", record)
+                self.assertNotIn("guard_pid", record)
+            evidence = pricing_mod.prices_from_observations(records)
+            self.assertTrue(
+                evidence is None or "owner verification" not in evidence["items"])
 
 
 class RecordConsistencyTests(unittest.TestCase):
