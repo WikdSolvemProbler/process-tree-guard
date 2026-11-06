@@ -120,23 +120,9 @@ def testkit(args):
 
 
 def pid_alive(pid):
-    """Windows-only survivor probe used by the kill-path family.
-    Mirrors campaign/probe.py's semantics exactly: an access-denied
-    open means the process exists, and a failed exit-code query is
-    a check that cannot answer (raised), never a "dead" verdict —
-    a survivor check that reports dead when it could not look can
-    pass a kill-path test over a live descendant."""
+    """Use the campaign's Windows survivor check in the kill-path family."""
     if sys.platform != "win32":
         raise RuntimeError("pid_alive is a Windows probe")
-    import ctypes
-    kernel32 = ctypes.windll.kernel32
-    handle = kernel32.OpenProcess(0x1000, False, pid)  # QUERY_LIMITED
-    if not handle:
-        return ctypes.get_last_error() == 5  # ERROR_ACCESS_DENIED
-    code = ctypes.c_ulong()
-    ok = kernel32.GetExitCodeProcess(handle, ctypes.byref(code))
-    kernel32.CloseHandle(handle)
-    if not ok:
-        raise RuntimeError("GetExitCodeProcess failed; "
-                           "survival cannot be answered")
-    return code.value == 259  # STILL_ACTIVE
+    from campaign.probe import pid_alive_windows
+
+    return pid_alive_windows(pid)

@@ -702,6 +702,21 @@ class KillTreeTests(unittest.TestCase):
         no_args = subprocess.run([sys.executable, PROBE],
                                  capture_output=True, timeout=30)
         self.assertEqual(no_args.returncode, 2)
+        if sys.platform == "win32":
+            import _winapi
+            import probe
+
+            child = subprocess.Popen([sys.executable, "-I", "-B", "-c", "raise SystemExit(259)"])
+            self.assertEqual(child.wait(timeout=30), 259)
+            self.assertFalse(probe.pid_alive_windows(child.pid))
+
+            for winerror, expected in ((5, 1), (87, 0), (123, 2)):
+                with self.subTest(winerror=winerror):
+                    error = OSError(0, "mocked OpenProcess error", None, winerror)
+                    with mock.patch.object(_winapi, "OpenProcess", side_effect=error):
+                        self.assertEqual(probe.main(["42"]), expected)
+            self.assertEqual(probe.main([str(1 << 32)]), 2)
+            self.assertEqual(probe.main([str(os.getpid()), str(1 << 32)]), 2)
 
 
 class PerContextTests(unittest.TestCase):
