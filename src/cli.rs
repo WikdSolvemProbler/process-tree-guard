@@ -21,7 +21,7 @@ pub use help::{help, usage_for, CONTAIN_USAGE, GATE_USAGE, USAGE};
 
 /// Seconds that are finite, greater than zero and at most MAX_SECONDS.
 pub fn check_seconds(seconds: f64) -> Result<f64, GuardError> {
-    if !seconds.is_finite() || seconds <= 0.0 || seconds > MAX_SECONDS {
+    if crate::deadline::invalid_seconds(seconds) {
         return Err(GuardError(format!("timeout must be greater than zero and at most {} seconds", crate::engine::format_seconds(MAX_SECONDS))));
     }
     Ok(seconds)

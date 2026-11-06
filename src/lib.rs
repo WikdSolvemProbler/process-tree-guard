@@ -24,7 +24,7 @@
 //! is drawn so that the refusal can be proved file by file.
 //!
 //! The pure set is: `src/auth/hello/text.rs`,
-//! `src/auth/message.rs`, `src/base64.rs`, `src/cli/help.rs`,
+//! `src/auth/message.rs`, `src/base64.rs`, `src/cli/help.rs`, `src/deadline.rs`,
 //! `src/engine/resolve.rs`,
 //! `src/engine/trace.rs`, `src/extend/codec.rs`,
 //! `src/extend/log/audit.rs`, `src/extend/log/format.rs`,
@@ -170,8 +170,8 @@ pub use extend::{Grant, CHANNEL_VARIABLE, DEFAULT_MAX_EXTENSION};
 pub(crate) use dispatch::{entry_contain, entry_deadline, entry_full, entry_gate};
 use std::fmt;
 
-/// The longest deadline the guard accepts, in seconds (24 hours).
-pub const MAX_SECONDS: f64 = 86400.0;
+mod deadline;
+pub use deadline::MAX_SECONDS;
 
 /// The exit code of a run whose deadline passed: the run's own result
 /// when its process tree was terminated at the deadline, and the code
