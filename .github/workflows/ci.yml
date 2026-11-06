@@ -93,6 +93,36 @@ jobs:
       - name: Check, release
         run: cargo check --release --locked --all-targets --target x86_64-pc-windows-msvc
 
+      - name: Verify the unsupported Linux backend refuses to build
+        timeout-minutes: 2
+        run: |
+          receipt="$RUNNER_TEMP/unsupported-backend.jsonl"
+          status=0
+          timeout --signal=KILL 75s cargo check --locked --offline --lib --target x86_64-unknown-linux-gnu --message-format=json > "$receipt" || status=$?
+          python3 - "$status" "$receipt" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          records = [json.loads(line) for line in Path(sys.argv[2]).read_text().splitlines()]
+          failures = []
+          for record in records:
+              if record["reason"] != "compiler-message" or record["message"]["level"] != "error":
+                  continue
+              message = record["message"]
+              primary = [span["file_name"] for span in message["spans"] if span["is_primary"] is True]
+              target = record["target"]
+              failures.append((target["name"], target["kind"], message["message"], primary))
+          finished = [record["success"] for record in records if record["reason"] == "build-finished"]
+          expected = ("process_tree_guard", ["lib"],
+                      "this build has no proven backend for its target; the proven backend at this version is Windows",
+                      ["src/sys/mod.rs"])
+          if (int(sys.argv[1]) != 101 or len(finished) != 1 or finished[0] is not False
+                  or failures != [expected]):
+              sys.exit(f"Unexpected backend refusal: Cargo {sys.argv[1]}, finished={finished}, errors={failures}")
+          print("Verified the intentional unsupported-backend error.")
+          PY
+
   build:
     name: build (x86_64-pc-windows-msvc)
     runs-on: windows-latest
