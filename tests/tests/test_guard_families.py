@@ -18,6 +18,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -254,16 +255,29 @@ class NegativeControlTests(unittest.TestCase):
             drv.run(argv, deadline=1.0)
 
     def test_build_dirs_never_fall_back_to_the_tree_target_folder(self):
-        # The families certify the staged package (build/, or the
-        # folder PTG_SUITE_BUILD names): a binary in the guard
-        # tree's cargo target folder was built by another route
-        # from an unrecorded tree state, and locating one there
-        # would let the families pass against a guard the
-        # campaign never staged. No build directory the driver
-        # searches may be a cargo target folder.
-        for folder in drv.build_dirs():
-            parts = folder.replace("\\", "/").split("/")
-            self.assertNotIn("target", parts, folder)
+        # Checkout and staging paths may contain a component named target.
+        # Only the implicit Cargo output directory is outside the contract.
+        with tempfile.TemporaryDirectory(prefix="ptg-build-dirs-") as tmp:
+            tree = os.path.join(tmp, "target", "checkout")
+            suite_root = os.path.join(tree, "tests")
+            default_stage = os.path.join(suite_root, "build")
+            explicit_stage = os.path.join(tmp, "target", "staged")
+            cargo_output = os.path.join(tree, "target", "release")
+            exe = drv._exe_name(drv.ROLES["full"])
+            os.makedirs(cargo_output)
+            os.makedirs(explicit_stage)
+            for folder in (cargo_output, explicit_stage):
+                with open(os.path.join(folder, exe), "wb") as handle:
+                    handle.write(b"unexecuted lookup fixture")
+
+            with mock.patch.object(drv, "SUITE_ROOT", suite_root):
+                with mock.patch.dict(os.environ, {"PTG_SUITE_BUILD": ""}):
+                    self.assertEqual(drv.build_dirs(), [default_stage])
+                    with self.assertRaises(drv.BinaryMissing):
+                        drv.locate("full")
+                with mock.patch.dict(os.environ, {"PTG_SUITE_BUILD": explicit_stage}):
+                    self.assertEqual(drv.build_dirs(), [explicit_stage, default_stage])
+                    self.assertEqual(drv.locate("full"), os.path.join(explicit_stage, exe))
 
 
 @needs_guard
