@@ -37,6 +37,14 @@ All 1,940 stored arm-process CPU readings fell on a 15.625 ms grid. The original
 
 These post-hoc arithmetic allowances favor the guard. The strict verdict uses the original readings, and the grid supplies no measurement error bound. [Exact analysis, affected cases, and replay script](../evidence/windows-cpu-accounting-audit-20261106.zip) · [Windows CPU counter documentation](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)
 
+### CPU counter calibration
+
+Independent replays on Linux ARM64 and native macOS ARM64 reproduced the Windows CPU audit byte-for-byte after line-ending normalization.
+
+The first bounded Windows calibration refused an elapsed pulse that exceeded its preregistered limit. A separate fixed-work calibration then compared two idle controls with 8,192 and 32,768 iterations. Raw process cycles distinguished the work levels in all 12 measured quartets. `GetProcessTimes` passed zero of the same 12. The result is specific to the synthetic workload and observed host. Cycles remain in raw units, and the original campaign verdict retains its original CPU-time readings. [Both calibration receipts and the cross-platform replay](../evidence/windows-cpu-calibration-20261106.zip) · [Process cycle counter](https://learn.microsoft.com/en-us/windows/win32/api/realtimeapiset/nf-realtimeapiset-queryprocesscycletime)
+
+Archive SHA-256 `0e6dae0c86b1e37ada4d5598d094d926382c236441f85a591a24b7242d808a17`.
+
 ## Windows comparison with repaired Wake, 6 November 2026
 
 The observed-load x64 MSVC run compared consolidated commit 8bf828a with Windows-repaired Wake commit 9c6f0df. The matched builds used the same release profile and toolchain. Two independent reviewers approved the exact manifest. The run completed 2,967 slots, including 2,880 measured trials, 72 warmups, and 15 controls.
