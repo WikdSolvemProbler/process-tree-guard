@@ -29,7 +29,11 @@ In a separate system scope, a supervisor atomically placed the payload in a root
 
 A one-shot watchdog drained the payload cgroup on supervisor loss, owner loss, deadline expiry, and normal completion. Held pidfds verified the original payload and its detached, double-forked descendants. The sibling survived all four cases. The deadline and owner-loss cases returned 124 and 125, and normal completion preserved the fixture's exit 23.
 
-The product backend still needs authenticated admission, an atomic startup fence against cancellation, arbitrary exit forwarding, and watchdog-failure recovery. [Root-owned control and lifecycle evidence](../../../tests/evidence/linux-root-supervision-20261106.zip)
+The root-owned control and lifecycle archive contains the source, outcomes, and independent cleanup checks. [Root-owned control and lifecycle evidence](../../../tests/evidence/linux-root-supervision-20261106.zip)
+
+A startup-fence prototype refused late launch requests after owner loss and deadline expiry. Killing the supervisor between atomic placement and release closed the exec-permit pipe and left the child reaped without an exec marker. Two permitted commands returned 7 and 197, and both statuses were forwarded exactly. [Startup fence evidence](../../../tests/evidence/linux-startup-fence-20261106.zip)
+
+The product backend still needs authenticated admission, simultaneous cancellation and release tests, and watchdog-failure recovery.
 
 **Next:** The wiki Platform Support page states the tier of each named place.
 
