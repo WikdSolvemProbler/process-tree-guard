@@ -27,6 +27,10 @@ An ephemeral hosted arm64 macOS 27.0.1 VM verified a dedicated worker account an
 
 The fixture parks each escaped process before the sweep. Production still needs a verified exclusive lease, authenticated admission, credential containment, and fork-race coverage.
 
+## Detached fork churn
+
+The fork-churn fixture compiled on the Tailscale Mac as an ordinary user. Its privileged hosted run recorded all 20 detached rounds with an empty-worker witness, native SIGKILL for the anchored process, and a live different-UID peer. Three rounds observed a successful fork entirely between sweep dispatch and reap. None recorded a successful fork entirely after the pre-kill marker. The all-round overlap gate failed, and the internal broadcast snapshot was unobserved. The parked regression passed separately. [Hosted run](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/42228789224) · [Sources, compile and runtime receipts](../../../tests/evidence/macos-fork-churn-20261106.zip)
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
