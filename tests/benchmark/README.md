@@ -107,6 +107,8 @@ The median paired lookup-form contrast was +4.721 ms in NO_WINDOW and -0.171 ms 
 The archive contains the protocol, source and executable identities, candidate patch, prior regression evidence, all raw slots and cleanup receipts, the approval and bounded invocation, and the replay. Archive SHA-256 is e7bdc5ff85068e8ed03176628db5a4ad60014cbc9973577b1891f381404c1293. [Diagnostic evidence and replay](../evidence/windows-resolver-valid-launch-20261106.zip)
 
 
+Independent offline replays of all 300 Windows launch records ran through Tailscale SSH on Linux ARM64 and physical macOS ARM64. Each reproduced the Windows analysis byte for byte after line-ending normalization. Independent post-run checks found no replay scratch directories, Mac replay process group, or Linux replay scope. [Native replay and cleanup evidence](../evidence/resolver-native-replay-20261106.zip)
+
 ## Owner-verification timing checks
 
 The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
