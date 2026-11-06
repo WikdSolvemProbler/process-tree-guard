@@ -41,6 +41,14 @@ The archive contains all raw slots and terminal receipts, the failed zero-row at
 
 Archive SHA-256 56d7e8282ce249dc5bfc3ab984ea03e97d99b463bb85e96db1684a7992f47038.
 
+## Windows startup phase diagnostic, 6 November 2026
+
+All 324 trials completed under the separately reviewed phase protocol. The original fixture produced a +2.6335 ms manual-startup p90 contrast, below the preregistered +3.9079 to +11.9079 ms anchor range. Its second-half contrast was −2.6100 ms. Five per-arm p90 comparisons between fixture conditions also exceeded the 2 ms threshold. Seven of 19 calibration checks failed, leaving phase localization inconclusive.
+
+The earlier +7.9079 ms contrast remains the result of the larger directional comparison. The archive preserves the preregistration, all phase trials, the initial zero-row admission refusal caused by a missing protocol hash, and the replay. A fresh extraction reproduced the exact analysis bytes using matching local Python and PowerShell executables. [Phase diagnostic evidence and replay](../evidence/windows-wake-phase-20261106.zip)
+
+Archive SHA-256 f13a78229c9b66c963dca3748c32fdbd813a6dfcbd95eb0e1c5bf37973c802a0.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
