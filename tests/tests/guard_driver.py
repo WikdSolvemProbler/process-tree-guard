@@ -53,6 +53,14 @@ def _exe_name(base):
     return base + (".exe" if sys.platform == "win32" else "")
 
 
+def spelling(path):
+    """The executable spelling the guard resolves for a path."""
+    text = path.replace("\\", "/")
+    if text.startswith("//?/"):
+        text = text[4:]
+    return text
+
+
 def build_dirs():
     dirs = []
     env = os.environ.get("PTG_SUITE_BUILD")

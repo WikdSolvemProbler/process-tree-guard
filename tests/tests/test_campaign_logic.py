@@ -10628,13 +10628,15 @@ class Round27LandingTests(unittest.TestCase):
 
     def test_runner_wide72_exact_count_passes(self):
         # The exact-count pass case at full variant size, via
-        # the suite's stub machinery (probe: wide spawns in one
-        # process, inside the arm's timeout).
+        # the suite's Python stub machinery. Give its 72 interpreter
+        # launches a separate fixture deadline. The real campaign's
+        # native child and two-second deadline are unchanged.
         with tempfile.TemporaryDirectory() as tmp:
             config = stub_config(tmp)
             slot = plan_mod.Slot("measured", "guard", "scale",
                                  "NO_WINDOW", 3, "wide-72")
-            record = run_slot(slot, config)
+            with mock.patch.object(runner_mod, "KILL_TIMEOUT_S", 6.0):
+                record = run_slot(slot, config)
             self.assertEqual(record["outcome"], "ok", record)
             self.assertEqual(record["exit_code"], 124)
             self.assertEqual(record["survivor"], False)

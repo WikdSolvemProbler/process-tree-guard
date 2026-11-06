@@ -42,14 +42,6 @@ MAX_INPUT = 16 * 1024 * 1024
 POLICY_FALLBACK = "POLICY.md not found beside the installed process guard."
 
 
-def spelling(path):
-    """The executable spelling the guard resolves for a path."""
-    text = path.replace("\\", "/")
-    if text.startswith("//?/"):
-        text = text[4:]
-    return text
-
-
 # ------------------------------------------------------------- F7 cap
 
 def cap_payloads(exe):
@@ -92,7 +84,7 @@ class F7PayloadCapTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.payloads = cap_payloads(spelling(drv.locate("full")))
+        cls.payloads = cap_payloads(drv.spelling(drv.locate("full")))
 
     def hook(self, payload):
         return drv.guard(["hook", "pretooluse"], stdin=payload)
@@ -133,11 +125,10 @@ class Install:
         if with_wrapper:
             shutil.copyfile(drv.locate("full"), self.wrapper)
         if policy_text is not None:
-            with open(os.path.join(root, "POLICY.md"), "w",
-                      encoding="utf-8") as handle:
-                handle.write(policy_text)
-        self.exe_spelling = spelling(self.exe)
-        self.wrapper_spelling = spelling(self.wrapper)
+            with open(os.path.join(root, "POLICY.md"), "wb") as handle:
+                handle.write(policy_text.encode("utf-8"))
+        self.exe_spelling = drv.spelling(self.exe)
+        self.wrapper_spelling = drv.spelling(self.wrapper)
 
     def hook(self, vendor, payload=b""):
         return drv.run([self.exe, "hook", vendor], stdin=payload)

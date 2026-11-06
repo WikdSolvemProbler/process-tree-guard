@@ -365,7 +365,7 @@ class F3HookTests(unittest.TestCase):
         return json.dumps({"tool_input": {"command": command}}).encode()
 
     def test_pretooluse_allows_a_guarded_command(self):
-        exe = drv.locate("full")
+        exe = drv.spelling(drv.locate("full"))
         import base64
         b64 = base64.b64encode(b"echo hi").decode()
         command = f"{exe} --timeout 60 --shell powershell --command-b64 {b64}"
@@ -382,7 +382,7 @@ class F3HookTests(unittest.TestCase):
         self.assertEqual(exit_code, 2)
 
     def test_cursor_allow_shape(self):
-        exe = drv.locate("full")
+        exe = drv.spelling(drv.locate("full"))
         import base64
         b64 = base64.b64encode(b"echo hi").decode()
         command = f"{exe} --timeout 60 --shell powershell --command-b64 {b64}"
@@ -400,14 +400,13 @@ class F3HookTests(unittest.TestCase):
     def test_gate_role_matches_full_role_on_allow_and_deny(self):
         import base64
         b64 = base64.b64encode(b"echo hi").decode()
-        # Allow case: each role is named by its own binary's envelope,
-        # as a host would spell it; the verdicts and answer bytes must
-        # still match across roles. Deny case: one shared payload.
+        # Both roles can vouch for the full executable's envelope.
+        # The gate executable itself cannot run that command.
+        exe = drv.spelling(drv.locate("full"))
+        command = (f"{exe} --timeout 60 --shell powershell "
+                   f"--command-b64 {b64}")
         answers = {}
         for role in ("gate", "full"):
-            exe = drv.locate(role)
-            command = (f"{exe} --timeout 60 --shell powershell "
-                       f"--command-b64 {b64}")
             code, out, _, _ = self.hook("pretooluse",
                                         self.envelope(command), role=role)
             answers[role] = (code, out)
