@@ -29,6 +29,8 @@ An offline replay corrected 32 survivor labels to name the scale path, case kind
 
 Archive SHA-256 `03d40c2964ee48306489117daaab66b0b43a25f2b9879b0888d045086fc8f7ea`.
 
+The archived SysPrims arm recorded 180 measured and 18 warmup fast slots. All 198 exited 0 and matched stdout. Every slot recorded 334 stderr bytes and failed the expected-stderr check. The invocations used the default CLI log settings. The published v0.2.4 source defaults to INFO-level stderr tracing and emits messages on successful runs, consistent with the captured mismatch. The freeze rule requires a successful fast-path median for each rival, so SysPrims left the startup comparison unevaluated in both contexts. Host quietness is a separate admission requirement. [SysPrims log defaults](https://github.com/3leaps/sysprims/blob/v0.2.4/crates/sysprims-cli/src/main.rs#L77-L85) · [SysPrims stderr writer](https://github.com/3leaps/sysprims/blob/v0.2.4/crates/sysprims-cli/src/main.rs#L691-L715)
+
 ## Windows comparison with repaired Wake, 6 November 2026
 
 The observed-load x64 MSVC run compared consolidated commit 8bf828a with Windows-repaired Wake commit 9c6f0df. The matched builds used the same release profile and toolchain. Two independent reviewers approved the exact manifest. The run completed 2,967 slots, including 2,880 measured trials, 72 warmups, and 15 controls.
