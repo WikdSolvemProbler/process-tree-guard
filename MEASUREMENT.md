@@ -1370,17 +1370,21 @@ deliverable.
   from the target's known shape and is not measured here, because there
   is no MSVC and no Windows on this machine.
 
-**Owed: the benchmark campaign on Windows.** For 0.5.0 the campaign run-20261104T230944Z-s20261029 recorded 922 of 1,940 slots and was stopped; its status is incomplete and it is not a speed result. The frozen capture
-(design 003): 1,620 slots — 36 controls, 144 warmups and 1,440
-measured — in six arms, with the `NO_WINDOW` and `DETACHED` console
-contexts kept separate, the endpoint being the whole outer lifetime of
-the program under test plus its included controller work and cleanup.
-The guard is compared against the three external competitors as found —
-ProcessKit CLI v0.3.4, nuewframe/timeout v1.0.0 and sysprims v0.2.4 —
-which receive no repairs and no tuning, while the guard is repaired
-generally until it wins or ties. One capture attempt, no retries,
-exclusions or replacements, and an incomplete capture produces no speed
-summary. That campaign, and only that campaign, is a speed verdict.
+**Windows benchmark campaign.** The 0.5.0 capture
+`run-20261104T230944Z-s20261029` stopped after 922 of 1,940 slots. A later
+Windows run recorded all 1,940 slots in the configured campaign, including
+36 controls, 224 warmups, and 1,680 measured trials. It ran under observed
+laptop load, and certification remained incomplete with 44 standing losses.
+The evidence pins both the harness and guard-build commits.
+[Capture outcomes and evidence](tests/benchmark/README.md#windows-capture-6-november-2026)
+
+The first quiet-host speed record remains open. The campaign uses six arms,
+separate `NO_WINDOW` and `DETACHED` console contexts, and the whole outer
+lifetime of the program under test, including controller work and cleanup.
+ProcessKit CLI v0.3.4, nuewframe/timeout v1.0.0, and SysPrims v0.2.4 run as
+found. The capture keeps all scheduled trials in their prescribed order,
+with one attempt and no exclusions or replacements.
+[Quiet-host requirement](https://github.com/WikdSolvemProbler/process-tree-guard/issues/7)
 
 **The self-measurement record is not a measurement of anything here.**
 `src/timing.rs` emits, only when both the trace name — read
