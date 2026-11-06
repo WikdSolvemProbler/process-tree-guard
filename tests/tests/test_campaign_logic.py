@@ -2602,7 +2602,7 @@ class CensusConsistencyTests(unittest.TestCase):
                 f"relative location ({tree}); the fresh battery "
                 "record cannot be re-derived here")
         battery_mod = battery_module()
-        ctx = {"tree": tree, "platform": sys.platform}
+        ctx = {"tree": tree, "platform": sys.platform, "driver_mode": "blocked"}
         fresh = [case.run(ctx) for case in battery_mod.CASES]
         fresh_lines = set()
         for report in fresh:
@@ -2681,7 +2681,7 @@ class CensusConsistencyTests(unittest.TestCase):
                 f"relative location ({tree}); the fresh battery "
                 "record cannot be re-derived here")
         battery_mod = battery_module()
-        ctx = {"tree": tree, "platform": sys.platform}
+        ctx = {"tree": tree, "platform": sys.platform, "driver_mode": "blocked"}
         fresh = [case.run(ctx) for case in battery_mod.CASES]
         details = {report["case"]: " ".join(
             condition.get("detail", "")
