@@ -55,6 +55,20 @@ A private completion port delivered fixture PIDs from an otherwise empty Job. Th
 
 Job completion messages can be lost. Any future phase experiment must account for missing observations and calibrate the observer against the uninstrumented workload. This proof covers fixture observation only. [Raw feasibility evidence](../evidence/windows-job-events-20261106.zip) · [Microsoft Job notification documentation](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_associate_completion_port)
 
+## Windows standalone manual-startup replication
+
+The standalone run retained the original manual-startup order within 40 blocks, all 72 warmups, and all 15 controls. It completed 807 slots, including 240 measured triplets. The binaries, original fixture, native timing bracket, and guard settings matched the earlier comparison. The measured sequence omitted the intervening AUTO and wait workloads.
+
+| Manual startup | Median | 90th percentile |
+| --- | ---: | ---: |
+| Consolidated guard | 37.9071 ms | 52.1849 ms |
+| Repaired Wake | 37.0708 ms | 49.3178 ms |
+| Bare fixture | 23.7398 ms | 30.1599 ms |
+
+The p90 contrast was +2.8671 ms with a primary interval of [−5.5511, +8.1285] ms. Both halves were positive and one launch order was negative. The standalone contrast was unresolved and failed the preregistered calibration gate for phase work. The previous mixed-workload result and the quiet-host issue retain their separate scopes. A fresh archive extraction reproduced the exact analysis bytes. [Raw replication and offline replay](../evidence/windows-wake-anchor-20261106.zip)
+
+Archive SHA-256 d6427f0343c829dff858cf850fee22b86cf8352e3047c7946c79ea8f2b33cf4c.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
