@@ -16905,7 +16905,7 @@ class Round43LandingTests(unittest.TestCase):
         self.assertEqual(
             report_mod.standing_losses(recs, FULL_COUNTS), [])
 
-    def test_scale_survivor_listing_names_the_slot_kind_and_variant(self):
+        # Measured and warmup scale slots can share a repetition number.
         records = complete_records()
         affected = [record for record in records
                     if record["path"] == "scale"
