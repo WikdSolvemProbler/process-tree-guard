@@ -4846,8 +4846,10 @@ class OwnerVerificationTimingTests(unittest.TestCase):
     """P5, route (b): the owner-verification probe times the guard
     process itself (the recording launcher records the guard
     child's PID and brackets its lifetime), so launcher startup
-    and teardown never enter the price — a launcher that sleeps
-    500 ms before exec'ing the guard must not move it.
+    and teardown are outside the priced interval. The default tests
+    verify bracket placement on real launches and price calculation on
+    the same observations. The explicitly selected run_live_* methods
+    exercise the historical cross-sample gate on a quiet host.
     Round-8 P5: the recording launcher is the loaded shape's only
     inserted level — no configured launcher wraps it — so loaded
     − baseline is exactly one ancestor level by construction. The
@@ -4943,6 +4945,57 @@ class OwnerVerificationTimingTests(unittest.TestCase):
         with open(path, "w", encoding="utf-8") as handle:
             handle.write(body)
         return path
+
+    def write_observed_timing_launcher(self, tmp, name, delay_code):
+        return self.write_launcher(
+            tmp, name,
+            "import json, sys, tempfile, time\n"
+            f"sys.path.insert(0, {CAMPAIGN!r})\n"
+            "import pricing\n"
+            + delay_code
+            + "path = sys.argv[1]\n"
+            "exit_code = pricing._guard_launcher_main(sys.argv[1:])\n"
+            "guard = pricing._read_guard_record(path)\n"
+            "if guard is None or 'end_ns' not in guard:\n"
+            "    sys.exit(97)\n"
+            f"with tempfile.NamedTemporaryFile(mode='w', dir={tmp!r}, "
+            "suffix='.timing-proof', delete=False, encoding='utf-8') as stream:\n"
+            "    json.dump(dict(path=path, guard=guard, delay=delay), stream)\n"
+            "sys.exit(exit_code)\n")
+
+    def check_observed_timing(self, tmp, records, duration_ns, before):
+        proofs = {}
+        for name in os.listdir(tmp):
+            if not name.endswith(".timing-proof"):
+                continue
+            with open(os.path.join(tmp, name), encoding="utf-8") as stream:
+                proof = json.load(stream)
+            self.assertNotIn(proof["path"], proofs)
+            proofs[proof["path"]] = proof
+        loaded = [record for record in records if record["shape"] == "loaded"]
+        self.assertEqual(len(proofs), len(loaded))
+        delays_ms = {}
+        for record in loaded:
+            self.assertEqual(record["outcome"], "ok", record)
+            path = record["argv"][2]
+            self.assertIn(path, proofs, record)
+            proof = proofs.pop(path)
+            guard = proof["guard"]
+            self.assertEqual(guard["pid"], record["guard_pid"])
+            self.assertEqual(guard["exit_code"], record["exit_code"])
+            self.assertEqual((guard["end_ns"] - guard["start_ns"]) / 1e6,
+                             record["elapsed_ms"])
+            self.assertGreater(record["outer_elapsed_ms"], record["elapsed_ms"])
+            start, end = proof["delay"]
+            self.assertGreaterEqual(end - start, duration_ns)
+            delays_ms[path] = (end - start) / 1e6
+            if before:
+                self.assertLessEqual(end, guard["start_ns"])
+            else:
+                self.assertLessEqual(guard["start_ns"], start)
+                self.assertLessEqual(end, guard["end_ns"])
+        self.assertEqual(proofs, {})
+        return delays_ms
 
     def owner_records(self, pricing_mod, tmp, guard_launcher, reduced):
         config = stub_config(tmp)
@@ -5164,146 +5217,89 @@ class OwnerVerificationTimingTests(unittest.TestCase):
                     1 if record["shape"] == "loaded" else 0)
 
     def test_sleeping_launcher_does_not_move_the_owner_price(self):
-        import pricing as pricing_mod
+        self._check_sleeping_launcher(live=False)
+
+    def run_live_sleeping_launcher_gate(self):
+        self._check_sleeping_launcher(live=True)
+
+    def _check_sleeping_launcher(self, *, live):
         with tempfile.TemporaryDirectory() as tmp:
-            # The sleeping control substitutes the recording
-            # launcher — the loaded shape's single intermediate
-            # level — with one that sleeps 500 ms in its startup,
-            # before its timing bracket opens, then records the
-            # guard child's bracket in the same format.
-            sleepy = self.write_launcher(
+            sleepy = self.write_observed_timing_launcher(
                 tmp, "sleepy-launcher.py",
-                "import json, os, subprocess, sys, time\n"
+                "start = time.perf_counter_ns()\n"
                 "time.sleep(0.5)\n"
-                "record_path, command = sys.argv[1], sys.argv[3:]\n"
-                "start_ns = time.perf_counter_ns()\n"
-                "proc = subprocess.Popen(command)\n"
-                "exit_code = proc.wait()\n"
-                "end_ns = time.perf_counter_ns()\n"
-                "payload = {\"pid\": proc.pid, \"start_ns\": start_ns,\n"
-                "           \"end_ns\": end_ns,\n"
-                "           \"elapsed_ms\": (end_ns - start_ns) / 1e6,\n"
-                "           \"exit_code\": exit_code}\n"
-                "tmp_path = record_path + \".tmp\"\n"
-                "with open(tmp_path, \"w\", encoding=\"utf-8\") as handle:\n"
-                "    json.dump(payload, handle)\n"
-                "os.replace(tmp_path, record_path)\n"
-                "sys.exit(exit_code)\n")
-            (plain_records, slept_records), \
-                (plain_sets, slept_sets) = \
-                self.owner_records_pooled_pair(
-                    pricing_mod, tmp, [sys.executable, sleepy])
-            # The 500 ms sleep really happened in the loaded
-            # shape's outer lifetime, the guard child's PID was
-            # recorded, and the guard's own lifetime excludes it
-            # (medians, so one load-slowed repetition cannot
-            # decide the control either way).
-            import statistics as _stats
-            loaded = [r for r in slept_records if r["shape"] == "loaded"]
-            self.assertTrue(all(r["outcome"] == "ok" for r in loaded))
-            self.assertTrue(all(isinstance(r["guard_pid"], int)
-                                for r in loaded))
-            self.assertGreaterEqual(
-                _stats.median(r["outer_elapsed_ms"] for r in loaded),
-                500.0)
-            self.assertLess(
-                _stats.median(r["elapsed_ms"] for r in loaded), 500.0)
-            plain = pricing_mod.prices_from_observations(
-                plain_records)["items"]["owner verification"]
-            slept = pricing_mod.prices_from_observations(
-                slept_records)["items"]["owner verification"]
-            self.assertEqual(slept["paired_observations"],
-                             5 * pricing_mod.PROBE_REPS)
-
-            def set_prices(sets):
-                return [pricing_mod.prices_from_observations(records)
-                        ["items"]["owner verification"]["ms"]
-                        for records in sets]
-
-            difference, bound = self.owner_price_gate(
-                plain, slept,
-                set_prices=(set_prices(plain_sets),
-                            set_prices(slept_sets)))
-            self.assertLessEqual(difference, bound)
+                "delay = [start, time.perf_counter_ns()]\n")
+            self._check_owner_delay(
+                tmp, sleepy, 500_000_000, before=True, live=live)
 
     def test_launcher_delay_inside_the_bracket_moves_the_owner_price(self):
-        """Sensitivity control for the repaired gate, rebuilt
-        on the landed construction (round-24): a launcher that
-        delays INSIDE its timing bracket (after the start
-        timestamp, before it spawns the guard) makes the
-        guard's recorded lifetime genuinely longer, so the
-        owner price must move — and the gate must FAIL on it
-        (difference beyond the dispersion-derived bound),
-        where the sleeping-launcher control above, whose delay
-        sits outside the bracket, must pass. A gate that
-        passes both controls would be toothless; a gate that
-        fails both would be noise. The construction is the
-        stability control's own — pooled interleaved sets with
-        the pair-level and paired set-level bounds — not the
-        unpooled 9-pair form round 23's control exercised,
-        which certified a weaker gate than the one landed.
-        The delay is the gate's demonstrated detection floor,
-        250 ms (see the class docstring for the repeated
-        constructions behind that figure), as a busy-wait on
-        a wall-clock deadline, not a sleep: a sleep's
-        overshoot under load varies by hundreds of ms, and
-        that variance lands in the treated item's own
-        dispersion, where the gate's pooled bound would read
-        it as noise; a busy-wait to a perf_counter deadline
-        lasts 250 ms regardless of load, so the movement
-        arrives as a pure location shift of the price — the
-        shift the gate exists to catch. Round-25: the bound
-        this control must fail against is now estimated from
-        the plain condition only (see the class docstring and
-        owner_price_gate); the mover's own dispersion — the
-        busy-wait's included — no longer enters it."""
-        import pricing as pricing_mod
+        self._check_inside_delay(live=False)
+
+    def run_live_inside_delay_gate(self):
+        self._check_inside_delay(live=True)
+
+    def _check_inside_delay(self, *, live):
         with tempfile.TemporaryDirectory() as tmp:
-            delaying = self.write_launcher(
+            delaying = self.write_observed_timing_launcher(
                 tmp, "delaying-launcher.py",
-                "import json, os, subprocess, sys, time\n"
-                "record_path, command = sys.argv[1], sys.argv[3:]\n"
-                "start_ns = time.perf_counter_ns()\n"
-                "deadline = time.perf_counter() + 0.25\n"
-                "while time.perf_counter() < deadline:\n"
-                "    pass\n"
-                "proc = subprocess.Popen(command)\n"
-                "exit_code = proc.wait()\n"
-                "end_ns = time.perf_counter_ns()\n"
-                "payload = {\"pid\": proc.pid, \"start_ns\": start_ns,\n"
-                "           \"end_ns\": end_ns,\n"
-                "           \"elapsed_ms\": (end_ns - start_ns) / 1e6,\n"
-                "           \"exit_code\": exit_code}\n"
-                "tmp_path = record_path + \".tmp\"\n"
-                "with open(tmp_path, \"w\", encoding=\"utf-8\") as handle:\n"
-                "    json.dump(payload, handle)\n"
-                "os.replace(tmp_path, record_path)\n"
-                "sys.exit(exit_code)\n")
-            (plain_records, delayed_records), \
-                (plain_sets, delayed_sets) = \
-                self.owner_records_pooled_pair(
-                    pricing_mod, tmp, [sys.executable, delaying])
-            plain = pricing_mod.prices_from_observations(
-                plain_records)["items"]["owner verification"]
-            delayed = pricing_mod.prices_from_observations(
-                delayed_records)["items"]["owner verification"]
-            self.assertEqual(delayed["paired_observations"],
+                "spawn = pricing.subprocess.Popen\n"
+                "delay = []\n"
+                "def delayed_spawn(*args, **kwargs):\n"
+                "    start = time.perf_counter_ns()\n"
+                "    deadline = start + 250_000_000\n"
+                "    while time.perf_counter_ns() < deadline:\n"
+                "        pass\n"
+                "    delay.extend((start, time.perf_counter_ns()))\n"
+                "    return spawn(*args, **kwargs)\n"
+                "pricing.subprocess.Popen = delayed_spawn\n")
+            self._check_owner_delay(
+                tmp, delaying, 250_000_000, before=False, live=live)
+
+    def _check_owner_delay(self, tmp, launcher, duration_ns, *, before, live):
+        import pricing as pricing_mod
+
+        def price(records):
+            return pricing_mod.prices_from_observations(
+                records)["items"]["owner verification"]
+
+        command = [sys.executable, launcher]
+        if live:
+            (plain_records, treated_records), (plain_sets, treated_sets) = (
+                self.owner_records_pooled_pair(pricing_mod, tmp, command))
+            self.check_observed_timing(tmp, treated_records, duration_ns, before)
+            plain = price(plain_records)
+            treated = price(treated_records)
+            self.assertEqual(treated["paired_observations"],
                              5 * pricing_mod.PROBE_REPS)
-
-            def set_prices(sets):
-                return [pricing_mod.prices_from_observations(records)
-                        ["items"]["owner verification"]["ms"]
-                        for records in sets]
-
             difference, bound = self.owner_price_gate(
-                plain, delayed,
-                set_prices=(set_prices(plain_sets),
-                            set_prices(delayed_sets)))
-            # The 250 ms floor mover lands as a location shift
-            # of the price (well over half the delay, not a
-            # dispersion artefact) and fails the landed gate.
-            self.assertGreater(delayed["ms"] - plain["ms"], 125.0)
-            self.assertGreater(difference, bound)
+                plain, treated, set_prices=(
+                    [price(records)["ms"] for records in plain_sets],
+                    [price(records)["ms"] for records in treated_sets]))
+            if before:
+                self.assertLessEqual(difference, bound)
+            else:
+                self.assertGreater(treated["ms"] - plain["ms"], 125.0)
+                self.assertGreater(difference, bound)
+            return
+
+        records = self.owner_records(pricing_mod, tmp, command, reduced=True)
+        delays_ms = self.check_observed_timing(tmp, records, duration_ns, before)
+        observed = price(records)
+        self.assertEqual(observed["paired_observations"],
+                         pricing_mod.REDUCED_PROBE_REPS)
+        # Use the same launches to isolate the field consumed by the estimator.
+        adjusted = []
+        for record in records:
+            copy = dict(record)
+            if copy["shape"] == "loaded":
+                delay_ms = delays_ms[copy["argv"][2]]
+                field = "outer_elapsed_ms" if before else "elapsed_ms"
+                copy[field] += delay_ms if before else -delay_ms
+            adjusted.append(copy)
+        if before:
+            self.assertEqual(observed, price(adjusted))
+        else:
+            self.assertGreater(observed["ms"] - price(adjusted)["ms"], 125.0)
 
     def test_gate_bound_is_estimated_from_the_plain_condition_only(self):
         """Round-25 repair control, synthetic and exact: the

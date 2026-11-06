@@ -69,6 +69,18 @@ The p90 contrast was +2.8671 ms with a primary interval of [−5.5511, +8.1285] 
 
 Archive SHA-256 d6427f0343c829dff858cf850fee22b86cf8352e3047c7946c79ea8f2b33cf4c.
 
+## Owner-verification timing checks
+
+The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
+
+The live stability and sensitivity gates compare independent conditions in five interleaved sets of nine pairs. Use a sampler-verified quiet host and retain telemetry and all outcomes. From the suite's `tests/tests` directory, run this command under a finite whole-process-tree deadline.
+
+```text
+python -m unittest -v test_campaign_logic.OwnerVerificationTimingTests.run_live_sleeping_launcher_gate test_campaign_logic.OwnerVerificationTimingTests.run_live_inside_delay_gate
+```
+
+The live stability gate uses the plain condition's median absolute deviation for both the pair and set components. The sensitivity gate requires a price increase greater than 125 ms and a difference beyond that bound. These two live gates are selected explicitly, outside default suite discovery.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
