@@ -164,7 +164,8 @@ static void drop(const struct account *a, int keep)
 {
     alarm(12);
     close_child_fds(keep);
-    if (setgroups(0, NULL) != 0 || setgid(a->gid) != 0 || setuid(a->uid) != 0)
+    gid_t primary_group = a->gid;
+    if (setgid(a->gid) != 0 || setgroups(1, &primary_group) != 0 || setuid(a->uid) != 0)
         _exit(72);
     gid_t group = 0;
     struct proc_bsdinfo self;
