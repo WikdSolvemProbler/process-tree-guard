@@ -138,20 +138,26 @@ pub(super) fn poll_before_resume(waits: &[Handle], mut decision: Option<&mut Dec
     Ok(None)
 }
 
-/// The fixed clock is sampled after a real zero-poll and before ResumeThread.
-/// If expired, one further native zero-poll preserves the existing
-/// child/owner-before-expiry precedence. None authorizes a resume now; it does
-/// not claim atomicity with a later ResumeThread scheduling step.
-pub(super) fn fixed_pre_resume_with(
-    deadline: u64,
-    mut now: impl FnMut() -> u64,
+/// The deadline is checked after a real zero-poll and before ResumeThread.
+/// If expired, one further native zero-poll preserves child/owner precedence.
+/// None authorizes a resume now, subject to the later scheduling step.
+pub(super) fn pre_resume_with(
+    expired: impl FnOnce() -> bool,
     mut poll: impl FnMut() -> Result<Option<u32>, GuardError>,
 ) -> Result<Option<u32>, GuardError> {
     if let Some(status) = poll()? { return Ok(Some(status)); }
-    if deadline_remaining(deadline, now()).is_none() {
+    if expired() {
         return Ok(Some(poll()?.unwrap_or(WAIT_TIMEOUT)));
     }
     Ok(None)
+}
+
+pub(super) fn fixed_pre_resume_with(
+    deadline: u64,
+    now: impl FnOnce() -> u64,
+    poll: impl FnMut() -> Result<Option<u32>, GuardError>,
+) -> Result<Option<u32>, GuardError> {
+    pre_resume_with(|| deadline_remaining(deadline, now()).is_none(), poll)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

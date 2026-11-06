@@ -247,10 +247,8 @@ impl Utf8Decoder {
 /// window and marks the scan failed.
 pub(crate) struct Scanner<R: Read> {
     pub(crate) source: R,
-    // Uninitialised storage: each fill writes the prefix whose length
-    // it reports through `end`, and `peek` reads only below `end`, so
-    // no byte is ever read before the fill that wrote it.
-    pub(crate) window: [std::mem::MaybeUninit<u8>; 16384],
+    // Read::read accepts initialized bytes and may inspect its input buffer.
+    pub(crate) window: [u8; 16384],
     pub(crate) pos: usize,
     pub(crate) end: usize,
     pub(crate) eof: bool,
@@ -261,7 +259,7 @@ pub(crate) struct Scanner<R: Read> {
 
 impl<R: Read> Scanner<R> {
     pub(crate) fn new(source: R) -> Self {
-        Scanner { source, window: [std::mem::MaybeUninit::uninit(); 16384], pos: 0, end: 0, eof: false, failed: false, budget: MAX_INPUT, fetched: 0 }
+        Scanner { source, window: [0; 16384], pos: 0, end: 0, eof: false, failed: false, budget: MAX_INPUT, fetched: 0 }
     }
     pub(crate) fn peek(&mut self) -> Option<u8> {
         if self.pos == self.end && !self.eof {
@@ -269,19 +267,15 @@ impl<R: Read> Scanner<R> {
                 self.eof = true;
             } else {
                 let want = self.budget.min(self.window.len());
-                // The fill slice exists only for this call: `read`
-                // writes the prefix whose length it returns, and that
-                // length becomes `end`, the bound on every later read.
-                let fill = unsafe { std::slice::from_raw_parts_mut(self.window.as_mut_ptr() as *mut u8, want) };
-                match self.source.read(fill) {
+                match self.source.read(&mut self.window[..want]) {
                     Ok(0) => self.eof = true,
-                    Ok(n) => {
+                    Ok(n) if n <= want => {
                         self.pos = 0;
                         self.end = n;
                         self.budget -= n;
                         self.fetched += n;
                     }
-                    Err(_) => {
+                    Ok(_) | Err(_) => {
                         self.eof = true;
                         self.failed = true;
                     }
@@ -290,7 +284,7 @@ impl<R: Read> Scanner<R> {
         }
         // `pos < end`, and `end` is the length the last fill reported,
         // so this byte was written by that fill.
-        if self.pos < self.end { Some(unsafe { self.window[self.pos].assume_init() }) } else { None }
+        if self.pos < self.end { Some(self.window[self.pos]) } else { None }
     }
     pub(crate) fn bump(&mut self) -> Option<u8> {
         let byte = self.peek()?;
@@ -313,7 +307,7 @@ impl<R: Read> Scanner<R> {
     pub(crate) fn available(&mut self) -> &[u8] {
         self.peek();
         if self.pos < self.end {
-            unsafe { std::slice::from_raw_parts(self.window.as_ptr().add(self.pos) as *const u8, self.end - self.pos) }
+            &self.window[self.pos..self.end]
         } else {
             &[]
         }

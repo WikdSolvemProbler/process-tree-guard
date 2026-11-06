@@ -1151,8 +1151,13 @@ fn a41_a_denial_exits_2_whether_or_not_its_output_can_be_written() {
         let default = run(&gate, helper, &[]);
         checks.check("A41", &format!("the gate without a vendor, with a {} nobody can write to: exit 2", closed), default == Some(2), format!("{:?}", default));
     }
-    // The vendors that always allow or rewrite exit 0 whatever their output does.
-    for vendor in ["antigravity", "antigravity-context", "cursor-context", "powershell-auto"] {
+    // A PowerShell rewrite needs its output. The host blocks on exit 2.
+    let full_denial = run(&full, "run-closed-stdout", &["hook", "powershell-auto"]);
+    let gate_denial = run(&gate, "run-closed-stdout", &["powershell-auto"]);
+    checks.check("A41", "PowerShell hook with unavailable stdout: exit 2",
+        full_denial == Some(2) && gate_denial == Some(2), format!("{:?} / {:?}", full_denial, gate_denial));
+    // Antigravity's protocol and the context vendors return their JSON with exit 0.
+    for vendor in ["antigravity", "antigravity-context", "cursor-context"] {
         let by_full = run(&full, "run-closed-stdout", &["hook", vendor]);
         let by_gate = run(&gate, "run-closed-stdout", &[vendor]);
         checks.check("A41", &format!("{} with a standard output nobody can write to: exit 0", vendor), by_full == Some(0) && by_gate == Some(0), format!("{:?} / {:?}", by_full, by_gate));

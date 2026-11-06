@@ -383,11 +383,15 @@ mod tests {
             assert!(valid_envelope(&line(&format!("C:/Tools/ptg/{}/process-tree-guard-deadline.exe", folder)), &gate), "{}", gate);
         }
         // A folder that only contains or starts or ends with the word is not libexec.
-        for folder in ["libexec2", "xlibexec", "my-libexec", "libexe", "libexec "] {
+        for folder in ["libexec2", "xlibexec", "my-libexec", "libexe"] {
             let gate = format!("C:/Tools/ptg/{}/process-tree-guard-gate.exe", folder);
             assert_eq!(envelope_paths(&gate).len(), 4, "{}", gate);
             assert!(!valid_envelope(&line("C:/Tools/ptg/bin/process-tree-guard.exe"), &gate), "{}", gate);
         }
+        // A folder with a space cannot be part of an unquoted envelope.
+        let spaced_gate = "C:/Tools/ptg/libexec /process-tree-guard-gate.exe";
+        assert!(envelope_paths(spaced_gate).is_empty());
+        assert!(!valid_envelope(&line("C:/Tools/ptg/libexec /ptg.exe"), spaced_gate));
         // Another file name keeps its own path only, as before.
         assert_eq!(envelope_paths("C:/Tools/ptg/libexec/other.exe"), vec!["C:/Tools/ptg/libexec/other.exe".to_string()]);
     }

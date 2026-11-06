@@ -40,9 +40,12 @@ pub(crate) const DEADLINE: &str = "process-tree-guard-deadline";
 /// whatever its file name (`exe`), because it would not run the command.
 #[cfg(test)]
 pub(crate) fn gate_envelope_paths(exe: &str, dir: &str) -> Vec<String> {
+    if !qualified_envelope_path(exe) || !unquoted_envelope_path(dir) {
+        return Vec::new();
+    }
     let mut folders = vec![dir.to_string()];
     if let Some((root, last)) = dir.rsplit_once('/') {
-        if last.eq_ignore_ascii_case("libexec") {
+        if last.eq_ignore_ascii_case("libexec") && (!dir.starts_with("//") || qualified_envelope_path(root)) {
             folders.push(format!("{}/bin", root));
         }
     }
@@ -61,10 +64,14 @@ pub(crate) fn gate_envelope_paths(exe: &str, dir: &str) -> Vec<String> {
 /// and, when it is installed under one of the three names, the other names in the
 /// same folder; for the hook role, see `gate_envelope_paths`. The other file need
 /// not exist; a command that names a missing program only fails to run.
+/// Every candidate must be a fully qualified, unquoted shell token.
 #[cfg(test)]
 pub(crate) fn envelope_paths(exe: &str, role: Role) -> Vec<String> {
     if role == Role::Gate {
         return exe.rsplit_once('/').map_or_else(Vec::new, |(dir, _)| gate_envelope_paths(exe, dir));
+    }
+    if !qualified_envelope_path(exe) || !unquoted_envelope_path(exe) {
+        return Vec::new();
     }
     let mut paths = vec![exe.to_string()];
     if let Some((dir, own)) = family(exe) {
@@ -82,7 +89,13 @@ pub(crate) fn envelope_paths(exe: &str, role: Role) -> Vec<String> {
 /// form in their path set, and this form stays for its tests.
 #[cfg(test)]
 pub fn wrapper_paths(exe: &str, role: Role) -> Option<Vec<String>> {
+    if !qualified_envelope_path(exe) {
+        return None;
+    }
     let (dir, _) = exe.rsplit_once('/')?;
+    if dir.starts_with("//") && !qualified_envelope_path(dir) {
+        return None;
+    }
     let auto = |name: &str| format!("{}/{}-auto.exe", dir, name);
     if role == Role::Gate {
         return Some([auto(DEADLINE)].into_iter().chain(NAMES.into_iter().map(auto)).collect());
@@ -142,10 +155,16 @@ impl<'a> WrapperSet<'a> {
 /// `wrapper_paths` yields None.
 pub(crate) fn wrapper_specs<'a>(exe: &'a str, role: Role) -> WrapperSet<'a> {
     let mut specs = WrapperSet::empty();
+    if !qualified_envelope_path(exe) {
+        return specs;
+    }
     let (dir, _) = match exe.rsplit_once('/') {
         Some(pair) => pair,
         None => return specs,
     };
+    if dir.starts_with("//") && !qualified_envelope_path(dir) {
+        return specs;
+    }
     if role == Role::Gate {
         specs.push(WrapperSpec { dir, name: DEADLINE });
         for name in NAMES {
@@ -261,7 +280,8 @@ impl StackSpelling {
 /// Spell this executable's path into stack storage, exactly as
 /// `self_path` spells it (forward slashes, the `//?/` prefix
 /// removed): the module name is read into a 1,024-unit stack buffer
-/// and decoded in place. A name that does not fit, cannot be read,
+/// and decoded in place. Extended UNC spellings keep their leading
+/// double slash. A name that does not fit, cannot be read,
 /// or does not decode returns None and the caller takes the standard
 /// call, whose growth loop settles those cases as it did before.
 pub(crate) fn stack_self_path() -> Option<StackSpelling> {
@@ -282,22 +302,29 @@ pub(crate) fn stack_self_path() -> Option<StackSpelling> {
         }
         spelling.len += text.len();
     }
-    // The `//?/` prefix is tested on the written bytes themselves:
-    // the prefix is plain ASCII, so its encoding is itself, and the
-    // bytes are valid UTF-8 by construction (the same fact `as_str`
-    // rests on), so byte equality here is the string test. Asking
-    // `as_str` for it validated the whole spelling — a full scan of
-    // up to 3,072 bytes — to decide a four-byte prefix, on every
-    // call that resolves the spelling.
-    let has_prefix = spelling.len >= 4
-        && (0..4).all(|i| unsafe { spelling.bytes[i].assume_init_read() } == b"//?/"[i]);
-    if has_prefix {
-        // The strip moves the written prefix only: bytes `4..len`
-        // land on `0..len - 4`, every one of them written above.
-        spelling.bytes.copy_within(4..spelling.len, 0);
-        spelling.len -= 4;
+    // Only the written prefix is examined. No full UTF-8 pass is
+    // needed to recognize either of the ASCII namespace prefixes.
+    let prefix = unsafe {
+        std::slice::from_raw_parts(spelling.bytes.as_ptr() as *const u8, spelling.len.min(8))
+    };
+    if let Some(strip) = extended_prefix_to_remove(prefix) {
+        spelling.bytes.copy_within(strip.end..spelling.len, strip.start);
+        spelling.len -= strip.len();
     }
     Some(spelling)
+}
+
+/// The part of the extended Win32 prefix to remove. In the UNC
+/// form retain the two leading slashes so it remains absolute.
+fn extended_prefix_to_remove(prefix: &[u8]) -> Option<std::ops::Range<usize>> {
+    if !prefix.starts_with(b"//?/") {
+        return None;
+    }
+    if prefix.get(4..8).is_some_and(|kind| kind.eq_ignore_ascii_case(b"UNC/")) {
+        Some(2..8)
+    } else {
+        Some(0..4)
+    }
 }
 
 /// The executable path exactly as the envelope must spell it: forward
@@ -309,10 +336,8 @@ pub(crate) fn stack_self_path() -> Option<StackSpelling> {
 pub fn self_path() -> Option<String> {
     let path = std::env::current_exe().ok()?;
     let mut text = path.to_str()?.replace('\\', "/");
-    // The prefix is removed in place: copying the stripped form into a
-    // second string would allocate on a path every hook call pays.
-    if text.starts_with("//?/") {
-        text.drain(..4);
+    if let Some(strip) = extended_prefix_to_remove(text.as_bytes()) {
+        text.drain(strip);
     }
     Some(text)
 }
@@ -337,8 +362,14 @@ pub(crate) fn exe_spelling<'a>(
 /// The policy file of the executable at `exe`: `POLICY.md` in the folder above the
 /// executable's own folder, whatever those folders are called.
 pub(crate) fn policy_path(exe: &str) -> Option<String> {
+    if !qualified_envelope_path(exe) {
+        return None;
+    }
     let (dir, _) = exe.rsplit_once('/')?;
     let (root, _) = dir.rsplit_once('/')?;
+    if exe.starts_with("//") && !qualified_envelope_path(root) {
+        return None;
+    }
     Some(format!("{}/POLICY.md", root))
 }
 
@@ -369,8 +400,91 @@ pub(crate) fn write_policy(out: &mut String) {
     write_quote(text, out);
 }
 
-/// True when every character of `path` is in `[A-Za-z0-9:/._-]`, so the path can
-/// be written without quoting and parse the same in PowerShell, cmd and Git Bash.
+/// True for a drive-qualified or UNC spelling. A spelling that becomes
+/// relative after the module-name prefix strip must never name an envelope.
+pub(crate) fn qualified_envelope_path(path: &str) -> bool {
+    if matches!(path.as_bytes(), [drive, b':', b'/', ..] if drive.is_ascii_alphabetic()) {
+        return true;
+    }
+    path.strip_prefix("//").and_then(|tail| tail.split_once('/')).is_some_and(|(server, share)| {
+        !server.is_empty() && !matches!(server, "." | ".." | "?") && !share.is_empty() && !share.starts_with('/')
+    })
+}
+
+/// Letters, numbers and literal path punctuation form a single unquoted
+/// token in PowerShell, cmd and Git Bash. Shell operators and whitespace
+/// are rejected even if they are part of the real installation path.
+pub(crate) fn unquoted_envelope_path(path: &str) -> bool {
+    path.chars().all(|c| c.is_alphanumeric() || matches!(c, ':' | '/' | '.' | '_' | '-'))
+}
+
+/// Antigravity's automatic wrapper uses the portable ASCII path form.
 pub(crate) fn plain_path(path: &str) -> bool {
-    path.bytes().all(|b| b.is_ascii_alphanumeric() || matches!(b, b':' | b'/' | b'.' | b'_' | b'-'))
+    path.is_ascii() && unquoted_envelope_path(path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extended_win32_paths_keep_their_absolute_wrapper_locations() {
+        for (loaded, expected, wrapper) in [
+            (
+                "//?/C:/tools/process-tree-guard.exe",
+                "C:/tools/process-tree-guard.exe",
+                "C:/tools/process-tree-guard-auto.exe",
+            ),
+            (
+                "//?/UNC/server/share/tools/process-tree-guard.exe",
+                "//server/share/tools/process-tree-guard.exe",
+                "//server/share/tools/process-tree-guard-auto.exe",
+            ),
+            (
+                "//?/unc/server/share/tools/process-tree-guard.exe",
+                "//server/share/tools/process-tree-guard.exe",
+                "//server/share/tools/process-tree-guard-auto.exe",
+            ),
+            (
+                "//server/share/tools/process-tree-guard.exe",
+                "//server/share/tools/process-tree-guard.exe",
+                "//server/share/tools/process-tree-guard-auto.exe",
+            ),
+        ] {
+            let mut normalized = loaded.to_string();
+            if let Some(strip) = extended_prefix_to_remove(loaded.as_bytes()) {
+                normalized.drain(strip);
+            }
+            assert_eq!(normalized, expected);
+            assert_eq!(path_set(&normalized, Role::Full).first_wrapper.as_deref(), Some(wrapper));
+        }
+    }
+
+    #[test]
+    fn wrapper_paths_reject_relative_or_unqualified_installations() {
+        for exe in [
+            "tools/process-tree-guard.exe",
+            "C:tools/process-tree-guard.exe",
+            "UNC/server/share/tools/process-tree-guard.exe",
+            "GLOBALROOT/Device/Volume/tools/process-tree-guard.exe",
+            "//?/Volume{test}/tools/process-tree-guard.exe",
+            "//server/process-tree-guard.exe",
+        ] {
+            for role in [Role::Full, Role::Gate] {
+                assert!(wrapper_specs(exe, role).first().is_none(), "{exe}");
+                assert!(wrapper_paths(exe, role).is_none(), "{exe}");
+                assert!(path_set(exe, role).first_wrapper.is_none(), "{exe}");
+            }
+            assert!(policy_path(exe).is_none(), "{exe}");
+        }
+    }
+
+    #[test]
+    fn context_policy_stays_within_the_installation_share() {
+        assert_eq!(
+            policy_path("//server/share/bin/process-tree-guard.exe").as_deref(),
+            Some("//server/share/POLICY.md")
+        );
+        assert!(policy_path("//server/share/process-tree-guard.exe").is_none());
+    }
 }

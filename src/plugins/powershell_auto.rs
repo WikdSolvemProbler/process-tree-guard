@@ -5,8 +5,14 @@
 
 use super::*;
 
-/// The PowerShell command line that runs `command` under the automatic guard.
-pub fn powershell_wrapped(auto_exe: &str, command: &str) -> String {
+/// PowerShell treats smart apostrophes as quote delimiters too. This
+/// wrapper supports ASCII apostrophe escaping, so reject other delimiters.
+fn wrapper_path_supported(path: &str) -> bool {
+    !path.contains(['\u{2018}', '\u{2019}', '\u{201a}', '\u{201b}'])
+}
+
+/// The PowerShell command line for a supported automatic wrapper path.
+fn powershell_wrapped(auto_exe: &str, command: &str) -> String {
     let utf8 = crate::base64::base64_encode(command.as_bytes());
     // The escaped form is built only when the path holds a quote to
     // escape: `replace` allocates a full copy of the path even when
@@ -94,7 +100,7 @@ impl<R: Read> Scanner<CapturingReader<R>> {
     /// the source inside one function.
     fn arm_capture(&mut self, start: usize) {
         let seed: &[u8] = if self.pos < self.end {
-            unsafe { std::slice::from_raw_parts(self.window.as_ptr().add(self.pos) as *const u8, self.end - self.pos) }
+            &self.window[self.pos..self.end]
         } else {
             &[]
         };
@@ -102,27 +108,14 @@ impl<R: Read> Scanner<CapturingReader<R>> {
     }
 }
 
-/// The two facts `powershell_auto` reads outside the last
-/// `tool_input` value, found by walking the payload's top level as
-/// it streams from `source` through the scanner, as
-/// `scan_top_object` walks it for the verdict vendors: the captured
-/// bytes of the last `tool_input` value, and whether the last
-/// `permission_mode` value is the string `bypassPermissions`,
-/// watched as it decodes with a key probe against that one name.
-/// Every other value — and every earlier value of either watched
-/// key — is skipped by shape (`Scanner::value`), so no value tree
-/// is built for it and its bytes are never held, and a repeated
-/// watched key re-arms the capture from empty in place of the
-/// earlier one, as the last value won in the whole-payload tree.
-/// The scanner's payload cap is the limit the whole-string read
-/// applied: bytes past it are never served, so a payload over the
-/// cap settles exactly as that capped read settled it. None when
-/// the payload is not exactly one JSON value, nothing after it but
-/// whitespace, or a read of it failed: the rejections the
-/// whole-payload parse gave.
+/// Capture the single `tool_input` value and check for
+/// `permission_mode: "bypassPermissions"`. Reject ambiguous spellings
+/// of either key so the host and the hook cannot select different values.
+/// Unwatched values are skipped without retaining their bytes.
 pub(super) fn powershell_payload_facts<R: Read>(source: R) -> Option<(Option<Vec<u8>>, bool)> {
     let mut scan = Scanner::new(CapturingReader::new(source));
     let mut span: Option<Vec<u8>> = None;
+    let mut seen_permission_mode = false;
     let mut bypass = false;
     let walked = (|| -> Option<()> {
         scan.ws();
@@ -131,29 +124,33 @@ pub(super) fn powershell_payload_facts<R: Read>(source: R) -> Option<(Option<Vec
             if scan.eat(b'}').is_none() {
                 loop {
                     scan.ws();
-                    let matched = scan.key(&["tool_input", "permission_mode"])?;
+                    let key = scan_watch_key(&mut scan, &["tool_input", "permission_mode"])?;
                     scan.eat(b':')?;
-                    match matched {
-                        Some(0) => {
-                            scan.ws();
-                            let start = scan.byte_offset();
-                            scan.arm_capture(start);
+                    if key.case_insensitive(0) {
+                        if !key.exact(0) || span.is_some() {
+                            return None;
+                        }
+                        scan.ws();
+                        let start = scan.byte_offset();
+                        scan.arm_capture(start);
+                        scan.value(2)?;
+                        let end = scan.byte_offset();
+                        span = Some(scan.source.disarm(end));
+                    } else if key.case_insensitive(1) {
+                        if !key.exact(1) || seen_permission_mode {
+                            return None;
+                        }
+                        seen_permission_mode = true;
+                        scan.ws();
+                        if scan.peek() == Some(b'"') {
+                            let mut probe = KeyProbe::new(&["bypassPermissions"]);
+                            scan.string(&mut probe)?;
+                            bypass = probe.matched() == Some(0);
+                        } else {
                             scan.value(2)?;
-                            let end = scan.byte_offset();
-                            span = Some(scan.source.disarm(end));
                         }
-                        Some(1) => {
-                            scan.ws();
-                            if scan.peek() == Some(b'"') {
-                                let mut probe = KeyProbe::new(&["bypassPermissions"]);
-                                scan.string(&mut probe)?;
-                                bypass = probe.matched() == Some(0);
-                            } else {
-                                scan.value(2)?;
-                                bypass = false;
-                            }
-                        }
-                        _ => scan.value(2)?,
+                    } else {
+                        scan.value(2)?;
                     }
                     if scan.eat(b',').is_some() {
                         continue;
@@ -177,57 +174,57 @@ pub(super) fn powershell_payload_facts<R: Read>(source: R) -> Option<(Option<Vec
     Some((span, bypass))
 }
 
-/// The denial `powershell_auto` answers a payload it cannot
-/// classify with: the PreToolUse decision form this hook builds
-/// for a denial (see `main`) and this vendor's own `ask` / `allow`
-/// answers use, with `permissionDecision` of deny and no
-/// `updatedInput`, written as one line through `say`, at exit
-/// code 0 — the exit code this vendor always uses (see the
-/// module doc). A payload that cannot be classified is denied,
-/// never passed through in silence: silence is no decision, and
-/// no decision is how this format lets the command run as
-/// written, without the guard.
+/// The host blocks on exit 2. If the decision cannot be delivered,
+/// returning success could let the host run the original tool call.
+fn reply(text: &str) -> i32 {
+    if crate::cli_process::try_write_stdout_line(text) {
+        0
+    } else {
+        crate::cli_process::write_stderr_line("The process guard could not write the PowerShell hook decision.");
+        crate::EXIT_HOOK_DENY
+    }
+}
+
+/// Deny a payload that cannot be classified or safely rewritten.
 pub(super) fn powershell_deny(why: &str) -> i32 {
     let mut out = String::with_capacity(why.len() + 112);
     out.push_str("{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":");
     write_quote(why, &mut out);
     out.push_str("}}");
-    say(&out);
-    0
+    reply(&out)
+}
+
+fn command_slot(tool_input: &mut Json) -> Result<&mut String, &'static str> {
+    let Json::Object(pairs) = tool_input else {
+        return Err("the hook payload's tool_input is not an object.");
+    };
+    let mut commands = pairs.iter_mut().filter(|(key, _)| key.eq_ignore_ascii_case("command"));
+    let first = commands.next();
+    if commands.next().is_some() {
+        return Err("the hook payload's tool_input has ambiguous command keys.");
+    }
+    match first {
+        Some((key, Json::Str(command))) if key == "command" => Ok(command),
+        _ => Err("the hook payload's tool_input has no string command."),
+    }
 }
 
 /// `hook powershell-auto`: rewrite a PowerShell tool call so the automatic
-/// guard runs it. A command that already starts with a guard path is left as is.
+/// guard runs it. An exactly guarded command is left as is.
 pub fn powershell_auto(role: Role) -> i32 {
-    // The payload is walked as it streams, and its command taken,
-    // before any path is built: a payload that is not a tool call
-    // with a command string (unreadable, not JSON, no `tool_input`,
-    // no string `command`) is denied at 0 without the wrapper and
-    // envelope strings — and the one path set the checks below share
-    // is computed once, where the wrapper list and the envelope list
-    // were each built separately before. The walk builds no tree and
-    // holds no whole-payload string: only the last `tool_input`
-    // value's captured bytes are parsed into one, because the
-    // rewrite below refills its command slot and re-serialises that
-    // subtree.
+    // Validate the tool call before resolving paths. Only the captured
+    // `tool_input` subtree is parsed into a value tree for rewriting.
     let (captured, bypass) = match powershell_payload_facts(crate::cli_process::standard_input()) {
         Some(facts) => facts,
-        None => return powershell_deny("the hook payload is missing or is not valid JSON."),
+        None => return powershell_deny("the hook payload is missing, malformed, or ambiguous."),
     };
     let captured = match captured { Some(captured) => captured, None => return powershell_deny("the hook payload has no tool_input, so it is not a recognised PowerShell tool payload.") };
     let mut tool_input = match std::str::from_utf8(&captured).ok().and_then(parse_json) { Some(value) => value, None => return powershell_deny("the hook payload's tool_input is not valid JSON.") };
-    // The command string is taken out of the `tool_input` value, not
-    // cloned: the value is owned, and the slot it leaves is exactly
-    // the one the rewrite below fills (its last `command` pair, as
-    // the read here selected: the last pair wins, as in `Json::get`).
-    // An already-guarded command returns before the slot is read again.
-    let command = match &mut tool_input {
-        Json::Object(pairs) => match pairs.iter_mut().rev().find(|(k, _)| k == "command") {
-            Some((_, Json::Str(text))) => std::mem::take(text),
-            _ => return powershell_deny("the hook payload's tool_input has no string command."),
-        },
-        _ => return powershell_deny("the hook payload's tool_input is not an object."),
+    let slot = match command_slot(&mut tool_input) {
+        Ok(slot) => slot,
+        Err(why) => return powershell_deny(why),
     };
+    let command = std::mem::take(slot);
     // The spelling is resolved here — after the captured command
     // has been extracted and before the path set is built from it,
     // mirroring `antigravity_entry`'s placement: every payload that
@@ -243,6 +240,9 @@ pub fn powershell_auto(role: Role) -> i32 {
         Some(path) => path,
         None => return powershell_deny("the location of the process guard is unknown."),
     };
+    if !wrapper_path_supported(auto_exe) {
+        return powershell_deny("the process guard's wrapper path contains a smart apostrophe.");
+    }
     // Pass through unchanged only what is already exactly guarded: this hook's
     // own wrapping (with any name's wrapper), or a valid envelope. Anything
     // else, including a command that merely starts with a guard path, is wrapped
@@ -279,25 +279,9 @@ pub fn powershell_auto(role: Role) -> i32 {
     // idempotent, so the walk reads byte-for-byte the same text).
     let already = valid_envelope_paths_trimmed(trimmed, &set.envelope) || set.wrappers.iter().any(wrapped_already);
     if already {
-        say("{}");
-        return 0;
+        return reply("{}");
     }
-    // The wrapped line is rendered once, from the extracted (last)
-    // command, and moved into the first
-    // `command` slot (an object with the key repeated gets a copy in
-    // each later slot, as the per-slot rendering produced before).
-    let wrapped = powershell_wrapped(auto_exe, &command);
-    if let Json::Object(pairs) = &mut tool_input {
-        let mut wrapped = Some(wrapped);
-        for (k, v) in pairs.iter_mut() {
-            if k == "command" {
-                *v = Json::Str(match wrapped.take() {
-                    Some(text) => text,
-                    None => powershell_wrapped(auto_exe, &command),
-                });
-            }
-        }
-    }
+    *slot = powershell_wrapped(auto_exe, &command);
     let updated = &tool_input;
     // The answer is serialized in one pass into a buffer reserved for
     // it: the wrapped command grows the captured subtree by about a third.
@@ -309,6 +293,46 @@ pub fn powershell_auto(role: Role) -> i32 {
     out.push_str(",\"updatedInput\":");
     write_json(updated, &mut out);
     out.push_str("}}");
-    say(&out);
-    0
+    reply(&out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rejects_ambiguous_payload_keys() {
+        for payload in [
+            r#"{"tool_input":{},"tool_input":{}}"#,
+            r#"{"Tool_Input":{},"tool_input":{}}"#,
+            r#"{"tool_input":{},"permission_mode":"default","permission_mode":"bypassPermissions"}"#,
+            r#"{"tool_input":{},"PERMISSION_MODE":"default","permission_mode":"bypassPermissions"}"#,
+        ] {
+            assert!(powershell_payload_facts(payload.as_bytes()).is_none(), "{payload}");
+        }
+        let payload = br#"{"tool_input":{"command":"echo hi"},"permission_mode":"bypassPermissions"}"#;
+        assert!(powershell_payload_facts(&payload[..]).unwrap().1);
+    }
+
+    #[test]
+    fn requires_one_exact_command_key() {
+        for payload in [
+            r#"{"command":"one","command":"two"}"#,
+            r#"{"Command":"one","command":"two"}"#,
+            r#"{"command":"one","comm\u0061nd":"two"}"#,
+        ] {
+            assert!(command_slot(&mut parse_json(payload).unwrap()).is_err(), "{payload}");
+        }
+        let mut input = parse_json(r#"{"command":"echo hi","other":true}"#).unwrap();
+        assert_eq!(command_slot(&mut input).unwrap().as_str(), "echo hi");
+    }
+
+    #[test]
+    fn rejects_smart_apostrophes_in_wrapper_paths() {
+        for quote in ['\u{2018}', '\u{2019}', '\u{201a}', '\u{201b}'] {
+            assert!(!wrapper_path_supported(&format!("C:/a{quote}; whoami; #/ptg-auto.exe")));
+        }
+        assert!(wrapper_path_supported("C:/a'b/ptg-auto.exe"));
+        assert!(powershell_wrapped("C:/a'b/ptg-auto.exe", "echo hi").starts_with("& 'C:/a''b/ptg-auto.exe' "));
+    }
 }

@@ -22,6 +22,13 @@ pub(super) struct Hold {
     pub(super) until: u64,
 }
 
+type HoldKey = (u32, u64, Token);
+
+struct PendingGrant {
+    key: HoldKey,
+    previous: Option<u64>,
+}
+
 /// What it takes to back out of a grant whose reply the client did not take: the hold, as it
 /// stood when granted and as it was before, and the client as the log names it.
 pub(super) struct Withdraw {
@@ -95,6 +102,9 @@ pub(super) struct State {
     pub(super) base: u64,
     pub(super) cap_seconds: f64,
     pub(super) holds: Vec<Hold>,
+    /// Reserve each holder and token until its grant is delivered or rolled back.
+    /// A reservation can outlive an expired or explicitly released hold.
+    pending: Vec<PendingGrant>,
     pub(super) limiter: Limiter,
     pub(super) budget: Budget,
     /// Nothing more is granted: the command has finished, or the channel can no longer be
@@ -127,7 +137,7 @@ pub(super) fn latest(base: u64, holds: impl Iterator<Item = u64>) -> u64 {
 
 impl State {
     pub(super) fn new(base: u64, cap_seconds: f64) -> State {
-        State { base, cap_seconds, holds: Vec::new(), limiter: Limiter::default(), budget: Budget::default(), closed: false, passed: false, expire_deadline: base, release_stamp: None, alive: process_alive }
+        State { base, cap_seconds, holds: Vec::new(), pending: Vec::new(), limiter: Limiter::default(), budget: Budget::default(), closed: false, passed: false, expire_deadline: base, release_stamp: None, alive: process_alive }
     }
 
     /// The latest of the run's own deadline and the holds of the live processes.
@@ -237,14 +247,44 @@ impl State {
         self.expire(now, job) || self.closed
     }
 
-    /// Hold the run up for `seconds` from `now` on `process`, as its hold `token`, or say
-    /// why not. `parent` is the key and the description of the process held when it is not
-    /// the one that asked, which has its share of the rate limit too. On success, the
-    /// deadline the hold had before this grant comes back with it (none when the grant
-    /// made the hold): the one pass below reads it before any write, so a caller that
-    /// needs it to back the grant out does not search the table for it again.
+    /// A provisional hold can keep the supervisor alive while its reply is
+    /// in flight. Only the base deadline and delivered holds admit new grants.
+    fn delivered_deadline_open(&self, now: u64) -> bool {
+        now < self.base || self.holds.iter().any(|hold| {
+            let key = (hold.process.id, hold.process.created, hold.token);
+            let delivered_until = match self.pending.iter().find(|pending| pending.key == key) {
+                Some(pending) => pending.previous,
+                None => Some(hold.until),
+            };
+            delivered_until.is_some_and(|until| now < until)
+        })
+    }
+
+    /// Install an already delivered grant for tests of the run state and supervisor.
+    #[cfg(test)]
     pub(super) fn grant(&mut self, now: u64, job: Option<Handle>, seconds: f64, process: Process, token: Token, parent: Option<(RateKey, u32, &str)>) -> Result<Option<u64>, Refused> {
-        if self.ended(now, job) {
+        self.apply_grant(now, job, seconds, process, token, parent).map(|(_, previous)| previous)
+    }
+
+    /// Reserve a grant while its audit line and reply are in flight. An older
+    /// delivered deadline still stands until the client takes a shorter renewal.
+    pub(super) fn begin_grant(&mut self, now: u64, job: Option<Handle>, seconds: f64, process: Process, token: Token, parent: Option<(RateKey, u32, &str)>) -> Result<Option<u64>, Refused> {
+        if !process.alive() {
+            return Err(Refusal::Unverified.into());
+        }
+        let key = (process.id, process.created, token);
+        let (index, previous) = self.apply_grant(now, job, seconds, process, token, parent)?;
+        self.pending.push(PendingGrant { key, previous });
+        if let Some(previous) = previous {
+            self.holds[index].until = self.holds[index].until.max(previous);
+        }
+        Ok(previous)
+    }
+
+    /// Apply a grant and return its slot and previous deadline. A holder
+    /// targeted by another process has its own share of the rate limit.
+    fn apply_grant(&mut self, now: u64, job: Option<Handle>, seconds: f64, process: Process, token: Token, parent: Option<(RateKey, u32, &str)>) -> Result<(usize, Option<u64>), Refused> {
+        if self.ended(now, job) || (!self.pending.is_empty() && !self.delivered_deadline_open(now)) {
             return Err(Refusal::Ended.into());
         }
         if let Some((key, pid, image)) = parent {
@@ -260,6 +300,10 @@ impl State {
         }
         if seconds > self.cap_seconds || seconds > crate::MAX_SECONDS {
             return Err(Refusal::OverCap.into());
+        }
+        let key = (process.id, process.created, token);
+        if self.pending.iter().any(|pending| pending.key == key) {
+            return Err(Refusal::Crowded.into());
         }
         let until = now + millis(seconds);
         // One pass over the holds settles the three facts the scans
@@ -281,8 +325,11 @@ impl State {
             }
         }
         let previous = existing_index.map(|index| self.holds[index].until);
-        match existing_index {
-            Some(index) => self.holds[index].until = until,
+        let index = match existing_index {
+            Some(index) => {
+                self.holds[index].until = until;
+                index
+            }
             None => {
                 if same_process >= MAX_HOLDS_PER_PROCESS {
                     return Err(Refusal::TooManyHoldsHere.into());
@@ -291,9 +338,10 @@ impl State {
                     return Err(Refusal::TooManyHolds.into());
                 }
                 self.holds.push(Hold { process, token, until });
+                self.holds.len() - 1
             }
-        }
-        Ok(previous)
+        };
+        Ok((index, previous))
     }
 
     /// When the hold `token` of the process `id`, created at `created`, ends, if it has one.
@@ -304,13 +352,17 @@ impl State {
         self.holds.iter().find(|hold| hold.process.id == id && hold.process.created == created && hold.token == token).map(|hold| hold.until)
     }
 
-    /// Take back a grant whose reply the client did not take: the hold goes back to what it
-    /// was before (none, or the earlier one) unless something has changed it since. True when
-    /// the grant was still standing.
-    pub(super) fn withdraw(&mut self, back: &Withdraw) -> bool {
+    /// Settle an in-flight grant exactly once. A failed reply restores only the
+    /// prior delivered deadline, and never recreates an expired or released hold.
+    /// True when the reserved hold was still present.
+    pub(super) fn finish_grant(&mut self, back: &Withdraw, delivered: bool) -> bool {
+        let key = (back.id, back.created, back.token);
+        let Some(pending) = self.pending.iter().position(|entry| entry.key == key) else { return false };
+        self.pending.swap_remove(pending);
+        let effective_until = back.until.max(back.previous.unwrap_or(0));
         let Some(index) = self.holds.iter().position(|hold| hold.process.id == back.id && hold.process.created == back.created
-            && hold.token == back.token && hold.until == back.until) else { return false };
-        match back.previous {
+            && hold.token == back.token && hold.until == effective_until) else { return false };
+        match if delivered { Some(back.until) } else { back.previous } {
             Some(until) => self.holds[index].until = until,
             None => {
                 self.holds.remove(index);

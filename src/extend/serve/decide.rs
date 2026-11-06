@@ -331,7 +331,7 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
         None => parent.image(),
     }));
     let parent_rate = holder.as_ref().zip(held.as_ref()).map(|(parent, (pid, name))| ((parent.id, parent.created), *pid, name.as_str()));
-    let process = holder.unwrap_or(client);
+    let process = holder.as_ref().unwrap_or(&client);
     let (id_held, created_held) = (process.id, process.created);
     // The grant's own pass over the holds reads the deadline the
     // hold had before it, and it comes back with the grant's
@@ -340,7 +340,12 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
     let (outcome, now) = {
         let mut state = shared.lock();
         let now = tick();
-        (state.grant(now, Some(job), seconds, process, token, parent_rate), now)
+        let outcome = if holder.is_some() && !client.alive() {
+            Err(Refusal::Unverified.into())
+        } else {
+            state.begin_grant(now, Some(job), seconds, holder.unwrap_or(client), token, parent_rate)
+        };
+        (outcome, now)
     };
     let previous = match outcome {
         Ok(previous) => previous,

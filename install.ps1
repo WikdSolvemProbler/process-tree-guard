@@ -32,6 +32,10 @@ $repo = "WikdSolvemProbler/process-tree-guard"
 $target = "x86_64-pc-windows-msvc"
 $native = "aarch64-pc-windows-msvc"
 $root = if ($env:PTG_ROOT) { $env:PTG_ROOT } else { Join-Path $env:LOCALAPPDATA "Programs\process-tree-guard" }
+$root = [IO.Path]::GetFullPath($root)
+if (-not $env:PTG_NO_PATH -and $root.Contains(";")) {
+    throw "PTG_ROOT cannot contain a semicolon when adding the installation to PATH. Set PTG_NO_PATH or choose a different directory."
+}
 $bin = Join-Path $root "bin"
 $libexec = Join-Path $root "libexec"
 
@@ -79,22 +83,45 @@ try {
     Invoke-WebRequest -Headers $headers -Uri $sumAsset.browser_download_url -OutFile $sums -UseBasicParsing
 
     $expected = @{}
-    foreach ($line in Get-Content $sums) {
-        if ($line -match '^([0-9a-f]{64})\s+(\S+)$') { $expected[$Matches[2]] = $Matches[1] }
+    foreach ($line in Get-Content -LiteralPath $sums) {
+        if ($line -match '^([0-9a-f]{64})\s+(\S+)$') {
+            if ($expected.ContainsKey($Matches[2])) { throw "Duplicate release checksum for $($Matches[2]); nothing was installed." }
+            $expected[$Matches[2]] = $Matches[1]
+        }
     }
-    if ($expected[$zipName] -ne (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()) {
+    if ($expected[$zipName] -ne (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLower()) {
         throw "Checksum mismatch for $zipName; nothing was installed."
     }
     $unpacked = Join-Path $work "unpacked"
-    Expand-Archive -Path $zip -DestinationPath $unpacked
-    $from = (Get-ChildItem $unpacked -Directory | Select-Object -First 1).FullName
-    # Every file in the zip against the SHA256SUMS the zip carries (the zip itself was checked above).
-    $inner = @{}
-    foreach ($line in Get-Content (Join-Path $from "SHA256SUMS")) {
-        if ($line -match '^([0-9a-f]{64})\s+(\S+)$') { $inner[$Matches[2]] = $Matches[1] }
+    Expand-Archive -LiteralPath $zip -DestinationPath $unpacked
+    $folders = @(Get-ChildItem -LiteralPath $unpacked -Force)
+    if ($folders.Count -ne 1 -or -not $folders[0].PSIsContainer -or
+        ($folders[0].Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw "Unexpected release archive layout; nothing was installed."
     }
-    foreach ($file in Get-ChildItem $from -File | Where-Object { $_.Name -ne "SHA256SUMS" }) {
-        if ($inner[$file.Name] -ne (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLower()) {
+    $from = $folders[0].FullName
+    $files = @{}
+    foreach ($file in Get-ChildItem -LiteralPath $from -Force) {
+        if ($file.PSIsContainer -or ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) -or $files.ContainsKey($file.Name)) {
+            throw "Unexpected release archive entry: $($file.Name); nothing was installed."
+        }
+        $files[$file.Name] = $file
+    }
+    $required = @("SHA256SUMS", "process-tree-guard.exe", "process-tree-guard-deadline.exe",
+        "process-tree-guard-gate.exe", "process-tree-guard-contain.exe", "POLICY.md", "LICENSE", "NOTICE", "README.md")
+    foreach ($name in $required) {
+        if (-not $files.ContainsKey($name)) { throw "Missing release file $name; nothing was installed." }
+    }
+    # Check every payload, including hidden files, before writing to the install.
+    $inner = @{}
+    foreach ($line in Get-Content -LiteralPath ($files["SHA256SUMS"].FullName)) {
+        if ($line -match '^([0-9a-f]{64})\s+(\S+)$') {
+            if ($inner.ContainsKey($Matches[2])) { throw "Duplicate release checksum for $($Matches[2]); nothing was installed." }
+            $inner[$Matches[2]] = $Matches[1]
+        }
+    }
+    foreach ($file in $files.Values | Where-Object { $_.Name -ne "SHA256SUMS" }) {
+        if ($inner[$file.Name] -ne (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash) {
             throw "Checksum mismatch for $($file.Name); nothing was installed."
         }
     }
@@ -102,21 +129,21 @@ try {
     # 3. The install layout, with the automatic copies.
     New-Item -ItemType Directory -Force $bin, $libexec | Out-Null
     $full = Join-Path $from "process-tree-guard.exe"
-    Copy-Item $full (Join-Path $bin "process-tree-guard.exe") -Force
-    Copy-Item $full (Join-Path $bin "process-tree-guard-auto.exe") -Force
+    Copy-Item -LiteralPath $full -Destination (Join-Path $bin "process-tree-guard.exe") -Force
+    Copy-Item -LiteralPath $full -Destination (Join-Path $bin "process-tree-guard-auto.exe") -Force
     $short = Join-Path $from "ptg.exe"
-    if (Test-Path $short) {
-        Copy-Item $short (Join-Path $bin "ptg.exe") -Force
-        Copy-Item $short (Join-Path $bin "ptg-auto.exe") -Force
+    if ($files.ContainsKey("ptg.exe")) {
+        Copy-Item -LiteralPath $short -Destination (Join-Path $bin "ptg.exe") -Force
+        Copy-Item -LiteralPath $short -Destination (Join-Path $bin "ptg-auto.exe") -Force
     }
     $deadline = Join-Path $from "process-tree-guard-deadline.exe"
-    Copy-Item $deadline (Join-Path $libexec "process-tree-guard-deadline.exe") -Force
-    Copy-Item $deadline (Join-Path $libexec "process-tree-guard-deadline-auto.exe") -Force
+    Copy-Item -LiteralPath $deadline -Destination (Join-Path $libexec "process-tree-guard-deadline.exe") -Force
+    Copy-Item -LiteralPath $deadline -Destination (Join-Path $libexec "process-tree-guard-deadline-auto.exe") -Force
     foreach ($role in @("process-tree-guard-gate.exe", "process-tree-guard-contain.exe")) {
-        Copy-Item (Join-Path $from $role) (Join-Path $libexec $role) -Force
+        Copy-Item -LiteralPath (Join-Path $from $role) -Destination (Join-Path $libexec $role) -Force
     }
     foreach ($doc in @("POLICY.md", "LICENSE", "NOTICE", "README.md")) {
-        Copy-Item (Join-Path $from $doc) (Join-Path $root $doc) -Force
+        Copy-Item -LiteralPath (Join-Path $from $doc) -Destination (Join-Path $root $doc) -Force
     }
     Write-Host "Installed process-tree-guard $version to $root"
 
@@ -130,6 +157,12 @@ try {
 
     # 5. Hook configuration for the coding agents found on this machine.
     $exe = (Join-Path $bin "process-tree-guard.exe") -replace '\\', '/'
+    # The host configurations use a command string shared across shell types.
+    # Only emit an unquoted path that is a single literal token in those shells.
+    if ($exe -cnotmatch '^(?:[A-Za-z]:/|//[\p{L}\p{N}._-]+/[\p{L}\p{N}._-]+/)[\p{L}\p{N}:/._-]+$') {
+        Write-Warning "Hook configuration requires an absolute install path with plain shell-safe characters. To generate hooks, choose such a PTG_ROOT and run the installer again."
+        return
+    }
     $hooks = Join-Path $root "hooks"
     New-Item -ItemType Directory -Force $hooks | Out-Null
     $found = @()
@@ -184,5 +217,5 @@ try {
     }
     Write-Host "Try: process-tree-guard --timeout 60 -- npm test"
 } finally {
-    Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue
 }

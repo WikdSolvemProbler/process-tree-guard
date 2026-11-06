@@ -441,7 +441,7 @@ pub(super) fn handle_client(shared: &Shared, io: &Io, connected_at: u64) {
                 // as at the silent-client budget above: the wake and
                 // the log queue run after the state lock is released,
                 // not under a condition-formed guard.
-                let withdrawn = shared.lock().withdraw(&back);
+                let withdrawn = shared.lock().finish_grant(&back, false);
                 if withdrawn {
                     unsafe { SetEvent(shared.wake as Handle) };
                     shared.log.push_decision_waited(&unrecorded_line(unix_ms_now(), &back, RECORD_MS), RECORD_MS);
@@ -458,13 +458,14 @@ pub(super) fn handle_client(shared: &Shared, io: &Io, connected_at: u64) {
             }
         }
     }
-    if !io.write(&reply, take_ms) && !shared.stopping.load(Ordering::SeqCst) {
-        // The client did not take the reply: it gets an error and not the grant, so the run
-        // must not keep the hold, or the two would disagree about whether there is one.
-        if let Some(back) = back {
-            let withdrawn = shared.lock().withdraw(&back);
-            if withdrawn {
-                unsafe { SetEvent(shared.wake as Handle) };
+    let delivered = io.write(&reply, take_ms);
+    if let Some(back) = back {
+        // Resolve the reservation on success and on failure, including shutdown.
+        // Until delivery a shorter renewal leaves the old deadline in effect.
+        let settled = shared.lock().finish_grant(&back, delivered);
+        if settled && (!delivered || back.previous.is_some_and(|until| until > back.until)) {
+            unsafe { SetEvent(shared.wake as Handle) };
+            if !delivered && !shared.stopping.load(Ordering::SeqCst) {
                 shared.log.push_decision_waited(&withdrawn_line(unix_ms_now(), &back, take_ms), RECORD_MS);
             }
         }

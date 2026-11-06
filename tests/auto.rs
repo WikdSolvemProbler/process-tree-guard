@@ -190,6 +190,16 @@ fn u09_powershell_hook_rewrites_and_the_rewrite_runs() {
     assert_eq!(out.get("permissionDecision").and_then(Json::as_str), Some("ask"));
     let rewrapped = out.get("updatedInput").and_then(|u| u.get("command")).and_then(Json::as_str).expect("command");
     assert!(rewrapped.contains("--command-b64"), "rewrapped command: {}", rewrapped);
+
+    // (e) The host must get a blocking status if it cannot receive a rewrite.
+    let input_file = dir.join("hook-input.json");
+    std::fs::write(&input_file, payload("bypassPermissions", r#""Write-Output test""#)).unwrap();
+    let mut silent = Command::new(&hook_exe);
+    silent.args(["hook", "powershell-auto"])
+        .stdin(std::fs::File::open(input_file).unwrap())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
+    assert_eq!(run_status(silent, 30), 2);
 }
 
 #[test]

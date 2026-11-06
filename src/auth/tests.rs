@@ -1207,18 +1207,18 @@
     #[test]
     fn a_name_that_is_not_the_guards_own_account_is_turned_away_before_any_logon() {
         let own = own_account_name().expect("the name of the account this test runs as");
-        assert!(!own.is_empty(), "{}", own);
-        assert!(account_check(&own).is_none(), "the account itself goes on to the logon: {}", own);
-        assert!(account_check(&own.to_uppercase()).is_none(), "in any letter case: {}", own);
+        assert!(!own.is_empty(), "the current account name is present");
+        assert!(account_check(&own).is_none(), "the current account goes on to logon");
+        assert!(account_check(&own.to_uppercase()).is_none(), "the current account is accepted in any letter case");
         // A well known account of the local system, which is looked up with no network and is the account of no user: it is another account.
         // Its name is asked of the system by its security identifier, since it is spelled differently on a localized Windows.
         let system_name = name_of_well_known_account("S-1-5-18").expect("the name of the local system account");
         let ours = current_user_sid().expect("the user of this process");
         let system = account_check(&system_name);
         if ours == "S-1-5-18" {
-            assert!(system.is_none(), "{}", system_name);
+            assert!(system.is_none(), "the current system account goes on to logon");
         } else {
-            assert_eq!(system, Some(Verified::OtherUser), "another account is turned away without a logon: {}", system_name);
+            assert_eq!(system, Some(Verified::OtherUser), "another account is turned away before logon");
         }
     }
 
@@ -1472,7 +1472,7 @@
         assert!(matches!(slow, Asked::Abandoned(ref reason) if reason.starts_with("no answer within")), "a prompt left open is abandoned, not failed");
         // The real name is DOMAIN\user, read without a look up of the identifier.
         let own = own_account_name().expect("the account this test runs as");
-        assert!(own.contains('\\') && !own.contains('\0'), "{}", own);
+        assert!(own.contains('\\') && !own.contains('\0'), "the account name has the expected format");
     }
 
     // ------------------------------------------------------------------ Windows Hello
@@ -2082,14 +2082,14 @@
         match names {
             Some((domain, user)) if !domain.is_empty() && !user.is_empty() && format!("{}\\{}", domain, user).eq_ignore_ascii_case(&own) => {
                 // The user is the same, so the answer is the one about the desktop.
-                assert_eq!(answer, in_front, "a guard that runs as the signed-in user is accepted where the desktop is the input desktop: {} / {}\\{}", own, domain, user);
+                assert!(answer == in_front, "a guard that runs as the signed-in user is accepted where the desktop is the input desktop");
             }
             Some((domain, user)) => {
                 // A read that gave the user where the domain belongs (and the domain where the user belongs) would never be accepted, and the
                 // guard would refuse every run of its own user: the two names read the wrong way round are not another user.
                 assert!(!format!("{}\\{}", user, domain).eq_ignore_ascii_case(&own) || domain.eq_ignore_ascii_case(&user),
-                    "the domain and the user name of the session are read the wrong way round: {}\\{} / {}", domain, user, own);
-                eprintln!("NOT ASSERTED: the session names {}\\{}, and this test runs as {}", domain, user, own)
+                    "the domain and the user name of the session are read the wrong way round");
+                eprintln!("NOT ASSERTED: the session account could not be matched to the test account by name")
             }
             None => {
                 assert!(answer.is_err(), "with no user to compare the run is refused");

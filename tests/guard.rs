@@ -2231,6 +2231,12 @@ fn over_cap<'a>(value: &'a str, extra: &[&'a str], child: &[&'a str]) -> Vec<&'a
     args
 }
 
+/// Summarize a consent test without writing its audit record or prompt to test output.
+fn exception_summary(result: &Out) -> String {
+    format!("exit {} in {:.2} s, stdout {} bytes, stderr {} bytes",
+        result.code, result.elapsed.as_secs_f64(), result.stdout.len(), result.stderr.len())
+}
+
 /// The one log line a refused exception writes, from a standard error text.
 fn exception_refusal(err: &str) -> Option<String> {
     let lines: Vec<String> = extension_lines(err).into_iter().filter(|line| line.contains("decision=exception-")).collect();
@@ -2263,48 +2269,48 @@ fn g87_a_run_over_the_cap_is_refused_when_standard_input_is_not_a_console_and_it
     for (name, result) in [("null", &from_null), ("a pipe", &from_pipe), ("a file", &from_file)] {
         let line = exception_refusal(&result.err()).unwrap_or_default();
         checks.check("G87", &format!("standard input is {}: exit 125, the command never runs and the run says why", name),
-            result.code == 125 && !marker.exists() && result.out().is_empty() && result.err().contains("exception refused") && result.err().contains(nobody_reason()), shown(result));
+            result.code == 125 && !marker.exists() && result.out().is_empty() && result.err().contains("exception refused") && result.err().contains(nobody_reason()), exception_summary(result));
         checks.check("G87", &format!("standard input is {}: one exception-refused line, attempt 0 (nothing was shown), with the cap in seconds and hours, the guard's own process and the reason", name),
             line.contains(&format!("requested=86400 hours=24 granted=0 decision=exception-refused attempt=0 reason=\"{}", nobody_reason()))
                 && log_field(&line, "image").as_deref() == Some("process-tree-guard.exe") && log_field(&line, "pid").map_or(false, |pid| pid.parse::<u32>().is_ok())
-                && log_field(&line, "time").map_or(false, |time| time.len() == 24 && time.ends_with('Z')), line.clone());
+                && log_field(&line, "time").map_or(false, |time| time.len() == 24 && time.ends_with('Z')), format!("{} audit bytes", line.len()));
         checks.check("G87", &format!("standard input is {}: nothing that was typed is in the log, and no line says the exception was approved", name),
-            !result.err().contains("hunter2") && !result.err().contains("exception-approved"), shown(result));
+            !result.err().contains("hunter2") && !result.err().contains("exception-approved"), exception_summary(result));
         // The record says what the decision was about and for whom: the account the guard runs as and the command line.
         let (account, command) = (log_field(&line, "account").unwrap_or_default(), log_field(&line, "command").unwrap_or_default());
         checks.check("G87", &format!("standard input is {}: the line names the account the guard runs as (DOMAIN\\user, as the system names it) and the command line, between the image and the cap", name),
             account.contains('\\') && account.eq_ignore_ascii_case(&own_account()) && command.contains("testkit") && command.contains("mark")
-                && line.find(" account=").zip(line.find(" requested=")).map_or(false, |(at, cap)| at < cap), line.clone());
+                && line.find(" account=").zip(line.find(" requested=")).map_or(false, |(at, cap)| at < cap), format!("{} audit bytes", line.len()));
         // And how the user was asked, the deadline the run starts with and the process that started the guard (this test program).
         let this_program = std::env::current_exe().ok().and_then(|path| path.file_name().map(|name| name.to_string_lossy().to_ascii_lowercase())).unwrap_or_default();
         checks.check("G87", &format!("standard input is {}: the line names the method (console), the deadline the run starts with (5 seconds) and the process that started the guard, after the command", name),
             log_field(&line, "method").as_deref() == Some("console") && log_field(&line, "timeout").as_deref() == Some("5")
                 && log_field(&line, "started_by").map_or(false, |starter| !this_program.is_empty() && starter.to_ascii_lowercase().ends_with(&this_program))
                 && line.find(" command=").zip(line.find(" method=")).map_or(false, |(at, method)| at < method)
-                && line.find(" started_by=").zip(line.find(" requested=")).map_or(false, |(at, cap)| at < cap), line.clone());
+                && line.find(" started_by=").zip(line.find(" requested=")).map_or(false, |(at, cap)| at < cap), format!("{} audit bytes", line.len()));
     }
-    checks.timing("G87", "the refusal is at once: nobody is waited for", from_null.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, shown(&from_null));
+    checks.timing("G87", "the refusal is at once: nobody is waited for", from_null.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, exception_summary(&from_null));
     // The same line is in the audit file, and the file is the record when there is one.
     let filed = run_guard(&over_cap("86400", &["--extension-log", log.as_str()], &child));
     let contents = std::fs::read_to_string(&log).unwrap_or_default();
     checks.check("G87", "the audit file holds the same line as standard error",
-        filed.code == 125 && !marker.exists() && contents.lines().eq(extension_lines(&filed.err()).iter().map(String::as_str)) && contents.lines().count() == 1, format!("{} / {:?}", shown(&filed), contents));
+        filed.code == 125 && !marker.exists() && contents.lines().eq(extension_lines(&filed.err()).iter().map(String::as_str)) && contents.lines().count() == 1, format!("{} / {} audit lines", exception_summary(&filed), contents.lines().count()));
     // Every cap over the default is an exception, down to the smallest step over it.
     for value in ["21600.5", "21601", "43200", "86399", "86400"] {
         let result = run_guard(&over_cap(value, &[], &child));
         checks.check("G87", &format!("a cap of {} is over the default and is refused the same way", value),
-            result.code == 125 && !marker.exists() && exception_refusal(&result.err()).map_or(false, |line| line.contains("decision=exception-refused")), shown(&result));
+            result.code == 125 && !marker.exists() && exception_refusal(&result.err()).map_or(false, |line| line.contains("decision=exception-refused")), exception_summary(&result));
     }
     // A shell run is an exception too: the encoded command is not run.
     let payload = base64(b"echo SHOULD_NOT_RUN");
     let via_shell = run_guard(&["--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "5", "--shell", "cmd", "--command-b64", payload.as_str()]);
     checks.check("G87", "the shell form of a run over the cap is refused with 125 and its command never runs",
-        via_shell.code == 125 && !via_shell.out().contains("SHOULD_NOT_RUN") && exception_refusal(&via_shell.err()).is_some(), shown(&via_shell));
+        via_shell.code == 125 && !via_shell.out().contains("SHOULD_NOT_RUN") && exception_refusal(&via_shell.err()).is_some(), exception_summary(&via_shell));
     // The widest request there is: the largest first deadline under the largest cap goes through the argument checks to the decision.
     let widest = run_guard(&["--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "86400", "--", testkit(), "mark", marker_text.as_str(), "20"]);
     checks.check("G87", "the largest deadline under the largest cap passes the argument checks and is refused as an exception for its standard input",
         widest.code == 125 && !marker.exists() && !widest.err().contains("is over --max-extension")
-            && exception_refusal(&widest.err()).map_or(false, |line| line.contains("requested=86400 hours=24") && line.contains(nobody_reason())), shown(&widest));
+            && exception_refusal(&widest.err()).map_or(false, |line| line.contains("requested=86400 hours=24") && line.contains(nobody_reason())), exception_summary(&widest));
     checks.finish();
 }
 
@@ -2352,7 +2358,7 @@ fn g89_the_deadline_role_refuses_a_run_over_the_cap_the_same_way_in_both_layouts
             let line = exception_refusal(&result.err()).unwrap_or_default();
             checks.check("G89", &format!("the deadline role in the {}, standard input {}: exit 125, an exception-refused line naming the role, and the command never runs", layout.name(), name),
                 result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(nobody_reason())
-                    && log_field(&line, "image").as_deref() == Some("process-tree-guard-deadline.exe"), format!("{} / {}", shown(result), line));
+                    && log_field(&line, "image").as_deref() == Some("process-tree-guard-deadline.exe"), exception_summary(result));
         }
     }
     checks.finish();
@@ -2394,12 +2400,12 @@ fn g91_a_run_over_the_cap_inside_another_run_is_refused_before_anyone_is_asked()
     let lines = extension_lines(&nested.err());
     let position = |needle: &str| lines.iter().position(|line| line.contains(needle));
     checks.check("G91", "the nested guard exits 125 with the nested reason, and its command never runs",
-        nested.code == 125 && !marker.exists() && nested.err().contains("exception refused: an exception above the cap cannot be granted inside another run"), shown(&nested));
+        nested.code == 125 && !marker.exists() && nested.err().contains("exception refused: an exception above the cap cannot be granted inside another run"), exception_summary(&nested));
     checks.check("G91", "the line says exception-refused, attempt 0 (none was made) and the nested reason, not the reason of standard input",
         lines.iter().any(|line| line.contains("requested=86400 hours=24 granted=0 decision=exception-refused attempt=0 reason=\"an exception above the cap cannot be granted inside another run\""))
-            && !nested.err().contains("standard input"), format!("{:?}", lines));
+            && !nested.err().contains("standard input"), format!("{} audit lines", lines.len()));
     checks.check("G91", "the nested guard is refused before it asks the outer run for anything, so the outer run granted it no hold: the only line is the refusal",
-        lines.len() == 1 && position("decision=granted").is_none() && position("decision=exception-refused").is_some(), format!("{:?}", lines));
+        lines.len() == 1 && position("decision=granted").is_none() && position("decision=exception-refused").is_some(), format!("{} audit lines", lines.len()));
     checks.finish();
 }
 
@@ -2427,7 +2433,7 @@ fn g92_a_cap_at_or_below_the_default_never_prompts_and_runs_as_before() {
         piped.code == 0 && piped.out().contains("ran") && !std::fs::read_to_string(&log).unwrap_or_default().contains("exception"), shown(&piped));
     // A cap over the default is the only thing that changes it: the same arguments one second over are refused.
     let over = run_guard(&over_cap("21601", &[], &[testkit(), "print", "SHOULD_NOT_RUN"]));
-    checks.check("G92", "one second over the default cap, the same arguments are an exception and are refused", over.code == 125 && !over.out().contains("SHOULD_NOT_RUN"), shown(&over));
+    checks.check("G92", "one second over the default cap, the same arguments are an exception and are refused", over.code == 125 && !over.out().contains("SHOULD_NOT_RUN"), exception_summary(&over));
     checks.finish();
 }
 
@@ -2723,13 +2729,13 @@ fn g94_a_guard_that_another_guard_started_is_not_asked_even_when_that_guard_is_n
     let result = guarded("30", &inner);
     let line = exception_refusal(&result.err()).unwrap_or_default();
     checks.check("G94", "a plain guard around an extendable guard over the cap: the inner guard is refused because another guard started it, with attempt 0, and its command never runs",
-        result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), shown(&result));
+        result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), exception_summary(&result));
     checks.check("G94", "the reason says what to do (start it from a terminal that is not under a guard), and the refusal is neither for its standard input nor as nested, which it is not",
-        result.err().contains("start it from a terminal that is not under a guard") && !result.err().contains("standard input is not") && !result.err().contains("inside another run") && !line.contains("inside another run"), shown(&result));
+        result.err().contains("start it from a terminal that is not under a guard") && !result.err().contains("standard input is not") && !result.err().contains("inside another run") && !line.contains("inside another run"), exception_summary(&result));
     // Piped input changes nothing: no input can answer a prompt that is not shown.
     let piped = exec_with(guard_cmd(&[vec!["--timeout", "30", "--"], inner.to_vec()].concat()), Opts { input: Some(b"hunter2\r\n".to_vec()), ..Opts::default() });
     checks.check("G94", "with a pipe on standard input: the same refusal, and nothing that was typed is in the output",
-        piped.code == 125 && !marker.exists() && piped.err().contains(WRAPPED_REASON) && !piped.err().contains("hunter2") && !piped.out().contains("hunter2"), shown(&piped));
+        piped.code == 125 && !marker.exists() && piped.err().contains(WRAPPED_REASON) && !piped.err().contains("hunter2") && !piped.out().contains("hunter2"), exception_summary(&piped));
     checks.finish();
 }
 
@@ -2801,10 +2807,10 @@ fn g95_the_desktop_prompt_is_refused_without_being_shown_on_a_window_station_tha
     };
     let line = exception_refusal(&result.err()).unwrap_or_default();
     checks.check("G95", "the guard on a window station that is not visible, with the default method: exit 125, nothing shown, and its command never runs",
-        result.code == 125 && !ran && result.out().is_empty() && result.err().contains("exception refused"), shown(&result));
+        result.code == 125 && !ran && result.out().is_empty() && result.err().contains("exception refused"), exception_summary(&result));
     checks.check("G95", "one exception-refused line, attempt 0, with the reason that the process has no interactive window station (or, on a host that runs in session 0, that it runs in session 0)",
-        line.contains("decision=exception-refused attempt=0") && (line.contains("no interactive window station") || line.contains("session 0")) && log_field(&line, "image").as_deref() == Some("process-tree-guard.exe"), line.clone());
-    checks.timing("G95", "the refusal is at once: nobody is waited for", result.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, shown(&result));
+        line.contains("decision=exception-refused attempt=0") && (line.contains("no interactive window station") || line.contains("session 0")) && log_field(&line, "image").as_deref() == Some("process-tree-guard.exe"), format!("{} audit bytes", line.len()));
+    checks.timing("G95", "the refusal is at once: nobody is waited for", result.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, exception_summary(&result));
     checks.finish();
 }
 
@@ -2956,7 +2962,7 @@ fn until_the_prompt_lock_is_free<T>(mut once: impl FnMut() -> (T, Out)) -> (T, O
 /// required (by a person setting it), and otherwise a notice that the check was not asserted.
 fn prompt_lock_not_free(checks: &mut Checks, id: &str, result: &Out) {
     checks.check(id, "the lock that keeps the prompts of the session apart was free in one of the tries (not asserted where it is not, unless PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE is set)",
-        !variable_set("PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE"), shown(result));
+        !variable_set("PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE"), exception_summary(result));
     checks.notice(format!("NOT ASSERTED {}: another sign-in prompt of the guard holds the lock of this session", id));
 }
 
@@ -2991,8 +2997,8 @@ fn g97_the_console_prompt_runs_in_a_pseudo_console_and_three_empty_answers_end_t
     if result.code == 95 {
         // No pseudo console can be made here (before Windows 10 1809, or a host that refuses one). Nothing was started.
         let required = variable_set("PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE");
-        checks.check("G97", "the helper makes a pseudo console (not asserted where the host refuses it, unless PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE is set)", !required, shown(&result));
-        checks.notice(format!("NOT ASSERTED G97: no pseudo console could be made here: {}", shown(&result)));
+        checks.check("G97", "the helper makes a pseudo console (not asserted where the host refuses it, unless PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE is set)", !required, exception_summary(&result));
+        checks.notice(format!("NOT ASSERTED G97: no pseudo console could be made here: {}", exception_summary(&result)));
         checks.finish();
         return;
     }
@@ -3000,18 +3006,18 @@ fn g97_the_console_prompt_runs_in_a_pseudo_console_and_three_empty_answers_end_t
     let contents = std::fs::read_to_string(&log).unwrap_or_default();
     let lines: Vec<&str> = contents.lines().collect();
     checks.check("G97", "the guard ended by itself in the pseudo console with exit 125, and its command never ran",
-        result.code == 0 && output.lines().next() == Some("exit 125") && !marker.exists(), shown(&result));
+        result.code == 0 && output.lines().next() == Some("exit 125") && !marker.exists(), exception_summary(&result));
     checks.check("G97", "the console prompt was shown on the console: the message, then the question for the password of the account",
-        output.contains("Process Tree Guard is asked to run:") && output.contains("Account: [") && output.matches("Process Tree Guard").count() >= 2, shown(&result));
+        output.contains("Process Tree Guard is asked to run:") && output.contains("Account: [") && output.matches("Process Tree Guard").count() >= 2, exception_summary(&result));
     checks.check("G97", "the call was accepted by the system: neither the error for invalid flags (1004) nor any failure of the prompt is in the output or the log",
-        !output.contains("1004") && !output.contains("the console prompt failed") && !contents.contains("1004"), shown(&result));
+        !output.contains("1004") && !output.contains("the console prompt failed") && !contents.contains("1004"), exception_summary(&result));
     checks.check("G97", "three attempts, one line each, in order, and the third says that no attempts are left",
         lines.len() == 3 && (1..=3).all(|n| lines[n - 1].contains("decision=exception-refused") && lines[n - 1].contains(&format!("attempt={} ", n)))
-            && lines[2].contains("no attempts are left") && !lines[0].contains("no attempts are left") && !lines[1].contains("no attempts are left"), format!("{:?}", lines));
+            && lines[2].contains("no attempts are left") && !lines[0].contains("no attempts are left") && !lines[1].contains("no attempts are left"), format!("{} audit lines", lines.len()));
     checks.check("G97", "an empty password is turned away before any logon is tried, with the reason that no password was entered, and nothing is approved",
-        lines.iter().all(|line| line.contains("reason=\"no password was entered, so no logon was tried")) && !output.contains("exception-approved") && !contents.contains("exception-approved"), format!("{:?}", lines));
+        lines.iter().all(|line| line.contains("reason=\"no password was entered, so no logon was tried")) && !output.contains("exception-approved") && !contents.contains("exception-approved"), format!("{} audit lines", lines.len()));
     checks.check("G97", "the same lines are on the console, and the run ends with the error that says that it did not start",
-        output.contains("attempt=3 ") && output.contains("PROCESS_GUARD_ERROR: exception refused:") && output.contains("no attempts are left; the run did not start"), shown(&result));
+        output.contains("attempt=3 ") && output.contains("PROCESS_GUARD_ERROR: exception refused:") && output.contains("no attempts are left; the run did not start"), exception_summary(&result));
     checks.finish();
 }
 
@@ -3050,8 +3056,8 @@ fn g98_a_guard_whose_starter_exits_while_the_console_prompt_is_open_is_refused_b
     if result.code == 95 {
         // No pseudo console can be made here. Nothing was started.
         let required = variable_set("PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE");
-        checks.check("G98", "the helper makes a pseudo console (not asserted where the host refuses it, unless PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE is set)", !required, shown(&result));
-        checks.notice(format!("NOT ASSERTED G98: no pseudo console could be made here: {}", shown(&result)));
+        checks.check("G98", "the helper makes a pseudo console (not asserted where the host refuses it, unless PROCESS_TREE_GUARD_REQUIRE_PSEUDO_CONSOLE is set)", !required, exception_summary(&result));
+        checks.notice(format!("NOT ASSERTED G98: no pseudo console could be made here: {}", exception_summary(&result)));
         checks.finish();
         return;
     }
@@ -3059,15 +3065,15 @@ fn g98_a_guard_whose_starter_exits_while_the_console_prompt_is_open_is_refused_b
     let contents = std::fs::read_to_string(&log).unwrap_or_default();
     let lines: Vec<&str> = contents.lines().collect();
     checks.check("G98", "the console prompt was shown to the guard's console before the starter left: the message and the question for the password",
-        output.contains("Process Tree Guard is asked to run:") && output.contains("Account: [") && output.matches("Process Tree Guard").count() >= 2, shown(&result));
+        output.contains("Process Tree Guard is asked to run:") && output.contains("Account: [") && output.matches("Process Tree Guard").count() >= 2, exception_summary(&result));
     checks.check("G98", "one exception-refused line, attempt 1 (the prompt was open), saying that the process that started the run exited and nobody is waiting for it",
-        lines.len() == 1 && lines[0].contains("decision=exception-refused") && lines[0].contains("attempt=1 ") && lines[0].contains("nobody is waiting for it"), format!("{:?}", lines));
+        lines.len() == 1 && lines[0].contains("decision=exception-refused") && lines[0].contains("attempt=1 ") && lines[0].contains("nobody is waiting for it"), format!("{} audit lines", lines.len()));
     checks.check("G98", "nothing was approved and the command of the guard never ran",
-        !contents.contains("exception-approved") && !output.contains("exception-approved") && !marker.exists(), shown(&result));
+        !contents.contains("exception-approved") && !output.contains("exception-approved") && !marker.exists(), exception_summary(&result));
     checks.check("G98", "the refusal is on the console as an error of its own, on a line of its own after the prompt",
         output.contains("PROCESS_GUARD_ERROR: exception refused:") && output.contains("nobody is waiting for it; the run did not start")
-            && output.lines().filter(|line| line.contains("PROCESS_TREE_GUARD_EXTENSION")).all(|line| line.trim_start().starts_with("PROCESS_TREE_GUARD_EXTENSION")), shown(&result));
-    checks.timing("G98", "the guard ended well before the 300 seconds of the prompt: the starter's exit ends the wait", result.elapsed.as_secs_f64() < 30.0, shown(&result));
+            && output.lines().filter(|line| line.contains("PROCESS_TREE_GUARD_EXTENSION")).all(|line| line.trim_start().starts_with("PROCESS_TREE_GUARD_EXTENSION")), exception_summary(&result));
+    checks.timing("G98", "the guard ended well before the 300 seconds of the prompt: the starter's exit ends the wait", result.elapsed.as_secs_f64() < 30.0, exception_summary(&result));
     checks.finish();
 }
 
@@ -3095,7 +3101,7 @@ fn g99_a_guard_under_any_program_of_the_guard_is_refused_by_name() {
         let result = exec(guard_cmd_of(&copy, &args));
         let line = exception_refusal(&result.err()).unwrap_or_default();
         checks.check("G99", &format!("under {}.exe: exit 125, one exception-refused line with attempt 0 and the reason that another guard started it, and the command never runs", name),
-            result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), shown(&result));
+            result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), exception_summary(&result));
     }
     // Automatic mode is selected by any file name that ends in -auto, so a wrapper that a host names freely is a guard by name too.
     for free_name in ["harness-auto", "Host-Auto"] {
@@ -3106,7 +3112,7 @@ fn g99_a_guard_under_any_program_of_the_guard_is_refused_by_name() {
         let result = exec(guard_cmd_of(&copy, &args));
         let line = exception_refusal(&result.err()).unwrap_or_default();
         checks.check("G99", &format!("under {}.exe, a name the guard does not list but whose ending selects automatic mode: refused because another guard started it, and the command never runs", free_name),
-            result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), shown(&result));
+            result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), exception_summary(&result));
     }
     // A program of another name is not taken for a guard by its name (the unit test of the names asserts that), but the copy is the
     // full command, which makes a job that kills on close for the inner guard, so the inner guard is refused by that job.
@@ -3117,7 +3123,7 @@ fn g99_a_guard_under_any_program_of_the_guard_is_refused_by_name() {
     let result = exec(guard_cmd_of(&other, &args));
     let line = exception_refusal(&result.err()).unwrap_or_default();
     checks.check("G99", "under a copy of the guard with another file name, which the names do not recognise: still refused as a run that another guard started, by the job that copy makes",
-        result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), shown(&result));
+        result.code == 125 && !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), exception_summary(&result));
     checks.finish();
 }
 
@@ -3165,11 +3171,11 @@ fn g100_a_guard_whose_parents_have_exited_is_still_refused_as_a_run_that_another
     let reported = std::fs::read_to_string(&report).unwrap_or_default();
     let line = exception_refusal(&reported).unwrap_or_default();
     checks.check("G100", "a guard under a guard whose chain of parents has a process that exited: refused as a run that another guard started, with attempt 0, and its command never runs",
-        !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), format!("{} / {}", shown(&outer), reported));
+        !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), format!("{} / {} report bytes", exception_summary(&outer), reported.len()));
     checks.check("G100", "and not for its standard input, which it never reaches",
-        !reported.contains(NO_CONSOLE_REASON) && reported.contains("start it from a terminal that is not under a guard"), reported.clone());
+        !reported.contains(NO_CONSOLE_REASON) && reported.contains("start it from a terminal that is not under a guard"), format!("{} report bytes", reported.len()));
     checks.check("G100", "and the reason names the cause: the job, and not a program found above the guard",
-        line.contains(JOB_REASON) && !line.contains(FOUND_ABOVE_REASON), line.clone());
+        line.contains(JOB_REASON) && !line.contains(FOUND_ABOVE_REASON), format!("{} audit bytes", line.len()));
     // The control: the same chain started by this test and not by a guard. Its last shell has no live parent either, so the names
     // above it are hidden here too, even where a guard is above the tests; the test process is in a job of its own that kills nothing
     // (see `leave_the_job_of_the_runner`), so the run reaches the test of its standard input. That shows that the job around the
@@ -3181,7 +3187,7 @@ fn g100_a_guard_whose_parents_have_exited_is_still_refused_as_a_run_that_another
     let status = run_status(command, 60);
     let control = std::fs::read_to_string(&control_report).unwrap_or_default();
     checks.check("G100", "the same chain with no guard around it reaches the test of the standard input and is refused for that, so it was the job that refused the run above",
-        !marker.exists() && control.contains(NO_CONSOLE_REASON) && !control.contains(WRAPPED_REASON), format!("{} / {}", status, control));
+        !marker.exists() && control.contains(NO_CONSOLE_REASON) && !control.contains(WRAPPED_REASON), format!("{} / {} report bytes", status, control.len()));
     checks.finish();
 }
 
@@ -3221,11 +3227,11 @@ fn g101_a_copy_of_a_program_named_explorer_outside_the_windows_folder_does_not_e
     let reported = std::fs::read_to_string(&report).unwrap_or_default();
     let line = exception_refusal(&reported).unwrap_or_default();
     checks.check("G101", "a guard under a copy named explorer.exe in another folder, under a program of the guard: refused as a run that another guard started, with attempt 0, and its command never runs",
-        !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), format!("{} / {}", status, reported));
+        !marker.exists() && line.contains("attempt=0") && line.contains(&format!("reason=\"{}", WRAPPED_REASON)), format!("{} / {} report bytes", status, reported.len()));
     checks.check("G101", "and not for its standard input, which it never reaches",
-        !reported.contains(NO_CONSOLE_REASON), reported.clone());
+        !reported.contains(NO_CONSOLE_REASON), format!("{} report bytes", reported.len()));
     checks.check("G101", "and the reason names the cause: the program of the guard found above it, by its file name",
-        line.contains(&format!("{}process-guard-auto.exe", FOUND_ABOVE_REASON)) && !line.contains(JOB_REASON), line.clone());
+        line.contains(&format!("{}process-guard-auto.exe", FOUND_ABOVE_REASON)) && !line.contains(JOB_REASON), format!("{} audit bytes", line.len()));
     checks.finish();
 }
 
@@ -3308,10 +3314,10 @@ fn g103_a_guard_on_a_window_station_that_is_not_visible_logs_the_desktop_method_
     // names the word of the method as the launch arguments give it and never the word for Windows Hello.
     checks.check("G103", "the line names the method desktop, with attempt 0 and the reason that nobody is present, and never the method hello",
         log_field(&line, "method").as_deref() == Some("desktop") && line.contains("decision=exception-refused attempt=0") && !line.contains("method=\"hello\"")
-            && (line.contains("no interactive window station") || line.contains("session 0")), line.clone());
+            && (line.contains("no interactive window station") || line.contains("session 0")), format!("{} audit bytes", line.len()));
     checks.check("G103", "nothing says that Windows Hello was asked or was not available, and the credential dialog was not reached: neither the output nor the line has the words",
-        !line.contains("Windows Hello") && !result.err().contains("Windows Hello") && !result.err().contains("the prompt was cancelled") && result.out().is_empty(), shown(&result));
-    checks.check("G103", "exit 125 and the command never runs", result.code == 125 && !ran, shown(&result));
-    checks.timing("G103", "the refusal is at once", result.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, shown(&result));
+        !line.contains("Windows Hello") && !result.err().contains("Windows Hello") && !result.err().contains("the prompt was cancelled") && result.out().is_empty(), exception_summary(&result));
+    checks.check("G103", "exit 125 and the command never runs", result.code == 125 && !ran, exception_summary(&result));
+    checks.timing("G103", "the refusal is at once", result.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, exception_summary(&result));
     checks.finish();
 }

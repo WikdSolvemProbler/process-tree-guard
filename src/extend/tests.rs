@@ -542,21 +542,73 @@
         // A first grant is removed.
         let previous = state.hold_until(me.id, me.created, 5);
         assert_eq!(previous, None);
-        assert_eq!(state.grant(10, None, 60.0, this_process(), 5, None), Ok(None));
+        assert_eq!(state.begin_grant(10, None, 60.0, this_process(), 5, None), Ok(None));
         assert_eq!(state.deadline(), 60_010);
-        assert!(state.withdraw(&back(60_010, previous)));
+        assert!(state.finish_grant(&back(60_010, previous), false));
         assert!(state.holds.is_empty() && state.deadline() == 1_000, "the hold is gone");
         // A renewal goes back to the hold it replaced, which the client was told of.
         assert_eq!(state.grant(10, None, 20.0, this_process(), 5, None), Ok(None));
         let previous = state.hold_until(me.id, me.created, 5);
-        assert_eq!(state.grant(11, None, 90.0, this_process(), 5, None), Ok(Some(20_010)));
-        assert!(state.withdraw(&back(90_011, previous)));
+        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 5, None), Ok(Some(20_010)));
+        assert!(state.finish_grant(&back(90_011, previous), false));
         assert_eq!(state.deadline(), 20_010, "the earlier hold stands");
         // A hold that something else has changed since is not touched, and the other holds of the process stand.
-        assert_eq!(state.grant(12, None, 5.0, this_process(), 6, None), Ok(None));
-        assert!(!state.withdraw(&back(90_011, None)), "it is no longer the grant that was made");
-        assert!(state.withdraw(&Withdraw { token: 6, ..back(5_012, None) }), "the other hold is withdrawn by its own record");
+        assert_eq!(state.begin_grant(12, None, 5.0, this_process(), 6, None), Ok(None));
+        assert!(!state.finish_grant(&back(90_011, None), false), "it is no longer the grant that was made");
+        assert!(state.finish_grant(&Withdraw { token: 6, ..back(5_012, None) }, false), "the other hold is withdrawn by its own record");
         assert_eq!(state.holds.len(), 1);
+    }
+
+    #[test]
+    fn an_overlapping_renewal_cannot_restore_an_undelivered_grant() {
+        let mut state = State::new(1_000, 3600.0);
+        let me = this_process();
+        let back = Withdraw { id: me.id, created: me.created, token: 0, until: 60_010, previous: None, pid: me.id, image: "client.exe".into(), seconds: 60.0 };
+        assert_eq!(state.begin_grant(10, None, 60.0, this_process(), 0, None), Ok(None));
+        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 0, None), Err(Refusal::Crowded.into()));
+        assert!(state.finish_grant(&back, false));
+        assert_eq!(state.deadline(), 1_000, "no delivered grant can be restored");
+
+        // Even release must not allow a second grant to reuse a pending reservation.
+        assert_eq!(state.begin_grant(10, None, 60.0, this_process(), 0, None), Ok(None));
+        assert!(state.drop_hold(me.id, me.created, 0, false));
+        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 0, None), Err(Refusal::Crowded.into()));
+        assert!(!state.finish_grant(&back, false));
+        assert_eq!(state.begin_grant(12, None, 0.001, this_process(), 0, None), Ok(None));
+        assert!(!state.expire(13, None));
+        assert!(state.holds.is_empty());
+        assert_eq!(state.begin_grant(13, None, 90.0, this_process(), 0, None), Err(Refusal::Crowded.into()));
+        assert!(!state.finish_grant(&Withdraw { until: 13, seconds: 0.001, ..back }, false));
+        assert_eq!(state.begin_grant(14, None, 60.0, this_process(), 0, None), Ok(None));
+    }
+
+    #[test]
+    fn a_provisional_grant_cannot_admit_another_after_the_delivered_deadline() {
+        let mut state = State::new(1_000, 3600.0);
+        let me = this_process();
+        let back = Withdraw { id: me.id, created: me.created, token: 0, until: 60_999, previous: None, pid: me.id, image: "client.exe".into(), seconds: 60.0 };
+        assert_eq!(state.begin_grant(999, None, 60.0, this_process(), 0, None), Ok(None));
+        assert!(!state.expire(1_000, None), "the supervisor allows the first reply to finish");
+        assert_eq!(state.begin_grant(1_000, None, 90.0, this_process(), 1, None), Err(Refusal::Ended.into()));
+        assert_eq!(state.holds.len(), 1, "the refused request did not create a hold");
+        assert!(state.finish_grant(&back, true));
+        assert_eq!(state.begin_grant(1_000, None, 90.0, this_process(), 1, None), Ok(None), "the delivered grant now admits a different token");
+    }
+
+    #[test]
+    fn a_shorter_renewal_takes_effect_only_after_delivery() {
+        let mut state = State::new(1_000, 3600.0);
+        let me = this_process();
+        assert_eq!(state.grant(10, None, 20.0, this_process(), 0, None), Ok(None));
+        let back = Withdraw { id: me.id, created: me.created, token: 0, until: 12, previous: Some(20_010), pid: me.id, image: "client.exe".into(), seconds: 0.001 };
+        assert_eq!(state.begin_grant(11, None, 0.001, this_process(), 0, None), Ok(Some(20_010)));
+        assert!(!state.expire(1_001, None), "the tentative shorter deadline cannot expire a delivered hold");
+        assert!(state.finish_grant(&back, false));
+        assert_eq!(state.deadline(), 20_010);
+
+        assert_eq!(state.begin_grant(1_002, None, 1.0, this_process(), 0, None), Ok(Some(20_010)));
+        assert!(state.finish_grant(&Withdraw { until: 2_002, seconds: 1.0, ..back }, true));
+        assert_eq!(state.deadline(), 2_002);
     }
 
     #[test]
@@ -1359,8 +1411,10 @@
             assert!(matches!(reply, Reply::Refused { refusal: Refusal::AuditBlocked, .. }) && matches!(line, Line::Refused(_)));
             assert!(shared.lock().holds.is_empty(), "and holds nothing");
             shared.log.blocked.store(false, Ordering::SeqCst);
-            let (reply, _) = evaluate(&shared, arrival(), created + 1, &request);
+            let (reply, line) = evaluate(&shared, arrival(), created + 1, &request);
             assert!(matches!(reply, Reply::Granted { .. }), "granted again once the file can be relied on");
+            let Line::Granted(_, back) = line else { panic!("the granted reply has a reservation") };
+            assert!(shared.lock().finish_grant(&back, true));
             // A release only brings the deadline in, so it is let through while the file is blocked.
             shared.log.blocked.store(true, Ordering::SeqCst);
             let release = Message::Bytes(MessageBytes::from_slice(&encode_request(Target::Release, 0, 0.0)));

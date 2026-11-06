@@ -342,6 +342,57 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
     }
 
     #[test]
+    fn zero_extendable_budget_never_resumes_the_suspended_child() {
+        use std::cell::Cell;
+        use std::rc::Rc;
+
+        let _cli_owner = crate::diagnostics::ProcessOwnership::begin();
+        let folder = crate::test_temp::fresh_dir("process-tree-guard-expired-extension");
+        let log = folder.join("audit.log");
+        let created = Rc::new(Cell::new(false));
+        let resumed = Rc::new(Cell::new(false));
+        let observed_creation = created.clone();
+        let observed_resume = resumed.clone();
+        AFTER_CREATE.with(|hook| *hook.borrow_mut() = Some(Box::new(move |_, _| {
+            observed_creation.set(true);
+        })));
+        BEFORE_RESUME.with(|hook| *hook.borrow_mut() = Some(Box::new(move || {
+            observed_resume.set(true);
+        })));
+        let argv = ["cmd.exe".into(), "/d".into(), "/c".into(), "exit /b 37".into()];
+        let mode = RunMode {
+            extendable: Some(Settings {
+                max_seconds: DEFAULT_MAX_EXTENSION,
+                log_path: Some(std::sync::Arc::from(log.as_path())),
+                exception: None,
+            }),
+            ..RunMode::default()
+        };
+        // As with the fixed-budget test, zero is only an internal test input.
+        let outcome = run_job_with(&argv, 0.0, None, false, &mode);
+        AFTER_CREATE.with(|hook| *hook.borrow_mut() = None);
+        BEFORE_RESUME.with(|hook| *hook.borrow_mut() = None);
+        let _ = std::fs::remove_file(log);
+        let _ = std::fs::remove_dir(folder);
+
+        assert_eq!(outcome.expect("expired extendable budget is reported"), EXIT_TIMEOUT as u32);
+        assert!(created.get(), "the child was created suspended inside its Job");
+        assert!(!resumed.get(), "the ResumeThread branch was never reached");
+    }
+
+    #[test]
+    fn embedded_nul_is_rejected_before_launch() {
+        let mut argv = ["cmd.exe".to_string(), "/d".into(), "/c".into(), "exit /b 37".into()];
+        argv[3].push_str("\0unexpected");
+        let err = crate::run(&argv, 2.0).expect_err("program arguments cannot be truncated");
+        assert!(err.message().contains("no NUL"));
+
+        let err = run_library_job(&argv[..3], 2.0, Some("exit /b 37\0unexpected"), false)
+            .expect_err("shell text cannot be truncated");
+        assert!(err.message().contains("no NUL"));
+    }
+
+    #[test]
     fn direct_wide_renderer_matches_prior_utf8_then_wide_for_quotes_unicode_and_spill() {
         let cases: &[&[&str]] = &[
             &[r"C:\Tools\guard.exe", "plain", "two words", ""],

@@ -1211,7 +1211,7 @@ fn b135_no_more_instances_of_the_channel_can_be_made_and_its_access_list_is_for_
         _ => sid.clone(),
     };
     checks.check("B135", "the access list is one entry, for the current user's identifier, and is protected",
-        sid.starts_with("S-1-") && sddl.out().trim() == format!("D:P(A;;0x12019b;;;{})", account), format!("{} as {}: {:?} / {}", sid, account, sddl.out().trim(), detail(&sddl)));
+        sid.starts_with("S-1-") && sddl.out().trim() == format!("D:P(A;;0x12019b;;;{})", account), format!("identity lookup exit {}, ACL probe exit {}", whoami.code, sddl.code));
     // The rights are read, write and synchronize: the right to make another instance is not among them.
     checks.check("B135", "the rights in the list do not include creating another instance of the pipe", 0x12019bu32 & 0x4 == 0, "0x12019b has no FILE_CREATE_PIPE_INSTANCE");
     checks.finish();

@@ -95,10 +95,10 @@ impl WatchKey {
         watch.ci_alive = watch.exact_alive;
         watch
     }
-    fn exact(&self, slot: usize) -> bool {
+    pub(super) fn exact(&self, slot: usize) -> bool {
         self.exact_alive[slot] && self.names[slot].is_some_and(|name| self.pos == name.len())
     }
-    fn case_insensitive(&self, slot: usize) -> bool {
+    pub(super) fn case_insensitive(&self, slot: usize) -> bool {
         self.ci_alive[slot] && self.names[slot].is_some_and(|name| self.pos == name.len())
     }
 }

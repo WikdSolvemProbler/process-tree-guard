@@ -264,6 +264,8 @@ trait Decisions {
     /// Whether the run serves an extension: its deadline then moves with
     /// the holds, and no fixed deadline is assigned before the start.
     fn serves(ext: &Self::Ext) -> bool;
+    /// Whether a served run's moving deadline has already expired.
+    fn extension_expired(ext: &Self::Ext) -> bool;
     /// The name of the extension's channel, for the command's environment.
     fn channel(ext: &Self::Ext) -> Option<&str>;
     /// The extension of the run, for the unit tests of the engine only.
@@ -298,6 +300,9 @@ impl Decisions for AskingDecisions {
     fn none() -> Self::Ext { None }
     fn starter(job: Handle, mode: &RunMode, seconds: f64, log: &mut Option<Log>) -> Result<Self::Ext, GuardError> { start_extension(job, mode, seconds, log) }
     fn serves(ext: &Self::Ext) -> bool { ext.is_some() }
+    fn extension_expired(ext: &Self::Ext) -> bool {
+        ext.as_ref().is_some_and(|extension| extension.remaining().is_none())
+    }
     fn channel(ext: &Self::Ext) -> Option<&str> { ext.as_ref().map(|extension| extension.channel.as_str()) }
     #[cfg(test)]
     fn extension_ref(ext: &Self::Ext) -> Option<&Extension> { ext.as_ref() }
@@ -340,6 +345,7 @@ impl Decisions for UnaskingDecisions {
     fn none() -> Self::Ext {}
     fn starter(job: Handle, mode: &RunMode, seconds: f64, log: &mut Option<Log>) -> Result<Self::Ext, GuardError> { start_no_extension(job, mode, seconds, log) }
     fn serves(_ext: &Self::Ext) -> bool { false }
+    fn extension_expired(_ext: &Self::Ext) -> bool { false }
     fn channel(_ext: &Self::Ext) -> Option<&str> { None }
     #[cfg(test)]
     fn extension_ref(_ext: &Self::Ext) -> Option<&Extension> { None }
@@ -369,6 +375,13 @@ fn run_job_core<D: Decisions>(
 ) -> Result<u32, GuardError> {
     let _trace_sample = TraceSample::begin();
     require_process_ownership(mode.extendable.is_some())?;
+    // CreateProcessW would silently stop reading either native string at a
+    // NUL. Returning callers can supply strings the OS argv could never hold.
+    if argv.iter().any(|arg| arg.as_bytes().contains(&0))
+        || raw_tail.is_some_and(|tail| tail.as_bytes().contains(&0))
+    {
+        return Err(GuardError("command arguments and shell text must contain no NUL".into()));
+    }
     trace("run");
     let _flush = FlushTrace;
     let process_cli = crate::cli_process::active() && !mode.library;
@@ -556,9 +569,9 @@ fn run_job_core<D: Decisions>(
             });
             let mut waits = HandleList::from_slice(&[info.process]);
             waits.extend_from_slice(&owners);
-            // Fixed-mode creation can outlast its assigned budget. Read the
-            // actual owner/child objects and fixed clock while the child is
-            // still suspended. The existing assigned-Job cleanup handles every
+            // Creation can outlast either assigned budget. Check the actual
+            // owner/child objects and the applicable deadline while the child
+            // is still suspended. Assigned-Job cleanup handles every
             // no-resume result on the original child and thread handles.
             let before_resume = if !D::serves(&extension) {
                 let assigned_deadline = deadline.expect("fixed deadline assigned before launch");
@@ -573,7 +586,9 @@ fn run_job_core<D: Decisions>(
                         || GetTickCount64(),
                         || poll_before_resume(&waits, None))?,
                 }
-            } else { None };
+            } else {
+                pre_resume_with(|| D::extension_expired(&extension), || poll_before_resume(&waits, None))?
+            };
             let status = if let Some(status) = before_resume {
                 status
             } else {

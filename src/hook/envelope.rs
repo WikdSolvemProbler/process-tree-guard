@@ -509,8 +509,13 @@ impl EnvelopePaths<'_> {
 /// components: the directory is a slice of `exe`, the program names
 /// are the static ones, and the gate's sibling `bin` folder is the
 /// parent slice plus one more segment. No path string is built.
+/// The unquoted spelling must be a fully qualified shell token. An
+/// exact match against an unsafe path could still split into commands.
 pub(crate) fn envelope_path_specs<'a>(exe: &'a str, role: Role) -> EnvelopePaths<'a> {
-    let mut specs = EnvelopePaths { list: [PathSegments::empty(); 8], count: 0 };
+    let mut specs = EnvelopePaths::empty();
+    if !qualified_envelope_path(exe) {
+        return specs;
+    }
     fn add<'a>(specs: &mut EnvelopePaths<'a>, segs: [&'a str; 5], count: usize) {
         if specs.count < specs.list.len() {
             specs.list[specs.count] = PathSegments { segs, count };
@@ -522,11 +527,15 @@ pub(crate) fn envelope_path_specs<'a>(exe: &'a str, role: Role) -> EnvelopePaths
             Some(pair) => pair,
             None => return specs,
         };
+        if !unquoted_envelope_path(dir) {
+            return specs;
+        }
         let mut folders: [[&'a str; 2]; 2] = [[dir, ""], ["", ""]];
         let mut folder_counts = [1usize, 0usize];
         let mut folder_total = 1usize;
         if let Some((root, last)) = dir.rsplit_once('/') {
-            if last.eq_ignore_ascii_case("libexec") {
+            // A UNC share root called libexec has no sibling folder on its share.
+            if last.eq_ignore_ascii_case("libexec") && (!dir.starts_with("//") || qualified_envelope_path(root)) {
                 folders[1] = [root, "/bin"];
                 folder_counts[1] = 2;
                 folder_total = 2;
@@ -551,6 +560,9 @@ pub(crate) fn envelope_path_specs<'a>(exe: &'a str, role: Role) -> EnvelopePaths
                 }
             }
         }
+        return specs;
+    }
+    if !unquoted_envelope_path(exe) {
         return specs;
     }
     add(&mut specs, [exe, "", "", "", ""], 1);
@@ -1364,4 +1376,64 @@ pub(crate) fn envelope_remainder(rest: &str) -> bool {
     // which the validator also reaches, kept so a payload that
     // fails them is refused before the decode walk starts.
     crate::base64::command_text_is_valid(payload)
+}
+
+#[cfg(test)]
+mod path_tests {
+    use super::*;
+
+    fn check(exe: &str, role: Role, candidate: &str, expected: bool) {
+        let line = format!("{candidate} --timeout 60 --shell powershell --command-b64 ZWNobw==");
+        let cursor = format!("{{\"command\":{}}}", quote(&line));
+        let pretool = format!("{{\"tool_input\":{{\"command\":{}}}}}", quote(&line));
+        let lazy = LazyPaths::fixed(exe, role);
+        assert_eq!(scan_verdict(cursor.as_bytes(), true, &lazy), expected, "{exe}: {candidate}");
+        assert_eq!(scan_verdict(pretool.as_bytes(), false, &lazy), expected, "{exe}: {candidate}");
+        assert_eq!(
+            valid_envelope_paths_trimmed(&line, &envelope_path_specs(exe, role)),
+            expected,
+            "{exe}: {candidate}"
+        );
+        assert_eq!(valid_envelope(&line, exe, role), expected, "{exe}: {candidate}");
+    }
+
+    #[test]
+    fn refuses_shell_active_and_relative_envelope_paths() {
+        for dir in [
+            "C:/tools/a&echo&b",
+            "C:/tools/a;echo",
+            "C:/tools/%GUARD%",
+            "C:/two words",
+            "UNC/server/share/tools",
+            "C:relative/tools",
+        ] {
+            let full = format!("{dir}/bin/process-tree-guard.exe");
+            let gate = format!("{dir}/libexec/process-tree-guard-gate.exe");
+            for name in NAMES {
+                let candidate = format!("{dir}/bin/{name}.exe");
+                check(&full, Role::Full, &candidate, false);
+                check(&gate, Role::Gate, &candidate, false);
+                check(&gate, Role::Gate, &format!("{dir}/libexec/{name}.exe"), false);
+            }
+            check(&gate, Role::Gate, &format!("{dir}/libexec/{DEADLINE}.exe"), false);
+        }
+    }
+
+    #[test]
+    fn accepts_qualified_shell_tokens_without_crossing_unc_share_roots() {
+        for dir in ["C:/tools", "//server/share/tools"] {
+            let full = format!("{dir}/bin/process-tree-guard.exe");
+            let gate = format!("{dir}/libexec/process-tree-guard-gate.exe");
+            for name in NAMES {
+                let candidate = format!("{dir}/bin/{name}.exe");
+                check(&full, Role::Full, &candidate, true);
+                check(&gate, Role::Gate, &candidate, true);
+                check(&gate, Role::Gate, &format!("{dir}/libexec/{name}.exe"), true);
+            }
+            check(&gate, Role::Gate, &format!("{dir}/libexec/{DEADLINE}.exe"), true);
+        }
+        let gate = "//server/libexec/process-tree-guard-gate.exe";
+        check(gate, Role::Gate, "//server/libexec/process-tree-guard.exe", true);
+        check(gate, Role::Gate, "//server/bin/process-tree-guard.exe", false);
+    }
 }

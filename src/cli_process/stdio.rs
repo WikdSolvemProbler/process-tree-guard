@@ -393,6 +393,21 @@ fn write_line_counted(handle: Handle, console: bool, text: &str) -> bool {
     }
 }
 
+/// A rewriting hook may report success only after its decision reaches
+/// stdout. Reject missing handles and non-console character devices such
+/// as NUL, which report a successful write while discarding the decision.
+pub(crate) fn try_write_stdout_line(text: &str) -> bool {
+    const FILE_TYPE_DISK: u32 = 1;
+    let (handle, console) = line_target(STD_OUTPUT_HANDLE);
+    if handle.is_null() || handle == INVALID_HANDLE {
+        return false;
+    }
+    if !console && !matches!(unsafe { GetFileType(handle) }, FILE_TYPE_DISK | FILE_TYPE_PIPE) {
+        return false;
+    }
+    write_line_counted(handle, console, text)
+}
+
 /// Write one line to standard output: the hook's decision write.
 pub(crate) fn write_stdout_line(text: &str) {
     write_std_line(STD_OUTPUT_HANDLE, text);
