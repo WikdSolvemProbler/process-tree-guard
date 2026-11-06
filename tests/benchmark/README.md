@@ -49,6 +49,12 @@ The earlier +7.9079 ms contrast remains the result of the larger directional com
 
 Archive SHA-256 f13a78229c9b66c963dca3748c32fdbd813a6dfcbd95eb0e1c5bf37973c802a0.
 
+## Windows Job event feasibility
+
+A private completion port delivered fixture PIDs from an otherwise empty Job. The observer opened each process, verified its image and Job membership while live, and read the terminal timestamps from the same held handle. Both the synthetic testkit lane and the nested launcher lane passed all 28 cases. Each lane included 24 immediate exits and four 50 ms waits. Every Job drained, and a synthetic packet naming an outsider was refused.
+
+Job completion messages can be lost. Any future phase experiment must account for missing observations and calibrate the observer against the uninstrumented workload. This proof covers fixture observation only. [Raw feasibility evidence](../evidence/windows-job-events-20261106.zip) · [Microsoft Job notification documentation](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_associate_completion_port)
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
