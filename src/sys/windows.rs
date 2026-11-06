@@ -351,6 +351,12 @@ extern "system" {
     pub fn ConvertSidToStringSidW(sid: *mut c_void, text: *mut *mut u16) -> Bool;
     pub fn ConvertStringSecurityDescriptorToSecurityDescriptorW(text: *const u16, revision: u32, descriptor: *mut *mut c_void, size: *mut u32) -> Bool;
     pub fn SetKernelObjectSecurity(object: Handle, information: u32, descriptor: *mut c_void) -> Bool;
+    pub fn RegOpenKeyExW(key: Handle, subkey: *const u16, options: u32, access: u32, result: *mut Handle) -> i32;
+    pub fn RegCreateKeyExW(key: Handle, subkey: *const u16, reserved: u32, class: *mut u16, options: u32, access: u32, attributes: *const SecurityAttributes, result: *mut Handle, disposition: *mut u32) -> i32;
+    pub fn RegQueryValueExW(key: Handle, value: *const u16, reserved: *mut u32, kind: *mut u32, data: *mut u8, size: *mut u32) -> i32;
+    pub fn RegSetValueExW(key: Handle, value: *const u16, reserved: u32, kind: u32, data: *const u8, size: u32) -> i32;
+    pub fn RegFlushKey(key: Handle) -> i32;
+    pub fn RegCloseKey(key: Handle) -> i32;
 }
 
 #[link(name = "ntdll")]

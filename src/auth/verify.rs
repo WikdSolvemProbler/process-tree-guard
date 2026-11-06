@@ -4,6 +4,7 @@
 //! Checking a password: the bounded background logon, so a check that never answers cannot hold the run.
 
 use super::*;
+use super::password_budget::Attempt;
 
 
 use crate::sys::windows::{
@@ -113,7 +114,18 @@ impl Verifier for LogonVerifier<'_> {
         if credentials.password_is_empty() {
             return Verified::Wrong;
         }
-        check_bounded(Duration::from_millis(LOGON_TIMEOUT_MS), self.owners, credentials, logon)
+        if self.owners.gone() {
+            return Verified::OwnerGone;
+        }
+        let limit = Duration::from_millis(LOGON_TIMEOUT_MS);
+        let deadline = Instant::now() + limit;
+        let active = Arc::new(AtomicBool::new(true));
+        let checking = Arc::clone(&active);
+        let verdict = check_bounded(limit, self.owners, credentials, move |credentials| {
+            logon(credentials, || checking.load(Ordering::Acquire) && Instant::now() < deadline)
+        });
+        active.store(false, Ordering::Release);
+        verdict
     }
 }
 
@@ -136,24 +148,50 @@ pub(super) fn classify_logon_error(code: u32) -> Verified {
     if code == ERROR_LOGON_FAILURE { Verified::Wrong } else { Verified::Failed(code) }
 }
 
-fn logon(credentials: Box<Credentials>) -> Verified {
+fn logon(credentials: Box<Credentials>, active: impl Fn() -> bool) -> Verified {
     let Some((name, domain)) = credentials.names() else { return Verified::Failed(ERROR_INSUFFICIENT_BUFFER) };
     let (domain, user) = split_name(&name, &domain);
     if let Some(verdict) = account_check(&full_name(domain.as_deref(), &user)) {
         return verdict;
     }
     let Some(api) = logon_api() else { return Verified::Failed(UNIDENTIFIED) };
+    let Ok(sid) = current_user_sid() else { return Verified::Failed(UNIDENTIFIED) };
     let (user, domain) = (wide(&user), domain.map(|domain| wide(&domain)));
+    if !active() {
+        return Verified::Failed(WAIT_TIMEOUT);
+    }
+    // A crash or unanswered check must not erase an attempt already
+    // submitted to Windows. Charge first while holding the account lock.
+    let attempt = match Attempt::reserve(&sid) {
+        Ok(attempt) => attempt,
+        Err(reason) => return Verified::RetryBudget(reason),
+    };
+    if !active() {
+        return Verified::Failed(WAIT_TIMEOUT);
+    }
     let mut handle: Handle = std::ptr::null_mut();
     let logged_on = unsafe {
         (api.logon)(user.as_ptr(), domain.as_ref().map_or(std::ptr::null(), |domain| domain.as_ptr()), credentials.password_pointer(),
             LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &mut handle)
     };
-    if logged_on == 0 {
-        return classify_logon_error(unsafe { GetLastError() });
+    let error = (logged_on == 0).then(|| unsafe { GetLastError() });
+    drop(credentials);
+    if let Some(code) = error {
+        return classify_logon_error(code);
     }
     let token = Token(handle);
-    same_user(token_user_sid(token.0), current_user_sid())
+    let verdict = same_user(token_user_sid(token.0), Ok(sid));
+    drop(token);
+    if verdict != Verified::Approved {
+        return verdict;
+    }
+    if !active() {
+        return Verified::Failed(WAIT_TIMEOUT);
+    }
+    match attempt.refund() {
+        Ok(()) => Verified::Approved,
+        Err(reason) => Verified::RetryBudget(reason),
+    }
 }
 
 /// Approved when the user of the logon token is the user the guard runs as: the text forms of

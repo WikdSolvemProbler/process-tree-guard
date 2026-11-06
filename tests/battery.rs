@@ -1561,7 +1561,7 @@ fn b148_the_documents_say_what_the_exception_above_the_cap_asks_refuses_and_resi
             body.contains("up to 1095 seconds, a little over 18 minutes (3 prompts of 300 seconds, 3 checks of at most 60 seconds, 2 waits of 2 seconds, \
                 5 seconds each for the name of the account and, with the console method, for the write of the message, \
                 and half a second for the record of the approval on standard error)")
-                && !body.contains("15 minutes") && !body.contains("up to 18 minutes"), name);
+                && !body.contains("up to 15 minutes") && !body.contains("up to 18 minutes"), name);
         checks.check("B148", &format!("{} says that a smart card cannot approve, and that the look up of a name in another form may contact a domain controller", name),
             body.contains("a smart card") && body.contains("domain controller") && body.contains("may contact a domain controller") && !body.contains("needs no network"), name);
         checks.check("B148", &format!("{} says that the hours are rounded up and does not say that they are rounded to the nearest or limited to at most two decimals", name),
@@ -1569,9 +1569,10 @@ fn b148_the_documents_say_what_the_exception_above_the_cap_asks_refuses_and_resi
     }
     for (name, body) in [("README.md", &readme_text), ("SECURITY.md", &security_text)] {
         checks.check("B148", &format!("{} says that the lock name can be held by a program of the session and that a program that drives a console can guess the password", name),
-            (body.contains("holds the name of the lock") || body.contains("holds that name")) && body.contains("can guess the password, three tries per start"), name);
-        checks.check("B148", &format!("{} advises an account lockout threshold against guessing at the console, and says that a wait of 2 seconds slows and does not stop a loop", name),
-            body.contains("account lockout") && body.contains("2 seconds") && body.contains("does not stop"), name);
+            (body.contains("holds the name of the lock") || body.contains("holds that name")) && body.contains("can supply password guesses"), name);
+        checks.check("B148", &format!("{} documents the cross-run password budget and Windows account lockout", name),
+            body.contains("three slots per Windows account") && body.contains("15 minutes")
+                && body.contains("shared retry budget") && body.contains("Windows account lockout"), name);
     }
     checks.check("B148", "the README and SECURITY.md say that the guard must stay with the person: if the agent runs as the account or can obtain its password, the exception gives no protection against it",
         readme_text.contains("the guard must run as the person") && security_text.contains("the guard itself must stay with the signed-in person")
@@ -1732,9 +1733,9 @@ fn b149_the_documents_say_what_windows_hello_verifies_whose_it_is_how_long_it_wa
             !body.contains("no consent path of Windows Hello") && !body.contains("which the guard does not unprotect") && (body.contains("`hello`") || body.contains("method=\"hello\"")), name);
     }
     checks.check("B149", "SECURITY.md says that the TPM limits the guessing of a PIN, that the prompt is not known to be on the secure desktop, that a program of the same user that can tamper with the guard is out of scope, \
-        and that the console method keeps 3 attempts per run and relies on the account lockout policy across runs",
+        and that console and desktop password checks share a budget across runs",
         security.contains("the TPM limits the guessing of a PIN") && security.contains("not known to be on the secure desktop") && security.contains("tamper with the guard")
-            && security.contains("The console method keeps 3 attempts per run") && security.contains("account lockout policy"), "SECURITY.md");
+            && security.contains("Console and desktop password checks share three slots") && security.contains("account lockout policy"), "SECURITY.md");
     checks.check("B149", "the README gives the limits of the message of Windows Hello and says that the clipping by the system is not established",
         readme.contains("512 16-bit units") && readme.contains("(100 characters once written out)") && readme.contains("is not established; step 12"), "README.md");
     checks.check("B149", "the changelog has an entry for 0.5.0, and it does not use dashes in prose",

@@ -164,6 +164,27 @@
     }
 
     #[test]
+    fn password_budget_refusal_ends_the_attempt_loop() {
+        struct Exhausted;
+        impl Verifier for Exhausted {
+            fn verify(&self, _credentials: Box<Credentials>) -> Verified {
+                Verified::RetryBudget("the shared password retry budget is exhausted")
+            }
+        }
+        let kept = Arc::new(Mutex::new(Vec::new()));
+        let log = Log::capture(kept.clone(), None);
+        let prompt = StubPrompt::new(vec![Answer::Password("right"), Answer::Cancel]);
+        let error = authorize_with(&settings("x"), &prompt, &Exhausted, &log)
+            .expect_err("an exhausted shared budget refuses approval");
+        log.finish(1_000);
+        assert_eq!(prompt.asked().len(), 1);
+        assert!(error.message().contains("shared password retry budget is exhausted"));
+        let lines = lines_of(&kept);
+        assert_eq!(decisions(&lines), ["refused"]);
+        assert!(lines[0].contains("attempt=1 ") && lines[0].contains("retry budget is exhausted"));
+    }
+
+    #[test]
     fn a_wrong_password_is_an_attempt_used_and_the_prompt_says_why_the_next_time() {
         let kept = Arc::new(Mutex::new(Vec::new()));
         let log = Log::capture(kept.clone(), None);

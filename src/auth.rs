@@ -81,6 +81,7 @@ mod hello;
 mod refusal;
 mod message;
 mod names;
+mod password_budget;
 mod verify;
 
 pub(crate) use console::*;
@@ -95,7 +96,8 @@ pub(crate) use verify::*;
 /// The caption of the prompt, and the name the console prompt gives as its target: the product name.
 pub(crate) const CAPTION: &str = "Process Tree Guard";
 
-/// Attempts a run gets. Each failed `LogonUserW` counts toward the lockout of the account.
+/// Prompts per run and slots in the shared password budget. Windows also
+/// applies the account's lockout policy to each native password check.
 pub(crate) const MAX_ATTEMPTS: u32 = 3;
 
 /// How long a prompt waits for an answer before the run is refused.
@@ -388,6 +390,8 @@ pub(crate) enum Verified {
     OtherUser,
     /// The failure is of the system, not of what was typed: a Windows error, or `UNIDENTIFIED`.
     Failed(u32),
+    /// The cross-run budget could not admit or settle a password check.
+    RetryBudget(&'static str),
     /// The process that started the guard exited while the check went on.
     OwnerGone,
 }

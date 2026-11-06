@@ -307,6 +307,7 @@ pub(super) fn attempts(settings: &Settings, subject: &Subject, prompt: &dyn Prom
                 };
             }
             Verified::OwnerGone => return Err(stop(attempt, OWNER_GONE)),
+            Verified::RetryBudget(reason) => return Err(refuse_shown(attempt, reason)),
             Verified::Wrong | Verified::OtherUser => rejection.unwrap_or_else(|| NOT_ACCEPTED.to_string()),
             Verified::Failed(code) if exception.method == Method::Console && AFTER_PASSWORD_CHECKED.contains(&code) => NOT_ACCEPTED.to_string(),
             Verified::Failed(UNIDENTIFIED) => return Err(refuse_shown(attempt, "the account of the credentials could not be identified")),
