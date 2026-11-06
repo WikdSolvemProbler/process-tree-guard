@@ -29,7 +29,7 @@ The harness logic of the test suite has Linux proof. That proof does not raise t
 | Architecture | Tier |
 |---|---|
 | x86-64, Windows Microsoft Visual C++ (MSVC) | Release target. Proven: the release test run on Windows 11 passed 433 of 437 in-tree tests; the 4 open tests are named on the [Testing and Benchmark](Testing-and-Benchmark.md) page. |
-| aarch64, Windows MSVC | Partial execution evidence. The programs were built in the release profile, and the library unit tests (264 passed, 0 failed) ran natively on GitHub's Windows 11 Arm64 hosted runner: [CI run 41952589923](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/41952589923). The integration suite was not run on Arm64, so the programs themselves stand at the type-and-borrow tier. This target is not a release target. |
+| aarch64, Windows MSVC | Release target. The release build and library unit tests passed natively on Windows 11 ARM64. Native integration tests, including the desktop-dependent cases, are pending. [Main CI run](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/42166290419) · [v0.5.0 ARM64 ZIP and checksums](https://github.com/WikdSolvemProbler/process-tree-guard/releases/tag/v0.5.0) |
 | i686, Windows MSVC | Type-and-borrow tier only. No execution evidence stands. This target is not a release target. |
 | x86-64, Windows GNU toolchain | Type-and-borrow tier only. The build carries no version resource. This target is not a release target. |
 
