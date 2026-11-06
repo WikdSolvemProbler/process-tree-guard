@@ -31,6 +31,10 @@ The fixture parks each escaped process before the sweep. Production still needs 
 
 The fork-churn fixture compiled on the Tailscale Mac as an ordinary user. Its privileged hosted run recorded all 20 detached rounds with an empty-worker witness, native SIGKILL for the anchored process, and a live different-UID peer. Three rounds observed a successful fork entirely between sweep dispatch and reap. None recorded a successful fork entirely after the pre-kill marker. The all-round overlap gate failed, and the internal broadcast snapshot was unobserved. The parked regression passed separately. [Hosted run](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/42228789224) · [Sources, compile and runtime receipts](../../../tests/evidence/macos-fork-churn-20261106.zip)
 
+## Native kqueue process events
+
+An ordinary-user probe on physical macOS ARM64 observed an ordinary fork event with a zero data field. On the same gated child, separate recursive tracking registrations using NOTE_TRACK, NOTE_TRACKERR and NOTE_CHILD each returned ENOTSUP. An exit-status subscription on that child succeeded, and its event agreed with waitpid on exit 7. The child was reaped naturally and a separate check found the process group gone. This rules out the tested kqueue registration path as a source of recursive child identity on this kernel. [Source, raw native receipts, and cleanup](../../../tests/evidence/macos-kqueue-native-20261106.zip)
+
 ## Teardown requirements
 
 Apple's published XNU source implements broadcast signaling by collecting a PID list under the process-list lock, releasing the lock, and then signaling the listed processes. The collection skips processes in the middle of being created. These source observations describe the pinned revision below. The hosted fixture did not observe the installed kernel's internal snapshot. [Broadcast signaling](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_sig.c#L1566-L1598) · [PID collection and delivery](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_proc.c#L3853-L3901)
