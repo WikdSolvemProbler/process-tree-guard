@@ -168,9 +168,12 @@ static void drop(const struct account *a, int keep)
         _exit(72);
     gid_t group = 0;
     struct proc_bsdinfo self;
-    if (getuid() != a->uid || geteuid() != a->uid || getgid() != a->gid || getegid() != a->gid ||
-        getgroups(1, &group) != 1 || group != a->gid || !proc_info(getpid(), &self) || !exact_creds(&self, a))
+    if (getuid() != a->uid || geteuid() != a->uid || getgid() != a->gid || getegid() != a->gid)
         _exit(73);
+    if (getgroups(1, &group) != 1 || group != a->gid)
+        _exit(90);
+    if (!proc_info(getpid(), &self) || !exact_creds(&self, a))
+        _exit(91);
     if (seteuid(0) != -1 || errno != EPERM || setegid(0) != -1 || errno != EPERM)
         _exit(74);
 }
@@ -260,8 +263,13 @@ static bool sweep(const struct account *a, pid_t protected_peer)
         (void)kill(-1, SIGKILL);
         _exit(76);
     }
-    if (reaped_kill(child, now_ms() + step_ms))
+    int status = 0;
+    const bool reaped = reap_until(child, &status, now_ms() + step_ms);
+    if (reaped && WIFSIGNALED(status) && WTERMSIG(status) == SIGKILL)
         return true;
+    fprintf(stderr, "uid-proof: sweep uid=%u reaped=%d status=%d exited=%d signal=%d\n",
+        (unsigned)a->uid, reaped, status, reaped && WIFEXITED(status) ? WEXITSTATUS(status) : -1,
+        reaped && WIFSIGNALED(status) ? WTERMSIG(status) : -1);
     /* Do not signal a possibly reaped or recycled PID. The helper also self-expires. */
     return false;
 }
@@ -411,8 +419,9 @@ static _Noreturn void controller(void)
 {
     alarm(controller_seconds);
     /* Empty positive test proves this Darwin libc broadcast includes the dropped caller. */
-    require(population(&worker, 0) == 0 && sweep(&worker, 0) && empty_until(&worker),
-        "sacrificial broadcast or initial UID emptiness proof failed");
+    require(population(&worker, 0) == 0, "initial worker UID was not empty");
+    require(sweep(&worker, 0), "sacrificial broadcast did not terminate as expected");
+    require(empty_until(&worker), "worker UID did not drain after the sacrificial broadcast");
     verify_nproc();
     int marker[2];
     require(pipe(marker) == 0, "could not create peer readiness channel");
