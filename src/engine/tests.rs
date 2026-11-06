@@ -57,10 +57,6 @@ impl DeepOwnerEvents {
         owned
     }
     fn signal(&self, index: usize) { assert_ne!(unsafe { SetEvent(self.0[index]) }, 0); }
-    fn close(&mut self, index: usize) {
-        let handle = std::mem::replace(&mut self.0[index], std::ptr::null_mut());
-        assert_ne!(unsafe { CloseHandle(handle) }, 0);
-    }
 }
 impl Drop for DeepOwnerEvents {
     fn drop(&mut self) {
@@ -144,20 +140,24 @@ fn deep_owner_expiry_timeout_is_the_final_real_native_receipt() {
 
 #[test]
 fn deep_owner_expiry_after_existing_timer_preserves_native_last_error() {
-    let mut owned = DeepOwnerEvents::new(62);
-    let waits = owned.0.clone(); // Handle values only; owned remains the sole owner.
+    // Three plain waits and one armed-timer wait each rotate to the
+    // next owner window, whether the timer or the relative timeout wins.
+    const LIVE_PASSES: usize = 4;
+    let owned = DeepOwnerEvents::new(1 + LIVE_PASSES * OWNERS_PER_WINDOW);
+    let mut waits = owned.0.clone();
+    // Only the final expiry sweep sees this fifth window. Keep every real
+    // handle alive so concurrent tests cannot reuse the invalid value.
+    waits.push(std::ptr::null_mut());
     let mut reads = 0;
     let status = wait_with_deadline_observed(|| {
         reads += 1;
-        assert!(reads <= 2);
-        // Close only between native waits, after the first timer wait exists.
-        // Expiry then makes the new final sweep observe this invalid HANDLE.
-        if reads == 2 { owned.close(61); None } else { Some(1) }
+        assert!(reads <= LIVE_PASSES + 1);
+        if reads <= LIVE_PASSES { Some(1) } else { None }
     }, None, &waits, None);
     let error = unsafe { GetLastError() };
     assert_eq!(status, WAIT_FAILED);
     assert_eq!(error, 6, "timer Drop must not replace ERROR_INVALID_HANDLE");
-    assert_eq!(reads, 2);
+    assert_eq!(reads, LIVE_PASSES + 1);
 }
 
 #[test]
