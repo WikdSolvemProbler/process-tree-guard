@@ -35,7 +35,9 @@ A startup-fence prototype refused late launch requests after owner loss and dead
 
 A Rust prototype recovered from watchdog death before the atomically placed child closed inherited descriptors, while the child waited for exec permission, and after exec. In the first case the watchdog pidfd became ready while the result pipe still had a writer. The supervisor drained the cgroup using its held process identity. A missing executable returned guard status 125 with an ENOENT receipt, while a real program's exit 127 passed through. Supervisor and owner loss also passed, and the independent sibling survived all seven cases. [Rust supervision evidence](../../../tests/evidence/linux-rust-supervision-20261106.zip)
 
-The product backend still needs authenticated admission, caller identity handling, and qualification of simultaneous lifecycle events.
+A one-shot admission fixture used kernel credentials on a private Unix socket and a held pidfd for its direct child. The supervisor launched the command with the verified UID, GID, and groups and forwarded exit 127. Seven refusal cases left the exec marker and payload cgroup absent. The existing seven lifecycle cases still passed, and the independent sibling survived. [Admission proof and raw receipts](../../../tests/evidence/linux-admission-20261106.zip)
+
+The fixture used a trusted root process and a synthetic caller on Linux ARM64 6.8. The product backend still needs authenticated external activation, qualification on the supported kernel floor, and concurrent lifecycle coverage.
 
 **Next:** The wiki Platform Support page states the tier of each named place.
 
