@@ -5,6 +5,14 @@ name: macOS dedicated UID proof
 
 on:
   workflow_dispatch:
+    inputs:
+      fixture:
+        description: Dedicated UID fixture
+        type: choice
+        default: parked
+        options:
+          - parked
+          - fork-churn
 
 permissions:
   contents: read
@@ -23,8 +31,10 @@ jobs:
       - name: Run the bounded native fixture
         shell: bash
         timeout-minutes: 5
+        env:
+          PTG_MACOS_FIXTURE: ${{ inputs.fixture }}
         run: |
-          exec /usr/bin/python3 -I -B .github/scripts/macos-uid-proof.py >"$RUNNER_TEMP/uid-proof.log" 2>&1
+          exec /usr/bin/python3 -I -B .github/scripts/macos-uid-proof.py "$PTG_MACOS_FIXTURE" >"$RUNNER_TEMP/uid-proof.log" 2>&1
 
       - name: Upload the transcript
         if: always()

@@ -163,10 +163,13 @@ def main():
     if len(sys.argv) == 4 and sys.argv[1] == "--provision":
         provision(Path(sys.argv[2]), sys.argv[3])
         return
-    if len(sys.argv) != 1 or os.geteuid() == 0:
-        raise RuntimeError("Start as the unprivileged hosted runner")
+    fixtures = {"parked": "uid-proof.c", "fork-churn": "uid-fork-churn.c"}
+    selection = sys.argv[1] if len(sys.argv) == 2 else "parked"
+    if len(sys.argv) > 2 or selection not in fixtures or os.geteuid() == 0:
+        raise RuntimeError("Select a fixture as the unprivileged hosted runner")
     environment = hosted_environment()
-    source = Path(__file__).resolve().with_name("uid-proof.c")
+    source = Path(__file__).resolve().with_name(fixtures[selection])
+    print(f"fixture={selection}", flush=True)
     print(f"source sha256={hashlib.sha256(source.read_bytes()).hexdigest()}", flush=True)
     with tempfile.TemporaryDirectory(prefix="ptg-macos-proof-", dir=os.environ["RUNNER_TEMP"]) as scratch:
         binary = Path(scratch) / "uid-proof"
