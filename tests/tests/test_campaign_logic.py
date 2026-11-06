@@ -16227,7 +16227,7 @@ class Round41LandingTests(unittest.TestCase):
             recs + [fab], FULL_COUNTS) if "rep 900" in loss]
         self.assertIn(
             "nuewframe kill path left a descendant alive in "
-            "NO_WINDOW rep 900", entries)
+            "NO_WINDOW (measured rep 900)", entries)
         recs = complete_records()
         src_f = next(r for r in recs
                      if r["path"] == "fast" and r["arm"] == "nuewframe"
@@ -16471,7 +16471,7 @@ class Round42LandingTests(unittest.TestCase):
             recs + [dup], FULL_COUNTS) if "rep 900" in loss]
         self.assertIn(
             "nuewframe kill path left a descendant alive in "
-            "NO_WINDOW rep 900", entries)
+            "NO_WINDOW (warmup rep 900)", entries)
         # Duplicate control output mismatch (floor arm).
         recs, dup = duplicate(
             lambda r: r["kind"] == "control"
@@ -16891,8 +16891,8 @@ class Round43LandingTests(unittest.TestCase):
                    and r["context"] == "NO_WINDOW" and r["rep"] == 0)
         survived(src, "fast")
         self.assertIn(
-            "nuewframe kill path left a descendant alive in "
-            "NO_WINDOW rep 0",
+            "nuewframe fast path left a descendant alive in "
+            "NO_WINDOW (measured rep 0)",
             report_mod.standing_losses(recs, FULL_COUNTS))
         self.assertEqual(report_mod.competitor_losses(recs), [])
         recs = complete_records()
@@ -16904,6 +16904,28 @@ class Round43LandingTests(unittest.TestCase):
                     "survivor": True})
         self.assertEqual(
             report_mod.standing_losses(recs, FULL_COUNTS), [])
+
+    def test_scale_survivor_listing_names_the_slot_kind_and_variant(self):
+        records = complete_records()
+        affected = [record for record in records
+                    if record["path"] == "scale"
+                    and record["context"] == "DETACHED"
+                    and record["rep"] == 2
+                    and (record["arm"] == "nuewframe"
+                         or (record["arm"] == "guard" and record["kind"] == "measured"))]
+        self.assertCountEqual([(record["arm"], record["kind"]) for record in affected],
+                              [("nuewframe", "measured"), ("nuewframe", "warmup"),
+                               ("guard", "measured")])
+        for record in affected:
+            record.update(outcome="descendant-survived", survivor=True)
+        entries = [entry for entry in report_mod.standing_losses(records, FULL_COUNTS)
+                   if "path left a descendant alive" in entry]
+        self.assertCountEqual(entries, [
+            f"{record['arm']} scale path left a descendant alive in "
+            f"DETACHED ({record['kind']} rep 2 variant {record['variant']})"
+            for record in affected
+        ])
+        self.assertEqual(report_mod.competitor_losses(records), [])
 
     # ---------------------------------------------------------- F3
     def test_every_consumer_of_the_child_spec_reads_through_the_shared_materialization(self):

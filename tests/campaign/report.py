@@ -5741,12 +5741,17 @@ def profile_dimension_losses(records, decisions=None,
     return losses
 
 
-def _competitor_loss_entry(record):
+def _survivor_loss_entry(record):
+    path = record.get("path", "<missing>")
+    variant = record.get("variant") if path == "scale" else None
+    suffix = f" variant {variant}" if variant is not None else ""
     return (
-        COMPETITOR_LOSS_PREFIX
-        + f"{record['arm']} kill path left a descendant alive in "
-          f"{record['context']} ({record.get('kind')} rep "
-          f"{record['rep']})")
+        f"{record['arm']} {path} path left a descendant alive in "
+        f"{record['context']} ({record.get('kind')} rep {record['rep']}{suffix})")
+
+
+def _competitor_loss_entry(record):
+    return COMPETITOR_LOSS_PREFIX + _survivor_loss_entry(record)
 
 
 def _competitor_output_loss_entry(record):
@@ -6034,9 +6039,7 @@ def standing_losses(records, plan_counts=None, expected_output=None,
                 f"{record.get('detail', 'no detail')}")
         if record["outcome"] == "descendant-survived" \
                 and record["arm"] == "guard":
-            losses.append(
-                f"guard kill path left a descendant alive in "
-                f"{record['context']} rep {record['rep']}")
+            losses.append(_survivor_loss_entry(record))
         elif record["outcome"] == "descendant-survived" \
                 and record.get("path") == "kill" \
                 and record.get("kind") == "measured" \
@@ -6060,10 +6063,7 @@ def standing_losses(records, plan_counts=None, expected_output=None,
             # above, and mints no listing at warmup/control
             # kind, under the planned population's kind
             # discipline the evidence branches state.)
-            losses.append(
-                f"{record['arm']} kill path left a descendant "
-                f"alive in {record['context']} rep "
-                f"{record['rep']}")
+            losses.append(_survivor_loss_entry(record))
         elif record["outcome"] == "descendant-survived" \
                 and record["arm"] in PRODUCT_ARMS \
                 and record["arm"] != "guard" \
@@ -6087,10 +6087,7 @@ def standing_losses(records, plan_counts=None, expected_output=None,
             # (arm x kind) cells, planned or unplanned,
             # while a floor arm's identical record was
             # listed in its own name.)
-            losses.append(
-                f"{record['arm']} kill path left a descendant "
-                f"alive in {record['context']} rep "
-                f"{record['rep']}")
+            losses.append(_survivor_loss_entry(record))
         elif record["outcome"] == "descendant-survived" \
                 and record["arm"] not in PRODUCT_ARMS \
                 and not planned_by_id.get(id(record), False) \
@@ -6100,10 +6097,7 @@ def standing_losses(records, plan_counts=None, expected_output=None,
             # survival in its own name on the same terms —
             # every unplanned record's evidenced fault, at
             # every kind, never nowhere.
-            losses.append(
-                f"{record['arm']} kill path left a descendant "
-                f"alive in {record['context']} rep "
-                f"{record['rep']}")
+            losses.append(_survivor_loss_entry(record))
     for context in CONTEXTS:
         has_floor_records = any(
             r.get("kind") == "control" and r.get("context") == context
