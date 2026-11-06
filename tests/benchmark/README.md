@@ -89,6 +89,24 @@ The p90 contrast was +2.8671 ms with a primary interval of [−5.5511, +8.1285] 
 
 Archive SHA-256 d6427f0343c829dff858cf850fee22b86cf8352e3047c7946c79ea8f2b33cf4c.
 
+## Windows valid-launch resolver diagnostic
+
+The proposed empty-executable fix rejected a malformed command that otherwise reached Windows executable-image validation. The controlled regression passed on the candidate and failed on its matched baseline. The timing diagnostic separately exercised valid launches from the baseline, candidate, and exact Windows-repaired Wake build on this laptop under observed load.
+
+Two independent Sol reviewers approved the same frozen manifest. All 12 controls and 288 measured launches completed, with exact exit and stream checks and natural slot Job drainage. The primary and backup guards both returned zero. No recorded process instance remained in the wrapper's post-run check. A fresh archive extraction reproduced the analysis byte for byte.
+
+| Windows context | Fixture argument | Paired median candidate minus baseline | Paired median candidate minus repaired Wake |
+| --- | --- | ---: | ---: |
+| NO_WINDOW | Absolute path | -7.557 ms | +2.367 ms |
+| NO_WINDOW | Bare name | +3.183 ms | +7.017 ms |
+| DETACHED | Absolute path | +2.487 ms | +6.798 ms |
+| DETACHED | Bare name | -3.999 ms | +3.884 ms |
+
+The median paired lookup-form contrast was +4.721 ms in NO_WINDOW and -0.171 ms in DETACHED. Those contrasts describe end-to-end elapsed time. The candidate's observed paired medians were above Wake's in each cell. Its changes relative to the matched baseline had mixed signs, and these data do not isolate a consistent resolver cost. The candidate remains unmerged and the separate speed acceptance requirement remains open.
+
+The archive contains the protocol, source and executable identities, candidate patch, prior regression evidence, all raw slots and cleanup receipts, the approval and bounded invocation, and the replay. Archive SHA-256 is e7bdc5ff85068e8ed03176628db5a4ad60014cbc9973577b1891f381404c1293. [Diagnostic evidence and replay](../evidence/windows-resolver-valid-launch-20261106.zip)
+
+
 ## Owner-verification timing checks
 
 The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
