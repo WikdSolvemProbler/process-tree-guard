@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 Peter Shiller
+
+name: macOS dedicated UID proof
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-proof:
+    if: github.ref == 'refs/heads/main'
+    runs-on: xcode-27
+    timeout-minutes: 7
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the bounded native fixture
+        shell: bash
+        timeout-minutes: 5
+        run: |
+          exec /usr/bin/python3 -I -B .github/scripts/macos-uid-proof.py >"$RUNNER_TEMP/uid-proof.log" 2>&1
+
+      - name: Upload the transcript
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-uid-proof
+          path: ${{ runner.temp }}/uid-proof.log
+          if-no-files-found: error
