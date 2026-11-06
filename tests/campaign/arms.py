@@ -1410,21 +1410,12 @@ def expected_exit(arm, path, config=None, variant=None):
     """The exit code a slot of this arm and path must produce, or
     None when the table pins none (floor arms have no kill path).
 
-    One function, two readings — the divergence is named here,
-    in this one place: the runner and the pricing probes call
-    this WITH the run's configuration, so a per-arm
-    "expected_exit" entry in that configuration overrides the
-    defaults for the slots actually executed; the report calls
-    it WITHOUT a configuration, so it judges records against
-    the default table below. The two readings diverge only when
-    a configuration exercises the documented override. The
-    shipped campaign.json carries no override that diverges
-    from the defaults (pinned by the round-22 neighbour tests),
-    so no shipped run is judged against a different table than
-    it ran against. Override values are held to the non-bool
-    integer discipline at load and admission (see
-    harness.load_config), as the defaults here are integers by
-    construction.
+    An explicit path override takes precedence. A scale slot
+    inherits a configured kill code unless scale has its own
+    override. The runner and report use this same resolution
+    when they have the run's verified configuration. Override
+    values are held to the non-bool integer discipline at load
+    and admission (see harness.load_config).
 
     The malformed path's expectation is per shape and
     designated-only (round-31 F2): it is stated in plan.py
@@ -1437,10 +1428,14 @@ def expected_exit(arm, path, config=None, variant=None):
     gets the path-level answer (None): no expectation may be
     acquired by construction from the path alone."""
     if config:
-        entry = config.get("arms", {}).get(arm, {})
+        arms = config.get("arms")
+        entry = arms.get(arm) if isinstance(arms, Mapping) else None
         table = entry.get("expected_exit") if isinstance(entry, dict) else None
-        if isinstance(table, dict) and path in table:
-            return table[path]
+        if isinstance(table, dict):
+            if path in table:
+                return table[path]
+            if path == "scale" and "kill" in table:
+                return table["kill"]
     if path == "fast":
         return EXPECTED_FAST_EXIT
     if path == "malformed":
@@ -1448,11 +1443,6 @@ def expected_exit(arm, path, config=None, variant=None):
             return None
         from plan import malformed_expected_exit
         return malformed_expected_exit(arm, variant)
-    if path == "scale":
-        # A scaling slot is a kill slot whose child builds a wider
-        # or deeper tree: the arm's documented timeout code is the
-        # kill table's, exactly as on the kill path.
-        return EXPECTED_KILL_EXITS.get(arm)
     return EXPECTED_KILL_EXITS.get(arm)
 
 

@@ -11,7 +11,7 @@ guard-driving families execute on Windows against the built package
 (their tier), while the harness-logic and battery-audit families
 execute anywhere.
 
-The guard's own in-tree Rust tests (437 counted once, in the tree's
+The guard's own in-tree Rust tests (459 counted once, in the tree's
 `src/` unit tests and `tests/` parity checks) are not recounted here;
 this suite's counted-once total is its own Python tests: 647 tests counted once, reported by
 `run_tests.py` and in the README.
@@ -60,7 +60,7 @@ census tests in `tests/test_campaign_logic.py`
 | Child asks to break away from the job and is allowed out | in-tree: `tree/tests/guard.rs` `g26_child_cannot_break_away_from_job` (G26) | covered in-tree (Windows-tier execution); no separate family in this suite |
 | Child runs before it is contained (the spawn race: created without the job, or created running and assigned to it afterwards) | the mechanism is structural: creation carries the job in its attribute list (`PROC_THREAD_ATTRIBUTE_JOB_LIST`) and the child is created suspended (the tree README's first guarantee; `tree/src/engine/attributes.rs`) — its observable consequences are the breakaway refusal (G26, above) and no descendant alive at return on any path (G19/G20, above; G28 for a slow-to-exit descendant) | the creation mechanism itself is source-audited in-tree, not behaviourally distinguishable by a test in either tree; its consequences are covered in-tree (Windows-tier execution) |
 | Partial output at kill lost | F2 `test_partial_output_survives_the_kill` | implemented (Windows) |
-| Teardown of a wide tree (>64 members) stalls or leaks | in-tree: `tree/tests/battery.rs` `b33_to_b35_wide_and_deep_trees_are_killed` (a 300-child wide tree and a 40-deep chain, all killed on return) — one of the tree's 437 counted tests | covered in-tree (Windows-tier execution); this suite claims no separate family for it |
+| Teardown of a wide tree (>64 members) stalls or leaks | in-tree: `tree/tests/battery.rs` `b33_to_b35_wide_and_deep_trees_are_killed` (a 300-child wide tree and a 40-deep chain, all killed on return) — one of the tree's 459 counted tests | covered in-tree (Windows-tier execution); this suite claims no separate family for it |
 | Member that never dies exhausts the teardown budget wrongly | battery case (o) burden item 3 | battery case (Windows) |
 | Poll-based teardown proof is slow or wrong | battery case (a) | battery case (Windows) |
 | IOCP proof faked by a forged packet | battery case (o) forged-packet condition | battery case (Windows) |

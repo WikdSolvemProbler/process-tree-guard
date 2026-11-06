@@ -1447,13 +1447,20 @@ def _package_expected_output(meta):
     return report_mod.expected_output_from_config(config)
 
 
+# The configuration digest recorded by the committed reduced stub run
+# in tests/evidence/reduced-run/run.json. It identifies only the known
+# historical exit contract, never a verified configuration anchor.
+LEGACY_REDUCED_STUB_CONFIG_SHA256 = (
+    "ca7872d19554552c55d2df72323bec76eed20906faef4dd53c34844010919f5a")
+
+
 def _package_plan_config(meta):
     """The plan a preserved package's argv length budget is
     derived from (round-36 F3): the anchored configuration
     the manifest names, when it verifies — the run's own
     plan, the same anchor _package_expected_output trusts.
-    When the anchor cannot be verified, report.NO_VERIFIED_
-    PLAN: no budget is derived from the package's own
+    When the anchor cannot be verified, an unverified-plan
+    sentinel: no budget is derived from the package's own
     recorded templates (that would compare the package
     against itself), and the absent anchor is already named
     unverifiable by _recorded_run_field_problems — since
@@ -1469,6 +1476,9 @@ def _package_plan_config(meta):
     anchored = _anchored_config(meta)
     if anchored is not None:
         return anchored
+    if meta.get("reduced") is True and \
+            meta.get("config_sha256") == LEGACY_REDUCED_STUB_CONFIG_SHA256:
+        return report_mod.NO_VERIFIED_LEGACY_STUB_PLAN
     return report_mod.NO_VERIFIED_PLAN
 
 
@@ -2890,14 +2900,14 @@ def _pricing_provenance(meta, probe_records):
     return global_problems, item_problems
 
 
-def _pricing_stamp_problems(probe_records):
+def _pricing_stamp_problems(probe_records, *, platform=None):
     """The probe-shape stamp defects of a namespace's pricing
     records as problem strings, in the shape check_run_package
     reports package defects: each names the item and the field
     whose stamp does not carry the construction the item's price
     claims (pricing.pricing_stamp_defects)."""
     problems = []
-    defects = pricing_mod.pricing_stamp_defects(probe_records)
+    defects = pricing_mod.pricing_stamp_defects(probe_records, platform=platform)
     for item in sorted(defects):
         for defect in defects[item]:
             problems.append(
@@ -2921,7 +2931,8 @@ def _pricing_provenance_problems(meta, probe_records):
     problems = list(global_problems)
     for item, detail in sorted(item_problems.items()):
         problems.append(f"pricing item '{item}' {detail}")
-    problems.extend(_pricing_stamp_problems(probe_records))
+    problems.extend(_pricing_stamp_problems(
+        probe_records, platform=meta.get("platform")))
     return problems
 
 
@@ -2943,12 +2954,14 @@ def _verified_pricing_evidence(meta, probe_records):
     global_problems, item_problems = _pricing_provenance(meta, probe_records)
     if global_problems:
         return None, problems
-    evidence = pricing_mod.prices_from_observations(probe_records)
+    platform = meta.get("platform")
+    evidence = pricing_mod.prices_from_observations(
+        probe_records, platform=platform)
     if evidence is None:
         return None, problems
     for item in item_problems:
         evidence["items"].pop(item, None)
-    for item in pricing_mod.pricing_stamp_defects(probe_records):
+    for item in pricing_mod.pricing_stamp_defects(probe_records, platform=platform):
         evidence["items"].pop(item, None)
     if not evidence["items"]:
         return None, problems
@@ -2979,7 +2992,8 @@ def _pricing_for_render(config, probe_records):
     typed into the configuration can never be reported as
     measured probe evidence — only prices_from_observations,
     built from recorded probe observations, may carry the tag."""
-    evidence = pricing_mod.prices_from_observations(probe_records)
+    evidence = pricing_mod.prices_from_observations(
+        probe_records, platform=sys.platform)
     if evidence is not None:
         return evidence
     pricing = config.get("pricing")

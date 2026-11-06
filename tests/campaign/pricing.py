@@ -164,6 +164,7 @@ Windows execution against the built guard is theory until run.
 
 import json
 import math
+import ntpath
 import os
 import statistics
 import subprocess
@@ -611,7 +612,7 @@ def _is_plausible_time(value):
     return _is_finite_number(value) and value >= 0
 
 
-def pricing_stamp_defects(records):
+def pricing_stamp_defects(records, *, platform=None):
     """Cross-check the probe-shape stamps of pricing records
     against the construction each price claims. Returns a mapping
     of item -> list of defect dicts, each naming the probe, the
@@ -655,8 +656,8 @@ def pricing_stamp_defects(records):
       the laid-out field itself: RESOLVER_EMPTY_FOLDERS empty
       folders followed by the child's folder, exactly
       RESOLVER_EMPTY_FOLDERS + 1 non-empty entries in path-list
-      order (the separator is the one the record's own platform
-      wrote: ";" on a Windows record, os.pathsep elsewhere),
+      order (the separator is the one the recorded platform
+      wrote: ";" on Windows and ":" on POSIX),
       with the empty folders named empty-<index> in order under
       one shared scratch parent — the parent of the record's own
       resolver-cwd working directory — so a field of arbitrary
@@ -959,9 +960,19 @@ def pricing_stamp_defects(records):
                     "actual": record.get("working_directory")})
             if shape == "loaded":
                 intended = record.get("intended_path")
+                wd = record.get("working_directory")
+                if isinstance(platform, str) and platform:
+                    windows_paths = platform.lower().startswith("win")
+                else:
+                    # A standalone record set has no manifest. The scratch
+                    # directory still identifies native drive/UNC paths and
+                    # relative Windows fixture paths.
+                    windows_paths = isinstance(wd, str) and (
+                        bool(ntpath.splitdrive(wd)[0])
+                        or (not wd.startswith("/") and "\\" in wd))
                 parts = []
                 if isinstance(intended, str) and intended:
-                    separator = ";" if ";" in intended else os.pathsep
+                    separator = ";" if windows_paths else ":"
                     parts = intended.split(separator)
                 # The laid-out field, checked as the construction
                 # lays it out — not merely counted: the first
@@ -976,7 +987,9 @@ def pricing_stamp_defects(records):
                 # construction and must not price, however tidy
                 # its entry count looks.
                 def _norm(part):
-                    return part.replace("\\", "/").rstrip("/")
+                    if windows_paths:
+                        part = part.replace("\\", "/")
+                    return part.rstrip("/")
                 laid_out = len(parts) == RESOLVER_EMPTY_FOLDERS + 1 \
                     and all(parts)
                 if laid_out:
@@ -987,7 +1000,6 @@ def pricing_stamp_defects(records):
                                for entry in empties}
                     names = [entry.rsplit("/", 1)[-1]
                              for entry in empties]
-                    wd = record.get("working_directory")
                     wd_norm = _norm(wd) if isinstance(wd, str) else ""
                     laid_out = (
                         names == [f"empty-{index}" for index in range(
@@ -1017,7 +1029,7 @@ def pricing_stamp_defects(records):
     return defects
 
 
-def prices_from_observations(records):
+def prices_from_observations(records, *, platform=None):
     """Build the pricing evidence object from raw probe observations,
     or None when no complete pair set prices any item.
 
@@ -1075,7 +1087,7 @@ def prices_from_observations(records):
                     and isinstance(
                         r.get("guard_fingerprint", {}).get("sha256"),
                         str)}
-    stamp_defects = pricing_stamp_defects(records)
+    stamp_defects = pricing_stamp_defects(records, platform=platform)
     items = {}
     for probe, item in PROBES.items():
         if item in stamp_defects:

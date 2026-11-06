@@ -1740,6 +1740,25 @@ a junk-tailed set certifying COMPLETE at both layers
 under this sentinel."""
 
 
+# This reduced stub used the same 124 timeout for every arm. The
+# ProcessKit name did not identify the current native binary in it.
+NO_VERIFIED_LEGACY_STUB_PLAN = object()
+_LEGACY_STUB_EXIT_CONFIG = {"arms": {"processkit": {"expected_exit": {"kill": 124}}}}
+
+
+def _plan_is_unverified(config):
+    return config is NO_VERIFIED_PLAN or config is NO_VERIFIED_LEGACY_STUB_PLAN
+
+
+def _slot_expected_exit(arm, path, config):
+    if config is NO_VERIFIED_LEGACY_STUB_PLAN:
+        config = _LEGACY_STUB_EXIT_CONFIG
+    # Malformed slots are checked separately against their plan variant.
+    if path == "malformed" or not isinstance(config, Mapping):
+        config = None
+    return expected_exit(arm, path, config)
+
+
 def _security_sentinel_degradation(config):
     """The dimension-(6) degradation a NO_VERIFIED_PLAN
     judgment carries (round-38 F2), as a naming string — or
@@ -1770,7 +1789,7 @@ def _security_sentinel_degradation(config):
     its five degraded problems do not move), and a FAIL —
     a designated pinned-expectation violation — stays a
     FAIL, named by its own channel."""
-    if config is not NO_VERIFIED_PLAN:
+    if not _plan_is_unverified(config):
         return None
     return ("the records are judged under NO_VERIFIED_PLAN "
             "— no verified plan exists for them (the footing "
@@ -1917,7 +1936,7 @@ def _plan_fast_argv_derivation(arm, config=None):
     verdict layer's sentinel cap (see
     _security_sentinel_degradation), not by a plan fact
     about a configuration that does not exist."""
-    if config is NO_VERIFIED_PLAN:
+    if _plan_is_unverified(config):
         return None, None
     effective = _shipped_config() if config is None else config
     if effective is None:
@@ -3294,7 +3313,7 @@ def _record_inconsistencies(records, expected_output=None,
         path = record.get("path")
         slot = (f"{record.get('kind')} {arm}/{path}/"
                 f"{record.get('context')} rep {record.get('rep')}")
-        expected = expected_exit(arm, path)
+        expected = _slot_expected_exit(arm, path, config)
         actual = record.get("exit_code")
         if expected is not None and actual is not None \
                 and actual == expected \
@@ -4001,7 +4020,7 @@ def _record_inconsistencies(records, expected_output=None,
         if arm in PRODUCT_ARMS \
                 and isinstance(argv, list) and argv \
                 and all(isinstance(token, str) for token in argv) \
-                and config is not NO_VERIFIED_PLAN:
+                and not _plan_is_unverified(config):
             if "map" not in arm_executables:
                 judged = config if isinstance(config, dict) \
                     else _shipped_config()
@@ -5738,7 +5757,7 @@ def _competitor_output_loss_entry(record):
           f"({record.get('kind')} rep {record['rep']})")
 
 
-def _evidenced_exit_mismatch(record):
+def _evidenced_exit_mismatch(record, config):
     """True when a record's exit fault is earned by its own
     fields: an observed exit code that differs from the expected
     exit for its arm and path (arms.expected_exit's table). A
@@ -5754,7 +5773,7 @@ def _evidenced_exit_mismatch(record):
     a float, a boolean, a list) is a record inconsistency,
     named by _record_inconsistencies, and earns no fault
     here."""
-    expected = expected_exit(record.get("arm"), record.get("path"))
+    expected = _slot_expected_exit(record.get("arm"), record.get("path"), config)
     actual = record.get("exit_code")
     return expected is not None and actual is not None \
         and isinstance(actual, int) \
@@ -5762,8 +5781,8 @@ def _evidenced_exit_mismatch(record):
         and actual != expected
 
 
-def _competitor_exit_loss_entry(record):
-    expected = expected_exit(record.get("arm"), record.get("path"))
+def _competitor_exit_loss_entry(record, config):
+    expected = _slot_expected_exit(record.get("arm"), record.get("path"), config)
     return (
         COMPETITOR_LOSS_PREFIX
         + f"{record['arm']} {record['path']} path produced exit "
@@ -5789,7 +5808,7 @@ def _evidenced_output_mismatch(record):
              or record.get("output_stderr_match") is False)
 
 
-def competitor_losses(records):
+def competitor_losses(records, config=None):
     """Evidence, not campaign standing losses: every competitor
     (non-guard product arm) measured kill slot whose
     descendant-survived classification is evidenced by its
@@ -5826,10 +5845,10 @@ def competitor_losses(records):
                and record.get("kind") == "measured"
                and record.get("arm") in PRODUCT_ARMS
                and record.get("arm") != "guard"]
-    losses += [_competitor_exit_loss_entry(record) for record in planned
+    losses += [_competitor_exit_loss_entry(record, config) for record in planned
                if record.get("outcome") in (
                    "exit-mismatch", "descendant-survived")
-               and _evidenced_exit_mismatch(record)
+               and _evidenced_exit_mismatch(record, config)
                and record.get("kind") == "measured"
                and record.get("arm") in PRODUCT_ARMS
                and record.get("arm") != "guard"]
@@ -5928,7 +5947,7 @@ def standing_losses(records, plan_counts=None, expected_output=None,
                     and record["arm"] != "guard" \
                     and record.get("kind") == "measured" \
                     and planned_by_id.get(id(record), False) \
-                    and _evidenced_exit_mismatch(record):
+                    and _evidenced_exit_mismatch(record, config):
                 # A competitor's measured exit fault is a
                 # measured product fault on profile dimension
                 # (1)'s exit-code component — competitor-loss
@@ -5938,14 +5957,14 @@ def standing_losses(records, plan_counts=None, expected_output=None,
                 # record inconsistency, already listed; the
                 # guard's own mismatches, and any arm's warmup
                 # or control mismatches, stay campaign losses.)
-                losses.append(_competitor_exit_loss_entry(record))
+                losses.append(_competitor_exit_loss_entry(record, config))
             else:
                 losses.append(
                     f"exit mismatch in {record['arm']}/{record['path']}/"
                     f"{record['context']} rep {record['rep']}: "
                     f"{record.get('detail', 'no detail')}")
         if record["outcome"] == "descendant-survived" \
-                and _evidenced_exit_mismatch(record):
+                and _evidenced_exit_mismatch(record, config):
             # Survivor-before-exit precedence: the slot is
             # classified by its survival, and its exit fault is
             # listed here under its own name — for the guard and
@@ -5956,13 +5975,13 @@ def standing_losses(records, plan_counts=None, expected_output=None,
                     and record["arm"] != "guard" \
                     and record.get("kind") == "measured" \
                     and planned_by_id.get(id(record), False):
-                losses.append(_competitor_exit_loss_entry(record))
+                losses.append(_competitor_exit_loss_entry(record, config))
             else:
                 losses.append(
                     f"exit mismatch in {record['arm']}/{record['path']}/"
                     f"{record['context']} rep {record['rep']}: "
                     f"exit code {record.get('exit_code')} != expected "
-                    f"{expected_exit(record['arm'], record['path'])} "
+                    f"{_slot_expected_exit(record['arm'], record['path'], config)} "
                     f"for {record['arm']}/{record['path']} (the slot "
                     f"is classified descendant-survived: survivor "
                     f"precedence carries the graver fault, and the "

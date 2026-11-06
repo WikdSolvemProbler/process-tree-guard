@@ -36,15 +36,11 @@ STUB = os.path.join(CAMPAIGN, "stubs.py")
 PROBE = os.path.join(CAMPAIGN, "probe.py")
 
 
-def stub_config(tmp, kill_mode="arm-kill-tree"):
-    exe = os.path.join(tmp, "stub-arm")
-    with open(exe, "w", encoding="utf-8") as handle:
-        handle.write(f'#!/bin/sh\nexec {sys.executable} {STUB} "$@"\n')
-    os.chmod(exe, 0o755)
+def stub_config(_tmp, kill_mode="arm-kill-tree"):
     config = {
-        "arms": {arm: {"executable": exe, "templates": {
-            "fast": ["arm-fast", "{timeout_s}", "--", "{child}", "{child_args}"],
-            "kill": [kill_mode, "{timeout_s}", "--", "{child}", "{child_args}"],
+        "arms": {arm: {"executable": sys.executable, "templates": {
+            "fast": [STUB, "arm-fast", "{timeout_s}", "--", "{child}", "{child_args}"],
+            "kill": [STUB, kill_mode, "{timeout_s}", "--", "{child}", "{child_args}"],
         }} for arm in plan_mod.PRODUCT_ARMS},
         "children": {
             "fast": {"program": sys.executable, "args": [STUB, "exit0"]},
@@ -60,6 +56,9 @@ def stub_config(tmp, kill_mode="arm-kill-tree"):
         },
         "survivor_checker": [sys.executable, PROBE],
     }
+    # The Python fixture returns 124 on every tree timeout. The pinned
+    # ProcessKit executable returns 106 in the Windows campaign.
+    config["arms"]["processkit"]["expected_exit"] = {"kill": 124}
     return config
 
 
@@ -68,6 +67,13 @@ FIXTURE_STDERR = b"error-stream\n"
 
 
 _SHIPPED_CONFIG = None
+
+# Count the executable and the expanded fast child (testkit relay 0).
+# The pinned nuewframe form requires a separator before the child.
+# ProcessKit also takes a timeout flag, an event path, and stdin forwarding.
+SHIPPED_FAST_ARGV_LENGTHS = {
+    "guard": 7, "nuewframe": 6, "processkit": 11, "sysprims": 6,
+}
 
 
 def shipped_config():
@@ -579,6 +585,7 @@ class KillTreeTests(unittest.TestCase):
     def test_direct_only_arm_leaves_descendant_survived(self):
         with tempfile.TemporaryDirectory() as tmp:
             config = stub_config(tmp, kill_mode="arm-kill")
+            config["_windows_slot_jobs"] = sys.platform == "win32"
             from plan import Slot
             rec = run_slot(Slot("measured", "nuewframe", "kill",
                                 "NO_WINDOW", 0), config)
@@ -589,7 +596,7 @@ class KillTreeTests(unittest.TestCase):
                 self.assertIsInstance(rec["child_pid"], int)
                 self.assertEqual(rec["exit_code"], 124)
             finally:
-                if isinstance(rec.get("grandchild_pid"), int):
+                if sys.platform != "win32" and isinstance(rec.get("grandchild_pid"), int):
                     try:
                         os.kill(rec["grandchild_pid"], signal.SIGKILL)
                     except OSError:
@@ -629,17 +636,8 @@ class KillTreeTests(unittest.TestCase):
                     "except subprocess.TimeoutExpired:\n"
                     "    proc.kill(); proc.wait()\n"
                     "sys.exit(7)\n")
-            wrapper = os.path.join(tmp, "arm-wrong-exit")
-            with open(wrapper, "w", encoding="utf-8") as handle:
-                handle.write(f"#!/bin/sh\nexec {sys.executable} "
-                             f"{arm_py} \"$@\"\n")
-            os.chmod(wrapper, 0o755)
-            config["arms"]["guard"]["executable"] = wrapper
-            config["arms"]["guard"]["templates"] = {
-                "fast": ["arm-fast", "{timeout_s}", "--",
-                         "{child}", "{child_args}"],
-                "kill": ["arm-kill", "{timeout_s}", "--",
-                         "{child}", "{child_args}"]}
+            config["_windows_slot_jobs"] = sys.platform == "win32"
+            config["arms"]["guard"]["templates"]["kill"][0] = arm_py
             from plan import Slot
             rec = run_slot(Slot("measured", "guard", "kill",
                                 "NO_WINDOW", 0), config)
@@ -655,7 +653,7 @@ class KillTreeTests(unittest.TestCase):
                     and "descendant-survived" in loss
                     for loss in losses), losses)
             finally:
-                if isinstance(rec.get("grandchild_pid"), int):
+                if sys.platform != "win32" and isinstance(rec.get("grandchild_pid"), int):
                     try:
                         os.kill(rec["grandchild_pid"], signal.SIGKILL)
                     except OSError:
@@ -777,11 +775,8 @@ class SlotAccountingTests(unittest.TestCase):
     def test_stub_arm_exiting_125_on_fast_is_exit_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:
             config = stub_config(tmp)
-            bad = os.path.join(tmp, "bad-arm")
-            with open(bad, "w", encoding="utf-8") as handle:
-                handle.write("#!/bin/sh\nexit 125\n")
-            os.chmod(bad, 0o755)
-            config["arms"]["guard"]["executable"] = bad
+            config["arms"]["guard"]["templates"]["fast"] = [
+                "-c", "raise SystemExit(125)"]
             from plan import Slot
             rec = run_slot(Slot("measured", "guard", "fast",
                                 "NO_WINDOW", 0), config)
@@ -1341,11 +1336,14 @@ class RunNamespaceTests(unittest.TestCase):
                 os.path.join(out, "fresh", "run.json")))
 
 
-def version_stub(tmp, name, banner):
+def version_probe_args(banner):
+    return ["-c", f"print({banner!r})"]
+
+
+def version_fixture(tmp, name, banner):
     path = os.path.join(tmp, name)
     with open(path, "w", encoding="utf-8") as handle:
-        handle.write(f'#!/bin/sh\necho "{banner}"\n')
-    os.chmod(path, 0o755)
+        handle.write(f"print({banner!r})\n")
     return path
 
 
@@ -1362,16 +1360,18 @@ class CompetitorIdentityTests(unittest.TestCase):
 
     def test_version_probe_reads_the_banner(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path = version_stub(tmp, "timeout.exe", "timeout 1.0.0")
-            self.assertEqual(arms_mod.probe_version(path), "1.0.0")
+            path = version_fixture(tmp, "timeout.exe", "timeout 1.0.0")
+            self.assertEqual(arms_mod.probe_version(
+                sys.executable, [path, "--version"]), "1.0.0")
             self.assertIsNone(arms_mod.probe_version(
                 os.path.join(tmp, "absent.exe")))
 
     def test_wrong_version_is_named_as_a_mismatch(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path = version_stub(tmp, "timeout.exe", "timeout 9.9.9")
+            path = version_fixture(tmp, "timeout.exe", "timeout 9.9.9")
             fps = {"nuewframe": arms_mod.fingerprint(path)}
-            versions = {"nuewframe": arms_mod.probe_version(path)}
+            versions = {"nuewframe": arms_mod.probe_version(
+                sys.executable, [path, "--version"])}
             staged = {"nuewframe": {"sha256": fps["nuewframe"]["sha256"]}}
             mismatches = arms_mod.check_competitor_identities(
                 self.identity_config(), fps, versions, staged)
@@ -1382,17 +1382,18 @@ class CompetitorIdentityTests(unittest.TestCase):
     def test_renamed_guard_binary_is_caught_not_measured(self):
         with tempfile.TemporaryDirectory() as tmp:
             # Staged record from the genuine as-found timeout.exe.
-            genuine = version_stub(tmp, "genuine.exe", "timeout 1.0.0")
+            genuine = version_fixture(tmp, "genuine.exe", "timeout 1.0.0")
             staged = {"nuewframe": {
                 "sha256": arms_mod.fingerprint(genuine)["sha256"]}}
             # The guard binary, renamed to timeout.exe, even claiming
             # the right version string in its banner.
-            impostor = version_stub(tmp, "timeout.exe",
+            impostor = version_fixture(tmp, "timeout.exe",
                                     "timeout 1.0.0 (guard build)")
             with open(impostor, "a", encoding="utf-8") as handle:
                 handle.write("# different bytes from the as-found input\n")
             fps = {"nuewframe": arms_mod.fingerprint(impostor)}
-            versions = {"nuewframe": arms_mod.probe_version(impostor)}
+            versions = {"nuewframe": arms_mod.probe_version(
+                sys.executable, [impostor, "--version"])}
             mismatches = arms_mod.check_competitor_identities(
                 self.identity_config(), fps, versions, staged)
             self.assertTrue(any("sha256" in m for m in mismatches),
@@ -1400,9 +1401,10 @@ class CompetitorIdentityTests(unittest.TestCase):
 
     def test_matching_identity_passes(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path = version_stub(tmp, "timeout.exe", "timeout 1.0.0")
+            path = version_fixture(tmp, "timeout.exe", "timeout 1.0.0")
             fps = {"nuewframe": arms_mod.fingerprint(path)}
-            versions = {"nuewframe": arms_mod.probe_version(path)}
+            versions = {"nuewframe": arms_mod.probe_version(
+                sys.executable, [path, "--version"])}
             staged = {"nuewframe": {"sha256": fps["nuewframe"]["sha256"]}}
             self.assertEqual(arms_mod.check_competitor_identities(
                 self.identity_config(), fps, versions, staged), [])
@@ -1459,9 +1461,10 @@ class CompetitorIdentityTests(unittest.TestCase):
         # campaign.json: the pin is the anchor, the record is an
         # added consistency record only.
         with tempfile.TemporaryDirectory() as tmp:
-            path = version_stub(tmp, "timeout.exe", "timeout 1.0.0")
+            path = version_fixture(tmp, "timeout.exe", "timeout 1.0.0")
             fps = {"nuewframe": arms_mod.fingerprint(path)}
-            versions = {"nuewframe": arms_mod.probe_version(path)}
+            versions = {"nuewframe": arms_mod.probe_version(
+                sys.executable, [path, "--version"])}
             config = {"competitor_identities": {"nuewframe": {
                 "binary": "timeout.exe", "version": "1.0.0",
                 "version_args": ["--version"], "sha256": "a" * 64}}}
@@ -1475,9 +1478,10 @@ class CompetitorIdentityTests(unittest.TestCase):
         # The record check is kept as well: matching the pin does
         # not excuse a hash that disagrees with the staging record.
         with tempfile.TemporaryDirectory() as tmp:
-            path = version_stub(tmp, "timeout.exe", "timeout 1.0.0")
+            path = version_fixture(tmp, "timeout.exe", "timeout 1.0.0")
             fps = {"nuewframe": arms_mod.fingerprint(path)}
-            versions = {"nuewframe": arms_mod.probe_version(path)}
+            versions = {"nuewframe": arms_mod.probe_version(
+                sys.executable, [path, "--version"])}
             config = {"competitor_identities": {"nuewframe": {
                 "binary": "timeout.exe", "version": "1.0.0",
                 "version_args": ["--version"],
@@ -1513,13 +1517,14 @@ class CompetitorIdentityTests(unittest.TestCase):
         # binary whose --version carries the right token but whose
         # bytes differ from the real pin in campaign.json.
         with tempfile.TemporaryDirectory() as tmp:
-            path = version_stub(tmp, "timeout.exe", "timeout 1.0.0")
+            path = version_fixture(tmp, "timeout.exe", "timeout 1.0.0")
             with open(os.path.join(HERE, "..", "campaign.json"),
                       encoding="utf-8") as handle:
                 config = json.load(handle)
             pin = config["competitor_identities"]["nuewframe"]["sha256"]
             actual = arms_mod.fingerprint(path)
-            self.assertEqual(arms_mod.probe_version(path), "1.0.0")
+            self.assertEqual(arms_mod.probe_version(
+                sys.executable, [path, "--version"]), "1.0.0")
             mismatch = arms_mod.sha256_pin_mismatch(
                 "nuewframe", "timeout.exe", actual["sha256"], pin)
             self.assertIsNotNone(mismatch)
@@ -2147,6 +2152,20 @@ class ClaimLedgerTests(unittest.TestCase):
                     for p in problems), problems)
 
 
+def count_tree_rust_tests(tree):
+    generated = {os.path.join(tree, ".git"), os.path.join(tree, "target"),
+                 os.path.join(tree, "tests", "build")}
+    count = 0
+    for root, dirs, files in os.walk(tree):
+        dirs[:] = [name for name in dirs
+                   if os.path.join(root, name) not in generated]
+        for name in files:
+            if name.endswith(".rs"):
+                with open(os.path.join(root, name), encoding="utf-8") as handle:
+                    count += handle.read().count("#[test]")
+    return count
+
+
 class CensusConsistencyTests(unittest.TestCase):
     """The counted-once anchor: every suite total stated in the
     suite's own documents, in the canonical phrasing
@@ -2381,13 +2400,7 @@ class CensusConsistencyTests(unittest.TestCase):
                 "guard tree not present at the suite's expected "
                 f"relative location ({tree}); the tree's test "
                 "count cannot be recounted here")
-        recount = 0
-        for root, _dirs, files in os.walk(tree):
-            for name in files:
-                if name.endswith(".rs"):
-                    with open(os.path.join(root, name),
-                              encoding="utf-8") as handle:
-                        recount += handle.read().count("#[test]")
+        recount = count_tree_rust_tests(tree)
         self.assertGreater(recount, 0)
         match = re.search(r"\((\d+) counted once\)", readme)
         self.assertIsNotNone(
@@ -4255,11 +4268,10 @@ class AdmissionTests(unittest.TestCase):
 
     def admission_config(self, tmp, banner="timeout 1.0.0"):
         config = stub_config(tmp)
-        exe = version_stub(tmp, "timeout.exe", banner)
-        config["arms"]["nuewframe"]["executable"] = exe
+        exe = config["arms"]["nuewframe"]["executable"]
         config["competitor_identities"] = {"nuewframe": {
-            "binary": "timeout.exe", "version": "1.0.0",
-            "version_args": ["--version"],
+            "binary": os.path.basename(exe), "version": "1.0.0",
+            "version_args": version_probe_args(banner),
             "sha256": arms_mod.fingerprint(exe)["sha256"]}}
         config["competitor_identities_record"] = os.path.join(
             tmp, "no-staging-record.json")
@@ -7836,12 +7848,8 @@ class HarnessDeadlineKillTests(unittest.TestCase):
                     "sep = sys.argv.index('--')\n"
                     "subprocess.Popen(sys.argv[sep + 1:])\n"
                     "time.sleep(30)\n")
-            exe = os.path.join(tmp, "hang-arm")
-            with open(exe, "w", encoding="utf-8") as handle:
-                handle.write(
-                    f'#!/bin/sh\nexec {sys.executable} {hang} "$@"\n')
-            os.chmod(exe, 0o755)
-            config["arms"]["nuewframe"]["executable"] = exe
+            config["_windows_slot_jobs"] = sys.platform == "win32"
+            config["arms"]["nuewframe"]["templates"]["kill"][0] = hang
             from plan import Slot
             original = runner_mod.SLOT_DEADLINE_S
             runner_mod.SLOT_DEADLINE_S = 2.0
@@ -7851,7 +7859,7 @@ class HarnessDeadlineKillTests(unittest.TestCase):
                                     "NO_WINDOW", 0), config)
             finally:
                 runner_mod.SLOT_DEADLINE_S = original
-                if rec is not None:
+                if sys.platform != "win32" and rec is not None:
                     for pid in (rec.get("child_pid"),
                                 rec.get("grandchild_pid")):
                         if isinstance(pid, int):
@@ -9551,13 +9559,7 @@ class Round25NeighbourTests(unittest.TestCase):
         tree = os.path.normpath(os.path.join(HERE, "..", ".."))
         if not os.path.isdir(tree):
             self.skipTest("guard tree not present")
-        recount = 0
-        for root, _dirs, files in os.walk(tree):
-            for name in files:
-                if name.endswith(".rs"):
-                    with open(os.path.join(root, name),
-                              encoding="utf-8") as handle:
-                        recount += handle.read().count("#[test]")
+        recount = count_tree_rust_tests(tree)
         with open(os.path.join(HERE, "..", "README.md"),
                   encoding="utf-8") as handle:
             readme = handle.read()
@@ -10658,7 +10660,9 @@ class Round27LandingTests(unittest.TestCase):
                 handle.write(
                     "import os, subprocess, sys, time\n"
                     "d = sys.argv[1]\n"
-                    "kids = [subprocess.Popen(['/bin/sleep', '30'])"
+                    "kids = [subprocess.Popen([sys.executable, '-S', '-c',"
+                    " 'import time; time.sleep(30)'],"
+                    " creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))"
                     " for _ in range(40)]\n"
                     "for i, k in enumerate(kids, 1):\n"
                     "    open(os.path.join(d, f'{i}.pid'), 'w')"
@@ -11088,7 +11092,9 @@ class Round28LandingTests(unittest.TestCase):
                 handle.write(
                     "import os, subprocess, sys, time\n"
                     "d = sys.argv[1]\n"
-                    "kids = [subprocess.Popen(['/bin/sleep', '30'])"
+                    "kids = [subprocess.Popen([sys.executable, '-S', '-c',"
+                    " 'import time; time.sleep(30)'],"
+                    " creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))"
                     " for _ in range(7)]\n"
                     "open(os.path.join(d, 'child.pid'), 'w')"
                     ".write(str(os.getpid()))\n"
@@ -11498,7 +11504,9 @@ class Round29LandingTests(unittest.TestCase):
                 handle.write(
                     "import os, subprocess, sys, time\n"
                     "d = sys.argv[1]\n"
-                    "kids = [subprocess.Popen(['/bin/sleep', '30'])"
+                    "kids = [subprocess.Popen([sys.executable, '-S', '-c',"
+                    " 'import time; time.sleep(30)'],"
+                    " creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))"
                     " for _ in range(3)]\n"
                     "open(os.path.join(d, 'child.pid'), 'w')"
                     ".write(str(os.getpid()))\n"
@@ -11513,8 +11521,7 @@ class Round29LandingTests(unittest.TestCase):
             slot = plan_mod.Slot("measured", "guard", "scale",
                                  "NO_WINDOW", 6, "deep-4")
             record = run_slot(slot, config)
-            self.assertEqual(record["child_pid"],
-                             record["descendant_pids"][0], record)
+            self.assertIn(record["child_pid"], record["descendant_pids"], record)
             self.assertEqual(len(record["descendant_pids"]), 4)
             self.assertEqual(record["outcome"], "ok", record)
             self.assertEqual(
@@ -11673,7 +11680,9 @@ class Round30LandingTests(unittest.TestCase):
                     "import os, subprocess, sys, time\n"
                     "ids = sys.argv[1]\n"
                     "d = os.path.dirname(ids)\n"
-                    "kids = [subprocess.Popen(['/bin/sleep', '30'])"
+                    "kids = [subprocess.Popen([sys.executable, '-S', '-c',"
+                    " 'import time; time.sleep(30)'],"
+                    " creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))"
                     " for _ in range(8)]\n"
                     "open(os.path.join(d, 'child.pid'), 'w')"
                     ".write(str(os.getpid()))\n"
@@ -11725,7 +11734,9 @@ class Round30LandingTests(unittest.TestCase):
                 handle.write(
                     "import os, subprocess, sys, time\n"
                     "d = sys.argv[1]\n"
-                    "kids = [subprocess.Popen(['/bin/sleep', '30'])"
+                    "kids = [subprocess.Popen([sys.executable, '-S', '-c',"
+                    " 'import time; time.sleep(30)'],"
+                    " creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))"
                     " for _ in range(3)]\n"
                     "open(os.path.join(d, '1.pid'), 'w')"
                     ".write(str(os.getpid()))\n"
@@ -14158,8 +14169,7 @@ class Round36LandingTests(unittest.TestCase):
         self.assertEqual(
             {arm: report_mod._plan_fast_argv_length(arm)
              for arm in plan_mod.PRODUCT_ARMS},
-            {"guard": 7, "processkit": 11, "nuewframe": 6,
-             "sysprims": 6})
+            SHIPPED_FAST_ARGV_LENGTHS)
         junk = ["extra-junk-token", "--not-a-shape-flag",
                 "plain-second-argument"]
 
@@ -14891,9 +14901,7 @@ class Round38LandingTests(unittest.TestCase):
             arm, shipped)
             for arm in ("guard", "nuewframe", "processkit",
                         "sysprims")}
-        self.assertEqual(lengths, {"guard": 7, "nuewframe": 5,
-                                   "processkit": 6,
-                                   "sysprims": 6})
+        self.assertEqual(lengths, SHIPPED_FAST_ARGV_LENGTHS)
         for arm in lengths:
             self.assertIsNone(
                 report_mod._plan_fast_argv_budget_gap(
@@ -15067,8 +15075,7 @@ class Round39LandingTests(unittest.TestCase):
         # over the genuine fixture.
         import copy
         base = self.shipped_config()
-        expected = {"guard": 7, "nuewframe": 5,
-                    "processkit": 6, "sysprims": 6}
+        expected = SHIPPED_FAST_ARGV_LENGTHS
         mutations = []
         config = copy.deepcopy(base)
         config["children"]["fast"]["args"] = ["relay", 0]
@@ -15642,17 +15649,17 @@ class Round40LandingTests(unittest.TestCase):
                     if "underived" in item["detail"]]
 
         config = copy.deepcopy(base)
-        config["children"]["fast"]["args"] = "relay 0"
+        text_args = "relay 0"
+        config["children"]["fast"]["args"] = text_args
+        extra_tokens = len(text_args) - len(base["children"]["fast"]["args"])
         self.assertEqual(lengths(config), {
-            "guard": 12, "processkit": 11,
-            "nuewframe": 10, "sysprims": 11})
+            arm: count + extra_tokens
+            for arm, count in SHIPPED_FAST_ARGV_LENGTHS.items()})
         self.assertEqual(underived(config), [])
 
         config = copy.deepcopy(base)
         config["children"]["fast"]["args"] = {"relay": 0, "x": 1}
-        self.assertEqual(lengths(config), {
-            "guard": 7, "processkit": 6,
-            "nuewframe": 5, "sysprims": 6})
+        self.assertEqual(lengths(config), SHIPPED_FAST_ARGV_LENGTHS)
         self.assertEqual(underived(config), [])
 
         for arm in arms:
@@ -15678,9 +15685,7 @@ class Round40LandingTests(unittest.TestCase):
                     report_mod._plan_fast_argv_budget_gap(
                         arm, config), (arm, token))
 
-        self.assertEqual(lengths(base), {
-            "guard": 7, "processkit": 6,
-            "nuewframe": 5, "sysprims": 6})
+        self.assertEqual(lengths(base), SHIPPED_FAST_ARGV_LENGTHS)
 
         # Genuinely unbuildable shapes still name their gap:
         # a non-iterable args value (the runner's list()
@@ -15990,8 +15995,13 @@ class Round41LandingTests(unittest.TestCase):
                  and i["field"] == "argv"
                  and "configured executable of arm" in i["detail"]]
         self.assertEqual(len(items), 2)
-        self.assertEqual(
-            len(report_mod.standing_losses(recs, FULL_COUNTS)), 2)
+        # ProcessKit's required timeout, event and input tokens also make
+        # its vector too long for the slot now labeled as sysprims.
+        losses = report_mod.standing_losses(recs, FULL_COUNTS)
+        self.assertEqual(len(losses), 3, losses)
+        self.assertTrue(any("sysprims/malformed" in loss
+                            and "not the exact vector" in loss
+                            for loss in losses), losses)
 
     # ---------------------------------------------------------- F4
     def test_the_derivation_never_consumes_a_one_shot_iterator(self):
@@ -17555,76 +17565,46 @@ class Round45LandingTests(unittest.TestCase):
             def __iter__(self):
                 return self._gen
 
-        def stub(directory, name, body):
-            path = os.path.join(directory, name)
-            with open(path, "w", encoding="utf-8") as handle:
-                handle.write(body)
-            os.chmod(path, 0o755)
-            return path
+        default_version = ".".join(map(str, sys.version_info[:3]))
+        fixture = arms_mod.fingerprint(sys.executable)
 
-        with tempfile.TemporaryDirectory() as tmp:
-            # Prints 9.9.9 only for the stated -V.
-            stub_v = stub(
-                tmp, "version-stub",
-                "#!/bin/sh\n"
-                "if [ \"$1\" = \"-V\" ]; then echo 9.9.9; fi\n")
-            # Prints the pinned 9.9.9 for the default, a
-            # refuting 1.1.1 for the stated -V.
-            stub_c = stub(
-                tmp, "version-stub2",
-                "#!/bin/sh\n"
-                "if [ \"$1\" = \"-V\" ]; then echo 1.1.1; "
-                "else echo 9.9.9; fi\n")
+        def cfg_with(version_args):
+            cfg = copy.deepcopy(base)
+            cfg["arms"]["processkit"]["executable"] = sys.executable
+            entry = cfg["competitor_identities"]["processkit"]
+            entry["binary"] = os.path.basename(sys.executable)
+            entry["sha256"] = fixture["sha256"]
+            entry["version"] = default_version
+            if version_args is _ABSENT:
+                entry.pop("version_args", None)
+            else:
+                entry["version_args"] = version_args
+            return cfg
 
-            def cfg_with(executable, version_args,
-                         version=None):
-                cfg = copy.deepcopy(base)
-                cfg["arms"]["processkit"]["executable"] = \
-                    executable
-                entry = cfg["competitor_identities"][
-                    "processkit"]
-                if version_args is _ABSENT:
-                    entry.pop("version_args", None)
-                else:
-                    entry["version_args"] = version_args
-                if version is not None:
-                    entry["version"] = version
-                return cfg
+        _ABSENT = object()
+        stated = version_probe_args("9.9.9")
+        # A plain stated vector and the interpreter's real default probe
+        # provide the two controls for the one-shot vector below.
+        self.assertEqual(harness_mod.arm_versions(cfg_with(stated))["processkit"],
+                         "9.9.9")
+        self.assertEqual(harness_mod.arm_versions(cfg_with(_ABSENT))["processkit"],
+                         default_version)
 
-            _ABSENT = object()
-            # Controls: a plain stated list, and the
-            # absent field's default, behave as before.
-            self.assertEqual(
-                harness_mod.arm_versions(cfg_with(
-                    stub_v, ["-V"]))["processkit"], "9.9.9")
-            self.assertEqual(
-                harness_mod.arm_versions(cfg_with(
-                    stub_c, _ABSENT))["processkit"], "9.9.9")
-            # The payload stated value is probed as
-            # stated, admission-first and arm-first alike.
-            cfg = cfg_with(stub_v, OneShotListSub(["-V"]))
-            harness_mod.admission_failures(cfg)
-            self.assertEqual(
-                harness_mod.arm_versions(cfg)["processkit"],
-                "9.9.9")
-            cfg = cfg_with(stub_v, OneShotListSub(["-V"]))
-            self.assertEqual(
-                harness_mod.arm_versions(cfg)["processkit"],
-                "9.9.9")
-            # The converse: no manufactured confirmation —
-            # the stated-args refutation is the probed
-            # version, and the identity check carries it.
-            cfg = cfg_with(stub_c, OneShotListSub(["-V"]),
-                           version="9.9.9")
-            versions = harness_mod.arm_versions(cfg)
-            self.assertEqual(versions["processkit"], "1.1.1")
-            mismatches = arms_mod.check_competitor_identities(
-                cfg, {"processkit": arms_mod.fingerprint(stub_c)},
-                versions)
-            self.assertTrue(any(
-                "probed version '1.1.1' != pinned version "
-                "'9.9.9'" in mismatch
-                for mismatch in mismatches), mismatches)
+        cfg = cfg_with(OneShotListSub(stated))
+        harness_mod.admission_failures(cfg)
+        self.assertEqual(harness_mod.arm_versions(cfg)["processkit"], "9.9.9")
+        cfg = cfg_with(OneShotListSub(stated))
+        self.assertEqual(harness_mod.arm_versions(cfg)["processkit"], "9.9.9")
+
+        # The default would match the pin. The stated vector refutes it.
+        cfg = cfg_with(OneShotListSub(version_probe_args("1.1.1")))
+        versions = harness_mod.arm_versions(cfg)
+        self.assertEqual(versions["processkit"], "1.1.1")
+        mismatches = arms_mod.check_competitor_identities(
+            cfg, {"processkit": fixture}, versions)
+        self.assertTrue(any(
+            f"probed version '1.1.1' != pinned version '{default_version}'"
+            in mismatch for mismatch in mismatches), mismatches)
 
     # ---------------------------------------------------------- F2
     def test_the_slot_cache_holds_a_factory_minting_one_shot_iterables(self):
