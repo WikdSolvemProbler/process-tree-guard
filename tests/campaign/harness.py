@@ -3388,4 +3388,7 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    # A redirected Windows console can use a legacy code page. Keep the
+    # saved UTF-8 report intact and escape characters the console cannot print.
+    sys.stdout.reconfigure(errors="backslashreplace")
     sys.exit(main())
