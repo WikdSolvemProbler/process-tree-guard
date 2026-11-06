@@ -487,7 +487,7 @@ static bool observed_fork(const struct churn_trace *trace, int64_t after, int64_
     return false;
 }
 
-static void verify_churn(unsigned round, pid_t sibling, const struct proc_bsdinfo *sibling_before)
+static bool verify_churn(unsigned round, pid_t sibling, const struct proc_bsdinfo *sibling_before)
 {
     int marker[2];
     struct churn_trace *trace = mmap(NULL, sizeof(*trace), PROT_READ | PROT_WRITE,
@@ -611,7 +611,7 @@ static void verify_churn(unsigned round, pid_t sibling, const struct proc_bsdinf
         " fork_start_ns=%" PRId64 " fork_return_ns=%" PRId64 "\n",
         round, ready.pid, held.pbi_start_tvsec, held.pbi_start_tvusec, ready.session, sibling,
         SIGKILL, passes, overlap, overlap_after_enter, first_dispatched, first_enter, first_reaped, fork_started, fork_completed);
-    require(overlap, "no recorded successful fork within first sweep interval");
+    return overlap;
 }
 
 static _Noreturn void controller(void)
@@ -636,10 +636,16 @@ static _Noreturn void controller(void)
     require(close(marker[1]) == 0 && read_marker(marker[0]).pid == sibling, "peer readiness identity differs");
     const struct proc_bsdinfo sibling_before = checked_info(sibling, &peer);
     require(population(&peer, sibling) == 1, "peer UID held an unexpected process");
-    for (unsigned round = 1; round <= rounds; ++round)
-        verify_churn(round, sibling, &sibling_before);
+    unsigned overlap_rounds = 0;
+    for (unsigned round = 1; round <= rounds; ++round) {
+        if (verify_churn(round, sibling, &sibling_before))
+            ++overlap_rounds;
+    }
     require(kill_owned_child(sibling) && empty_until(&peer),
         "could not reap the owned peer");
+    printf("churn_summary completed=%u overlap_rounds=%u worker_empty=1 peer_empty=1\n",
+        (unsigned)rounds, overlap_rounds);
+    require(overlap_rounds == rounds, "successful fork overlap was not observed in every round");
     _exit(0);
 }
 
