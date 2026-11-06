@@ -14,8 +14,11 @@
 //! parity table is in tests/PARITY.md.
 
 mod common;
+#[path = "support/suspension.rs"]
+mod suspension;
 
 use common::*;
+use suspension::TestGuard;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -1298,9 +1301,10 @@ fn g61_a_standard_error_that_nobody_reads_does_not_stop_the_deadline() {
     checks.finish();
 }
 
-/// The first thread of a process, by creation time, is suspended for `hold` seconds after `delay`: the helper does it.
-fn stall_supervisor(guard_id: u32, delay: &str, hold: &str) -> std::process::Child {
-    spawn_quiet(testkit(), &["suspend-main", &guard_id.to_string(), delay, hold])
+fn quiet_test_guard(args: &[&str], retain_supervisor: bool) -> TestGuard {
+    let mut command = guard_cmd(args);
+    command.stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null());
+    TestGuard::spawn(command, retain_supervisor).expect("start the guard with test-owned handles")
 }
 
 #[test]
@@ -1313,19 +1317,20 @@ fn g62_a_request_after_the_deadline_is_refused_even_if_the_supervisor_has_not_no
     // granted, it would move the deadline to 8.6, a run that went past its deadline and lived on.
     let args = extendable_args(&["--extension-log", &log], "3", &[testkit(), "after", "3.5", testkit(), "extend-self", "5", "100"]);
     let began = std::time::Instant::now();
-    let mut running = spawn_quiet(guard(), &args);
-    let mut stall = stall_supervisor(running.id(), "1.5", "3");
-    let status = wait_limited(&mut running, 40);
+    let mut running = quiet_test_guard(&args, true);
+    nap(1.5 * UNIT);
+    let stalled = running.suspend_supervisor().expect("suspend the retained supervisor thread");
+    nap(3.0 * UNIT);
+    let while_stalled = std::fs::read_to_string(&log).unwrap_or_default();
+    stalled.resume().expect("resume the supervisor");
+    let status = running.wait(40);
     let elapsed = began.elapsed().as_secs_f64();
-    if status.is_none() {
-        kill(&mut running);
-    }
-    let _ = wait_limited(&mut stall, 10);
     let file = std::fs::read_to_string(&log).unwrap_or_default();
     checks.check("G62", "the run ends with 124, not before its deadline", status.and_then(|s| s.code()) == Some(124) && elapsed >= 3.0 * UNIT - 0.1, format!("{:?} after {:.2} s", status, elapsed));
     checks.bound("G62", "the run ends when the supervisor resumes, long before a late grant would have let it", elapsed < 7.0 * UNIT, format!("{:.2} s", elapsed));
-    checks.check("G62", "the late request is in the log as refused because the run has ended, and nothing was granted",
-        file.lines().any(|l| l.contains("requested=5 ") && l.contains("decision=refused") && l.contains("the run has ended")) && !file.contains("decision=granted"), file);
+    let late_refusal = |line: &str| line.contains("requested=5 ") && line.contains("decision=refused") && line.contains("the run has ended");
+    checks.check("G62", "the worker recorded the late refusal while the supervisor was paused, and nothing was granted",
+        while_stalled.lines().any(late_refusal) && file.lines().any(late_refusal) && !file.contains("decision=granted"), file);
     checks.finish();
 }
 
@@ -1775,30 +1780,46 @@ fn g71_a_reply_out_of_range_is_refused_by_the_client_and_never_crashes_it() {
 
 #[test]
 fn g72_a_request_from_a_client_that_has_gone_by_the_time_the_run_decides_is_refused() {
-    let mut checks = Checks::new("client gone");
-    let dir = TempDir::new("g72-");
-    let (ready, frozen, log) = (dir.join("ready.txt"), dir.join("frozen.txt"), text(&dir.join("extension.log")));
-    // A client in the job waits until the run is frozen, then connects, writes a request for 30 units and exits at once,
-    // so it is gone when the run is thawed and reads the request. The run's own deadline is 8 units, and nothing was held.
-    let (ready_text, frozen_text) = (text(&ready), text(&frozen));
-    let args = extendable_args(&["--extension-log", &log], BOSS, &[testkit(), "par", "100", "+", testkit(), "ask-and-exit", &ready_text, &frozen_text, "30"]);
-    let began = std::time::Instant::now();
-    let mut run = spawn_quiet(guard(), &args);
-    let up = wait_for_file(&ready, 30.0);
-    let mut freezer = spawn_quiet(testkit(), &["freeze", &run.id().to_string(), &frozen_text, "2"]);
-    let status = wait_limited(&mut run, 60);
-    let elapsed = began.elapsed().as_secs_f64();
-    if status.is_none() {
-        kill(&mut run);
+    check_disconnected_client("G72", "client gone", false);
+}
+
+fn check_disconnected_client(id: &str, title: &str, stays_alive: bool) {
+    let mut checks = Checks::new(title);
+    let dir = TempDir::new(&format!("{}-", id.to_ascii_lowercase()));
+    let (ready, frozen, closed) = (dir.join("ready.txt"), dir.join("frozen.txt"), dir.join("closed.txt"));
+    let (ready_text, frozen_text, closed_text) = (text(&ready), text(&frozen), text(&closed));
+    let log = text(&dir.join("extension.log"));
+    let mut child = vec![testkit(), "par", "100", "+", testkit(), "ask-and-exit", &ready_text, &frozen_text, &closed_text, "30"];
+    if stays_alive {
+        child.push("100");
     }
-    let _ = wait_limited(&mut freezer, 10);
+    let args = extendable_args(&["--extension-log", &log], BOSS, &child);
+    let began = std::time::Instant::now();
+    let mut run = quiet_test_guard(&args, false);
+    let pid = published(&ready, 30.0).expect("client ready marker").trim().parse().expect("client PID");
+    let client = Watched::open(pid).expect("retain the waiting client's handle");
+    assert!(client.exit_code(0).is_none(), "client exited before the guard was suspended");
+
+    // Signal the client only after suspension succeeds. Its second marker
+    // proves it wrote the request and closed the pipe before the guard resumed.
+    let paused = run.suspend_process().expect("suspend the guard through its creation handle");
+    std::fs::write(&frozen, "frozen").expect("signal the client");
+    let closed_while_frozen = wait_for_file(&closed, 2.0);
+    let client_exit = if stays_alive || !closed_while_frozen { client.exit_code(0) } else { client.exit_code(2) };
+    paused.resume().expect("resume the guard");
+    let status = run.wait(60);
+    let elapsed = began.elapsed().as_secs_f64();
     let file = std::fs::read_to_string(&log).unwrap_or_default();
-    checks.check("G72", "the client was ready and the run was frozen and thawed", up && frozen.exists(), format!("{} {}", up, frozen.exists()));
-    checks.check("G72", "the request is in the log as refused because the process could not be verified, and nothing was granted",
-        file.lines().any(|l| l.contains("requested=30 ") && l.contains("decision=refused") && l.contains("the process could not be verified")) && !file.contains("decision=granted"), file.clone());
-    checks.check("G72", "the run ends with 124 at its own deadline", status.and_then(|s| s.code()) == Some(124) && elapsed >= 7.9 * UNIT, format!("{:?} after {:.2} s", status, elapsed));
-    checks.timing("G72", "the run ends by its own deadline plus the grace", elapsed <= 8.0 * UNIT + GRACE, format!("{:.2} s", elapsed));
-    checks.bound("G72", "the run ends before 14 units, long before the 30 units the client asked for", elapsed < 14.0 * UNIT, format!("{:.2} s", elapsed));
+
+    let client_state = if stays_alive { client_exit.is_none() } else { client_exit == Some(0) };
+    checks.check(id, if stays_alive { "the client closed its pipe and stayed alive while the guard was frozen" }
+        else { "the client closed its pipe and exited while the guard was frozen" },
+        closed_while_frozen && client_state, format!("closed: {}, exit: {:?}", closed_while_frozen, client_exit));
+    checks.check(id, "the request is refused because the process could not be verified, and nothing was granted",
+        file.lines().any(|l| l.contains("requested=30 ") && l.contains("decision=refused") && l.contains("the process could not be verified")) && !file.contains("decision=granted"), file);
+    checks.check(id, "the run ends with 124 at its own deadline", status.and_then(|s| s.code()) == Some(124) && elapsed >= 7.9 * UNIT, format!("{:?} after {:.2} s", status, elapsed));
+    checks.timing(id, "the run ends by its own deadline plus the grace", elapsed <= 8.0 * UNIT + GRACE, format!("{:.2} s", elapsed));
+    checks.bound(id, "the run ends before 14 units, long before the 30 units the client asked for", elapsed < 14.0 * UNIT, format!("{:.2} s", elapsed));
     checks.finish();
 }
 
@@ -1999,32 +2020,7 @@ fn g79_an_audit_file_that_cannot_be_turned_over_stops_the_run_instead_of_losing_
 
 #[test]
 fn g80_a_request_from_a_process_that_is_alive_but_is_not_the_client_that_connected_is_refused() {
-    let mut checks = Checks::new("client closed its end");
-    let dir = TempDir::new("g80-");
-    let (ready, frozen, log) = (dir.join("ready.txt"), dir.join("frozen.txt"), text(&dir.join("extension.log")));
-    // As G72, with a client that does not exit: it connects while the run is frozen, writes a request for 30 units, closes its end
-    // of the channel and lives on, in the job, alive, and older than the connection. That is a process that took the identifier of
-    // a client that wrote and exited: everything about it checks out but the end of the pipe the request came on, which is closed.
-    let (ready_text, frozen_text) = (text(&ready), text(&frozen));
-    let args = extendable_args(&["--extension-log", &log], BOSS, &[testkit(), "par", "100", "+", testkit(), "ask-and-exit", &ready_text, &frozen_text, "30", "100"]);
-    let began = std::time::Instant::now();
-    let mut run = spawn_quiet(guard(), &args);
-    let up = wait_for_file(&ready, 30.0);
-    let mut freezer = spawn_quiet(testkit(), &["freeze", &run.id().to_string(), &frozen_text, "2"]);
-    let status = wait_limited(&mut run, 60);
-    let elapsed = began.elapsed().as_secs_f64();
-    if status.is_none() {
-        kill(&mut run);
-    }
-    let _ = wait_limited(&mut freezer, 10);
-    let file = std::fs::read_to_string(&log).unwrap_or_default();
-    checks.check("G80", "the client was ready and the run was frozen and thawed", up && frozen.exists(), format!("{} {}", up, frozen.exists()));
-    checks.check("G80", "the request is in the log as refused because the process could not be verified, and nothing was granted",
-        file.lines().any(|l| l.contains("requested=30 ") && l.contains("decision=refused") && l.contains("the process could not be verified")) && !file.contains("decision=granted"), file.clone());
-    checks.check("G80", "the run ends with 124 at its own deadline", status.and_then(|s| s.code()) == Some(124) && elapsed >= 7.9 * UNIT, format!("{:?} after {:.2} s", status, elapsed));
-    checks.timing("G80", "the run ends by its own deadline plus the grace", elapsed <= 8.0 * UNIT + GRACE, format!("{:.2} s", elapsed));
-    checks.bound("G80", "the run ends before 14 units, long before the 30 units the client asked for", elapsed < 14.0 * UNIT, format!("{:.2} s", elapsed));
-    checks.finish();
+    check_disconnected_client("G80", "client closed its end", true);
 }
 
 #[test]
@@ -2109,7 +2105,7 @@ fn g82_extend_cannot_put_a_hold_on_a_process_that_is_not_in_the_job() {
 fn g83_a_command_that_ends_on_its_own_inside_its_hold_is_not_reported_as_a_timeout() {
     let mut checks = Checks::new("exit inside the hold");
     let dir = TempDir::new("g83-");
-    let (out, err) = (dir.join("out.txt"), dir.join("err.txt"));
+    let (out, err, ready) = (dir.join("out.txt"), dir.join("err.txt"), dir.join("holder.txt"));
     let files = |path: &Path| Stdio::from(std::fs::File::create(path).expect("make the file"));
     // The run has 2 units, and the command is its own last holder: it asks for 8, goes on for 4 and ends with 0, after the run's own
     // deadline and inside its hold. The supervisor (the guard's first thread) is suspended from 3 to 6 units, across the exit, so the
@@ -2117,20 +2113,26 @@ fn g83_a_command_that_ends_on_its_own_inside_its_hold_is_not_reported_as_a_timeo
     // exit must still win: reported as the deadline, it would end the run with 124 and a notice that is false. A suspended wait looks at
     // the command again when it resumes, so this shows the whole path from a stalled supervisor to the exit code; the order in which the
     // supervisor looks at the command and at the deadline is fixed by the unit test in engine.rs, which fails without the second look.
-    let args = extendable_args(&["--max-extension", "20"], "2", &[testkit(), "extend-self", "8", "4"]);
+    let ready_text = text(&ready);
+    let args = extendable_args(&["--max-extension", "20"], "2", &[testkit(), "extend-self", "8", "4", &ready_text]);
     let began = std::time::Instant::now();
-    refuse_prompt(&args);
-    let mut running = Command::new(guard()).args(&args).stdin(Stdio::null()).stdout(files(&out)).stderr(files(&err)).spawn().expect("start the guard");
-    let mut stall = stall_supervisor(running.id(), "3", "3");
-    let status = wait_limited(&mut running, 40);
+    let mut command = guard_cmd(&args);
+    command.stdin(Stdio::null()).stdout(files(&out)).stderr(files(&err));
+    let mut running = TestGuard::spawn(command, true).expect("start the guard with its supervisor handle");
+    let pid = published(&ready, 3.0).expect("holder acquired its extension").trim().parse().expect("holder PID");
+    let holder = Watched::open(pid).expect("retain the holder's process handle");
+    nap((3.0 * UNIT - began.elapsed().as_secs_f64()).max(0.0));
+    let stalled = running.suspend_supervisor().expect("suspend the retained supervisor thread");
+    let alive_when_paused = holder.exit_code(0).is_none();
+    nap(3.0 * UNIT);
+    let exit_while_paused = holder.exit_code(0);
+    stalled.resume().expect("resume the supervisor");
+    let status = running.wait(40);
     let elapsed = began.elapsed().as_secs_f64();
-    if status.is_none() {
-        kill(&mut running);
-    }
-    let _ = wait_limited(&mut stall, 10);
     let (printed, notices) = (std::fs::read_to_string(&out).unwrap_or_default(), std::fs::read_to_string(&err).unwrap_or_default());
     let shown = format!("{:?} after {:.2} s: {} {}", status, elapsed, printed.trim(), notices.trim());
-    checks.check("G83", "the command asked for its hold and went on", printed.contains("granted"), shown.clone());
+    checks.check("G83", "the command acquired its hold and exited during the pause",
+        printed.contains("granted") && alive_when_paused && exit_while_paused == Some(0), shown.clone());
     checks.check("G83", "the run ends with the command's exit code, 0, not with 124 at the deadline", status.and_then(|s| s.code()) == Some(0), shown.clone());
     checks.check("G83", "and says nothing of a timeout", !notices.contains("PROCESS_TIMEOUT"), shown.clone());
     checks.bound("G83", "it ends when the supervisor resumes, not when the hold would have ended (8 units)", (5.9 * UNIT..7.5 * UNIT).contains(&elapsed), shown);

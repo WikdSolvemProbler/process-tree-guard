@@ -32,18 +32,6 @@ use std::process::{exit, Child, Command, Stdio};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-/// A thread in a snapshot (THREADENTRY32).
-#[repr(C)]
-struct ThreadEntry {
-    size: u32,
-    usage: u32,
-    thread_id: u32,
-    owner_process_id: u32,
-    base_priority: i32,
-    delta_priority: i32,
-    flags: u32,
-}
-
 /// A process in a snapshot (PROCESSENTRY32W).
 #[repr(C)]
 struct ProcessEntry {
@@ -79,11 +67,6 @@ extern "system" {
     fn GetLastError() -> u32;
     fn LocalFree(memory: *mut c_void) -> *mut c_void;
     fn CreateToolhelp32Snapshot(flags: u32, process_id: u32) -> *mut c_void;
-    fn Thread32First(snapshot: *mut c_void, entry: *mut ThreadEntry) -> i32;
-    fn Thread32Next(snapshot: *mut c_void, entry: *mut ThreadEntry) -> i32;
-    fn OpenThread(access: u32, inherit: i32, thread_id: u32) -> *mut c_void;
-    fn GetThreadTimes(thread: *mut c_void, creation: *mut u64, exit: *mut u64, kernel: *mut u64, user: *mut u64) -> i32;
-    fn SuspendThread(thread: *mut c_void) -> u32;
     fn ResumeThread(thread: *mut c_void) -> u32;
     fn SetHandleInformation(handle: *mut c_void, mask: u32, flags: u32) -> i32;
     fn WaitForSingleObject(handle: *mut c_void, milliseconds: u32) -> u32;
@@ -109,12 +92,6 @@ extern "system" {
     fn GetProcessWindowStation() -> *mut c_void;
     fn CreateDesktopW(name: *const u16, device: *const u16, mode: *mut c_void, flags: u32, access: u32, attributes: *mut c_void) -> *mut c_void;
     fn GetUserObjectInformationW(object: *mut c_void, index: i32, info: *mut c_void, length: u32, needed: *mut u32) -> i32;
-}
-
-#[link(name = "ntdll")]
-extern "system" {
-    fn NtSuspendProcess(process: *mut c_void) -> i32;
-    fn NtResumeProcess(process: *mut c_void) -> i32;
 }
 
 #[link(name = "secur32")]
@@ -297,48 +274,6 @@ fn ask_slowly(name: &str, token: u64, asked: f64, delay: f64) -> String {
         }
         Ok(n) => format!("read {} bytes that are not a reply", n),
         Err(error) => format!("read failed {}", error.raw_os_error().unwrap_or(0)),
-    }
-}
-
-/// Suspend the first thread (by creation time) of the process `id` for `hold` seconds and
-/// resume it. The first thread of the guard is the supervisor: the others serve the channel.
-fn suspend_first_thread(id: u32, hold: f64) {
-    const THREADS: u32 = 4;
-    const SUSPEND_RESUME_AND_QUERY: u32 = 0x2 | 0x800;
-    unsafe {
-        let snapshot = CreateToolhelp32Snapshot(THREADS, 0);
-        if snapshot as isize == -1 {
-            usage("cannot list the threads");
-        }
-        let mut entry = ThreadEntry { size: std::mem::size_of::<ThreadEntry>() as u32, usage: 0, thread_id: 0, owner_process_id: 0, base_priority: 0, delta_priority: 0, flags: 0 };
-        let mut first: Option<(u64, *mut c_void)> = None;
-        let mut more = Thread32First(snapshot, &mut entry);
-        while more != 0 {
-            if entry.owner_process_id == id {
-                let thread = OpenThread(SUSPEND_RESUME_AND_QUERY, 0, entry.thread_id);
-                if !thread.is_null() {
-                    let (mut created, mut exited, mut kernel, mut user) = (0u64, 0u64, 0u64, 0u64);
-                    GetThreadTimes(thread, &mut created, &mut exited, &mut kernel, &mut user);
-                    match first {
-                        Some((earliest, _)) if earliest <= created => {
-                            CloseHandle(thread);
-                        }
-                        Some((_, kept)) => {
-                            CloseHandle(kept);
-                            first = Some((created, thread));
-                        }
-                        None => first = Some((created, thread)),
-                    }
-                }
-            }
-            more = Thread32Next(snapshot, &mut entry);
-        }
-        CloseHandle(snapshot);
-        let Some((_, thread)) = first else { usage("the process has no thread") };
-        SuspendThread(thread);
-        pause(hold);
-        ResumeThread(thread);
-        CloseHandle(thread);
     }
 }
 
@@ -989,12 +924,19 @@ fn main() {
             pause(wait);
         }
         "extend-self" => {
-            // The library call `extend`; the answer is printed, 125 when refused. Then hold.
-            need(rest, 2, "extend-self SECONDS HOLD");
+            // The library call `extend`; the answer is printed, 125 when refused.
+            // A successful holder may also publish its PID before it waits.
+            need_at_least(rest, 2, "extend-self SECONDS HOLD [READY]");
+            if rest.len() > 3 {
+                usage("usage: testkit extend-self SECONDS HOLD [READY]");
+            }
             // Any number: the run decides what it will grant, and logs what it refuses.
             let asked: f64 = rest[0].parse().unwrap_or_else(|_| usage(&format!("not a number: {}", rest[0])));
             let (line, granted) = extension_line(process_tree_guard::extend(asked));
             println!("{}", line);
+            if let Some(ready) = rest.get(2).filter(|_| granted) {
+                publish_own_id(Path::new(ready));
+            }
             pause(seconds(&rest[1]));
             exit(if granted { 0 } else { 125 });
         }
@@ -1047,18 +989,15 @@ fn main() {
             println!("granted {} limited {} other {}", granted, limited, other);
         }
         "ask-and-exit" => {
-            // Publish READY, wait until FROZEN exists, then write one request to the channel in the
-            // environment (30 seconds, for this process) and exit at once without reading the reply:
-            // a client that is gone by the time the run decides what to make of its request. With STAY,
-            // it closes its end of the channel and then lives on for STAY seconds: the stand-in for a process
-            // that has taken the identifier of a client that exited, which is alive and in the job but is
-            // not the end of the pipe the request came on.
-            need_at_least(rest, 3, "ask-and-exit READY FROZEN MAXSECONDS [STAY]");
-            if rest.len() > 4 {
-                usage("usage: testkit ask-and-exit READY FROZEN MAXSECONDS [STAY]");
+            // Announce this client before the guard pauses, then send a request
+            // while it is paused. Acknowledge closing the pipe before exiting
+            // or staying alive without the pipe.
+            need_at_least(rest, 4, "ask-and-exit READY FROZEN CLOSED WAIT [STAY]");
+            if rest.len() > 5 {
+                usage("usage: testkit ask-and-exit READY FROZEN CLOSED WAIT [STAY]");
             }
-            let limit = seconds(&rest[2]);
-            publish(Path::new(&rest[0]), "ready");
+            let limit = seconds(&rest[3]);
+            publish_own_id(Path::new(&rest[0]));
             let begun = Instant::now();
             while !Path::new(&rest[1]).exists() {
                 if begun.elapsed().as_secs_f64() > limit {
@@ -1080,26 +1019,11 @@ fn main() {
                 exit(1);
             }
             drop(channel);
-            if let Some(stay) = rest.get(3) {
+            publish(Path::new(&rest[2]), "closed");
+            if let Some(stay) = rest.get(4) {
                 pause(seconds(stay));
             }
             exit(0);
-        }
-        "freeze" => {
-            // Suspend every thread of the process PID, publish FROZEN, hold for HOLD seconds, resume it.
-            need(rest, 3, "freeze PID FROZEN HOLD");
-            let hold = seconds(&rest[2]);
-            unsafe {
-                // PROCESS_SUSPEND_RESUME
-                let process = OpenProcess(0x0800, 0, number(&rest[0], "PID"));
-                if process.is_null() || NtSuspendProcess(process) != 0 {
-                    usage("cannot suspend the process");
-                }
-                publish(Path::new(&rest[1]), "frozen");
-                pause(hold);
-                NtResumeProcess(process);
-                CloseHandle(process);
-            }
         }
         "forged-channel" => {
             // A channel served by something that is not the guard: it answers the first request with the
@@ -1151,12 +1075,6 @@ fn main() {
             unsafe { ConnectNamedPipe(pipe, std::ptr::null_mut()) };
             pause(wait);
             unsafe { CloseHandle(pipe) };
-        }
-        "suspend-main" => {
-            // After DELAY seconds, suspend the first thread of process PID for HOLD seconds, then resume it.
-            need(rest, 3, "suspend-main PID DELAY HOLD");
-            pause(seconds(&rest[1]));
-            suspend_first_thread(number(&rest[0], "PID"), seconds(&rest[2]));
         }
         "run-wait" => {
             // Run PROGRAM with the streams of this process and wait for it, hold, and exit with its code.
