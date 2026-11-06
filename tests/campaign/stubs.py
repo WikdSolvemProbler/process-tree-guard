@@ -61,6 +61,12 @@ Usage:
                                  kill arm that kills the child's
                                  whole process group at TIMEOUT and
                                  exits 124; no descendant survives it
+  stubs.py scale-ready SHAPE COUNT MARKER READY SECONDS [TESTKIT]
+                                 starts COUNT sleepers, publishes their
+                                 actual PID records, then signals READY
+  stubs.py arm-kill-scale-ready TIMEOUT COUNT READY -- CHILD ARGS...
+                                 waits up to 15 seconds for the fixture
+                                 before starting its kill interval
   stubs.py survivor-check [PID ...]
                                  exits 1 when any named PID is alive,
                                  0 when none is (with no PIDs, 0)
@@ -99,7 +105,16 @@ def _pid_alive(pid):
     return True
 
 
-def _windows_tree_kill(argv, timeout):
+def _await_scale_ready(path):
+    deadline = time.monotonic() + 15
+    while time.monotonic() < deadline:
+        if os.path.isfile(path):
+            return time.monotonic() < deadline
+        time.sleep(0.025)
+    return False
+
+
+def _windows_tree_kill(argv, timeout, scale_fixture=None):
     from windows_slot_job import SlotJob
 
     job = SlotJob()
@@ -107,11 +122,17 @@ def _windows_tree_kill(argv, timeout):
         proc = job.launch(argv, subprocess.CREATE_NO_WINDOW,
                           stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
         try:
-            try:
-                code = proc.wait(timeout)
-            except subprocess.TimeoutExpired:
-                code = 124
-            job.drain()
+            if scale_fixture is not None and not _await_scale_ready(scale_fixture[0]):
+                code = 97
+            else:
+                try:
+                    code = proc.wait(timeout)
+                except subprocess.TimeoutExpired:
+                    code = 124
+            receipt = job.drain()
+            if scale_fixture is not None and code == 124:
+                if receipt["active_before"] < scale_fixture[1]:
+                    return 97
             return code
         finally:
             proc.close()
@@ -147,6 +168,28 @@ def main(argv):
         marker, seconds = rest[0], float(rest[1])
         _publish(marker, str(os.getpid()))
         time.sleep(seconds)
+        return 0
+    if mode == "scale-ready":
+        shape, count_text, marker, ready, seconds, *testkit = rest
+        count = int(count_text)
+        if shape == "wide":
+            _publish(os.path.join(os.path.dirname(marker), "child.pid"), str(os.getpid()))
+        if testkit:
+            sleeper = [testkit[0], "sleep", seconds]
+        else:
+            sleeper = [
+                sys.executable, "-I", "-S", "-c",
+                "import sys, time; time.sleep(float(sys.argv[1]))",
+                seconds,
+            ]
+        children = [subprocess.Popen(sleeper) for _ in range(count)]
+        if shape == "wide":
+            _publish(marker, "".join(f"{child.pid}\n" for child in children))
+        else:
+            for level, child in enumerate(children, 1):
+                _publish(os.path.join(marker, f"{level}.pid"), str(child.pid))
+        _publish(ready, "ready")
+        time.sleep(float(seconds))
         return 0
     if mode == "wide":
         count, ids_path = int(rest[0]), rest[1]
@@ -192,29 +235,38 @@ def main(argv):
         sys.stderr.buffer.write(done.stderr)
         sys.stderr.buffer.flush()
         return done.returncode
-    if mode in ("arm-fast", "arm-kill", "arm-kill-tree"):
+    if mode in ("arm-fast", "arm-kill", "arm-kill-tree", "arm-kill-scale-ready"):
         timeout = float(rest[0])
-        child = rest[2:]
-        if mode == "arm-kill-tree":
+        scale_fixture = None
+        if mode == "arm-kill-scale-ready":
+            scale_fixture = (rest[2], int(rest[1]) + 1)
+            child = rest[4:]
+        else:
+            child = rest[2:]
+        tree = mode in ("arm-kill-tree", "arm-kill-scale-ready")
+        if tree:
             if sys.platform == "win32":
-                return _windows_tree_kill(child, timeout)
+                return _windows_tree_kill(child, timeout, scale_fixture)
             proc = subprocess.Popen(child, start_new_session=True)
         else:
             proc = subprocess.Popen(child)
         if mode == "arm-fast":
             return proc.wait()
-        try:
-            return proc.wait(timeout=timeout)
-        except subprocess.TimeoutExpired:
-            if mode == "arm-kill-tree":
-                try:
-                    os.killpg(proc.pid, signal.SIGKILL)
-                except (ProcessLookupError, PermissionError):
-                    proc.kill()
-            else:
+        ready = scale_fixture is None or _await_scale_ready(scale_fixture[0])
+        if ready:
+            try:
+                return proc.wait(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                pass
+        if tree:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
                 proc.kill()
-            proc.wait()
-            return 124
+        else:
+            proc.kill()
+        proc.wait()
+        return 124 if ready else 97
     return 97
 
 

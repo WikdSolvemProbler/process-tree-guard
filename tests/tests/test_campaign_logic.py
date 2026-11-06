@@ -62,6 +62,26 @@ def stub_config(_tmp, kill_mode="arm-kill-tree"):
     return config
 
 
+def ready_scale_config(tmp, shape, count, marker):
+    import guard_driver
+
+    config = stub_config(tmp)
+    ready = os.path.join(tmp, "scale-ready")
+    args = [STUB, "scale-ready", shape, str(count), marker, ready, "{sleep_s}"]
+    try:
+        testkit = guard_driver.locate("testkit")
+    except guard_driver.BinaryMissing:
+        pass
+    else:
+        args.append(testkit)
+    config["children"][f"scale_{shape}"] = {"program": sys.executable, "args": args}
+    config["arms"]["guard"]["templates"]["kill"] = [
+        STUB, "arm-kill-scale-ready", "{timeout_s}", str(count), ready,
+        "--", "{child}", "{child_args}",
+    ]
+    return config
+
+
 FIXTURE_STDOUT = b"ptg-output-stdout\n"
 FIXTURE_STDERR = b"error-stream\n"
 
@@ -10680,16 +10700,12 @@ class Round27LandingTests(unittest.TestCase):
                           record["detail"])
 
     def test_runner_wide72_exact_count_passes(self):
-        # The exact-count pass case at full variant size, via
-        # the suite's Python stub machinery. Give its 72 interpreter
-        # launches a separate fixture deadline. The real campaign's
-        # native child and two-second deadline are unchanged.
+        # The fixture signals readiness after all 72 real children exist.
         with tempfile.TemporaryDirectory() as tmp:
-            config = stub_config(tmp)
+            config = ready_scale_config(tmp, "wide", 72, "{ids}")
             slot = plan_mod.Slot("measured", "guard", "scale",
                                  "NO_WINDOW", 3, "wide-72")
-            with mock.patch.object(runner_mod, "KILL_TIMEOUT_S", 6.0):
-                record = run_slot(slot, config)
+            record = run_slot(slot, config)
             self.assertEqual(record["outcome"], "ok", record)
             self.assertEqual(record["exit_code"], 124)
             self.assertEqual(record["survivor"], False)
@@ -10698,33 +10714,10 @@ class Round27LandingTests(unittest.TestCase):
                 report_mod._record_inconsistencies([record]), [])
 
     def test_runner_deep40_exact_count_passes(self):
-        # The exact-count pass case for deep-40 under the
-        # corrected convention (F5's pin): a child publishing
-        # one PID file per level, levels 1..40 — 40 published
-        # PIDs, the in-tree chain's size — is "ok" at exactly
-        # 40, judged by the survivor probe like every scale
-        # tree. (The stub deep child builds its 40 levels
-        # sequentially past the arm's 2 s timeout — the
-        # truncated case above; this construction publishes
-        # the full chain inside it, as the native testkit's
-        # faster spawns do on the Windows tier.)
+        # This flat fixture exercises the deep variant's 40 PID records.
+        # The recursive deep-4 and truncated deep-40 tests cover shape.
         with tempfile.TemporaryDirectory() as tmp:
-            config = stub_config(tmp)
-            script = os.path.join(tmp, "full-deep.py")
-            with open(script, "w", encoding="utf-8") as handle:
-                handle.write(
-                    "import os, subprocess, sys, time\n"
-                    "d = sys.argv[1]\n"
-                    "kids = [subprocess.Popen([sys.executable, '-S', '-c',"
-                    " 'import time; time.sleep(30)'],"
-                    " creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))"
-                    " for _ in range(40)]\n"
-                    "for i, k in enumerate(kids, 1):\n"
-                    "    open(os.path.join(d, f'{i}.pid'), 'w')"
-                    ".write(str(k.pid))\n"
-                    "time.sleep(30)\n")
-            config["children"]["scale_deep"] = {
-                "program": sys.executable, "args": [script, "{dir}"]}
+            config = ready_scale_config(tmp, "deep", 40, "{dir}")
             slot = plan_mod.Slot("measured", "guard", "scale",
                                  "NO_WINDOW", 9, "deep-40")
             record = run_slot(slot, config)
