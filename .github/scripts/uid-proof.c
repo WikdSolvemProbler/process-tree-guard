@@ -160,6 +160,15 @@ static void close_child_fds(int keep)
     }
 }
 
+static bool exact_snapshot_creds(const struct kinfo_proc *row, const struct account *a)
+{
+    const struct _pcred *p = &row->kp_eproc.e_pcred;
+    const struct _ucred *u = &row->kp_eproc.e_ucred;
+    return p->p_ruid == a->uid && p->p_svuid == a->uid && u->cr_uid == a->uid &&
+        p->p_rgid == a->gid && p->p_svgid == a->gid &&
+        u->cr_ngroups == 1 && u->cr_groups[0] == a->gid;
+}
+
 static void drop(const struct account *a, int keep)
 {
     alarm(12);
@@ -167,13 +176,18 @@ static void drop(const struct account *a, int keep)
     gid_t primary_group = a->gid;
     if (setgid(a->gid) != 0 || setgroups(1, &primary_group) != 0 || setuid(a->uid) != 0)
         _exit(72);
-    gid_t group = 0;
+    const pid_t pid = getpid();
     struct proc_bsdinfo self;
     if (getuid() != a->uid || geteuid() != a->uid || getgid() != a->gid || getegid() != a->gid)
         _exit(73);
-    if (getgroups(1, &group) != 1 || group != a->gid)
+    int mib[] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid};
+    struct kinfo_proc row;
+    size_t bytes = sizeof(row);
+    if (sysctl(mib, 4, &row, &bytes, NULL, 0) != 0 || bytes != sizeof(row) || row.kp_proc.p_pid != pid)
+        _exit(92);
+    if (!exact_snapshot_creds(&row, a))
         _exit(90);
-    if (!proc_info(getpid(), &self) || !exact_creds(&self, a))
+    if (!proc_info(pid, &self) || !exact_creds(&self, a))
         _exit(91);
     if (seteuid(0) != -1 || errno != EPERM || setegid(0) != -1 || errno != EPERM)
         _exit(74);
@@ -199,8 +213,7 @@ static int population(const struct account *a, pid_t expected)
             const struct _ucred *u = &rows[i].kp_eproc.e_ucred;
             if (p->p_ruid != a->uid && p->p_svuid != a->uid && u->cr_uid != a->uid)
                 continue;
-            if (p->p_ruid != a->uid || p->p_svuid != a->uid || u->cr_uid != a->uid ||
-                p->p_rgid != a->gid || p->p_svgid != a->gid || u->cr_ngroups != 1 || u->cr_groups[0] != a->gid ||
+            if (!exact_snapshot_creds(&rows[i], a) ||
                 (expected > 1 && rows[i].kp_proc.p_pid != expected)) {
                 count = -1;
                 break;
