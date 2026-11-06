@@ -25,6 +25,10 @@ The archive contains the original report, all observations and ProcessKit event 
 
 Archive SHA-256 `ef653c4fb2921adc9e466f767225ba257b26e0b9adecf354b8000f30ccf751bd`.
 
+An offline replay corrected 32 survivor labels to name the scale path, case kind, and variant. All 44 standing losses, the incomplete verdict, and every other report line matched the baseline replay. The original capture and reports remain in the archive above. [Replayed reports and regression receipts](../evidence/windows-survivor-report-replay-20261106.zip)
+
+Archive SHA-256 `03d40c2964ee48306489117daaab66b0b43a25f2b9879b0888d045086fc8f7ea`.
+
 ## Windows comparison with repaired Wake, 6 November 2026
 
 The observed-load x64 MSVC run compared consolidated commit 8bf828a with Windows-repaired Wake commit 9c6f0df. The matched builds used the same release profile and toolchain. Two independent reviewers approved the exact manifest. The run completed 2,967 slots, including 2,880 measured trials, 72 warmups, and 15 controls.
