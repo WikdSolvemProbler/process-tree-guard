@@ -115,6 +115,8 @@ The archive contains the protocol, source and executable identities, candidate p
 
 Independent offline replays of all 300 Windows launch records ran through Tailscale SSH on Linux ARM64 and physical macOS ARM64. Each reproduced the Windows analysis byte for byte after line-ending normalization. Independent post-run checks found no replay scratch directories, Mac replay process group, or Linux replay scope. [Native replay and cleanup evidence](../evidence/resolver-native-replay-20261106.zip)
 
+The earlier directional comparison built both images with rust-lld.exe. The resolver baseline and candidate used Microsoft link.exe 14.51.36260.0, while repaired Wake retained its exact directional image. The baseline and candidate therefore share a build recipe, and their comparisons against Wake include a linker difference. The archived image audit also records a larger consolidated text section and one additional direct DLL import. No phase timing was measured by the audit. [Build records and PE replay](../evidence/windows-wake-build-audit-20261106.zip)
+
 ## Owner-verification timing checks
 
 The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
