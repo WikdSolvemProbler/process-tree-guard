@@ -479,13 +479,13 @@ was run under finite deadlines. Raw outputs are in `evidence/`.
    `evidence/battery-linux.json` holds the record. The audits are
    function-scoped: each names its file, function and line —
    `Sleep(10)` at `src/engine/wait.rs`, function
-   `wait_until_empty`, line 481; `vars_os()` at
+   `wait_until_empty`, line 487. The `vars_os()` call is at
    `src/engine/environment.rs`, function `environment_block`,
-   line 72; the four pseudo-handle fetch sites in
-   `harden_self` (lines 213, 220), `watched_owner_handles`
-   (line 481) and `cli_exit` (line 336), each with its handle
-   consumers enumerated (e.g. `deny_acl` line 214,
-   `parent_process_id_on` line 489, `TerminateProcess` line 336);
+   line 72. The audit enumerates the four pseudo-handle fetch
+   sites in `harden_self` (lines 212, 219), `watched_owner_handles`
+   (line 481), and `cli_exit` (line 335), with their consumers,
+   including `deny_acl` line 213, `parent_process_id_on` line 489,
+   and `TerminateProcess` line 335.
    `Console::finish` at `src/cli_process.rs` line 173; and
    `CreateIoCompletionPort` inside `Extension::start` at
    `src/extend/server.rs` line 124. (Coordinates re-recorded in

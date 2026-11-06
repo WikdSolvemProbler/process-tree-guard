@@ -42,9 +42,9 @@ The census is the counting that tests reach. For each production file, the censu
 
 ## The pure set and the pinned exception
 
-A pure file is a production file with a census count of zero on every channel. The pure set is the set of pure files, pinned by name. The standing shipped claim is a pin-match claim. The pinned files match the recorded pin. The count stands here after the final graph step: 12.
+A pure file is a production file with a census count of zero on every channel. The earlier census pinned 12 files, including one exception for the Windows UTF-16 encoding in `src/engine/environment.rs`.
 
-One pinned exception stands inside the definition. The file `src/engine/environment.rs` names `std::os::windows::ffi::OsStrExt` at one occurrence, for its UTF-16 encoding logic. That file stands in the set by pin. A second such occurrence fails by name until that occurrence wins its argument.
+The environment builder now calls the encoder in `src/sys/windows/encoding.rs`. The earlier pin records its own revision. A fresh graph census is pending for the changed boundary.
 
 [↑ Back to Contents](#contents)
 

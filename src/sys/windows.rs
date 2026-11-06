@@ -7,12 +7,21 @@
 use crate::GuardError;
 use std::ffi::c_void;
 
+mod encoding;
 mod rng;
+#[cfg(test)]
+pub(crate) mod test_api;
 
+pub(crate) use encoding::encode_wide;
 pub(crate) use rng::secure_random_16;
 
 pub type Handle = *mut c_void;
 pub type Bool = i32;
+
+#[inline]
+pub(crate) fn raw_handle(resource: &impl std::os::windows::io::AsRawHandle) -> Handle {
+    resource.as_raw_handle().cast()
+}
 
 #[repr(C)]
 pub struct StartupInfoW {

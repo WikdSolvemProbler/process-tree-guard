@@ -10,15 +10,14 @@ use crate::sys::windows::{
 
     DACL_SECURITY_INFORMATION, GetCurrentProcess, GetCurrentThread, GetSecurityInfo, Handle,
 
-    LocalFree, SetSecurityInfo, WRITE_DAC, error_for,
+    LocalFree, SetSecurityInfo, WRITE_DAC, error_for, raw_handle,
 
 };
 /// The creating thread already owns this native handle. Apply the worker ACL
 /// before any payload exists; no thread-ID reopen or process-wide enumeration.
 pub(crate) fn harden_worker<T>(thread: &std::thread::JoinHandle<T>) -> Result<(), GuardError> {
-    use std::os::windows::io::AsRawHandle;
     if REAL_CLI.load(std::sync::atomic::Ordering::Acquire) {
-        harden_thread(thread.as_raw_handle() as Handle)?;
+        harden_thread(raw_handle(thread))?;
     }
     Ok(())
 }

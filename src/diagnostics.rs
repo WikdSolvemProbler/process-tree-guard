@@ -3,10 +3,9 @@
 
 //! Returning APIs own optional output; only the explicit CLI finalizer writes it.
 
-use crate::sys::windows::{GetCurrentProcess, GetTickCount64, TerminateProcess};
+use crate::sys::windows::{raw_handle, GetCurrentProcess, GetTickCount64, TerminateProcess};
 use std::cell::{Cell, RefCell};
 use std::io::Write;
-use std::os::windows::io::AsRawHandle;
 
 const GRACE_MS: u64 = 500;
 /// The largest backlog `cli_exit` writes synchronously, in total across
@@ -328,7 +327,7 @@ pub fn cli_exit(kind: crate::Role) -> ! {
             }
         }) {
             if crate::cli_process::harden_worker(&writer).is_ok() && job_sender.send(records).is_ok() {
-                crate::engine::wait_diagnostic_writer(deadline, writer.as_raw_handle() as crate::sys::windows::Handle);
+                crate::engine::wait_diagnostic_writer(deadline, raw_handle(&writer));
             }
         }
     }

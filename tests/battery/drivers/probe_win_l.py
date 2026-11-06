@@ -172,10 +172,15 @@ HELPER_RS = r"""
 // The battery case (l) enumeration helper: the tree's own
 // environment builder, compiled in, plus the two enumerations.
 // No dependencies; the Win32 walk is declared directly.
-mod engine {
-    pub mod environment {
-        include!(__ENVIRONMENT_RS__);
+mod sys {
+    pub mod windows {
+        include!(__ENCODING_RS__);
     }
+}
+
+mod engine {
+    #[path = __ENVIRONMENT_RS__]
+    mod environment;
     // environment_block is pub(super) in the tree's module: it is
     // visible inside engine, and this wrapper carries it out.
     pub fn build(name: &str, value: &str) -> Vec<u16> {
@@ -292,8 +297,10 @@ def build_helper(tree):
     env_rs = os.path.join(tree, "src", "engine",
                           "environment.rs").replace("\\", "/")
     work = tempfile.mkdtemp(prefix="case-l-helper-")
-    source = HELPER_RS.replace("__ENVIRONMENT_RS__",
-                               json.dumps(env_rs))
+    encoding_rs = os.path.join(tree, "src", "sys", "windows",
+                               "encoding.rs").replace("\\", "/")
+    source = HELPER_RS.replace("__ENVIRONMENT_RS__", json.dumps(env_rs))
+    source = source.replace("__ENCODING_RS__", json.dumps(encoding_rs))
     source_path = os.path.join(work, "env_helper.rs")
     with open(source_path, "w", encoding="utf-8") as handle:
         handle.write(source)

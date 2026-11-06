@@ -7,7 +7,7 @@
       {
         "condition": "baseline poll located in source",
         "status": "evidenced",
-        "detail": "baseline located: src/engine/wait.rs, function wait_until_empty, line 481: Sleep(10) sits inside wait_until_empty, which terminate_and_wait calls at line 448; terminate_and_wait polls active_processes with Sleep(10) between polls inside the 5,000 ms teardown budget"
+        "detail": "baseline located: src/engine/wait.rs, function wait_until_empty, line 487: Sleep(10) sits inside wait_until_empty, which terminate_and_wait calls at line 454; terminate_and_wait polls active_processes with Sleep(10) between polls inside the 5,000 ms teardown budget"
       },
       {
         "condition": "verdict equivalence + latency + budget",
@@ -20,7 +20,7 @@
         "detail": "race runs: a job that empties between the non-empty check and the wait's start must still wake the wait (no lost signal), across 1,000 repetitions with randomised emptying delays: requires Windows; the driver battery/drivers/case_a.py executes these runs and is not run on linux"
       }
     ],
-    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+    "tree": "/tmp/ptg-fixtures.wzhuTykC"
   },
   {
     "case": "l",
@@ -38,7 +38,7 @@
         "detail": "vars_os differential: for each fixture environment in the fixture set (empty, empty-value, equals-in-value, drive-entries, duplicate-case, unicode-and-case, channel-entry, five-hundred-entries \u2014 the named shapes in fixtures/env-fixtures.json plus the 500-entry case generated deterministically by battery/env_fixtures.py), the block built from GetEnvironmentStringsW and the block built from vars_os must be byte-identical after the documented sort, or every difference must be a named, lossless, adoption-blocking-or-accepted entry in the case report; adoption requires losslessness, preserved skip-all matching, =C: parsing, and stable-sort/one-entry semantics. The vars_os side is produced by executing the tree's actual builder (a Rust helper compiled with the tree's src/engine/environment.rs included, its environment_block run in a process whose environment is the fixture), the GetEnvironmentStringsW side is read unfiltered (every entry the enumeration yields, not only names a fixture names), and the two enumerations themselves are compared, so a divergence in a non-fixture entry is decidable; the one case matcher is the tree's eq_ignore_ascii_case semantics, implemented identically on both sides. Each fixture is judged in two forms: as-is, and with the channel entry set \u2014 the set operation actually performed on both sides, every existing case-variant of the channel name skipped and replaced; a fixture a real Windows environment cannot represent (duplicate case-folded names) is judged at the list level, never installed where it would collapse: requires Windows; the driver battery/drivers/case_l.py executes these runs and is not run on linux"
       }
     ],
-    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+    "tree": "/tmp/ptg-fixtures.wzhuTykC"
   },
   {
     "case": "m",
@@ -48,7 +48,7 @@
       {
         "condition": "per-site comparison audit (source)",
         "status": "evidenced",
-        "detail": "per-site comparison audit: all four counted fetch sites located inside their enclosing functions \u2014 hardening process fetch: src/cli_process/harden.rs, function harden_self, line 213; handle consumers: deny_acl (line 214), SetSecurityInfo (line 215); hardening thread fetch: src/cli_process/harden.rs, function harden_self, line 220; handle consumers: harden_thread (line 220); owner facts self fetch: src/engine/owners.rs, function watched_owner_handles, line 481; handle consumers: use (line 482), started_at (line 483), use (line 488), parent_process_id_on (line 489), direct_owner_chain (line 508); exit path process fetch: src/diagnostics.rs, function cli_exit, line 336; handle consumers: TerminateProcess (line 336). Each site's consumer set is enumerated above and must be re-read at adoption time: (HANDLE)-1 collides numerically with INVALID_HANDLE_VALUE, so every consumer of each replaced handle must be shown not to test the value against INVALID_HANDLE_VALUE"
+        "detail": "per-site comparison audit: all four counted fetch sites located inside their enclosing functions \u2014 hardening process fetch: src/cli_process/harden.rs, function harden_self, line 212; handle consumers: deny_acl (line 213), SetSecurityInfo (line 214); hardening thread fetch: src/cli_process/harden.rs, function harden_self, line 219; handle consumers: harden_thread (line 219); owner facts self fetch: src/engine/owners.rs, function watched_owner_handles, line 481; handle consumers: use (line 482), started_at (line 483), use (line 488), parent_process_id_on (line 489), direct_owner_chain (line 508); exit path process fetch: src/diagnostics.rs, function cli_exit, line 335; handle consumers: TerminateProcess (line 335). Each site's consumer set is enumerated above and must be re-read at adoption time: (HANDLE)-1 collides numerically with INVALID_HANDLE_VALUE, so every consumer of each replaced handle must be shown not to test the value against INVALID_HANDLE_VALUE"
       },
       {
         "condition": "per-site A/B behaviour on Windows",
@@ -56,7 +56,7 @@
         "detail": "per-site A/B: build with the constant substituted at one site at a time and run the guard's own Windows test files (guard, auto, antigravity, battery parity checks) plus the hook verdict path; adoption per site requires the full set green with that site substituted and no consumer treating the constant as an invalid handle: requires Windows; the driver battery/drivers/case_m.py executes these runs and is not run on linux"
       }
     ],
-    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+    "tree": "/tmp/ptg-fixtures.wzhuTykC"
   },
   {
     "case": "n",
@@ -74,7 +74,7 @@
         "detail": "before/after verdict equality: for every combination of standard handles (console / pipe / file / closed) x every role program x runs with and without post-finish output pending, the set of console verdicts consulted and their values under lazy probing must equal those under eager probing, across the whole Console::finish FreeConsole/AttachConsole cycle. Role cells evidence this with verdict-shaped records \u2014 each role's full decision output bytes plus exit code plus the consulted verdict values, paired across the pending dimension, never exit codes alone; pending output is really produced on the role's own handles and every held byte count is measured (pending-pattern bytes counted in the drained stream or in the producer's write record), never assigned from the pending label; the gate runs a guarded payload through a named vendor whose verdict can vary, and the contain role runs inside a real enclosing extendable run (a contain cell that cannot run in that shape is BLOCKED-ERROR, never a pairing). Adoption is gated on full equality; on any inequality the fallback is to pin, before Console::finish, only the verdicts with pending post-finish output \u2014 the battery must then evidence that the fallback preserves equality on the failing cells: requires Windows; the driver battery/drivers/case_n.py executes these runs and is not run on linux"
       }
     ],
-    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+    "tree": "/tmp/ptg-fixtures.wzhuTykC"
   },
   {
     "case": "o",
@@ -122,6 +122,6 @@
         "detail": "a packet forged or posted by a same-user foreign process must not fake the proof: the packet is wake-only, the verdict comes only from an authoritative job query at the decision instant, and no reply field may influence the verdict \u2014 the case posts forged packets of every shape the port accepts and requires the verdict to track the job query, never the packet: requires Windows; the driver battery/drivers/case_o.py executes these runs and is not run on linux"
       }
     ],
-    "tree": "/home/hatch/workspace/pgl-gauntlet/tree"
+    "tree": "/tmp/ptg-fixtures.wzhuTykC"
   }
 ]

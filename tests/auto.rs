@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Peter Shiller
 
+#![cfg(windows)]
+
 //! Behaviour tests for automatic mode: the wrapper a host puts in front of every
 //! shell command (inventory U1 to U25), including the deadline role and the hook
 //! role in both install layouts. Git Bash, Windows PowerShell and cmd are

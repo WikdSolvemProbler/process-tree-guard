@@ -916,11 +916,7 @@
         assert!(window_station_api().is_some());
     }
 
-    #[link(name = "user32")]
-    extern "system" {
-        fn CreateWindowStationW(name: *const u16, flags: u32, access: u32, attributes: *mut c_void) -> Handle;
-        fn SetProcessWindowStation(station: Handle) -> Bool;
-    }
+    use crate::sys::windows::test_api::{CreateWindowStationW, SetProcessWindowStation};
 
     /// Set in the environment of the copy of this test executable that `detect` is tried in.
     const DETECT_CHILD: &str = "PROCESS_TREE_GUARD_UNIT_TEST_HIDDEN_STATION_CHILD";
@@ -1031,10 +1027,7 @@
 
     const GENERIC_READ: u32 = 0x8000_0000;
 
-    #[link(name = "kernel32")]
-    extern "system" {
-        fn CreatePipe(read: *mut Handle, write: *mut Handle, attributes: *mut c_void, size: u32) -> Bool;
-    }
+    use crate::sys::windows::test_api::CreatePipe;
 
     #[test]
     fn only_a_console_input_buffer_is_taken_for_a_console_and_the_screen_buffer_of_a_console_is_not() {
@@ -1243,12 +1236,7 @@
         }
     }
 
-    #[link(name = "advapi32")]
-    extern "system" {
-        fn ConvertStringSidToSidW(text: *const u16, sid: *mut *mut c_void) -> Bool;
-        fn LookupAccountSidW(system: *const u16, sid: *mut c_void, name: *mut u16, name_chars: *mut u32, domain: *mut u16, domain_chars: *mut u32, kind: *mut u32) -> Bool;
-        fn CredProtectW(as_self: Bool, credentials: *const u16, chars: u32, protected: *mut u16, protected_chars: *mut u32, kind: *mut i32) -> Bool;
-    }
+    use crate::sys::windows::test_api::{ConvertStringSidToSidW, LookupAccountSidW, CredProtectW};
 
     /// The name, `DOMAIN\name`, that the system gives the account with the security identifier `text` (looked up locally).
     fn name_of_well_known_account(text: &str) -> Option<String> {
@@ -2541,10 +2529,7 @@
 
     // ---- the password in a protected form, with a stand-in for the calls of the system
 
-    #[link(name = "kernel32")]
-    extern "system" {
-        fn SetLastError(code: u32);
-    }
+    use crate::sys::windows::SetLastError;
 
     /// What the stand-ins for the calls of the dialog do.
     #[derive(Default)]
@@ -2768,13 +2753,7 @@
         assert!(started.elapsed() < Duration::from_millis(SYSTEM_TIMEOUT_MS + 2_000), "{:?}", started.elapsed());
     }
 
-    #[link(name = "user32")]
-    extern "system" {
-        fn CreateDesktopW(name: *const u16, device: *const u16, devmode: *mut c_void, flags: u32, access: u32, attributes: *mut c_void) -> Handle;
-        fn SetThreadDesktop(desktop: Handle) -> Bool;
-        fn PostMessageW(window: Handle, message: u32, w: usize, l: isize) -> Bool;
-        fn PostThreadMessageW(thread: u32, message: u32, w: usize, l: isize) -> Bool;
-    }
+    use crate::sys::windows::test_api::{CreateDesktopW, SetThreadDesktop, PostMessageW, PostThreadMessageW};
 
     /// Set by the function that a timer message posted to the owner window names, if it is ever called.
     static TIMER_FUNCTION_CALLED: AtomicBool = AtomicBool::new(false);

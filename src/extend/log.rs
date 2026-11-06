@@ -354,8 +354,7 @@ pub(super) fn check_log_path(path: Option<&Path>) -> Result<Option<std::fs::File
 }
 
 pub(super) fn require_disk_file(file: &std::fs::File, path: &Path) -> Result<(), GuardError> {
-    use std::os::windows::io::AsRawHandle;
-    if unsafe { GetFileType(file.as_raw_handle() as Handle) } != FILE_TYPE_DISK {
+    if unsafe { GetFileType(crate::sys::windows::raw_handle(file)) } != FILE_TYPE_DISK {
         return Err(GuardError(format!("the extension log must be a regular file: {} is a device or a pipe; the run did not start", path.display())));
     }
     Ok(())

@@ -25,28 +25,41 @@
 //!
 //! The pure set is: `src/auth/hello/text.rs`,
 //! `src/auth/message.rs`, `src/base64.rs`, `src/cli/help.rs`,
-//! `src/engine/environment.rs`, `src/engine/resolve.rs`,
+//! `src/engine/resolve.rs`,
 //! `src/engine/trace.rs`, `src/extend/codec.rs`,
 //! `src/extend/log/audit.rs`, `src/extend/log/format.rs`,
 //! `src/hook/json.rs`, `src/hook/scanner.rs`.
-//! The one pinned exception is `src/engine/environment.rs` and its
-//! single `std::os::windows::ffi::OsStrExt` use.
+//! The environment builder calls the Windows backend to encode OS text.
+//! The earlier census pinned it as an exception before that boundary moved.
 //!
 //! The full criterion stands on the wiki page
 //! `The-Seam-Criterion.md`.
+// The backend selector also owns the unsupported-target diagnostic.
+mod sys;
+
+#[cfg(windows)]
 mod auth;
 mod base64;
+#[cfg(windows)]
 mod cli;
+#[cfg(windows)]
 mod cli_process;
+#[cfg(windows)]
 mod diagnostics;
+#[cfg(windows)]
 mod dispatch;
 
+#[cfg(windows)]
 pub use diagnostics::{cli_exit, take_diagnostics, DiagnosticOutput, DiagnosticStream};
+#[cfg(windows)]
 mod engine;
+#[cfg(windows)]
 mod extend;
+#[cfg(windows)]
 mod hook;
+#[cfg(windows)]
 mod plugins;
-mod sys;
+#[cfg(windows)]
 mod timing;
 
 /// Inline storage for the ordinary handful of handles/IDs; deep ancestry
@@ -150,8 +163,10 @@ pub(crate) mod test_temp {
     }
 }
 
+#[cfg(windows)]
 pub use extend::{Grant, CHANNEL_VARIABLE, DEFAULT_MAX_EXTENSION};
 
+#[cfg(windows)]
 pub(crate) use dispatch::{entry_contain, entry_deadline, entry_full, entry_gate};
 use std::fmt;
 
@@ -229,6 +244,7 @@ impl Shell {
 /// parent has already exited the call is an error, or returns 125 at once. Inside an
 /// extendable run the call asks the run for `seconds` first (an error if the run refuses),
 /// and the hold it makes is ended when the call returns; see the crate documentation.
+#[cfg(windows)]
 pub fn run(command: &[String], seconds: f64) -> Result<u32, GuardError> {
     crate::cli_process::returning(|| {
         let _diagnostics = diagnostics::Invocation::begin();
@@ -244,6 +260,7 @@ pub fn run(command: &[String], seconds: f64) -> Result<u32, GuardError> {
 /// same deadline and owner rules as [`run`]: the owner is the calling process's
 /// parent, and when that parent has already exited the call is an error, or returns
 /// 125 at once. The text must decode to a nonempty command with no NUL character.
+#[cfg(windows)]
 pub fn run_shell(shell: Shell, command_b64: &str, seconds: f64) -> Result<u32, GuardError> {
     crate::cli_process::returning(|| {
         let _diagnostics = diagnostics::Invocation::begin();
@@ -261,6 +278,7 @@ pub fn run_shell(shell: Shell, command_b64: &str, seconds: f64) -> Result<u32, G
 /// owners are every live ancestor of the calling process, not only its parent: the
 /// tree ends, with 125, when any of them exits. When the parent has already exited
 /// the call is an error, or returns 125 at once.
+#[cfg(windows)]
 pub fn run_auto(args: &[String]) -> Result<u32, GuardError> {
     crate::cli_process::returning(|| {
         let _diagnostics = diagnostics::Invocation::begin();
@@ -277,6 +295,7 @@ pub fn run_auto(args: &[String]) -> Result<u32, GuardError> {
 /// in its job, the request is invalid or over its cap, a rate limit, the run is
 /// over), when it does not answer within a few seconds, or when there is no run to
 /// ask. The hold ends when the calling process exits, or when the seconds run out.
+#[cfg(windows)]
 pub fn extend(seconds: f64) -> Result<Grant, GuardError> {
     crate::cli_process::returning(|| {
         let _diagnostics = diagnostics::Invocation::begin();
@@ -292,6 +311,7 @@ pub fn extend(seconds: f64) -> Result<Grant, GuardError> {
 /// `antigravity` vendors and `powershell-auto` always return 0). The files it looks for (the automatic
 /// copy, `POLICY.md`) and the envelope it accepts follow the file name of the
 /// running program, as for `process-tree-guard hook VENDOR`.
+#[cfg(windows)]
 pub fn run_hook(vendor: &str) -> i32 {
     crate::cli_process::returning(|| {
         let _diagnostics = diagnostics::Invocation::begin();
@@ -310,6 +330,7 @@ pub enum Role {
     /// The hook role: it answers hook payloads and never runs a command (see [`main_gate`]).
     Gate,
     /// The contain role: a `--timeout` run inside an extendable run, as a request to it (see [`main_contain`]).
+    #[cfg(windows)]
     Contain,
 }
 
@@ -319,6 +340,7 @@ pub enum Role {
 /// by a file name ending in `-auto`. Returns the exit code; optional output is retrieved with [`take_diagnostics`].
 /// --extendable requires calling this entry point through [`cli_exit`]; otherwise
 /// it is refused before audit sinks or a child are started.
+#[cfg(windows)]
 pub fn main_full() -> i32 {
     let _diagnostics = diagnostics::Invocation::begin();
     let code = entry_full();
@@ -331,6 +353,7 @@ pub fn main_full() -> i32 {
 /// command with `--timeout` (and `--extendable`), `extend` or automatic mode, and
 /// no hook mode. Returns the exit code; optional output is retrieved with [`take_diagnostics`].
 /// --extendable requires the process-owning [`cli_exit`] adapter.
+#[cfg(windows)]
 pub fn main_deadline() -> i32 {
     let _diagnostics = diagnostics::Invocation::begin();
     let code = entry_deadline();
@@ -349,6 +372,7 @@ pub fn main_deadline() -> i32 {
 /// envelope and wrapper rules and never accepts an envelope that names its own
 /// path, in whatever letter case it was started. Returns the exit code; optional
 /// output is retrieved with [`take_diagnostics`].
+#[cfg(windows)]
 pub fn main_gate() -> i32 {
     let _diagnostics = diagnostics::Invocation::begin();
     let code = entry_gate();
@@ -365,6 +389,7 @@ pub fn main_gate() -> i32 {
 /// runs a command without a deadline that something finite holds. It takes no
 /// extension options and has no automatic or hook mode, whatever its file name.
 /// Returns the exit code; optional output is retrieved with [`take_diagnostics`].
+#[cfg(windows)]
 pub fn main_contain() -> i32 {
     let _diagnostics = diagnostics::Invocation::begin();
     let code = entry_contain();
@@ -373,7 +398,7 @@ pub fn main_contain() -> i32 {
     code
 }
 
-#[cfg(test)]
+#[cfg(all(test, windows))]
 mod diagnostic_api_tests {
     use super::*;
     use crate::dispatch::finish;

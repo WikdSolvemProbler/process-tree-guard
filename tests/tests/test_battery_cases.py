@@ -226,9 +226,9 @@ class FunctionScopedAuditTests(unittest.TestCase):
     def test_case_m_audit_enumerates_handle_consumers(self):
         detail = conditions("m")["per-site comparison audit (source)"]["detail"]
         self.assertIn("handle consumers:", detail)
-        self.assertIn("deny_acl (line 214)", detail)
+        self.assertIn("deny_acl (line 213)", detail)
         self.assertIn("parent_process_id_on (line 489)", detail)
-        self.assertIn("TerminateProcess (line 336)", detail)
+        self.assertIn("TerminateProcess (line 335)", detail)
 
     def test_unmutated_scratch_tree_audits_evidenced(self):
         root = scratch_tree()

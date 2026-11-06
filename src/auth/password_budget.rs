@@ -232,7 +232,7 @@ fn reserve_in(lock_name: &str, key_path: &str, now_ms: u64) -> Result<Attempt, &
 }
 
 #[cfg(test)]
-#[path = "password_budget/process_tests.rs"]
+#[path = "password_budget/tests.rs"]
 mod process_tests;
 
 #[cfg(test)]

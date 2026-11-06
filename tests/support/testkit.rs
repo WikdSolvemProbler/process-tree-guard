@@ -152,6 +152,14 @@ fn pause(value: f64) {
     sleep(Duration::from_secs_f64(value));
 }
 
+/// Bound the fixture even if a failed test never connects to its pipe.
+fn bound_pipe_fixture(seconds: f64) {
+    drop(std::thread::spawn(move || {
+        pause(seconds);
+        exit(125);
+    }));
+}
+
 fn args_after(skip: usize) -> Vec<String> {
     std::env::args_os().skip(skip).map(|a| a.to_string_lossy().into_owned()).collect()
 }
@@ -1030,6 +1038,7 @@ fn main() {
             // bytes REPLYHEX, whatever they are. FILE is published once the pipe exists.
             need(rest, 4, "forged-channel FILE NAME SECONDS REPLYHEX");
             let wait = seconds(&rest[2]);
+            bound_pipe_fixture(wait);
             let reply = hex_bytes(&rest[3]);
             let name: Vec<u16> = rest[1].encode_utf16().chain(std::iter::once(0)).collect();
             // Message mode, blocking, one instance, the default access list.
@@ -1064,6 +1073,7 @@ fn main() {
             // A channel that takes a client and never answers: FILE is published once the pipe exists.
             need(rest, 3, "fake-channel FILE NAME SECONDS");
             let wait = seconds(&rest[2]);
+            bound_pipe_fixture(wait);
             let name: Vec<u16> = rest[1].encode_utf16().chain(std::iter::once(0)).collect();
             // Message mode, blocking, one instance, the default access list.
             let pipe = unsafe { CreateNamedPipeW(name.as_ptr(), 3, 4 | 2, 1, 512, 512, 0, std::ptr::null_mut()) };

@@ -23,10 +23,7 @@ const DONE: &str = "PTG_BUDGET_TEST_DONE";
 const TIMEOUT: Duration = Duration::from_secs(15);
 const NOW_MS: u64 = 1_700_000_000_000;
 
-#[link(name = "advapi32")]
-extern "system" {
-    fn RegDeleteKeyW(key: Handle, subkey: *const u16) -> i32;
-}
+use crate::sys::windows::test_api::RegDeleteKeyW;
 
 fn test_paths(nonce: &str) -> (String, String) {
     (

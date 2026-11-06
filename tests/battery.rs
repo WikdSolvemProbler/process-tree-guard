@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Peter Shiller
 
+#![cfg(windows)]
+
 //! Edge case and efficiency battery for the process guard (inventory B1 to B149):
 //! exit codes across the 32 bit range, timeout precision, wide and deep process
 //! trees, escape attempts, nested guards, missing standard handles, bulk output,

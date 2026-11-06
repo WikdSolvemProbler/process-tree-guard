@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Peter Shiller
 
+#![cfg(windows)]
+
 //! Behaviour tests for the Google Antigravity hook vendors (inventory A1 to A42):
 //! `hook antigravity` rewrites a `run_command` call so the automatic wrapper runs
 //! it, and `hook antigravity-context` prints the policy as a SessionStart message.

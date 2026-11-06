@@ -424,7 +424,7 @@ mod tests {
 
     use crate::sys::windows::{
 
-        Bool, CreateJobObjectW, DACL_SECURITY_INFORMATION, SetSecurityInfo, WRITE_DAC,
+        CreateJobObjectW, DACL_SECURITY_INFORMATION, SetSecurityInfo, WRITE_DAC,
 
     };
     #[test]
@@ -559,10 +559,7 @@ mod tests {
     }
     #[test]
     fn acl_stack_and_heap_are_accepted_by_windows() {
-        #[link(name = "advapi32")]
-        extern "system" {
-            fn IsValidAcl(acl: *const c_void) -> Bool;
-        }
+        use crate::sys::windows::test_api::IsValidAcl;
         struct TestJob(Handle);
         impl Drop for TestJob {
             fn drop(&mut self) { unsafe { CloseHandle(self.0); } }

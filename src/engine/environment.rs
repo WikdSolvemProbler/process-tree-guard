@@ -43,7 +43,7 @@ fn already_upper_ascii(text: &str) -> bool {
 /// text before the first `=` after the first character), each entry ended by NUL, then
 /// one more NUL.
 pub(super) fn environment_block(name: &str, value: &str) -> Vec<u16> {
-    use std::os::windows::ffi::OsStrExt;
+    use crate::sys::windows::encode_wide;
     // The entries are held as `vars_os` yielded them, which already
     // exist, so no entry is encoded to be held. Beside them, aligned
     // by index, stands the owned sort text of exactly the entries
@@ -129,9 +129,9 @@ pub(super) fn environment_block(name: &str, value: &str) -> Vec<u16> {
     let mut block = Vec::with_capacity(capacity);
     for &index in &order {
         let (entry_name, entry_value) = &entries[index];
-        block.extend(entry_name.encode_wide());
+        block.extend(encode_wide(entry_name));
         block.push(b'=' as u16);
-        block.extend(entry_value.encode_wide());
+        block.extend(encode_wide(entry_value));
         block.push(0);
     }
     block.push(0);
