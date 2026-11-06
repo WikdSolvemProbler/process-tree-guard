@@ -25,6 +25,22 @@ The archive contains the original report, all observations and ProcessKit event 
 
 Archive SHA-256 `ef653c4fb2921adc9e466f767225ba257b26e0b9adecf354b8000f30ccf751bd`.
 
+## Windows comparison with repaired Wake, 6 November 2026
+
+The observed-load x64 MSVC run compared consolidated commit 8bf828a with Windows-repaired Wake commit 9c6f0df. The matched builds used the same release profile and toolchain. Two independent reviewers approved the exact manifest. The run completed 2,967 slots, including 2,880 measured trials, 72 warmups, and 15 controls.
+
+| Manual startup | Median | 90th percentile |
+| --- | ---: | ---: |
+| Consolidated guard | 84.2891 ms | 107.1302 ms |
+| Repaired Wake | 84.2844 ms | 99.2223 ms |
+| Bare fixture | 54.4989 ms | 64.9063 ms |
+
+The consolidated guard was slower on one of the 16 prespecified contrasts. The manual-startup 90th percentile was **7.9079 ms slower**, with a primary interval of **[2.6032, 17.0082] ms**. The estimate was positive in both chronological halves and all six launch orders. The other 15 contrasts were unresolved. The nominal intervals assume stationary weak dependence across chronological blocks. The separate quiet-host campaign and the speed acceptance requirement remain open.
+
+The archive contains all raw slots and terminal receipts, the failed zero-row attempt, the matched-build inputs and Windows-repaired Wake source, and the exact analysis. A fresh extraction reproduced all 16 contrasts and the original analysis file byte for byte. [Download the evidence and Windows replay package](../evidence/windows-wake-directional-20261106.zip)
+
+Archive SHA-256 56d7e8282ce249dc5bfc3ab984ea03e97d99b463bb85e96db1684a7992f47038.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
