@@ -33,7 +33,9 @@ The root-owned control and lifecycle archive contains the source, outcomes, and 
 
 A startup-fence prototype refused late launch requests after owner loss and deadline expiry. Killing the supervisor between atomic placement and release closed the exec-permit pipe and left the child reaped without an exec marker. Two permitted commands returned 7 and 197, and both statuses were forwarded exactly. [Startup fence evidence](../../../tests/evidence/linux-startup-fence-20261106.zip)
 
-The product backend still needs authenticated admission, simultaneous cancellation and release tests, and watchdog-failure recovery.
+A Rust prototype recovered from watchdog death before the atomically placed child closed inherited descriptors, while the child waited for exec permission, and after exec. In the first case the watchdog pidfd became ready while the result pipe still had a writer. The supervisor drained the cgroup using its held process identity. A missing executable returned guard status 125 with an ENOENT receipt, while a real program's exit 127 passed through. Supervisor and owner loss also passed, and the independent sibling survived all seven cases. [Rust supervision evidence](../../../tests/evidence/linux-rust-supervision-20261106.zip)
+
+The product backend still needs authenticated admission, caller identity handling, and qualification of simultaneous lifecycle events.
 
 **Next:** The wiki Platform Support page states the tier of each named place.
 
