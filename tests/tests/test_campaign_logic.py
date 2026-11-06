@@ -9880,7 +9880,10 @@ class Round26LandingTests(unittest.TestCase):
             config = stub_config(tmp)
             slot = plan_mod.Slot("measured", "guard", "scale",
                                  "NO_WINDOW", 6, "deep-4")
-            record = run_slot(slot, config)
+            # The positive oracle needs all four Python interpreters to
+            # start and publish before the synthetic arm's deadline.
+            with mock.patch.object(runner_mod, "KILL_TIMEOUT_S", 6.0):
+                record = run_slot(slot, config)
             self.assertEqual(record["outcome"], "ok", record)
             self.assertEqual(record["exit_code"], 124)
             self.assertEqual(record["survivor"], False)
