@@ -148,7 +148,6 @@ def provision(binary, expected_sha):
                 "PrimaryGroupID": str(number),
                 "NFSHomeDirectory": "/var/empty",
                 "UserShell": "/usr/bin/false",
-                "IsHidden": "1",
             },
         )
     print("verified two disabled fixture accounts", flush=True)
