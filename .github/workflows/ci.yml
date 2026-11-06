@@ -9,13 +9,12 @@
 # build:  release build of the programs for x86_64-pc-windows-msvc on Windows, then the
 #         library unit tests, then an artifact that holds the four programs.
 # build-arm64: release build of the programs for aarch64-pc-windows-msvc on a Windows 11 Arm64
-#         hosted runner, then the library unit tests run natively on Arm64, then an artifact
-#         that holds the four programs.
+#         hosted runner, then the library and shared process behavior tests run natively
+#         on Arm64, then an artifact that holds the programs.
 # minimum-rust: the same check with the toolchain named by rust-version in Cargo.toml.
 #
-# The integration test suite (tests/guard.rs and the other files in tests/) is NOT run
-# here. It needs Git Bash paths and an interactive desktop session, which a hosted runner
-# does not provide. Run it with `cargo test --release` on a Windows machine that has
+# The full integration suite needs Git Bash paths and an interactive desktop session.
+# Run it with `cargo test --release` on a Windows machine that has
 # Git Bash; CONTRIBUTING.md states how.
 
 name: ci
@@ -155,9 +154,13 @@ jobs:
       - name: Build, release
         run: cargo build --release --locked --target aarch64-pc-windows-msvc --all-targets
 
-      # Native on Arm64. The library unit tests only; the integration suite is not run here.
       - name: Test the library, release
         run: cargo test --release --locked --lib --target aarch64-pc-windows-msvc
+
+      - name: Test shared process behavior natively
+        shell: pwsh
+        timeout-minutes: 8
+        run: ./.github/scripts/test-windows-arm64.ps1
 
       - name: Upload the programs
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
