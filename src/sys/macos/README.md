@@ -65,6 +65,12 @@ Coalitions offer kernel-maintained fork grouping, but the examined XNU terminati
 
 This review pins public XNU revision `f6217f891ac0bb64f3d375211650a4c1ff8ca1ea`. It establishes no mapping to the installed macOS kernel and excludes no unexamined private interface. [Structured source references](../../../tests/evidence/macos-coalition-source-review.json)
 
+### Deferred administrator validation
+
+The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](../../../tests/evidence/macos-admin-validation-preparation.zip)
+
+Archive SHA-256 487ec5a2899c4312ea2a15c0cc35ade3bcc6ece106ddd5cee310bf80690459bd.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
