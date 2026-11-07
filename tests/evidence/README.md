@@ -405,6 +405,10 @@ The [ten-second read-only tooling snapshot](windows-tooling-cpu-diagnostic-001.j
 
 Both independent Sol reviewers approved exact fresh016 manifest `40d2d0713ed38c0243df3bc040f78223ad6404a19aaa3b705689b00e27c0d9b5` for **one** attempt after public preregistration. [Protocol016](windows-laptop-exploratory-protocol-016.zip) reuses all seven015measurement modules and the exact same twenty frozen inputs,1940slotplan,seed,rivals and gates. Only the runID/destination and method disclosure change. Our workers will idle during capture to reduce our own activity. No new framework or control is introduced; refused/partial results remain unqualified. Archive SHA-256 `1d9b5b4e1c8deb97e20fe68043bfb6b15aefdfdf9db28562e448d725fab375a9` (185 verified members).
 
+The one actual016 attempt **passed preflight, then failed during warmup**. Its first twelve CPU windows ranged2.1876–4.7259%. Later consecutive residualCPU estimates16.8386% and15.5853% exceeded the unchanged15% paired ceiling. The run retained **36controls+55warmups+0measured trials**. Recorded abort cleanup drained five active processes to zero. RAM remained at least14.4906GiB; AC/saver and native/window validity checks passed. No further admission retry was attempted this turn.
+
+All14 guard warmups reportedok; sixnuewframe warmups recordeddescendant-survived. These partial diagnostic warmups establish neither relative speed nor full benchmark qualification. [Complete failed016 attempt](windows-laptop-exploratory-attempt-016.zip) retains rawdata,91observations,eventfiles,source,commandoutput and independent saved-data verification. Archive SHA-256 `f6628a3b57ea1e34f2bc5f77548887d74b6392f97c389d66df4990455009cff3`.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
