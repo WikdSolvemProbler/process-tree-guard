@@ -73,6 +73,12 @@ At `59cc806`, the Windows x64 suite recorded 643 passes, four skips, and zero fa
 
 Archive SHA-256 7ba2860543706f065009052c0763d0598757ef65bed5e3ea3392a383a8808295.
 
+## Linux cgroup authority qualification
+
+An ordinary-user Linux ARM64 test exercised the authority candidate’s real openat, statx and fstatfs calls. It rejected mismatched inodes, symlinks and incorrect descriptor types, and refused provisioning before creation. The first native attempt exposed incorrect ARM64 open flags. Corrected source passed, and a C program using the guest headers independently matched the selected constants. The canonical installation-path correction passed the same test. The archive preserves the failed attempt, corrected source, successful receipts and independent cleanup checks. Positive root-owned provisioning, installation provenance, generic placement and watchdog integration remain unqualified. [Authority source and raw evidence](linux-cgroup-authority.zip)
+
+Archive SHA-256 `87901397e99a762094f561470a468adad142da62994a7c91a134cd99f61dd031`.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
