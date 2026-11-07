@@ -250,6 +250,10 @@ The prospective grouped census retains all process rows and checks while sharing
 
 Preparation archive SHA-256 24ac9a06a804e7d229fb5eae7a0cdd59a3208d3d133ab3ffad9fdfdc757896d2.
 
+The grouped method then passed six genuine native file/member component controls, with handles 170 to 170 and all fixtures removed. Its one approved three-snapshot observer diagnostic still failed: complete output-inclusive spans were 88.4836/82.8714/62.2483 ms, all above 50 ms. Original sample-to-return spans also failed. All emitted census and telemetry replays were valid, but the two observed windows failed memory, observer CPU or background CPU criteria and lacked full phase coverage. Diagnostic exit zero is not admission; qualification remained false and zero slots ran. Independent raw arithmetic and original observer/guard absence checks passed. No comparative speed conclusion or old-schedule equivalence follows. [Native controls, failed pipeline and measured cost decomposition](../evidence/windows-grouped-census-native-pipeline.zip)
+
+Archive SHA-256 34fa7babbdba6d5124fd88ea434cc9b4845e64700b9924f92579c794138b24d2.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)

@@ -241,6 +241,16 @@ The separate diagnostic driver replays actual emitted census and telemetry bytes
 
 Archive SHA-256 24ac9a06a804e7d229fb5eae7a0cdd59a3208d3d133ab3ffad9fdfdc757896d2 (43 verified members).
 
+## Grouped native controls passed; census timing failed
+
+One reviewed native attempt passed all six fixed component controls: stable data, persistent in-place edit, growth, truncation, explicit callback refusal and successful pre-content-open replacement. Exact refusal branches, final bytes, real process P0/P1 facts, full file identities and callback/read ordering were independently checked. Handles returned 170 to 170; the empty owned Job drained 0 to 0 without termination, and all six fixtures were removed. Fixture files are explicitly unrelated to that process image, so these are component controls.
+
+The separately approved three-snapshot pipeline completed with exit zero and qualification false. Output-inclusive spans were 88.4836, 82.8714 and 62.2483 ms; original sample-to-return spans were 87.681, 81.7326 and 61.1095 ms. Every sample exceeded 50 ms. All three emitted census/telemetry replays passed consistency checks, with 39/38/41 rows and four groups each. Two windows failed memory admission; the first also failed observer CPU. Residual CPU estimates were 33.9613% and 27.1331%, and twelve-window coverage remained incomplete. Zero benchmark slots ran. Changed schedules and populations prevent a paired speedup inference against earlier methods.
+
+Nonoverlapping decomposition measured 20.142–28.414 ms in the native snapshot API, another 7.566–9.091 ms in enumeration/wrapping, and 18.676–35.230 ms in group work excluding member checks. Shared reads account for 2.646–4.129 ms inside that group envelope. Independent checks found both original observer and guard identities absent. The archive preserves exact source/plan approvals, every prelaunch correction, all native raw evidence, replay/audit scripts, cost analysis and separate later tooling-memory diagnostics. No production guard or numeric gate changed. [Full component and failed pipeline evidence](windows-grouped-census-native-pipeline.zip)
+
+Archive SHA-256 34fa7babbdba6d5124fd88ea434cc9b4845e64700b9924f92579c794138b24d2 (94 verified members).
+
 ## Linux direct-child reaper: ABI and object builds
 
 The concrete reaper source uses a single nonblocking held-pidfd wait and a native C status bridge. One ordinary-user ARM64 VM attempt passed the installed-header ABI reporter and both warnings-denied Rust object builds. The C/Rust normalized frame matched at 40 bytes/alignment 4, with native siginfo_t observed at 128 bytes/alignment 8. Header dependency identities and hashes matched before and after compilation.
