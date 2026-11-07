@@ -223,6 +223,16 @@ The Python312 target's C open/close envelopes totaled 5.5454 ms, compared with 8
 
 Diagnostic archive SHA-256 df75877895e00a5271d3ea1e7bcc70289054b95b2cc80a090365fdf44ffd9f9e.
 
+## Partial by-name metadata diagnostic
+
+The documented by-name API was investigated separately; it was not adopted into the collector. The first preparation compiled but refused its SDK trace because repeated separators defeated the path gate, so its binary never ran. A malformed generated parser was preserved unexecuted. Corrected literal source passed syntax checks and eight path controls, and the fresh build verified all four exact reported SDK header paths and hashes.
+
+The single native probe attempted only the Python image. SDK layout and export availability passed, full identity/volume and core fields agreed, and both pinned hashes matched. Contemporaneous by-name and held comparisons agreed on every mapped field. Access time changed across the before/after observations, causing the declared strict control to exit one; the other three images were not attempted. This is neither an API-defect finding nor a rescored success. The two by-name envelopes were 3.7437 and 2.2684 ms, versus 2.5943 and 3.7125 ms for the corresponding legacy named-open/metadata/close brackets in this one observation. No clear full-census speed benefit was established.
+
+All handles closed. Missing deletion/type properties and reparse equivalence remain unqualified, and no collector behavior or gate changed. Both preparations, binaries, exact header evidence, malformed source, corrections and partial raw output are retained. [Complete preparation and partial probe](windows-image-by-name-diagnostic.zip)
+
+Diagnostic archive SHA-256 52c85969003200e5f8c19b44db9e8428c8b8a5a821333afc1a40c2fc7a4769a1.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)

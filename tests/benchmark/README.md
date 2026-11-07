@@ -242,6 +242,10 @@ An independent C control subsequently matched all four pins on both complete rea
 
 Diagnostic archive SHA-256 df75877895e00a5271d3ea1e7bcc70289054b95b2cc80a090365fdf44ffd9f9e.
 
+The separate by-name metadata investigation was not adopted. After preserving the refused SDK-path preparation and correcting a malformed parser, syntax, eight path controls and actual SDK-header checks passed. The native probe attempted only Python: identity, volume, core fields and both hashes agreed, but access time changed across observations and the strict mapping control exited one. The other three images were not attempted. The single observed by-name and legacy named-query envelopes did not establish a clear census-speed benefit. All handles closed; deletion/type/reparse equivalence remains unqualified. No collector or gate changed. [Preserved preparations and partial diagnostic](../evidence/windows-image-by-name-diagnostic.zip)
+
+Diagnostic archive SHA-256 52c85969003200e5f8c19b44db9e8428c8b8a5a821333afc1a40c2fc7a4769a1.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
