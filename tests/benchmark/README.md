@@ -204,6 +204,12 @@ Three fixed no-workload snapshots instrumented the frozen013 observer pipeline. 
 
 Diagnostic archive SHA-256 f092428723c692770f1977c6e95a9f4b6c1164842a84b7f9bd7f3c46522be413.
 
+One fixed three-snapshot calibration then measured the same frozen013 pipeline with QPC boundary reads and no added per-API CPU-clock queries. Complete brackets were 244.1854, 397.7710 and 334.8737 ms, all over the unchanged 50 ms budget. The native snapshot calls took 21.3224, 25.6743 and 22.7875 ms. Toolhelp alone did not exceed 50 ms in this control, but the remaining pipeline still requires repair. Candidate populations were 37, 38 and 36; the middle snapshot retained one unverified process-open failure. Exit zero records diagnostic completion, not benchmark admission. All nine frozen source hashes were unchanged, and zero slots ran.
+
+The package retains the raw streams and exact corrected source, plus the hash-matching unexecuted pre-review source reconstructed by reverting its two deadline edits. Only the corrected source executed, under 45-second outer and 35-second internal bounds. Different timestamps, populations and instrumentation prevent a paired speed claim against earlier diagnostics or the original refusal. [Calibrated observer evidence](../evidence/windows-observer-inventory-calibration.zip)
+
+Calibration archive SHA-256 e0a812fae07dfc176231c5e4bda54ed152441e41b3eeea6a2f27b226868703cb.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)

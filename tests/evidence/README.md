@@ -135,6 +135,14 @@ The third snapshot retained an outside pinned guard and a transient image-query 
 
 Diagnostic archive SHA-256 f092428723c692770f1977c6e95a9f4b6c1164842a84b7f9bd7f3c46522be413.
 
+## Low-overhead observer calibration
+
+One fixed three-snapshot control measured the same frozen013 pipeline with QPC boundary reads and no added per-API CPU-clock queries. Complete brackets were 244.1854, 397.7710 and 334.8737 ms; all exceeded the unchanged 50 ms budget. The native snapshot calls took 21.3224, 25.6743 and 22.7875 ms. These observations show that Toolhelp alone did not exceed 50 ms in this control, while the remaining pipeline still requires repair. The populations were 37, 38 and 36 inspected candidates; the middle snapshot retained one unverified process-open failure. Exit zero records diagnostic completion, not benchmark admission.
+
+The archive preserves the corrected source, raw streams, three observations, unchanged frozen inputs, 45-second whole-tree bound and 35-second internal budget. It also preserves the hash-matching unexecuted pre-review source, reconstructed by reverting the two reviewed deadline checks; only the corrected source ran. Different times, populations and instrumentation prevent a paired speed comparison with the earlier diagnostic or original refusal. No benchmark slots ran and no guard source or gate changed. [Calibrated observer source and raw evidence](windows-observer-inventory-calibration.zip)
+
+Calibration archive SHA-256 e0a812fae07dfc176231c5e4bda54ed152441e41b3eeea6a2f27b226868703cb.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)
