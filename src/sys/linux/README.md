@@ -71,9 +71,15 @@ A native ARM64 Linux compiler check now covers the proposed activation adapter a
 
 Archive SHA-256 a093c2af157eb2148c241adfff6d5be540b8a2097f37e8cdaf33a8f21f9b5a32.
 
-An ordinary-user Linux ARM64 test exercised the authority candidate’s real openat, statx and fstatfs calls. It rejected mismatched inodes, symlinks and incorrect descriptor types, and refused provisioning before creation. The first native attempt exposed incorrect ARM64 open flags. Corrected source passed, and a C program using the guest headers independently matched the selected constants. The canonical installation-path correction passed the same test. The archive preserves the failed attempt, corrected source, successful receipts and independent cleanup checks. Positive root-owned provisioning, installation provenance, generic placement and watchdog integration remain unqualified. [Authority source and raw evidence](../../../tests/evidence/linux-cgroup-authority.zip)
+An ordinary-user Linux ARM64 test exercised the authority candidate’s real openat, statx and fstatfs calls. It rejected mismatched inodes, symlinks and incorrect descriptor types, and refused provisioning before creation. The first native attempt exposed incorrect ARM64 open flags. Corrected source passed, and a C program using the guest headers independently matched the selected constants. The canonical installation-path correction passed the same test. The archive preserves the failed attempt, corrected source, successful receipts and independent cleanup checks. That read-only qualification did not exercise positive root-owned provisioning, installation provenance, generic placement or watchdog integration. [Authority source and raw evidence](../../../tests/evidence/linux-cgroup-authority.zip)
 
 The older ARM64 Rust lifecycle fixtures used the incorrect open flags. Their saved outcomes remain evidence of those executions; they do not establish no-follow path opening. The corrected authority component has the read-only scope stated above. Bounded settlement must retain or resolve created-leaf ownership on every arming error and consume the armed run through verified drainage and exact reaping before production activation.
+
+### Native empty-domain settlement
+
+On the Linux ARM64 VM, a hash-verified root-owned binary exercised the actual factory and bounded settlement API. The sequential fixture exclusively created its fixed test root, provisioned one empty leaf, wrote through the retained kill descriptor, verified emptiness, revalidated the original identities and removed the exact leaf and root. Both finite system services reported success. Independent checks found the fixed root, private root scratch, service cgroups and selected workers absent. The ordinary handoff was archived before removal under its original UID. The fixture executed no workload and recorded zero poll wakeups, so populated polling, child reaping, watchdog behavior and full one-shot activation remain unqualified. [Source, native receipts and cleanup](../../../tests/evidence/linux-domain-settlement.zip)
+
+Archive SHA-256 609e1812f40f0387680f2e8e7686ddb8f1262469e47581cf752dffb0d4a69b35.
 
 **Next:** The wiki Platform Support page states the tier of each named place.
 
