@@ -258,6 +258,10 @@ The subsequent native bulk-enumeration component compiled and passed 27 Python/C
 
 Archive SHA-256 c4dcc4578071029c9da39a02fae4091eb3929b5296e0a30a2aad96f99cf289b6.
 
+The byte decoder then passed one actual native capture of 503 unique rows, with valid held controller anchors and handles restored. Its complete snapshot took 24.3351 ms, including 5.7321 ms after the native call. This capture and the earlier 524-row observation differ in time/population and do not form a paired speed comparison. All reference/tool pins and raw row/cleanup facts passed independent audit. Full census and phase/campaign admission remain unqualified, and zero benchmark slots ran. [Actual native decoder component](../evidence/windows-native-byte-decoder-capture.zip)
+
+Archive SHA-256 5bf81a8a64698206faa48b60e7d55c7b21721ad0c25c91baa2f7f06e99a46b12.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)

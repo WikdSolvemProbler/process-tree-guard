@@ -277,6 +277,14 @@ Only the ordinary direct-child component is qualified. Failure/expiry branches, 
 
 Archive SHA-256 f546645adef6e0b470837f5a68a124cb073f5a92c7ec8b9626fac4eeb6d7ea34.
 
+## Actual native capture through the byte decoder
+
+One separately reviewed fresh capture passed through the new decoder and the unchanged C module. It returned 503 unique rows with matching raw/decoded identities, valid held observer/guard anchors and no native error. Handles returned 165 to 165, the module unloaded and the terminal deadline check passed. The complete snapshot took 24.3351 ms: 0.2739 ms before the native call, 18.3291 ms inside it and 5.7321 ms after it. The earlier capture had 524 rows at another moment; these observations cannot establish a paired native speedup.
+
+Two independent Sols approved the exact source/seal/command, and independent raw audits checked all 49 bound source/artifact files, four tool pins, every returned row and cleanup facts. Exact source, raw output, prior receipts, audits and the unexecuted syntax-correction draft are retained. The [offline archive audit](audit_bulk_enumeration.py) checks both enumeration archives. No full census, 50 ms pipeline admission, resource/phase qualification or guard comparison ran; zero benchmark slots remain. [Complete actual component evidence](windows-native-byte-decoder-capture.zip)
+
+Archive SHA-256 5bf81a8a64698206faa48b60e7d55c7b21721ad0c25c91baa2f7f06e99a46b12 (65 verified members).
+
 ## Linux terminal-controller object compilation
 
 One ordinary ARM64 VM attempt compiled the native terminal bridge and the complete normal/test Rust controller graph with warnings denied. All six compiler/version/dependency steps succeeded, and 125 header dependencies matched before and after compilation. This checks the actual consuming ownership/control flow, including conservative cancellation on an interrupted active poll; it does not exercise that behavior at runtime.

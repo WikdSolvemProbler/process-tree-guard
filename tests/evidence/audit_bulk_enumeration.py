@@ -112,5 +112,52 @@ def audit(path):
             'adversarial_cases': 16, 'python_tests': 11, 'benchmark_slots': 0,
             'scope': 'Offline byte/raw consistency only; per-call output equality rests on reviewed enforcement and logged digests. No native replay, full-census admission or guard comparison.'}
 
+def audit_fast_capture(path):
+    """Check the later component archive without importing its native code."""
+    import posixpath
+    assert sha(path.read_bytes()) == '5bf81a8a64698206faa48b60e7d55c7b21721ad0c25c91baa2f7f06e99a46b12'
+    with zipfile.ZipFile(path) as z:
+        names = z.namelist()
+        assert len(names) == len(set(names)) == 65 and z.testzip() is None
+        index = json.loads(z.read('INDEX.json'))
+        assert set(names) == set(index) | {'INDEX.json'}
+        for name, pin in index.items():
+            raw = z.read(name)
+            assert len(raw) == pin['bytes'] and sha(raw) == pin['sha256']
+        prefix = 'inputs/issue7-native-bulk-decoder-capture-001/'
+        seal = json.loads(z.read(prefix + 'native-seal.json'))
+        assert len(seal['source_sha256']) == 49
+        for name, pin in seal['source_sha256'].items():
+            assert sha(z.read(posixpath.normpath(prefix + name))) == pin
+        records = [json.loads(line) for line in z.read(prefix + 'native-001.jsonl').splitlines()]
+        observed = [r for r in records if r['kind'] == 'snapshot_observed']
+        snapshots = [r for r in records if r['kind'] == 'snapshot']
+        assert len(observed) == len(snapshots) == 1
+        obs, snap, terminal = observed[0], snapshots[0], records[-1]
+        assert terminal['qualified'] is True and terminal['code'] == 0
+        assert terminal['baseline_handles'] == terminal['final_handles'] == 165
+        assert terminal['observed_ns'] < terminal['deadline_ns']
+        assert not terminal['cleanup_errors'] and not terminal['reporting_failures']
+        assert terminal['primary_failure'] is None and terminal['module_cleanup_failure'] is None
+        e = obs['evidence']
+        assert e['native']['count'] == len(obs['rows']) == len(e['raw_utf16_rows']) == 503
+        assert len({r['pid'] for r in obs['rows']}) == 503
+        for row, raw in zip(obs['rows'], e['raw_utf16_rows']):
+            assert (row['pid'], row['parent_pid']) == (raw['pid'], raw['parent_pid'])
+            name = bytes.fromhex(raw['name_utf16le_hex'])
+            assert len(name) == raw['name_units'] * 2
+            assert name.decode('utf-16le', 'surrogatepass').casefold() == row['name']
+        assert 0 < snap['observer_created_ticks'] <= obs['upper_ticks']
+        assert 0 < snap['guard_created_ticks'] <= obs['upper_ticks']
+        root = json.loads(z.read(prefix + 'root-audit-001.json'))
+        assert root['snapshot_ns'] == e['end_ns'] - e['begin_ns'] == 24335100
+        assert root['postnative_ns'] == e['end_ns'] - e['native_end_ns'] == 5732100
+        for key in ('census_qualified', 'phase_qualified', 'campaign_qualified', 'benchmark_slots'):
+            assert not terminal[key]
+    return {'members': 65, 'native_rows': 503, 'benchmark_slots': 0,
+            'scope': 'Later native component only; no paired speedup, full census or campaign qualification.'}
+
 if __name__ == '__main__':
-    print(json.dumps(audit(Path(__file__).resolve().parent / 'windows-native-bulk-enumeration-001.zip'), indent=2))
+    folder = Path(__file__).resolve().parent
+    print(json.dumps({'initial_and_saved': audit(folder / 'windows-native-bulk-enumeration-001.zip'),
+                      'later_native': audit_fast_capture(folder / 'windows-native-byte-decoder-capture.zip')}, indent=2))
