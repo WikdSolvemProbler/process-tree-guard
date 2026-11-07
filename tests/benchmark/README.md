@@ -238,6 +238,10 @@ A subsequent four-image diagnostic measured the existing file APIs with QPC-base
 
 Diagnostic archive SHA-256 73420df6a90917ef7d63e026f8a8bb1662bcfa0af14a64a89d4e64717427a40d.
 
+An independent C control subsequently matched all four pins on both complete reads and all four native signatures. The Python312 target's open/close envelopes also remained relatively costly in that process, totaling 5.5454 ms. This does not support a solely ctypes explanation, establish the OS/filter cause or prove parity with the separately timed Python control. Raw QPC ticks/frequency, native statuses, exact build/source pins and all preparation corrections are preserved. No collector or numerical gate changed. [Independent C diagnostic](../evidence/windows-native-c-image-api-cost-001.zip)
+
+Diagnostic archive SHA-256 df75877895e00a5271d3ea1e7bcc70289054b95b2cc80a090365fdf44ffd9f9e.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)

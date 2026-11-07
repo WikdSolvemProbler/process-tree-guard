@@ -215,6 +215,14 @@ This localizes the large observed Python-path cost to open/close call envelopes,
 
 Diagnostic archive SHA-256 73420df6a90917ef7d63e026f8a8bb1662bcfa0af14a64a89d4e64717427a40d.
 
+## Independent C file API diagnostic
+
+A separate native C control used the same four pinned paths, native file arguments, four full signatures and two complete size-bounded reads with checked rewind. CNG SHA-256 matched each pin on both passes. One warnings-denied MSVC build and one native invocation succeeded. All tracked file/hash handles and the provider closed, sources and binary references stayed unchanged, and no emergency cleanup call was omitted from the log.
+
+The Python312 target's C open/close envelopes totaled 5.5454 ms, compared with 8.7641 ms in the earlier separate Python observation. The relatively expensive path operations therefore also occurred outside ctypes. Different observation times, executable contexts and CNG hashing prevent an end-to-end parity claim or attribution to a specific OS/filter mechanism. The archive retains raw QPC ticks and frequency, every API status and argument, exact compiler/source/binary pins, and unexecuted preparations including the corrected sticky clock-error handling. No collector source, gate or guard behavior changed. [Independent native source and raw observations](windows-native-c-image-api-cost-001.zip)
+
+Diagnostic archive SHA-256 df75877895e00a5271d3ea1e7bcc70289054b95b2cc80a090365fdf44ffd9f9e.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)
