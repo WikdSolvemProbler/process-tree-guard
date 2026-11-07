@@ -337,6 +337,24 @@ The archive includes exact current source and SPEC_Benchmark, before/rejected dr
 
 Archive SHA-256 cc62ab5842f2139fd057af42f5f72a0c38bd2aa419f0287eaf9d23d2bc0af3c8.
 
+## Windows host-session preparation
+
+The prospective descriptive session compares the current repaired release with three pinned rivals in 30 adjacent pairs plus six warmups. It remains a supplement to the full 1,940-slot campaign; it cannot establish equivalence, a pooled ranking or the primary speed acceptance. Its source preparation passed 21 pure controls on one revision and 24 on the next. These are successive revisions, not 45 independent cases. The [preparation archive](windows-host-session-preparation-001.zip) preserves both sources, exact inputs, earlier drafts, plans, reviews and actual receipts. The [offline audit](audit_host_session_preparation.py) checks all 151 members.
+
+Archive SHA-256 `72fcac301fd3ea3279bed07fd18d25d37d8e2750bf9702d5267a0a6be602cacb`.
+
+Subsequent native controls remain **failed**: the first attempt passed ten controls, then showed that metadata-only directory handles allowed a rename. A separate minimal rights repair passed all 24 pure controls and the first twelve native controls, including the strict rename and protected-close checks. Its final junction control rejected the reparse point and removed only the owned leaf, but failed the unchanged handle-balance check. Neither run qualifies whole-arm custody, the dispatcher, the session or competitive performance. Zero comparative slots ran. The [complete preparation and failed-native history](windows-host-session-preparation-history-001.zip) also preserves all three failed offline-auditor attempts and the corrected audit receipt.
+
+History archive SHA-256 `96b2b20929a592ca4518aaa55193d82c390a6960fa785c754ce218d8244a0990` (112 verified members).
+
+## Linux watchdog-arming object compilation
+
+One ordinary-user ARM64 VM attempt compiled two C objects and the complete normal/test Rust arming graph. All eight compiler/version/dependency steps succeeded, and installed-header identities matched before and after compilation. This checks source compilation only: no linked watchdog, native arming, readiness exchange, payload placement, controller or product backend executed. The production Linux backend remains disabled; runtime and failure-path qualification are still open.
+
+All 191 artifacts were downloaded and independently checked before exact scratch removal. The original compiler scope and all nine recorded process identities were absent. An initial preservation launch failed locally with Windows error 206 before SSH started; the bounded compressed transport preserved the same existing artifacts without recompilation. The [complete source, review, compiler and cleanup archive](linux-watchdog-arming-objects.zip) retains that failure, both pre-review corrections, raw objects, header evidence and every preservation/removal receipt. The [offline audit](audit_linux_watchdog_arming_objects.py) verifies all 416 members, the four ARM64 relocatable objects, saved records and cleanup proof. No guard-performance result follows.
+
+Archive SHA-256 `69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213`.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
