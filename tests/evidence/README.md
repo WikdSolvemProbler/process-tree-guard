@@ -121,6 +121,20 @@ The package links the original 40-sample lifecycle, six held-process edge window
 
 Archive SHA-256 77ef0d6eca6835f087b77114c871373684134b6b4464b35a0f3e37e52427722a.
 
+## Rejected exploratory laptop attempt 013
+
+The single approved attempt refused its first preflight sample and launched zero benchmark slots. All 33 inspected process rows were permitted, but the complete sample-to-inventory interval took 1,107,467,900 ns against the unchanged 50,000,000 ns budget. The counter read itself took 892,900 ns. The saved generic error combines census-state and timing predicates; independent inspection identifies a timing-budget failure here, not a detected competing process. Available memory was 4,585,127,936 bytes, with AC connected and battery saver off. The archive preserves the exact source, manifest, preparations, raw refusal and original terminal reason. A separate native check found the recorded exact enclosing-guard identity absent. The observer had no saved creation identity, so no exact-identity cleanup claim is made for it. There was no campaign worker, slot journal or measured result. [Rejected preflight and exact guard check](windows-laptop-exploratory-attempt-013.zip)
+
+Attempt archive SHA-256 3686ef75656a67fbe7dc27dc4e873d32326440b33112c5a8d471aad48c0206ac.
+
+## Observer inventory cost diagnostic
+
+Three fixed no-workload snapshots instrumented the frozen013 observer pipeline. Their complete brackets were 785.412, 487.709 and 802.415 ms. Repeated image-path metadata and open operations accounted for the largest measured exclusive costs; content hashing took 17.409–36.953 ms. The first two snapshots inspected 22 external candidates covering four distinct file identities. The profiler adds CPU-clock queries and bookkeeping inside the spans, so its 49.257–69.829 ms snapshot-API spans do not isolate uninstrumented API latency. These observations cannot reconstruct the stage costs of the original refusal or establish that any proposed optimization meets the 50 ms gate.
+
+The third snapshot retained an outside pinned guard and a transient image-query error. These diagnostic classifications do not explain the original013 capture, whose rows were all permitted. The first generated profiler failed before sampling; its source, error and exit are preserved alongside the corrected source, all three snapshots, raw telemetry, analysis and unchanged frozen inputs. No production guard source, benchmark gate or failed capture was changed. [Diagnostic sources and raw stage evidence](windows-observer-inventory-cost.zip)
+
+Diagnostic archive SHA-256 f092428723c692770f1977c6e95a9f4b6c1164842a84b7f9bd7f3c46522be413.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)

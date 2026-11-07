@@ -194,6 +194,16 @@ The package links the original 40-sample lifecycle, six held-process edge window
 
 Archive SHA-256 77ef0d6eca6835f087b77114c871373684134b6b4464b35a0f3e37e52427722a.
 
+### Rejected attempt 013 and observer diagnosis
+
+The single approved attempt refused its first preflight sample and launched zero benchmark slots. All 33 inspected process rows were permitted, but the complete sample-to-inventory interval took 1,107,467,900 ns against the unchanged 50,000,000 ns budget. The counter read itself took 892,900 ns. The saved generic error combines census-state and timing predicates; independent inspection identifies a timing-budget failure here, not a detected competing process. Available memory was 4,585,127,936 bytes, with AC connected and battery saver off. The archive preserves the exact source, preparations, raw refusal and terminal reason. A separate native check found the recorded exact enclosing-guard identity absent. No campaign worker or measured result existed, and the observer had no saved creation identity for an exact cleanup claim. [Rejected preflight and exact guard check](../evidence/windows-laptop-exploratory-attempt-013.zip)
+
+Attempt archive SHA-256 3686ef75656a67fbe7dc27dc4e873d32326440b33112c5a8d471aad48c0206ac.
+
+Three fixed no-workload snapshots instrumented the frozen013 observer pipeline. Their complete brackets were 785.412, 487.709 and 802.415 ms. Repeated image-path metadata and open operations accounted for the largest measured exclusive costs; content hashing took 17.409–36.953 ms. The first two snapshots inspected 22 external candidates covering four distinct file identities. CPU-clock queries and bookkeeping are inside the measured spans, so the recorded 49.257–69.829 ms snapshot-API spans do not establish uninstrumented API latency. The third snapshot's outside pinned guard and transient image-query error remain in the raw evidence. They were absent from the original013 refusal. The failed first profiler source and exit are also retained. No guard source, gate or prior capture was changed, and these diagnostics support no speed or parity conclusion. [Diagnostic sources and raw stage evidence](../evidence/windows-observer-inventory-cost.zip)
+
+Diagnostic archive SHA-256 f092428723c692770f1977c6e95a9f4b6c1164842a84b7f9bd7f3c46522be413.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
