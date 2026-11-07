@@ -267,6 +267,16 @@ Preservation completed before identity-checked removal. Independent verification
 
 Archive SHA-256 a2e04ba953e7974a23b44164bc07e6ce3236d90f6abdabe811811c30588c2b14 (153 verified members).
 
+## Linux reaper and static-link repair passed
+
+The fresh ordinary ARM64 attempt linked the exact earlier C objects using a deterministic two-member static archive and normal Rust native-library linkage. Stack protection and compiler flags remained intact; the real link map resolves the stack-guard reference through the dynamic loader. The unchanged reaper/fixture then passed normal exit 23, genuine Pending followed by release/exit 29, and exact pidfd SIGTERM/signal 15. Every validated reap was followed by a raw ECHILD observation through its retained pidfd.
+
+The archive preserves all raw status bytes, source, headers, objects, archive/member checks, link map, test binary and receipts. The independent [audit script](audit_reaper_static_link.py) verifies all 221 members, decodes raw statuses from the installed-header offsets and confirms the C objects match the failed attempt. All 103 native artifacts were preserved before exact scratch cleanup; the original scope/cgroup and 26 recorded PIDs were absent. The earlier link and user-bus refusals remain preserved and unrescored.
+
+Only the ordinary direct-child component is qualified. Failure/expiry branches, populated drainage, lease/exec/watchdog/adopted-child integration and production activation remain open. No speed comparison is established. [Complete native evidence](linux-direct-child-reaper-static-link.zip)
+
+Archive SHA-256 f546645adef6e0b470837f5a68a124cb073f5a92c7ec8b9626fac4eeb6d7ea34.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)

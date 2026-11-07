@@ -131,6 +131,18 @@ Independent verification covered every archive member and confirmed exact scratc
 
 Archive SHA-256 a2e04ba953e7974a23b44164bc07e6ce3236d90f6abdabe811811c30588c2b14 (153 verified members).
 
+### Actual sequential child reaping and static-link repair
+
+A fresh ordinary Linux ARM64 attempt linked the same C object bytes through Rust's normal native static-library interface, retaining the stack-protection reference and all compiler hardening. The link map identifies the dynamic loader as the provider for that reference. This repaired the earlier link-order failure without changing the reaper or fixture code. The failed attempt remains preserved.
+
+The selected native test passed all three sequential cases: exit 23; a genuine Pending result retaining the original PID/pidfd followed by exit 29; and pidfd-directed SIGTERM reported as signal 15. Each validated reaped receipt retained its pidfd for a separate raw wait that returned ECHILD. All native status bytes were retained. An independent [offline audit](../../../tests/evidence/audit_reaper_static_link.py) decoded those bytes using the installed-header offsets, matched the normalized fields and terminal outcomes, verified every archive member, and checked the unchanged C objects and link map.
+
+All 103 artifacts were preserved before exact removal. The original scratch, scope/cgroup and 26 recorded PIDs were independently absent. The archive also preserves the read-only inspection's user-bus refusal, corrected inspection, unexecuted parser revisions and generation-size refusal. [Complete native qualification and cleanup](../../../tests/evidence/linux-direct-child-reaper-static-link.zip)
+
+Archive SHA-256 f546645adef6e0b470837f5a68a124cb073f5a92c7ec8b9626fac4eeb6d7ea34 (221 verified members).
+
+This qualifies the ordinary direct-child reaper component and link repair. Timer-expiry, cleanup-failure/quarantine and post-reap clock-error branches remain unqualified at runtime. Populated cgroup drainage, original lease/owner and exec-report supervision, watchdog/adopted-child settlement and a consuming terminal controller still require integration. The production backend stays disabled; no guard performance result follows.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
