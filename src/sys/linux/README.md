@@ -111,6 +111,18 @@ Archive SHA-256 9f7532dc455e73b8b82d0f7e73fcbbea0c5b4788613d9286f4a39e48ac7051f1
 
 Native pidfd reaping, subreaper ownership, exec-result observation, mandatory terminal orchestration and watchdog integration remain open. The production Linux backend remains disabled.
 
+### Direct-child reaper ABI qualification
+
+The next component performs one nonblocking wait through an owned child pidfd and decodes native status through a C bridge built against the installed Linux headers. Pending and error paths retain ownership; a validated exit receipt retains the original pidfd and raw status. A later clock failure preserves a status already consumed. This source contract still needs runtime qualification with genuine children.
+
+One ordinary-user Linux ARM64 attempt passed the native constant/header reporter and warnings-denied ordinary and test-object builds of the complete Rust graph. The normalized C/Rust frame was 40 bytes with alignment 4; native siginfo_t was 128 bytes with alignment 8. Only the constant reporter executed. No child was constructed, no component wait call or Rust harness ran, and no root, cgroup or payload operation occurred. Installed header identities and hashes matched before and after compilation.
+
+All 58 remote artifacts were preserved before exact identity-checked cleanup. Independent checks found the original scope, cgroup path and 11 recorded tool/controller PIDs absent. The archive retains source, installed-header provenance, objects, reporter, raw streams and cleanup receipts. [Source and limited native qualification](../../../tests/evidence/linux-direct-child-reaper-abi.zip)
+
+Archive SHA-256 7f890abddee02d8a0c14e9f9b2fd0ac7456667926750dfba0172263f29d3b67a.
+
+Actual normal exit, Pending, signal termination and repeated-wait behavior remain untested. Terminal orchestration, subreaper adoption, watchdog and exec-result handling, populated settlement and production activation remain open.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)

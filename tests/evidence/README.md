@@ -233,6 +233,14 @@ All handles closed. Missing deletion/type properties and reparse equivalence rem
 
 Diagnostic archive SHA-256 52c85969003200e5f8c19b44db9e8428c8b8a5a821333afc1a40c2fc7a4769a1.
 
+## Linux direct-child reaper: ABI and object builds
+
+The concrete reaper source uses a single nonblocking held-pidfd wait and a native C status bridge. One ordinary-user ARM64 VM attempt passed the installed-header ABI reporter and both warnings-denied Rust object builds. The C/Rust normalized frame matched at 40 bytes/alignment 4, with native siginfo_t observed at 128 bytes/alignment 8. Header dependency identities and hashes matched before and after compilation.
+
+Only the no-child constant reporter executed. No reaper wait, child fixture, Rust harness, root, cgroup or payload operation ran. These results establish ABI and compiler acceptance, not actual child reaping or backend readiness. Exact sources, objects, binaries and raw evidence were preserved before identity-checked cleanup; the original scope and 11 recorded controller/tool PIDs were independently absent. [Complete limited qualification](linux-direct-child-reaper-abi.zip)
+
+Archive SHA-256 7f890abddee02d8a0c14e9f9b2fd0ac7456667926750dfba0172263f29d3b67a (112 verified members).
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)
