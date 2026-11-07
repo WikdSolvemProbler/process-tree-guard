@@ -67,6 +67,12 @@ This review launched zero benchmark slots. The quiet-host campaign and speed acc
 
 Archive SHA-256 f3601f500f8a0e146ba9afdf00aa45d360ae793b25265d8e7b790597ce4dbc98.
 
+## Correctness after the optional SysPrims profile
+
+At `59cc806`, the Windows x64 suite recorded 643 passes, four skips, and zero failures or errors across 647 cases. The per-test journal matched all 647 certificates. The suite reused verified CI binaries from `e73981a` after confirming that the Rust and build inputs were unchanged. Both changed regression methods also passed from the same `59cc806` source on the Linux ARM64 VM and physical macOS ARM64 via Tailscale. Independent checks found both remote scratch directories and their containment scopes gone. [Full Windows and focused native receipts](sysprims-profile-correctness.zip)
+
+Archive SHA-256 7ba2860543706f065009052c0763d0598757ef65bed5e3ea3392a383a8808295.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
