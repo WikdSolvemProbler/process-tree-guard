@@ -228,6 +228,12 @@ Independent follow-up controls qualified growth/truncation against their exact s
 
 Controls archive SHA-256 72d2a97b6fdd6e863f63df93ca174156ed47fb7f94cf22930c6ff5b8c5591a33.
 
+The complete two-read observer pipeline then failed all three unchanged 50 ms checks: 252.5741, 351.2949 and 341.4947 ms. The middle snapshot also retained a transient process-open failure and invalid creation evidence. Diagnostic exit zero did not mean admission: `observer_pipeline_qualified` was false and zero benchmark slots ran. The intrinsic file envelopes totaled 208.903–287.333 ms, while both content passes used 17.463–24.110 ms; the specific open/metadata/Python cost remains unisolated. Diagnostic observer CPU deltas of 234.375 and 328.125 ms include post-cutoff validation and emission and would also exceed the observer ceiling if treated as phase windows. No campaign phase was scored.
+
+All raw data and exact bindings are retained, including the failed first unit import and subsequent seven passing strict-evidence checks. No guard source, gate or prior capture changed. [Failed pipeline qualification](../evidence/windows-native-image-pipeline-001.zip)
+
+Pipeline archive SHA-256 045952810870af384f49a7d9872135a70e63ec358a33b59da54cde860609baaa.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)

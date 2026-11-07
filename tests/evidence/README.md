@@ -189,6 +189,16 @@ The separate OS diagnostic confirmed that ordinary replacement succeeded with a 
 
 Controls archive SHA-256 72d2a97b6fdd6e863f63df93ca174156ed47fb7f94cf22930c6ff5b8c5591a33.
 
+## Failed native-reader pipeline qualification
+
+The fixed two-read collector was tested in the complete observer pipeline for three snapshots spaced five seconds apart. All three exceeded the unchanged 50 ms budget: 252.5741, 351.2949 and 341.4947 ms. The middle snapshot also retained a transient process-open failure and invalid creation evidence; the other two passed independent file-evidence validation. The process completed with exit zero while `observer_pipeline_qualified` remained false. Zero benchmark slots ran, and no retry occurred.
+
+The native snapshot calls took 21.0799–27.1834 ms. Intrinsic file-inspection envelopes totaled 208.903–287.333 ms, with both content passes accounting for 17.463–24.110 ms. The remaining envelope combines open/metadata calls, Python work and buffer handling; it does not identify a specific API cause. Raw observer CPU deltas were 234.375 and 328.125 ms over roughly five-second intervals on 16 logical processors. These diagnostic intervals include independent validation and emission outside the inventory cutoff. They would exceed the standing 0.1% observer ceiling if scored as phase windows, but are not executed campaign-phase verdicts.
+
+The archive retains exact source/tool bindings, raw counters, census evidence, offline decomposition and preparation history. The first unit attempt failed on a missing policy import; corrected source also rejects zero creation times, directory inconsistencies and policy conflicts, and all seven focused checks then passed. No guard source or numerical gate changed, and the pipeline remains unqualified. [Complete failed diagnostic and controls](windows-native-image-pipeline-001.zip)
+
+Pipeline archive SHA-256 045952810870af384f49a7d9872135a70e63ec358a33b59da54cde860609baaa.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)
