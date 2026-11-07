@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "scope": "Primary-source review; zero native tests; no shipping-kernel mapping or exhaustive private-interface claim.",
+  "source_revision": "f6217f891ac0bb64f3d375211650a4c1ff8ca1ea",
+  "findings": [
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/sys_coalition.c#L88-L93",
+      "claim": "Existing members may continue to fork after a termination request."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/coalition.c#L2034-L2085",
+      "claim": "The request marks a nonempty coalition; it does not kill its members."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/coalition.c#L1847-L1888",
+      "claim": "Adoption rejects terminated or reaped state, not merely requested termination."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_fork.c#L182-L197",
+      "claim": "Ordinary forks inherit coalition membership."
+    },
+    {
+      "url": "https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/sys_coalition.c#L208-L235",
+      "claim": "The management permission check uses privileged-coalition membership."
+    }
+  ],
+  "conclusion": "These examined operations alone provide no bounded kill/drain fence. Dedicated-UID fork-fence and privileged-reserve-custody requirements remain open."
+}

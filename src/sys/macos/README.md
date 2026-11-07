@@ -59,6 +59,12 @@ Archive SHA-256 470527f7e8fd5f95c74404638035da5c082fc41a775b3e0ba14c4ff19dad34eb
 
 Backend acceptance still requires the shared process behavior tests and 20 escape repetitions with no survivors. [Shared behavior tests](../../../tests/support/shared_process_behavior.rs) · [Issue #1](https://github.com/WikdSolvemProbler/process-tree-guard/issues/1)
 
+### Coalition source review
+
+Coalitions offer kernel-maintained fork grouping, but the examined XNU termination request does not kill live members or stop existing members from forking. It marks the coalition for an empty notification. Adoption refuses a terminated or reaped coalition, while termination is finalized only after the active count reaches zero. The syscall also requires privileged-coalition membership. Consequently, root or privileged coalition access alone does not establish the required bounded kill/drain fence. These source findings leave coalitions useful as a grouping component and leave other private interfaces unqualified. The dedicated-UID fork-fence and privileged-custody requirements remain open. [Termination and fork semantics](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/sys_coalition.c#L88-L93) · [Adoption](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/coalition.c#L1847-L1888) · [Termination implementation](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/coalition.c#L2034-L2085)
+
+This review pins public XNU revision `f6217f891ac0bb64f3d375211650a4c1ff8ca1ea`. It establishes no mapping to the installed macOS kernel and excludes no unexamined private interface. [Structured source references](../../../tests/evidence/macos-coalition-source-review.json)
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
