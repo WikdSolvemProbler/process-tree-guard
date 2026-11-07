@@ -45,6 +45,14 @@ A successful fork by a trusted non-root verifier with both `RLIMIT_NPROC` limits
 
 Two related interfaces have narrower documented roles. Apple's descendant-scoped Endpoint Security client requires an entitlement and delivers authorization and notification events. The published coalition termination request marks the request and reports completion when the active count reaches zero. Both would require separate proof of bounded whole-tree teardown. [Endpoint Security descendants client](https://developer.apple.com/documentation/endpointsecurity/es_new_descendants_client%28_%3A_%3A%29?changes=_2_1_1&language=objc) · [XNU coalition termination request](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/coalition.c#L2030-L2085) · [XNU coalition count and notification](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/osfmk/kern/coalition.c#L1775-L1818)
 
+### Retained child accounting
+
+An ordinary-user test on physical macOS 27.0.1 ARM64 checked `fork` and `posix_spawn` at the same process-local limit before, during, and after retaining one exited child. Both calls succeeded before retention, returned `EAGAIN` while the exact child was held with `waitid(WNOWAIT)`, succeeded at the next higher limit while it was held, and succeeded again at the original limit after it was reaped. All eight trials completed. The first attempt failed calibration because it reused the inherited hard limit after XNU clamped it. The corrected attempt recorded the effective limits. Both attempts verified scratch and process group cleanup. [Sources and both native attempts](../../../tests/evidence/macos-nproc-accounting.zip)
+
+The observed one-entry shift supports the hypothesis that a retained exit could help fence fork admission for a dedicated UID. The shared-UID test covers accounting only. Credential transfer at saturation, reserve custody, concurrent fork publication, and bounded cleanup on supervisor loss remain open. [XNU reap accounting](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_exit.c#L2593-L2617) · [XNU process limit clamping](https://github.com/apple-oss-distributions/xnu/blob/f6217f891ac0bb64f3d375211650a4c1ff8ca1ea/bsd/kern/kern_resource.c#L1568-L1589)
+
+Archive SHA-256 edcf989f29c5769973ab339c9ea07eede811fe38d636245d7ceb931bec085610.
+
 Backend acceptance still requires the shared process behavior tests and 20 escape repetitions with no survivors. [Shared behavior tests](../../../tests/support/shared_process_behavior.rs) · [Issue #1](https://github.com/WikdSolvemProbler/process-tree-guard/issues/1)
 
 **Next:** The wiki Platform Support page states the tier of each named place.
