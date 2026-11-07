@@ -143,6 +143,14 @@ Archive SHA-256 f546645adef6e0b470837f5a68a124cb073f5a92c7ec8b9626fac4eeb6d7ea34
 
 This qualifies the ordinary direct-child reaper component and link repair. Timer-expiry, cleanup-failure/quarantine and post-reap clock-error branches remain unqualified at runtime. Populated cgroup drainage, original lease/owner and exec-report supervision, watchdog/adopted-child settlement and a consuming terminal controller still require integration. The production backend stays disabled; no guard performance result follows.
 
+### Consuming terminal-controller source and object qualification
+
+The next concrete controller retains the original absolute lease, prearmed cleanup authority, supervisor's own pidfd, owned exec-report reader and direct children. Stop events latch a held kill before later diagnostics; drained controls remain owned through direct and adopted reaping, with removal last. An interrupted active poll conservatively cancels before later clock/allocation work. These are reviewed source contracts, not exercised runtime guarantees.
+
+One ordinary Linux ARM64 attempt compiled the installed-header C bridge and actual full-graph normal/test Rust objects with warnings denied. All six compiler steps passed, 125 header dependencies matched and all three relocatable objects were preserved. No link, compiled test/controller/reaper/reporter, child, root operation or cgroup write ran. All 49 artifacts were verified before exact scratch removal; the original scope/cgroup and seven recorded PIDs were absent. [Complete source and compiler evidence](../../../tests/evidence/linux-terminal-controller-objects.zip) and [independent offline audit](../../../tests/evidence/audit_terminal_controller_objects.py).
+
+Archive SHA-256 0848ccef7232bb14df277ab4e0ad4a65a637f7b020af3eb1ff1ad3da64b7c4eb (133 members). Native arming/placement, partial-arm settlement, trusted bootstrap, product entry and all terminal runtime/failure paths remain unqualified. The production backend remains disabled; no guard performance claim follows.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)

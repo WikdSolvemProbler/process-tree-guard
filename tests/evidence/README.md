@@ -277,6 +277,16 @@ Only the ordinary direct-child component is qualified. Failure/expiry branches, 
 
 Archive SHA-256 f546645adef6e0b470837f5a68a124cb073f5a92c7ec8b9626fac4eeb6d7ea34.
 
+## Linux terminal-controller object compilation
+
+One ordinary ARM64 VM attempt compiled the native terminal bridge and the complete normal/test Rust controller graph with warnings denied. All six compiler/version/dependency steps succeeded, and 125 header dependencies matched before and after compilation. This checks the actual consuming ownership/control flow, including conservative cancellation on an interrupted active poll; it does not exercise that behavior at runtime.
+
+The implementation retains the original lease, prearmed cleanup authority, exact supervisor pidfd, termination-first held kill, cgroup controls through direct/adopted reaping and removal-last ownership. Native arming/placement, partial-arm failure settlement, trusted bootstrap, product wiring and runtime/failure-path qualification remain open. No executable linking, controller/reaper/test/reporter invocation, child, root operation or cgroup write occurred. The production backend remains disabled and no performance result follows.
+
+All 49 artifacts were preserved before exact scratch cleanup. The original scope/cgroup and seven recorded PIDs were independently absent. The [independent offline audit](audit_terminal_controller_objects.py) verifies all 133 archive members, ARM64 relocatable object identities, raw compiler records, matching headers, preserved bytes and cleanup receipts. [Complete source, drafts and compiler evidence](linux-terminal-controller-objects.zip)
+
+Archive SHA-256 0848ccef7232bb14df277ab4e0ad4a65a637f7b020af3eb1ff1ad3da64b7c4eb. The [audit preparation](linux-terminal-audit-preparation.zip) retains its initial refusal: the first audit compared entire transport records although only preservation includes base64 payloads. The corrected audit compares every metadata field and independently decodes all payloads; it passed without changing the native evidence. Audit preparation archive SHA-256 ff696a9f87d21a344c5bac0ce3c1256f35c2e639b486b66f8e570415cef7447f.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)
