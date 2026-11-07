@@ -283,6 +283,16 @@ The corrected fixed-M8 credential/quota control compiled on the physical macOS A
 
 Archive SHA-256 487ec5a2899c4312ea2a15c0cc35ade3bcc6ece106ddd5cee310bf80690459bd.
 
+## Native enumeration and saved-data decoder controls
+
+The native bulk enumerator compiled with warnings denied and passed eleven Python controls plus sixteen scripted C branches. One actual capture returned 524 rows with complete raw UTF16 facts, valid held observer/guard identities and no truncation, duplicate PID or native error. Handles returned 165 to 165 and the module unloaded. The complete snapshot took 36.9241 ms, including 17.1389 ms after the native call for marshalling and validation. That elapsed envelope includes possible scheduling; it is not an old/new speed comparison or full-census qualification.
+
+A fresh byte decoder keeps the same checks and raw evidence while replacing repeated code-unit iteration with one bounded contiguous copy and compiled struct decoding. In one fixed saved-data/shim experiment, all eight full outputs matched, sixteen adversarial acceptance/refusal/evidence pairs agreed and eleven tests passed. Four old/new wall pairs were 14.8180/1.5684, 10.3439/1.0326, 12.9498/1.1307 and 10.5693/3.0047 ms. These descriptive observations exclude actual native enumeration and cannot establish native, full-pipeline or process-guard performance. CPU counters were quantized to 0 or 15.625 ms; zero is not zero work.
+
+The archive preserves exact sources, binaries, SDK traces, build/unit/native plans and raw output, independent reviews/audits and every preparation correction, including a publisher syntax refusal. The [offline audit](audit_bulk_enumeration.py) checks every member and uses lossless integers to reconstruct saved rows and verify identities, order, timing and receipts. Full census, phase and campaign qualification remain false, with zero benchmark slots. No production guard source, guarantee, default or numerical gate changed. [Complete native and saved-data evidence](windows-native-bulk-enumeration-001.zip)
+
+Archive SHA-256 c4dcc4578071029c9da39a02fae4091eb3929b5296e0a30a2aad96f99cf289b6 (88 verified members).
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)

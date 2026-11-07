@@ -254,6 +254,10 @@ The grouped method then passed six genuine native file/member component controls
 
 Archive SHA-256 34fa7babbdba6d5124fd88ea434cc9b4845e64700b9924f92579c794138b24d2.
 
+The subsequent native bulk-enumeration component compiled and passed 27 Python/C controls. One capture validated all 524 returned rows and held controller identities, with handles 165 to 165 and successful module cleanup. Its complete snapshot took 36.9241 ms, including 17.1389 ms after the native call. A separate saved-input byte-decoder experiment preserved identical full output across eight calls, all sixteen adversarial outcomes and eleven tests; descriptive old/new wall times were 10.3–14.8 versus 1.0–3.0 ms. This phase used a Python memory shim, not actual enumeration. Neither experiment establishes full-census admission or guard-versus-competitor speed; zero qualified measured campaign comparisons exist. Exact sources, raw output, drafts and an independent offline audit are public. No guard guarantee/default or numeric gate changed. [Native component and saved-data diagnostic](../evidence/windows-native-bulk-enumeration-001.zip)
+
+Archive SHA-256 c4dcc4578071029c9da39a02fae4091eb3929b5296e0a30a2aad96f99cf289b6.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
