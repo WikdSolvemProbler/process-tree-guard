@@ -233,6 +233,14 @@ All handles closed. Missing deletion/type properties and reparse equivalence rem
 
 Diagnostic archive SHA-256 52c85969003200e5f8c19b44db9e8428c8b8a5a821333afc1a40c2fc7a4769a1.
 
+## Prospective grouped census: source and mock checkpoint
+
+The next observer method retains every relevant process row and its native checks, but shares one two-read file observation among rows with the exact same raw image-path string. This changes the observation schedule: it provides fewer independent content observations than the earlier per-row method. Its METHOD records the transient/ABA, process freshness and loaded-image limits. Twenty-seven fake/mocked controls passed, and two independent Sol reviewers approved the collector source with no unresolved source objections. No native grouped control, census or pipeline had run at this checkpoint.
+
+The separate diagnostic driver replays actual emitted census and telemetry bytes, retains the original timing span and adds a stricter output-inclusive span, and keeps the numerical gates unchanged. Its required native-control receipt remains unset, so it refuses before sampling. The archive preserves earlier unexecuted clock/accounting drafts and both successful mock attempts. The second independent driver source approval arrived after the archived review snapshot; the final receipt-sealed launch plan still needs review. No guard source, protection, default or performance result changed. [Reviewed source and complete preparation](windows-grouped-census-preparation.zip)
+
+Archive SHA-256 24ac9a06a804e7d229fb5eae7a0cdd59a3208d3d133ab3ffad9fdfdc757896d2 (43 verified members).
+
 ## Linux direct-child reaper: ABI and object builds
 
 The concrete reaper source uses a single nonblocking held-pidfd wait and a native C status bridge. One ordinary-user ARM64 VM attempt passed the installed-header ABI reporter and both warnings-denied Rust object builds. The C/Rust normalized frame matched at 40 bytes/alignment 4, with native siginfo_t observed at 128 bytes/alignment 8. Header dependency identities and hashes matched before and after compilation.

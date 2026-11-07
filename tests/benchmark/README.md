@@ -246,6 +246,10 @@ The separate by-name metadata investigation was not adopted. After preserving th
 
 Diagnostic archive SHA-256 52c85969003200e5f8c19b44db9e8428c8b8a5a821333afc1a40c2fc7a4769a1.
 
+The prospective grouped census retains all process rows and checks while sharing one file observation for each exact raw image-path string. This is a changed sampling schedule with fewer independent content observations, not proven equivalence to the former per-row schedule. Twenty-seven mocked controls passed; two independent Sol reviewers approved its source. The diagnostic driver replays emitted census and telemetry bytes and requires both original and stricter output-inclusive 50 ms spans. Native controls and the final receipt-sealed plan are still pending, so no native grouped performance or admission result exists. Unexecuted drafts and passed mock attempts are preserved. [Source checkpoint and declared limits](../evidence/windows-grouped-census-preparation.zip)
+
+Preparation archive SHA-256 24ac9a06a804e7d229fb5eae7a0cdd59a3208d3d133ab3ffad9fdfdc757896d2.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
