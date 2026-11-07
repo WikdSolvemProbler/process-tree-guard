@@ -288,7 +288,7 @@ import statistics
 from collections import Counter
 from collections.abc import Mapping
 
-from arms import expected_exit, expand_template, \
+from arms import expected_exit, expand_template, has_sysprims_fast_workload, \
     materialized_candidate_pending, \
     materialized_child_args_proven, materialized_child_args_stated, \
     materialized_list_proven
@@ -298,6 +298,7 @@ from plan import CONTEXTS, CONTROL_REPS, DESIGNATED_ARM, \
     expected_descendants, malformed_expected_exit, \
     malformed_pin_violation, scale_count_matches, \
     scale_distinct_count, slot_variant, variant_for
+from runner import fast_workload_argv
 
 # Census anchors: the vendored enumeration of MEASUREMENT.md
 # section 2's named calls in campaign/census.json (this package) —
@@ -1023,7 +1024,7 @@ def _resource_coverage(records):
 RESOURCE_COUNTERS = ("cpu_ms", "peak_working_set_bytes")
 
 
-def _paired_cost_comparison_detail(records):
+def _paired_cost_comparison_detail(records, config=None):
     """The arm-comparison verdict of dimension (3) (round-31
     F1, rebuilt round-32 F1, rebuilt round-33 F3, rebuilt
     round-34 F1; censoring held round-35 F1; the magnitude
@@ -1250,6 +1251,7 @@ def _paired_cost_comparison_detail(records):
     # naming those branches exist for.
     planned_measured = [r for r in _planned_records(records)
                         if r.get("kind") == "measured"]
+    unverified_fast = _unverified_sysprims_fast_contexts(records, config)
     losses = []
     unpaired = []
     compared = []
@@ -1360,6 +1362,12 @@ def _paired_cost_comparison_detail(records):
                     cell, {}).get(competitor, 0)
                 where = (f"{competitor} on {counter} in "
                          f"{path}/{context} variant {variant!r}")
+                if competitor == "sysprims" and path == "fast" \
+                        and context in unverified_fast:
+                    unpaired.append(
+                        f"{where}: measured argv cannot be verified "
+                        "against the anchored fast_workload profile")
+                    continue
                 counts = (
                     f"the designated arm carries "
                     f"{len(designated_values)} numeric "
@@ -1559,7 +1567,7 @@ def _paired_cost_comparison_detail(records):
     return losses, unpaired, compared, failing_pairs
 
 
-def _paired_cost_comparison_full(records):
+def _paired_cost_comparison_full(records, config=None):
     """The (losses, unpaired, compared) form of the
     dimension-(3) arm comparison (see
     _paired_cost_comparison_detail, whose fourth return —
@@ -1569,11 +1577,11 @@ def _paired_cost_comparison_full(records):
     round-34 wiring: the PASS surfaces unpack exactly
     three."""
     losses, unpaired, compared, _failing_pairs = \
-        _paired_cost_comparison_detail(records)
+        _paired_cost_comparison_detail(records, config)
     return losses, unpaired, compared
 
 
-def _paired_cost_comparison(records):
+def _paired_cost_comparison(records, config=None):
     """The (losses, unpaired) form of the dimension-(3)
     arm comparison (see _paired_cost_comparison_full, whose
     third return — the compared units with their per-unit
@@ -1581,7 +1589,7 @@ def _paired_cost_comparison(records):
     The two-value shape is retained from the round-31 wiring:
     every standing caller and probe unpacks exactly two."""
     losses, unpaired, _compared = \
-        _paired_cost_comparison_full(records)
+        _paired_cost_comparison_full(records, config)
     return losses, unpaired
 
 
@@ -1719,6 +1727,7 @@ def _shipped_config():
 
 
 NO_VERIFIED_PLAN = object()
+NO_VERIFIED_SYSPRIMS_FAST_PLAN = object()
 """Sentinel for _plan_fast_argv_length's config argument:
 the records under judgment belong to a run whose plan no
 verified configuration supplies (a preserved package whose
@@ -1747,7 +1756,9 @@ _LEGACY_STUB_EXIT_CONFIG = {"arms": {"processkit": {"expected_exit": {"kill": 12
 
 
 def _plan_is_unverified(config):
-    return config is NO_VERIFIED_PLAN or config is NO_VERIFIED_LEGACY_STUB_PLAN
+    return (config is NO_VERIFIED_PLAN
+            or config is NO_VERIFIED_LEGACY_STUB_PLAN
+            or config is NO_VERIFIED_SYSPRIMS_FAST_PLAN)
 
 
 def _slot_expected_exit(arm, path, config):
@@ -2498,7 +2509,7 @@ def _designated_malformed_violations(records):
     return violations
 
 
-def _collected_record_state(dimension, records):
+def _collected_record_state(dimension, records, config=None):
     """The record-observed state of a collected dimension whose
     evidence is the run's records: "PASS", "FAIL" or
     "UNEVALUATED" (the collection is absent or incomplete in
@@ -2637,7 +2648,7 @@ def _collected_record_state(dimension, records):
         for _arm, (_total, cpu, peak) in coverage.items():
             if not cpu or not peak:
                 return "FAIL"
-        cost_losses, unpaired = _paired_cost_comparison(records)
+        cost_losses, unpaired = _paired_cost_comparison(records, config)
         if cost_losses:
             return "FAIL"
         if unpaired:
@@ -3056,6 +3067,34 @@ def _same_executable(token, executable):
         or canonical_token.endswith("\\" + canonical_executable)
 
 
+def _expected_sysprims_fast_argv(config):
+    if config is NO_VERIFIED_SYSPRIMS_FAST_PLAN:
+        return ()
+    if not has_sysprims_fast_workload(config):
+        return None
+    try:
+        return fast_workload_argv("sysprims", config)
+    except (KeyError, TypeError, ValueError):
+        return ()
+
+
+def _wrong_sysprims_fast_argv(record, expected):
+    return (expected is not None
+            and record.get("arm") == "sysprims"
+            and record.get("path") == "fast"
+            and record.get("kind") in ("warmup", "measured")
+            and (not expected or record.get("argv") != expected))
+
+
+def _unverified_sysprims_fast_contexts(records, config):
+    expected = _expected_sysprims_fast_argv(config)
+    if expected is None:
+        return set()
+    return {record.get("context") for record in _planned_records(records)
+            if record.get("kind") == "measured"
+            and _wrong_sysprims_fast_argv(record, expected)}
+
+
 def _record_inconsistencies(records, expected_output=None,
                             config=None):
     """Every disagreement between a record's classification and
@@ -3307,6 +3346,7 @@ def _record_inconsistencies(records, expected_output=None,
     found = []
     fast_argv_lengths = {}
     arm_executables = {}
+    sysprims_fast_argv = _expected_sysprims_fast_argv(config)
     for record in records:
         outcome = record.get("outcome")
         arm = record.get("arm")
@@ -3937,6 +3977,15 @@ def _record_inconsistencies(records, expected_output=None,
         # held for arm_pid above, in their own idiom, and are
         # not named twice.)
         argv = record.get("argv")
+        if _wrong_sysprims_fast_argv(record, sysprims_fast_argv):
+            found.append({
+                "record": record, "field": "fast_workload_argv", "slot": slot,
+                "detail": (
+                    "SysPrims fast_workload argv differs from the "
+                    f"anchored profile: expected {sysprims_fast_argv!r}, "
+                    f"observed {argv!r}" if sysprims_fast_argv else
+                    "SysPrims fast_workload argv cannot be checked "
+                    "without a verified profile")})
         if not (isinstance(argv, list) and argv
                 and all(isinstance(token, str) for token in argv)):
             found.append({
@@ -4939,6 +4988,41 @@ def freeze_gate(records, expected_output=None, config=None):
                           "record-inconsistency standing losses); "
                           "the fast-path median cannot be certified "
                           "from them"})
+        elif inc("sysprims", "fast", {"fast_workload_argv"}):
+            timing_fields = {
+                "elapsed_ms", "argv", "arm_pid", "exit_code", "outcome",
+                "output_stdout_match", "output_stderr_match",
+                "output_stdout_sha256", "output_stderr_sha256",
+                "output_stdout_len", "output_stderr_len",
+            }
+            # An absent verdict does not contradict the record shape,
+            # but it cannot certify a sample with configured output.
+            unobserved_output = {
+                row["arm"] for row in planned_records
+                if row.get("path") == "fast" and row.get("context") == context
+                and row.get("kind") == "measured" and row.get("outcome") == "ok"
+                and _is_plausible_elapsed(row.get("elapsed_ms"))
+                and any(_expected_pair(expected_output, row, stream) is not None
+                        and row.get(f"output_{stream}_match") is not True
+                        for stream in ("stdout", "stderr"))
+            }
+            independent_losses = []
+            if (guard is not None and not _plan_is_unverified(config)
+                    and "guard" not in unobserved_output
+                    and not inc("guard", "fast", timing_fields)):
+                independent_losses = [
+                    f"{arm} {med:.3f} ms" for arm, med in sorted(rivals.items())
+                    if arm != "sysprims" and med is not None and guard > med
+                    and arm not in unobserved_output
+                    and not inc(arm, "fast", timing_fields)]
+            profile_note = ("measured SysPrims fast argv cannot be verified "
+                            "against the anchored fast_workload profile")
+            entries.append({
+                "dimension": "fast-path latency", "context": context,
+                "outcome": "FAIL" if independent_losses else "UNEVALUATED",
+                "detail": (f"guard median {guard:.3f} ms is slower than "
+                           + ", ".join(independent_losses) + "; " + profile_note
+                           if independent_losses else profile_note)})
         elif rival_fast_timing:
             entries.append({
                 "dimension": "fast-path latency", "context": context,
@@ -5343,7 +5427,7 @@ def profile_dimension_states(records, decisions=None,
                                   "at 'not-run'), so the "
                                   "dimension is not yet collected"})
             elif dimension == DIM_RESOURCE:
-                state = _collected_record_state(dimension, records)
+                state = _collected_record_state(dimension, records, config)
                 coverage = _resource_coverage(records)
                 summary = "; ".join(
                     f"{arm}: {cpu} numeric cpu_ms and {peak} "
@@ -5356,7 +5440,7 @@ def profile_dimension_states(records, decisions=None,
                           f"arm from this run's records — "
                           f"{summary}")
                 cost_losses, unpaired, compared_units = \
-                    _paired_cost_comparison_full(records)
+                    _paired_cost_comparison_full(records, config)
                 if state == "FAIL" and cost_losses:
                     detail += ("; FAIL on the arm comparison: "
                                + "; ".join(cost_losses))
@@ -5384,7 +5468,7 @@ def profile_dimension_states(records, decisions=None,
                     "dimension": dimension, "state": state,
                     "detail": detail})
             else:
-                state = _collected_record_state(dimension, records)
+                state = _collected_record_state(dimension, records, config)
                 detail = ("collected by the named instrument: "
                           f"{instrument}; state from this "
                           "run's records for that collection")
@@ -5525,7 +5609,7 @@ def claim_ledger(records, decisions=None, expected_output=None,
                                  "collected",
                         "reason": decisions[dimension]})
             else:
-                state = _collected_record_state(dimension, records)
+                state = _collected_record_state(dimension, records, config)
                 capped = False
                 degradation = None
                 if dimension == DIM_SECURITY:
@@ -5597,7 +5681,7 @@ def claim_ledger(records, decisions=None, expected_output=None,
                         for arm, (total, cpu, peak)
                         in sorted(coverage.items()))
                     cost_losses, unpaired, compared_units = \
-                        _paired_cost_comparison_full(records)
+                        _paired_cost_comparison_full(records, config)
                     if state == "PASS":
                         basis += ("; PASS observed per-arm numeric "
                                   f"coverage: {summary}; and the "
@@ -5725,7 +5809,7 @@ def profile_dimension_losses(records, decisions=None,
                 # the generic entry, and the ledger basis names
                 # the coverage it failed on.)
                 _losses, _unpaired, _compared, failing_pairs = \
-                    _paired_cost_comparison_detail(records)
+                    _paired_cost_comparison_detail(records, config)
                 if failing_pairs:
                     total_ranks = sum(
                         count for _where, count in failing_pairs)
@@ -6539,13 +6623,18 @@ def render(records, plan_counts, fingerprints, pricing=None, platform="",
                 lines.append(f"      - unexplained remainder: {decomp['unexplained_ms']:.3f} ms")
     lines.append("")
     lines.append("Per-arm medians by context (for inspection only):")
+    unverified_fast = _unverified_sysprims_fast_contexts(records, config)
     for context in CONTEXTS:
         lines.append(f"  [{context}]")
         for path in ("fast", "kill"):
             parts = []
             for arm in PRODUCT_ARMS:
-                med = _median(records, arm, path, context)
-                text = f"{med:.3f} ms" if med is not None else "no successful slots"
+                if arm == "sysprims" and path == "fast" \
+                        and context in unverified_fast:
+                    text = "unverified fast_workload argv"
+                else:
+                    med = _median(records, arm, path, context)
+                    text = f"{med:.3f} ms" if med is not None else "no successful slots"
                 parts.append(f"{arm}: {text}")
             lines.append(f"    {path}: " + "; ".join(parts))
     lines.append("")

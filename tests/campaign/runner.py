@@ -297,6 +297,16 @@ def child_for(slot, config, marker=None):
     return spec["program"], [fill(a) for a in _materialized_args(spec)]
 
 
+def fast_workload_argv(arm, config):
+    """Build the complete argv for one ordinary product fast slot."""
+    exe = arm_executable(arm, config)
+    child = config["children"]["fast"]
+    program, args = child["program"], _materialized_args(child)
+    return [exe] + expand_template(
+        resolve_template(arm, "fast_workload", config),
+        FAST_TIMEOUT_S, program, args)
+
+
 def output_spec_for(slot, config):
     """The child spec whose output expectation governs one fast
     slot: the floor-spawn arm runs its own minimal program, every
@@ -646,13 +656,14 @@ def _run_slot(slot, config, job, event_dir):
             argv = [exe] + expand_template(
                 resolve_template(slot.arm, "kill", config),
                 KILL_TIMEOUT_S, child, child_args)
+        elif slot.path == "fast":
+            argv = fast_workload_argv(slot.arm, config)
         else:
             exe = arm_executable(slot.arm, config)
             child, child_args = child_for(slot, config, marker)
-            timeout_s = FAST_TIMEOUT_S if slot.path == "fast" else KILL_TIMEOUT_S
             argv = [exe] + expand_template(
                 resolve_template(slot.arm, slot.path, config),
-                timeout_s, child, child_args)
+                KILL_TIMEOUT_S, child, child_args)
         if event_dir:
             event_log = os.path.abspath(os.path.join(event_dir, "events.jsonl"))
             argv = [event_log if token == "{event_log}" else token

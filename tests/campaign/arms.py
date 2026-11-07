@@ -1320,6 +1320,14 @@ def materialized_candidate_pending(spec):
         and pending[1] is not _NO_CANDIDATE
 
 
+def has_sysprims_fast_workload(config):
+    """Whether the supplied configuration explicitly opts into this profile."""
+    arms = config.get("arms") if isinstance(config, Mapping) else None
+    entry = arms.get("sysprims") if isinstance(arms, Mapping) else None
+    templates = entry.get("templates") if isinstance(entry, Mapping) else None
+    return isinstance(templates, Mapping) and "fast_workload" in templates
+
+
 def resolve_template(arm, path, config):
     """Return the argv template (list of tokens) for one arm and path.
 
@@ -1365,7 +1373,14 @@ def resolve_template(arm, path, config):
     template is never the value rewritten below."""
     arms_cfg = config.get("arms", {})
     entry = arms_cfg.get(arm, {})
-    template = entry.get("templates", {}).get(path)
+    templates = entry.get("templates", {})
+    template = templates.get(path)
+    if path == "fast_workload":
+        if template is None:
+            path = "fast"
+            template = templates.get(path)
+        elif arm != "sysprims":
+            raise ArmConfigError("fast_workload is only supported for SysPrims")
     if template is None:
         template = DEFAULT_TEMPLATES[arm][path]
     elif not isinstance(template, list) \

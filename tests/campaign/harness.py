@@ -157,7 +157,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from arms import fingerprint, probe_version, check_competitor_identities, expected_exit, materialized_list  # noqa: E402
+from arms import fingerprint, probe_version, check_competitor_identities, expected_exit, materialized_list, has_sysprims_fast_workload  # noqa: E402
 from plan import DEFAULT_SEED, build_plan, check_plan, slot_key  # noqa: E402
 import pricing as pricing_mod           # noqa: E402
 import report as report_mod             # noqa: E402
@@ -179,9 +179,18 @@ CAMPAIGN_STATUS_COMPLETE = "complete"
 CAMPAIGN_STATUS_INCOMPLETE = "incomplete"
 
 
+def _read_config_bytes(path):
+    with open(path, "rb") as handle:
+        return handle.read()
+
+
 def load_config(path):
-    with open(path, encoding="utf-8") as handle:
-        config = json.load(handle)
+    path = os.path.abspath(path)
+    return _parse_config(path, _read_config_bytes(path))
+
+
+def _parse_config(path, raw):
+    config = json.loads(raw.decode("utf-8"))
     # The configuration is an interchange input like the package
     # files: its root and the arms / children / pricing_probes
     # containers must be objects before anything consumes them,
@@ -306,6 +315,11 @@ def load_config(path):
                     and isinstance(entry.get("templates"), dict):
                 for path_name, template in \
                         entry["templates"].items():
+                    if path_name == "fast_workload" and name != "sysprims":
+                        raise ValueError(
+                            f"campaign configuration in {path} gives "
+                            f"{name!r} a fast_workload template; only "
+                            "SysPrims supports it")
                     if not isinstance(template, list):
                         raise ValueError(
                             f"campaign configuration in {path} "
@@ -813,6 +827,10 @@ def admission_failures(config):
                 "pre-flight admission failure")
         elif isinstance(templates, dict):
             for path_name, template in templates.items():
+                if path_name == "fast_workload" and arm != "sysprims":
+                    failures.append(
+                        f"{arm}: fast_workload is only supported for "
+                        "SysPrims; pre-flight admission failure")
                 if not isinstance(template, list):
                     failures.append(
                         f"{arm}: templates value for "
@@ -1395,19 +1413,8 @@ def _recomputed_identity_mismatches(meta):
     recomputed mismatch list, or None when the configuration
     cannot be verified (absent, or its hash differs), in which
     case the recorded list is all the package offers."""
-    config_path = meta.get("config_path")
-    recorded_sha = meta.get("config_sha256")
-    if not isinstance(config_path, str) \
-            or not isinstance(recorded_sha, str) \
-            or not config_path or not recorded_sha \
-            or not os.path.isfile(config_path):
-        return None
-    try:
-        with open(config_path, "rb") as handle:
-            if hashlib.sha256(handle.read()).hexdigest() != recorded_sha:
-                return None
-        config = load_config(config_path)
-    except (OSError, ValueError):
+    config = _anchored_config(meta)
+    if config is None:
         return None
     fingerprints = meta.get("fingerprints")
     versions = meta.get("arm_versions")
@@ -1430,19 +1437,8 @@ def _package_expected_output(meta):
     differs): the package's match evidence is then held to the
     digest form the runner writes, and no expected-bytes
     comparison is claimed for it."""
-    config_path = meta.get("config_path")
-    recorded_sha = meta.get("config_sha256")
-    if not isinstance(config_path, str) \
-            or not isinstance(recorded_sha, str) \
-            or not config_path or not recorded_sha \
-            or not os.path.isfile(config_path):
-        return None
-    try:
-        with open(config_path, "rb") as handle:
-            if hashlib.sha256(handle.read()).hexdigest() != recorded_sha:
-                return None
-        config = load_config(config_path)
-    except (OSError, ValueError):
+    config = _anchored_config(meta)
+    if config is None:
         return None
     return report_mod.expected_output_from_config(config)
 
@@ -1452,6 +1448,11 @@ def _package_expected_output(meta):
 # historical exit contract, never a verified configuration anchor.
 LEGACY_REDUCED_STUB_CONFIG_SHA256 = (
     "ca7872d19554552c55d2df72323bec76eed20906faef4dd53c34844010919f5a")
+
+# The exact published alternate configuration is a profile claim even if
+# its unanchored config_templates metadata has been erased.
+SYSPRIMS_FAST_WARN_CONFIG_SHA256 = (
+    "dbd53f039277755f40d9c3156e85c6e92a67a018778109f11e5effd71d1e2ce5")
 
 
 def _package_plan_config(meta):
@@ -1479,6 +1480,13 @@ def _package_plan_config(meta):
     if meta.get("reduced") is True and \
             meta.get("config_sha256") == LEGACY_REDUCED_STUB_CONFIG_SHA256:
         return report_mod.NO_VERIFIED_LEGACY_STUB_PLAN
+    templates = meta.get("config_templates")
+    sysprims = templates.get("sysprims") if isinstance(templates, dict) else None
+    if meta.get("config_sha256") == SYSPRIMS_FAST_WARN_CONFIG_SHA256 or (
+            isinstance(sysprims, dict) and "fast_workload" in sysprims):
+        # Either indicator only adds a verification requirement.
+        # Unanchored token values cannot supply the expected command line.
+        return report_mod.NO_VERIFIED_SYSPRIMS_FAST_PLAN
     return report_mod.NO_VERIFIED_PLAN
 
 
@@ -1700,10 +1708,11 @@ def _anchored_config(meta):
             or not os.path.isfile(config_path):
         return None
     try:
-        with open(config_path, "rb") as handle:
-            if hashlib.sha256(handle.read()).hexdigest() != recorded_sha:
-                return None
-        return load_config(config_path)
+        config_path = os.path.abspath(config_path)
+        raw = _read_config_bytes(config_path)
+        if hashlib.sha256(raw).hexdigest() != recorded_sha:
+            return None
+        return _parse_config(config_path, raw)
     except (OSError, ValueError):
         return None
 
@@ -2676,49 +2685,24 @@ def _claim_ledger_problems(run_dir, meta, records):
             "evaluation-profile dimension; it carries "
             f"{dimensions}")
     decisions = _recorded_decisions(meta)
-    # When the configuration file the run names is still present
-    # and hashes to the value run.json records, its decisions must
-    # be the recorded ones: the recorded decisions are the run's,
-    # not an after-the-fact edit's.
-    config_path = meta.get("config_path")
-    recorded_sha = meta.get("config_sha256")
-    if isinstance(config_path, str) \
-            and isinstance(recorded_sha, str) \
-            and config_path and recorded_sha \
-            and os.path.isfile(config_path):
-        try:
-            with open(config_path, "rb") as handle:
-                actual_sha = hashlib.sha256(handle.read()).hexdigest()
-            if actual_sha == recorded_sha:
-                with open(config_path, encoding="utf-8") as handle:
-                    file_decisions = report_mod.decisions_from_config(
-                        json.load(handle))
-                if file_decisions != decisions:
-                    problems.append(
-                        "run.json's recorded profile-dimension "
-                        "decisions do not match the decisions in "
-                        "the configuration whose SHA-256 run.json "
-                        "records")
-        except (OSError, ValueError):
-            pass
-    # The verification SOURCE for decisions is the anchored
-    # configuration, never the package under check (round-25
-    # P1): when the configuration the manifest names is present
-    # and hashes to the recorded SHA-256, the expected ledger
-    # is computed from ITS decisions. When the anchor is
-    # absent, the recorded decisions serve only the package's
-    # internal consistency (the ledger file against the
-    # manifest's own recorded claim), and
-    # _recorded_run_field_problems names profile decisions
-    # unverifiable — the recorded mapping is never presented
-    # as a verified source.
-    anchored = _anchored_config(meta)
-    if anchored is not None:
-        decisions = report_mod.decisions_from_config(anchored)
+    # Use the same verified configuration snapshot for decisions,
+    # output expectations and the plan. Under an absent anchor,
+    # recorded decisions serve only the package's internal consistency.
+    config = _package_plan_config(meta)
+    expected_output = None
+    if isinstance(config, dict):
+        file_decisions = report_mod.decisions_from_config(config)
+        if file_decisions != decisions:
+            problems.append(
+                "run.json's recorded profile-dimension "
+                "decisions do not match the decisions in "
+                "the configuration whose SHA-256 run.json "
+                "records")
+        decisions = file_decisions
+        expected_output = report_mod.expected_output_from_config(config)
     expected = {entry["dimension"]: entry
                 for entry in report_mod.claim_ledger(
-                    records, decisions, _package_expected_output(meta),
-                    _package_plan_config(meta))}
+                    records, decisions, expected_output, config)}
     for claim in claims:
         dimension = claim.get("dimension")
         wanted = expected.get(dimension)
@@ -3006,9 +2990,16 @@ def _pricing_for_render(config, probe_records):
 
 
 def cmd_run(args):
+    config_path = os.path.abspath(args.config)
     try:
-        config = load_config(args.config)
-    except ValueError as error:
+        raw_config = _read_config_bytes(config_path)
+        config = _parse_config(config_path, raw_config)
+        if has_sysprims_fast_workload(config) and any(
+                name.upper() == "RUST_LOG" for name in os.environ):
+            raise ValueError(
+                "SysPrims fast_workload requires RUST_LOG to be absent "
+                "from the campaign environment")
+    except (OSError, ValueError) as error:
         # A configuration that does not parse, or whose root or
         # arms / children containers are not objects, is refused
         # by name in the admission idiom, before any namespace
@@ -3019,9 +3010,8 @@ def cmd_run(args):
               "slot executed and no observations were written",
               file=sys.stderr)
         return EXIT_ADMISSION_FAILURE
-    config["_config_path"] = os.path.abspath(args.config)
-    with open(args.config, "rb") as handle:
-        config_sha256 = hashlib.sha256(handle.read()).hexdigest()
+    config["_config_path"] = config_path
+    config_sha256 = hashlib.sha256(raw_config).hexdigest()
     seed = args.seed
     if seed is None:
         seed = config.get("seed", DEFAULT_SEED)
@@ -3060,7 +3050,7 @@ def cmd_run(args):
         "platform": env["platform"],
         "python": env["python"],
         "config_sha256": config_sha256,
-        "config_path": os.path.abspath(args.config),
+        "config_path": config_path,
         "slot_isolation": (WINDOWS_SLOT_ISOLATION
                            if config["_windows_slot_jobs"] else None),
         "profile_dimension_decisions": decisions,

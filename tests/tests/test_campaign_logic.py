@@ -836,6 +836,26 @@ class ConfigPathTests(unittest.TestCase):
             self.assertEqual(config["children"]["fast"]["program"],
                              os.path.join(tmp, "testkit.exe"))
 
+            import hashlib
+            with open(cfg_path, "rb") as handle:
+                config_sha = hashlib.sha256(handle.read()).hexdigest()
+
+            @contextlib.contextmanager
+            def replace_after_read(path, *args, **kwargs):
+                with open(path, *args, **kwargs) as handle:
+                    yield handle
+                with open(cfg_path, "w", encoding="utf-8") as handle:
+                    json.dump({"children": {"fast": {"program": "other.exe"}}},
+                              handle)
+
+            with mock.patch.object(harness_mod, "open",
+                                   side_effect=replace_after_read, create=True) as reader:
+                self.assertEqual(harness_mod._anchored_config({
+                    "config_path": cfg_path, "config_sha256": config_sha}), config)
+            self.assertEqual(reader.call_count, 1)
+            self.assertIsNone(harness_mod._anchored_config({
+                "config_path": cfg_path, "config_sha256": config_sha}))
+
 
 class StubRunTests(unittest.TestCase):
     def test_stub_fast_and_kill_slots(self):
@@ -6205,6 +6225,36 @@ class RecordConsistencyTests(unittest.TestCase):
             problems = harness_mod.check_run_package(bad)
             self.assertTrue(any("exit_code" in problem
                                 for problem in problems), problems)
+
+            import hashlib
+            profile = json.loads(json.dumps(shipped_config()))
+            templates = profile["arms"]["sysprims"]["templates"]
+            templates["fast_workload"] = ["--log-level=warn", *templates["fast"]]
+            cfg_path = os.path.join(tmp, "profile.json")
+            with open(cfg_path, "w", encoding="utf-8") as handle:
+                json.dump(profile, handle)
+            with open(cfg_path, "rb") as handle:
+                profile_sha = hashlib.sha256(handle.read()).hexdigest()
+            profile_meta = dict(meta, config_path=cfg_path, config_sha256=profile_sha)
+            plan_config = harness_mod._package_plan_config(profile_meta)
+            expected = runner_mod.fast_workload_argv("sysprims", plan_config)
+            profiled = complete_records()
+            for record in profiled:
+                if record["arm"] == "sysprims" and record["path"] == "fast":
+                    record["argv"] = list(expected)
+            victim = next(record for record in profiled
+                          if record["arm"] == "sysprims" and record["path"] == "fast"
+                          and record["kind"] == "measured")
+            self.assertFalse(any("fast_workload argv" in loss for loss in
+                                 report_mod.record_consistency_losses(
+                                     [victim], config=plan_config)))
+            victim["argv"].pop(1)
+            profile_pkg = os.path.join(tmp, "profile", "consistency")
+            write_namespace(profile_pkg, profiled, profile_meta)
+            self.assertTrue(any(
+                problem.startswith("observations.jsonl record inconsistency in measured sysprims/fast/")
+                and "fast_workload argv differs from the anchored profile" in problem
+                for problem in harness_mod.check_run_package(profile_pkg)))
 
     # -- Round-18 adjudication P3: at the package layer, a fast
     # record's match verdict was certified from the boolean
