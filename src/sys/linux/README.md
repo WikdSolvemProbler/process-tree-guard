@@ -1,3 +1,25 @@
+# Linux product integration in progress
+
+The canonical tree now contains actual one-shot admission, original-lease preparation, verified cgroup authority, native watchdog, atomic payload placement, release gate, exec-error channel, supervision, direct/adopted reaping, and consuming settlement. An ordinary Linux ARM64 component build compiled all five C bridges, created their normal static archive, generated the actual Rust entry call graph and linked the existing test harness. All eight steps passed with warnings denied. All seven existing parser/numeric tests then passed serially as UID501, with no failures or ignored tests. These tests do not call the backend: no payload, watchdog, cgroup or privileged product operation has run. The non-Windows selector remains fail closed.
+
+The entry is run_connection in supervisor.rs. It consumes one already accepted nonblocking credential-bearing connection plus a trusted owned caller launch context, prepares the original immutable owner/timer/argv, and invokes native_port::run_admitted. The concrete port calls C-only clone3(CLONE_INTO_CGROUP | CLONE_PIDFD), retains successful PID/pidfd custody before interpreting later failures, drops verified non-root credentials with NNP and zero capabilities, and uses the shared irreversible HELD/RELEASED/CANCELLED gate. It returns all outcomes through the existing real terminal/failure controllers. No daemon or process-group fallback is added.
+
+Activation performs bounded read-only checks that fs.suid_dumpable is exactly0, effective/saved/filesystem UID/GID are root, and TracerPid is0 before any cgroup or child is created. It refuses missing, unknown or nonzero policy values and changes no sysctl. The child sets and verifies irreversible NNP before credential transition, then verifies dumpable0 after the drop. The actual privileged entry must still establish trusted origin/namespace and caller-context policy; these checks do not claim universal ptrace resistance against privileged actors.
+
+The watchdog holds the exact supervisor pidfd opened before its clone, the original caller pidfd and original BOOTTIME timer. Watchdog and supervisor cancellation latch the same shared gate before writing the original held cgroup.kill descriptor. The sole permit endpoint is a private nonblocking CLOEXEC seqpacket socket with MSG_NOSIGNAL; READY and EXE1 remain private pipes. Payload signal dispositions are reset with installed kernel-UAPI rt_sigaction while maskable kernel signals remain blocked; the original raw mask is restored and checked before exec. Both watchdog and latest attempted payload raw-mask observations remain owned by terminal/quarantine receipts, including a failed clone with no child.
+
+Mandatory cleanup retains the same separately prearmed finite authority, writes held kill before fresh clocks/path checks, drains to cgroup populated0, reaps exact payload/watchdog PIDFD children, obtains same-context adopted ECHILD, restores the dedicated context, and removes only the verified exact leaf last. Shared gate unmap happens only after those reaps; unmap failure retains mapping and removal state in quarantine. A settled failed request is never execution success; missing/unconfirmed facts map to125.
+
+Still open before enabling: normal product-build/dispatch linkage and actual one-shot runtime qualification; authenticated client/privileged entry acquisition of caller stdio/CWD/environment (LaunchContext construction is explicitly unsafe and peer-bound); trusted root-owned canonical cgroup-root provisioning; Linux kernel-floor/shared escape tests and performance comparison. Ordinary-user positive provisioning is deliberately denied. No root concurrency experiment or Mac administrator work is included.
+
+Required native translation units: native_arming.c, kernel_signal_abi.c, payload_bootstrap.c, terminal_bridge.c, waitid_bridge.c. Preserve stack protection and normal native static-library link ordering. Installed headers remain the ABI authority. Target scope is Linux little-endian LP64 aarch64/x86-64 only. Existing evidence below qualifies predecessor components, not this complete integration.
+
+The [build and unit-test evidence](../../../tests/evidence/linux-contained-launch-build.zip) preserves the initial failed compile, exact source revisions, compiler/link artifacts, raw seven-test output and verified scratch cleanup. Only the three recorded owned scratch directories were removed after all108artifacts were checked locally. Original scopes were absent; no shared runtime or other worker was stopped. Source candidate91a0e19f62964a7fa0238baafec1d2f46dff5f323503597407f9a19fc7531d58 identifies the actual pre-documentation build inputs.
+
+PROVENANCE.json identifies extracted predecessor sources. Standalone qualification clients/drivers and scripted activation stand-ins were not imported. Prior evidence and failures below are historical and preserved.
+
+---
+
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- Copyright 2026 Peter Shiller -->
 
@@ -7,13 +29,7 @@
 
 - [src/sys/linux](#srcsyslinux)
 
-This folder is a named place for a Linux backend. It holds this README and nothing else.
-
-**Belongs here:** This README only.
-
-**Does not belong here:** Code of any kind. A file here that is not this README is a defect at this version.
-
-Linux is a named place, not a backend. The revival condition stands on the wiki Platform Support page.
+The following records describe predecessor-component checkpoints. Their then-current limitations are historical; the staged implementation and remaining enabling conditions are stated above. Original sources, failed attempts and raw evidence remain preserved. Linux is still not an enabled backend.
 
 ## Native containment probes
 

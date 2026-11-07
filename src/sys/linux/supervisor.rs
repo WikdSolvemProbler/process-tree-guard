@@ -1,0 +1,300 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Peter Shiller
+
+//! Owned one-shot supervisor; no fixture clients or child drivers.
+use super::*;
+use std::time::Duration;
+use std::ffi::c_char;
+const POLICY_REFUSAL: &str = "verified identity refused by activation policy";
+type Probe<T> = std::result::Result<T, String>;
+fn native<T>(result: super::Result<T>) -> Probe<T> {
+    result.map_err(|error| format!("{error:?}"))
+}
+
+fn io_result<T>(result: io::Result<T>) -> Probe<T> {
+    result.map_err(|error| error.to_string())
+}
+
+fn check(condition: bool, message: &str) -> Probe<()> {
+    if !condition {
+        return Err(message.into());
+    }
+    Ok(())
+}
+
+fn fd_from_call(value: c_int) -> Probe<OwnedFd> {
+    let fd = native(os_result(value as isize))? as RawFd;
+    // The successful socket or accept syscall returns a newly owned fd.
+    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+}
+
+const CLOCK_BOOTTIME: c_int = 7;
+const TFD_TIMER_ABSTIME: c_int = 1;
+const POLLHUP: c_short = 0x10;
+const F_DUPFD_CLOEXEC: c_int = 1030;
+const NS_PER_SECOND: u64 = 1_000_000_000;
+
+#[repr(C)]
+#[derive(Default)]
+struct Timespec {
+    seconds: i64,
+    nanoseconds: i64,
+}
+
+#[repr(C)]
+struct ItimerSpec {
+    interval: Timespec,
+    value: Timespec,
+}
+
+unsafe extern "C" {
+    fn clock_gettime(clock: c_int, time: *mut Timespec) -> c_int;
+    fn timerfd_create(clock: c_int, flags: c_int) -> c_int;
+    fn timerfd_settime(
+        fd: c_int,
+        flags: c_int,
+        value: *const ItimerSpec,
+        old: *mut ItimerSpec,
+    ) -> c_int;
+    fn pipe2(fds: *mut c_int, flags: c_int) -> c_int;
+}
+
+fn boottime_ns() -> Probe<u64> {
+    let mut time = Timespec::default();
+    native(os_result(
+        unsafe { clock_gettime(CLOCK_BOOTTIME, &mut time) } as isize,
+    ))?;
+    let seconds = u64::try_from(time.seconds).map_err(|_| "negative boot time")?;
+    let nanoseconds = u64::try_from(time.nanoseconds).map_err(|_| "negative boot fraction")?;
+    check(nanoseconds < NS_PER_SECOND, "invalid boot fraction")?;
+    seconds
+        .checked_mul(NS_PER_SECOND)
+        .and_then(|value| value.checked_add(nanoseconds))
+        .ok_or_else(|| "boot time overflow".into())
+}
+
+struct RetainedLease {
+    owner: OwnedFd,
+    timer: OwnedFd,
+    admitted_ns: u64,
+    deadline_ns: u64,
+}
+
+impl RetainedLease {
+    fn arm(admitted: Admitted) -> Probe<Self> {
+        Self::from_owner(admitted.owner, admitted.plan.duration(), boottime_ns()?)
+    }
+
+    fn from_owner(owner: OwnedFd, duration: Duration, admitted_ns: u64) -> Probe<Self> {
+        let duration_ns =
+            u64::try_from(duration.as_nanos()).map_err(|_| "request duration overflow")?;
+        check(duration_ns > 0, "decoded deadline became zero")?;
+        let deadline_ns = admitted_ns
+            .checked_add(duration_ns)
+            .ok_or("absolute deadline overflow")?;
+        let timer =
+            fd_from_call(unsafe { timerfd_create(CLOCK_BOOTTIME, SOCK_NONBLOCK | SOCK_CLOEXEC) })?;
+        native(close_on_exec(timer.as_raw_fd()))?;
+        let value = ItimerSpec {
+            interval: Timespec::default(),
+            value: Timespec {
+                seconds: (deadline_ns / NS_PER_SECOND) as i64,
+                nanoseconds: (deadline_ns % NS_PER_SECOND) as i64,
+            },
+        };
+        native(os_result(unsafe {
+            timerfd_settime(
+                timer.as_raw_fd(),
+                TFD_TIMER_ABSTIME,
+                &value,
+                ptr::null_mut(),
+            )
+        } as isize))?;
+        Ok(Self {
+            owner,
+            timer,
+            admitted_ns,
+            deadline_ns,
+        })
+    }
+
+    fn sample(&self) -> Probe<DecisionReceipt> {
+        let mut watched = [
+            PollFd {
+                fd: self.owner.as_raw_fd(),
+                events: POLLIN,
+                revents: 0,
+            },
+            PollFd {
+                fd: self.timer.as_raw_fd(),
+                events: POLLIN,
+                revents: 0,
+            },
+        ];
+        let count = native(os_result(
+            unsafe { poll(watched.as_mut_ptr(), watched.len(), 0) } as isize,
+        ))?;
+        let sampled_ns = boottime_ns()?;
+        let owner_events = watched[0].revents;
+        let timer_events = watched[1].revents;
+        check(
+            count == watched.iter().filter(|fd| fd.revents != 0).count()
+                && owner_events & !(POLLIN | POLLHUP) == 0
+                && timer_events & !POLLIN == 0,
+            "unexpected release sample poll result",
+        )?;
+        let decision = if owner_events != 0 {
+            Decision::OwnerLost
+        } else if timer_events != 0 || sampled_ns >= self.deadline_ns {
+            Decision::Deadline
+        } else {
+            Decision::Permit
+        };
+        Ok(DecisionReceipt {
+            decision,
+            owner_events,
+            timer_events,
+            sampled_ns,
+        })
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Decision {
+    Permit,
+    OwnerLost,
+    Deadline,
+}
+
+#[derive(Debug)]
+struct DecisionReceipt {
+    decision: Decision,
+    owner_events: c_short,
+    timer_events: c_short,
+    sampled_ns: u64,
+}
+fn pipe() -> Probe<(OwnedFd, OwnedFd)> {
+    let mut fds = [-1; 2];
+    native(os_result(
+        unsafe { pipe2(fds.as_mut_ptr(), SOCK_CLOEXEC | SOCK_NONBLOCK) } as isize,
+    ))?;
+    // Successful pipe2 installs two newly owned descriptors.
+    let [reader, writer] = fds.map(|fd| unsafe { OwnedFd::from_raw_fd(fd) });
+    native(close_on_exec(reader.as_raw_fd()))?;
+    native(close_on_exec(writer.as_raw_fd()))?;
+    Ok((reader, writer))
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct VerifiedIdentity {
+    uid: u32,
+    gid: u32,
+    groups: Vec<u32>,
+}
+
+struct PreparedRun {
+    owner_pid: c_int,
+    identity: VerifiedIdentity,
+    plan: request::ExecPlan,
+    lease: RetainedLease,
+}
+
+fn status_field<'a>(status: &'a str, name: &str) -> Probe<&'a str> {
+    let mut fields = status.lines().filter_map(|line| line.strip_prefix(name));
+    let value = fields
+        .next()
+        .ok_or_else(|| format!("missing process status field {name}"))?;
+    check(fields.next().is_none(), "duplicate process status field")?;
+    Ok(value.trim())
+}
+
+fn status_ids(status: &str, name: &str) -> Probe<Vec<u32>> {
+    status_field(status, name)?
+        .split_whitespace()
+        .map(|id| {
+            id.parse()
+                .map_err(|_| format!("invalid process ID field {name}"))
+        })
+        .collect()
+}
+
+fn verify_identity(owner: &OwnedFd, peer: Credentials) -> Probe<VerifiedIdentity> {
+    native(validate_pidfd(owner, peer, &mut NativeReceipt::default()))?;
+    let status = io_result(fs::read_to_string(format!("/proc/{}/status", peer.pid)))?;
+    check(
+        peer.uid != 0
+            && peer.gid != 0
+            && status_ids(&status, "Uid:")? == [peer.uid; 4]
+            && status_ids(&status, "Gid:")? == [peer.gid; 4],
+        "owner credentials differ from the kernel transport identity",
+    )?;
+    for name in ["CapEff:", "CapPrm:", "CapInh:", "CapAmb:"] {
+        check(
+            status_field(&status, name)? == "0000000000000000",
+            "owner retained capabilities",
+        )?;
+    }
+    check(
+        status_field(&status, "NoNewPrivs:")? == "1",
+        "owner lacks NoNewPrivs",
+    )?;
+    let groups = status_ids(&status, "Groups:")?;
+    check(!groups.contains(&0), "owner has a root supplementary group")?;
+    // A PID exit or replacement during the numeric procfs lookup refuses preparation.
+    native(validate_pidfd(owner, peer, &mut NativeReceipt::default()))?;
+    Ok(VerifiedIdentity {
+        uid: peer.uid,
+        gid: peer.gid,
+        groups,
+    })
+}
+
+fn prepare(
+    admitted: Admitted,
+    admitted_ns: u64,
+    authorizes: impl FnOnce(&VerifiedIdentity) -> bool,
+) -> Probe<PreparedRun> {
+    let Admitted { peer, owner, plan } = admitted;
+    let identity = verify_identity(&owner, peer)?;
+    check(authorizes(&identity), POLICY_REFUSAL)?;
+    let lease = RetainedLease::from_owner(owner, plan.duration(), admitted_ns)?;
+    check(
+        lease.sample()?.decision == Decision::Permit,
+        "owner or deadline became inactive during preparation",
+    )?;
+    Ok(PreparedRun {
+        owner_pid: peer.pid,
+        identity,
+        plan,
+        lease,
+    })
+}
+
+
+#[path="native_activation.rs"]
+pub(super) mod native_activation;
+pub(crate) use native_activation::{LaunchContext, RunOutcome};
+
+/// # Safety
+/// Dedicated one-shot process, no unrelated children/threads, exclusive wait
+/// ownership, independently finite enclosing authority. Accepted connection is
+/// already nonblocking SOCK_SEQPACKET with SO_PASSCRED; context belongs to its
+/// authenticated caller. No caller-discovery or daemon loop is performed.
+pub(crate) unsafe fn run_connection(
+    connection:OwnedFd,launch:LaunchContext,
+    authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
+)->RunOutcome {
+    let mut admission=NativeReceipt::default();
+    let admitted_ns=match boottime_ns(){Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,error)};
+    let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
+        Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,format!("admission refused: {error:?}")),
+    };
+    if !launch.matches(admitted.peer) {
+        return native_activation::before_activation(launch,admission,"launch context differs from authenticated peer".into());
+    }
+    let program=admitted.plan.program().to_owned();
+    let prepared=match prepare(admitted,admitted_ns,|identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {
+        Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,error),
+    };
+    unsafe{native_activation::run_admitted(prepared,launch,admission)}
+}

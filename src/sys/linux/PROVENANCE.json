@@ -1,0 +1,81 @@
+{
+  "status": "staged concrete Linux implementation; ordinary ARM64 component build/link and7pure tests passed; no containment runtime qualification; backend disabled",
+  "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
+  "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
+  "source_directory": "target/codex-security/issue2-linux-arming-015",
+  "changes": "Concrete NativePort/payload/shared cancellation integrated with preserved original controller/transport ownership; standalone fixture drivers not imported.",
+  "sources": [
+    {
+      "path": "native_activation.rs",
+      "sha256": "b35081030ac94d245d7fe9d43e8c6d603cc6200120eb24d66b9792a5df45f9eb"
+    },
+    {
+      "path": "native_arming.rs",
+      "sha256": "cb19efda42a129d211c50f216db0285ffb299155a996896b7a51e9ab7991993c"
+    },
+    {
+      "path": "cgroup_authority.rs",
+      "sha256": "804dc0ca5363f6dcfe0b168252c2b52997782efb6323dcf0ffb1647063f2c3d1"
+    },
+    {
+      "path": "terminal_controller.rs",
+      "sha256": "555db00a370866cf62d7654902f034e3be8d1e8779af862bddc451df2b15efc4"
+    },
+    {
+      "path": "arming_failure_controller.rs",
+      "sha256": "f3c2f568e872e8f43ff26f6a0c32b383668480f10eab2a2f94f738c1734fdbe5"
+    },
+    {
+      "path": "child_reaper.rs",
+      "sha256": "c102501bbef829c412ce16cbe0eb20dde74dccce1919553fec4f526c0f9c3760"
+    },
+    {
+      "path": "settlement.rs",
+      "sha256": "c9b1d321ea59e3169169717ae3f3d6772741c48366d8dceecddcaf7f4f6e04e5"
+    },
+    {
+      "path": "prepared_run.rs",
+      "sha256": "55e302b30dee581f7fe0515847fcdcfa2abd8998775275cb48e705c45a6ea78a"
+    },
+    {
+      "path": "release_lease.rs",
+      "sha256": "8b148c0f6a8a445af0e577a669d233c74eed1c75ec4dfd8311e54d70ece20bf4"
+    },
+    {
+      "path": "transport.rs",
+      "sha256": "907472caaa18f3e4a288f323c8969d85b5b0e494bcfad2cbf65357d24185fee9"
+    },
+    {
+      "path": "cross_peer.rs",
+      "sha256": "dab5eb3884ff1711d4396aa422b795cf5747c06a8d647f731e4250028dcd4091"
+    }
+  ],
+  "canonical_entry": "supervisor::run_connection -> native_port::run_admitted -> concrete NativePort -> activate -> terminal/failure controller",
+  "source_extraction": {
+    "transport": "production admission functions, no fixture main/client",
+    "supervisor": "real cross-peer error/FD helpers + original lease + verified identity preparation, no scripted activation",
+    "request": "owned packet parser uses crate::deadline",
+    "native_modules": "real015 authority/arming/controllers/reaper/settlement with product integration changes; fixture module includes removed"
+  },
+  "generic_request": {
+    "path": "target/codex-security/issue2-linux-generic-request-001/request.rs",
+    "sha256": "6531478a6cb85c31ba4639c01c144c789968178df57b64d3d128073a8d91b4c4"
+  },
+  "primary_kernel_references": [
+    "https://raw.githubusercontent.com/torvalds/linux/v5.14/arch/x86/include/uapi/asm/signal.h",
+    "https://raw.githubusercontent.com/torvalds/linux/v5.14/arch/arm64/include/uapi/asm/signal.h",
+    "https://raw.githubusercontent.com/torvalds/linux/v5.14/include/uapi/asm-generic/signal.h"
+  ],
+  "validation": {
+    "implementation_source_candidate_sha256": "91a0e19f62964a7fa0238baafec1d2f46dff5f323503597407f9a19fc7531d58",
+    "platform": "Linux6.8.0-147-generic aarch64,ordinaryUID501",
+    "build_steps_passed": 8,
+    "existing_pure_tests_passed": 7,
+    "failed": 0,
+    "ignored": 0,
+    "backend_enabled": false,
+    "native_containment_executed": false,
+    "evidence": "tests/evidence/linux-contained-launch-build.zip",
+    "limits": "No caller-context acquisition/trusted privileged entry, normal product dispatch, kernel-floor/shared escape/failure or performance qualification."
+  }
+}

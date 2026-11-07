@@ -409,6 +409,18 @@ The one actual016 attempt **passed preflight, then failed during warmup**. Its f
 
 All14 guard warmups reportedok; sixnuewframe warmups recordeddescendant-survived. These partial diagnostic warmups establish neither relative speed nor full benchmark qualification. [Complete failed016 attempt](windows-laptop-exploratory-attempt-016.zip) retains rawdata,91observations,eventfiles,source,commandoutput and independent saved-data verification. Archive SHA-256 `f6628a3b57ea1e34f2bc5f77548887d74b6392f97c389d66df4990455009cff3`.
 
+## Canonical Linux contained-launch integration
+
+The actual admission/lease, concreteNativePort, C-only atomic child placement, shared watchdog/payload cancellation and consuming cleanup controllers now live in `src/sys/linux`. Original mask uncertainty, including failed clones with no child, remains part of final failure reporting. The supported product selector still refuses Linux. This is staged implementation with an explicit unsafe trusted-entry contract, not an enabled backend.
+
+One ordinary LinuxARM64 build first failed on two C formatting warnings, two unused Rust imports and unused API exports in the component wrapper. The original failed sources/output are preserved. After the two source imports/formatting fixes and an API-consuming wrapper correction, **all eight build/link steps passed**: five C objects, native static archive, real Rust entry call-graph object, and the linked existing test harness. Compiler protections remained enabled.
+
+All **seven existing parser/numeric tests passed**, zero failed/ignored. They execute no payload, watchdog, cgroup or privileged backend function. Both independent Sol reviewers cleared that narrow test scope and examined the internal source contract; this is not whole-backend approval. Actual caller IO/CWD/environment acquisition, trusted privileged startup/namespace/anti-tracer/finite authority, product dispatch, native lifecycle/failure/shared escape and kernel-floor qualification remain open.
+
+The [complete source/build/test/history and cleanup evidence](linux-contained-launch-build.zip) retains108downloaded artifacts, all failed preparations, exact compiler sources/objects/harness/logs, scoped source-review records and SPEC_Benchmark. Every artifact was checked before exact removal of the three owned scratch roots; their original scopes were absent. No shared runtime or other worker was reset. Sourcecandidate `91a0e19f62964a7fa0238baafec1d2f46dff5f323503597407f9a19fc7531d58` identifies the actual build inputs; later documentation/LF-policy updates and exactly one trailing-LF removal are recorded with the reversible source-byte transform; no code tokens changed.
+
+Archive SHA-256 `428eb7ff832731b341240c959761d097ef6c58f282d9e207c64c76f5c0a023a0`. No Linux protection or guard-performance claim follows from these build and pure-test results.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)

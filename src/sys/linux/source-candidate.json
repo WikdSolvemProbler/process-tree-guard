@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "status": "STAGED COMPONENT BUILD/LINK +7 PURE TESTS PASS; no containment runtime or backend activation qualification",
+  "root": "src/sys/linux",
+  "history": "target/codex-security/linux-product-integration-history-001",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 14,
+      "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
+    },
+    {
+      "path": "PROVENANCE.json",
+      "bytes": 3739,
+      "sha256": "be2dd45c620d82cacdd0c51262ef4caa2efaea7152cd5e1a491a671ef5fe6297"
+    },
+    {
+      "path": "README.md",
+      "bytes": 30642,
+      "sha256": "9134aa5b078909d9469ce36608a304119bb281cf3c20ce2c1466cacad2a0a8d1"
+    },
+    {
+      "path": "arming_failure_controller.rs",
+      "bytes": 8062,
+      "sha256": "6a77466a948c04217c0311475eda2a84bdf465bc009d8e093ce4afe40ff93db6"
+    },
+    {
+      "path": "cgroup_authority.rs",
+      "bytes": 16181,
+      "sha256": "8f85a6fa7ba742dd43c1b0d1bb0735b233ab44b4dc6368b37a925a9ab6e85367"
+    },
+    {
+      "path": "child_reaper.rs",
+      "bytes": 15306,
+      "sha256": "cd71240834ecb1a9da099b6a917648b76e4b1f125ff4578df35e80546c820788"
+    },
+    {
+      "path": "kernel_signal_abi.c",
+      "bytes": 2944,
+      "sha256": "36bb4945359ea42d540161c3a85cf4e73ed22d8bf4eafa86535509abc250ae4a"
+    },
+    {
+      "path": "mod.rs",
+      "bytes": 12169,
+      "sha256": "51198ec61c4ac44deda9f51d1f2d7ed3dc2f988769a762387082b03db4ff4c09"
+    },
+    {
+      "path": "native_activation.rs",
+      "bytes": 12204,
+      "sha256": "53b1420df8e6df4fc385330a492844abca569311ce5a3622d5fdb57f70d63ff4"
+    },
+    {
+      "path": "native_arming.c",
+      "bytes": 12231,
+      "sha256": "6c365c27805a6625e396c529e130481bf5815991dd5d625cb4184f925ca9b413"
+    },
+    {
+      "path": "native_arming.h",
+      "bytes": 1605,
+      "sha256": "65fbb746e90657033378fcd9ce169b1195d7f774ce52e976eae4cc24268c85fb"
+    },
+    {
+      "path": "native_arming.rs",
+      "bytes": 10076,
+      "sha256": "999a683641ba49a019394c73e8c956e6f8a3f13c4a5b20a1b05dcc21fed706e4"
+    },
+    {
+      "path": "native_port.rs",
+      "bytes": 19739,
+      "sha256": "d00de991950d9128f38b3d6cbbfb042cf8cf397f2590a9ab28520047b472acef"
+    },
+    {
+      "path": "payload_bootstrap.c",
+      "bytes": 24342,
+      "sha256": "1e96667df37586dd4a102644ff9a7ad081bf96da33f253a1901e7e41c2855f46"
+    },
+    {
+      "path": "payload_bootstrap.h",
+      "bytes": 6253,
+      "sha256": "edc8fc5b3eb061d8751d007ed939e4e3c0df0a400351158a2dc93d566c5d3d09"
+    },
+    {
+      "path": "request.rs",
+      "bytes": 9175,
+      "sha256": "fcb01564814080c50bcd6020ce57fb8ae2901b927b9312e9d74b81094175d8eb"
+    },
+    {
+      "path": "settlement.rs",
+      "bytes": 21954,
+      "sha256": "ffcb610c6375161f48215b1118b3d5ffca8a290bfd33809a0acfba70aacc7778"
+    },
+    {
+      "path": "supervisor.rs",
+      "bytes": 9853,
+      "sha256": "214625ca5288e6bc58e548555de0f45879812da2c26bfa144e248f9a386b1ca3"
+    },
+    {
+      "path": "terminal_bridge.c",
+      "bytes": 4300,
+      "sha256": "432ebe70077eb6311030ec8d22b0dfb45da380e9f387a7f244675d670ac71bd4"
+    },
+    {
+      "path": "terminal_bridge.h",
+      "bytes": 1068,
+      "sha256": "b6a5f3c4b3a1e22b568c74ddb34c3c0b9b25845d9b4623a0cc0c787fc366ab67"
+    },
+    {
+      "path": "terminal_controller.rs",
+      "bytes": 42397,
+      "sha256": "902eaf114563ca1c2ca9cc9607832ce54b53e3ba3dd0c50334b9f5f948262de2"
+    },
+    {
+      "path": "waitid_bridge.c",
+      "bytes": 4412,
+      "sha256": "066ef61dfa5d606b4c819ffd26be66988dabe8bef955b1fe46be07ba84449077"
+    },
+    {
+      "path": "waitid_bridge.h",
+      "bytes": 3022,
+      "sha256": "4b3562bd4e0e8fe9540f7986fbd125859906e0462a136075e32baf6c10ffb851"
+    }
+  ],
+  "previous_candidate_sha256": "eeb2b0983b9de8b7754c950f7c9ef7a58b8454011d94b3ade3dbdc6e51477763",
+  "change_reason": "Actual compiler build001: remove unused CStr/MetadataExt imports; split two misleading C indentation statements without behavior changes. Intended public reexports retained; compile wrapper will reference them.",
+  "implementation_build_candidate_sha256": "91a0e19f62964a7fa0238baafec1d2f46dff5f323503597407f9a19fc7531d58",
+  "repository_text_policy": "LF in this new Linux tree; scoped .gitattributes preserves source hashes on Windows checkouts; selected Windows source policy unchanged.",
+  "after_build_formatting": "One trailingLF removed fromterminal_controller.rs to passGitwhitespacecheck; reverse transform recordedinbuild evidence. All other C/Rust/header bytes match91a0."
+}
