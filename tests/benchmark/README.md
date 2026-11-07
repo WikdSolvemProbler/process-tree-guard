@@ -166,3 +166,7 @@ The live stability gate uses the plain condition's median absolute deviation for
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
+
+The single approved attempt stopped after 91 of 1,940 recorded slots: all 36 controls and 55 warmups, with zero measured trials. The frozen counter-order gate rejected a sample whose idle and kernel totals each decreased by 156,250 100-nanosecond ticks between immediate reads; derived busy time was unchanged. The containing Job drained from five active processes to zero. A separate native check found all 174 recorded exact process identities absent. The raw package remains provisional and incomplete, and supports no speed conclusion. The archive preserves all records, including six non-ok Nuewframe warmups, without rescoring or discarding them. [Rejected attempt and exact cleanup evidence](../evidence/windows-laptop-exploratory-attempt-011.zip)
+
+Attempt archive SHA-256 db31b44814b8e9250b8a4e88174a03da481f00212427695469859b4033421171.
