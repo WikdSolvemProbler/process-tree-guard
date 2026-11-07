@@ -321,6 +321,12 @@ The archive preserves exact sources, binaries, SDK traces, build/unit/native pla
 
 Archive SHA-256 c4dcc4578071029c9da39a02fae4091eb3929b5296e0a30a2aad96f99cf289b6 (88 verified members).
 
+## Second grouped native pipeline diagnostic
+
+The second grouped native pipeline diagnostic is preserved in [windows-grouped-native-pipeline-002.zip](windows-grouped-native-pipeline-002.zip). Qualification **failed**: strict observations were 40.9461, 59.6387 and 48.2621 ms; the middle observation exceeded the unchanged 50 ms cutoff. All three raw census/native/telemetry consistency checks passed. The two observed resource windows had no resource errors, but provide only 2 of 12 required windows; phase and campaign qualification remain false. This was one no-workload observer diagnostic with **zero benchmark slots**, not a performance comparison or primary admission. The archive retains all four pre-review drafts, the actual 34-control receipt/log, raw streams, source/dependency pins and independent audits.
+
+Archive SHA-256 be73309a694f63a408e63560c2c6c123fe22ee52b298cab30047b9799f4a46a3 (153 verified members). The [offline audit](audit_grouped_native_pipeline.py) verifies every member and reconstructs the saved timing verdicts; it performs no new native capture or benchmark.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
