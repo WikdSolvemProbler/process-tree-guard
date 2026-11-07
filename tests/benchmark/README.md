@@ -129,6 +129,18 @@ The archive binds the draft source and binary inputs. A full run still requires 
 
 Archive SHA-256 de38e7ba32962d6850060c57d54865e1fcd33019d112b02631370140ccd66a11.
 
+### Sealed launcher qualification
+
+The candidate launcher binds the source and binary inventory, effective environment digest, run ID, configuration, seeded order, raw host samples, process inventory, and complete campaign package. Its offline audit accepted a current-format replay of all 1,940 historical observations, retained the 44 standing losses, bound 473 files, and passed seven refusal controls. It requires the ProcessKit event files named by each slot and explicitly records the parser refusals that produce no event. It does not equate a completed package with a passing campaign.
+
+Six additional native windows compared enclosing Job CPU deltas with the exact retained process handles when nested fixture children exited before and after a sampling boundary. All differences were zero. The final median and coverage use only scheduled complete five-second windows. Terminal intervals still undergo contamination checks. Twelve synthetic tests passed, including an idle-tail case that had changed a failing median into a passing one in the earlier draft.
+
+Both independent Sol reviewers approved exact revision 007 with no unresolved implementation objections, conditional on a successful natural lifecycle control before the full campaign. Three revision-007 lifecycle attempts refused in preflight after observing external Git timeout or Python runtimes. They launched zero benchmark slots. Earlier drafts and their failed checks remain preserved.
+
+The strict census classifies generic external runtime names as competing work. Both reviewers identified that this is broader than evidence of an actual competing test. A refined census would need its own frozen definition and review. The strict quiet-host issue and speed acceptance remain open. [Exact sources, manifest, controls, refusals and replay](../evidence/windows-quiet-launch-qualification.zip)
+
+Archive SHA-256 22297e02b935643b11d4a58fdd01895021f4b3e41edd77541c35fcc30e9c9de6.
+
 ## Owner-verification timing checks
 
 The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
