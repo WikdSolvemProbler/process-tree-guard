@@ -123,6 +123,14 @@ This qualification does not establish populated drainage, native cgroup error re
 
 Archive SHA-256 eda65f3210dbdc12a72b9e0f9ec4ca76ab10f94aaf348b674e446d9075e5df12.
 
+## Typed Linux arming-failure custody
+
+The next adapter returns actual factory failures or verified controls and direct watchdog ownership instead of erasing arming failures into strings. Activation errors retain the original prepared run and its owner handle and absolute timer. Direct child records carry both PID and pidfd. One ordinary Linux ARM64 attempt compiled the full graph into ordinary and test objects with warnings denied. Neither object was linked or executed; no activation, test harness, root operation or payload ran.
+
+All 24 remote artifacts were downloaded and verified before exact ordinary-user cleanup. Independent checks found the original scope, cgroup path and recorded compiler/controller PIDs absent. This is compiler evidence for the ownership API, not proof of native arming-error behavior, mandatory settlement on drop or a complete backend. Consuming terminal settlement and native watchdog/reaping integration remain open. [Source, relocatable objects and cleanup](linux-arming-custody.zip)
+
+Archive SHA-256 c19869448c84258d15f47ebef214e38c6b57d1d1817d23e89f55eaad3d65a155.
+
 ## Prospective laptop attempt 013
 
 Attempt013 is frozen under manifest SHA-256 313bf9796153453177636419137275ebd0f5374d71c359138c8001455a6e81ae. Both independent Sol reviewers approved exactly one full exploratory 1,940-slot attempt after public preregistration, with zero unresolved objections. All seven measurement modules are byte-identical to native-qualified012. The driver changes only the run ID and its derived destination; the method records the current chronology and binds the original qualification receipts.
@@ -174,6 +182,12 @@ A separate candidate always reads the same held file twice, with a checked 64-bi
 The next control's `os.replace` operation returned PermissionError/WinError5 before a pathname replacement was demonstrated. The control exited one; growth and truncation were not reached. This OS refusal does not prove replacement detection, and its cause is unresolved. The outer error logger omitted the unexpected error's attached partial evidence; that missing evidence is explicitly recorded. Handles returned to baseline167 and the owned fixture was absent. The original failed reader and all records remain unchanged. Two-read consistency is not atomic immutability or loaded-image authentication, and neither full-pipeline timing nor the 50 ms gate has been qualified. [Two-read source, passed in-place control and incomplete native qualification](windows-two-read-image-qualification-001.zip)
 
 Qualification archive SHA-256 e02164c5d081970bf833ecf0fe60ff07a63b6f8ac2057e35d048626a2669e0ef.
+
+Independent follow-up controls successfully grew and truncated their own files and required the exact second-read extent errors, expected final bytes and sizes, and correct first-pass evidence. A separate case successfully replaced the named file after the initial named handle closed and before content open. Full 128-bit identities showed the new held file matched the replacement, and the helper rejected the exact binding mismatch before any hash call. Every case restored its handle baseline and removed its owned fixture.
+
+The separate OS diagnostic confirmed that ordinary replacement succeeded with a closed target but returned WinError5 with the shared-read handle held. That observation does not explain the OS mechanism or qualify detection in the blocked window. The earlier incomplete qualification remains incomplete in its original record. No helper, gate or sharing policy changed, and no full pipeline ran. [Follow-up controls and complete raw evidence](windows-two-read-image-controls-002.zip)
+
+Controls archive SHA-256 72d2a97b6fdd6e863f63df93ca174156ed47fb7f94cf22930c6ff5b8c5591a33.
 
 ## Deferred macOS administrator validation
 

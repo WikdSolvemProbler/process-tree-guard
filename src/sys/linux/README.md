@@ -91,6 +91,16 @@ Archive SHA-256 eda65f3210dbdc12a72b9e0f9ec4ca76ab10f94aaf348b674e446d9075e5df12
 
 A native write can still block, so this component requires independent watchdog coverage before payload activation. It does not settle created resources after every arming failure or consume `PendingSettlement` through exact child reaping. Populated drainage, actual cgroup failure recovery and the full one-shot port remain unqualified. The production Linux backend stays disabled.
 
+### Typed arming-failure custody
+
+The next adapter returns owning arming failures instead of erasing them into a string. Its variants retain the actual factory failure and optional created leaf, or verified controls with any direct watchdog child. Direct child records retain both PID and pidfd. Activation errors also retain the original prepared run, including its owner handle and absolute lease.
+
+Both ordinary and test-object builds of the complete module graph passed on Linux ARM64 with warnings denied. The objects were not linked or executed, and no activation or test harness ran. Exact sources, compiler outputs and independently checked archive-before-removal cleanup are preserved. [Typed API and compiler evidence](../../../tests/evidence/linux-arming-custody.zip)
+
+Archive SHA-256 c19869448c84258d15f47ebef214e38c6b57d1d1817d23e89f55eaad3d65a155.
+
+This establishes compiler acceptance of the owning API. The native arming and clone contracts are not runtime-qualified, and dropping a returned owner does not guarantee settlement. Consuming arming failures and `PendingSettlement`, exact child reaping, watchdog integration and production activation remain open.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)

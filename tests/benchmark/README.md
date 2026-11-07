@@ -224,6 +224,10 @@ A separate fixed-two-read candidate passed thirteen unit tests, matched four pin
 
 Qualification archive SHA-256 e02164c5d081970bf833ecf0fe60ff07a63b6f8ac2057e35d048626a2669e0ef.
 
+Independent follow-up controls qualified growth/truncation against their exact second-read errors and expected bytes. An actual replacement between the first named handle's closure and content open produced the expected full-identity mismatch and was rejected before any hash call. A separate OS diagnostic observed successful closed-target replacement and WinError5 while the shared-read handle was held; this does not establish detection in that blocked window. Every case restored its handle baseline and removed its owned fixture. Earlier failures remain unchanged, and no full-pipeline timing or gate compliance is claimed. [Follow-up native controls](../evidence/windows-two-read-image-controls-002.zip)
+
+Controls archive SHA-256 72d2a97b6fdd6e863f63df93ca174156ed47fb7f94cf22930c6ff5b8c5591a33.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
