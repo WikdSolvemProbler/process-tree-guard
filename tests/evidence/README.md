@@ -355,6 +355,16 @@ The preceding native diagnostic remains failed: its count rose from 137 to 143 a
 
 Archive SHA-256 `5b4a91c2dca3c01e2878a4da99a98214a00a727926e480fe4ccebff318099b80`.
 
+## Own-process launch-handle diagnostic
+
+One bounded diagnostic captured three complete SDK-based snapshots of the calling Python process’s handle table. Every capture released its own marker and snapshot, restored its entry handle count, and returned complete bounded data. The owned DLL also loaded and unloaded without a count change. The one guarded helper exited successfully and its retained process handle closed. The original process count nevertheless rose from **130 to 132**, so the diagnostic remains **failed**.
+
+The later snapshots contain two newly observed handle values: one exposes a registry-key type/name under the current user’s Windows NT/CurrentVersion path; the other provides no type or name information. Repeated values do not prove object continuity or identify the cause. This changed helper/instrumentation context does not resolve or rescore the earlier failed diagnostics. No reader-component, whole-arm, session or performance qualification follows.
+
+The [complete source, compilation and native evidence](windows-own-handle-diagnostic-004.zip) preserves both independent actual audits, all three raw wire captures, exact input/history/review/launch records, SDK-layout assertions and identity-checked build artifacts. It records selected installed-header pins and complete raw include traces, not full interpreter/OS provenance or mapped-page immutability. All 248 entries were verified; external system/compiler/Python inputs and earlier public archives remain digest references. No competitive trials ran.
+
+Archive SHA-256 `cc77040b21458e7dd2facef3039bf26df3544871a1cfa7322e755b79cf9af47d`.
+
 ## Linux watchdog-arming object compilation
 
 One ordinary-user ARM64 VM attempt compiled two C objects and the complete normal/test Rust arming graph. All eight compiler/version/dependency steps succeeded, and installed-header identities matched before and after compilation. This checks source compilation only: no linked watchdog, native arming, readiness exchange, payload placement, controller or product backend executed. The production Linux backend remains disabled; runtime and failure-path qualification are still open.
