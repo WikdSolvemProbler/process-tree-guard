@@ -123,6 +123,14 @@ Archive SHA-256 7f890abddee02d8a0c14e9f9b2fd0ac7456667926750dfba0172263f29d3b67a
 
 Actual normal exit, Pending, signal termination and repeated-wait behavior remain untested. Terminal orchestration, subreaper adoption, watchdog and exec-result handling, populated settlement and production activation remain open.
 
+### Sequential reaper attempt stopped at linking
+
+The next ordinary-user ARM64 attempt compiled the native C bridge/fixture and both Rust objects with warnings denied, and passed the constant ABI reporter. Linking the selected Rust test failed on an unresolved stack-protection symbol, with the dynamic loader reported as missing from the link. The test was never listed or executed; zero fixture children and zero component wait calls ran. The source, failed link argv and stderr, all 81 native artifacts and earlier unexecuted preparations are preserved.
+
+Independent verification covered every archive member and confirmed exact scratch removal, original scope/cgroup absence and all 14 recorded PIDs absent. The link log suggests an ordering problem with appended C objects; that diagnosis and a normal static-library repair still need native validation. Compiler protections remain enabled, the failed attempt stays failed, and actual reaping remains unqualified. [Complete failed attempt and cleanup](../../../tests/evidence/linux-direct-child-reaper-sequential.zip)
+
+Archive SHA-256 a2e04ba953e7974a23b44164bc07e6ce3236d90f6abdabe811811c30588c2b14 (153 verified members).
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
