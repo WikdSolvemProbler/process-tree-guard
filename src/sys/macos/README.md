@@ -53,6 +53,10 @@ The observed one-entry shift supports the hypothesis that a retained exit could 
 
 Archive SHA-256 edcf989f29c5769973ab339c9ea07eede811fe38d636245d7ceb931bec085610.
 
+A second physical Mac experiment tested who controls a retained child. The same-UID nonparent received `ECHILD` in both cases. The exact retained child disappeared after explicit reaping in the control and after the owning parent exited in the other case. This verifies that the reservation depends on continued custody on the tested macOS build. The first native compile failed its format checks. Both attempts and independent scratch and process group cleanup receipts are preserved. The test used ordinary credentials and did not exercise privileged UID transfer or concurrent publication. [Custody protocol, sources and receipts](../../../tests/evidence/macos-reserve-custody.zip)
+
+Archive SHA-256 470527f7e8fd5f95c74404638035da5c082fc41a775b3e0ba14c4ff19dad34eb.
+
 Backend acceptance still requires the shared process behavior tests and 20 escape repetitions with no survivors. [Shared behavior tests](../../../tests/support/shared_process_behavior.rs) · [Issue #1](https://github.com/WikdSolvemProbler/process-tree-guard/issues/1)
 
 **Next:** The wiki Platform Support page states the tier of each named place.

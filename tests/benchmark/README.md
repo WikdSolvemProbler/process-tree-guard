@@ -119,6 +119,16 @@ Independent offline replays of all 300 Windows launch records ran through Tailsc
 
 The earlier directional comparison built both images with rust-lld.exe. The resolver baseline and candidate used Microsoft link.exe 14.51.36260.0, while repaired Wake retained its exact directional image. The baseline and candidate therefore share a build recipe, and their comparisons against Wake include a linker difference. The archived image audit also records a larger consolidated text section and one additional direct DLL import. No phase timing was measured by the audit. [Build records and PE replay](../evidence/windows-wake-build-audit-20261106.zip)
 
+## Quiet-host telemetry qualification
+
+A one-minute Windows x64 observation recorded 12 five-second windows with median CPU at 2.25%, maximum CPU at 7.85%, and more than 6.7 GiB of available physical memory throughout. Those windows met the draft preflight thresholds. This establishes the observed minute's conditions. Each full campaign needs its own admission and postflight.
+
+A native nested-Job calibration matched the enclosing Job's CPU deltas to the sum of two exact process-handle readings over three windows. Both processes were active in the first two windows and had exited by the third. The Job drained naturally. A separate settled fixture and five offline controls also passed. The archive retains the initial clock-binding failure. These checks launched zero benchmark slots. The estimate bounds the bracketed counter readings, with quantization and accounting lag limiting its interpretation as physical CPU activity.
+
+The archive binds the draft source and binary inputs. A full run still requires a reviewed launcher with continuous phase coverage, process and power checks, and approval on the same frozen manifest. [Sampler, staged input identities and raw receipts](../evidence/windows-quiet-host-sampler.zip)
+
+Archive SHA-256 de38e7ba32962d6850060c57d54865e1fcd33019d112b02631370140ccd66a11.
+
 ## Owner-verification timing checks
 
 The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
