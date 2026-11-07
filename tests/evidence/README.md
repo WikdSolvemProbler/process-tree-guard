@@ -347,6 +347,14 @@ Subsequent native controls remain **failed**: the first attempt passed ten contr
 
 History archive SHA-256 `96b2b20929a592ca4518aaa55193d82c390a6960fa785c754ce218d8244a0990` (112 verified members).
 
+## Windows event-reader lifetime repair
+
+The event reader now records primary-error presence with a boolean instead of retaining the exception object in its context-manager frame. Primary error text, reraising, close-error reporting and handle quarantine keep the same behavior. A targeted regression failed at the expected caller-retention assertion on the actual earlier reader, then all **25 controls passed** on the repaired source. The test temporarily disabled automatic collection to expose the cycle, restored its prior state and never forced collection.
+
+The preceding native diagnostic remains failed: its count rose from 137 to 143 and later fell to 139. Lifecycle checkpoints locate the persistent two-handle increase within the process-launch interval; they do not yet identify those handles. The reader repair does not waive that check or establish native cleanup, session readiness or speed. The [complete repair and diagnostic evidence](windows-event-reader-cycle-repair.zip) preserves exact source, reviews, plans, both comparison logs, every raw diagnostic record and the earlier packaging failure. All 133 members were independently verified. No competitive trials ran.
+
+Archive SHA-256 `5b4a91c2dca3c01e2878a4da99a98214a00a727926e480fe4ccebff318099b80`.
+
 ## Linux watchdog-arming object compilation
 
 One ordinary-user ARM64 VM attempt compiled two C objects and the complete normal/test Rust arming graph. All eight compiler/version/dependency steps succeeded, and installed-header identities matched before and after compilation. This checks source compilation only: no linked watchdog, native arming, readiness exchange, payload placement, controller or product backend executed. The production Linux backend remains disabled; runtime and failure-path qualification are still open.
