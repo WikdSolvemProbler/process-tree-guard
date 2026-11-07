@@ -1,5 +1,5 @@
 {
-  "status": "PTGEX3 actualownedcaller handoff built/linked and8tests passed; privileged startup/containment unqualified; selector disabled",
+  "status": "Per-unit authority compiled/linked and unchanged8tests passed; trusted manager entry mint absent and backend disabled",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -50,7 +50,7 @@
       "sha256": "dab5eb3884ff1711d4396aa422b795cf5747c06a8d647f731e4250028dcd4091"
     }
   ],
-  "canonical_entry": "supervisor::run_received -> authenticated5rights+PTGEX3 environment -> private LaunchContext -> native_port::run_admitted -> real NativePort/controllers",
+  "canonical_entry": "run_received: failclosed at absent origin mint; typed run_in_service(scope,connection,policy) -> real NativePort -> per-unit provision + unchanged controllers",
   "source_extraction": {
     "transport": "production admission functions, no fixture main/client",
     "supervisor": "real cross-peer error/FD helpers + original lease + verified identity preparation, no scripted activation",
@@ -144,5 +144,58 @@
     "native_containment_executed": false,
     "evidence": "tests/evidence/linux-contained-launch-build.zip",
     "limits": "No caller-context acquisition/trusted privileged entry, normal product dispatch, kernel-floor/shared escape/failure or performance qualification."
-  }
+  },
+  "per_unit_authority": {
+    "baseline_commit": "3cfd005",
+    "baseline_candidate_sha256": "c1a2840e256e18ecc033e138c8a065234f6fed7e901491b9bead404af05d4b34",
+    "global_provision_fallback": false,
+    "entry_minted": false,
+    "source": "service_scope.rs",
+    "scope_lifetime": "NativePort or early RunOutcome plus shared anchor through InstallationRoot/CreatedLeaf/refused-create/all ProvisionFailure cases",
+    "topology": "unit/supervisor contains supervisor+watchdog; fresh payload run-* is sibling below sameheldunit; exact unit origin remains unminted",
+    "protected_migration_controls": "cgroup.procs retained/revalidated for hierarchy, each named ancestor and supervisor",
+    "path_bounds": {
+      "components": 64,
+      "bytes": 4096,
+      "component_bytes": 255
+    },
+    "unchanged": [
+      "C/H",
+      "Windows",
+      "Cargo/build",
+      "selector",
+      "termination-first held payload kill",
+      "existing8test bodies"
+    ],
+    "not_qualified": [
+      "actual root-manager entry and clean bootstrap/namespace origin",
+      "manual originalparent/all originalautoancestor capability capture and native watch",
+      "original absolute deadline before manager startup",
+      "live fixed finite recursive unit policy",
+      "native per-unit/payload runtime"
+    ],
+    "validation": {
+      "implementation_build_candidate_sha256": "dfd3b75f18a0a9c801e89b7d6b7c28dea775072e162c440fce8a02b61d1669be",
+      "platform": "6.8.0-147-generic aarch64",
+      "uid": 501,
+      "rust_build_link_steps_passed": 2,
+      "existing_tests_passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "existing_tests_changed": false,
+      "native_per_unit_topology_executed": false,
+      "entry_minted": false,
+      "backend_enabled": false,
+      "artifact_files_preserved_and_verified": 44,
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true,
+      "evidence": "tests/evidence/linux-per-unit-authority.zip",
+      "limits": "Compile/link and unchanged ordinary IPC/parser tests only. No checked manager startup, full public owners/deadline, payload containment, supported kernel-floor or performance qualification."
+    }
+  },
+  "per_unit_primary_sources": [
+    "https://docs.kernel.org/6.8/admin-guide/cgroup-v2.html#delegation-containment",
+    "https://www.freedesktop.org/software/systemd/man/255/systemd.resource-control.html#DelegateSubgroup=",
+    "https://www.freedesktop.org/software/systemd/man/255/systemd.service.html#RuntimeMaxSec="
+  ]
 }

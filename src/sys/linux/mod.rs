@@ -446,7 +446,17 @@ fn receive_observed(socket: RawFd, receipt: &mut NativeReceipt) -> Result<Admitt
 }
 
 mod supervisor;
-pub(crate) use supervisor::{run_received, RunOutcome};
+pub(crate) use supervisor::{run_in_service, VerifiedServiceScope, RunOutcome};
+
+/// Unqualified privileged startup fails closed; there is no global cgroup
+/// fallback or caller-constructed service authority.
+/// # Safety
+/// Complete public caller-parent/ancestor and original-time entry invariants
+/// remain required before a Linux backend can be enabled.
+pub(crate) unsafe fn run_received(
+    connection:OwnedFd,
+    policy:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
+)->RunOutcome {unsafe{supervisor::run_received(connection,policy)}}
 
 /// Send the calling ordinary process's request to its connected privileged
 /// one-shot peer. Borrowed IO/CWD are passed as actual kernel references; no

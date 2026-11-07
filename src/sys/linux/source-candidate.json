@@ -1,24 +1,17 @@
 {
   "schema": 1,
-  "status": "PTGEX3 RUST BUILD/LINK +8 TESTS PASS, including ordinarykernelFDtransport; no privilegedstartup/containment/activation qualification",
+  "status": "Per-unit authority Rust build/link + unchanged8tests PASS; entry origin mint absent; backend disabled; no runtime topology or protection/performance qualification",
   "root": "src/sys/linux",
-  "baseline_commit": "09a3e0c5f0b507eca5078b5d01086ceb33836331",
-  "baseline_candidate_sha256": "0f0f8924d1114e6ca335c66760b67b23316922fd2f4e2e5798d3a2ddb35dc1fd",
-  "wire": "PTGEX3; exact5rights; nativebyte argv+environment",
-  "entry_signature": "unsafe fn(OwnedFd, Policy) -> RunOutcome = linux::run_received; Policy=fn(u32,u32,&[u32],&CStr)->bool",
-  "tests": {
-    "pure": 7,
-    "native_transport": 1,
-    "current_revision_executed": false,
-    "new_native_effects": [
-      "ordinary self pidfd_open",
-      "owned AF_UNIX socketpairs/sendmsg/recvmsg",
-      "fresh0700 directory and three own regular files under private caller TMPDIR; retained",
-      "fcntl/getsockopt/poll and proc-self FD counts",
-      "bounded own-file read/write/seek and held-directory metadata"
-    ],
-    "no_fork_exec_signal_cgroup_root_or_global_setting": true
-  },
+  "baseline_commit": "3cfd005",
+  "baseline_candidate_sha256": "c1a2840e256e18ecc033e138c8a065234f6fed7e901491b9bead404af05d4b34",
+  "history": "target/codex-security/linux-product-integration-history-001/c1a-before-unit-authority-006",
+  "entry_signature": "unsafe fn(VerifiedServiceScope,OwnedFd,Policy)->RunOutcome = linux::run_in_service; Policy=fn(u32,u32,&[u32],&CStr)->bool",
+  "origin_mint": "ABSENT: checked_entry_origin returns Err; no public/unsafe caller-derived constructor and no test mint",
+  "global_cgroup_fallback": false,
+  "scope_ownership": "NativePort/earlyRunOutcome; shared exact held anchor in all leaf parent/provision/refused-create/quarantine paths",
+  "public_owner_time_unqualified": "peer auth/locally-admitted timer do not replace original manual parent, auto ALL live original ancestors, and pre-manager absolute timeout; full goal remains required",
+  "tests": "existing8 bodies unchanged; no new tests/framework/effects",
+  "selector_sha256": "55d0d8d6caa5d224b554cd6ace3b103142196ba3ef5bfa5cec0fc330d6c58d8a",
   "files": [
     {
       "path": ".gitattributes",
@@ -27,13 +20,13 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 6540,
-      "sha256": "6cca1c3c205b1f7325d9b90950990df116e3928f670f098c4a76b6ab5daede68"
+      "bytes": 9043,
+      "sha256": "a1c2f4369609a31cb5c3c4fa141d4215c31461785b6f4f25dea985705ff81f17"
     },
     {
       "path": "README.md",
-      "bytes": 31534,
-      "sha256": "ab17d63e41ac77c13c45a68e2d5cc9d3585887643f575e9bb83cd8dfa585bc91"
+      "bytes": 34972,
+      "sha256": "c28927c1c4695741b25f1c39a6fc957f989ae0edc7252d843912f15b357e6468"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -42,8 +35,8 @@
     },
     {
       "path": "cgroup_authority.rs",
-      "bytes": 16181,
-      "sha256": "8f85a6fa7ba742dd43c1b0d1bb0735b233ab44b4dc6368b37a925a9ab6e85367"
+      "bytes": 16089,
+      "sha256": "c8de18721b9722e1b4630283afb19f0f8e0ece662f8b45bb4c39145586bff90e"
     },
     {
       "path": "child_reaper.rs",
@@ -57,13 +50,13 @@
     },
     {
       "path": "mod.rs",
-      "bytes": 23631,
-      "sha256": "015279c945b6537f94b3f21bec872a818c62a9612d47483d5a5909cf61c7bc2d"
+      "bytes": 24124,
+      "sha256": "6f84cb05e38b033f144852b571c4e13e30b3638c7b0126148befc868b33c7d2d"
     },
     {
       "path": "native_activation.rs",
-      "bytes": 12276,
-      "sha256": "ba75e575c223fba08ac5678bde9e07d0d05656f29698836e2f5bdb150f6cb2fd"
+      "bytes": 12468,
+      "sha256": "71129197ed3bc0bc9390c47b85837a732e189242fee254b983194b628defdb5c"
     },
     {
       "path": "native_arming.c",
@@ -77,13 +70,13 @@
     },
     {
       "path": "native_arming.rs",
-      "bytes": 10076,
-      "sha256": "999a683641ba49a019394c73e8c956e6f8a3f13c4a5b20a1b05dcc21fed706e4"
+      "bytes": 10142,
+      "sha256": "91a17984b0b84fc8481b62c0c3efeae72b29b592c2586df97842b4fe24d46775"
     },
     {
       "path": "native_port.rs",
-      "bytes": 19253,
-      "sha256": "eead0af174ef67410ccec96a68ea28d083ea0bc755b42e867cf48b53c6d7dd9e"
+      "bytes": 19677,
+      "sha256": "0fcd6fb9a394cbf0ae184b802eb2a06f5e6b1dde8fd49ac2738cf5752c2aeb18"
     },
     {
       "path": "payload_bootstrap.c",
@@ -101,14 +94,19 @@
       "sha256": "3a364ef8d026d5412dbe17a5c2f0c258f2af1a86ce96b7377a67330c3d7d528b"
     },
     {
+      "path": "service_scope.rs",
+      "bytes": 11093,
+      "sha256": "93fd4b8e5edc7d336d637d199de6f09455f85e940777111d8c0ac4445b08cd9a"
+    },
+    {
       "path": "settlement.rs",
       "bytes": 21954,
       "sha256": "ffcb610c6375161f48215b1118b3d5ffca8a290bfd33809a0acfba70aacc7778"
     },
     {
       "path": "supervisor.rs",
-      "bytes": 10134,
-      "sha256": "21b85b2390ef9bf04de91d5f29f69a2b57bfa34343f83a2f37bd36e8c406ac76"
+      "bytes": 11403,
+      "sha256": "9cc241896cb723b1db050b26079f1b29ef543938658983b2525d45b03e2ff520"
     },
     {
       "path": "terminal_bridge.c",
@@ -136,7 +134,5 @@
       "sha256": "4b3562bd4e0e8fe9540f7986fbd125859906e0462a136075e32baf6c10ffb851"
     }
   ],
-  "test_restoration": "Prior specific framing, decoderargvNUL and headerargc-overflow assertions preserved; exact aggregate argv+env native-cap boundaries added inside samefivepuretests.",
-  "final_lint_delta": "Only redundant mut removed from receive_observed packet binding; ownedrights still consumed and all production behavior unchanged.",
-  "implementation_build_candidate_sha256": "ea06c421acabed5a4c8984949bb1187f38fb958b388f7deb0e957f501abcd083"
+  "implementation_build_candidate_sha256": "dfd3b75f18a0a9c801e89b7d6b7c28dea775072e162c440fce8a02b61d1669be"
 }

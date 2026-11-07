@@ -3,6 +3,7 @@
 
 use super::*;
 use std::ffi::{CStr, CString};
+use std::sync::Arc;
 
 const CGROUP2_MAGIC: i64 = 0x6367_7270;
 const AT_FDCWD: c_int = -100;
@@ -34,6 +35,8 @@ const REQUIRED_STATX: u32 = 0x011b | STATX_MNT_ID;
 
 #[path = "settlement.rs"]
 pub(super) mod settlement;
+#[path = "service_scope.rs"]
+pub(super) mod service_scope;
 
 // Linux v5.14 statx and 64-bit Linux GNU statfs layouts.
 #[repr(C)]
@@ -271,32 +274,11 @@ fn require_fresh(directory: &OwnedFd) -> Probe<()> {
 struct InstallationRoot {
     directory: OwnedFd,
     identity: Identity,
+    scope: Arc<service_scope::TrustedUnitAnchor>,
 }
 
-// The fixed installation path is chosen by trusted activation code.
-// The service must start outside caller-controlled mount and user namespaces.
-fn installation_root() -> Probe<InstallationRoot> {
-    let root = directory(AT_FDCWD, c"/")?;
-    let sys = directory(root.as_raw_fd(), c"sys")?;
-    let fs = directory(sys.as_raw_fd(), c"fs")?;
-    let hierarchy = directory(fs.as_raw_fd(), c"cgroup")?;
-    require_cgroup2(&hierarchy)?;
-    let _hierarchy_migration = control(&hierarchy, c"cgroup.procs", false)?;
-    let directory = directory(hierarchy.as_raw_fd(), c"process-tree-guard")?;
-    require_cgroup2(&directory)?;
-    let identity = Identity::from(&descriptor_stat(&directory)?);
-    check(
-        identity.same_mount(Identity::from(&descriptor_stat(&hierarchy)?)),
-        "installation root changes cgroup mounts",
-    )?;
-    require_domain(&directory)?;
-    let _migration = control(&directory, c"cgroup.procs", false)?;
-    Ok(InstallationRoot {
-        directory,
-        identity,
-    })
-}
-
+// Parent authority is duplicated ONLY from the held checked per-invocation unit.
+// There is no installation/global-path fallback.
 fn generated_name() -> Probe<CString> {
     let mut random = [0u8; 16];
     // GRND_NONBLOCK refuses rather than waiting for initial entropy.
@@ -327,6 +309,8 @@ struct LeafAnchor {
 }
 
 pub(super) struct ProvisionFailure {
+    // Retain actual unit custody even when no mkdir occurred.
+    pub(super) scope: Arc<service_scope::TrustedUnitAnchor>,
     pub(super) error: String,
     pub(super) created: Option<CreatedLeaf>,
     // A failed mkdir result is not proof of absence or deletion authority.
@@ -356,9 +340,10 @@ struct VerifiedHandles {
 
 fn open_created(created: &mut CreatedLeaf) -> Probe<VerifiedHandles> {
     let parent = &created.parent;
+    parent.scope.revalidate()?;
     check(
         Identity::from(&descriptor_stat(&parent.directory)?) == parent.identity,
-        "installation root identity changed",
+        "held service-unit parent identity changed",
     )?;
     let directory = directory(parent.directory.as_raw_fd(), &created.name)?;
     require_cgroup2(&directory)?;
@@ -393,17 +378,19 @@ fn open_created(created: &mut CreatedLeaf) -> Probe<VerifiedHandles> {
 
 // Errors after mkdir preserve the created-leaf token. Nothing auto-unlinks
 // an unverified path, and no failure case can release a payload.
-pub(super) fn provision() -> std::result::Result<DomainControls, ProvisionFailure> {
+pub(super) fn provision(scope:&service_scope::VerifiedServiceScope) -> std::result::Result<DomainControls, ProvisionFailure> {
+    let retained_scope=scope.retain_anchor();
     let before_create = || -> Probe<(InstallationRoot, CString)> {
         check(
             unsafe { geteuid() } == 0,
             "fresh cgroup authority requires trusted root",
         )?;
-        let parent = installation_root()?;
+        let parent = retained_scope.duplicate_leaf_parent()?;
         let name = generated_name()?;
         Ok((parent, name))
     };
     let (parent, name) = before_create().map_err(|error| ProvisionFailure {
+        scope: Arc::clone(&retained_scope),
         error,
         created: None,
         refused_create: None,
@@ -412,6 +399,7 @@ pub(super) fn provision() -> std::result::Result<DomainControls, ProvisionFailur
     if result != 0 {
         let errno = io::Error::last_os_error().raw_os_error();
         return Err(ProvisionFailure {
+            scope: Arc::clone(&retained_scope),
             error: "native cgroup mkdir refused; parent/name and raw outcome retained".into(),
             created: None,
             refused_create: Some(RefusedCreate { parent, name, result, errno }),
@@ -433,6 +421,7 @@ pub(super) fn provision() -> std::result::Result<DomainControls, ProvisionFailur
             },
         }),
         Err(error) => Err(ProvisionFailure {
+            scope: Arc::clone(&retained_scope),
             error,
             created: Some(created),
             refused_create: None,
@@ -449,6 +438,7 @@ impl CreatedLeaf {
 
     pub(super) fn validate_unactivated(&self) -> Probe<()> {
         let anchor = self.anchor.as_ref().ok_or("unactivated leaf has no held identity anchor")?;
+        self.parent.scope.revalidate()?;
         let parent = &self.parent.directory;
         require_cgroup2(parent)?;
         check(require_root_mode(&descriptor_stat(parent)?, S_IFDIR)? == self.parent.identity,
@@ -463,8 +453,12 @@ impl CreatedLeaf {
 }
 
 impl DomainControls {
+    pub(super) fn belongs_to(&self,scope:&service_scope::VerifiedServiceScope)->bool {
+        scope.matches_anchor(&self.provenance.creation.parent.scope)
+    }
     pub(super) fn revalidate(&self) -> Probe<()> {
         let creation = &self.provenance.creation;
+        creation.parent.scope.revalidate()?;
         let parent = &creation.parent.directory;
         require_root_mode(&descriptor_stat(parent)?, S_IFDIR)?;
         check(

@@ -164,12 +164,13 @@ fn duplicate(fd:&OwnedFd)->Probe<OwnedFd> {
 #[derive(Default)]
 struct PayloadReceipt {abi:Option<[u64;13]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
 struct NativePort {
+    scope:VerifiedServiceScope,
     launch:LaunchContext, watch:Option<OriginalWatch>, receipt:PayloadReceipt, host_policy:ActivationHostReceipt,
     arguments:Vec<CString>, argv:Vec<*const c_char>, groups:Vec<u32>, uid:u32,gid:u32,
 }
 impl NativePort {
-    fn new(launch:LaunchContext)->Self {
-        Self{launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0}
+    fn new(launch:LaunchContext,scope:VerifiedServiceScope)->Self {
+        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0}
     }
     fn spec(&self,domain:&ArmedDomain,permit:c_int,ready:c_int,exec:c_int)->Probe<PayloadSpec> {
         let watch=self.watch.as_ref().ok_or("missing original retained watch")?;
@@ -197,6 +198,7 @@ impl NativePort {
 }
 impl OneShotPort for NativePort {
     fn authorize(&mut self,identity:&VerifiedIdentity,exec:&request::ExecPlan)->Probe<()> {
+        self.scope.revalidate()?;
         self.host_policy.check()?;
         check(self.launch.caller.uid==identity.uid && self.launch.caller.gid==identity.gid
             && exec.environment()==self.launch.environment,"authenticated launch context differs from prepared identity/environment")?;
@@ -220,9 +222,10 @@ impl OneShotPort for NativePort {
             Ok(value)=>self.watch=Some(value),
             Err(error)=>return Err(ArmFailure::BeforeProvision{error,arming:native_arming::ArmingReceipt::default()}),
         }
-        unsafe{native_arming::arm(watch)}
+        unsafe{native_arming::arm(watch,&self.scope)}
     }
     fn place_held(&mut self,domain:&ArmedDomain,child:ChildPlan<'_>)->Probe<PlacedChild> {
+        check(domain.controls.belongs_to(&self.scope),"payload domain belongs to a different managed service scope")?;
         check(self.receipt.spawn.is_none(),"native port may place only one payload")?;
         check(child.directory.as_raw_fd()==domain.controls.directory.as_raw_fd()
             && child.identity.uid==self.uid && child.identity.gid==self.gid && child.identity.groups==self.groups
@@ -291,18 +294,18 @@ enum Completion {
 /// arming owner, all payload/bootstrap observations, and the caller launch context.
 /// No Debug/Display exposes argv/environment/credential plans.
 #[must_use="inspect terminal versus quarantine; dropping an outcome is not cleanup"]
-pub(crate) struct RunOutcome {completion:Completion,port:Option<NativePort>,admission:NativeReceipt}
+pub(crate) struct RunOutcome {completion:Completion,port:Option<NativePort>,early_scope:Option<VerifiedServiceScope>,admission:NativeReceipt}
 
-pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchContext,admission:NativeReceipt)->RunOutcome {
-    let mut port=NativePort::new(launch);
+pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt)->RunOutcome {
+    let mut port=NativePort::new(launch,scope);
     let completion=match unsafe{activate(prepared,&mut port)} {
         Ok(pending)=>Completion::Terminal(pending.run_to_terminal()),
         Err(failure)=>Completion::Arming(failure.settle_arming_failure()),
     };
-    RunOutcome{completion,port:Some(port),admission}
+    RunOutcome{completion,port:Some(port),early_scope:None,admission}
 }
-pub(in super::super) fn before_activation(launch:LaunchContext,admission:NativeReceipt,error:String)->RunOutcome {
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:Some(NativePort::new(launch)),admission}
+pub(in super::super) fn before_activation(launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt,error:String)->RunOutcome {
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:Some(NativePort::new(launch,scope)),early_scope:None,admission}
 }
 
 impl RunOutcome {
@@ -323,6 +326,6 @@ impl RunOutcome {
     }
 }
 
-pub(in super::super) fn before_admission(admission:NativeReceipt,error:String)->RunOutcome {
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:None,admission}
+pub(in super::super) fn before_admission(scope:Option<VerifiedServiceScope>,admission:NativeReceipt,error:String)->RunOutcome {
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:None,early_scope:scope,admission}
 }

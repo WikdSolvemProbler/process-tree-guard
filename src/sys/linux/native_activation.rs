@@ -310,3 +310,8 @@ pub(crate) use native_port::RunOutcome;
 pub(super) use native_port::run_admitted;
 pub(super) use native_port::before_activation;
 pub(super) use native_port::before_admission;
+
+pub(crate) use cgroup_authority::service_scope::VerifiedServiceScope;
+pub(super) fn capture_service_scope()->Probe<VerifiedServiceScope> {
+    VerifiedServiceScope::capture_checked_entry()
+}

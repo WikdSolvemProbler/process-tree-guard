@@ -275,7 +275,7 @@ fn prepare(
 #[path="native_activation.rs"]
 pub(super) mod native_activation;
 use native_activation::LaunchContext;
-pub(crate) use native_activation::RunOutcome;
+pub(crate) use native_activation::{RunOutcome,VerifiedServiceScope};
 
 /// # Safety
 /// The privileged launcher must establish a fresh trusted one-shot main process,
@@ -290,19 +290,43 @@ pub(crate) unsafe fn run_received(
     connection:OwnedFd,
     authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
 )->RunOutcome {
-    let mut admission=NativeReceipt::default();
-    let admitted_ns=match boottime_ns(){
-        Ok(value)=>value,Err(error)=>return native_activation::before_admission(admission,error),
+    let scope=match native_activation::capture_service_scope(){
+        Ok(scope)=>scope,
+        Err(error)=>return native_activation::before_admission(None,NativeReceipt::default(),error),
     };
+    unsafe{run_in_service(scope,connection,authorizes)}
+}
+
+/// Typed internal consuming path, exported only so the actual checked entry and
+/// compiler anchor can reach the complete NativePort/controller graph. A type
+/// export grants no construction/mint authority. No fake token is provided.
+/// # Safety
+/// Real entry must already establish the full public original owner set and
+/// pre-manager absolute lease as well as all dedicated supervisor invariants.
+/// This preserved internal peer-lease code does not claim that public parity.
+pub(crate) unsafe fn run_in_service(
+    scope:VerifiedServiceScope,
+    connection:OwnedFd,
+    authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
+)->RunOutcome {
+    let mut admission=NativeReceipt::default();
+    // Preserve the internal peer lease start before added scope/packet checks.
+    // This local sample still does not mint the required pre-manager public lease.
+    let admitted_ns=match boottime_ns(){
+        Ok(value)=>value,Err(error)=>return native_activation::before_admission(Some(scope),admission,error),
+    };
+    if let Err(error)=scope.revalidate(){
+        return native_activation::before_admission(Some(scope),admission,error);
+    }
     let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
-        Ok(value)=>value,Err(error)=>return native_activation::before_admission(admission,format!("admission refused: {error:?}")),
+        Ok(value)=>value,Err(error)=>return native_activation::before_admission(Some(scope),admission,format!("admission refused: {error:?}")),
     };
     let Admitted{peer,owner,plan,io}=admitted;
     let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec());
     let program=plan.program().to_owned();
     let prepared=match prepare(peer,owner,plan,admitted_ns,
         |identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {
-        Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,error),
+        Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,scope,admission,error),
     };
-    unsafe{native_activation::run_admitted(prepared,launch,admission)}
+    unsafe{native_activation::run_admitted(prepared,launch,scope,admission)}
 }

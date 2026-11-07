@@ -431,6 +431,16 @@ The [complete handoff source/build/test/fixture/history evidence](linux-authenti
 
 This qualifies that one-process ordinary kernel IPC scope only. Privileged startup, cross-process service admission, manual-parent/auto-ancestor owner policies, original deadline across manager startup, domain-wide finite authority, actual payload containment/shared escapes/kernel floor and performance remain open. The Linux selector is still disabled; no full guard or comparative claim follows.
 
+## Held Linux per-unit authority
+
+The global payload-cgroup fallback is removed. The staged code retains the exact held unit directory, protected migration files and unit ancestry through admission, provisioning, all partial failures and terminal outcomes. The payload parent can only be duplicated from that held unit; no request path or unsafe assumed-origin constructor can mint it. Trusted entry minting remains absent and Linux remains disabled.
+
+Both independent Sol reviewers cleared build candidate `dfd3b75f18a0a9c801e89b7d6b7c28dea775072e162c440fce8a02b61d1669be` for the bounded ordinary build and unchanged eight tests, with zero unresolved objections in that scope. Both Rust compile/link steps and all eight tests passed, zero failed or ignored. The never-called typed service entry forces actual NativePort/controller codegen without constructing authority or running a payload. C/header bytes, Windows, Cargo/build and selector wiring are unchanged.
+
+The [complete source/build/test/review/cleanup archive](linux-per-unit-authority.zip) preserves the initial migration-control objection, its repair, prior source snapshots, all44 verified artifacts and SPEC_Benchmark. Both owned scratch roots and their original scopes were absent after exact cleanup; no shared runtime or other worker was reset. Archive SHA-256 `1430333ed86a0c1f293b18fac7867dd4b13013b2239fb4a4edc319956627d832`. Later status metadata changes alter no Rust/C/header bytes.
+
+This establishes compilation and the unchanged ordinary parser/kernel-IPC tests only. The per-unit topology was not executed. Actual manager/service/client startup, full original parent/all-ancestor ownership, the pre-manager absolute deadline, native payload/lifecycle/shared escape/kernel-floor qualification and performance remain open. No protection or comparative performance claim follows.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)

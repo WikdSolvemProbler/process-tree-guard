@@ -125,13 +125,13 @@ fn prepare(watch:&LeaseWatch<'_>, receipt:&mut ArmingReceipt)->Probe<(OwnedFd,Ow
 /// every returned ArmFailure into the real014 failure controller, and must keep
 /// this receipt with that outcome. Successful ArmedDomain still requires actual
 /// placement, shared release cancellation and terminal-controller integration.
-pub(super) unsafe fn arm(watch:LeaseWatch<'_>)
+pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_scope::VerifiedServiceScope)
     ->std::result::Result<ArmedDomain,ArmFailure> {
     let mut receipt=ArmingReceipt::default();
     let (reader,writer)=match prepare(&watch,&mut receipt) {
         Ok(value)=>value, Err(error)=>return Err(ArmFailure::BeforeProvision{error,arming:receipt}),
     };
-    let mut controls=match cgroup_authority::provision() {
+    let mut controls=match cgroup_authority::provision(scope) {
         Ok(value)=>value, Err(failure)=>return Err(ArmFailure::Provision{failure,arming:receipt}),
     };
     controls.gate=match native_port::SharedGate::create() {
