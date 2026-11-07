@@ -399,6 +399,12 @@ The single preregistered attempt **failed pre-admission** after all twelve five-
 
 [Complete failed attempt015](windows-laptop-exploratory-attempt-015.zip) preserves the original raw records, exclusive capture, executed command output, current sources, rejected preparation and both independent outcome checks. Source and raw hashes matched after execution. No automatic retry or gate change occurred. Attempt archive SHA-256 `1293357f1527a4a4efa096a5fbedecd29ed0c654ccdbd6eac9ea332a2afb813b`.
 
+## Existing campaign016 and own-tooling diagnosis
+
+The [ten-second read-only tooling snapshot](windows-tooling-cpu-diagnostic-001.json) found approximately2.0792% machineCPU in matched ChatGPTprocesses and0.08744% in codex. Matched Nodeprocesses had zero chargedCPU delta in that interval; this does not prove zero work below counter resolution. No process was stopped or reprioritized and no shared runtime was reset. Accessible matched processes only: the snapshot cannot attribute the earlier015 refusal or account for all kernel/new/exited/inaccessible work.
+
+Both independent Sol reviewers approved exact fresh016 manifest `40d2d0713ed38c0243df3bc040f78223ad6404a19aaa3b705689b00e27c0d9b5` for **one** attempt after public preregistration. [Protocol016](windows-laptop-exploratory-protocol-016.zip) reuses all seven015measurement modules and the exact same twenty frozen inputs,1940slotplan,seed,rivals and gates. Only the runID/destination and method disclosure change. Our workers will idle during capture to reduce our own activity. No new framework or control is introduced; refused/partial results remain unqualified. Archive SHA-256 `1d9b5b4e1c8deb97e20fe68043bfb6b15aefdfdf9db28562e448d725fab375a9` (185 verified members).
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
