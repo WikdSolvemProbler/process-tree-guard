@@ -421,6 +421,16 @@ The [complete source/build/test/history and cleanup evidence](linux-contained-la
 
 Archive SHA-256 `428eb7ff832731b341240c959761d097ef6c58f282d9e207c64c76f5c0a023a0`. No Linux protection or guard-performance claim follows from these build and pure-test results.
 
+## Actual Linux caller IO/environment handoff
+
+The staged `run_received` path now obtains real caller stdin/stdout/stderr/CWD and native-byte environment through the authenticated PTGEX3 kernel socket transfer. It owns every delivered descriptor before refusing malformed data, requires exactly five rights and matching live kernel peer/packet/pidfd identity, checks original access/CLOEXEC/O_PATH roles and preserves open-file descriptions without privileged pathname reopen. The externally fabricated public launch-context constructor was removed.
+
+Both independent Sol reviewers cleared exact buildcandidate `ea06c421acabed5a4c8984949bb1187f38fb958b388f7deb0e957f501abcd083` for the bounded ordinary build and eight tests. **Both Rust build/link steps passed** using the exact previous native archive after every C/header byte matched. **8/8tests passed**, zero failed/ignored: seven parser/numeric tests and one actual kernel transport test. The native test recorded five-right/OFD/CWD/native-environment success and eleven refusal cases with per-exchange descriptor settlement. Its three own-file fixtures were retained, downloaded and checked before exact cleanup. All42newartifacts were verified; both owned scratch roots and original scopes were absent.
+
+The [complete handoff source/build/test/fixture/history evidence](linux-authenticated-handoff.zip) includes raw native output, retained files, exact sources, reviews, compiler/link artifacts, preparation refusals and SPEC_Benchmark. Subsequent README/provenance status changes alter no Rust/C/header code bytes. Archive SHA-256 `42446f658b5423d224eeebc0651252083ccc3c9fa59761bb15121212ec53dce3`.
+
+This qualifies that one-process ordinary kernel IPC scope only. Privileged startup, cross-process service admission, manual-parent/auto-ancestor owner policies, original deadline across manager startup, domain-wide finite authority, actual payload containment/shared escapes/kernel floor and performance remain open. The Linux selector is still disabled; no full guard or comparative claim follows.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)

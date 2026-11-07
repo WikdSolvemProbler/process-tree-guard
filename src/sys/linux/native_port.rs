@@ -107,34 +107,18 @@ impl DomainControls {
     }
 }
 
-/// Trusted launch context acquired for the authenticated caller, before arm.
-/// This is not populated from raw client-supplied fd numbers or the privileged
-/// helper's ambient stdio/CWD/environment. Endpoint acquisition is an unsafe
-/// integration boundary until the Linux client/privileged entry is qualified.
-pub(crate) struct LaunchContext {
-    caller:(c_int,u32,u32), stdio:[OwnedFd;3], cwd:OwnedFd, environment:Vec<CString>, envp:Vec<*const c_char>,
+// Private context is minted ONLY from the authenticated exact-five-right bundle.
+// No public raw-fd constructor and no privileged ambient context substitution.
+pub(in super::super) struct LaunchContext {
+    caller:Credentials, stdio:[OwnedFd;3],cwd:OwnedFd,
+    environment:Vec<CString>,envp:Vec<*const c_char>,
 }
 impl LaunchContext {
-    pub(in super::super) fn matches(&self,peer:Credentials)->bool {
-        self.caller==(peer.pid,peer.uid,peer.gid)
-    }
-    /// # Safety
-    /// FDs/environment must be the authenticated caller's authorized snapshot;
-    /// exclusive owned FDs and immutable buffers must not be concurrently altered.
-    /// The one-shot supervisor must be independently finitely bounded.
-    pub(crate) unsafe fn from_verified_caller(caller:(c_int,u32,u32),stdio:[OwnedFd;3],cwd:OwnedFd,environment:Vec<CString>)->Probe<Self> {
-        check(caller.0>0 && caller.1!=0 && caller.2!=0,"invalid verified caller context")?;
-        check(environment.len()<=65536,"environment vector exceeds native bound")?;
-        let mut bytes=0usize;
-        for item in &environment {
-            check(item.as_bytes().contains(&b'='),"environment entry lacks name/value separator")?;
-            bytes=bytes.checked_add(item.as_bytes_with_nul().len()).ok_or("environment size overflow")?;
-        }
-        check(bytes<=131072,"environment bytes exceed native bound")?;
-        for fd in stdio.iter().chain(std::iter::once(&cwd)) {native(close_on_exec(fd.as_raw_fd()))?;}
+    pub(in super::super) fn from_received(caller:Credentials,io:CallerIo,environment:Vec<CString>)->Self {
+        let CallerIo{stdio,cwd}=io;
         let mut envp:Vec<_>=environment.iter().map(|item|item.as_ptr()).collect();
         envp.push(ptr::null());
-        Ok(Self{caller,stdio,cwd,environment,envp})
+        Self{caller,stdio,cwd,environment,envp}
     }
 }
 // Read-only host preconditions, never a sysctl write or ptrace workaround.
@@ -214,6 +198,8 @@ impl NativePort {
 impl OneShotPort for NativePort {
     fn authorize(&mut self,identity:&VerifiedIdentity,exec:&request::ExecPlan)->Probe<()> {
         self.host_policy.check()?;
+        check(self.launch.caller.uid==identity.uid && self.launch.caller.gid==identity.gid
+            && exec.environment()==self.launch.environment,"authenticated launch context differs from prepared identity/environment")?;
         check(identity.uid!=0 && identity.gid!=0 && !identity.groups.contains(&0),"native payload refuses privileged identity")?;
         check(exec.program().to_bytes().starts_with(b"/"),"native payload requires an absolute program")?;
         let abi=std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)});
@@ -225,6 +211,9 @@ impl OneShotPort for NativePort {
         Ok(())
     }
     fn arm(&mut self,watch:LeaseWatch<'_>)->std::result::Result<ArmedDomain,ArmFailure> {
+        if watch.owner_pid!=self.launch.caller.pid {
+            return Err(ArmFailure::BeforeProvision{error:"original owner differs from authenticated caller".into(),arming:native_arming::ArmingReceipt::default()});
+        }
         let binding=(||->Probe<OriginalWatch>{Ok(OriginalWatch{owner:duplicate(watch.owner)?,timer:duplicate(watch.timer)?,
             supervisor:duplicate(watch.supervisor)?,deadline_ns:watch.deadline_ns})})();
         match binding {
@@ -302,7 +291,7 @@ enum Completion {
 /// arming owner, all payload/bootstrap observations, and the caller launch context.
 /// No Debug/Display exposes argv/environment/credential plans.
 #[must_use="inspect terminal versus quarantine; dropping an outcome is not cleanup"]
-pub(crate) struct RunOutcome {completion:Completion,port:NativePort,admission:NativeReceipt}
+pub(crate) struct RunOutcome {completion:Completion,port:Option<NativePort>,admission:NativeReceipt}
 
 pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchContext,admission:NativeReceipt)->RunOutcome {
     let mut port=NativePort::new(launch);
@@ -310,10 +299,10 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
         Ok(pending)=>Completion::Terminal(pending.run_to_terminal()),
         Err(failure)=>Completion::Arming(failure.settle_arming_failure()),
     };
-    RunOutcome{completion,port,admission}
+    RunOutcome{completion,port:Some(port),admission}
 }
 pub(in super::super) fn before_activation(launch:LaunchContext,admission:NativeReceipt,error:String)->RunOutcome {
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:NativePort::new(launch),admission}
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:Some(NativePort::new(launch)),admission}
 }
 
 impl RunOutcome {
@@ -332,4 +321,8 @@ impl RunOutcome {
             None=>125,
         }
     }
+}
+
+pub(in super::super) fn before_admission(admission:NativeReceipt,error:String)->RunOutcome {
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error},port:None,admission}
 }

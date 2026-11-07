@@ -1,5 +1,5 @@
 {
-  "status": "staged concrete Linux implementation; ordinary ARM64 component build/link and7pure tests passed; no containment runtime qualification; backend disabled",
+  "status": "PTGEX3 actualownedcaller handoff built/linked and8tests passed; privileged startup/containment unqualified; selector disabled",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -50,7 +50,7 @@
       "sha256": "dab5eb3884ff1711d4396aa422b795cf5747c06a8d647f731e4250028dcd4091"
     }
   ],
-  "canonical_entry": "supervisor::run_connection -> native_port::run_admitted -> concrete NativePort -> activate -> terminal/failure controller",
+  "canonical_entry": "supervisor::run_received -> authenticated5rights+PTGEX3 environment -> private LaunchContext -> native_port::run_admitted -> real NativePort/controllers",
   "source_extraction": {
     "transport": "production admission functions, no fixture main/client",
     "supervisor": "real cross-peer error/FD helpers + original lease + verified identity preparation, no scripted activation",
@@ -67,6 +67,73 @@
     "https://raw.githubusercontent.com/torvalds/linux/v5.14/include/uapi/asm-generic/signal.h"
   ],
   "validation": {
+    "implementation_candidate_sha256": "ea06c421acabed5a4c8984949bb1187f38fb958b388f7deb0e957f501abcd083",
+    "platform": "Linux6.8.0-147-generic aarch64,ordinaryUID501",
+    "rust_build_link_steps_passed": 2,
+    "native_archive_reused_sha256": "b5399d54fb6b6b5f170df60ba3946267ea606a28e283e8572c3ad6152f26e8cd",
+    "all_C_header_bytes_match_predecessor": true,
+    "tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "pure_tests": 7,
+    "native_transport_tests": 1,
+    "native_refusals": 11,
+    "backend_enabled": false,
+    "payload_watchdog_cgroup_execution": false,
+    "evidence": "tests/evidence/linux-authenticated-handoff.zip",
+    "limits": "One-process kernelIPC and source reviewed handoff, not trustedmanager startup/cross-process admission, publicownerpolicies, realpayload or kernel-floor/sharedescape/performance qualification."
+  },
+  "baseline_commit": "09a3e0c5f0b507eca5078b5d01086ceb33836331",
+  "baseline_candidate_sha256": "0f0f8924d1114e6ca335c66760b67b23316922fd2f4e2e5798d3a2ddb35dc1fd",
+  "wire": {
+    "version": "PTGEX3",
+    "header_bytes": 20,
+    "rights": [
+      "owner_pidfd",
+      "stdin",
+      "stdout",
+      "stderr",
+      "cwd"
+    ],
+    "ancillary_buffer_bytes": 96,
+    "required_aligned_ancillary_bytes": 72,
+    "packet_cap": 131072,
+    "native_vector_cap": 131072,
+    "argument_cap": 4096,
+    "environment_cap": 4096,
+    "legacy_active_api": false
+  },
+  "native_test": {
+    "name": "linux::tests::native_seqpacket_admission_and_refusals",
+    "ancestry": "existing ordinary native_seqpacket_admission_and_refusals from issue2-linux-arming-015/transport.rs; adapted to real5rights/env",
+    "executed": true,
+    "effects": [
+      "ordinary self pidfd_open",
+      "own AF_UNIX nonblocking socketpairs",
+      "sendmsg/recvmsg/getsockopt/fcntl/poll",
+      "fresh0700 directory under caller TMPDIR",
+      "three fresh own regular fixture files; bounded read/write/seek",
+      "O_PATH directory/file descriptors",
+      "per-exchange /proc/self/fd counts"
+    ],
+    "prohibited_effects_not_present": [
+      "fork",
+      "exec",
+      "signal/kill",
+      "cgroup writes",
+      "root operations",
+      "global settings"
+    ],
+    "fixture_policy": "3normalfilefixtures insideprivate0700TMPDIR preserved/hashverified beforeexact2-root cleanup; originalscopesabsent.",
+    "result": "PASS: fivekernelrights/OFD/CWD/env positive and11refusals; every per-exchange descriptorcount restored"
+  },
+  "handoff_primary_sources": [
+    "https://raw.githubusercontent.com/torvalds/linux/v6.8/include/linux/socket.h",
+    "https://raw.githubusercontent.com/torvalds/linux/v6.8/include/uapi/asm-generic/socket.h",
+    "https://raw.githubusercontent.com/torvalds/linux/v6.8/include/net/scm.h"
+  ],
+  "predecessor_validation": {
     "implementation_source_candidate_sha256": "91a0e19f62964a7fa0238baafec1d2f46dff5f323503597407f9a19fc7531d58",
     "platform": "Linux6.8.0-147-generic aarch64,ordinaryUID501",
     "build_steps_passed": 8,

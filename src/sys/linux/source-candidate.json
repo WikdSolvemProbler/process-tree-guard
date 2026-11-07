@@ -1,8 +1,24 @@
 {
   "schema": 1,
-  "status": "STAGED COMPONENT BUILD/LINK +7 PURE TESTS PASS; no containment runtime or backend activation qualification",
+  "status": "PTGEX3 RUST BUILD/LINK +8 TESTS PASS, including ordinarykernelFDtransport; no privilegedstartup/containment/activation qualification",
   "root": "src/sys/linux",
-  "history": "target/codex-security/linux-product-integration-history-001",
+  "baseline_commit": "09a3e0c5f0b507eca5078b5d01086ceb33836331",
+  "baseline_candidate_sha256": "0f0f8924d1114e6ca335c66760b67b23316922fd2f4e2e5798d3a2ddb35dc1fd",
+  "wire": "PTGEX3; exact5rights; nativebyte argv+environment",
+  "entry_signature": "unsafe fn(OwnedFd, Policy) -> RunOutcome = linux::run_received; Policy=fn(u32,u32,&[u32],&CStr)->bool",
+  "tests": {
+    "pure": 7,
+    "native_transport": 1,
+    "current_revision_executed": false,
+    "new_native_effects": [
+      "ordinary self pidfd_open",
+      "owned AF_UNIX socketpairs/sendmsg/recvmsg",
+      "fresh0700 directory and three own regular files under private caller TMPDIR; retained",
+      "fcntl/getsockopt/poll and proc-self FD counts",
+      "bounded own-file read/write/seek and held-directory metadata"
+    ],
+    "no_fork_exec_signal_cgroup_root_or_global_setting": true
+  },
   "files": [
     {
       "path": ".gitattributes",
@@ -11,13 +27,13 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 3739,
-      "sha256": "be2dd45c620d82cacdd0c51262ef4caa2efaea7152cd5e1a491a671ef5fe6297"
+      "bytes": 6540,
+      "sha256": "6cca1c3c205b1f7325d9b90950990df116e3928f670f098c4a76b6ab5daede68"
     },
     {
       "path": "README.md",
-      "bytes": 30642,
-      "sha256": "9134aa5b078909d9469ce36608a304119bb281cf3c20ce2c1466cacad2a0a8d1"
+      "bytes": 31534,
+      "sha256": "ab17d63e41ac77c13c45a68e2d5cc9d3585887643f575e9bb83cd8dfa585bc91"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -41,13 +57,13 @@
     },
     {
       "path": "mod.rs",
-      "bytes": 12169,
-      "sha256": "51198ec61c4ac44deda9f51d1f2d7ed3dc2f988769a762387082b03db4ff4c09"
+      "bytes": 23631,
+      "sha256": "015279c945b6537f94b3f21bec872a818c62a9612d47483d5a5909cf61c7bc2d"
     },
     {
       "path": "native_activation.rs",
-      "bytes": 12204,
-      "sha256": "53b1420df8e6df4fc385330a492844abca569311ce5a3622d5fdb57f70d63ff4"
+      "bytes": 12276,
+      "sha256": "ba75e575c223fba08ac5678bde9e07d0d05656f29698836e2f5bdb150f6cb2fd"
     },
     {
       "path": "native_arming.c",
@@ -66,8 +82,8 @@
     },
     {
       "path": "native_port.rs",
-      "bytes": 19739,
-      "sha256": "d00de991950d9128f38b3d6cbbfb042cf8cf397f2590a9ab28520047b472acef"
+      "bytes": 19253,
+      "sha256": "eead0af174ef67410ccec96a68ea28d083ea0bc755b42e867cf48b53c6d7dd9e"
     },
     {
       "path": "payload_bootstrap.c",
@@ -81,8 +97,8 @@
     },
     {
       "path": "request.rs",
-      "bytes": 9175,
-      "sha256": "fcb01564814080c50bcd6020ce57fb8ae2901b927b9312e9d74b81094175d8eb"
+      "bytes": 12331,
+      "sha256": "3a364ef8d026d5412dbe17a5c2f0c258f2af1a86ce96b7377a67330c3d7d528b"
     },
     {
       "path": "settlement.rs",
@@ -91,8 +107,8 @@
     },
     {
       "path": "supervisor.rs",
-      "bytes": 9853,
-      "sha256": "214625ca5288e6bc58e548555de0f45879812da2c26bfa144e248f9a386b1ca3"
+      "bytes": 10134,
+      "sha256": "21b85b2390ef9bf04de91d5f29f69a2b57bfa34343f83a2f37bd36e8c406ac76"
     },
     {
       "path": "terminal_bridge.c",
@@ -120,9 +136,7 @@
       "sha256": "4b3562bd4e0e8fe9540f7986fbd125859906e0462a136075e32baf6c10ffb851"
     }
   ],
-  "previous_candidate_sha256": "eeb2b0983b9de8b7754c950f7c9ef7a58b8454011d94b3ade3dbdc6e51477763",
-  "change_reason": "Actual compiler build001: remove unused CStr/MetadataExt imports; split two misleading C indentation statements without behavior changes. Intended public reexports retained; compile wrapper will reference them.",
-  "implementation_build_candidate_sha256": "91a0e19f62964a7fa0238baafec1d2f46dff5f323503597407f9a19fc7531d58",
-  "repository_text_policy": "LF in this new Linux tree; scoped .gitattributes preserves source hashes on Windows checkouts; selected Windows source policy unchanged.",
-  "after_build_formatting": "One trailingLF removed fromterminal_controller.rs to passGitwhitespacecheck; reverse transform recordedinbuild evidence. All other C/Rust/header bytes match91a0."
+  "test_restoration": "Prior specific framing, decoderargvNUL and headerargc-overflow assertions preserved; exact aggregate argv+env native-cap boundaries added inside samefivepuretests.",
+  "final_lint_delta": "Only redundant mut removed from receive_observed packet binding; ownedrights still consumed and all production behavior unchanged.",
+  "implementation_build_candidate_sha256": "ea06c421acabed5a4c8984949bb1187f38fb958b388f7deb0e957f501abcd083"
 }

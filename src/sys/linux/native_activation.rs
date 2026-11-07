@@ -305,6 +305,8 @@ mod native_arming;
 
 #[path="native_port.rs"]
 mod native_port;
-pub(crate) use native_port::{LaunchContext, RunOutcome};
+pub(super) use native_port::LaunchContext;
+pub(crate) use native_port::RunOutcome;
 pub(super) use native_port::run_admitted;
 pub(super) use native_port::before_activation;
+pub(super) use native_port::before_admission;

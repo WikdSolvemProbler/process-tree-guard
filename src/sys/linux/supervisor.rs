@@ -250,11 +250,12 @@ fn verify_identity(owner: &OwnedFd, peer: Credentials) -> Probe<VerifiedIdentity
 }
 
 fn prepare(
-    admitted: Admitted,
+    peer:Credentials,
+    owner:OwnedFd,
+    plan:request::ExecPlan,
     admitted_ns: u64,
     authorizes: impl FnOnce(&VerifiedIdentity) -> bool,
 ) -> Probe<PreparedRun> {
-    let Admitted { peer, owner, plan } = admitted;
     let identity = verify_identity(&owner, peer)?;
     check(authorizes(&identity), POLICY_REFUSAL)?;
     let lease = RetainedLease::from_owner(owner, plan.duration(), admitted_ns)?;
@@ -273,27 +274,34 @@ fn prepare(
 
 #[path="native_activation.rs"]
 pub(super) mod native_activation;
-pub(crate) use native_activation::{LaunchContext, RunOutcome};
+use native_activation::LaunchContext;
+pub(crate) use native_activation::RunOutcome;
 
 /// # Safety
-/// Dedicated one-shot process, no unrelated children/threads, exclusive wait
-/// ownership, independently finite enclosing authority. Accepted connection is
-/// already nonblocking SOCK_SEQPACKET with SO_PASSCRED; context belongs to its
-/// authenticated caller. No caller-discovery or daemon loop is performed.
-pub(crate) unsafe fn run_connection(
-    connection:OwnedFd,launch:LaunchContext,
+/// The privileged launcher must establish a fresh trusted one-shot main process,
+/// initial trusted namespaces/bootstrap environment, exclusive wait ownership,
+/// no unrelated children or threads, and independent finite authority covering
+/// BOTH the supervisor/watchdog and the exact payload domain. Killing only a
+/// service-manager cgroup is insufficient if placement migrates payload outside
+/// it. Those launcher preconditions remain unqualified; selector stays disabled.
+/// The received kernel-authenticated request supplies all caller IO/CWD/env;
+/// no privileged ambient or externally fabricated caller context is accepted.
+pub(crate) unsafe fn run_received(
+    connection:OwnedFd,
     authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
 )->RunOutcome {
     let mut admission=NativeReceipt::default();
-    let admitted_ns=match boottime_ns(){Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,error)};
-    let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
-        Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,format!("admission refused: {error:?}")),
+    let admitted_ns=match boottime_ns(){
+        Ok(value)=>value,Err(error)=>return native_activation::before_admission(admission,error),
     };
-    if !launch.matches(admitted.peer) {
-        return native_activation::before_activation(launch,admission,"launch context differs from authenticated peer".into());
-    }
-    let program=admitted.plan.program().to_owned();
-    let prepared=match prepare(admitted,admitted_ns,|identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {
+    let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
+        Ok(value)=>value,Err(error)=>return native_activation::before_admission(admission,format!("admission refused: {error:?}")),
+    };
+    let Admitted{peer,owner,plan,io}=admitted;
+    let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec());
+    let program=plan.program().to_owned();
+    let prepared=match prepare(peer,owner,plan,admitted_ns,
+        |identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {
         Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,admission,error),
     };
     unsafe{native_activation::run_admitted(prepared,launch,admission)}
