@@ -17,7 +17,7 @@ This page states the guarantees and limits of process-tree-guard. It states the 
 
 ## The promise
 
-The guard runs one command under a finite deadline. The guard ends the whole process tree at the deadline. No process in the tree survives the run. Tier: Windows, proven backend. Execution evidence for the final version comes from the release test run.
+The guard runs one command under a finite deadline. The guard ends the whole process tree at the deadline. A successful result requires confirmed cleanup; uncertainty is reported as a guard error, not a successful run. Tier: Windows, proven backend. Execution evidence for the final version comes from the release test run.
 
 [↑ Back to Contents](#contents)
 
@@ -33,7 +33,7 @@ A system that cannot place a process at creation gets no backend. [Platform Supp
 
 The job object carries the kill on close flag. The close of the last job handle ends every process in the job. The job refuses breakaway. A child that asks to leave the job gets a refusal. Tier: Windows, proven backend.
 
-The guard waits at most 5 seconds after the end for every process in the job to exit. No descendant outlives the guard after that wait.
+The guard uses one bounded 5-second cleanup budget to confirm that the job is empty and its original child has exited. An unconfirmed Job, failed or skipped retained-member wait, or unconfirmed original-child wait is a guard error (exit 125), even if the child returned zero or the deadline was reached. Kill on close remains the fallback; a termination request alone is not reported as confirmed completion. Windows termination can depend on outstanding I/O finishing or being canceled, so a guard error does not certify that every process has exited.
 
 [↑ Back to Contents](#contents)
 

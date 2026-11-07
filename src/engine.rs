@@ -648,24 +648,26 @@ fn run_job_core<D: Decisions>(
     // No more grants once the command has finished or the deadline has passed.
     D::close(&extension);
     let mut job_proven_empty = false;
+    let mut member_wait_uncertainty = None;
     // One teardown budget: what terminating the job did not spend of it is
     // all the wait on the child that follows may spend.
     let mut teardown_remainder = TEARDOWN_BUDGET_MS;
+    let original_child_cleanup;
     unsafe {
         if assigned {
-            let (empty, remainder) = terminate_and_wait(job, EXIT_TIMEOUT as u32, TEARDOWN_BUDGET_MS);
+            let (empty, remainder) = terminate_and_wait(job, EXIT_TIMEOUT as u32, TEARDOWN_BUDGET_MS, &mut member_wait_uncertainty);
             job_proven_empty = empty;
             teardown_remainder = remainder;
-            trace("job empty");
+            trace(if empty && member_wait_uncertainty.is_none() { "job empty" } else { "job cleanup unconfirmed" });
         } else if !info.process.is_null() {
             TerminateProcess(info.process, EXIT_GUARD_ERROR as u32);
         }
-        let _original_child_wait = observe_child_cleanup(info.process, child_exited, teardown_remainder, |child, milliseconds| {
+        original_child_cleanup = observe_child_cleanup_with_error(info.process, child_exited, teardown_remainder, |child, milliseconds| {
             WaitForSingleObject(child, milliseconds)
         });
         #[cfg(test)]
         AFTER_CHILD_CLEANUP.with(|hook| {
-            if let Some(observe) = hook.borrow().as_ref() { observe(info.process, _original_child_wait); }
+            if let Some(observe) = hook.borrow().as_ref() { observe(info.process, original_child_cleanup.0); }
         });
     }
     // The channel is closed after the tree is gone, so a stalled client never delays the kill.
@@ -683,6 +685,14 @@ fn run_job_core<D: Decisions>(
         if !process_cli {
             for &handle in handles.iter().rev() { CloseHandle(handle); }
         }
+    }
+    let (outcome, cleanup_confirmed) = finalize_cleanup(outcome, CleanupObservation {
+        assigned, job_proven_empty, member_wait_uncertainty, child_created: !info.process.is_null(),
+        child_exited, original_child_wait: original_child_cleanup.0,
+        original_child_wait_error: original_child_cleanup.1,
+    });
+    if !cleanup_confirmed {
+        if let Some(timing) = timing.as_mut() { timing.invalidate_cleanup(); }
     }
     if let Some(timing) = timing { timing.emit(); }
     outcome

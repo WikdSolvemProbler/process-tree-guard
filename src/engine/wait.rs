@@ -14,7 +14,7 @@ use crate::sys::windows::{
 
     PROCESS_ID_LIST_CLASS, QueryInformationJobObject, SYNCHRONIZE, SetLastError, SetWaitableTimer,
 
-    Sleep, TIMER_ALL_ACCESS, TerminateJobObject, WAIT_FAILED, WAIT_TIMEOUT,
+    Sleep, TIMER_ALL_ACCESS, TerminateJobObject, WAIT_FAILED, WAIT_OBJECT_0, WAIT_TIMEOUT,
 
     WaitForMultipleObjects, os_error,
 
@@ -409,7 +409,7 @@ fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(
 /// Returns whether the job emptied, and the unspent remainder of the one
 /// teardown budget: the wait on the child shares that budget, it does not
 /// start a second one.
-pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32) -> (bool, u32) {
+pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32, member_wait_uncertainty: &mut Option<MemberWaitUncertainty>) -> (bool, u32) {
     if active_processes(job) == Some(0) { return (true, milliseconds); }
     let start = std::time::Instant::now();
     let deadline = start + std::time::Duration::from_millis(u64::from(milliseconds));
@@ -441,11 +441,12 @@ pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32) -> (
     while next < members.len() {
         let end = (next + 64).min(members.len());
         let remaining = deadline.saturating_duration_since(std::time::Instant::now()).as_millis() as u32;
-        if remaining == 0 {
-            break;
-        }
         let chunk = &members[next..end];
-        unsafe { WaitForMultipleObjects(chunk.len() as u32, chunk.as_ptr(), 1, remaining) };
+        let unconfirmed_handles = if remaining == 0 { members.len() - next } else { chunk.len() };
+        observe_member_cleanup(chunk, remaining, unconfirmed_handles, member_wait_uncertainty, |handles, milliseconds| unsafe {
+            WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
+        });
+        if remaining == 0 { break; }
         next = end;
     }
     for &handle in members.iter() {
@@ -453,6 +454,87 @@ pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32) -> (
     }
     let empty = wait_until_empty(job, deadline);
     (empty, deadline.saturating_duration_since(std::time::Instant::now()).as_millis() as u32)
+}
+
+/// The first retained-member window whose terminality was not confirmed.
+/// None status means the existing budget expired before a native wait; it is
+/// not a fabricated native timeout. The count is the first failed batch, or
+/// the unvisited suffix when the budget first expires; it is not a total.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct MemberWaitUncertainty {
+    pub(super) status: Option<u32>,
+    pub(super) win32_error: Option<u32>,
+    pub(super) unconfirmed_handles: usize,
+}
+
+/// Perform the existing bounded WaitAll, capturing its failure before any
+/// owned-handle close. No native call is added on a successful window, and a
+/// spent budget never starts another wait. Preserve the documented success
+/// range rather than interpreting an abandoned or unexpected code as success.
+#[inline]
+pub(super) fn observe_member_cleanup(
+    handles: &[Handle],
+    milliseconds: u32,
+    unconfirmed_handles: usize,
+    uncertainty: &mut Option<MemberWaitUncertainty>,
+    wait: impl FnOnce(&[Handle], u32) -> u32,
+) {
+    let observed = if milliseconds == 0 {
+        Some(MemberWaitUncertainty { status: None, win32_error: None, unconfirmed_handles })
+    } else {
+        let status = wait(handles, milliseconds);
+        let win32_error = if status == WAIT_FAILED { Some(unsafe { GetLastError() }) } else { None };
+        if status.checked_sub(WAIT_OBJECT_0).is_some_and(|index| (index as usize) < handles.len()) {
+            None
+        } else {
+            Some(MemberWaitUncertainty { status: Some(status), win32_error, unconfirmed_handles })
+        }
+    };
+    // Later successful waits or accounting zero cannot erase the first fault.
+    // Continue the pre-existing later waits under their same single deadline.
+    if uncertainty.is_none() { *uncertainty = observed; }
+}
+
+/// Facts already collected by the one bounded teardown; this performs no wait.
+#[derive(Clone, Copy, Debug)]
+pub(super) struct CleanupObservation {
+    pub(super) assigned: bool,
+    pub(super) job_proven_empty: bool,
+    pub(super) member_wait_uncertainty: Option<MemberWaitUncertainty>,
+    pub(super) child_created: bool,
+    pub(super) child_exited: bool,
+    pub(super) original_child_wait: Option<u32>,
+    pub(super) original_child_wait_error: Option<u32>,
+}
+
+/// Preserve the original result only after the required native cleanup proof.
+/// No new syscalls, waits or allocations occur on the confirmed path.
+#[inline]
+pub(super) fn finalize_cleanup(
+    outcome: Result<u32, GuardError>,
+    observed: CleanupObservation,
+) -> (Result<u32, GuardError>, bool) {
+    let job_confirmed = !observed.assigned || observed.job_proven_empty;
+    let child_confirmed = !observed.child_created || observed.child_exited
+        || observed.original_child_wait == Some(WAIT_OBJECT_0);
+    if job_confirmed && child_confirmed && observed.member_wait_uncertainty.is_none() {
+        (outcome, true)
+    } else {
+        (Err(unconfirmed_cleanup_error(outcome, observed)), false)
+    }
+}
+
+#[cold]
+fn unconfirmed_cleanup_error(outcome: Result<u32, GuardError>, observed: CleanupObservation) -> GuardError {
+    let original = match outcome {
+        Ok(code) => format!("original run result: exit code {code}"),
+        Err(error) => format!("original run error: {}", error.message()),
+    };
+    GuardError(format!(
+        "process-tree cleanup could not be confirmed (job_assigned={}, job_empty={}, member_wait_uncertainty={:?}, child_created={}, child_previously_exited={}, original_child_wait={:?}, native_wait_error={:?}); {original}",
+        observed.assigned, observed.job_proven_empty, observed.member_wait_uncertainty, observed.child_created, observed.child_exited,
+        observed.original_child_wait, observed.original_child_wait_error,
+    ))
 }
 
 /// Only a prior native observation of this child establishes its terminality.
@@ -463,6 +545,24 @@ pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32) -> (
 pub(super) fn observe_child_cleanup(child: Handle, child_exited: bool, milliseconds: u32, wait: impl FnOnce(Handle, u32) -> u32) -> Option<u32> {
     if child.is_null() || child_exited { None } else { Some(wait(child, milliseconds)) }
 }
+
+/// Collect the existing original-object wait and its error before any cleanup
+/// can change LastError. Previously observed exits retain their no-wait path.
+pub(super) fn observe_child_cleanup_with_error(
+    child: Handle,
+    child_exited: bool,
+    milliseconds: u32,
+    wait: impl FnOnce(Handle, u32) -> u32,
+) -> (Option<u32>, Option<u32>) {
+    let mut error = None;
+    let status = observe_child_cleanup(child, child_exited, milliseconds, |child, milliseconds| {
+        let status = wait(child, milliseconds);
+        if status == WAIT_FAILED { error = Some(unsafe { GetLastError() }); }
+        status
+    });
+    (status, error)
+}
+
 
 /// Wait, at most `milliseconds`, until the job reports no active process.
 fn active_processes(job: Handle) -> Option<u32> {

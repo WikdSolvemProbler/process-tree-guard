@@ -1151,3 +1151,191 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             assert_eq!(list2cmdline(&owned), expected);
         }
     }
+
+
+    fn cleanup_observation() -> CleanupObservation {
+        CleanupObservation {
+            assigned: true, job_proven_empty: true, member_wait_uncertainty: None, child_created: true,
+            child_exited: true, original_child_wait: None, original_child_wait_error: None,
+        }
+    }
+
+    #[test]
+    fn cleanup_unconfirmed_job_cannot_preserve_child_or_timeout_success() {
+        for code in [0, 37, 124, 125, u32::MAX] {
+            let (result, confirmed) = finalize_cleanup(Ok(code), CleanupObservation {
+                job_proven_empty: false, ..cleanup_observation()
+            });
+            assert!(!confirmed);
+            let error = result.expect_err("unconfirmed Job cannot be a successful run");
+            assert!(error.message().contains("cleanup could not be confirmed"));
+            assert!(error.message().contains(&format!("exit code {code}")));
+        }
+    }
+
+    #[test]
+    fn cleanup_confirmed_proofs_preserve_all_original_dword_codes() {
+        for code in [0, 1, 37, 124, 125, u32::MAX] {
+            assert_eq!(finalize_cleanup(Ok(code), cleanup_observation()), (Ok(code), true));
+            assert_eq!(finalize_cleanup(Ok(code), CleanupObservation {
+                child_exited: false, original_child_wait: Some(WAIT_OBJECT_0),
+                ..cleanup_observation()
+            }), (Ok(code), true));
+        }
+    }
+
+    #[test]
+    fn cleanup_real_unsignaled_object_wait_cannot_be_minted_into_terminal_proof() {
+        // A native event supplies an actual nonterminal wait receipt. It is
+        // not a claim that a real guarded process escaped or survived cleanup.
+        let event = DeepOwnerEvents::new(1);
+        let (status, error) = observe_child_cleanup_with_error(event.0[0], false, 0,
+            |handle, milliseconds| unsafe { WaitForSingleObject(handle, milliseconds) });
+        assert_eq!(status, Some(WAIT_TIMEOUT));
+        assert_eq!(error, None);
+        let (result, confirmed) = finalize_cleanup(Ok(124), CleanupObservation {
+            child_exited: false, original_child_wait: status,
+            original_child_wait_error: error, ..cleanup_observation()
+        });
+        assert!(!confirmed);
+        assert!(result.unwrap_err().message().contains("exit code 124"));
+        event.signal(0);
+        let (status, error) = observe_child_cleanup_with_error(event.0[0], false, 0,
+            |handle, milliseconds| unsafe { WaitForSingleObject(handle, milliseconds) });
+        assert_eq!(status, Some(WAIT_OBJECT_0));
+        assert_eq!(finalize_cleanup(Ok(37), CleanupObservation {
+            child_exited: false, original_child_wait: status,
+            original_child_wait_error: error, ..cleanup_observation()
+        }), (Ok(37), true));
+    }
+
+    #[test]
+    fn cleanup_native_wait_error_is_captured_before_later_owned_handle_close() {
+        let event = DeepOwnerEvents::new(1);
+        let (status, native_error) = observe_child_cleanup_with_error(event.0[0], false, 0,
+            |_, milliseconds| unsafe { WaitForSingleObject(std::ptr::null_mut(), milliseconds) });
+        assert_eq!(status, Some(WAIT_FAILED));
+        assert!(native_error.is_some_and(|error| error != 0));
+        drop(event); // Real CloseHandle after the error has been captured.
+        unsafe { SetLastError(0x13572468) };
+        let (result, confirmed) = finalize_cleanup(Ok(0), CleanupObservation {
+            child_exited: false, original_child_wait: status,
+            original_child_wait_error: native_error, ..cleanup_observation()
+        });
+        assert!(!confirmed);
+        assert!(result.unwrap_err().message().contains(&format!("native_wait_error={native_error:?}")));
+    }
+
+    #[test]
+    fn cleanup_unconfirmed_result_preserves_original_guard_error() {
+        let original = GuardError("original native launch error 87".into());
+        let (result, confirmed) = finalize_cleanup(Err(original.clone()), CleanupObservation {
+            job_proven_empty: false, ..cleanup_observation()
+        });
+        assert!(!confirmed);
+        let error = result.unwrap_err();
+        assert!(error.message().contains(original.message()));
+        assert!(error.message().contains("cleanup could not be confirmed"));
+        assert_eq!(finalize_cleanup(Err(original.clone()), cleanup_observation()), (Err(original), true));
+    }
+
+    #[test]
+    fn cleanup_unobserved_or_unexpected_child_receipt_refuses_without_new_waits() {
+        for receipt in [None, Some(WAIT_TIMEOUT), Some(WAIT_FAILED), Some(128)] {
+            let (result, confirmed) = finalize_cleanup(Ok(0), CleanupObservation {
+                child_exited: false, original_child_wait: receipt, ..cleanup_observation()
+            });
+            assert!(!confirmed);
+            assert!(result.is_err());
+        }
+        let (status, error) = observe_child_cleanup_with_error(std::ptr::null_mut(), false, 0,
+            |_, _| panic!("no wait for a nonexistent child"));
+        assert_eq!((status, error), (None, None));
+        let (status, error) = observe_child_cleanup_with_error(1usize as Handle, true, 0,
+            |_, _| panic!("no extra wait after an actual observed child exit"));
+        assert_eq!((status, error), (None, None));
+        assert_eq!(finalize_cleanup(Err(GuardError("not started".into())), CleanupObservation {
+            assigned: false, job_proven_empty: false, member_wait_uncertainty: None, child_created: false,
+            child_exited: false, original_child_wait: None, original_child_wait_error: None,
+        }), (Err(GuardError("not started".into())), true));
+    }
+
+    #[test]
+    fn cleanup_native_member_timeout_survives_later_signal_and_job_zero() {
+        let events = DeepOwnerEvents::new(2);
+        let mut uncertainty = None;
+        observe_member_cleanup(&events.0, 1, events.0.len(), &mut uncertainty, |handles, milliseconds| unsafe {
+            WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
+        });
+        let first = uncertainty.expect("actual unsignaled WaitAll is unconfirmed");
+        assert_eq!(first, MemberWaitUncertainty {
+            status: Some(WAIT_TIMEOUT), win32_error: None, unconfirmed_handles: 2,
+        });
+        for index in 0..2 { events.signal(index); }
+        observe_member_cleanup(&events.0, 1, events.0.len(), &mut uncertainty, |handles, milliseconds| unsafe {
+            let status = WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds);
+            assert_eq!(status, WAIT_OBJECT_0);
+            status
+        });
+        assert_eq!(uncertainty, Some(first));
+        // Later accounting zero is a separate fact, not a replacement receipt
+        // for the earlier failed wait on an already retained native object.
+        let (result, confirmed) = finalize_cleanup(Ok(0), CleanupObservation {
+            member_wait_uncertainty: uncertainty, ..cleanup_observation()
+        });
+        assert!(!confirmed);
+        let error = result.unwrap_err();
+        assert!(error.message().contains("job_empty=true"));
+        assert!(error.message().contains("member_wait_uncertainty=Some"));
+    }
+
+    #[test]
+    fn cleanup_native_member_failed_wait_retains_error_across_later_close() {
+        let event = DeepOwnerEvents::new(1);
+        let invalid = [std::ptr::null_mut()];
+        let mut uncertainty = None;
+        observe_member_cleanup(&invalid, 1, 1, &mut uncertainty, |handles, milliseconds| unsafe {
+            WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
+        });
+        let first = uncertainty.expect("native invalid handle is unconfirmed");
+        assert_eq!(first.status, Some(WAIT_FAILED));
+        assert!(first.win32_error.is_some_and(|error| error != 0));
+        drop(event);
+        unsafe { SetLastError(0x24681357) };
+        observe_member_cleanup(&invalid, 0, 65, &mut uncertainty, |_, _| panic!("spent budget cannot wait"));
+        assert_eq!(uncertainty, Some(first));
+        let (result, confirmed) = finalize_cleanup(Ok(37), CleanupObservation {
+            member_wait_uncertainty: uncertainty, ..cleanup_observation()
+        });
+        assert!(!confirmed);
+        assert!(result.unwrap_err().message().contains(&format!("win32_error: {:?}", first.win32_error)));
+    }
+
+    #[test]
+    fn cleanup_skipped_member_suffix_cannot_be_erased_by_job_zero() {
+        let mut uncertainty = None;
+        observe_member_cleanup(&[1usize as Handle], 0, 72, &mut uncertainty, |_, _| panic!("no new wait after deadline"));
+        assert_eq!(uncertainty, Some(MemberWaitUncertainty {
+            status: None, win32_error: None, unconfirmed_handles: 72,
+        }));
+        assert!(!finalize_cleanup(Ok(0), CleanupObservation {
+            member_wait_uncertainty: uncertainty, ..cleanup_observation()
+        }).1);
+    }
+
+    #[test]
+    fn cleanup_member_wait_all_classification_accepts_only_documented_range() {
+        // These are status-classification boundary controls, not native proof
+        // that every code in the documented WaitAll range occurs on this host.
+        let handles = [1usize as Handle; 64];
+        for status in [WAIT_OBJECT_0, WAIT_OBJECT_0 + 63] {
+            let mut uncertainty = None;
+            observe_member_cleanup(&handles, 1, handles.len(), &mut uncertainty, |_, _| status);
+            assert_eq!(uncertainty, None);
+        }
+        for status in [WAIT_OBJECT_0 + 64, 128, WAIT_TIMEOUT] {
+            let mut uncertainty = None;
+            observe_member_cleanup(&handles, 1, handles.len(), &mut uncertainty, |_, _| status);
+            assert_eq!(uncertainty.unwrap().status, Some(status));
+        }
+    }

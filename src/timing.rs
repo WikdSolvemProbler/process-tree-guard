@@ -223,6 +223,15 @@ impl FixedTiming {
         }
     }
 
+    /// Cleanup changes the final classification, never the supervision endpoint.
+    /// This failure-only update reads no clock and performs no native operation.
+    pub(crate) fn invalidate_cleanup(&mut self) {
+        self.outcome = "error";
+        self.status = None;
+        self.error_stage = Some("cleanup");
+        self.invalid = true;
+    }
+
     fn record(&self) -> String {
         fn number<T: std::fmt::Display>(value: Option<T>) -> String { value.map_or_else(|| "null".into(), |value| value.to_string()) }
         fn string(value: Option<&str>) -> String { value.map_or_else(|| "null".into(), |value| format!("\"{}\"", value)) }
@@ -311,6 +320,23 @@ mod tests {
         error.outcome = "error"; error.status = None; error.error_stage = Some("launch_or_supervision");
         assert!(error.record().contains("\"status_u32\":null,\"error_stage\":\"launch_or_supervision\""));
     }
+    #[test]
+    fn cleanup_failure_invalidates_success_without_moving_supervision_time() {
+        let mut timing = fixture(0, 0);
+        let endpoint = timing.after;
+        let decision = timing.decision.before;
+        let native_wait = timing.decision.wait_status;
+        timing.invalidate_cleanup();
+        assert_eq!(timing.after, endpoint);
+        assert_eq!(timing.decision.before, decision);
+        assert_eq!(timing.decision.wait_status, native_wait);
+        let record = timing.record();
+        assert!(record.contains("\"outcome\":\"error\""));
+        assert!(record.contains("\"status_u32\":null"));
+        assert!(record.contains("\"error_stage\":\"cleanup\""));
+        assert!(record.contains("\"valid\":false"));
+    }
+
     #[test]
     fn threshold_interval_keeps_latest_below_and_first_at_from_actual_reads() {
         let read = |before, g, after| TickRead { before: Some(before), g, after: Some(after) };
