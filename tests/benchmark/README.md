@@ -141,6 +141,16 @@ The strict census classifies generic external runtime names as competing work. B
 
 Archive SHA-256 22297e02b935643b11d4a58fdd01895021f4b3e41edd77541c35fcc30e9c9de6.
 
+### Exploratory laptop protocol 011
+
+One prospective 1,940-slot exploratory capture is preregistered with manifest SHA-256 fa64410ae847be10735cdf5a69ce71acb7213a2d9bbe3b7695c83a8f15df454a. Both independent Sol reviewers approved the same source and bounded command. This protocol retains the numerical CPU, memory, power, clock, observer, timing and cleanup gates. Its scoped image census vetoes identified compilers and pinned benchmark content outside the owned Job. Other inspected runtimes are recorded as unclassified background and their CPU remains in the residual. The archive states the sampled-name and on-disk identity limitations. This scope is exploratory, and the strict quiet-host issue remains open.
+
+The native lifecycle control completed preflight, a 62.4-second sleeper, natural Job drainage, postflight and raw telemetry replay. Its final inventory verifier exposed a reused local creation-time variable. The corrected verifier accepts the immutable native receipts and rejects forged identities. All 26 synthetic and saved-receipt checks passed. The collector, sampler, gates and raw replay were unchanged by that correction.
+
+The preregistration archive preserves the reviewed source, exact current binaries, all staged input hashes, native control receipts, earlier refusals, the metadata and timestamp compatibility repairs, and both approvals. The full capture had executed zero benchmark slots when this archive was produced. Its complete package, actual gate values, losses and exclusions require separate publication. A completed exploratory package will not establish final certification or whole-run absence of interference. [Frozen protocol, artifacts and controls](../evidence/windows-laptop-exploratory-protocol-011.zip)
+
+Archive SHA-256 f8770781e11b87c2ed592ab8e56ae6487a86c56e9ce11c4de738965bb53cf5a0.
+
 ## Owner-verification timing checks
 
 The default suite verifies the placement of the production guard clock on real launches. It tests the price calculation on the same observations, changing only the recorded outer time or removing the measured delay from the priced interval.
