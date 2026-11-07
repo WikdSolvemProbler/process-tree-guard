@@ -373,6 +373,20 @@ All 191 artifacts were downloaded and independently checked before exact scratch
 
 Archive SHA-256 `69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213`.
 
+## Windows event-reader native controls
+
+All **13 native event-reader controls passed**, with every per-case and final handle count returning from 134 to 134. Fixture setup ran outside the counted reader under one 45-second Job deadline. The archive retains failed attempt005 and its unchanged raw result; attempt006 corrected two unintended setup pipeline outputs. This qualifies the reader component only. Earlier launch-handle failures remain unresolved; whole-arm custody, session readiness and comparative performance are not established. [Complete native controls and failed history](windows-event-reader-native-controls.zip)
+
+Archive SHA-256 `50daad2a0f0b61feff37d1c7b152109a0cbd5adc1b521bab80b04eca8c75cc87` (171 verified members).
+
+## Campaign Job handle ownership repair
+
+The campaign harness now clears its retained Job/process handle only after the native close succeeds. A failed close keeps the original owner available for recovery. Two ordinary Windows regressions exercised actual protected-close refusal, retained ownership, successful recovery and repeated close; **both passed**, with no errors or skips. The first test attempt called a nonexistent helper API and failed with two errors; its source, output and correction remain preserved.
+
+The [repair evidence](windows-slot-close-ownership.zip) includes before/current sources, both attempts, exact command/input hashes and independent source and actual-result reviews. This covers the two tested close methods, not constructor failures, general resource balance or benchmark performance. No production Rust code changed.
+
+Archive SHA-256 `d9e31eb96f82052e9df42a591be592b7644940d3bcc4bf1b665398152bf43091`.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)

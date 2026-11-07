@@ -158,9 +158,10 @@ class _Process:
         return _winapi.GetExitCodeProcess(self._handle)
 
     def close(self):
-        handle, self._handle = self._handle, None
+        handle = self._handle
         if handle is not None:
             _winapi.CloseHandle(handle)
+            self._handle = None
 
 
 class SlotJob:
@@ -267,6 +268,7 @@ class SlotJob:
             after = self._active_processes()
 
     def close(self):
-        handle, self._handle = self._handle, None
+        handle = self._handle
         if handle is not None:
             _winapi.CloseHandle(handle)
+            self._handle = None
