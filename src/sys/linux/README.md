@@ -151,6 +151,14 @@ One ordinary Linux ARM64 attempt compiled the installed-header C bridge and actu
 
 Archive SHA-256 0848ccef7232bb14df277ab4e0ad4a65a637f7b020af3eb1ff1ad3da64b7c4eb (133 members). Native arming/placement, partial-arm settlement, trusted bootstrap, product entry and all terminal runtime/failure paths remain unqualified. The production backend remains disabled; no guard performance claim follows.
 
+### Consuming arming failures and partial creation custody
+
+The next source consumes actual activation/arming failures. It retains the original request/lease, existing cleanup timer, context, created-leaf controls and optional watchdog. Verified domains use the real held-kill-first drain/reap/remove path. A never-activated leaf is removed only after original identity/empty-domain and no-child context proof, with removal last. Ambiguous or refused creation retains the attempted held parent/name and raw outcome without assuming deletion authority. No release, signal or child exit receipt is invented.
+
+One ordinary ARM64 attempt compiled both full-graph normal/test Rust objects with warnings denied. The Rust version query and two object builds all succeeded; no C compile, linking, compiled test/controller, child, root or cgroup operation occurred. Prior unchanged C/ABI evidence stays historical. All 37 artifacts were preserved before exact removal, and the original scope/cgroup plus four recorded PIDs were absent. [Source, objects and raw cleanup evidence](../../../tests/evidence/linux-arming-failure-controller-objects.zip) and [independent offline audit](../../../tests/evidence/audit_terminal_controller_objects.py).
+
+Archive SHA-256 cdb04781716f2ae29b2cf5a21fa83f949ded244af3b409008abbbb7d7a56e1e0 (103 members). Native arming/placement, independent setup supervision, runtime/failure-path qualification and product integration remain open; the production backend remains disabled.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)

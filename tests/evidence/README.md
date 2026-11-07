@@ -295,6 +295,16 @@ All 49 artifacts were preserved before exact scratch cleanup. The original scope
 
 Archive SHA-256 0848ccef7232bb14df277ab4e0ad4a65a637f7b020af3eb1ff1ad3da64b7c4eb. The [audit preparation](linux-terminal-audit-preparation.zip) retains its initial refusal: the first audit compared entire transport records although only preservation includes base64 payloads. The corrected audit compares every metadata field and independently decodes all payloads; it passed without changing the native evidence. Audit preparation archive SHA-256 ff696a9f87d21a344c5bac0ce3c1256f35c2e639b486b66f8e570415cef7447f.
 
+## Linux arming-failure settlement: object qualification
+
+The next concrete path consumes activation and arming failures while retaining the original request/lease, prearmed cleanup authority, context, factory and optional watchdog ownership. Verified domains use the actual termination-first drain/reap/removal path. Never-activated leaves require held identity, actual emptiness and restored no-child context before final removal. Refused or ambiguous creation retains the attempted parent/name and raw outcome in quarantine; it never acquires deletion authority by assumption.
+
+One ordinary ARM64 VM attempt compiled both full-graph normal/test Rust objects with warnings denied. Only the Rust version query and two object builds ran; all three succeeded with empty stderr. The unchanged C bridge/header qualification is explicitly historical, with no new C compile, linking, test/controller execution, child, root or cgroup operation. All 37 artifacts were preserved before exact scratch cleanup; the original scope/cgroup and four recorded PIDs were absent.
+
+The [independent offline audit](audit_terminal_controller_objects.py) checks all 103 archive members, both ARM64 relocatable objects, actual command records, retained artifact bytes and cleanup receipts. Native arming, setup-time supervision, runtime/failure-path qualification and production activation remain open. This does not establish guard performance. [Complete source, compiler evidence and cleanup](linux-arming-failure-controller-objects.zip)
+
+Archive SHA-256 cdb04781716f2ae29b2cf5a21fa83f949ded244af3b409008abbbb7d7a56e1e0 (103 verified members).
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)
