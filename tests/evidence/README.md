@@ -387,6 +387,14 @@ The [repair evidence](windows-slot-close-ownership.zip) includes before/current 
 
 Archive SHA-256 `d9e31eb96f82052e9df42a591be592b7644940d3bcc4bf1b665398152bf43091`.
 
+## Prospective current-build campaign015
+
+The [frozen protocol015 package](windows-laptop-exploratory-protocol-015.zip) preregisters one fresh execution of the existing **1,940-slot** observed-accounting laptop campaign. Both independent reviewers approved exact manifest `ae01d69752dc0fd2725b8b75e5dfbc2c25b17e665aba571b3fddfb0985772c9c` with zero unresolved objections, conditional on this public preregistration before launch. The current qualified guard is `8fa4e58b`; the campaign and observer use the separately verified handle-ownership repair. Eighteen other frozen input files, workloads, rivals, fixture, seed and numerical gates remain unchanged.
+
+Six measurement modules are byte-identical to the earlier qualification; the sampler changes one dependency-path literal to load the repaired helper. The package preserves the rejected stale-import binding, preparation corrections, actual reviews and input verification. This is prospective execution clearance with **zero new comparative measurements**, not a performance result or strict issue7 completion.
+
+Archive SHA-256 `972f1377d839a1db9246c07bd6dd9a10b6bd570f607aef59fe960e52ee4b2f69` (204 verified members).
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
