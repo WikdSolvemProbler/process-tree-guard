@@ -131,6 +131,14 @@ All 24 remote artifacts were downloaded and verified before exact ordinary-user 
 
 Archive SHA-256 c19869448c84258d15f47ebef214e38c6b57d1d1817d23e89f55eaad3d65a155.
 
+## Linux owning drain/removal split
+
+The next component retains the actual controls, same armed cleanup deadline and receipts after successful drainage. Final removal is separate and consuming, preserves partial removal state on failure and creates no replacement timer. A private unsafe caller contract requires completed native reaping and prevention of further placement; no reaper or runtime controller is implied. The old combined shortcut exists only in the empty test fixture.
+
+One ordinary Linux ARM64 attempt compiled the complete graph into ordinary and test objects with warnings denied. Neither object was linked or executed. All 24 remote files were preserved and verified before exact ordinary-user cleanup; independent checks found the original scope, cgroup path and recorded compiler/controller PIDs absent. This establishes compiler acceptance of the owning phases, not populated drainage, post-arm runtime recovery, child reaping or a production backend. [Sources, objects and cleanup](linux-domain-drain-ownership.zip)
+
+Archive SHA-256 9f7532dc455e73b8b82d0f7e73fcbbea0c5b4788613d9286f4a39e48ac7051f1.
+
 ## Prospective laptop attempt 013
 
 Attempt013 is frozen under manifest SHA-256 313bf9796153453177636419137275ebd0f5374d71c359138c8001455a6e81ae. Both independent Sol reviewers approved exactly one full exploratory 1,940-slot attempt after public preregistration, with zero unresolved objections. All seven measurement modules are byte-identical to native-qualified012. The driver changes only the run ID and its derived destination; the method records the current chronology and binds the original qualification receipts.

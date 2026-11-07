@@ -101,6 +101,16 @@ Archive SHA-256 c19869448c84258d15f47ebef214e38c6b57d1d1817d23e89f55eaad3d65a155
 
 This establishes compiler acceptance of the owning API. The native arming and clone contracts are not runtime-qualified, and dropping a returned owner does not guarantee settlement. Consuming arming failures and `PendingSettlement`, exact child reaping, watchdog integration and production activation remain open.
 
+### Retaining the drained domain until final removal
+
+The next component separates termination and drainage from removal. A successful drain now returns an owner containing every original control, the same armed cleanup deadline and its receipts. Returned failures also retain the armed deadline once it exists. Final removal consumes that owner, reuses the deadline and preserves partial removal state on error. Its private unsafe caller contract requires actual prior reaping and no future placement; that contract is not itself a reaping proof. The old combined settlement shortcut remains only in the empty test fixture.
+
+Both ordinary and test-object builds of the complete graph passed on Linux ARM64 with warnings denied. No test harness or component was executed. Exact objects, source continuity and independent archive-before-cleanup receipts are preserved. [Owning drain/removal source and compiler evidence](../../../tests/evidence/linux-domain-drain-ownership.zip)
+
+Archive SHA-256 9f7532dc455e73b8b82d0f7e73fcbbea0c5b4788613d9286f4a39e48ac7051f1.
+
+Native pidfd reaping, subreaper ownership, exec-result observation, mandatory terminal orchestration and watchdog integration remain open. The production Linux backend remains disabled.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
