@@ -210,6 +210,20 @@ The package retains the raw streams and exact corrected source, plus the hash-ma
 
 Calibration archive SHA-256 e0a812fae07dfc176231c5e4bda54ed152441e41b3eeea6a2f27b226868703cb.
 
+The proposed direct Windows file reader passed ten unit tests and the independent SDK layout check, then failed its single native mutation control. All four pinned images matched the manifest and original013 digests. A same-length edit after the content read was accepted, so qualification exited one; replacement, growth and truncation never ran. Handles returned to baseline167 and the owned fixture was absent. The candidate remains unadopted, with no full-pipeline or speed result.
+
+The record lacks the accepted edit's returned metadata and cannot establish the cause or whether013 shares the limitation. Both readers make final metadata observations before content-handle closure; a preserved correction withdraws an incorrect draft sequencing claim. The archive includes that correction, raw failure, exact code, passed controls, the compiler metadata probe's diagnostic and the unexecuted unsafe-cleanup preparation. No production guard or gate changed. [Failed native qualification](../evidence/windows-native-image-qualification-001.zip)
+
+Qualification archive SHA-256 989ad9d5d57887db6af8d78ea909d71baf884b7e931dbf5d19c0289a0e8afa8f.
+
+A separate fixed two-file diagnostic retained every metadata query and independent post-close bytes. The013 case refused its edit;014 accepted the pre-edit digest despite changed final bytes and unchanged recorded native and Python metadata. Distinct files, observation times and instrumentation prevent a universal API or timestamp-cause inference. Both helpers stayed unchanged. [Mutation observations](../evidence/windows-image-mutation-observation.zip)
+
+Observation archive SHA-256 b9cf0c747815c29f409ced6f7772c8328a5e11d10faf615e4f928ad99e9f9993.
+
+A separate fixed-two-read candidate passed thirteen unit tests, matched four pinned images, and correctly refused the persistent in-place edit between reads with both differing digests recorded. Its next control's `os.replace` failed with WinError5 before demonstrating a replacement. Qualification exited one, and growth/truncation were not reached. This OS refusal does not qualify replacement detection. The unexpected replacement error's partial helper evidence was not emitted by the outer logger; that limitation is preserved. Handles returned to baseline167 and the owned fixture was absent. No full-pipeline timing, 50 ms compliance, atomic immutability or loaded-image identity claim follows. [Two-read candidate and incomplete native qualification](../evidence/windows-two-read-image-qualification-001.zip)
+
+Qualification archive SHA-256 e02164c5d081970bf833ecf0fe60ff07a63b6f8ac2057e35d048626a2669e0ef.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)

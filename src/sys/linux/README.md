@@ -81,6 +81,16 @@ On the Linux ARM64 VM, a hash-verified root-owned binary exercised the actual fa
 
 Archive SHA-256 609e1812f40f0387680f2e8e7686ddb8f1262469e47581cf752dffb0d4a69b35.
 
+### Termination-first settlement repair
+
+The next prototype requests termination through its original held kill descriptor before clock reads, cleanup-timer setup or pathname revalidation. The shared driver owns the actual controls and returns that custody plus the write outcome on every returned error. Failed or short writes do not enter wait setup. Removal still requires the bounded timer, validated original identities, observed emptiness, exact unlink and absence confirmation. The receipt timestamp is explicitly after the kill write returns.
+
+One ordinary-user Linux ARM64 attempt compiled the full module graph with warnings denied and passed four selected controls. The native control wrote through a held descriptor to its own ordinary file, then exercised real expired-deadline refusal while retaining the descriptor. The other three check the shared driver's ordering and outcomes. There was no cgroup write, payload or root fixture. Remote artifacts were preserved and verified before exact identity-checked cleanup; independent checks found the original scope, cgroup path and recorded PIDs absent. [Source, native controls and cleanup receipts](../../../tests/evidence/linux-domain-termination-first.zip)
+
+Archive SHA-256 eda65f3210dbdc12a72b9e0f9ec4ca76ab10f94aaf348b674e446d9075e5df12.
+
+A native write can still block, so this component requires independent watchdog coverage before payload activation. It does not settle created resources after every arming failure or consume `PendingSettlement` through exact child reaping. Populated drainage, actual cgroup failure recovery and the full one-shot port remain unqualified. The production Linux backend stays disabled.
+
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)

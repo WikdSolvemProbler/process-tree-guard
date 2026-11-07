@@ -113,6 +113,16 @@ On the Linux ARM64 VM, a hash-verified root-owned binary exercised the actual fa
 
 Archive SHA-256 609e1812f40f0387680f2e8e7686ddb8f1262469e47581cf752dffb0d4a69b35.
 
+## Linux termination-first settlement repair
+
+The next prototype requests termination through its original held kill descriptor before clock reads, cleanup-timer setup or pathname revalidation. The shared driver owns the actual controls and returns that custody plus the write outcome on every returned error. Failed or short writes do not enter wait setup. Removal still requires the bounded timer, validated original identities, observed emptiness, exact unlink and absence confirmation. The timestamp explicitly records an observation after the kill write returns.
+
+One ordinary-user Linux ARM64 attempt compiled the full module graph with warnings denied and passed all four selected controls. Three check the driver's order and outcomes; the fourth performed a real held write to its own ordinary file, then required the real expired-deadline path to refuse while retaining the file descriptor. It did not open or write a cgroup, execute a payload or run the ignored root fixture. Independent checks found the original scope, cgroup path and recorded worker PIDs absent. All 26 remote artifacts were downloaded and hash-verified before exact identity-checked removal of the private scratch.
+
+This qualification does not establish populated drainage, native cgroup error recovery, reaping or watchdog behavior. A native write can block; independent watchdog custody remains required before production activation. Typed arming failures and consuming terminal settlement are still open, and the Linux backend remains disabled. The prior empty-domain proof and all earlier source are preserved. [Repaired source, native controls and cleanup](linux-domain-termination-first.zip)
+
+Archive SHA-256 eda65f3210dbdc12a72b9e0f9ec4ca76ab10f94aaf348b674e446d9075e5df12.
+
 ## Prospective laptop attempt 013
 
 Attempt013 is frozen under manifest SHA-256 313bf9796153453177636419137275ebd0f5374d71c359138c8001455a6e81ae. Both independent Sol reviewers approved exactly one full exploratory 1,940-slot attempt after public preregistration, with zero unresolved objections. All seven measurement modules are byte-identical to native-qualified012. The driver changes only the run ID and its derived destination; the method records the current chronology and binds the original qualification receipts.
@@ -142,6 +152,28 @@ One fixed three-snapshot control measured the same frozen013 pipeline with QPC b
 The archive preserves the corrected source, raw streams, three observations, unchanged frozen inputs, 45-second whole-tree bound and 35-second internal budget. It also preserves the hash-matching unexecuted pre-review source, reconstructed by reverting the two reviewed deadline checks; only the corrected source ran. Different times, populations and instrumentation prevent a paired speed comparison with the earlier diagnostic or original refusal. No benchmark slots ran and no guard source or gate changed. [Calibrated observer source and raw evidence](windows-observer-inventory-calibration.zip)
 
 Calibration archive SHA-256 e0a812fae07dfc176231c5e4bda54ed152441e41b3eeea6a2f27b226868703cb.
+
+## Failed native image-reader qualification
+
+A candidate replaces Python file-metadata calls with direct Windows queries while retaining independent per-row inspection, full 128-bit file identity, four named/held signatures and read-only access that shares reads, writes and deletes. Ten unit tests passed, and an executable compiled against the installed Windows SDK confirmed the structure sizes and offsets. The compiler metadata probe's missing-source diagnostic is retained alongside the successful actual build.
+
+The single native control matched four pinned image digests against both the manifest and frozen013 reader. It then accepted a same-length edit made after its content read and correctly failed qualification with exit one. Replacement, growth and truncation controls did not run. The process handle count returned to its baseline of 167, and the owned fixture was absent. The candidate has not been adopted into a full pipeline, and no speed result exists.
+
+The failed control did not retain the accepted edit's returned metadata or digest, so it does not establish the cause or a regression relative to013. An early derived receipt incorrectly placed013's final metadata query after content-handle closure. A separate correction preserves and withdraws that claim: both readers query final metadata inside the open-handle context. The archive retains the failed source, raw streams, correction, unexecuted unsafe-cleanup draft and corrected ownership tests. No production guard source or gate changed. [Component source, passed controls and failed native qualification](windows-native-image-qualification-001.zip)
+
+Qualification archive SHA-256 989ad9d5d57887db6af8d78ea909d71baf884b7e931dbf5d19c0289a0e8afa8f.
+
+A separate fixed two-file diagnostic retained every metadata query, returned digest and independent post-close content read. The013 case rejected its edit; the014 case accepted the pre-edit digest even though the final bytes differed and its recorded native and Python metadata remained unchanged. The files and observation times differed, and instrumentation affected timing. These two outcomes establish neither a universal API difference nor the timestamp mechanism. Both helpers stayed unchanged. [Matched mutation observations](windows-image-mutation-observation.zip)
+
+Observation archive SHA-256 b9cf0c747815c29f409ced6f7772c8328a5e11d10faf615e4f928ad99e9f9993.
+
+## Two-read image verification: qualification incomplete
+
+A separate candidate always reads the same held file twice, with a checked 64-bit seek to zero between the complete size-bounded reads. It requires both digests to agree and preserves all prior metadata and process checks. Thirteen unit tests passed. The native control matched four pinned images and correctly refused the persistent in-place edit between passes, retaining both differing digests and refusal evidence.
+
+The next control's `os.replace` operation returned PermissionError/WinError5 before a pathname replacement was demonstrated. The control exited one; growth and truncation were not reached. This OS refusal does not prove replacement detection, and its cause is unresolved. The outer error logger omitted the unexpected error's attached partial evidence; that missing evidence is explicitly recorded. Handles returned to baseline167 and the owned fixture was absent. The original failed reader and all records remain unchanged. Two-read consistency is not atomic immutability or loaded-image authentication, and neither full-pipeline timing nor the 50 ms gate has been qualified. [Two-read source, passed in-place control and incomplete native qualification](windows-two-read-image-qualification-001.zip)
+
+Qualification archive SHA-256 e02164c5d081970bf833ecf0fe60ff07a63b6f8ac2057e35d048626a2669e0ef.
 
 ## Deferred macOS administrator validation
 
