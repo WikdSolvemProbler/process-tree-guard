@@ -327,6 +327,16 @@ The second grouped native pipeline diagnostic is preserved in [windows-grouped-n
 
 Archive SHA-256 be73309a694f63a408e63560c2c6c123fe22ee52b298cab30047b9799f4a46a3 (153 verified members). The [offline audit](audit_grouped_native_pipeline.py) verifies every member and reconstructs the saved timing verdicts; it performs no new native capture or benchmark.
 
+## Windows cleanup verdict repair
+
+The [repair evidence archive](windows-cleanup-verdict-repair.zip) preserves the failure-reporting fix pushed as `cf6045b`: failed or skipped retained-member waits and unconfirmed Job/original-child cleanup now prevent a successful result. The original single teardown budget, wait order, owner monitoring, atomic Job containment, console behavior and supervision timing endpoint remain. This was a confirmed source-level reporting defect; no live escaped process was reproduced.
+
+The full default release run reported **472 passed, zero failed**, including eleven new regressions. The guarded run does not certify the environment-gated G95/G97/G98/G103 interactive assertions or G87's separate stdin-refusal reason. Normal release binaries and repository-configured Clippy passed; the optional stricter Clippy attempt remains failed. Its four library findings and all 105 pre-existing advisory locations from the default lint run are retained and independently triaged. CI, CodeQL and Clippy also succeeded remotely for the repair commit; zero open code-scanning and Dependabot alerts does not mean zero historical/raw results or prove absence of every vulnerability.
+
+The archive includes exact current source and SPEC_Benchmark, before/rejected drafts, every failed launch, raw local/remote results, six release binaries and independent reviews. The [offline audit](audit_cleanup_verdict.py) verifies all 243 members, source/binary identities and the saved result counts without executing archived code. **Performance remains unqualified, with zero benchmark slots.**
+
+Archive SHA-256 cc62ab5842f2139fd057af42f5f72a0c38bd2aa419f0287eaf9d23d2bc0af3c8.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
