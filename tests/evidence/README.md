@@ -395,6 +395,10 @@ Six measurement modules are byte-identical to the earlier qualification; the sam
 
 Archive SHA-256 `972f1377d839a1db9246c07bd6dd9a10b6bd570f607aef59fe960e52ee4b2f69` (204 verified members).
 
+The single preregistered attempt **failed pre-admission** after all twelve five-second windows. Observed CPU reached **16.4839%**, above the unchanged 15% outside maximum; another window reached 16.2113%. The median was 9.2583%. Available RAM stayed at least 14.624 GiB, AC power and battery-saver checks passed, and there were no native/window errors. Observer CPU peaked at 0.01954% of machine capacity and inventory time at 12.616 ms. No campaign directory or comparative slot was created. **This supplies no performance ranking or speedup evidence.**
+
+[Complete failed attempt015](windows-laptop-exploratory-attempt-015.zip) preserves the original raw records, exclusive capture, executed command output, current sources, rejected preparation and both independent outcome checks. Source and raw hashes matched after execution. No automatic retry or gate change occurred. Attempt archive SHA-256 `1293357f1527a4a4efa096a5fbedecd29ed0c654ccdbd6eac9ea332a2afb813b`.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
