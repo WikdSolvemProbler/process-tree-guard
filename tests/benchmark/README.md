@@ -15,6 +15,8 @@ This folder holds the preserved competitor set of the suite. The campaign runs a
 
 `results-record.json` states the outcomes, the SHA record, and the competitor programs of the benchmark.
 
+The [benchmark specification](../../SPEC_Benchmark.md) records the evaluation contract, review requirements, and freeze gate.
+
 ## Windows capture, 6 November 2026
 
 The campaign recorded all 1,940 planned slots in 56 minutes 53 seconds. The seeded order, 1,680 measured rows, and 1,940 successful slot Job drain receipts verified. The harness reported an incomplete certification with 44 standing losses. The startup comparison was unevaluated under its full eligibility rules, and resource and scaling gates failed. Manual usability remained unevaluated. Host CPU before launch was 22.7–27.8%, so this capture does not establish a quiet-host speed record.
