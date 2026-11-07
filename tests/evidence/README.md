@@ -199,6 +199,14 @@ The archive retains exact source/tool bindings, raw counters, census evidence, o
 
 Pipeline archive SHA-256 045952810870af384f49a7d9872135a70e63ec358a33b59da54cde860609baaa.
 
+## Native file API cost diagnostic
+
+One fixed four-image diagnostic placed only `perf_counter_ns` brackets around the existing native calls, preserving arguments, sharing and read checks. Both reads matched every pinned digest, all owned handles closed and all bound sources stayed unchanged. The Python312 image inspection took 11.524 ms: three open-call envelopes totaled 6.1374 ms and three closes 2.6267 ms. Its metadata-query envelopes totaled 1.5434 ms, reads 0.4589 ms and seek 0.003 ms; the remaining 0.7546 ms included wrapper, hashing and unattributed work. The other three complete image inspections took 2.976, 9.4611 and 1.3173 ms.
+
+This localizes the large observed Python-path cost to open/close call envelopes, which still include the Python/ctypes boundary. It does not establish an OS/filter cause or a universal path cost. The control inspected each image once, not a full census; projecting its cost across rows would not be a measured pipeline result. The source, raw API returns and errors, exact argument classes and closure checks are retained. A publication-metadata correction explicitly notes that this Python control recorded nanosecond intervals but no raw QPC frequency. No collector source or gate changed. [API-level diagnostic](windows-native-image-api-cost-001.zip)
+
+Diagnostic archive SHA-256 73420df6a90917ef7d63e026f8a8bb1662bcfa0af14a64a89d4e64717427a40d.
+
 ## Deferred macOS administrator validation
 
 The corrected fixed-M8 credential/quota control compiled on the physical macOS ARM64 host with an explicit SDK. The earlier header failure and incorrect zero-group-readback source are preserved; that source never ran as root. The reviewed corrected invocation stopped at sudo authentication before either the privileged controller or native control started. Administrator-only tests are deferred at the user’s request and tracked in [issue10](https://github.com/WikdSolvemProbler/process-tree-guard/issues/10). The archive preserves sources, binaries, exact plans and refusal logs. Ordinary-user checks and identity-verified cleanup completed after preservation. There is no privileged native result, fork-fence proof or custody qualification from this preparation. [Prepared inputs and refusal evidence](macos-admin-validation-preparation.zip)

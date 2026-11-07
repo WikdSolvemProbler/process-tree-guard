@@ -234,6 +234,10 @@ All raw data and exact bindings are retained, including the failed first unit im
 
 Pipeline archive SHA-256 045952810870af384f49a7d9872135a70e63ec358a33b59da54cde860609baaa.
 
+A subsequent four-image diagnostic measured the existing file APIs with QPC-based nanosecond call brackets. The observed Python312 inspection took 11.524 ms, with open/close envelopes totaling 8.7641 ms. All four images matched their pinned digests on both reads and closed their owned handles. These call envelopes include Python/ctypes boundary costs and establish neither an OS/filter cause nor full-census performance. No collector or gate changed. [Exact API-cost source and observations](../evidence/windows-native-image-api-cost-001.zip)
+
+Diagnostic archive SHA-256 73420df6a90917ef7d63e026f8a8bb1662bcfa0af14a64a89d4e64717427a40d.
+
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
