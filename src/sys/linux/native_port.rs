@@ -107,13 +107,21 @@ impl SharedGate {
         if result==0 && error==0 {Ok(())} else {Err((self,result,error))}
     }
 }
+// Every Rust generic cancellation preserves both first observation and the
+// first result invalid during ARMING. State1 is normal after payload release,
+// so this second fact is a veto only for arming timeout eligibility.
+pub(super) fn arming_gate_cancel_valid(value:c_int)->bool{matches!(value,0|2)}
+fn record_gate_cancel(first:Option<c_int>,invalid:Option<c_int>,value:c_int)->(Option<c_int>,Option<c_int>){
+ (first.or(Some(value)),invalid.or_else(||(!arming_gate_cancel_valid(value)).then_some(value)))
+}
 impl DomainControls {
     pub(super) fn cancel_release_peer(&self)->(c_int,c_int){let facts=self.gate.as_ref().map_or((-1,-1),|gate|(gate.cancel_peer(),gate.peer_cancelled()));if self.peer_cancel.get().is_none(){self.peer_cancel.set(Some(facts));}facts}
     pub(super) fn peer_cancelled(&self)->c_int{self.gate.as_ref().map_or(-1,SharedGate::peer_cancelled)}
     pub(super) fn cancel_release(&self) {
         if let Some(gate)=self.gate.as_ref() {
             let previous=gate.cancel();
-            if self.gate_cancel.get().is_none(){self.gate_cancel.set(Some(previous));}
+            let (first,invalid)=record_gate_cancel(self.gate_cancel.get(),self.gate_cancel_invalid.get(),previous);
+            self.gate_cancel.set(first);self.gate_cancel_invalid.set(invalid);
         }
         // Gate cancellation is not a substitute for the original held kill.
     }
@@ -373,11 +381,11 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
             // expiration; this later sample is diagnostic/invalidation only.
             let (prepared,primary_decision)=match &failure {
                 ActivationFailure::BeforeArm{prepared,decision,..}=>(prepared,*decision),
-                ActivationFailure::Arming{prepared,..}=>(prepared,None),
+                ActivationFailure::Arming{prepared,failure,..}=>(prepared,failure.has_primary_deadline().then_some(Decision::Deadline)),
             };
             let diagnostic_sample=prepared.lease.sample();
             let error=match &failure{ActivationFailure::BeforeArm{error,..}=>error.clone(),ActivationFailure::Arming{failure,..}=>match failure{ArmFailure::BeforeProvision{error,..}|ArmFailure::VerifiedDomain{error,..}=>error.clone(),ArmFailure::Provision{failure,..}=>failure.error.clone()}};
-            Completion::Arming{settled:failure.settle_arming_failure(),primary_decision,diagnostic_sample,error}
+            Completion::Arming{settled:failure.settle_arming_failure(Arc::clone(&port.launch.cancellation)),primary_decision,diagnostic_sample,error}
         },
     };
     RunOutcome{completion,port:Some(port),early_scope:None,early_cancellation:None,admission}
@@ -415,8 +423,8 @@ impl RunOutcome {
     pub(crate) fn exit_code(&self)->i32 {
         match &self.completion {
             Completion::RefusedBeforeActivation{code,..}=>return *code,
-            Completion::Arming{settled:Ok(_),primary_decision:Some(Decision::Deadline),
-                diagnostic_sample:Ok(DecisionReceipt{decision:Decision::Deadline,..}),..}=>return 124,
+            Completion::Arming{settled:Ok(settled),primary_decision:Some(Decision::Deadline),
+                diagnostic_sample:Ok(DecisionReceipt{decision:Decision::Deadline,..}),..} if settled.permits_timeout()=>return 124,
             _=>{},
         }
         let Completion::Terminal(Ok(run))=&self.completion else{return 125;};
@@ -461,4 +469,14 @@ pub(in super::super) fn before_admission_code(scope:Option<VerifiedServiceScope>
  println!("native_gate_first_cause held_peer=preserved released_peer=preserved generic_first=not_relabelled gates=3 mappings_destroyed=3");
 }
 
-#[cfg(test)]pub(super) fn watchdog_mapping_regression(){for other in [0,4,32]{assert!(unknown_watchdog_stop(8|other));}for primary in [1,2,512]{assert!(!unknown_watchdog_stop(8|primary));}assert!(!unknown_watchdog_stop(4));}
+#[cfg(test)]fn gate_cancel_recording_regression(){
+ for (sequence,expected) in [([0,1,2],1),([0,-1,2],-1),([2,9,0],9),([1,-1,2],1)]{
+  let mut first=None;let mut invalid=None;
+  for value in sequence{(first,invalid)=record_gate_cancel(first,invalid,value);}
+  assert_eq!(first,Some(sequence[0]));assert_eq!(invalid,Some(expected));
+ }
+ let mut facts=(None,None);for value in [0,2,0,2]{facts=record_gate_cancel(facts.0,facts.1,value);}assert_eq!(facts,(Some(0),None));
+ for value in [-1,1,3,9]{assert!(!arming_gate_cancel_valid(value));}for value in [0,2]{assert!(arming_gate_cancel_valid(value));}
+ println!("arming_gate_cancel every_attempt_recorded=true first_invalid_sticky=true valid_invalid_valid_veto=true pure=true");
+}
+#[cfg(test)]pub(super) fn watchdog_mapping_regression(){gate_cancel_recording_regression();for other in [0,4,32]{assert!(unknown_watchdog_stop(8|other));}for primary in [1,2,512]{assert!(!unknown_watchdog_stop(8|primary));}assert!(!unknown_watchdog_stop(4));}

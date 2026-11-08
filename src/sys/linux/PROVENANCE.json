@@ -1,5 +1,5 @@
 {
-  "status": "ORDINARY SOURCE QUALIFIED: tested4a9 build11PASS/tests12PASS and ABI4/160/27 constants verified; protected mode2/native lifecycle remains unexecuted",
+  "status": "Ordinary build01511/11 and unit01012/12 passed for exact40a implementation; native guard lifecycle remains unexecuted/unqualified",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -250,35 +250,46 @@
     }
   },
   "current_validation": {
-    "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
-    "platform": "6.8.0-147-generic aarch64",
-    "uid": 501,
-    "build_steps_passed": 8,
-    "tests": {
-      "passed": 8,
-      "failed": 0,
-      "ignored": 0,
-      "existing_names_preserved": true,
-      "bodies_adapted": true,
-      "original_owners": {
-        "manual_watchers": 2,
-        "auto_watchers": 7,
-        "captured_ns": "513101464506901",
-        "cutoff_ns": "513161714506901",
-        "requested_f64_bits": "4633676250982907904",
-        "duration_ns": "60250000000",
-        "absolute_unchanged": true
-      },
-      "native_refusals": 14,
-      "retained_fixture_files": 3
-    },
-    "artifacts_verified": 69,
+    "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
+    "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
+    "scope": "Ordinary compilation/linking and12 existing tests only; no native guard lifecycle or activation.",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "build_receipt_sha256": "a4a6b998b4e6cdc26862847e42da592c662dc93fc453b62b6fca6e7e9c81552d",
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "timed_out": false,
+    "unit_receipt_sha256": "eeaf17a7d8cc3ee23be243e1b167ea1b1aae92f04e8ec0fd2c865f08fc8d5901",
+    "harness_sha256": "c14bf7d437ce129bb23a9633b1eaf926785c2ec8f1a43e0116039f7343fe9b5b",
+    "harness_bytes": 9856352,
+    "pure_arming_proof_and_peer_veto_tables_passed": true,
+    "production_gate_reducer_valid_invalid_valid_passed": true,
+    "native_ipc_refusals": 17,
+    "native_gate_mappings_destroyed": 3,
+    "artifact_files_preserved_and_verified": 90,
     "owned_scratch_roots_removed": 2,
     "original_scopes_absent": true,
-    "native_guard_functions_executed": false,
-    "backend_enabled": false,
-    "evidence": "tests/evidence/linux-original-owners.zip",
-    "limits": "Compilation/linking and ordinary capture/IPC/parser tests only. Actual privileged startup/public dispatch/native timeout-classification/lifecycle/kernel-floor and performance remain open."
+    "cleanup_receipt_sha256": "647b1afea479b0e56f7832cd34efff61c3f197e021a5d3b34bba92e52277ebcf",
+    "linked_entry_ELFs": [
+      {
+        "name": "process-tree-guard-root",
+        "bytes": 6311216,
+        "sha256": "75d6f5c5ed27033c89b10476905db37a6e4b2433eb879f4e78c1357cc8cab03c"
+      },
+      {
+        "name": "process-tree-guard-client",
+        "bytes": 5561504,
+        "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
+      }
+    ],
+    "native_arming_payload_release_EXE1_lifecycle_executed": false,
+    "privileged_lifecycle_executed": false,
+    "public_backend_enabled": false,
+    "raw_receipts": "Local only; no raw archive published.",
+    "limits": "Pure branch/validator/reducer checks plus prior scalar C ABI/gate/IPC/parser effects. Native timer124 behavior, full payload/release/EXE1 parity, privileged lifecycle, caller-context preservation, kernel floor, public wiring and performance remain OPEN."
   },
   "public_raw_evidence": {
     "status": "withdrawn-from-current-public-tree",
@@ -361,55 +372,34 @@
     "https://raw.githubusercontent.com/systemd/systemd/v255/src/core/dbus-execute.c"
   ],
   "entry_source_validation": {
-    "implementation_build_candidate_sha256": "4a9fd73f868cb93b60c41a6ca1e4574f8da7d735792568699eb1487ed76fadf6",
-    "baseline_commit": "3e3148c64fcabe8dec6e9eafb9361415edd1b17b",
-    "platform": "Linux6.8 aarch64 ordinary user",
+    "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
+    "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
+    "scope": "Ordinary compilation/linking and12 existing tests only; no native guard lifecycle or activation.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
     "compile_link_failed": 0,
-    "fresh_native_objects": 6,
-    "native_archive_reused": false,
-    "actual_root_and_client_executables_linked": true,
-    "build_receipt_sha256": "e4b6ec570065a60b8b6c57cf20b514961b413a1196ea6c27c2a5448bb84eb96f",
+    "build_receipt_sha256": "a4a6b998b4e6cdc26862847e42da592c662dc93fc453b62b6fca6e7e9c81552d",
     "tests": 12,
     "passed": 12,
     "failed": 0,
     "ignored": 0,
     "timed_out": false,
-    "unit_receipt_sha256": "9d6504d3f77380980074492ed3af7d5f2de75fffb0918452af410f76f6322544",
-    "harness_sha256": "487cdc951e1183954303b4ee0f256b6a1f7534b7e5ab991a0e5626d319ab0c64",
-    "native_abi": {
-      "schema": 4,
-      "spec_bytes": 160,
-      "words": 27,
-      "prlimit64": 261,
-      "core_guard_literal": 1,
-      "checked_by": "same production27-word foreign-C scalar query and validator in existing gate regression"
-    },
-    "pure_predicates_exercised": [
-      "host0/2 versus unsupported modes",
-      "reviewed kernel-family string classification",
-      "synthetic ELF header acceptance/refusal",
-      "synthetic CORE hard-limit bound"
-    ],
-    "actual_host_CORE_limit_read_executed": false,
-    "actual_credential_or_CORE_mutation_executed": false,
-    "actual_protected_ELF_policy_executed": false,
-    "actual_mode2_core_window_executed": false,
-    "root_client_payload_watchdog_terminal_lifecycle_executed": false,
-    "privileged_policy_file_enforcement_executed": false,
+    "unit_receipt_sha256": "eeaf17a7d8cc3ee23be243e1b167ea1b1aae92f04e8ec0fd2c865f08fc8d5901",
+    "harness_sha256": "c14bf7d437ce129bb23a9633b1eaf926785c2ec8f1a43e0116039f7343fe9b5b",
+    "harness_bytes": 9856352,
+    "pure_arming_proof_and_peer_veto_tables_passed": true,
+    "production_gate_reducer_valid_invalid_valid_passed": true,
     "native_ipc_refusals": 17,
-    "native_ipc_refusals_descriptors_settled": true,
     "native_gate_mappings_destroyed": 3,
     "artifact_files_preserved_and_verified": 90,
     "owned_scratch_roots_removed": 2,
     "original_scopes_absent": true,
-    "cleanup_receipt_sha256": "39c4230f0220974001add057f524676d76610e46df0becc8fbd32975560d8dcc",
+    "cleanup_receipt_sha256": "647b1afea479b0e56f7832cd34efff61c3f197e021a5d3b34bba92e52277ebcf",
     "linked_entry_ELFs": [
       {
         "name": "process-tree-guard-root",
-        "bytes": 6288608,
-        "sha256": "064fb8d6b11587429655c81a36b0c1fd862307b386860d8d598b0a7ccbdf19ce"
+        "bytes": 6311216,
+        "sha256": "75d6f5c5ed27033c89b10476905db37a6e4b2433eb879f4e78c1357cc8cab03c"
       },
       {
         "name": "process-tree-guard-client",
@@ -417,9 +407,11 @@
         "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
       }
     ],
+    "native_arming_payload_release_EXE1_lifecycle_executed": false,
+    "privileged_lifecycle_executed": false,
     "public_backend_enabled": false,
-    "raw_receipts": "Local-only under publication privacy policy; no public raw archive",
-    "limits": "Ordinary compile/link, pure predicates, scalar ABI query and existing IPC/gate checks only; NO CORE/credential/core-window/real-image policy or privileged lifecycle execution. Kernel-family classification is not kernel attestation. Full context preservation, native timer124, supported floor, public wiring and performance remain OPEN."
+    "raw_receipts": "Local only; no raw archive published.",
+    "limits": "Pure branch/validator/reducer checks plus prior scalar C ABI/gate/IPC/parser effects. Native timer124 behavior, full payload/release/EXE1 parity, privileged lifecycle, caller-context preservation, kernel floor, public wiring and performance remain OPEN."
   },
   "caller_cancellation": {
     "design_sha256": "81748885f8249642c4083ad9f5c7740d9d36c94c19cb5cf422b6f9deb0e59434",
@@ -738,7 +730,7 @@
     }
   },
   "mode2_core_window": {
-    "status": "Compiled and ordinary12 tests passed; pure host predicates and actual27-word ABI constants only; real mode2 CORE/credential/image-policy path UNEXECUTED",
+    "status": "Historical tested4a9 component: ordinary ABI/predicate checks passed; current arming successor uncompiled and actual mode2/native lifecycle still unexecuted",
     "baseline_commit": "3e3148c64fcabe8dec6e9eafb9361415edd1b17b",
     "baseline_snapshot": "target/codex-security/linux-product-integration-history-001/3e-before-core-window-038",
     "host_source": "read-only privileged ActivationHostReceipt only; never request/wire",
@@ -770,7 +762,7 @@
     "capability_bounding_set_zero_claim": false,
     "parent_or_caller_limit_mutation": false,
     "global_sysctl_mutation": false,
-    "tests": "12/12 existing ordinary tests passed; synthetic mode/family/hard/ELF predicates and27 C scalar ABI constants plus old IPC/3 gate mappings. No actual CORE/credential/protected-image-policy/child execution.",
+    "tests": "Historical tested4a9 ordinary12/12; current expanded arming-focused regression unexecuted. No CORE/credential/protected-image-policy/child execution.",
     "runtime_capsule001": "immutable0-only source snapshot, not refreshed/qualified",
     "rejected_proposals_preserved": true,
     "native_contract_sha256": "292ab03cbd731872630de18c073ad51cc2d43ad2f2ed6bd07854b2f23f62c511",
@@ -880,5 +872,175 @@
     "public_backend_enabled": false,
     "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
     "limits": "Ordinary source compilation/link and12 tests only. Administrative default-deny hardening does not preserve the caller seccomp/LSM/Landlock/rlimit/cgroup-ancestry context; that full requirement remains OPEN. Privileged enforcement/lifecycle, native timer124, supported kernel floor, public wiring and performance remain unqualified."
+  },
+  "arming_prior_current_validation": {
+    "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
+    "platform": "6.8.0-147-generic aarch64",
+    "uid": 501,
+    "build_steps_passed": 8,
+    "tests": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "existing_names_preserved": true,
+      "bodies_adapted": true,
+      "original_owners": {
+        "manual_watchers": 2,
+        "auto_watchers": 7,
+        "captured_ns": "513101464506901",
+        "cutoff_ns": "513161714506901",
+        "requested_f64_bits": "4633676250982907904",
+        "duration_ns": "60250000000",
+        "absolute_unchanged": true
+      },
+      "native_refusals": 14,
+      "retained_fixture_files": 3
+    },
+    "artifacts_verified": 69,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "native_guard_functions_executed": false,
+    "backend_enabled": false,
+    "evidence": "tests/evidence/linux-original-owners.zip",
+    "limits": "Compilation/linking and ordinary capture/IPC/parser tests only. Actual privileged startup/public dispatch/native timeout-classification/lifecycle/kernel-floor and performance remain open."
+  },
+  "arming_predecessor_validation": {
+    "implementation_build_candidate_sha256": "4a9fd73f868cb93b60c41a6ca1e4574f8da7d735792568699eb1487ed76fadf6",
+    "baseline_commit": "3e3148c64fcabe8dec6e9eafb9361415edd1b17b",
+    "platform": "Linux6.8 aarch64 ordinary user",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "fresh_native_objects": 6,
+    "native_archive_reused": false,
+    "actual_root_and_client_executables_linked": true,
+    "build_receipt_sha256": "e4b6ec570065a60b8b6c57cf20b514961b413a1196ea6c27c2a5448bb84eb96f",
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "timed_out": false,
+    "unit_receipt_sha256": "9d6504d3f77380980074492ed3af7d5f2de75fffb0918452af410f76f6322544",
+    "harness_sha256": "487cdc951e1183954303b4ee0f256b6a1f7534b7e5ab991a0e5626d319ab0c64",
+    "native_abi": {
+      "schema": 4,
+      "spec_bytes": 160,
+      "words": 27,
+      "prlimit64": 261,
+      "core_guard_literal": 1,
+      "checked_by": "same production27-word foreign-C scalar query and validator in existing gate regression"
+    },
+    "pure_predicates_exercised": [
+      "host0/2 versus unsupported modes",
+      "reviewed kernel-family string classification",
+      "synthetic ELF header acceptance/refusal",
+      "synthetic CORE hard-limit bound"
+    ],
+    "actual_host_CORE_limit_read_executed": false,
+    "actual_credential_or_CORE_mutation_executed": false,
+    "actual_protected_ELF_policy_executed": false,
+    "actual_mode2_core_window_executed": false,
+    "root_client_payload_watchdog_terminal_lifecycle_executed": false,
+    "privileged_policy_file_enforcement_executed": false,
+    "native_ipc_refusals": 17,
+    "native_ipc_refusals_descriptors_settled": true,
+    "native_gate_mappings_destroyed": 3,
+    "artifact_files_preserved_and_verified": 90,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "cleanup_receipt_sha256": "39c4230f0220974001add057f524676d76610e46df0becc8fbd32975560d8dcc",
+    "linked_entry_ELFs": [
+      {
+        "name": "process-tree-guard-root",
+        "bytes": 6288608,
+        "sha256": "064fb8d6b11587429655c81a36b0c1fd862307b386860d8d598b0a7ccbdf19ce"
+      },
+      {
+        "name": "process-tree-guard-client",
+        "bytes": 5561504,
+        "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
+      }
+    ],
+    "public_backend_enabled": false,
+    "raw_receipts": "Local-only under publication privacy policy; no public raw archive",
+    "limits": "Ordinary compile/link, pure predicates, scalar ABI query and existing IPC/gate checks only; NO CORE/credential/core-window/real-image policy or privileged lifecycle execution. Kernel-family classification is not kernel attestation. Full context preservation, native timer124, supported floor, public wiring and performance remain OPEN."
+  },
+  "native_arming_primary": {
+    "status": "Ordinary build01511/11 and unit01012/12 passed for exact40a implementation; native guard lifecycle remains unexecuted/unqualified",
+    "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
+    "baseline_candidate_sha256": "cc474e72d1c3e423e92612b45e5d88ac0db584aa5ec16e2d0d42835448e7b71d",
+    "snapshot": "target/codex-security/linux-product-integration-history-001/native-arming-primary-source-043",
+    "snapshot_index_sha256": "c86954aa2538fcf642cacb2b7ca8b078e6553795e6b07bec3bca3f828e975f13",
+    "proposal_sha256": "1f6c45662d4e1260ade60abbc7c695a0dd62fa5071998175419ef53aaa92ed16",
+    "design_reviews": {
+      "critic": "950ccf1840343b722ff3a61ab6e3eb449bdb1b2065d5e20fec36e1ce5c160b03",
+      "reviewer2": "6eb17fc62ad59e29162241f2123b4c890f5bf32311774dfd89f398579aec263a"
+    },
+    "arming_abi": {
+      "schema": 4,
+      "words": 21,
+      "spawn_bytes": 128,
+      "ready_bytes": 112,
+      "C_headers_unchanged": true
+    },
+    "primary": "Private exact refusal-site clock/poll proof only; setup/cleanup/errno/string/late diagnostic cannot mint original expiry.",
+    "peer_veto": "Same actual opaque authenticated Arc retained in every arming owner. Entry plus last pre-INTERNAL or final-no-INTERNAL samples. Peer/Fault stays125 independently of generic-first/native peerflag; no self-induced readiness reused as caller evidence.",
+    "faults": "Full raw branch/sentinel/count/message/mask/time checks; all gate/heldkill attempts and independent watchdog/mask/protocol/kernel/cleanup faults retained. Quarantine125 always.",
+    "tests": "Existing12 tests passed; mod.rs bodies/names preserved. New arming assertions use pure production validators/reducers only; prior scalar C ABI/3 gate maps/17 IPC refusal effects unchanged.",
+    "validation": "Exact40a passed11 ordinary build/link steps and12 tests; pure arming proof/veto/reducer assertions only. No native guard lifecycle or full124 parity qualification.",
+    "full_payload_release_EXE1_124_parity": false,
+    "backend_enabled": false,
+    "selector_C_H_wire_Windows_Cargo_changed": false,
+    "public_raw_evidence": false,
+    "repair_snapshot": "target/codex-security/linux-product-integration-history-001/native-arming-primary-repair-044",
+    "repaired_candidate_sha256": "8243c686b93ffb193ddcb4250a680b9d426fa449c277ff775f7bbb05ea7f6876",
+    "contract_repairs": [
+      "OriginalDeadlineProof is private non-Clone/non-Copy; timeout eligibility borrows and compares reconstructed raw evidence by reference.",
+      "Every Rust generic gate-cancel attempt retains the first arming-invalid result independently of the first result; actual eligibility consumes the sticky veto."
+    ],
+    "ordinary_validation": {
+      "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
+      "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
+      "scope": "Ordinary compilation/linking and12 existing tests only; no native guard lifecycle or activation.",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "build_receipt_sha256": "a4a6b998b4e6cdc26862847e42da592c662dc93fc453b62b6fca6e7e9c81552d",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "timed_out": false,
+      "unit_receipt_sha256": "eeaf17a7d8cc3ee23be243e1b167ea1b1aae92f04e8ec0fd2c865f08fc8d5901",
+      "harness_sha256": "c14bf7d437ce129bb23a9633b1eaf926785c2ec8f1a43e0116039f7343fe9b5b",
+      "harness_bytes": 9856352,
+      "pure_arming_proof_and_peer_veto_tables_passed": true,
+      "production_gate_reducer_valid_invalid_valid_passed": true,
+      "native_ipc_refusals": 17,
+      "native_gate_mappings_destroyed": 3,
+      "artifact_files_preserved_and_verified": 90,
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true,
+      "cleanup_receipt_sha256": "647b1afea479b0e56f7832cd34efff61c3f197e021a5d3b34bba92e52277ebcf",
+      "linked_entry_ELFs": [
+        {
+          "name": "process-tree-guard-root",
+          "bytes": 6311216,
+          "sha256": "75d6f5c5ed27033c89b10476905db37a6e4b2433eb879f4e78c1357cc8cab03c"
+        },
+        {
+          "name": "process-tree-guard-client",
+          "bytes": 5561504,
+          "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
+        }
+      ],
+      "native_arming_payload_release_EXE1_lifecycle_executed": false,
+      "privileged_lifecycle_executed": false,
+      "public_backend_enabled": false,
+      "raw_receipts": "Local only; no raw archive published.",
+      "limits": "Pure branch/validator/reducer checks plus prior scalar C ABI/gate/IPC/parser effects. Native timer124 behavior, full payload/release/EXE1 parity, privileged lifecycle, caller-context preservation, kernel floor, public wiring and performance remain OPEN."
+    },
+    "publication_snapshot": "target/codex-security/linux-product-integration-history-001/native-arming-primary-publication-045",
+    "negative_history": "Earlier build014 preparation failures and denied evaluations remain preserved locally; no failed/denied attempt is reclassified as passed."
   }
 }

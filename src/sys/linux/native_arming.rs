@@ -61,6 +61,75 @@ impl ReadinessObservation{
  }
 }
 
+
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+enum DeadlineSite {PrepareClock,SpawnTimer,SpawnBeforeClock,SpawnAfterClock,ReadyBeforeClock,ReadyFirstTimer,ReadyAfterTimer,ReadyAfterClock}
+#[derive(Debug,PartialEq,Eq)]
+struct OriginalDeadlineProof {site:DeadlineSite,cutoff:u64,sampled_ns:Option<u64>}
+fn prepare_deadline_proof(now:u64,cutoff:u64)->Option<OriginalDeadlineProof>{
+ (cutoff>0&&now>=cutoff).then_some(OriginalDeadlineProof{site:DeadlineSite::PrepareClock,cutoff,sampled_ns:Some(now)})
+}
+fn expected_abi()->[u64;21]{[4,128,112,8,CLONE_PIDFD,SIGCHLD,435,7,8,8,64,2,RT_SIGPROCMASK_NUMBER,9,19,8,BLOCKED_KERNEL_MASK,16,249,8193,256]}
+impl SpawnObservation {
+ fn untouched_mask(&self)->bool{
+  self.mask_set_result==c_int::MIN&&self.mask_set_errno==0&&self.mask_query_result==c_int::MIN&&self.mask_query_errno==0
+   &&self.mask_restore_result==c_int::MIN&&self.mask_restore_errno==0&&self.mask_restore_query_result==c_int::MIN&&self.mask_restore_query_errno==0
+   &&self.original_signal_mask==0&&self.blocked_mask==0&&self.restored_mask==0
+ }
+ fn no_clone(&self)->bool{self.schema==4&&self.stage==1&&self.child_created==0&&self.pid== -1&&self.pidfd== -1
+  &&self.clone_result==c_int::MIN&&self.cancellation_revents==0&&self.after_clone_ns==0&&self.untouched_mask()&&self.failure_kill_errno==0}
+ fn complete(&self,cutoff:u64)->bool{
+  cutoff>0&&self.schema==4&&self.stage==4&&self.child_created==1&&self.pid>0&&self.pidfd>=0&&self.clone_result==self.pid&&self.call_errno==0
+   &&self.initial_poll_result==0&&self.initial_revents==[0;3]&&self.cancellation_revents==0
+   &&self.mask_set_result==0&&self.mask_set_errno==0&&self.mask_query_result==0&&self.mask_query_errno==0
+   &&self.mask_restore_result==0&&self.mask_restore_errno==0&&self.mask_restore_query_result==0&&self.mask_restore_query_errno==0
+   &&self.blocked_mask==BLOCKED_KERNEL_MASK&&self.original_signal_mask&!BLOCKED_KERNEL_MASK==0&&self.restored_mask==self.original_signal_mask
+   &&self.failure_kill_result==c_int::MIN&&self.failure_kill_errno==0&&self.before_clone_ns>0&&self.before_clone_ns<cutoff&&self.after_clone_ns>=self.before_clone_ns
+ }
+ fn deadline_proof(&self,cutoff:u64)->Option<OriginalDeadlineProof>{
+  if cutoff==0{return None;}
+  let (site,sampled_ns)=if self.no_clone()&&self.call_errno==125&&self.initial_poll_result==1&&self.initial_revents==[0,1,0]
+    &&self.before_clone_ns==0&&self.failure_kill_result==1{(DeadlineSite::SpawnTimer,None)}
+   else if self.no_clone()&&self.call_errno==110&&self.initial_poll_result==0&&self.initial_revents==[0;3]
+    &&self.before_clone_ns>=cutoff&&self.failure_kill_result==c_int::MIN{(DeadlineSite::SpawnBeforeClock,Some(self.before_clone_ns))}
+   else if self.complete(cutoff)&&self.after_clone_ns>=cutoff{(DeadlineSite::SpawnAfterClock,Some(self.after_clone_ns))}
+   else{return None;};
+  Some(OriginalDeadlineProof{site,cutoff,sampled_ns})
+ }
+}
+impl ReadinessObservation {
+ fn empty_message(&self)->bool{self.read_count== -1&&self.token==0&&self.message_schema==0&&self.reserved==0&&self.child_mask==0}
+ fn complete_message(&self)->bool{self.read_count==16&&self.token==u32::from(b'R')&&self.message_schema==4&&self.reserved==0&&self.child_mask==BLOCKED_KERNEL_MASK}
+ fn first_ready_only(&self)->bool{self.poll_result==1&&matches!(self.revents[0],1|17)&&self.revents[1..].iter().all(|event|*event==0)}
+ fn exact_count(result:c_int,events:&[c_int;7])->bool{events[2]==0&&result>=0&&result as usize==events.iter().filter(|event|**event!=0).count()}
+ fn timer_events(events:&[c_int;7],setup:u64,cutoff:u64,allow_ready:bool)->bool{
+  (if allow_ready{matches!(events[0],0|1|16|17)}else{events[0]==0})
+   &&events[1]==0&&events[2]==0&&events[3]==1&&events[4]==0&&events[6]==0
+   &&(events[5]==0||(events[5]==1&&setup==cutoff))
+ }
+ fn deadline_proof(&self,cutoff:u64,setup:u64,spawn:&SpawnObservation)->Option<OriginalDeadlineProof>{
+  if cutoff==0||setup==0||setup>cutoff||!spawn.complete(cutoff)||spawn.after_clone_ns>=cutoff
+   ||self.result!= -1||self.reserved!=0{return None;}
+  let before_valid=self.before_ns>=spawn.after_clone_ns&&self.before_ns>0;
+  let before_live=before_valid&&self.before_ns<setup;
+  let (site,sampled_ns)=if setup==cutoff&&before_valid&&self.before_ns>=cutoff&&self.call_errno==110&&self.empty_message()
+   &&self.poll_result==c_int::MIN&&self.after_poll_result==c_int::MIN&&self.revents==[0;7]&&self.after_revents==[0;7]&&self.after_ns==0{
+    (DeadlineSite::ReadyBeforeClock,Some(self.before_ns))
+   }else if before_live&&self.call_errno==125&&self.empty_message()&&Self::timer_events(&self.revents,setup,cutoff,false)
+    &&Self::exact_count(self.poll_result,&self.revents)&&self.after_poll_result==c_int::MIN&&self.after_revents==[0;7]&&self.after_ns==0{
+    (DeadlineSite::ReadyFirstTimer,None)
+   }else if before_live&&self.call_errno==125&&self.complete_message()&&self.first_ready_only()
+    &&Self::timer_events(&self.after_revents,setup,cutoff,true)&&Self::exact_count(self.after_poll_result,&self.after_revents)&&self.after_ns==0{
+    (DeadlineSite::ReadyAfterTimer,None)
+   }else if setup==cutoff&&before_live&&self.call_errno==110&&self.complete_message()&&self.first_ready_only()
+    &&matches!(self.after_revents[0],0|1|16|17)&&self.after_revents[1..].iter().all(|event|*event==0)
+    &&Self::exact_count(self.after_poll_result,&self.after_revents)&&self.after_ns>=self.before_ns&&self.after_ns>=cutoff{
+    (DeadlineSite::ReadyAfterClock,Some(self.after_ns))
+   }else{return None;};
+  Some(OriginalDeadlineProof{site,cutoff,sampled_ns})
+ }
+}
+
 // The caller retains this real receipt alongside success OR ArmFailure through
 // the existing014 consuming controller. None means no native call occurred.
 // It contains an owned, pre-clone short readiness timer, not a replacement
@@ -77,9 +146,24 @@ pub(super) struct ArmingReceipt {
     ready: bool,
     gate_error: Option<String>,
     ready_peer_cancel:Option<(c_int,c_int)>,
+    primary_deadline:Option<OriginalDeadlineProof>,
 }
 
 impl ArmingReceipt {
+    pub(super) fn has_primary_deadline(&self)->bool{self.primary_deadline.is_some()}
+    pub(super) fn permits_timeout(&self)->bool{
+        let Some(primary)=self.primary_deadline.as_ref() else{return false;};
+        if !self.started||self.abi!=Some(expected_abi())||self.original_deadline_ns!=Some(primary.cutoff)||primary.cutoff==0
+            ||self.ready||self.gate_error.is_some()||self.ready_peer_cancel.is_some()||self.parent_mask_uncertain(){return false;}
+        if primary.site==DeadlineSite::PrepareClock{return self.setup.is_none()&&self.spawn.is_none()&&self.readiness.is_none()&&self.refused_kill.is_none()
+            &&primary.sampled_ns.is_some_and(|sample|sample>=primary.cutoff);}
+        let Some(setup)=self.setup.as_ref()else{return false;};
+        if setup.effective_until_ns()==0||setup.effective_until_ns()>primary.cutoff||setup.armed_ceiling_ns()!=setup.effective_until_ns()||setup.narrow_observation().is_some()
+            ||!self.refused_kill.is_some_and(|raw|raw.result==1&&raw.call_errno==0){return false;}
+        let Some(spawn)=self.spawn.as_ref()else{return false;};
+        let observed=match self.readiness.as_ref(){Some(ready)=>ready.deadline_proof(primary.cutoff,setup.effective_until_ns(),spawn),None=>spawn.deadline_proof(primary.cutoff)};
+        observed.as_ref()==Some(primary)
+    }
     pub(super) fn original_mask(&self)->Option<u64> {
         self.spawn.filter(|_|self.parent_mask_confirmed()).map(|raw|raw.original_signal_mask)
     }
@@ -114,12 +198,17 @@ fn prepare(watch:&LeaseWatch<'_>, receipt:&mut ArmingReceipt)->Probe<(OwnedFd,Ow
     receipt.started=true;
     let abi=std::array::from_fn(|i|unsafe{ptg_arm_abi(i as u32)});
     receipt.abi=Some(abi);
-    check(abi==[4,128,112,8,CLONE_PIDFD,SIGCHLD,435,7,8,8,64,2,RT_SIGPROCMASK_NUMBER,9,19,8,BLOCKED_KERNEL_MASK,16,249,8193,256],"native watchdog bridge ABI differs")?;
+    check(abi==expected_abi(),"native watchdog bridge ABI differs")?;
     check(watch.owner_pid>0,"native armer lacks original owner identity")?;
+    receipt.original_deadline_ns=Some(watch.deadline_ns);
+    check(watch.deadline_ns>0,"original arming cutoff is missing")?;
     let now=boottime_ns()?;
+    if let Some(primary)=prepare_deadline_proof(now,watch.deadline_ns){
+        receipt.primary_deadline=Some(primary);
+        return Err("original deadline expired before native setup".into());
+    }
     let setup_until=now.checked_add(READINESS_BOUND_NS).ok_or("readiness deadline overflow")?
         .min(watch.deadline_ns);
-    receipt.original_deadline_ns=Some(watch.deadline_ns);
     // Store the actual armed timer before any post-arm validation. Original
     // owner/timer/deadline remain unchanged and separately retained.
     receipt.setup=Some(Deadline::arm_before_placement(setup_until)?);
@@ -162,6 +251,7 @@ pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_s
         Some(unsafe {DirectChild::from_successful_clone(raw.pid,OwnedFd::from_raw_fd(raw.pidfd))})
     } else {None};
     receipt.spawn=Some(raw);
+    receipt.primary_deadline=raw.deadline_proof(watch.deadline_ns);
     drop(writer); // child owns the only remaining readiness writer after scrub.
     if raw.child_created!=1 {
         return Err(refuse_verified(controls,watchdog,receipt,"native watchdog clone refused"));
@@ -183,6 +273,7 @@ pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_s
         &watch.owners.watch(),watch.timer.as_raw_fd(),watch.supervisor.as_raw_fd(),watch.cancellation.fd(),
         setup.timer_fd(),setup.effective_until_ns(),&mut ready)};
     receipt.readiness=Some(ready);
+    receipt.primary_deadline=ready.deadline_proof(watch.deadline_ns,setup.effective_until_ns(),&raw);
     if ready.result!=0 || ready.call_errno!=0 || ready.read_count!=16 || ready.token!=u32::from(b'R')
         || ready.message_schema!=4 || ready.child_mask!=BLOCKED_KERNEL_MASK
         || ready.before_ns<raw.after_clone_ns || ready.after_ns<ready.before_ns
@@ -194,3 +285,53 @@ pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_s
 }
 
 pub(super) unsafe fn kill_held(fd:c_int,out:*mut KillObservation) {unsafe{ptg_arm_kill_held(fd,out)}}
+
+#[cfg(test)]pub(super) fn deadline_refusal_regression(){
+ const CUTOFF:u64=100;
+ assert!(prepare_deadline_proof(100,CUTOFF).is_some());assert!(prepare_deadline_proof(99,CUTOFF).is_none());assert!(prepare_deadline_proof(100,0).is_none());
+ let untouched=SpawnObservation{schema:4,stage:1,pid:-1,pidfd:-1,clone_result:c_int::MIN,mask_set_result:c_int::MIN,mask_query_result:c_int::MIN,
+  mask_restore_result:c_int::MIN,mask_restore_query_result:c_int::MIN,failure_kill_result:c_int::MIN,..SpawnObservation::default()};
+ let timer=SpawnObservation{call_errno:125,initial_poll_result:1,initial_revents:[0,1,0],failure_kill_result:1,..untouched};
+ let before=SpawnObservation{call_errno:110,before_clone_ns:CUTOFF,..untouched};
+ let after=SpawnObservation{schema:4,stage:4,child_created:1,pid:123,pidfd:9,clone_result:123,original_signal_mask:2,blocked_mask:BLOCKED_KERNEL_MASK,restored_mask:2,
+  before_clone_ns:10,after_clone_ns:CUTOFF,failure_kill_result:c_int::MIN,..SpawnObservation::default()};
+ for raw in [timer,before,after]{assert!(raw.deadline_proof(CUTOFF).is_some());}
+ macro_rules! reject_spawn{($base:expr,$field:ident,$value:expr)=>{{let mut raw=$base;raw.$field=$value;assert!(raw.deadline_proof(CUTOFF).is_none(),stringify!($field));}}}
+ reject_spawn!(timer,schema,5);reject_spawn!(timer,stage,2);reject_spawn!(timer,child_created,1);reject_spawn!(timer,pid,1);reject_spawn!(timer,pidfd,0);
+ reject_spawn!(timer,call_errno,110);reject_spawn!(timer,initial_poll_result,2);reject_spawn!(timer,clone_result,-1);reject_spawn!(timer,cancellation_revents,1);
+ reject_spawn!(timer,mask_set_result,0);reject_spawn!(timer,mask_set_errno,4);reject_spawn!(timer,mask_query_result,0);reject_spawn!(timer,mask_query_errno,4);
+ reject_spawn!(timer,mask_restore_result,0);reject_spawn!(timer,mask_restore_errno,4);reject_spawn!(timer,mask_restore_query_result,0);reject_spawn!(timer,mask_restore_query_errno,4);
+ reject_spawn!(timer,original_signal_mask,1);reject_spawn!(timer,blocked_mask,1);reject_spawn!(timer,restored_mask,1);reject_spawn!(timer,before_clone_ns,1);reject_spawn!(timer,after_clone_ns,1);
+ reject_spawn!(timer,failure_kill_result,0);reject_spawn!(timer,failure_kill_errno,5);
+ for i in [0,2]{let mut raw=timer;raw.initial_revents[i]=1;raw.initial_poll_result=2;assert!(raw.deadline_proof(CUTOFF).is_none());}
+ reject_spawn!(before,before_clone_ns,0);reject_spawn!(before,before_clone_ns,99);reject_spawn!(before,stage,2);reject_spawn!(before,clone_result,-1);
+ reject_spawn!(before,call_errno,5);reject_spawn!(before,initial_poll_result,1);reject_spawn!(before,failure_kill_result,1);
+ reject_spawn!(after,schema,5);reject_spawn!(after,stage,3);reject_spawn!(after,child_created,0);reject_spawn!(after,pid,0);reject_spawn!(after,pidfd,-1);
+ reject_spawn!(after,clone_result,-1);reject_spawn!(after,call_errno,110);reject_spawn!(after,mask_set_result,-1);reject_spawn!(after,mask_set_errno,4);
+ reject_spawn!(after,mask_query_result,-1);reject_spawn!(after,mask_query_errno,4);reject_spawn!(after,mask_restore_result,-1);reject_spawn!(after,mask_restore_errno,4);
+ reject_spawn!(after,mask_restore_query_result,-1);reject_spawn!(after,mask_restore_query_errno,4);reject_spawn!(after,blocked_mask,0);reject_spawn!(after,restored_mask,0);
+ reject_spawn!(after,original_signal_mask,u64::MAX);reject_spawn!(after,failure_kill_result,1);reject_spawn!(after,failure_kill_errno,5);
+ reject_spawn!(after,initial_poll_result,1);reject_spawn!(after,cancellation_revents,1);reject_spawn!(after,before_clone_ns,CUTOFF);reject_spawn!(after,after_clone_ns,9);
+ let spawn=SpawnObservation{after_clone_ns:20,..after};
+ let pre=ReadinessObservation{result:-1,call_errno:110,read_count:-1,poll_result:c_int::MIN,after_poll_result:c_int::MIN,before_ns:CUTOFF,..ReadinessObservation::default()};
+ let first=ReadinessObservation{call_errno:125,poll_result:2,revents:[0,0,0,1,0,1,0],before_ns:30,..pre};
+ let post=ReadinessObservation{result:-1,call_errno:125,read_count:16,token:82,poll_result:1,revents:[17,0,0,0,0,0,0],after_poll_result:3,after_revents:[16,0,0,1,0,1,0],before_ns:30,message_schema:4,child_mask:BLOCKED_KERNEL_MASK,..ReadinessObservation::default()};
+ let final_clock=ReadinessObservation{call_errno:110,after_poll_result:1,after_revents:[16,0,0,0,0,0,0],after_ns:CUTOFF,..post};
+ for raw in [pre,first,post,final_clock]{assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_some());}
+ assert!(pre.deadline_proof(CUTOFF,90,&spawn).is_none());assert!(final_clock.deadline_proof(CUTOFF,90,&spawn).is_none());
+ macro_rules! reject_ready{($base:expr,$field:ident,$value:expr)=>{{let mut raw=$base;raw.$field=$value;assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none(),stringify!($field));}}}
+ reject_ready!(pre,result,0);reject_ready!(pre,call_errno,5);reject_ready!(pre,read_count,0);reject_ready!(pre,token,82);reject_ready!(pre,message_schema,4);
+ reject_ready!(pre,reserved,1);reject_ready!(pre,child_mask,BLOCKED_KERNEL_MASK);reject_ready!(pre,poll_result,0);reject_ready!(pre,after_poll_result,0);reject_ready!(pre,before_ns,19);reject_ready!(pre,after_ns,1);
+ reject_ready!(first,poll_result,1);reject_ready!(first,after_poll_result,0);reject_ready!(first,read_count,16);reject_ready!(first,after_ns,1);reject_ready!(first,before_ns,CUTOFF);
+ let setup_only=ReadinessObservation{poll_result:1,revents:[0,0,0,0,0,1,0],..first};assert!(setup_only.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none());
+ for i in [0,1,2,4,6]{let mut raw=first;raw.revents[i]=1;raw.poll_result+=1;assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none());}
+ for i in 0..7{let mut raw=pre;raw.revents[i]=1;assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none());raw=pre;raw.after_revents[i]=1;assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none());}
+ reject_ready!(post,poll_result,2);reject_ready!(post,after_poll_result,2);reject_ready!(post,read_count,8);reject_ready!(post,token,0);reject_ready!(post,message_schema,3);
+ reject_ready!(post,child_mask,0);reject_ready!(post,reserved,1);reject_ready!(post,after_ns,1);reject_ready!(post,call_errno,110);
+ for i in [1,2,4,6]{let mut raw=post;raw.after_revents[i]=1;raw.after_poll_result+=1;assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none());}
+ for value in [0,1,16,17]{let raw=ReadinessObservation{after_poll_result:1+c_int::from(value!=0),after_revents:[value,0,0,1,0,0,0],..post};assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_some());}
+ reject_ready!(final_clock,after_ns,0);reject_ready!(final_clock,after_ns,99);reject_ready!(final_clock,after_poll_result,0);reject_ready!(final_clock,before_ns,19);
+ for i in 1..7{let mut raw=final_clock;raw.after_revents[i]=1;raw.after_poll_result+=1;assert!(raw.deadline_proof(CUTOFF,CUTOFF,&spawn).is_none());}
+ let native_fault=SpawnObservation{call_errno:5,..spawn};for raw in [pre,first,post,final_clock]{assert!(raw.deadline_proof(CUTOFF,CUTOFF,&native_fault).is_none());}
+ println!("arming_original_deadline exact_rows=8 raw_shape_count_mask_message_clock_vetoes=true no_native_calls=true");
+}

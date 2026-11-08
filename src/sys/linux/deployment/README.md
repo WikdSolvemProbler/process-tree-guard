@@ -50,8 +50,11 @@ entry/bootstrap/unit and full lifecycle qualification remains pending. Temporary
 qualification must independently bound the socket, template, services and cleanup;
 it cannot introduce an unreviewed socket drop-in because the current source checks
 exact configuration provenance. The Linux 5.14 compatibility floor remains open
-until actual entry qualification on supported kernels. Generic/native-timer errors
-remain125; source work does not establish complete native timeout-cause124 parity.
+until actual entry qualification on supported kernels. Generic or unproved native-timer errors remain125. A Rust-only arming repair now
+records typed original-deadline proof and independent authenticated-peer vetoes;
+its exact40a implementation passed11 ordinary build/link steps and12 tests,
+including pure branch/veto/reducer checks. No native arming/payload/release/EXE1
+or privileged lifecycle was executed; complete native timeout124 parity remains open.
 
 Prior failed attempts retain their original outcomes. Public evidence requires
 privacy review; raw host/account/SSH transport artifacts stay local.

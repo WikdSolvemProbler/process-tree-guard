@@ -463,6 +463,7 @@ pub(super) struct TerminalRun {
     cancellation_sample:Option<super::super::super::entry::CancellationObservation>,
     cancellation_poll:Option<PollObservation>,peer_gate:Option<(c_int,c_int)>,late_peer_cause:Option<c_int>,watchdog_early:bool,watchdog_cause_sample:Option<Probe<DecisionReceipt>>,
     arming: native_arming::ArmingReceipt,
+    arming_peer:Option<arming_failure_controller::ArmingPeerVeto>,
     payload_mask: Option<native_port::ParentMaskObservation>,
     release_failure_sample:Option<Probe<DecisionReceipt>>,
     prepared: PreparedRun,
@@ -492,6 +493,7 @@ pub(super) struct SettledParts {
     cancellation_sample:Option<super::super::super::entry::CancellationObservation>,
     cancellation_poll:Option<PollObservation>,peer_gate:Option<(c_int,c_int)>,late_peer_cause:Option<c_int>,watchdog_early:bool,watchdog_cause_sample:Option<Probe<DecisionReceipt>>,
     arming: native_arming::ArmingReceipt,
+    arming_peer:Option<arming_failure_controller::ArmingPeerVeto>,
     payload_mask: Option<native_port::ParentMaskObservation>,
     release_failure_sample:Option<Probe<DecisionReceipt>>,
     prepared: PreparedRun,
@@ -539,7 +541,7 @@ impl TerminalRun {
             Some(PayloadChild { identity, exec_report, .. }) => (Some(ChildOwner::Live(identity)), Some(exec_report)),
             None => (None, None),
         };
-        Self { cancellation:Some(cancellation),cancellation_sample:None,cancellation_poll:None,peer_gate:None,late_peer_cause:None,watchdog_early:false,watchdog_cause_sample:None, arming, payload_mask, release_failure_sample:None, prepared, origin: ExecutionOrigin::Release(release), supervisor, domain: Some(DomainOwner::Active(controls)),
+        Self { cancellation:Some(cancellation),cancellation_sample:None,cancellation_poll:None,peer_gate:None,late_peer_cause:None,watchdog_early:false,watchdog_cause_sample:None, arming, arming_peer:None, payload_mask, release_failure_sample:None, prepared, origin: ExecutionOrigin::Release(release), supervisor, domain: Some(DomainOwner::Active(controls)),
             cleanup: Some(cleanup), payload, watchdog: Some(ChildOwner::Live(watchdog)), exec,
             stop: None, latched_reasons: None, last_poll: PollObservation::default(), poll_observed: false,
             interrupted_polls: 0, last_pending: [None, None], pending_count: [0, 0],
@@ -559,6 +561,7 @@ impl TerminalRun {
                 self.peer_gate=peer;
                 let killed = controls.terminate_owned();
                 let kill_outcome = killed.outcome();
+                if let Some(veto)=self.arming_peer.as_mut(){let (previous,invalid,cause)=killed.arming_gate_observation();veto.gate(previous,invalid,cause); }
                 self.domain = Some(DomainOwner::Killed(killed));
                 self.stop = Some(StopReceipt { reasons,
                     observed_poll: self.poll_observed.then_some(self.last_poll), kill_outcome });
@@ -705,10 +708,12 @@ impl TerminalRun {
         let peer=self.cancellation.as_ref().ok_or(TerminalFault::Invariant)?;let pre_sample=peer.sample();
         let pre_cause=match self.domain.as_ref(){Some(DomainOwner::Drained(domain))=>domain.peer_cancelled(),_=>return Err(TerminalFault::Invariant)};
         self.cancellation_sample=Some(pre_sample);self.late_peer_cause=Some(pre_cause);
+        if let Some(veto)=self.arming_peer.as_mut(){veto.pre_internal(peer,pre_sample,pre_cause); }
         if pre_sample.state()==super::super::super::entry::CancellationState::Fault||pre_cause<0{self.faults.record(TerminalFault::CancellationProtocol);}
         // Domain-empty and the earlier generic gate cancellation precede this
         // explicit INTERNAL marker. Self-induced readiness is never a caller stop.
         self.watchdog_internal=Some(InternalWatchdogStop{pre_sample,pre_cause,until_ns:until,requested:true,shutdown:None,wait_poll:None,uncertain:false});
+        if let Some(veto)=self.arming_peer.as_mut(){veto.mark_internal();}
         let (result,errno)=peer.shutdown_read();self.watchdog_internal.as_mut().expect("internal intent stored").shutdown=Some(NativeCall{result,errno});
         if result!=0||errno!=0{self.faults.record(TerminalFault::WatchdogStopIncomplete);}
         loop{
@@ -894,7 +899,7 @@ impl TerminalRun {
         }
         let parts = SettledParts {
             cancellation:self.cancellation,cancellation_sample:self.cancellation_sample,cancellation_poll:self.cancellation_poll,peer_gate:self.peer_gate,late_peer_cause:self.late_peer_cause,watchdog_early:self.watchdog_early,watchdog_cause_sample:self.watchdog_cause_sample,
-            arming: self.arming, payload_mask: self.payload_mask, release_failure_sample:self.release_failure_sample, prepared: self.prepared, origin: self.origin, supervisor: self.supervisor,
+            arming: self.arming, arming_peer:self.arming_peer, payload_mask: self.payload_mask, release_failure_sample:self.release_failure_sample, prepared: self.prepared, origin: self.origin, supervisor: self.supervisor,
             payload, watchdog, exec: self.exec, stop, watchdog_kill,watchdog_internal:self.watchdog_internal, adopted: self.adopted,
             echild_index: self.echild_index.expect("checked actual ECHILD receipt"),
             last_pending: self.last_pending, pending_count: self.pending_count,
@@ -936,7 +941,8 @@ impl ReadyToRemove {
         // No future placement or clone path is called after that proof.
         match unsafe { drained.remove_after_reaping() } {
             Ok(removed) => {
-                let owner = SettledRun { parts, removed };
+                let mut owner = SettledRun { parts, removed };
+                if let Some(veto)=owner.parts.arming_peer.as_mut(){veto.finish_without_internal();}
                 if faults.is_empty(){Ok(owner)}else{Err(TerminalQuarantine::SettledFault{owner,faults})}
             }
             Err(domain) => Err(TerminalQuarantine::Removal { parts, domain, faults }),
@@ -955,6 +961,12 @@ pub(super) struct TerminalFacts<'a> {
 }
 
 impl SettledRun {
+    pub(super) fn arming_timeout_eligible(&self)->bool{
+        matches!(self.parts.origin,ExecutionOrigin::ArmingFailure{..})&&self.parts.arming.permits_timeout()
+            &&self.parts.arming_peer.as_ref().is_some_and(arming_failure_controller::ArmingPeerVeto::permits_timeout)
+            &&self.parts.stop.reasons==STOP_ARMING_FAILURE&&self.parts.stop.kill_outcome==KillOutcome::Written
+            &&self.removed.drain.kill_outcome==KillOutcome::Written&&self.parts.payload.is_none()&&self.parts.exec.is_none()
+    }
     pub(super) fn facts(&self) -> TerminalFacts<'_> {
         let (release, arming_failure) = match &self.parts.origin {
             ExecutionOrigin::Release(value) => (Some(value), None),
@@ -1000,12 +1012,15 @@ pub(super) fn settle_verified_arming_failure(
     watchdog: Option<DirectChild>,
     error: String,
     arming: native_arming::ArmingReceipt,
+    cancellation:Arc<super::super::super::entry::AuthenticatedCancellation>,
 ) -> Result<SettledRun, TerminalQuarantine> {
     // Vec::new allocates no storage. No clock, formatting, pathname validation
     // or fresh allocation occurs before the original held kill below.
     let mask_fault=arming.parent_mask_uncertain().then_some(TerminalFault::ParentSignalMask);
+    let mut arming_peer=arming_failure_controller::ArmingPeerVeto::new(cancellation,&prepared);
+    arming_peer.bind_controls(controls.cancellation.as_ref());
     let mut owner = TerminalRun {
-        cancellation:controls.cancellation.as_ref().map(Arc::clone),cancellation_sample:None,cancellation_poll:None,peer_gate:None,late_peer_cause:None,watchdog_early:false,watchdog_cause_sample:None,arming, payload_mask: None, release_failure_sample:None, prepared, origin: ExecutionOrigin::ArmingFailure { error }, supervisor,
+        cancellation:controls.cancellation.as_ref().map(Arc::clone),cancellation_sample:None,cancellation_poll:None,peer_gate:None,late_peer_cause:None,watchdog_early:false,watchdog_cause_sample:None,arming, arming_peer:Some(arming_peer), payload_mask: None, release_failure_sample:None, prepared, origin: ExecutionOrigin::ArmingFailure { error }, supervisor,
         domain: Some(DomainOwner::Active(controls)), cleanup: Some(cleanup),
         payload: None, watchdog: watchdog.map(ChildOwner::Live), exec: None,
         stop: None, latched_reasons: None, last_poll: PollObservation::default(), poll_observed: false,
@@ -1013,6 +1028,7 @@ pub(super) fn settle_verified_arming_failure(
         watchdog_kill: None,watchdog_internal:None, adopted: Vec::new(), echild_index: None, faults:FaultSet::new(mask_fault),
     };
     if let Err(fault) = owner.latch_stop(STOP_ARMING_FAILURE) { return Err(owner.fail(fault)); }
+    if let Some(veto)=owner.arming_peer.as_mut(){veto.entry();}
     TerminalRun::settle_stopped(owner)
 }
 

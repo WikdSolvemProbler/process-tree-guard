@@ -36,6 +36,7 @@ struct DomainControls {
     peer_cancel:std::cell::Cell<Option<(c_int,c_int)>>,
     gate: Option<native_port::SharedGate>,
     gate_cancel: std::cell::Cell<Option<c_int>>,
+    gate_cancel_invalid: std::cell::Cell<Option<c_int>>,
     gate_release: Option<(c_int,c_int)>,
     directory: OwnedFd,
     watchdog_kill: OwnedFd,
@@ -65,6 +66,12 @@ enum ArmFailure {
         error: String,
         arming: native_arming::ArmingReceipt,
     },
+}
+
+impl ArmFailure{
+    fn has_primary_deadline(&self)->bool{match self{
+        Self::BeforeProvision{arming,..}|Self::Provision{arming,..}|Self::VerifiedDomain{arming,..}=>arming.has_primary_deadline(),
+    }}
 }
 
 struct ChildPlan<'a> {
@@ -341,7 +348,7 @@ pub(crate) use cgroup_authority::service_scope::PrivateRuntimeDirectory;
 
 #[cfg(test)]pub(crate) fn gate_first_cause_regression(){native_port::gate_first_cause_regression()}
 
-#[cfg(test)]pub(crate) fn watchdog_fault_regression(){terminal_controller::watchdog_fault_regression();native_port::watchdog_mapping_regression()}
+#[cfg(test)]pub(crate) fn watchdog_fault_regression(){terminal_controller::watchdog_fault_regression();native_port::watchdog_mapping_regression();native_arming::deadline_refusal_regression();arming_failure_controller::peer_veto_regression()}
 
 pub(crate) fn capture_calling_umask()->Probe<u16>{cgroup_authority::service_scope::capture_calling_umask()}
 

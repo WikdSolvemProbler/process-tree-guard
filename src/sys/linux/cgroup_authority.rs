@@ -412,6 +412,7 @@ pub(super) fn provision(scope:&service_scope::VerifiedServiceScope) -> std::resu
             peer_cancel:std::cell::Cell::new(None),
             gate: None,
             gate_cancel: std::cell::Cell::new(None),
+            gate_cancel_invalid: std::cell::Cell::new(None),
             gate_release: None,
             directory: handles.directory,
             watchdog_kill: handles.watchdog_kill,

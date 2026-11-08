@@ -414,6 +414,7 @@ impl DomainControls {
 }
 
 impl KilledDomain {
+    pub(in super::super) fn arming_gate_observation(&self)->(Option<c_int>,Option<c_int>,c_int){(self.controls.gate_cancel.get(),self.controls.gate_cancel_invalid.get(),self.controls.peer_cancelled())}
     pub(in super::super) fn outcome(&self) -> KillOutcome { self.kill_outcome }
 
     pub(in super::super) fn drain(
