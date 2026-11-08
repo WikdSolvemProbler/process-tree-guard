@@ -23,7 +23,8 @@ function Assert-Arm64Pe($Path) {
 
 # The released guard owns the Job deadline while we test the current build.
 $asset = 'process-tree-guard-0.5.0-aarch64-pc-windows-msvc.zip'
-$url = "https://github.com/WikdSolvemProbler/process-tree-guard/releases/download/v0.5.0/$asset"
+# The immutable asset API avoids the release-download gateway; the digest below still pins its bytes.
+$url = 'https://api.github.com/repos/WikdSolvemProbler/process-tree-guard/releases/assets/711818509'
 $sha256 = 'eca8fb7ad0abb2d9c72b99446a12011b6e7130288d1612da55a868694edc098a'
 $scratch = Join-Path $env:RUNNER_TEMP ("ptg-arm64-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $scratch | Out-Null
@@ -32,6 +33,8 @@ $http = [Net.Http.HttpClient]::new()
 try {
     $http.Timeout = [TimeSpan]::FromSeconds(45)
     $http.MaxResponseContentBufferSize = 8MB
+    $http.DefaultRequestHeaders.UserAgent.ParseAdd('process-tree-guard-ci')
+    $http.DefaultRequestHeaders.Accept.ParseAdd('application/octet-stream')
     $response = $http.GetAsync($url).GetAwaiter().GetResult()
     try {
         $null = $response.EnsureSuccessStatusCode()
