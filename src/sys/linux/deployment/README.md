@@ -1,7 +1,7 @@
 # Staged Linux product entry
 
 These are product source entry points, not installed services or a test framework.
-The normal cross-platform selector remains fail-closed for Linux.
+The normal cross-platform selector remains fail-closed for Linux. Exact d16 notify source passed11 ordinary build/link steps and12 tests. Added phase/timer-readback checks are pure; actual READY/timer/privileged lifecycle remains unqualified.
 
 - `../root_main.rs` builds the protected root-service executable installed as
   `/usr/libexec/process-tree-guard-root`. Its only accepted role is `--service`.
@@ -17,7 +17,7 @@ The normal cross-platform selector remains fail-closed for Linux.
   Acknowledgment discloses a separate service context; it grants no authority.
 - `process-tree-guard.socket` and `process-tree-guard@.service` are exact checked
   runtime configuration sources. They have no installation hooks. PID1 owns the
-  activation listener; each accepted connection creates one finite Type=exec
+  activation listener; each accepted connection creates one finite Type=notify
   service. The supervisor/watchdog subgroup and payload leaves remain inside the
   same held managed unit.
 
@@ -26,6 +26,7 @@ caller identity, validates real procfs/nsfs and protected installation authority
 queries authenticated PID1 effective configuration, arms its sticky self timer,
 and binds the original cutoff before it creates any watchdog or payload child.
 It creates one private root listener for the same live requester and full request.
+The fixed15s bootstrap timer stays armed during the checked STARTING→RUNNING handoff. Only after the original sticky cleanup timer is confirmed may the held protected `/run/systemd/notify` channel send nonblocking `READY=1`; same-unit RUNNING readback precedes private admission or child creation. Type=notify/NotifyAccess=main, startup20s, stop5s, static RuntimeMax86430s and recursive SIGKILL are checked. The static runtime is only a ceiling: exact original deadline+5s kernel timer ownership survives through result writes and `_exit`. No loaded-unit property setter, extension message or timer reset is used.
 No root-manager bus descriptor is transferred to the ordinary client. The client
 uses its own public read-authorized manager connection/reference.
 
@@ -63,7 +64,7 @@ Every synchronous post-bind refusal attempts exact private socket unlink and ret
 
 The prior847 checkpoint returned incomplete owning125 quarantine without a post-presentation cancellation/join. Cancellation v2 below implements the missing path; unconfirmed outcomes still retain quarantine and runtime qualification remains required.
 
-Cancellation v2 is now present in source: the same accepted private connection is directly watched by the native watchdog and terminal controller, with a first-cancellation cause and bounded client shutdown/join. The prior quarantine gap remains historical; current behavior compiles and its ordinary tests pass; native lifecycle qualification remains required. Only a valid native frame plus exact service/domain/manager join can complete a failed call; otherwise the125 outcome retains quarantine.
+Cancellation v2 is now present in source: the same accepted private connection is directly watched by the native watchdog and terminal controller, with a first-cancellation cause and bounded client shutdown/join. The prior quarantine gap remains historical; the predecessor behavior compiled and passed its ordinary tests; this successor passed ordinary compilation/tests but native lifecycle remains pending; native lifecycle qualification remains required. Only a valid native frame plus exact service/domain/manager join can complete a failed call; otherwise the125 outcome retains quarantine.
 
 The previous d6 source passed11 ordinary build/link steps and10 tests, including read-only caller-thread umask capture and three parent-only gate mappings. Child umask/watchdog/terminal/root-client lifecycles remain unexecuted. Tested78 adds deny-default administrative delegation and PTGEX6 acknowledgment; its11 build/link steps and12 ordinary tests passed. Parser/default-refusal/IPC checks did not open a real /etc policy or exercise privileged enforcement. Nothing installs or activates a socket/service.
 
@@ -72,7 +73,7 @@ The fixed policy `/etc/process-tree-guard/delegation.policy` is at most4096 byte
 `uid N\n` lines, canonical decimal1..4294967294. Empty grants deny; comments, CR,
 unknown text, duplicates and wildcards refuse. The service retains the protected
 root-owned nofollow directory/file chain and exact bytes. The actual authenticated
-requester UID must be granted before RuntimeMax extension, private listener or
+requester UID must be granted before READY, private listener or
 provisioning; the same held snapshot is revalidated before provision, payload
 creation and permit. Snapshot changes refuse admission/release, not an atomic
 promise to revoke an already executing run. Both requests bind byte7=1 in the

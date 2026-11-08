@@ -16,7 +16,7 @@ struct CheckedEntryOrigin {
     authority:manager::CheckedUnit,
     unit_components:Vec<CString>,
     original:Option<invocation::Metadata>,
-    cleanup:Option<Rc<entry::ExitTimer>>,
+    cleanup:Option<entry::OriginalDeadlineProof>,
     delegation:Option<DelegationGrant>,
 }
 fn checked_entry_origin()->Probe<CheckedEntryOrigin>{
@@ -128,13 +128,13 @@ impl VerifiedServiceScope {
     }
 
     pub(crate) fn completion_capabilities(&self)->Probe<(CString,String,[u8;16],OwnedFd,OwnedFd)>{
-        let origin=&self.anchor.origin;
+        let origin=&self.anchor.origin;origin.authority.require_running()?;
         let pidfd=super::super::super::super::pidfd_for(std::process::id() as c_int).map_err(|e|format!("self pidfd: {e:?}"))?;
         let events=fd_from_call(unsafe{fcntl(self.anchor.unit_events.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;
         Ok((origin.authority.name().to_owned(),origin.authority.group().to_owned(),origin.authority.invocation(),pidfd,events))
     }
     // Called only after actual kernel peer/packet/requester validation, before
-    // RuntimeMax extension, private listener creation or any payload provision.
+    // READY, private listener creation or any payload provision.
     pub(in super::super::super::super) fn bind_delegation(&mut self,uid:u32,metadata:&invocation::Metadata)->Probe<()>{
         check(metadata.separate_service,"explicit separate-service acknowledgment missing")?;
         let anchor=Arc::get_mut(&mut self.anchor).ok_or("service authority shared before delegation binding")?;
@@ -152,18 +152,24 @@ impl VerifiedServiceScope {
             let until=original.metadata().deadline_ns.checked_add(entry::GRACE).ok_or("cleanup cutoff overflow")?;cleanup.confirmed_until(until)?;
             let anchor=Arc::get_mut(&mut self.anchor).ok_or("service authority was shared before run binding")?;
             check(anchor.origin.original.is_none()&&anchor.origin.cleanup.is_none(),"service original binding reused")?;
-            let grant=anchor.origin.delegation.as_ref().ok_or("delegation must precede runtime extension")?;
+            let grant=anchor.origin.delegation.as_ref().ok_or("delegation must precede kernel deadline binding")?;
             check(original.metadata().separate_service,"original invocation lacks separate-service acknowledgment")?;grant.revalidate(grant.uid)?;
-            anchor.origin.authority.bind_runtime(until)?;
-            cleanup.confirmed_until(until)?;
-            anchor.origin.original=Some(original.metadata().clone());anchor.origin.cleanup=Some(cleanup);
+            let proof=entry::OriginalDeadlineProof::bind(original,cleanup)?;
+            anchor.origin.original=Some(original.metadata().clone());anchor.origin.cleanup=Some(proof);
             anchor.revalidate()?;Ok(())
         })();match result{Ok(())=>Ok(self),Err(error)=>Err((self,error))}
     }
+    pub(in super::super::super::super) fn enter_running(&mut self,notification:&mut entry::PendingNotify,original:&invocation::VerifiedInvocation,until:u64)->Probe<()>{
+        let anchor=Arc::get_mut(&mut self.anchor).ok_or("service authority shared before READY handoff")?;let origin=&mut anchor.origin;
+        let grant=origin.delegation.as_ref().ok_or("delegation missing before READY")?;grant.revalidate(grant.uid)?;
+        check(origin.original.as_ref()==Some(original.metadata()),"READY original invocation differs")?;
+        let proof=origin.cleanup.as_ref().ok_or("READY sticky original deadline missing")?;
+        origin.authority.enter_running(notification,original,proof,until)?;grant.revalidate(grant.uid)?;anchor.revalidate()
+    }
     pub(in super::super) fn authorize_original(&self,metadata:&invocation::Metadata,uid:u32)->Probe<()>{
-        self.require_delegation(uid)?;check(metadata.separate_service,"separate-service acknowledgment missing at native admission")?;
+        self.anchor.origin.authority.require_running()?;self.require_delegation(uid)?;check(metadata.separate_service,"separate-service acknowledgment missing at native admission")?;
         let origin=&self.anchor.origin;check(origin.original.as_ref()==Some(metadata),"original invocation differs from established root entry")?;
-        origin.cleanup.as_ref().ok_or("entry has no sticky cleanup authority")?.confirmed_until(metadata.deadline_ns.checked_add(entry::GRACE).ok_or("cleanup cutoff overflow")?)
+        origin.cleanup.as_ref().ok_or("entry has no sticky cleanup authority")?.revalidate(metadata)
     }
     pub(in super::super) fn retain_anchor(&self) -> Arc<TrustedUnitAnchor> {Arc::clone(&self.anchor)}
     pub(crate) fn revalidate(&self) -> Probe<()> {self.anchor.revalidate()}
@@ -212,6 +218,7 @@ impl TrustedUnitAnchor {
         require_name_matches(parent.as_raw_fd(),c"cgroup.procs",fd)?;Ok(())
     }
     pub(super) fn duplicate_leaf_parent(self:&Arc<Self>) -> Probe<InstallationRoot> {
+        self.origin.authority.require_running()?;let metadata=self.origin.original.as_ref().ok_or("original invocation missing before provision")?;self.origin.cleanup.as_ref().ok_or("sticky deadline missing before provision")?.revalidate(metadata)?;
         let grant=self.origin.delegation.as_ref().ok_or("delegation missing before payload provision")?;grant.revalidate(grant.uid)?;
         self.revalidate()?;
         let source=self.unit_directory()?;
@@ -388,15 +395,6 @@ impl EntryKernelAuthority{
   namespace_identities.push(Identity::from(&descriptor_stat(&exe)?));namespaces.push(exe);
   let result=Self{protected,proc,proc_identity,own_proc:own,one_proc:one,maps,namespaces,namespace_identities,manager};result.revalidate()?;Ok(result)
  }
- pub(crate) fn bind_runtime_overrides(&mut self,paths:&[String],unit:&CStr)->Probe<()>{
-  check(paths.len()<=1,"manager created unexpected additional run overrides")?;
-  let unit=unit.to_str().map_err(|_|"unit override UTF8")?;check(!unit.contains('/')&&unit.len()<=255,"unit override component refused")?;
-  let prefix=format!("/run/systemd/system.control/{unit}.d/");
-  for path in paths{let name=path.strip_prefix(&prefix).ok_or("runtime override is outside exact own-unit control directory")?;
-   check(!name.is_empty()&&name.len()<=255&&!name.contains('/')&&name.ends_with(".conf")&&name.bytes().all(|b|b.is_ascii_alphanumeric()||b"._-".contains(&b)),"runtime override filename refused")?;
-   let file=open_protected(path,&mut self.protected)?;let _raw=bounded_fd_bytes(&self.protected[file].fd,65536)?;
-  }Ok(())
- }
  pub(crate) fn revalidate(&self)->Probe<()>{
   require_fs(&self.proc,PROC_MAGIC)?;require_proc_self(&self.proc)?;
   let own_name=CString::new(std::process::id().to_string()).expect("decimalPID");require_name_matches(self.proc.as_raw_fd(),&own_name,&self.own_proc)?;require_name_matches(self.proc.as_raw_fd(),c"1",&self.one_proc)?;
@@ -537,6 +535,26 @@ impl PublicBusEndpoint{
   require_name_matches(self.root.as_raw_fd(),c"run",&self.run)?;require_name_matches(self.run.as_raw_fd(),c"dbus",&self.parent)?;require_name_matches(self.parent.as_raw_fd(),c"system_bus_socket",&self.socket)?;
   let raw=descriptor_stat(&self.socket)?;check(raw.uid==0&&raw.gid==0&&raw.mode&S_IFMT==0o140000&&Identity::from(&raw)==self.identities[3],"public bus socket identity changed")?;
   if let(Some(fd),Some(peer))=(&self.peer,self.peer_credentials){super::super::super::super::validate_pidfd(fd,peer.pid,&mut NativeReceipt::default()).map_err(|e|format!("system bus daemon lost: {e:?}"))?;}Ok(())
+ }
+}
+
+// A pending fixed PID1 notification endpoint is not entry/runtime authority.
+pub(crate) struct PendingNotifyAuthority{root:OwnedFd,run:OwnedFd,parent:OwnedFd,node:OwnedFd,identities:[Identity;4]}
+impl PendingNotifyAuthority{
+ pub(crate) fn capture()->Probe<Self>{
+  let root=directory(AT_FDCWD,c"/")?;let run=directory(root.as_raw_fd(),c"run")?;let parent=directory(run.as_raw_fd(),c"systemd")?;
+  let node=open_relative(parent.as_raw_fd(),c"notify",O_PATH,0o140000)?;
+  let mut identities=[Identity::from(&descriptor_stat(&root)?);4];
+  for(index,fd)in [&root,&run,&parent].into_iter().enumerate(){identities[index]=require_root_mode(&descriptor_stat(fd)?,S_IFDIR)?;}
+  let raw=descriptor_stat(&node)?;check(raw.uid==0&&raw.gid==0&&raw.mode&S_IFMT==0o140000,"PID1 notify node is not a root-owned socket")?;
+  identities[3]=Identity::from(&raw);check(identities[3].same_mount(identities[2]),"notify node mount differs from protected parent")?;
+  let value=Self{root,run,parent,node,identities};value.revalidate()?;Ok(value)
+ }
+ pub(crate) fn revalidate(&self)->Probe<()>{
+  let actual=directory(AT_FDCWD,c"/")?;check(require_root_mode(&descriptor_stat(&actual)?,S_IFDIR)?==self.identities[0],"notify root view changed")?;
+  for(index,fd)in [&self.root,&self.run,&self.parent].into_iter().enumerate(){check(require_root_mode(&descriptor_stat(fd)?,S_IFDIR)?==self.identities[index],"notify protected parent changed")?;}
+  require_name_matches(self.root.as_raw_fd(),c"run",&self.run)?;require_name_matches(self.run.as_raw_fd(),c"systemd",&self.parent)?;require_name_matches(self.parent.as_raw_fd(),c"notify",&self.node)?;
+  let raw=descriptor_stat(&self.node)?;check(raw.uid==0&&raw.gid==0&&raw.mode&S_IFMT==0o140000&&Identity::from(&raw)==self.identities[3],"notify node identity changed")?;Ok(())
  }
 }
 

@@ -344,7 +344,7 @@ pub(crate) fn verify_runtime_parent(fds:&[OwnedFd])->Probe<()>{cgroup_authority:
 
 pub(crate) use cgroup_authority::service_scope::PublicBusEndpoint;
 
-pub(crate) use cgroup_authority::service_scope::PrivateRuntimeDirectory;
+pub(crate) use cgroup_authority::service_scope::{PrivateRuntimeDirectory,PendingNotifyAuthority};
 
 #[cfg(test)]pub(crate) fn gate_first_cause_regression(){native_port::gate_first_cause_regression()}
 

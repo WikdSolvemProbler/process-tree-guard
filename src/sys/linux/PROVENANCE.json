@@ -1,5 +1,5 @@
 {
-  "status": "Ordinary build01511/11 and unit01012/12 passed for exact40a implementation; native guard lifecycle remains unexecuted/unqualified",
+  "status": "Exact d16 notify source passed ordinary build01611/11 and unit01112/12; actual privileged notify/payload/timer lifecycle remains unexecuted/unqualified",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -250,46 +250,45 @@
     }
   },
   "current_validation": {
-    "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
-    "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
-    "scope": "Ordinary compilation/linking and12 existing tests only; no native guard lifecycle or activation.",
+    "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
+    "scope": "Ordinary native compilation/linking and twelve existing tests only; pure notify phase/readback additions do not execute notification or entry timers.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
     "compile_link_failed": 0,
-    "build_receipt_sha256": "a4a6b998b4e6cdc26862847e42da592c662dc93fc453b62b6fca6e7e9c81552d",
+    "build_receipt_sha256": "68d67aafe73df6d5475de440e12db464ff3c155e956f73fbccfcd005ba779b2b",
     "tests": 12,
     "passed": 12,
     "failed": 0,
     "ignored": 0,
     "timed_out": false,
-    "unit_receipt_sha256": "eeaf17a7d8cc3ee23be243e1b167ea1b1aae92f04e8ec0fd2c865f08fc8d5901",
-    "harness_sha256": "c14bf7d437ce129bb23a9633b1eaf926785c2ec8f1a43e0116039f7343fe9b5b",
-    "harness_bytes": 9856352,
-    "pure_arming_proof_and_peer_veto_tables_passed": true,
-    "production_gate_reducer_valid_invalid_valid_passed": true,
+    "unit_receipt_sha256": "1650f243016c61e462eebba8ce0648c2cfc205681a0222f8dc0461f016ae28d6",
+    "harness_sha256": "98b50a7c66444363a9cfcb77fcc300b5fa773641ea49ad649bea2f3f3340eb36",
+    "harness_bytes": 9865656,
+    "notify_phase_pure_regression_passed": true,
+    "original_timer_raw_readback_pure_rejections_passed": true,
     "native_ipc_refusals": 17,
     "native_gate_mappings_destroyed": 3,
-    "artifact_files_preserved_and_verified": 90,
-    "owned_scratch_roots_removed": 2,
-    "original_scopes_absent": true,
-    "cleanup_receipt_sha256": "647b1afea479b0e56f7832cd34efff61c3f197e021a5d3b34bba92e52277ebcf",
+    "cleanup_status": "Actual cleanup016 terminal0;90files verified locally/remotely, two exact scratch roots removed and both original scopes absent.",
     "linked_entry_ELFs": [
       {
         "name": "process-tree-guard-root",
-        "bytes": 6311216,
-        "sha256": "75d6f5c5ed27033c89b10476905db37a6e4b2433eb879f4e78c1357cc8cab03c"
+        "bytes": 6384248,
+        "sha256": "f8b392223d82cf951231d0996052c2767bd3bd19bc417bf1a2d44656887b3dd5"
       },
       {
         "name": "process-tree-guard-client",
-        "bytes": 5561504,
-        "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
+        "bytes": 5569144,
+        "sha256": "736d1b02dec3d2c53eb59b5713f4780c57226b4a9dfbf0e5c71bec7eeb72d6a0"
       }
     ],
-    "native_arming_payload_release_EXE1_lifecycle_executed": false,
-    "privileged_lifecycle_executed": false,
+    "privileged_notify_payload_timer_lifecycle_executed": false,
     "public_backend_enabled": false,
-    "raw_receipts": "Local only; no raw archive published.",
-    "limits": "Pure branch/validator/reducer checks plus prior scalar C ABI/gate/IPC/parser effects. Native timer124 behavior, full payload/release/EXE1 parity, privileged lifecycle, caller-context preservation, kernel floor, public wiring and performance remain OPEN."
+    "limits": "No real READY notification, POSIX timer create/expire, root entry/manager lifecycle, payload/credentials, original-timer124 qualification, transparent caller context, kernel floor, public wiring or performance run. Private predecessor015 remains failed125 at unsupported setter; no rescoring.",
+    "raw_receipts": "Private only; no raw machine/account/connection data or archive published.",
+    "cleanup_receipt_sha256": "962e1453654877aedbcd59e9a97be56046dbc43d9a758cd2db72e5f2fef3c7eb",
+    "artifact_files_preserved_and_verified": 90,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true
   },
   "public_raw_evidence": {
     "status": "withdrawn-from-current-public-tree",
@@ -327,7 +326,7 @@
     "baseline_commit": "cf1e8f4",
     "baseline_preserved": "target/codex-security/linux-product-integration-history-001/6d9a-before-real-entry-011",
     "source_only": true,
-    "compiled": false,
+    "compiled": true,
     "executed": false,
     "main_sources": [
       "root_main.rs",
@@ -342,15 +341,14 @@
       "full initial UID/GID mappings plus actual nsfs ownership/type and PID1 relationships",
       "protected installed helper inode and exact fixed unit source bytes",
       "authenticated root PID1 private-bus effective service/socket configuration",
-      "fixed per-invocation cgroup, finite Type=exec start/runtime/stop and recursive SIGKILL policy",
+      "fixed per-invocation cgroup, finite Type=notify start/runtime/stop and recursive SIGKILL policy",
       "sticky original cutoff+cleanup self timer bound before children; no early deletion"
     ],
     "ordinary_client": "original requester plus manual direct parent/all auto ancestors; unchanged absolute cutoff; existing NNP1 library precondition; standalone CLI self-only NNP/timer",
     "result": "framed settled outcome + original held service pidfd terminal + original unit empty/strict typed retirement + retained manager InvocationID/ExecMainPID/code/status/Result",
     "retirement": "Linux5.14/6.8 source inference: originally populated exact held unit/event, raw original event read ENODEV then same held protected parent and exact original basename strict ENOENT; replacement/other errno fails; no nlink shortcut; not child reaping/CSS-free proof",
-    "wire_version": "PTGEX4 request; PTGBOOT1 bootstrap; PTGOUTC1 exact bounded result with native timer receipts",
+    "wire_version": "PTGEX6 request; PTGBOOT1 bootstrap; PTGOUTC1 exact bounded result with unchanged native timer receipts",
     "remaining": [
-      "current entry compile/link and two exact source reviews",
       "temporary independently finite socket/service/deployment custody and exact cleanup",
       "native privileged full-owner/clock/payload/watchdog/bootstrap/terminal failure qualification",
       "complete typed native timer-refusal124 parity",
@@ -372,46 +370,45 @@
     "https://raw.githubusercontent.com/systemd/systemd/v255/src/core/dbus-execute.c"
   ],
   "entry_source_validation": {
-    "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
-    "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
-    "scope": "Ordinary compilation/linking and12 existing tests only; no native guard lifecycle or activation.",
+    "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
+    "scope": "Ordinary native compilation/linking and twelve existing tests only; pure notify phase/readback additions do not execute notification or entry timers.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
     "compile_link_failed": 0,
-    "build_receipt_sha256": "a4a6b998b4e6cdc26862847e42da592c662dc93fc453b62b6fca6e7e9c81552d",
+    "build_receipt_sha256": "68d67aafe73df6d5475de440e12db464ff3c155e956f73fbccfcd005ba779b2b",
     "tests": 12,
     "passed": 12,
     "failed": 0,
     "ignored": 0,
     "timed_out": false,
-    "unit_receipt_sha256": "eeaf17a7d8cc3ee23be243e1b167ea1b1aae92f04e8ec0fd2c865f08fc8d5901",
-    "harness_sha256": "c14bf7d437ce129bb23a9633b1eaf926785c2ec8f1a43e0116039f7343fe9b5b",
-    "harness_bytes": 9856352,
-    "pure_arming_proof_and_peer_veto_tables_passed": true,
-    "production_gate_reducer_valid_invalid_valid_passed": true,
+    "unit_receipt_sha256": "1650f243016c61e462eebba8ce0648c2cfc205681a0222f8dc0461f016ae28d6",
+    "harness_sha256": "98b50a7c66444363a9cfcb77fcc300b5fa773641ea49ad649bea2f3f3340eb36",
+    "harness_bytes": 9865656,
+    "notify_phase_pure_regression_passed": true,
+    "original_timer_raw_readback_pure_rejections_passed": true,
     "native_ipc_refusals": 17,
     "native_gate_mappings_destroyed": 3,
-    "artifact_files_preserved_and_verified": 90,
-    "owned_scratch_roots_removed": 2,
-    "original_scopes_absent": true,
-    "cleanup_receipt_sha256": "647b1afea479b0e56f7832cd34efff61c3f197e021a5d3b34bba92e52277ebcf",
+    "cleanup_status": "Actual cleanup016 terminal0;90files verified locally/remotely, two exact scratch roots removed and both original scopes absent.",
     "linked_entry_ELFs": [
       {
         "name": "process-tree-guard-root",
-        "bytes": 6311216,
-        "sha256": "75d6f5c5ed27033c89b10476905db37a6e4b2433eb879f4e78c1357cc8cab03c"
+        "bytes": 6384248,
+        "sha256": "f8b392223d82cf951231d0996052c2767bd3bd19bc417bf1a2d44656887b3dd5"
       },
       {
         "name": "process-tree-guard-client",
-        "bytes": 5561504,
-        "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
+        "bytes": 5569144,
+        "sha256": "736d1b02dec3d2c53eb59b5713f4780c57226b4a9dfbf0e5c71bec7eeb72d6a0"
       }
     ],
-    "native_arming_payload_release_EXE1_lifecycle_executed": false,
-    "privileged_lifecycle_executed": false,
+    "privileged_notify_payload_timer_lifecycle_executed": false,
     "public_backend_enabled": false,
-    "raw_receipts": "Local only; no raw archive published.",
-    "limits": "Pure branch/validator/reducer checks plus prior scalar C ABI/gate/IPC/parser effects. Native timer124 behavior, full payload/release/EXE1 parity, privileged lifecycle, caller-context preservation, kernel floor, public wiring and performance remain OPEN."
+    "limits": "No real READY notification, POSIX timer create/expire, root entry/manager lifecycle, payload/credentials, original-timer124 qualification, transparent caller context, kernel floor, public wiring or performance run. Private predecessor015 remains failed125 at unsupported setter; no rescoring.",
+    "raw_receipts": "Private only; no raw machine/account/connection data or archive published.",
+    "cleanup_receipt_sha256": "962e1453654877aedbcd59e9a97be56046dbc43d9a758cd2db72e5f2fef3c7eb",
+    "artifact_files_preserved_and_verified": 90,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true
   },
   "caller_cancellation": {
     "design_sha256": "81748885f8249642c4083ad9f5c7740d9d36c94c19cb5cf422b6f9deb0e59434",
@@ -670,9 +667,9 @@
     "authority": "held protected UID0 non-group/other-writable nofollow /->etc->process-tree-guard->regular policy file, actual type/mount/name/inode identities plus exact bounded stable bytes",
     "uid_binding": "actual kernel-authenticated first.peer.uid after original requester verification; no claimed request UID",
     "custody": "DelegationGrant including failed/denied capture retained on CheckedEntryOrigin within shared TrustedUnitAnchor and every scope/port/leaf/refusal/terminal outcome",
-    "admission_order": "after first kernel identity validation and checked service scope; BEFORE bind_original RuntimeMax extension/private listener/provision",
+    "admission_order": "after first kernel identity validation and checked STARTING service scope; BEFORE original sticky deadline binding/READY/private listener/provision",
     "revalidation": [
-      "before RuntimeMax extension",
+      "before original sticky deadline binding and READY",
       "before NativePort authorization",
       "before exact unit leaf provision",
       "before payload clone",
@@ -1042,5 +1039,107 @@
     },
     "publication_snapshot": "target/codex-security/linux-product-integration-history-001/native-arming-primary-publication-045",
     "negative_history": "Earlier build014 preparation failures and denied evaluations remain preserved locally; no failed/denied attempt is reclassified as passed."
+  },
+  "notify_predecessor_validation": {
+    "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
+    "baseline_commit": "254700bbb631e5c2e01105d985fd80d4767ec9b5",
+    "scope": "Ordinary compilation/linking and12 existing tests only; no native guard lifecycle or activation.",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "build_receipt_sha256": "a4a6b998b4e6cdc26862847e42da592c662dc93fc453b62b6fca6e7e9c81552d",
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "timed_out": false,
+    "unit_receipt_sha256": "eeaf17a7d8cc3ee23be243e1b167ea1b1aae92f04e8ec0fd2c865f08fc8d5901",
+    "harness_sha256": "c14bf7d437ce129bb23a9633b1eaf926785c2ec8f1a43e0116039f7343fe9b5b",
+    "harness_bytes": 9856352,
+    "pure_arming_proof_and_peer_veto_tables_passed": true,
+    "production_gate_reducer_valid_invalid_valid_passed": true,
+    "native_ipc_refusals": 17,
+    "native_gate_mappings_destroyed": 3,
+    "artifact_files_preserved_and_verified": 90,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "cleanup_receipt_sha256": "647b1afea479b0e56f7832cd34efff61c3f197e021a5d3b34bba92e52277ebcf",
+    "linked_entry_ELFs": [
+      {
+        "name": "process-tree-guard-root",
+        "bytes": 6311216,
+        "sha256": "75d6f5c5ed27033c89b10476905db37a6e4b2433eb879f4e78c1357cc8cab03c"
+      },
+      {
+        "name": "process-tree-guard-client",
+        "bytes": 5561504,
+        "sha256": "67fd257a5b54ab329ee840e234dcc4bdc8d86ba674a421f087412aa25d57b180"
+      }
+    ],
+    "native_arming_payload_release_EXE1_lifecycle_executed": false,
+    "privileged_lifecycle_executed": false,
+    "public_backend_enabled": false,
+    "raw_receipts": "Local only; no raw archive published.",
+    "limits": "Pure branch/validator/reducer checks plus prior scalar C ABI/gate/IPC/parser effects. Native timer124 behavior, full payload/release/EXE1 parity, privileged lifecycle, caller-context preservation, kernel floor, public wiring and performance remain OPEN."
+  },
+  "notify_handoff": {
+    "design_sha256": "b6a6cfeab2f4a1f8fc64630dd8c738a42b2143becf2c43524de134be596b1358",
+    "status": "Exact d16 notify source passed ordinary build01611/11 and unit01112/12; actual privileged notify/payload/timer lifecycle remains unexecuted/unqualified",
+    "bootstrap_seconds": 15,
+    "startup_and_job_seconds": 20,
+    "static_runtime_ceiling_seconds": 86430,
+    "original_authority": "Retained non-Copy/non-Clone proof minted from actual sticky CLOCK_BOOTTIME/SIGKILL timer at original absolute deadline+5s; no fresh relative cutoff, setter or timer rearm.",
+    "transition": "Protected pending expected filesystem notification endpoint before environment erase; authenticated sameunit STARTING+grant+original sticky proof; fixed nonblocking READY=1 only; atomic Unit state snapshot and sameunit RUNNING before private/native admission.",
+    "policy": "Type=notify/NotifyAccess=main/ExitType=main/RemainAfterExit=no, fixed finite start/runtime/stop/jobs and recursive SIGKILL; exact protected template/no dropins/hooks.",
+    "client": "UnitReference.live checks same running notify policy; existing final native timer receipts and exact original service/domain/manager join unchanged.",
+    "failure015": "Actual installed client returned125 before payload: own static-unit RuntimeMax setter libsystemd error-30. Upstreamv255 setter restriction is source-consistent, not exact Ubuntu vendor attestation or filesystem-cause proof.014 EACCES remains separate failed history.",
+    "tests": "Same12 names passed; added checks are pure phase/static-ceiling/raw-readback assertions only, with no actual READY notification, POSIX timer or privileged lifecycle calls.",
+    "C_H_wire_selector_Windows_unchanged": true,
+    "public_backend_enabled": false,
+    "baseline_commit": "8f7fd60a245f5cbdd6b33789aade61a35fec2cb1",
+    "implementation_authorization_sha256": "12fdfabfe6fe65e883140432f33e659893ff82135bbefb720f212c1d92184610",
+    "READY_attempts": "Exactly one nonblocking send; any negative/short result refuses125 and retains raw result/errno.",
+    "phase_assignment": "Running enum is assigned only after final successful policy/state/original/sticky/channel checks; no fallible work after assignment within transition.",
+    "ordinary_validation": {
+      "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
+      "scope": "Ordinary native compilation/linking and twelve existing tests only; pure notify phase/readback additions do not execute notification or entry timers.",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "build_receipt_sha256": "68d67aafe73df6d5475de440e12db464ff3c155e956f73fbccfcd005ba779b2b",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "timed_out": false,
+      "unit_receipt_sha256": "1650f243016c61e462eebba8ce0648c2cfc205681a0222f8dc0461f016ae28d6",
+      "harness_sha256": "98b50a7c66444363a9cfcb77fcc300b5fa773641ea49ad649bea2f3f3340eb36",
+      "harness_bytes": 9865656,
+      "notify_phase_pure_regression_passed": true,
+      "original_timer_raw_readback_pure_rejections_passed": true,
+      "native_ipc_refusals": 17,
+      "native_gate_mappings_destroyed": 3,
+      "cleanup_status": "Actual cleanup016 terminal0;90files verified locally/remotely, two exact scratch roots removed and both original scopes absent.",
+      "linked_entry_ELFs": [
+        {
+          "name": "process-tree-guard-root",
+          "bytes": 6384248,
+          "sha256": "f8b392223d82cf951231d0996052c2767bd3bd19bc417bf1a2d44656887b3dd5"
+        },
+        {
+          "name": "process-tree-guard-client",
+          "bytes": 5569144,
+          "sha256": "736d1b02dec3d2c53eb59b5713f4780c57226b4a9dfbf0e5c71bec7eeb72d6a0"
+        }
+      ],
+      "privileged_notify_payload_timer_lifecycle_executed": false,
+      "public_backend_enabled": false,
+      "limits": "No real READY notification, POSIX timer create/expire, root entry/manager lifecycle, payload/credentials, original-timer124 qualification, transparent caller context, kernel floor, public wiring or performance run. Private predecessor015 remains failed125 at unsupported setter; no rescoring.",
+      "raw_receipts": "Private only; no raw machine/account/connection data or archive published.",
+      "cleanup_receipt_sha256": "962e1453654877aedbcd59e9a97be56046dbc43d9a758cd2db72e5f2fef3c7eb",
+      "artifact_files_preserved_and_verified": 90,
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true
+    }
   }
 }

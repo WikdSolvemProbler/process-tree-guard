@@ -24,6 +24,7 @@ unsafe extern "C"{
  fn ptg_entry_timer_delete(owner:*mut c_void,out:*mut TimerObservation);
  pub(super) fn _exit(code:c_int)->!;
  fn write(fd:c_int,bytes:*const c_void,count:usize)->isize;
+ fn sendto(fd:c_int,bytes:*const c_void,count:usize,flags:c_int,address:*const c_void,length:u32)->isize;
  fn shutdown(fd:c_int,how:c_int)->c_int;
  fn socket(domain:c_int,kind:c_int,protocol:c_int)->c_int;
  fn bind(fd:c_int,address:*const c_void,length:u32)->c_int;
@@ -55,6 +56,7 @@ impl ExitTimer{
   Ok(owner)
  }
  pub(super) fn confirmed_until(&self,until:u64)->Probe<()>{
+  if self.observations.borrow().first_failure.is_some(){return Err("entry cleanup timer has prior failure".into());}
   if !self.sticky||until!=self.until{return Err("entry cleanup timer identity differs".into());}
   let pointer=self.pointer.ok_or("entry cleanup timer has no native owner")?;let mut raw=TimerObservation::default();
   {let mut journal=self.observations.borrow_mut();journal.checks=journal.checks.checked_add(1).ok_or("entry timer observation counter exhausted")?;}
@@ -74,6 +76,38 @@ impl ExitTimer{
  }
 }
 // No Drop deletes/disarms either timer. C sticky ownership also rejects deletion.
+// Private, non-Copy original-deadline authority. Only a real sticky timer can mint it.
+pub(super) struct OriginalDeadlineProof{timer:Rc<ExitTimer>,metadata:invocation::Metadata,until:u64}
+impl OriginalDeadlineProof{
+ pub(super) fn bind(original:&invocation::VerifiedInvocation,timer:Rc<ExitTimer>)->Probe<Self>{
+  original.check_live().map_err(|e|format!("{e:?}"))?;original.check_time().map_err(|e|format!("{e:?}"))?;
+  let until=original.metadata().deadline_ns.checked_add(GRACE).ok_or("cleanup cutoff overflow")?;timer.confirmed_until(until)?;
+  Ok(Self{timer,metadata:original.metadata().clone(),until})
+ }
+ pub(super) fn revalidate(&self,metadata:&invocation::Metadata)->Probe<()>{if metadata!=&self.metadata||metadata.deadline_ns.checked_add(GRACE)!=Some(self.until){return Err("original kernel deadline binding differs".into());}self.timer.confirmed_until(self.until)}
+ pub(super) fn until(&self)->u64{self.until}
+}
+// A captured environment value and pending channel alone never authorize READY or children.
+pub(super) struct PendingNotify{authority:supervisor::native_activation::PendingNotifyAuthority,channel:Option<OwnedFd>,sent:bool,attempts:u32,last_result:Option<isize>,last_errno:Option<c_int>}
+impl PendingNotify{
+ fn capture()->Probe<Self>{
+  if std::env::var_os("NOTIFY_SOCKET").as_deref()!=Some(std::ffi::OsStr::new("/run/systemd/notify")){return Err("unexpected PID1 notification endpoint".into());}
+  let authority=supervisor::native_activation::PendingNotifyAuthority::capture()?;
+  let channel=own_fd(unsafe{socket(AF_UNIX,2|SOCK_NONBLOCK|SOCK_CLOEXEC,0)})?;
+  Ok(Self{authority,channel:Some(channel),sent:false,attempts:0,last_result:None,last_errno:None})
+ }
+ pub(super) fn ready(&mut self,until:u64)->Probe<()>{
+  if self.sent||self.attempts!=0||self.channel.is_none(){return Err("notification channel already attempted/consumed".into());}
+  if supervisor::boottime_ns()?>=until{return Err("original notification bound expired".into());}self.authority.revalidate()?;
+  let(target,length)=address("/run/systemd/notify")?;let fd=self.channel.as_ref().ok_or("notification channel missing")?.as_raw_fd();self.attempts=1;
+  let result=unsafe{sendto(fd,b"READY=1".as_ptr().cast(),7,MSG_DONTWAIT|MSG_NOSIGNAL,(&target as *const UnixAddress).cast(),length)};
+  self.last_result=Some(result);self.last_errno=if result<0{io::Error::last_os_error().raw_os_error()}else{None};
+  if result!=7{return Err(format!("PID1 READY refused result={result} errno={:?}",self.last_errno));}
+  self.sent=true;self.authority.revalidate()?;Ok(())
+ }
+ pub(super) fn consumed(&mut self)->Probe<()>{if !self.sent{return Err("PID1 READY was not sent".into());}self.authority.revalidate()?;drop(self.channel.take());Ok(())}
+}
+
 #[repr(C)]struct UnixAddress{family:u16,path:[u8;108]}
 fn address(path:&str)->Probe<(UnixAddress,u32)>{if !path.starts_with('/')||path.len()>=108||path.as_bytes().contains(&0){return Err("invalid bounded Unix address".into());}let mut value=UnixAddress{family:AF_UNIX as u16,path:[0;108]};value.path[..path.len()].copy_from_slice(path.as_bytes());Ok((value,(2+path.len()+1) as u32))}
 fn own_fd(value:c_int)->Probe<OwnedFd>{let fd=os_result(value as isize).map_err(|e|format!("{e:?}"))? as RawFd;Ok(unsafe{OwnedFd::from_raw_fd(fd)})}
@@ -276,6 +310,7 @@ pub(crate) fn root_service_main()->!{
  let now=match supervisor::boottime_ns(){Ok(n)=>n,Err(_)=>unsafe{_exit(125)}};
  let until=match now.checked_add(BOOTSTRAP){Some(n)=>n,None=>unsafe{_exit(125)}};
  let mut bootstrap=match ExitTimer::create(until,false){Ok(owner)=>owner,Err(failure)=>{let _retained=failure.owner;unsafe{_exit(125)}}};
+ let mut notification=match PendingNotify::capture(){Ok(owner)=>owner,Err(error)=>refuse_activation(activation.as_raw_fd(),&error,&bootstrap,None)};
  if let Err(error)=erase_service_environment(){refuse_activation(activation.as_raw_fd(),&error,&bootstrap,None)}
  let mut cleanup:Option<Rc<ExitTimer>>=None;
  let mut admission=NativeReceipt::default();
@@ -290,6 +325,7 @@ pub(crate) fn root_service_main()->!{
  let mut scope=match supervisor::native_activation::capture_service_scope(){Ok(scope)=>scope,Err(error)=>refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))};
  if let Err(error)=scope.bind_delegation(first.peer.uid,first.invocation.metadata()){refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}
  scope=match scope.bind_original(&first.invocation,Rc::clone(&cleanup)){Ok(scope)=>scope,Err((held,error))=>{let _retained=held;refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}};
+ if let Err(error)=scope.enter_running(&mut notification,&first.invocation,until){refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}
  let (unit,group,invocation,service_pidfd,events)=match scope.completion_capabilities(){Ok(info)=>info,Err(error)=>refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))};
  let listener=match PrivateListener::create(unit.to_str().unwrap_or("")){Ok(value)=>value,Err(failure)=>{let retained=failure.owner;let _attempted_path=failure.path;let primary=match retained.as_ref(){Some(owner)=>owner.cleanup_error(&failure.error),None=>failure.error};let _quarantine=retained;refuse_activation(activation.as_raw_fd(),&primary,&bootstrap,Some(&cleanup))}};
  let hello=Hello{pid:std::process::id(),invocation,cutoff:cleanup.until,unit:unit.to_string_lossy().into_owned(),group,socket:listener.path.clone(),early:0};
@@ -318,4 +354,11 @@ pub(crate) fn root_service_main()->!{
  // No exec, destructor flush, timer disarm or unbounded diagnostic tail follows.
  // Native owners/namespace/unit/timers stay live until the kernel closes them.
  unsafe{_exit(code)}
+}
+
+#[cfg(test)]pub(super) fn original_deadline_readback_regression(){
+ let until=1000;let mut raw=TimerObservation{schema:1,stage:4,result:0,call_errno:0,created:1,armed:1,get_result:0,get_errno:0,deadline_ns:until,remaining_ns:100,interval_ns:0,before_ns:899,observed_ns:901,..TimerObservation::default()};
+ assert!(timer_readback(&raw,until));assert!(!timer_readback(&raw,until+1));
+ raw.interval_ns=1;assert!(!timer_readback(&raw,until));raw.interval_ns=0;raw.remaining_ns=0;assert!(!timer_readback(&raw,until));raw.remaining_ns=100;raw.before_ns=902;assert!(!timer_readback(&raw,until));raw.before_ns=899;raw.get_errno=5;assert!(!timer_readback(&raw,until));
+ eprintln!("notify_original_timer_raw_readback_rejections_verified");
 }
