@@ -32,6 +32,7 @@ _Static_assert(sizeof(struct pollfd)==8,"native pollfd ABI");
 _Static_assert(sizeof(struct ptg_payload_spec)==152,"payload spec ABI");
 _Static_assert(offsetof(struct ptg_payload_spec,gate)==144,"payload gate offset");
 _Static_assert(offsetof(struct ptg_payload_spec,owners)==16,"payload original owner-set offset");
+_Static_assert(offsetof(struct ptg_payload_spec,umask)==92,"explicit caller umask offset");
 _Static_assert(sizeof(struct ptg_payload_spawn)==128,"payload spawn ABI");
 _Static_assert(sizeof(struct ptg_payload_ready)==96,"payload readiness ABI");
 _Static_assert(sizeof(struct ptg_payload_release)==80,"payload release ABI");
@@ -41,6 +42,8 @@ _Static_assert(SIGCHLD==17 && SIGKILL==9 && SIGSTOP==19 && SIG_SETMASK==2,"raw s
 #define PTG_BLOCKED_MASK (UINT64_MAX & ~(UINT64_C(1)<<(SIGKILL-1)) & ~(UINT64_C(1)<<(SIGSTOP-1)))
 #define PTG_GATE_MAGIC UINT32_C(0x50475447)
 struct ptg_payload_gate {uint32_t magic; _Atomic unsigned int state;};
+_Static_assert(sizeof(struct ptg_payload_gate)==8
+    && offsetof(struct ptg_payload_gate,state)==4,"opaque shared gate layout");
 struct ready_message {uint32_t schema,token;uint64_t mask;};
 _Static_assert(sizeof(struct ready_message)==16,"ready wire ABI");
 extern uint64_t ptg_arm_kernel_signal_abi(uint32_t word);
@@ -63,6 +66,8 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 13:return sizeof(struct ptg_owner_watch);
     case 14:return PTG_OWNER_WATCH_MAX;
     case 15:return offsetof(struct ptg_payload_spec,owners);
+    case 16:return offsetof(struct ptg_payload_spec,umask);
+    case 17:return UINT32_C(0777);
     default:return UINT64_MAX;
     }
 }
@@ -81,18 +86,47 @@ int32_t ptg_payload_gate_destroy(struct ptg_payload_gate *g,int32_t *error) {
     /* No state change first: failed unmap leaves the exact owner usable. */
     const int r=munmap(g,sizeof(*g));if(error)*error=r<0?errno:0;return r;
 }
-int32_t ptg_payload_gate_state(const struct ptg_payload_gate *g) {
-    return gate_valid(g)?(int32_t)atomic_load_explicit(&g->state,memory_order_acquire):-1;
+static int32_t gate_logical(unsigned int state) {
+    switch(state) {
+    case PTG_PAYLOAD_HELD:case PTG_PAYLOAD_RELEASED:case PTG_PAYLOAD_CANCELLED:
+        return (int32_t)state;
+    case PTG_PAYLOAD_CANCELLED|PTG_PAYLOAD_PEER_CANCEL_FLAG:
+        return PTG_PAYLOAD_CANCELLED;
+    default:return -1;
+    }
 }
-int32_t ptg_payload_gate_cancel(struct ptg_payload_gate *g) {
-    return gate_valid(g)?(int32_t)atomic_exchange_explicit(&g->state,PTG_PAYLOAD_CANCELLED,memory_order_acq_rel):-1;
+int32_t ptg_payload_gate_state(const struct ptg_payload_gate *g) {
+    return gate_valid(g)?gate_logical(atomic_load_explicit(&g->state,memory_order_acquire)):-1;
+}
+static int32_t gate_cancel(struct ptg_payload_gate *g,unsigned int peer) {
+    if(!gate_valid(g))return -1;
+    unsigned int observed=atomic_load_explicit(&g->state,memory_order_acquire);
+    for(;;) {
+        const int32_t previous=gate_logical(observed);
+        if(previous<0 || previous==PTG_PAYLOAD_CANCELLED)return previous;
+        const unsigned int desired=PTG_PAYLOAD_CANCELLED
+            | (peer?PTG_PAYLOAD_PEER_CANCEL_FLAG:0U);
+        if(atomic_compare_exchange_strong_explicit(&g->state,&observed,desired,
+                memory_order_acq_rel,memory_order_acquire))return previous;
+        /* The only valid transitions are HELD->RELEASED->CANCELLED (or direct
+         * cancellation). A failed strong CAS therefore cannot spin through
+         * repeated cancellation writes or relabel a prior cause. */
+    }
+}
+int32_t ptg_payload_gate_cancel(struct ptg_payload_gate *g) {return gate_cancel(g,0);}
+int32_t ptg_payload_gate_cancel_peer(struct ptg_payload_gate *g) {return gate_cancel(g,1);}
+int32_t ptg_payload_gate_peer_cancelled(const struct ptg_payload_gate *g) {
+    if(!gate_valid(g))return -1;
+    const unsigned int value=atomic_load_explicit(&g->state,memory_order_acquire);
+    if(gate_logical(value)<0)return -1;
+    return value==(PTG_PAYLOAD_CANCELLED|PTG_PAYLOAD_PEER_CANCEL_FLAG)?1:0;
 }
 int32_t ptg_payload_gate_commit(struct ptg_payload_gate *g) {
     if(!gate_valid(g))return -1;
     unsigned int expected=PTG_PAYLOAD_HELD;
     if(atomic_compare_exchange_strong_explicit(&g->state,&expected,PTG_PAYLOAD_RELEASED,
             memory_order_acq_rel,memory_order_acquire))return PTG_PAYLOAD_HELD;
-    return (int32_t)expected;
+    return gate_logical(expected);
 }
 static int kernel_abi_ok(void) {
     return ptg_arm_kernel_signal_abi(0)==8 && ptg_arm_kernel_signal_abi(1)==64
@@ -161,7 +195,7 @@ static int nonblocking_permit(int fd) {
 }
 static int watch_spec_valid(const struct ptg_payload_spec *s) {
     if(!s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
-       || !gate_valid(s->gate) || !s->deadline_ns)return EINVAL;
+       || !gate_valid(s->gate) || !s->deadline_ns || (s->umask&~UINT32_C(0777)))return EINVAL;
     const int32_t other[4]={s->kill_fd,s->timer_fd,s->supervisor_fd,s->watchdog_fd};
     return ptg_owner_watch_disjoint(&s->owners,other,4)?0:EINVAL;
 }
@@ -287,6 +321,14 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     if(syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,EPERM,125);
     /* Caller credentials, not root, must be able to enter the trusted CWD. */
     if(syscall(SYS_fchdir,s->cwd_fd)!=0 || syscall(SYS_close,s->cwd_fd)!=0)child_fail(s->exec_writer,errno,125);
+    /* clone3 did not share fs_struct. Change only this already-contained child,
+     * never the caller or root service, and confirm by setting the same mask. */
+    const long previous_mask=syscall(SYS_umask,s->umask);
+    if(previous_mask<0)child_fail(s->exec_writer,errno,125);
+    if((uint64_t)previous_mask>UINT32_C(0777))child_fail(s->exec_writer,EPROTO,125);
+    const long confirmed_mask=syscall(SYS_umask,s->umask);
+    if(confirmed_mask<0)child_fail(s->exec_writer,errno,125);
+    if((uint64_t)confirmed_mask!=s->umask)child_fail(s->exec_writer,EPROTO,125);
     if(raw_mask(NULL,&mask)!=0 || mask!=PTG_BLOCKED_MASK)child_fail(s->exec_writer,EPROTO,125);
     if(ptg_payload_gate_state(s->gate)!=PTG_PAYLOAD_HELD)child_fail(s->exec_writer,ECANCELED,125);
     const struct ready_message ready={.schema=PTG_PAYLOAD_SCHEMA,.token='R',.mask=mask};

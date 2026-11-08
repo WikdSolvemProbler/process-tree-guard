@@ -16,12 +16,12 @@ const _:()={assert!(size_of::<OwnerWatch>()==16);assert!(std::mem::offset_of!(Ow
 pub(super) struct ProcessIdentity {pub(super) pid:u32,pub(super) ppid:u32,pub(super) start_ticks:u64}
 #[derive(Clone,Debug,PartialEq)]
 pub(super) struct Metadata {
-    pub(super) mode:OwnerMode,pub(super) seconds:f64,pub(super) captured_ns:u64,pub(super) deadline_ns:u64,
+    pub(super) mode:OwnerMode,pub(super) umask:u16,pub(super) seconds:f64,pub(super) captured_ns:u64,pub(super) deadline_ns:u64,
     pub(super) identities:Vec<ProcessIdentity>,
 }
 #[derive(Debug,PartialEq,Eq)]
 pub(crate) enum InvocationError {
-    InvalidDuration,InvalidTime,Expired,OwnerLost,TooDeep,InvalidChain,IdentityChanged,Namespace,Kernel(String),
+    InvalidDuration,InvalidTime,InvalidUmask,Expired,OwnerLost,TooDeep,InvalidChain,IdentityChanged,Namespace,Kernel(String),
 }
 impl InvocationError {
     pub(crate) fn exit_code(&self)->i32 {if *self==Self::Expired {124}else{125}}
@@ -73,6 +73,7 @@ fn live_set(fds:&[OwnedFd])->CaptureResult<()> {
 }
 impl Metadata {
     pub(super) fn validate(&self)->CaptureResult<()> {
+        if self.umask>0o777{return Err(InvocationError::InvalidUmask);}
         let nanos=requested_ns(self.seconds)?;
         if self.captured_ns==0 || self.captured_ns.checked_add(nanos)!=Some(self.deadline_ns){return Err(InvocationError::InvalidTime);}
         if !(2..=MAX_WATCHERS).contains(&self.identities.len()) {return Err(InvocationError::TooDeep);}
@@ -104,6 +105,7 @@ impl OriginalInvocation {
         let duration=requested_ns(seconds)?;
         let captured_ns=clock()?;
         let deadline_ns=captured_ns.checked_add(duration).ok_or(InvocationError::InvalidTime)?;
+        let umask=supervisor::native_activation::capture_calling_umask().map_err(InvocationError::Kernel)?;
         let requester=std::process::id();
         let captured_namespaces=namespaces(requester)?;
         let first=kernel(pidfd_for(requester as c_int))?;
@@ -120,7 +122,7 @@ impl OriginalInvocation {
             if mode==OwnerMode::Manual || next==1 {break;}
             next=identity.ppid;
         }
-        let metadata=Metadata{mode,seconds,captured_ns,deadline_ns,identities};
+        let metadata=Metadata{mode,umask,seconds,captured_ns,deadline_ns,identities};
         metadata.validate()?;
         let result=Self{metadata,pidfds,namespaces:captured_namespaces};
         result.revalidate()?;

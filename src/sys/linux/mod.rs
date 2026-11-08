@@ -487,14 +487,15 @@ pub(crate) fn run_library(command:&[std::ffi::OsString],seconds:f64,mode:OwnerMo
 pub(crate) fn run_cli(arguments:Vec<std::ffi::OsString>)->ClientOutcome{client::run_cli(arguments)}
 // Concrete aliases/wrapper preserve the internal API in both actual binaries;
 // a type alias grants no construction authority and avoids unused reexports.
+pub(crate) type AuthenticatedCancellation=entry::AuthenticatedCancellation;
 pub(crate) type VerifiedServiceScope=supervisor::VerifiedServiceScope;
 pub(crate) type RunOutcome=supervisor::RunOutcome;
 /// # Safety
 /// Preserve the checked scope and dedicated-supervisor preconditions of the
 /// consuming supervisor entry. No raw/unverified scope can enter this wrapper.
-pub(crate) unsafe fn run_in_service(scope:VerifiedServiceScope,connection:OwnedFd,
+pub(crate) unsafe fn run_in_service(scope:VerifiedServiceScope,connection:OwnedFd,cancellation:AuthenticatedCancellation,
  authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool)->RunOutcome{
- unsafe{supervisor::run_in_service(scope,connection,authorizes)}
+ unsafe{supervisor::run_in_service(scope,connection,cancellation,authorizes)}
 }
 
 /// Unqualified privileged startup fails closed; there is no global cgroup
@@ -503,9 +504,9 @@ pub(crate) unsafe fn run_in_service(scope:VerifiedServiceScope,connection:OwnedF
 /// Complete public caller-parent/ancestor and original-time entry invariants
 /// remain required before a Linux backend can be enabled.
 pub(crate) unsafe fn run_received(
-    connection:OwnedFd,
+    connection:OwnedFd,cancellation:AuthenticatedCancellation,
     policy:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
-)->RunOutcome {unsafe{supervisor::run_received(connection,policy)}}
+)->RunOutcome {unsafe{supervisor::run_received(connection,cancellation,policy)}}
 
 /// Send the calling ordinary process's request to its connected privileged
 /// one-shot peer. Borrowed IO/CWD are passed as actual kernel references; no
@@ -532,6 +533,12 @@ pub(crate) fn send_request(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn watchdog_fault125_is_not_hidden_by_later_cancellation(){super::supervisor::native_activation::watchdog_fault_regression();}
+
+    #[test]
+    fn native_gate_first_cancellation_cause_is_irreversible(){super::supervisor::native_activation::gate_first_cause_regression();}
+
     use super::*;
     use std::io::{Read,Seek,SeekFrom,Write};
     use std::os::unix::fs::{DirBuilderExt,MetadataExt,OpenOptionsExt};
@@ -654,6 +661,8 @@ mod tests {
         future.deadline_ns=future.captured_ns+60_250_000_000;
         let future=request::encode(&future,&[b"/never-executed"],&[]).unwrap();
         refusal("future_original_start",&future,&rights,Refusal::Invocation(invocation::InvocationError::InvalidTime));
+        let mut invalid_umask=frame.clone();invalid_umask[38..40].copy_from_slice(&0o1000u16.to_le_bytes());
+        refusal("invalid_caller_umask",&invalid_umask,&rights,Refusal::InvalidRequest(request::Refusal::Umask));
         let mut malformed=frame.clone();malformed[5]=b'2';
         refusal("wrong_version",&malformed,&rights,Refusal::InvalidRequest(request::Refusal::Version));
         let mut malformed=frame.clone();malformed.push(0);
@@ -665,7 +674,7 @@ mod tests {
         assert_eq!(count_fds(),before_eof);drop(rx);
         drop((readonly,regular_path,original,input,output,error,cwd));
         assert_eq!(count_fds(),beginning,"native test left owned descriptors");
-        println!("native_wire=PTGEX4 manual_rights=6 max_rights=253 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
+        println!("native_wire=PTGEX5 manual_rights=6 max_rights=253 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
     }
 }
 

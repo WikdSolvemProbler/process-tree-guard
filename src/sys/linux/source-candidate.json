@@ -1,48 +1,59 @@
 {
   "schema": 1,
-  "status": "Actual checked entry/client source rebuilt/linked all11steps and existing8 ordinarytests PASS; nativeprivileged/cancellation/publicactivation unqualified and selector disabled",
+  "status": "ORDINARY SOURCE QUALIFIED: tested d6 build11PASS/tests10PASS; metadata-only successor, no privileged activation or public enablement",
   "root": "src/sys/linux",
-  "baseline_commit": "dfd6e8a968f462f737d43fb809f9b05ebe887bb0",
-  "baseline_candidate_sha256": "a6ce83a293db3ca86e85fcae585aee5cf19e4e784ff26bbf9edd9c12a6cab93f",
-  "history": "target/codex-security/linux-product-integration-history-001/entry-source-freeze-018",
-  "entry_signature": "root_main.rs -> linux::root_service_main(); client_main.rs -> linux::run_cli; library linux::run_library(command,seconds,OwnerMode) requires existing NNP1",
+  "baseline_commit": "d81331e2332362531e2c9c3cf1f2cc4cab3e0b2c",
+  "baseline_candidate_sha256": "e7a3244c623af8d50d00dec502eab4f27cabebf461923cea7ebfb1eb72adfb64",
+  "history": "target/codex-security/linux-product-integration-history-001/d813-before-caller-cancel-023",
+  "entry_signature": "unsafe fn(VerifiedServiceScope,OwnedFd,AuthenticatedCancellation,Policy)->RunOutcome; opaque AuthenticatedCancellation constructor only actual accepted finalprivate entry; realroot/clientmains unchanged",
   "original_client": "OriginalInvocation::capture(OwnerMode::{Manual,Auto},seconds:f64) before manager/helpers; private fields/no raw verified constructor",
-  "wire": "PTGEX4: 40Bheader + 16B ordered identity records; 2..249watchers +4IO/CWD rights <=253; aligned1088B ancillary; packet/native bytes cap131072",
+  "wire": "PTGEX5:40B header, immutable callerthreadumask LE16@38; originalowner/time/IO/CWD/env capabilities unchanged; oldPTGEX4refused",
   "deadline": "captured BOOTTIME + exact requested fractional duration preserved; receiver-owned absolute private timer; raw authenticated client time is a claim not privileged attestation",
   "native_abi": {
     "owner_watch_bytes": 16,
     "min": 2,
     "max": 249,
-    "arming_schema": 3,
-    "arming_words": 19,
-    "payload_schema": 2,
+    "arming_schema": 4,
+    "arming_words": 21,
+    "payload_schema": 3,
     "payload_spec_bytes": 152,
     "payload_owners_offset": 16,
     "payload_gate_offset": 144,
-    "payload_words": 16,
-    "terminal_poll_max": 254,
+    "payload_words": 18,
+    "terminal_poll_max": 255,
     "entry_timer_schema": 1,
     "entry_timer_observation_bytes": 96,
-    "entry_timer_words": 9
+    "entry_timer_words": 9,
+    "arming_spawn_bytes": 128,
+    "arming_spawn_cancel_offset": 52,
+    "arming_ready_bytes": 112,
+    "arming_ready_slots": 7,
+    "arming_ready_before_offset": 80,
+    "arming_ready_child_mask_offset": 104,
+    "cancellation_poll_mask": 8193,
+    "first_peer_flag": 256,
+    "gate_layout_bytes": 8,
+    "payload_umask_offset": 92,
+    "payload_umask_max": 511
   },
   "tests": {
     "existing_names": 8,
-    "bodies": "ADAPTED in place, prior numeric/framing/native assertions retained and full-owner/time boundaries added",
+    "bodies": "ADAPTEDinplace forPTGEX5; prior numeric/owner/time/IO/codec assertions preserved; readonlythreadumaskcapture andnativeinvalidmaskrefusal added",
+    "added_names": [
+      "native_gate_first_cancellation_cause_is_irreversible",
+      "watchdog_fault125_is_not_hidden_by_later_cancellation"
+    ],
+    "total": 10,
     "new_framework": false,
-    "runtime_effects": "7pure codec/numeric plus1ordinary own IPC/file test with actual manual/auto ancestry proc/pidfd reads; no fork/exec/signals/NNP/settings/cgroup/root",
-    "control_truncation": "same recvmsg/adopt/flags code;96B aligned testprefix; production1088B",
-    "status": "PASS exact847:8existing serial tests,0failed/ignored, unchangedbodies; no new testframework or privilegedentry execution"
+    "status": "PASSED same10 existing ordinary tests on d6:10PASS/0FAIL/0ignored; previous d0 actual9PASS/1FAIL retained",
+    "effects": "prior ordinaryIPC/proc/pidfd/3privatefiles +readonlyownthreadprocfs/gettid/statx/fstatfs/readlink +3nativeanonymousgate mappings; purefault/classificationmatrix; NOchild/signal/NNP/setting/cgroup"
   },
   "origin_mint": "IMPLEMENTED in checked positive source path: protected installed sources/executable + kernel proc/nsfs origin + authenticated PID1 effective unit facts; runtime qualification PENDING",
   "unqualified": [
-    "exact full cancellation/native-runtime implementation review beforeactivation",
-    "temporary independently finite deployment/activation and exact cleanup",
-    "native privileged whole-owner/payload/watchdog/controller lifecycle/failure tests",
-    "complete typed original-native-timer124 classification",
-    "supported5.14 compatibility and native runtime",
-    "Cargo packaging/public selector wiring and performance",
-    "native bounded cancellation/join for post-presentation library error; current finite quarantine is not public parity",
-    "actual per-service RuntimeDirectory cleanup/manager terminal transition qualification"
+    "privileged root/client entry and payload/watchdog/terminal lifecycle, cancellation/natural-stop/child-umask/cleanup qualification",
+    "administrative delegation policy and transparent caller confinement/resource-context inheritance",
+    "actual native timer124 cause and supported Linux5.14 kernel floor",
+    "Cargo/public selector wiring, enablement and comparative performance"
   ],
   "selector_sha256": "55d0d8d6caa5d224b554cd6ace3b103142196ba3ef5bfa5cec0fc330d6c58d8a",
   "external": [
@@ -61,24 +72,14 @@
       "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
     },
     {
-      "path": "PROVENANCE.json",
-      "bytes": 19906,
-      "sha256": "89102b97d0acdb1052c32d2690f67e9873c36b28d446d57d3363284b192cc478"
-    },
-    {
-      "path": "README.md",
-      "bytes": 43390,
-      "sha256": "e5886143c0cf28e5fe4a8618cd424da7fe642d0d47469dbf3d197d0529b5ce12"
-    },
-    {
       "path": "arming_failure_controller.rs",
       "bytes": 8109,
       "sha256": "7e163e3960f97f33abe28bb1e241b90c781ff006de1773d3800ee769d073794a"
     },
     {
       "path": "cgroup_authority.rs",
-      "bytes": 16089,
-      "sha256": "c8de18721b9722e1b4630283afb19f0f8e0ece662f8b45bb4c39145586bff90e"
+      "bytes": 16172,
+      "sha256": "d5dc71ad3e9c9ca3c1375e7e0d1d6055269bf4eb667cea3d73a334c17881a356"
     },
     {
       "path": "child_reaper.rs",
@@ -86,19 +87,14 @@
       "sha256": "cd71240834ecb1a9da099b6a917648b76e4b1f125ff4578df35e80546c820788"
     },
     {
-      "path": "client.rs",
-      "bytes": 13910,
-      "sha256": "5579bc1e0a18b764c839d466a5ba6d2d2653bdad8c60cc5575908cdf59465ca1"
-    },
-    {
       "path": "client_main.rs",
       "bytes": 879,
       "sha256": "4dbe19a147bb37a8abc8aa08bc34b6b2fdfd89777afd6dc1388242186fb4c9ac"
     },
     {
-      "path": "deployment/README.md",
-      "bytes": 4198,
-      "sha256": "65917a9efbd1bc41cf53077a928eb6df75ab509d12ab7a6fcbc834e3b52538f6"
+      "path": "client.rs",
+      "bytes": 17983,
+      "sha256": "8519db7b4bd8cc3ef696144f512a9c7b00a30b92f9bf4d787bb7179937e0f63d"
     },
     {
       "path": "deployment/process-tree-guard.socket",
@@ -111,9 +107,9 @@
       "sha256": "31d4a3bf22c937dee7ec289a14ade3f50cafab27d0a7bd4563e18d1a6acb330b"
     },
     {
-      "path": "entry.rs",
-      "bytes": 31757,
-      "sha256": "4893452ecddeb24709c38b28fb8ef77a3eacdb72ad710c46b968cee15c7c004f"
+      "path": "deployment/README.md",
+      "bytes": 5029,
+      "sha256": "21dc7b5b230462580f0cc7208c20db65cd72ec0615d65c7c81a607d1bd244906"
     },
     {
       "path": "entry_timer.c",
@@ -126,9 +122,14 @@
       "sha256": "3d0bc3f2f16ad3c67db4ea92f48813583da9740d16804b14f1bef751dcc912d8"
     },
     {
+      "path": "entry.rs",
+      "bytes": 35149,
+      "sha256": "06f3516d801c658782b3ccdc829947482094dbae55c8281700a51941fcf1440d"
+    },
+    {
       "path": "invocation.rs",
-      "bytes": 9933,
-      "sha256": "d5ee4c060a040018b8af41c87aa499802cddd029dbaf265c6693e73dad83cbb8"
+      "bytes": 10153,
+      "sha256": "1763c3ac8143cbf36f4645c9814509c6f6fd9119b53fd42b31dcf23e6aa96919"
     },
     {
       "path": "kernel_signal_abi.c",
@@ -137,38 +138,38 @@
     },
     {
       "path": "manager.rs",
-      "bytes": 24583,
-      "sha256": "f0c45df763b22b16832fc23e583304a0b849423a445c16327b0cbb3fbd6632ed"
+      "bytes": 25136,
+      "sha256": "70cdf1669b66b82712037399a1452f625ee799c3ca6c8614bd474d1c9f9e553d"
     },
     {
       "path": "mod.rs",
-      "bytes": 30923,
-      "sha256": "07bb2db3fb8e204f349a17aaad4afec357f665685988685798fedf6e4cf4c953"
+      "bytes": 31614,
+      "sha256": "3f83ebd19e9c8218bdd9e3588815bf9d4c53daa480f50aaeb769cd2bb0a14d44"
     },
     {
       "path": "native_activation.rs",
-      "bytes": 13921,
-      "sha256": "db0de8ed9a2f42a76fa8454a51247f2513a080c081aed4ee8b8f9ac78a77475b"
+      "bytes": 14838,
+      "sha256": "75e207ebecca62054f3fc6d2c159641097115362aa0c85b017091c36feeb4c6a"
     },
     {
       "path": "native_arming.c",
-      "bytes": 13448,
-      "sha256": "8b494dfb77aede4ba3e1f8d9c42bf91e63ec666e21c01d37f5012e9254e2d03a"
+      "bytes": 16616,
+      "sha256": "571e995c229f417cada20bd6335cfbb4ae8511f5e0d5f1298a96f77a093ff040"
     },
     {
       "path": "native_arming.h",
-      "bytes": 1676,
-      "sha256": "eda6fde4b5514133d502a4166b39302d902d2c5c78c8cac805903449b8ebdef1"
+      "bytes": 1732,
+      "sha256": "3a85dc0368d0aa296f659cafee73c9aeabf40ab2c7944277a4d76ebd8eea144d"
     },
     {
       "path": "native_arming.rs",
-      "bytes": 10171,
-      "sha256": "b90f94c2817553419533f3c46004c5fc07df8e149d920ed3c3e6c1e2879ff8b3"
+      "bytes": 11024,
+      "sha256": "72f4798f7c037b89a65b75b53b88f481c58dad3423def052a9b9bd27437415ba"
     },
     {
       "path": "native_port.rs",
-      "bytes": 23478,
-      "sha256": "f3549d1bcff3a993174ed9b54efcdbb11f934ed54aa15207e6e021bbffc865ed"
+      "bytes": 27271,
+      "sha256": "af121920fc4dfb69e4d14572e199bc1e1ba8d15c179f962d94d4f48fed6c8e97"
     },
     {
       "path": "owner_poll.h",
@@ -182,18 +183,28 @@
     },
     {
       "path": "payload_bootstrap.c",
-      "bytes": 26602,
-      "sha256": "f8446c9028fbe85c7fcb343cf5c034033185467bdde8d4c5f9f3f1403eba001d"
+      "bytes": 28977,
+      "sha256": "529a8f0c41b8f14a5e713c496da36c80d2427143d673bdebd5442013f862010e"
     },
     {
       "path": "payload_bootstrap.h",
-      "bytes": 6391,
-      "sha256": "724ab8b77544cca873c43f171feb494b5ec30afe2b03cb9f98c43dff30b713f2"
+      "bytes": 6915,
+      "sha256": "6cf64e6fa6c472f4f16de23a5ba1c226a1405e232cb65191a9e79447608c2ce9"
+    },
+    {
+      "path": "PROVENANCE.json",
+      "bytes": 32520,
+      "sha256": "20d1639c029c23fa1e8e883cd7ff0baf1b1208a7f4a8912a143bd8cf4f3c6770"
+    },
+    {
+      "path": "README.md",
+      "bytes": 42698,
+      "sha256": "652456ef5be8b760467a23af4ca7d59eb20d2d800baeb31c586042aeb734aa9b"
     },
     {
       "path": "request.rs",
-      "bytes": 16193,
-      "sha256": "87548f2491a8bc374e3d05868f9bb7a6266de042a4b5e9a1c48d5f226a2eb9d2"
+      "bytes": 16813,
+      "sha256": "a4ae0556ddfcf55140d73958bfafc3b1a57e050d0855f01435e8bb60bd67b40c"
     },
     {
       "path": "root_main.rs",
@@ -202,33 +213,33 @@
     },
     {
       "path": "service_scope.rs",
-      "bytes": 38369,
-      "sha256": "9a5f8442d838318a25560d8643c0c495639b4c737094e04b54a908218c149815"
+      "bytes": 41259,
+      "sha256": "3b7a7cf37cc7f97ddda08da2af8a7231ab931ce4554554534d74bf44ff3be018"
     },
     {
       "path": "settlement.rs",
-      "bytes": 21954,
-      "sha256": "ffcb610c6375161f48215b1118b3d5ffca8a290bfd33809a0acfba70aacc7778"
+      "bytes": 22043,
+      "sha256": "1a654a5cd3826d2f90e244a279808d12791ea7911dcdd15db1b0a8eff1e72f31"
     },
     {
       "path": "supervisor.rs",
-      "bytes": 13005,
-      "sha256": "a9226eda9d8df5a920b936ac7c7121ece7017a7f3af230aff053f9e4ce8c567e"
+      "bytes": 13648,
+      "sha256": "280d4dc3bd0088168971a843f3041e7c60b166b1501f38edc414001184776212"
     },
     {
       "path": "terminal_bridge.c",
-      "bytes": 4347,
-      "sha256": "b93c722e2f278a0cdb3b7ed76c0a1f23b2dabbcb84dc7338917b9e949d06d8ac"
+      "bytes": 4429,
+      "sha256": "939004aecead5a3f95e7da31d8c01b21b30fa3444ed70c70a6a11f0167ca8102"
     },
     {
       "path": "terminal_bridge.h",
-      "bytes": 1068,
-      "sha256": "b6a5f3c4b3a1e22b568c74ddb34c3c0b9b25845d9b4623a0cc0c787fc366ab67"
+      "bytes": 1111,
+      "sha256": "7ed6f4c0bae97aa4a89eda4069dab5fe40ccff45759b5cbd41e48e5fd8d96747"
     },
     {
       "path": "terminal_controller.rs",
-      "bytes": 43759,
-      "sha256": "0ed071df179f0b6ffc31741b931a2ac3dca7daf0362e4220a7959fee39530800"
+      "bytes": 53833,
+      "sha256": "32e9ce5c08e69ccf8fad2b0d27c5c7ea2d46b29c5809efb90631018a51adc391"
     },
     {
       "path": "waitid_bridge.c",
@@ -255,20 +266,21 @@
   ],
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
-  "implementation_build_candidate_sha256": "84762a4132e57a670d99a096899c7509de40140840b31d9caf87ebd90744594c",
+  "implementation_build_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
   "publication_change": "New source-only checked entry; earlier qualified timer/ordinary tests retain exact historical scope. No public raw archive is produced; privacy review required.",
   "entry_timer_component": {
     "source_qualified": true,
     "native_component_tests_passed": 3,
-    "full_entry_link_qualified": false,
+    "full_entry_link_qualified": true,
     "public_backend_enabled": false,
     "component_manifest_sha256": "d4eb8810737ba066a55ffdd3fcb0f8b636446a01d0e38ba54bd270408a1abee3",
-    "raw_receipts": "local-only for publication privacy"
+    "raw_receipts": "local-only for publication privacy",
+    "full_entry_runtime_qualified": false
   },
   "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
   "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities.",
-  "entry_compile_status": "PASS exact847 build008:6freshC+archive+normalRustobject+testlink+actualroot/clientlinks; all11commands0, no generatedroot/clientexecution",
-  "source_only": true,
+  "entry_compile_status": "Tested d6 all11 ordinary compile/link steps passed; all10 ordinary tests passed; whole entry/native lifecycle not executed",
+  "source_only": false,
   "retirement": "typed original live/populated cgroup2 capabilities; terminal original pidfd; raw original events ENODEV + exact held-parent basename ENOENT; all replacement/other errors125; manager empty group accepted only typedRetired+same invocation/status",
   "reviewed_predecessor_sha256": "d55e32d40fa1b9f1588c758aaddbf1c09cb681014969f9b5ae76f1a473318517",
   "preserved_predecessor": "target/codex-security/linux-product-integration-history-001/entry-ffi-successor-021/source",
@@ -278,11 +290,155 @@
     "no inherited stderr F_SETFL/OFD mutation; dedicated exit timer covers write",
     "protected public system-bus endpoint and kernel peer/pidfd before trusting bus replies"
   ],
-  "client_postpresentation_failure": "explicit incomplete owning125 quarantine; live library host may leave service/payload until original cutoff; NOT settled teardown-on-error parity; native cancel/join remains required before enablement",
+  "client_postpresentation_failure": "shutdownWR actualresult/errno then boundedjoin under min(originalobservationend,currentBOOT+5s); preserve primary125 and valid consumed rootframe/code; only actual full nativeframe/service/domain/manager join completes; otherwise explicitowningquarantine",
   "compile_repair": "Actual ff3af607 compile007 found writeFFI *const u8 vs existing libc *const c_void signature conflict; declaration and explicit caller cast only; no lint suppression or behavior change",
   "compile_export_repair": "Actual root/client main compile007 diagnosed unused pub imports; preserve concrete opaque type aliases and a same-contract consuming function wrapper instead of unused reexports; no lint suppression or API removal",
   "predecessor_implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
   "entry_source_validation": {
+    "implementation_build_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
+    "platform": "Linux 6.8 aarch64 ordinary user",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "fresh_native_objects": 6,
+    "native_archive_reused": false,
+    "actual_root_and_client_executables_linked": true,
+    "build_receipt_sha256": "2252d72a9551ff460a4637df3743abe14f1535c54ffd82d8075a054ba551de17",
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "ignored": 0,
+    "timed_out": false,
+    "unit_receipt_sha256": "c2c6ded6e857a5e38a5f10ee7ae67f3339912e4c83f6658c882eb936c381c5bb",
+    "harness_sha256": "52d42f5a131225eeade643cc566eba0ec794ef288aa30a7737fd9c4b5f76698e",
+    "harness_bytes": 9630568,
+    "build_artifact_files": 81,
+    "unit_artifact_files": 8,
+    "test_scope": "Existing eight adapted parser/numeric/IPC tests plus two focused regressions: three parent-only native gate mappings and pure watchdog125 fault classification. IPC reads genuine caller-thread umask and ordinary owner/proc/pidfd/socket capabilities.",
+    "test_bodies_changed_from_tested_candidate": false,
+    "author_processes_launched": 0,
+    "privileged_entry_executed": false,
+    "root_client_entry_lifecycle_executed": false,
+    "payload_executed": false,
+    "child_umask_executed": false,
+    "watchdog_controller_executed": false,
+    "terminal_controller_executed": false,
+    "public_backend_enabled": false,
+    "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
+    "limits": "Compile/link and ten ordinary tests only. No privileged activation, payload/child-umask/watchdog/terminal lifecycle, complete cancellation/cleanup, native timer124 cause, supported-kernel-floor, transparent confinement/resource-context inheritance, public wiring or performance qualification.",
+    "native_ipc_refusals": 15,
+    "native_ipc_refusals_descriptors_settled": true,
+    "manual_watchers": 2,
+    "auto_watchers": 7,
+    "absolute_interval_seconds": 60.25,
+    "absolute_interval_unchanged": true,
+    "native_gate_mappings_created": 3,
+    "native_gate_mappings_destroyed": 3,
+    "artifact_files_preserved_and_verified": 89,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "cleanup_receipt_sha256": "360a7f9e17db459a65ce1498fd67be839791d771869e6c6b172fb79e640e3560",
+    "local_preservation_receipt_sha256": "b9da490ebd430b93aef8f7d82bdf95d444f1a009bf8365a4070502dbf98c1e16"
+  },
+  "cancellation_design_sha256": "81748885f8249642c4083ad9f5c7740d9d36c94c19cb5cf422b6f9deb0e59434",
+  "cancellation_source_status": "Compiled in d6; native gate first-cause and pure watchdog-fault regression passed; whole cancellation lifecycle unexecuted",
+  "preceding_frozen_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
+  "preserved_preceding": "target/codex-security/linux-product-integration-history-001/proc-caller-ownership-fix-033/source",
+  "natural_stop_design_sha256": "96286f342081b17eea627647534abaf0e3906d3478340ec0128048fb85bab626",
+  "umask_claim": "genuinecallingthreadreadonlysnapshotbeforeactivation, validatedauthcaller-contextdata, notprivilegedTIDattestation; service077unchanged; childonlySYS_umask",
+  "procfs_caller_directory_repair": {
+    "baseline_candidate_sha256": "d0cc6a797d8ea87b2b088f4818823ec82c0c019aba2e82c631fd4da18156d6fe",
+    "baseline_snapshot": "target/codex-security/linux-product-integration-history-001/frozen-entry-handoff-031",
+    "history": "target/codex-security/linux-product-integration-history-001/proc-caller-ownership-fix-033",
+    "changed_executable_files": [
+      "service_scope.rs"
+    ],
+    "change": "Separate procfs child-directory authority from protected installation/cgroup ownership: genuine PROC_MAGIC, descriptor-relative nofollow/CLOEXEC directory open, held parent mount and name identity; no proc child UID predicate.",
+    "call_sites": [
+      "proc_process:TGID",
+      "namespace:ns",
+      "capture_calling_umask:task",
+      "capture_calling_umask:TID"
+    ],
+    "unchanged": [
+      "generic directory()/require_root_mode() and protected physical /proc root",
+      "kernel thread-self/TID/TGID/name/mount proof",
+      "all C/H and test bodies",
+      "selector/Windows/Cargo/build"
+    ],
+    "status": "Exact reviewed repair compiled and same10 tests passed; generic protected authority unchanged; privileged lifecycle remains unqualified",
+    "previous_attempt": {
+      "candidate_sha256": "d0cc6a797d8ea87b2b088f4818823ec82c0c019aba2e82c631fd4da18156d6fe",
+      "build_attempt": "target/codex-security/linux-product-build-010",
+      "build_receipt_sha256": "823182c1ea8db1376eeeb93151fbd575267116dbe515bad006229b6f24906815",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "unit_attempt": "target/codex-security/linux-product-unit-006",
+      "unit_receipt_sha256": "8a8725d74b87764b4f04929ac221762d4c30d8d308f8e7cfcc023dab6d33449c",
+      "tests": 10,
+      "passed": 9,
+      "failed": 1,
+      "ignored": 0,
+      "test_exit": 101,
+      "timed_out": false,
+      "failed_test": "linux::tests::native_seqpacket_admission_and_refusals",
+      "primary_error": "Kernel: authority is not a protected root-owned inode",
+      "root_reported_artifacts_verified": 89,
+      "root_reported_owned_scratch_roots_removed": 2,
+      "root_reported_original_scopes_absent": true,
+      "author_processes_launched": 0,
+      "privileged_entry_executed": false,
+      "source": "Receipt fields and exact test summary checked; preservation/cleanup status separately reported by root."
+    },
+    "qualification": {
+      "implementation_build_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
+      "platform": "Linux 6.8 aarch64 ordinary user",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "fresh_native_objects": 6,
+      "native_archive_reused": false,
+      "actual_root_and_client_executables_linked": true,
+      "build_receipt_sha256": "2252d72a9551ff460a4637df3743abe14f1535c54ffd82d8075a054ba551de17",
+      "tests": 10,
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "timed_out": false,
+      "unit_receipt_sha256": "c2c6ded6e857a5e38a5f10ee7ae67f3339912e4c83f6658c882eb936c381c5bb",
+      "harness_sha256": "52d42f5a131225eeade643cc566eba0ec794ef288aa30a7737fd9c4b5f76698e",
+      "harness_bytes": 9630568,
+      "build_artifact_files": 81,
+      "unit_artifact_files": 8,
+      "test_scope": "Existing eight adapted parser/numeric/IPC tests plus two focused regressions: three parent-only native gate mappings and pure watchdog125 fault classification. IPC reads genuine caller-thread umask and ordinary owner/proc/pidfd/socket capabilities.",
+      "test_bodies_changed_from_tested_candidate": false,
+      "author_processes_launched": 0,
+      "privileged_entry_executed": false,
+      "root_client_entry_lifecycle_executed": false,
+      "payload_executed": false,
+      "child_umask_executed": false,
+      "watchdog_controller_executed": false,
+      "terminal_controller_executed": false,
+      "public_backend_enabled": false,
+      "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
+      "limits": "Compile/link and ten ordinary tests only. No privileged activation, payload/child-umask/watchdog/terminal lifecycle, complete cancellation/cleanup, native timer124 cause, supported-kernel-floor, transparent confinement/resource-context inheritance, public wiring or performance qualification.",
+      "native_ipc_refusals": 15,
+      "native_ipc_refusals_descriptors_settled": true,
+      "manual_watchers": 2,
+      "auto_watchers": 7,
+      "absolute_interval_seconds": 60.25,
+      "absolute_interval_unchanged": true,
+      "native_gate_mappings_created": 3,
+      "native_gate_mappings_destroyed": 3,
+      "artifact_files_preserved_and_verified": 89,
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true,
+      "cleanup_receipt_sha256": "360a7f9e17db459a65ce1498fd67be839791d771869e6c6b172fb79e640e3560",
+      "local_preservation_receipt_sha256": "b9da490ebd430b93aef8f7d82bdf95d444f1a009bf8365a4070502dbf98c1e16"
+    }
+  },
+  "metadata_only_successor": true,
+  "previous_entry_source_validation": {
     "implementation_build_candidate_sha256": "84762a4132e57a670d99a096899c7509de40140840b31d9caf87ebd90744594c",
     "platform": "Linux6.8 aarch64 ordinary user",
     "compile_link_steps": 11,

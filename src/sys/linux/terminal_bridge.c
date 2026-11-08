@@ -73,8 +73,10 @@ uint32_t ptg_terminal_errno_kind(int32_t error) {
     return 0;
 }
 
+uint32_t ptg_terminal_poll_capacity(void) {return PTG_OWNER_WATCH_MAX + 6;}
+
 int32_t ptg_terminal_poll(void *fds, uint32_t count, int32_t timeout, int32_t *error) {
-    if (fds == NULL || count == 0 || count > PTG_OWNER_WATCH_MAX + 5 || timeout < -1) {
+    if (fds == NULL || count == 0 || count > ptg_terminal_poll_capacity() || timeout < -1) {
         *error = EINVAL;
         return -1;
     }

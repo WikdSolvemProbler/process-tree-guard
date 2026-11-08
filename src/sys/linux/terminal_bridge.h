@@ -11,6 +11,7 @@ int32_t ptg_terminal_sigchld(uint32_t *facts, int32_t *error);
 int32_t ptg_terminal_subreaper(uint32_t operation, int32_t *value, int32_t *error);
 int32_t ptg_terminal_kill(int32_t pidfd, int32_t *error);
 uint32_t ptg_terminal_errno_kind(int32_t error);
+uint32_t ptg_terminal_poll_capacity(void);
 int32_t ptg_terminal_poll(void *fds, uint32_t count, int32_t timeout, int32_t *error);
 void ptg_terminal_wait_any(uint32_t peek, struct ptg_wait_frame *out,
                          unsigned char *native_bytes, uint32_t native_capacity);

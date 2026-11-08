@@ -13,16 +13,18 @@ struct LeaseWatch<'a> {
     timer: &'a OwnedFd,
     deadline_ns: u64,
     supervisor: &'a OwnedFd,
+    cancellation:&'a Arc<super::super::entry::AuthenticatedCancellation>,
 }
 
 impl<'a> LeaseWatch<'a> {
-    fn original(prepared: &'a PreparedRun, supervisor: &'a terminal_controller::DedicatedSupervisor) -> Self {
+    fn original(prepared: &'a PreparedRun, supervisor: &'a terminal_controller::DedicatedSupervisor,cancellation:&'a Arc<super::super::entry::AuthenticatedCancellation>) -> Self {
         Self {
             owner_pid: prepared.owner_pid,
             owners: &prepared.lease.invocation,
             timer: &prepared.lease.timer,
             deadline_ns: prepared.lease.deadline_ns,
             supervisor: supervisor.self_pidfd(),
+            cancellation,
         }
     }
 }
@@ -30,6 +32,8 @@ impl<'a> LeaseWatch<'a> {
 // The trusted provisioner supplies these from one verified fresh cgroup2
 // domain. These are owned descriptors, never paths from the request.
 struct DomainControls {
+    cancellation:Option<Arc<super::super::entry::AuthenticatedCancellation>>,
+    peer_cancel:std::cell::Cell<Option<(c_int,c_int)>>,
     gate: Option<native_port::SharedGate>,
     gate_cancel: std::cell::Cell<Option<c_int>>,
     gate_release: Option<(c_int,c_int)>,
@@ -105,6 +109,7 @@ struct PayloadChild {
 // held-to-released bootstrap. Product selection still awaits qualification.
 // The port is inside the privileged trust boundary. It is not request input.
 trait OneShotPort {
+    fn caller_cancellation(&self)->&Arc<super::super::entry::AuthenticatedCancellation>;
     // Apply the command policy to the original decoded plan before arming.
     // This check must create no domain or child resources.
     // The first native proof may authorize only the pinned absolute fixture.
@@ -145,6 +150,7 @@ trait OneShotPort {
 }
 
 struct ActiveRun {
+    cancellation:Arc<super::super::entry::AuthenticatedCancellation>,
     payload_mask: Option<native_port::ParentMaskObservation>,
     prepared: PreparedRun,
     domain: ArmedDomain,
@@ -268,13 +274,15 @@ unsafe fn activate(
     }
     // Original execution owner/timer/deadline are never retargeted. The cleanup
     // timer exists before arm can create a watchdog or place any payload.
-    let domain = match port.arm(LeaseWatch::original(&prepared, &supervisor)) {
+    let cancellation=Arc::clone(port.caller_cancellation());
+    let domain = match port.arm(LeaseWatch::original(&prepared, &supervisor,&cancellation)) {
         Ok(domain) => domain,
         Err(failure) => return Err(ActivationFailure::Arming {
             prepared, supervisor, cleanup, failure,
         }),
     };
     let mut active = ActiveRun {
+        cancellation,
         payload_mask: None,
         prepared,
         domain,
@@ -329,3 +337,9 @@ pub(crate) fn verify_runtime_parent(fds:&[OwnedFd])->Probe<()>{cgroup_authority:
 pub(crate) use cgroup_authority::service_scope::PublicBusEndpoint;
 
 pub(crate) use cgroup_authority::service_scope::PrivateRuntimeDirectory;
+
+#[cfg(test)]pub(crate) fn gate_first_cause_regression(){native_port::gate_first_cause_regression()}
+
+#[cfg(test)]pub(crate) fn watchdog_fault_regression(){terminal_controller::watchdog_fault_regression();native_port::watchdog_mapping_regression()}
+
+pub(crate) fn capture_calling_umask()->Probe<u16>{cgroup_authority::service_scope::capture_calling_umask()}

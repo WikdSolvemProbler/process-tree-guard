@@ -26,6 +26,7 @@ unsafe extern "C" {
     fn ptg_terminal_subreaper(operation: u32, value: *mut c_int, error: *mut c_int) -> c_int;
     fn ptg_terminal_kill(pidfd: c_int, error: *mut c_int) -> c_int;
     fn ptg_terminal_errno_kind(error: c_int) -> u32;
+    fn ptg_terminal_poll_capacity()->u32;
     fn ptg_terminal_poll(fds: *mut c_void, count: u32, timeout: c_int, error: *mut c_int) -> c_int;
     fn ptg_terminal_exec_read(fd: c_int, bytes: *mut u8, capacity: u32,
                               count: *mut c_int, error: *mut c_int) -> u32;
@@ -42,6 +43,7 @@ pub(super) struct ContextPreflight {
     sigchld_facts: u32,
     original_get: NativeCall,
     original_flag: c_int,
+    poll_capacity:u32,
 }
 
 fn subreaper(operation: u32) -> (NativeCall, c_int) {
@@ -111,7 +113,7 @@ fn before_child_preflight() -> ContextPreflight {
     let result = unsafe { ptg_terminal_sigchld(&mut facts, &mut error) };
     let (get, flag) = subreaper(0);
     ContextPreflight { pid, tid, signal: NativeCall { result, errno: error },
-        sigchld_facts: facts, original_get: get, original_flag: flag }
+        sigchld_facts: facts, original_get: get, original_flag: flag,poll_capacity:unsafe{ptg_terminal_poll_capacity()} }
 }
 
 fn require_empty_probe(receipt: &mut EmptyContextReceipt, after: bool) -> Probe<()> {
@@ -129,6 +131,7 @@ fn require_empty_probe(receipt: &mut EmptyContextReceipt, after: bool) -> Probe<
 }
 
 fn require_before_child_facts(facts: ContextPreflight, flag: c_int) -> Probe<()> {
+    check(facts.poll_capacity==255,"native terminal poll capacity differs")?;
     check(facts.pid > 0 && facts.tid == facts.pid, "no-child cleanup is not its dedicated main thread")?;
     single_thread()?;
     check(facts.signal.result == 0 && facts.signal.errno == 0 && facts.sigchld_facts == 7
@@ -203,8 +206,9 @@ impl DedicatedSupervisor {
         let result = unsafe { ptg_terminal_sigchld(&mut facts, &mut error) };
         let (get, original_flag) = subreaper(0);
         let preflight = ContextPreflight { pid, tid, signal: NativeCall { result, errno: error },
-            sigchld_facts: facts, original_get: get, original_flag };
+            sigchld_facts: facts, original_get: get, original_flag,poll_capacity:unsafe{ptg_terminal_poll_capacity()} };
         let initial = (|| -> Probe<()> {
+            check(preflight.poll_capacity==255,"native terminal poll capacity differs")?;
             check(pid > 0 && tid == pid, "one-shot supervisor must be its process main thread")?;
             single_thread()?;
             check(result == 0 && error == 0 && facts == 7,
@@ -396,8 +400,8 @@ enum DomainOwner {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub(super) struct PollObservation { returned:c_int,errno:c_int,events:[c_short;6],owner_count:u32,owner_events:[c_short;MAX_WATCHERS] }
-impl Default for PollObservation {fn default()->Self{Self{returned:0,errno:0,events:[0;6],owner_count:0,owner_events:[0;MAX_WATCHERS]}}}
+pub(super) struct PollObservation { returned:c_int,errno:c_int,events:[c_short;7],owner_count:u32,owner_events:[c_short;MAX_WATCHERS] }
+impl Default for PollObservation {fn default()->Self{Self{returned:0,errno:0,events:[0;7],owner_count:0,owner_events:[0;MAX_WATCHERS]}}}
 
 const STOP_OWNER: u32 = 1;
 const STOP_DEADLINE: u32 = 2;
@@ -408,6 +412,7 @@ const STOP_EXEC_FAILURE: u32 = 32;
 const STOP_PROTOCOL: u32 = 64;
 const STOP_POLL: u32 = 128;
 const STOP_ARMING_FAILURE: u32 = 256;
+const STOP_CANCEL:u32=512;
 
 #[derive(Clone, Copy, Debug)]
 struct StopReceipt {
@@ -430,6 +435,18 @@ pub(super) enum TerminalFault {
     Release,
     WatchdogEarlyExit,
     ParentSignalMask,
+    CancellationProtocol,
+    WatchdogStopIncomplete,
+}
+
+
+// Fixed one-first-record-per-category storage preserves every independent fault
+// category without allocating on the cancellation-before-held-kill path.
+pub(super) struct FaultSet{first:[Option<TerminalFault>;15],occurrences:[u64;15]}
+impl FaultSet{
+ fn new(initial:Option<TerminalFault>)->Self{let mut value=Self{first:std::array::from_fn(|_|None),occurrences:[0;15]};if let Some(fault)=initial{value.record(fault);}value}
+ fn record(&mut self,fault:TerminalFault){let index=match &fault{TerminalFault::Invariant=>0,TerminalFault::Poll(_)=>1,TerminalFault::Deadline(_)=>2,TerminalFault::Context(_)=>3,TerminalFault::Domain=>4,TerminalFault::WatchdogSignal(_)=>5,TerminalFault::DirectReap=>6,TerminalFault::Adopted(_)=>7,TerminalFault::RawStorage=>8,TerminalFault::ExecProtocol=>9,TerminalFault::Release=>10,TerminalFault::WatchdogEarlyExit=>11,TerminalFault::ParentSignalMask=>12,TerminalFault::CancellationProtocol=>13,TerminalFault::WatchdogStopIncomplete=>14};self.occurrences[index]=self.occurrences[index].saturating_add(1);if self.first[index].is_none(){self.first[index]=Some(fault);}}
+ fn is_empty(&self)->bool{self.first.iter().all(Option::is_none)}
 }
 
 // An arming failure never attempted a release. Keep that actual origin instead
@@ -439,7 +456,12 @@ pub(super) enum ExecutionOrigin {
     ArmingFailure { error: String },
 }
 
+struct InternalWatchdogStop{pre_sample:super::super::super::entry::CancellationObservation,pre_cause:c_int,until_ns:u64,requested:bool,shutdown:Option<NativeCall>,wait_poll:Option<PollObservation>,uncertain:bool}
+
 pub(super) struct TerminalRun {
+    cancellation:Option<Arc<super::super::super::entry::AuthenticatedCancellation>>,
+    cancellation_sample:Option<super::super::super::entry::CancellationObservation>,
+    cancellation_poll:Option<PollObservation>,peer_gate:Option<(c_int,c_int)>,late_peer_cause:Option<c_int>,watchdog_early:bool,watchdog_cause_sample:Option<Probe<DecisionReceipt>>,
     arming: native_arming::ArmingReceipt,
     payload_mask: Option<native_port::ParentMaskObservation>,
     release_failure_sample:Option<Probe<DecisionReceipt>>,
@@ -459,12 +481,16 @@ pub(super) struct TerminalRun {
     last_pending: [Option<child_reaper::RawWaitObservation>; 2],
     pending_count: [u64; 2],
     watchdog_kill: Option<NativeCall>,
+    watchdog_internal:Option<InternalWatchdogStop>,
     adopted: Vec<AnyWaitObservation>,
     echild_index: Option<usize>,
-    semantic_fault: Option<TerminalFault>,
+    faults:FaultSet,
 }
 
 pub(super) struct SettledParts {
+    cancellation:Option<Arc<super::super::super::entry::AuthenticatedCancellation>>,
+    cancellation_sample:Option<super::super::super::entry::CancellationObservation>,
+    cancellation_poll:Option<PollObservation>,peer_gate:Option<(c_int,c_int)>,late_peer_cause:Option<c_int>,watchdog_early:bool,watchdog_cause_sample:Option<Probe<DecisionReceipt>>,
     arming: native_arming::ArmingReceipt,
     payload_mask: Option<native_port::ParentMaskObservation>,
     release_failure_sample:Option<Probe<DecisionReceipt>>,
@@ -476,6 +502,7 @@ pub(super) struct SettledParts {
     exec: Option<ExecReport>,
     stop: StopReceipt,
     watchdog_kill: Option<NativeCall>,
+    watchdog_internal:Option<InternalWatchdogStop>,
     adopted: Vec<AnyWaitObservation>,
     echild_index: usize,
     last_pending: [Option<child_reaper::RawWaitObservation>; 2],
@@ -490,16 +517,21 @@ pub(super) struct SettledRun { parts: SettledParts, removed: RemovedDomain }
 #[must_use = "quarantine owns actual remaining resources; dropping it is not settlement"]
 pub(super) enum TerminalQuarantine {
     Running { owner: TerminalRun, fault: TerminalFault },
-    Removal { parts: SettledParts, domain: SettlementQuarantine, fault: Option<TerminalFault> },
-    SettledFault { owner: SettledRun, fault: TerminalFault },
+    Removal { parts: SettledParts, domain: SettlementQuarantine, faults:FaultSet },
+    SettledFault { owner: SettledRun, faults:FaultSet },
 }
 
-struct ReadyToRemove { parts: SettledParts, drained: DrainedDomain, fault: Option<TerminalFault> }
+struct ReadyToRemove { parts: SettledParts, drained: DrainedDomain, faults:FaultSet }
+
+// Native fault125/other statuses cannot be healed by later safety/peer events.
+fn expected_watchdog_stop(outcome:ExitOutcome,known_safety:bool,peer:Option<bool>,internal:bool)->bool{
+ match outcome{ExitOutcome::Exited{code:124}=>peer.unwrap_or(known_safety||internal),_=>false}
+}
 
 impl TerminalRun {
     fn from_pending(pending: PendingSettlement) -> Self {
         let PendingSettlement { active, release } = pending;
-        let ActiveRun { payload_mask, prepared, domain, child, cleanup, supervisor } = active;
+        let ActiveRun { cancellation,payload_mask, prepared, domain, child, cleanup, supervisor } = active;
         let ArmedDomain { controls, watchdog, arming } = domain;
         let mask_fault=(arming.parent_mask_uncertain() || payload_mask.is_some_and(|value|value.uncertain()))
             .then_some(TerminalFault::ParentSignalMask);
@@ -507,11 +539,11 @@ impl TerminalRun {
             Some(PayloadChild { identity, exec_report, .. }) => (Some(ChildOwner::Live(identity)), Some(exec_report)),
             None => (None, None),
         };
-        Self { arming, payload_mask, release_failure_sample:None, prepared, origin: ExecutionOrigin::Release(release), supervisor, domain: Some(DomainOwner::Active(controls)),
+        Self { cancellation:Some(cancellation),cancellation_sample:None,cancellation_poll:None,peer_gate:None,late_peer_cause:None,watchdog_early:false,watchdog_cause_sample:None, arming, payload_mask, release_failure_sample:None, prepared, origin: ExecutionOrigin::Release(release), supervisor, domain: Some(DomainOwner::Active(controls)),
             cleanup: Some(cleanup), payload, watchdog: Some(ChildOwner::Live(watchdog)), exec,
             stop: None, latched_reasons: None, last_poll: PollObservation::default(), poll_observed: false,
             interrupted_polls: 0, last_pending: [None, None], pending_count: [0, 0],
-            watchdog_kill: None, adopted: Vec::new(), echild_index: None, semantic_fault: mask_fault }
+            watchdog_kill: None,watchdog_internal:None, adopted: Vec::new(), echild_index: None, faults:FaultSet::new(mask_fault) }
     }
 
     fn latch_stop(&mut self, reasons: u32) -> Result<(), TerminalFault> {
@@ -521,11 +553,16 @@ impl TerminalRun {
         let domain = self.domain.take().ok_or(TerminalFault::Invariant)?;
         match domain {
             DomainOwner::Active(controls) => {
+                // Recognized readiness on the exact held private endpoint is
+                // the only Rust operation allowed to mint the first-peer bit.
+                let peer=if reasons&STOP_CANCEL!=0{Some(controls.cancel_release_peer())}else{None};
+                self.peer_gate=peer;
                 let killed = controls.terminate_owned();
                 let kill_outcome = killed.outcome();
                 self.domain = Some(DomainOwner::Killed(killed));
                 self.stop = Some(StopReceipt { reasons,
                     observed_poll: self.poll_observed.then_some(self.last_poll), kill_outcome });
+                if peer.is_some_and(|(previous,cause)|!(0..=2).contains(&previous)||!(0..=1).contains(&cause)){self.faults.record(TerminalFault::CancellationProtocol);}
                 Ok(())
             }
             other => { self.domain = Some(other); Err(TerminalFault::Invariant) }
@@ -535,11 +572,11 @@ impl TerminalRun {
     fn supervise(&mut self) -> Result<(), TerminalFault> {
         let early = match &self.origin {
             ExecutionOrigin::ArmingFailure { .. } => return Err(TerminalFault::Invariant),
-            ExecutionOrigin::Release(Err(_)) => { if self.semantic_fault.is_none(){self.semantic_fault=Some(TerminalFault::Release);} Some(STOP_RELEASE) }
+            ExecutionOrigin::Release(Err(_)) => { self.faults.record(TerminalFault::Release); Some(STOP_RELEASE) }
             ExecutionOrigin::Release(Ok(Decision::OwnerLost)) => Some(STOP_OWNER),
             ExecutionOrigin::Release(Ok(Decision::Deadline)) => Some(STOP_DEADLINE),
             ExecutionOrigin::Release(Ok(Decision::Permit)) if self.payload.is_none() || self.exec.is_none() => {
-                self.semantic_fault = Some(TerminalFault::Invariant); Some(STOP_PROTOCOL)
+                self.faults.record(TerminalFault::Invariant); Some(STOP_PROTOCOL)
             }
             ExecutionOrigin::Release(Ok(Decision::Permit)) => None,
         };
@@ -555,15 +592,17 @@ impl TerminalRun {
         }
         loop {
             let cleanup = self.cleanup.as_ref().ok_or(TerminalFault::Invariant)?;
+            let cancellation_fd=self.cancellation.as_ref().ok_or(TerminalFault::Invariant)?.fd();
             let owners=self.prepared.lease.invocation.numbers();
             let owner_count=owners.len();
-            let mut watched=[PollFd{fd:-1,events:POLLIN,revents:0};MAX_WATCHERS+5];
+            let mut watched=[PollFd{fd:-1,events:POLLIN,revents:0};MAX_WATCHERS+6];
             for (entry,fd) in watched.iter_mut().zip(owners){entry.fd=*fd;}
             let other=[self.prepared.lease.timer.as_raw_fd(),
                 self.payload.as_ref().map_or(-1,ChildOwner::fd),self.watchdog.as_ref().map_or(-1,ChildOwner::fd),
-                self.exec.as_ref().map_or(-1,ExecReport::fd),cleanup.timer_fd()];
+                self.exec.as_ref().map_or(-1,ExecReport::fd),cleanup.timer_fd(),cancellation_fd];
             for (entry,fd) in watched[owner_count..].iter_mut().zip(other){entry.fd=fd;}
-            let watched=&mut watched[..owner_count+5];
+            let watched=&mut watched[..owner_count+6];
+            watched[owner_count+5].events=POLLIN|0x2000;
             // Full original set, not a relay/aggregate whose event can be consumed.
             // Both absolute execution and prearmed cleanup timers remain held.
             let mut errno=0;
@@ -573,7 +612,7 @@ impl TerminalRun {
             for (slot,entry) in owner_events.iter_mut().zip(&watched[..owner_count]){*slot=entry.revents;}
             let events=[owner_events[..owner_count].iter().fold(0,|bits,event|bits|event),
                 watched[owner_count].revents,watched[owner_count+1].revents,watched[owner_count+2].revents,
-                watched[owner_count+3].revents,watched[owner_count+4].revents];
+                watched[owner_count+3].revents,watched[owner_count+4].revents,watched[owner_count+5].revents];
             self.last_poll=PollObservation{returned,errno,events,owner_count:owner_count as u32,owner_events};
             self.poll_observed = true;
             if returned < 0 && unsafe { ptg_terminal_errno_kind(errno) } == 1 {
@@ -581,17 +620,17 @@ impl TerminalRun {
                 // An unbounded signal stream must not bypass readable timers.
                 // Cancel conservatively before any clock/diagnostic allocation;
                 // the same prearmed authority bounds subsequent settlement.
-                self.semantic_fault = Some(TerminalFault::Poll(self.last_poll));
+                self.faults.record(TerminalFault::Poll(self.last_poll));
                 self.latch_stop(STOP_POLL)?;
                 return Ok(());
             }
             let allowed = [POLLIN | POLLHUP, POLLIN, POLLIN | POLLHUP,
-                           POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN];
+                           POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN, POLLIN|POLLHUP|0x2000];
             let invalid = returned <= 0
                 || returned as usize != expanded_ready
                 || self.last_poll.events.iter().zip(allowed).any(|(event, mask)| event & !mask != 0);
             if invalid {
-                self.semantic_fault = Some(TerminalFault::Poll(self.last_poll));
+                self.faults.record(TerminalFault::Poll(self.last_poll));
                 self.latch_stop(STOP_POLL)?;
                 return Ok(());
             }
@@ -601,9 +640,10 @@ impl TerminalRun {
             if events[1] != 0 || events[5] != 0 { reasons |= STOP_DEADLINE; }
             if events[2] != 0 { reasons |= STOP_PAYLOAD; }
             if events[3] != 0 { reasons |= STOP_WATCHDOG; }
+            if events[6]!=0{self.cancellation_poll=Some(self.last_poll);reasons|=STOP_CANCEL;}
             if reasons != 0 {
                 if reasons & STOP_WATCHDOG != 0 && reasons & (STOP_OWNER | STOP_DEADLINE) == 0 {
-                    self.semantic_fault = Some(TerminalFault::WatchdogEarlyExit);
+                    self.watchdog_early=true;
                 }
                 self.latch_stop(reasons)?;
                 return Ok(());
@@ -613,7 +653,7 @@ impl TerminalRun {
                 match state {
                     ExecState::ReportedFailure { .. } => { self.latch_stop(STOP_EXEC_FAILURE)?; return Ok(()); }
                     ExecState::Unverified => {
-                        self.semantic_fault = Some(TerminalFault::ExecProtocol);
+                        self.faults.record(TerminalFault::ExecProtocol);
                         self.latch_stop(STOP_PROTOCOL)?;
                         return Ok(());
                     }
@@ -647,19 +687,52 @@ impl TerminalRun {
     }
 
     fn kill_watchdog_after_empty(&mut self) -> Result<(), TerminalFault> {
-        if self.watchdog_kill.is_some() { return Ok(()); }
-        if !matches!(self.domain, Some(DomainOwner::Drained(_))) { return Err(TerminalFault::Invariant); }
-        // Verified-domain arming may fail before any watchdog clone. Absence
-        // is not a fabricated successful signal or reap.
-        if self.watchdog.is_none() { return Ok(()); }
-        let descriptor = self.watchdog.as_ref().map_or(-1, ChildOwner::fd);
-        if descriptor < 0 { return Err(TerminalFault::Invariant); }
-        let mut error = 0;
-        let result = unsafe { ptg_terminal_kill(descriptor, &mut error) };
-        let receipt = NativeCall { result, errno: error };
-        self.watchdog_kill = Some(receipt);
-        if result == 0 || (result == -1 && unsafe { ptg_terminal_errno_kind(error) } == 3) { Ok(()) }
-        else { Err(TerminalFault::WatchdogSignal(receipt)) }
+        if self.watchdog_kill.is_some(){return Ok(());}
+        if !matches!(self.domain,Some(DomainOwner::Drained(_))){return Err(TerminalFault::Invariant);}
+        let Some(actor)=self.watchdog.as_ref()else{return Ok(());};
+        if actor.reaped().is_some(){return Ok(());} // actual natural reap, no fake signal
+        let descriptor=actor.fd();if descriptor<0{return Err(TerminalFault::Invariant);}
+        let mut errno=0;let result=unsafe{ptg_terminal_kill(descriptor,&mut errno)};let raw=NativeCall{result,errno};self.watchdog_kill=Some(raw);
+        // A forced signal can suppress an unreported native fault and is NEVER
+        // clean, even if a later receipt happens to show natural124.
+        self.faults.record(TerminalFault::WatchdogStopIncomplete);
+        if result==0||(result== -1&&unsafe{ptg_terminal_errno_kind(errno)}==3){Ok(())}else{Err(TerminalFault::WatchdogSignal(raw))}
+    }
+    fn stop_watchdog_after_empty(&mut self)->Result<(),TerminalFault>{
+        if self.watchdog.is_none(){return Ok(());}
+        let deadline=self.deadline()?;let now=deadline.check().map_err(TerminalFault::Deadline)?;
+        let until=now.checked_add(1_000_000_000).ok_or(TerminalFault::Invariant)?.min(deadline.effective_until_ns());
+        let peer=self.cancellation.as_ref().ok_or(TerminalFault::Invariant)?;let pre_sample=peer.sample();
+        let pre_cause=match self.domain.as_ref(){Some(DomainOwner::Drained(domain))=>domain.peer_cancelled(),_=>return Err(TerminalFault::Invariant)};
+        self.cancellation_sample=Some(pre_sample);self.late_peer_cause=Some(pre_cause);
+        if pre_sample.state()==super::super::super::entry::CancellationState::Fault||pre_cause<0{self.faults.record(TerminalFault::CancellationProtocol);}
+        // Domain-empty and the earlier generic gate cancellation precede this
+        // explicit INTERNAL marker. Self-induced readiness is never a caller stop.
+        self.watchdog_internal=Some(InternalWatchdogStop{pre_sample,pre_cause,until_ns:until,requested:true,shutdown:None,wait_poll:None,uncertain:false});
+        let (result,errno)=peer.shutdown_read();self.watchdog_internal.as_mut().expect("internal intent stored").shutdown=Some(NativeCall{result,errno});
+        if result!=0||errno!=0{self.faults.record(TerminalFault::WatchdogStopIncomplete);}
+        loop{
+            let now=self.deadline()?.check().map_err(TerminalFault::Deadline)?;
+            if now>=until{
+                self.watchdog_internal.as_mut().expect("internal intent stored").uncertain=true;
+                self.faults.record(TerminalFault::WatchdogStopIncomplete);
+                return self.kill_watchdog_after_empty();
+            }
+            let domain=match self.domain.as_ref(){Some(DomainOwner::Drained(value))=>value,_=>return Err(TerminalFault::Invariant)};
+            if step_direct(&mut self.watchdog,&mut self.last_pending[1],&mut self.pending_count[1],domain.cleanup_deadline())?{
+                // Preserve an already consumed natural status before checking
+                // the short budget; a late receipt is retained but not clean.
+                if boottime_ns().map_err(TerminalFault::Deadline)? >= until{self.watchdog_internal.as_mut().expect("internal intent stored").uncertain=true;self.faults.record(TerminalFault::WatchdogStopIncomplete);}return Ok(());
+            }
+            let left=until.checked_sub(boottime_ns().map_err(TerminalFault::Deadline)?).unwrap_or(0);
+            if left==0{continue;}
+            let mut watched=[PollFd{fd:self.watchdog.as_ref().map_or(-1,ChildOwner::fd),events:POLLIN,revents:0},PollFd{fd:self.deadline()?.timer_fd(),events:POLLIN,revents:0}];
+            let mut errno=0;let returned=unsafe{ptg_terminal_poll(watched.as_mut_ptr().cast(),2,left.div_ceil(1_000_000).min(100) as c_int,&mut errno)};
+            let events=[watched[0].revents,watched[1].revents,0,0,0,0,0];let raw=PollObservation{returned,errno,events,..PollObservation::default()};
+            self.watchdog_internal.as_mut().expect("internal intent stored").wait_poll=Some(raw);
+            if returned<0&&unsafe{ptg_terminal_errno_kind(errno)}==1{continue;} // next loop rechecks BOTH unchanged bounds
+            if returned<0||returned as usize!=watched.iter().filter(|item|item.revents!=0).count()||watched[0].revents&!(POLLIN|POLLHUP)!=0||watched[1].revents&!POLLIN!=0{return Err(TerminalFault::Poll(raw));}
+        }
     }
 
     fn wait_cleanup(&mut self, adopted_pending: bool) -> Result<(), TerminalFault> {
@@ -676,11 +749,11 @@ impl TerminalRun {
         let mut errno = 0;
         let returned = unsafe { ptg_terminal_poll(watched.as_mut_ptr().cast(), watched.len() as u32,
                                                   if adopted_pending { 10 } else { -1 }, &mut errno) };
-        let events = [watched[0].revents, watched[1].revents, watched[2].revents, watched[3].revents, 0, 0];
+        let events = [watched[0].revents, watched[1].revents, watched[2].revents, watched[3].revents, 0, 0,0];
         self.last_poll = PollObservation { returned, errno, events, ..PollObservation::default() };
         self.poll_observed = true;
         if returned < 0 && unsafe { ptg_terminal_errno_kind(errno) } == 1 { return Ok(()); }
-        let allowed = [POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN, 0, 0];
+        let allowed = [POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN, 0, 0,0];
         if returned < 0 || (returned == 0 && !adopted_pending)
             || returned as usize != events.iter().filter(|event| **event != 0).count()
             || events.iter().zip(allowed).any(|(event, mask)| event & !mask != 0) {
@@ -688,6 +761,24 @@ impl TerminalRun {
         }
         self.deadline()?.check().map_err(TerminalFault::Deadline)?;
         Ok(())
+    }
+
+    fn validate_peer_watchdog(&mut self){
+        let Some(outcome)=self.watchdog.as_ref().and_then(ChildOwner::reaped).map(ReapedChild::outcome)else{if self.watchdog.is_some(){self.faults.record(TerminalFault::WatchdogEarlyExit);}return;};
+        let reasons=self.stop.map_or(0,|value|value.reasons);
+        let Some(internal)=self.watchdog_internal.as_ref()else{self.faults.record(TerminalFault::WatchdogStopIncomplete);return;};
+        // ONLY pre-local observations may identify real caller cancellation.
+        // Never sample SHUT_RD-induced readiness as new peer evidence.
+        let recognized=self.cancellation_poll.is_some()||internal.pre_sample.state()==super::super::super::entry::CancellationState::Peer;
+        let first=internal.pre_cause;
+        let genuine_peer=recognized&&first==1;
+        let peer=if reasons&STOP_CANCEL!=0||genuine_peer{Some(genuine_peer)}else{None};
+        let known_safety=reasons&(STOP_OWNER|STOP_DEADLINE)!=0;
+        let unknown_watchdog=reasons&STOP_WATCHDOG!=0&&reasons&(STOP_OWNER|STOP_DEADLINE|STOP_CANCEL)==0;
+        let successful_internal=internal.requested&&internal.shutdown.is_some_and(|raw|raw.result==0&&raw.errno==0)&&!internal.uncertain&&!unknown_watchdog;
+        if self.watchdog_kill.is_some()||internal.uncertain||!expected_watchdog_stop(outcome,known_safety,peer,successful_internal){self.faults.record(TerminalFault::WatchdogEarlyExit);}
+        // Every125/signal stays a fault. No late lease sample or internal intent
+        // can heal a WATCHDOG-only primary stop or any earlier independent fault.
     }
 
     fn reap_directs(&mut self) -> Result<(), TerminalFault> {
@@ -701,7 +792,7 @@ impl TerminalRun {
             let watchdog_done = step_direct(&mut self.watchdog, &mut self.last_pending[1],
                                             &mut self.pending_count[1], deadline)?;
             if let Some(exec) = self.exec.as_mut() {
-                if exec.sample() == ExecState::Unverified { self.semantic_fault = Some(TerminalFault::ExecProtocol); }
+                if exec.sample() == ExecState::Unverified { self.faults.record(TerminalFault::ExecProtocol); }
             }
             if payload_done && watchdog_done { return Ok(()); }
             self.wait_cleanup(false)?;
@@ -747,7 +838,7 @@ impl TerminalRun {
         while let Some(exec) = self.exec.as_mut() {
             match exec.sample() {
                 ExecState::Pending => self.wait_cleanup(false)?,
-                ExecState::Unverified => { self.semantic_fault = Some(TerminalFault::ExecProtocol); return Ok(()); }
+                ExecState::Unverified => { self.faults.record(TerminalFault::ExecProtocol); return Ok(()); }
                 ExecState::NoExecErrorReport | ExecState::ReportedFailure { .. } => return Ok(()),
             }
         }
@@ -797,23 +888,19 @@ impl TerminalRun {
                 return Err(self.fail(TerminalFault::Invariant));
             }
         };
-        let watchdog_kill = match (watchdog.is_some(), self.watchdog_kill) {
-            (true, Some(value)) => Some(value),
-            (false, None) => None,
-            _ => {
-                self.domain = Some(DomainOwner::Drained(drained)); self.payload = payload.map(ChildOwner::Reaped);
-                self.watchdog = watchdog.map(ChildOwner::Reaped);
-                return Err(self.fail(TerminalFault::Invariant));
-            }
-        };
+        let watchdog_kill=self.watchdog_kill;
+        if watchdog.is_some()&&self.watchdog_internal.is_none()||watchdog.is_none()&&watchdog_kill.is_some(){
+            self.domain=Some(DomainOwner::Drained(drained));self.payload=payload.map(ChildOwner::Reaped);self.watchdog=watchdog.map(ChildOwner::Reaped);return Err(self.fail(TerminalFault::Invariant));
+        }
         let parts = SettledParts {
+            cancellation:self.cancellation,cancellation_sample:self.cancellation_sample,cancellation_poll:self.cancellation_poll,peer_gate:self.peer_gate,late_peer_cause:self.late_peer_cause,watchdog_early:self.watchdog_early,watchdog_cause_sample:self.watchdog_cause_sample,
             arming: self.arming, payload_mask: self.payload_mask, release_failure_sample:self.release_failure_sample, prepared: self.prepared, origin: self.origin, supervisor: self.supervisor,
-            payload, watchdog, exec: self.exec, stop, watchdog_kill, adopted: self.adopted,
+            payload, watchdog, exec: self.exec, stop, watchdog_kill,watchdog_internal:self.watchdog_internal, adopted: self.adopted,
             echild_index: self.echild_index.expect("checked actual ECHILD receipt"),
             last_pending: self.last_pending, pending_count: self.pending_count,
             interrupted_polls: self.interrupted_polls,
         };
-        Ok(ReadyToRemove { parts, drained, fault: self.semantic_fault })
+        Ok(ReadyToRemove { parts, drained, faults:self.faults })
     }
 }
 
@@ -843,19 +930,16 @@ fn step_direct(
 
 impl ReadyToRemove {
     fn remove_last(self) -> Result<SettledRun, TerminalQuarantine> {
-        let Self { parts, drained, fault } = self;
+        let Self { parts, drained, faults } = self;
         // This private type can only be built after direct receipts, actual
         // same-context adopted ECHILD, closed permit, and restored empty context.
         // No future placement or clone path is called after that proof.
         match unsafe { drained.remove_after_reaping() } {
             Ok(removed) => {
                 let owner = SettledRun { parts, removed };
-                match fault {
-                    None => Ok(owner),
-                    Some(fault) => Err(TerminalQuarantine::SettledFault { owner, fault }),
-                }
+                if faults.is_empty(){Ok(owner)}else{Err(TerminalQuarantine::SettledFault{owner,faults})}
             }
-            Err(domain) => Err(TerminalQuarantine::Removal { parts, domain, fault }),
+            Err(domain) => Err(TerminalQuarantine::Removal { parts, domain, faults }),
         }
     }
 }
@@ -887,8 +971,9 @@ impl SettledRun {
 impl TerminalRun {
     fn settle_stopped(mut owner: Self) -> Result<SettledRun, TerminalQuarantine> {
         if let Err(fault) = owner.drain() { return Err(owner.fail(fault)); }
-        if let Err(fault) = owner.kill_watchdog_after_empty() { return Err(owner.fail(fault)); }
+        if let Err(fault) = owner.stop_watchdog_after_empty() { return Err(owner.fail(fault)); }
         if let Err(fault) = owner.reap_directs() { return Err(owner.fail(fault)); }
+        owner.validate_peer_watchdog();
         if let Err(fault) = owner.reap_adopted() { return Err(owner.fail(fault)); }
         if let Err(fault) = owner.finish_exec_report() { return Err(owner.fail(fault)); }
         if let Err(error) = owner.deadline().and_then(|deadline| deadline.check().map_err(TerminalFault::Deadline)) {
@@ -920,13 +1005,26 @@ pub(super) fn settle_verified_arming_failure(
     // or fresh allocation occurs before the original held kill below.
     let mask_fault=arming.parent_mask_uncertain().then_some(TerminalFault::ParentSignalMask);
     let mut owner = TerminalRun {
-        arming, payload_mask: None, release_failure_sample:None, prepared, origin: ExecutionOrigin::ArmingFailure { error }, supervisor,
+        cancellation:controls.cancellation.as_ref().map(Arc::clone),cancellation_sample:None,cancellation_poll:None,peer_gate:None,late_peer_cause:None,watchdog_early:false,watchdog_cause_sample:None,arming, payload_mask: None, release_failure_sample:None, prepared, origin: ExecutionOrigin::ArmingFailure { error }, supervisor,
         domain: Some(DomainOwner::Active(controls)), cleanup: Some(cleanup),
         payload: None, watchdog: watchdog.map(ChildOwner::Live), exec: None,
         stop: None, latched_reasons: None, last_poll: PollObservation::default(), poll_observed: false,
         interrupted_polls: 0, last_pending: [None, None], pending_count: [0, 0],
-        watchdog_kill: None, adopted: Vec::new(), echild_index: None, semantic_fault: mask_fault,
+        watchdog_kill: None,watchdog_internal:None, adopted: Vec::new(), echild_index: None, faults:FaultSet::new(mask_fault),
     };
     if let Err(fault) = owner.latch_stop(STOP_ARMING_FAILURE) { return Err(owner.fail(fault)); }
     TerminalRun::settle_stopped(owner)
+}
+
+#[cfg(test)]pub(super) fn watchdog_fault_regression(){
+ for owner in [false,true]{for deadline in [false,true]{for peer in [None,Some(false),Some(true)]{
+  let internal=true;
+  assert!(!expected_watchdog_stop(ExitOutcome::Exited{code:125},owner||deadline,peer,internal));
+  let mut faults=FaultSet::new(Some(TerminalFault::ParentSignalMask));
+  if !expected_watchdog_stop(ExitOutcome::Exited{code:125},owner||deadline,peer,internal){faults.record(TerminalFault::WatchdogEarlyExit);}
+  assert!(faults.first[12].is_some()&&faults.first[11].is_some());
+ }}}
+ assert!(!expected_watchdog_stop(ExitOutcome::Signaled{signal:9,core_dumped:false},true,Some(true),true));
+ assert!(expected_watchdog_stop(ExitOutcome::Exited{code:124},false,Some(true),false));
+ assert!(!expected_watchdog_stop(ExitOutcome::Exited{code:124},false,Some(false),false));
 }

@@ -242,10 +242,20 @@ fn require_proc_self(proc:&OwnedFd)->Probe<()>{
  let mut bytes=[0u8;32];let count=native(os_result(unsafe{readlinkat(proc.as_raw_fd(),c"self".as_ptr(),bytes.as_mut_ptr(),bytes.len())}))?;
  check(count<bytes.len()&&&bytes[..count]==std::process::id().to_string().as_bytes(),"procfs self PID space differs from actual caller")
 }
-fn proc_process(proc:&OwnedFd,pid:u32)->Probe<OwnedFd>{let name=CString::new(pid.to_string()).expect("decimalPID");let fd=directory(proc.as_raw_fd(),&name)?;require_fs(&fd,PROC_MAGIC)?;let root=Identity::from(&descriptor_stat(proc)?);let raw=descriptor_stat(&fd)?;check(raw.mode&S_IFMT==S_IFDIR&&Identity::from(&raw).same_mount(root),"proc task directory mount/type differs")?;Ok(fd)}
+// Procfs task directories are kernel-generated and may belong to the ordinary
+// caller or change ownership with dumpability. Their authority is the genuine
+// held proc mount/name/type binding, not the installation/cgroup UID0 rule.
+fn proc_directory(parent:&OwnedFd,name:&CStr)->Probe<OwnedFd>{
+ require_fs(parent,PROC_MAGIC)?;let parent_identity=Identity::from(&descriptor_stat(parent)?);
+ let child=open_relative(parent.as_raw_fd(),name,O_PATH|O_DIRECTORY,S_IFDIR)?;
+ require_fs(&child,PROC_MAGIC)?;let raw=descriptor_stat(&child)?;
+ check(raw.mode&S_IFMT==S_IFDIR&&Identity::from(&raw).same_mount(parent_identity),"proc child directory mount/type differs")?;
+ require_name_matches(parent.as_raw_fd(),name,&child)?;Ok(child)
+}
+fn proc_process(proc:&OwnedFd,pid:u32)->Probe<OwnedFd>{let name=CString::new(pid.to_string()).expect("decimalPID");let fd=proc_directory(proc,&name)?;require_fs(&fd,PROC_MAGIC)?;let root=Identity::from(&descriptor_stat(proc)?);let raw=descriptor_stat(&fd)?;check(raw.mode&S_IFMT==S_IFDIR&&Identity::from(&raw).same_mount(root),"proc task directory mount/type differs")?;Ok(fd)}
 fn proc_leaf(process:&OwnedFd,name:&CStr)->Probe<OwnedFd>{let fd=fd_from_call(unsafe{fd_openat(process.as_raw_fd(),name.as_ptr(),O_CLOEXEC|O_NOFOLLOW)})?;require_fs(&fd,PROC_MAGIC)?;let raw=descriptor_stat(&fd)?;check(raw.mode&S_IFMT==S_IFREG&&Identity::from(&raw).same_mount(Identity::from(&descriptor_stat(process)?)),"proc leaf mount/type differs")?;Ok(fd)}
 fn namespace(proc_process:&OwnedFd,name:&CStr,kind:c_int)->Probe<OwnedFd>{
- let ns=directory(proc_process.as_raw_fd(),c"ns")?;require_fs(&ns,PROC_MAGIC)?;let mount=Identity::from(&descriptor_stat(proc_process)?);check(Identity::from(&descriptor_stat(&ns)?).same_mount(mount),"proc namespace directory mount differs")?;
+ let ns=proc_directory(proc_process,c"ns")?;require_fs(&ns,PROC_MAGIC)?;let mount=Identity::from(&descriptor_stat(proc_process)?);check(Identity::from(&descriptor_stat(&ns)?).same_mount(mount),"proc namespace directory mount differs")?;
  let link=metadata(ns.as_raw_fd(),name,AT_SYMLINK_NOFOLLOW)?;check(link.mode&S_IFMT==0o120000&&Identity::from(&link).same_mount(mount),"namespace leaf is not same-mount proc magic link")?;
  let fd=fd_from_call(unsafe{fd_openat(ns.as_raw_fd(),name.as_ptr(),O_CLOEXEC)})?;require_fs(&fd,NSFS_MAGIC)?;
  let actual=unsafe{ioctl(fd.as_raw_fd(),NS_GET_NSTYPE)};native(os_result(actual as isize))?;check(actual==kind,"namespace type differs")?;Ok(fd)
@@ -459,4 +469,22 @@ impl PrivateRuntimeDirectory{
  }
  pub(crate) fn path(&self)->Probe<String>{Ok(format!("/run/process-tree-guard/{}/private.sock",self.name.to_str().map_err(|_|"runtime unit UTF8")?))}
  pub(crate) fn revalidate(&self)->Probe<()>{verify_runtime_parent(&self.installation)?;check(require_root_mode(&descriptor_stat(&self.directory)?,S_IFDIR)?==self.identity,"held per-service runtime directory changed")?;let parent=&self.installation[self.installation.len()-2];require_name_matches(parent.as_raw_fd(),&self.name,&self.directory)?;Ok(())}
+}
+
+// Genuine calling-thread snapshot. No umask(0)/restore and no main-thread
+// substitution when a library caller has a distinct fs_struct.
+pub(in super::super::super) fn capture_calling_umask()->Probe<u16>{
+ #[cfg(target_arch="aarch64")]const GETTID:c_long=178;
+ #[cfg(target_arch="x86_64")]const GETTID:c_long=186;
+ let tid=unsafe{super::super::super::super::syscall(GETTID)};check(tid>0&&tid<=c_int::MAX as c_long,"calling thread identity refused")?;
+ let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;let mount=require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;
+ let link=metadata(proc.as_raw_fd(),c"thread-self",AT_SYMLINK_NOFOLLOW)?;check(link.mode&S_IFMT==0o120000&&Identity::from(&link).same_mount(mount),"thread-self is not same-mount kernel proc link")?;
+ let expected=format!("{}/task/{tid}",std::process::id());let mut target=[0u8;96];let count=native(os_result(unsafe{readlinkat(proc.as_raw_fd(),c"thread-self".as_ptr(),target.as_mut_ptr(),target.len())}))?;
+ check(count<target.len()&&&target[..count]==expected.as_bytes(),"proc thread-self differs from actual calling thread")?;
+ let process=proc_process(&proc,std::process::id())?;let tasks=proc_directory(&process,c"task")?;require_fs(&tasks,PROC_MAGIC)?;check(Identity::from(&descriptor_stat(&tasks)?).same_mount(mount),"proc task directory mount differs")?;
+ let name=CString::new(tid.to_string()).expect("decimalTID");let thread=proc_directory(&tasks,&name)?;require_fs(&thread,PROC_MAGIC)?;check(Identity::from(&descriptor_stat(&thread)?).same_mount(mount),"proc calling-thread directory mount differs")?;
+ let status=proc_leaf(&thread,c"status")?;let raw=bounded_fd_bytes(&status,65536)?;require_name_matches(thread.as_raw_fd(),c"status",&status)?;
+ let text=std::str::from_utf8(&raw).map_err(|_|"calling-thread status UTF8")?;let value=status_field(text,"Umask:")?;
+ check(!value.is_empty()&&value.len()<=4&&value.bytes().all(|byte|(b'0'..=b'7').contains(&byte)),"calling-thread umask format refused")?;
+ let mask=u16::from_str_radix(value,8).map_err(|_|"calling-thread umask octal")?;check(mask<=0o777,"calling-thread umask exceeds0777")?;Ok(mask)
 }

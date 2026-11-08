@@ -7,21 +7,28 @@ use std::os::fd::AsFd;
 use std::os::unix::ffi::{OsStrExt,OsStringExt};
 use std::os::unix::fs::OpenOptionsExt;
 const OBSERVE_GRACE:u64=1_000_000_000;
-unsafe extern "C"{fn prctl(option:c_int,...)->c_int;fn access(path:*const c_char,mode:c_int)->c_int;}
+unsafe extern "C"{fn prctl(option:c_int,...)->c_int;fn access(path:*const c_char,mode:c_int)->c_int;fn shutdown(fd:c_int,how:c_int)->c_int;}
+
+#[derive(Clone,Copy)]struct ShutdownReceipt{result:c_int,errno:Option<c_int>}
+#[derive(Clone,Copy,Default)]struct JoinFacts{service_terminal:bool,domain_empty:bool,manager_status:Option<i32>,manager_verified:bool,unit_unreferenced:bool}
+struct CancellationJoin{until_ns:Option<u64>,shutdown:Option<ShutdownReceipt>,read:entry::PacketAttempt,read_error:Option<String>,join_error:Option<String>,facts:JoinFacts,native_settled:bool}
+impl CancellationJoin{fn new()->Self{Self{until_ns:None,shutdown:None,read:entry::PacketAttempt::default(),read_error:None,join_error:None,facts:JoinFacts::default(),native_settled:false}}}
+fn before(until:u64)->std::result::Result<(),String>{if supervisor::boottime_ns()?<until{Ok(())}else{Err("client bounded join deadline expired".into())}}
+
 #[must_use="inspect completion versus retained uncertain service capabilities"]
 pub(crate) struct ClientOutcome{
  code:i32,error:Option<String>,original:Option<OriginalInvocation>,
  activation:Option<OwnedFd>,private:Option<OwnedFd>,service:Option<OwnedFd>,events:Option<fs::File>,
  unit:Option<manager::UnitReference>,completion:Option<supervisor::native_activation::ClientCompletion>,private_runtime:Option<supervisor::native_activation::PrivateRuntimeDirectory>,protected:Vec<OwnedFd>,hello:Option<entry::Hello>,
- raw_hello:Vec<u8>,raw_result:Vec<u8>,result:Option<entry::DecodedOutcome>,exit_timer:Option<std::rc::Rc<entry::ExitTimer>>,presentation_attempted:bool,completed:bool,
+ raw_hello:Vec<u8>,raw_result:Vec<u8>,result_read:entry::PacketAttempt,cancellation_join:Option<CancellationJoin>,join_facts:JoinFacts,result:Option<entry::DecodedOutcome>,exit_timer:Option<std::rc::Rc<entry::ExitTimer>>,presentation_attempted:bool,completed:bool,
 }
 impl ClientOutcome{
- fn empty()->Self{Self{code:125,error:None,original:None,activation:None,private:None,service:None,events:None,unit:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
+ fn empty()->Self{Self{code:125,error:None,original:None,activation:None,private:None,service:None,events:None,unit:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result_read:entry::PacketAttempt::default(),cancellation_join:None,join_facts:JoinFacts::default(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
  pub(crate) fn exit_code(&self)->i32{self.code}
  pub(crate) fn error(&self)->Option<&str>{self.error.as_deref()}
  pub(crate) fn complete(&self)->bool{self.completed}
- /// Conservative owning quarantine: a live library host may retain a service
- /// until the original cutoff; this is NOT teardown-on-error parity.
+ /// A failed bounded cancellation/join retains unresolved capabilities. A valid
+ /// native frame plus exact terminal/domain/manager join closes this obligation.
  pub(crate) fn may_have_active_service(&self)->bool{self.presentation_attempted&&!self.completed}
  pub(crate) fn wire_evidence(&self)->(&[u8],&[u8]){(&self.raw_hello,&self.raw_result)}
 }
@@ -44,6 +51,50 @@ fn command_absolute(command:&[OsString])->std::result::Result<Vec<Vec<u8>>,Strin
 }
 fn environment()->Vec<Vec<u8>>{std::env::vars_os().map(|(key,value)|{let mut bytes=key.into_vec();bytes.push(b'=');bytes.extend(value.into_vec());bytes}).collect()}
 fn service_gone(fd:&OwnedFd)->std::result::Result<bool,String>{let mut entry=PollFd{fd:fd.as_raw_fd(),events:POLLIN,revents:0};let count=error(os_result(unsafe{poll(&mut entry,1,0)} as isize))?;if count==0&&entry.revents==0{return Ok(false);}if count==1&&entry.revents&(POLLIN|0x10)!=0&&entry.revents&!(POLLIN|0x10)==0{return Ok(true);}Err("service pidfd poll unverified".into())}
+fn join_service(outcome:&mut ClientOutcome,reported:Option<i32>,until:u64,facts:&mut JoinFacts)->std::result::Result<(),String>{
+ let hello=outcome.hello.as_ref().ok_or("missing service hello for join")?.clone();
+ loop{
+  before(until)?;let service=outcome.service.as_ref().ok_or("missing exact service capability")?;
+  if service_gone(service)?{facts.service_terminal=true;before(until)?;if !outcome.completion.as_mut().ok_or("missing exact completion authority")?.population_after_terminal(service,hello.pid)?{facts.domain_empty=true;break;}}
+  before(until)?;let left=until.checked_sub(supervisor::boottime_ns()?).filter(|n|*n>0).ok_or("join poll deadline expired")?;
+  let mut watched=PollFd{fd:service.as_raw_fd(),events:POLLIN,revents:0};let result=unsafe{poll(&mut watched,1,left.div_ceil(1_000_000).min(10) as c_int)};
+  if result<0{return Err(format!("root settlement poll: {}",io::Error::last_os_error()));}
+ }
+ before(until)?;let code=match reported{Some(code)=>code,None=>outcome.unit.as_ref().ok_or("missing retained unit reference")?.terminal_code(until)?};facts.manager_status=Some(code);
+ let status=outcome.unit.as_ref().ok_or("missing retained unit reference")?.final_status(code,outcome.completion.as_ref().ok_or("missing completion")?.retired(),until)?;
+ if matches!(status,manager::FinalStatus::NeedsRetirement){
+  before(until)?;if outcome.completion.as_mut().ok_or("missing completion")?.population_after_terminal(outcome.service.as_ref().ok_or("missing service")?,hello.pid)?{return Err("terminal unit is still populated".into());}
+  let proof=outcome.completion.as_ref().expect("checked completion").retired().ok_or("manager pruned path without exact original retirement proof")?;
+  before(until)?;if !matches!(outcome.unit.as_ref().expect("checked unit").final_status(code,Some(proof),until)?,manager::FinalStatus::Verified){return Err("terminal retirement join remained unverified".into());}
+ }
+ facts.manager_verified=true;before(until)?;outcome.unit.as_mut().expect("checked unit").release(until)?;facts.unit_unreferenced=true;before(until)
+}
+fn cancel_and_join(outcome:&mut ClientOutcome){
+ let mut receipt=CancellationJoin::new();receipt.native_settled=outcome.completed;if outcome.completed{receipt.facts=outcome.join_facts;}
+ let cap=(||->std::result::Result<u64,String>{let original=outcome.original.as_ref().ok_or("missing original join lease")?;let observed_end=original.metadata().deadline_ns.checked_add(entry::GRACE+OBSERVE_GRACE).ok_or("original observation cutoff overflow")?;Ok(supervisor::boottime_ns()?.checked_add(5_000_000_000).ok_or("short cancellation join overflow")?.min(observed_end))})();
+ if let Ok(until)=&cap{receipt.until_ns=Some(*until);}
+ // Attempt the actual half-close even if clock/budget validation failed; retain
+ // its raw result. No local error can postpone the original service deadline.
+ if let Some(private)=outcome.private.as_ref(){let result=unsafe{shutdown(private.as_raw_fd(),1)};let errno=if result<0{io::Error::last_os_error().raw_os_error()}else{None};receipt.shutdown=Some(ShutdownReceipt{result,errno});}
+ let result=(||->std::result::Result<(),String>{
+  let until=cap?;before(until)?;
+  if outcome.completed{receipt.native_settled=true;return Ok(());}
+  // Reuse an already consumed valid native frame. A consumed invalid frame is
+  // never replaced by a second read or by invented native settlement evidence.
+  if outcome.result.is_none()&&!outcome.result_read.returned.is_some_and(|count|count>=0){
+   let read=(||->std::result::Result<entry::DecodedOutcome,String>{let hello=outcome.hello.as_ref().ok_or("missing service hello")?;before(until)?;
+    let packet=entry::packet_observed(outcome.private.as_ref().ok_or("missing private channel")?.as_raw_fd(),until,8192,&mut receipt.read)?;
+    outcome.raw_result=packet.bytes;if !packet.rights.is_empty()||packet.sender!=(Credentials{pid:hello.pid as c_int,uid:0,gid:0}){return Err("cancel-join root frame sender/rights differ".into());}
+    entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,hello.cutoff)
+   })();match read{Ok(frame)=>outcome.result=Some(frame),Err(error)=>receipt.read_error=Some(error)}
+  }
+  let expected=outcome.result.as_ref().map(|frame|frame.code);join_service(outcome,expected,until,&mut receipt.facts)?;
+  receipt.native_settled=outcome.result.as_ref().is_some_and(|frame|frame.settled);outcome.completed=receipt.native_settled;
+  if !receipt.native_settled{return Err("native settlement frame missing or unconfirmed; separate empty-domain facts retained".into());}Ok(())
+ })();if let Err(error)=result{receipt.join_error=Some(error);}outcome.cancellation_join=Some(receipt);
+ // The original local error/code125 is never cleared, even after full join.
+}
+
 fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)->ClientOutcome{
  let mut outcome=ClientOutcome::empty();outcome.original=Some(original);
  let result=(||->std::result::Result<i32,String>{
@@ -87,31 +138,16 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   validate_pidfd(outcome.service.as_ref().expect("held service"),hello.pid as c_int,&mut NativeReceipt::default()).map_err(|e|format!("{e:?}"))?;
   outcome.presentation_attempted=true;
   error(send_request(private,original,&args,&env,io.stdio.each_ref().map(|fd|fd.as_fd()),io.cwd.as_fd()))?;
-  let packet=entry::packet(private.as_raw_fd(),observation_end,8192)?;outcome.raw_result=packet.bytes;
+  let packet=entry::packet_observed(private.as_raw_fd(),observation_end,8192,&mut outcome.result_read)?;outcome.raw_result=packet.bytes;
   if !packet.rights.is_empty()||packet.sender!=peer{return Err("root result sender/capabilities differ".into());}
   outcome.result=Some(entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,end)?);
   let decoded=outcome.result.as_ref().expect("owned root result");let code=decoded.code;let settled=decoded.settled;let root_error=decoded.error.clone();
-  // The framed result is PROVISIONAL through actual process exit, unit empty,
-  // and exact retained manager ExecMainPID/code/status/result publication.
-  loop{
-   if supervisor::boottime_ns()? >= observation_end{return Err("root service settlement observation expired".into());}
-   if service_gone(outcome.service.as_ref().expect("held service"))?&&!outcome.completion.as_mut().expect("held completion authority").population_after_terminal(outcome.service.as_ref().expect("held service"),hello.pid)?{break;}
-   let mut watched=PollFd{fd:outcome.service.as_ref().expect("held service").as_raw_fd(),events:POLLIN,revents:0};
-   if unsafe{poll(&mut watched,1,10)}<0{return Err(format!("root settlement poll: {}",io::Error::last_os_error()));}
-  }
-  let status=outcome.unit.as_ref().expect("unit reference retained").final_status(code,outcome.completion.as_ref().expect("held completion authority").retired(),observation_end)?;
-  if matches!(status,manager::FinalStatus::NeedsRetirement){
-   // This is the authoritative final query's typed same-incarnation empty-path
-   // case, not a preflight or a retry of arbitrary manager/read errors.
-   if outcome.completion.as_mut().expect("held completion authority").population_after_terminal(outcome.service.as_ref().expect("held service"),hello.pid)?{return Err("terminal unit is still populated".into());}
-   let proof=outcome.completion.as_ref().expect("held completion authority").retired().ok_or("manager pruned path without exact original retirement proof")?;
-   if !matches!(outcome.unit.as_ref().expect("unit reference retained").final_status(code,Some(proof),observation_end)?,manager::FinalStatus::Verified){return Err("terminal retirement join remained unverified".into());}
-  }
-  outcome.unit.as_mut().expect("unit reference retained").release(observation_end)?;
+  let mut facts=JoinFacts::default();let joined=join_service(&mut outcome,Some(code),observation_end,&mut facts);outcome.join_facts=facts;joined?;
+  outcome.completed=settled;
   if !settled||!root_error.is_empty(){return Err(if root_error.is_empty(){"root native settlement is unverified".into()}else{root_error});}
   outcome.completed=true;Ok(code)
  })();
- match result{Ok(code)=>outcome.code=code,Err(error)=>{outcome.code=125;outcome.error=Some(if outcome.presentation_attempted{format!("{error}; nonsettled service quarantine retained; payload may continue until original cutoff") }else{error});}}
+ match result{Ok(code)=>outcome.code=code,Err(primary)=>{outcome.code=125;outcome.error=Some(primary);if outcome.presentation_attempted{cancel_and_join(&mut outcome);}}}
  outcome
 }
 /// Library host policy is read-only. Capture precedes every activation attempt.

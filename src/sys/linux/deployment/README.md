@@ -54,4 +54,8 @@ privacy review; raw host/account/SSH transport artifacts stay local.
 
 Every synchronous post-bind refusal attempts exact private socket unlink and retains primary plus cleanup errors. PID1 owns the per-instance RuntimeDirectory and removes its remaining socket after stop, including abrupt self-timer death; the service verifies the effective directory/preserve/mode settings and holds its protected directory identity. This cleanup behavior still requires actual native entry qualification.
 
-Post-presentation library failures currently return incomplete owning125 quarantine. A live host can leave the service/payload until the original cutoff. This does not satisfy public teardown-on-error parity and blocks enablement until native bounded cancellation/join is implemented and qualified.
+The prior847 checkpoint returned incomplete owning125 quarantine without a post-presentation cancellation/join. Cancellation v2 below implements the missing path; unconfirmed outcomes still retain quarantine and runtime qualification remains required.
+
+Cancellation v2 is now present in source: the same accepted private connection is directly watched by the native watchdog and terminal controller, with a first-cancellation cause and bounded client shutdown/join. The prior quarantine gap remains historical; current behavior still needs fresh compile/native qualification. Only a valid native frame plus exact service/domain/manager join can complete a failed call; otherwise the125 outcome retains quarantine.
+
+The latest handoff also contains PTGEX5 caller-thread umask and source-only natural watchdog stop (internal SHUT_RD after domain empty, natural124 only,1s cap, every forced signal uncertain). Nothing in these source files installs or activates a socket/service. An explicit deny-by-default administrative execution-delegation policy and confinement/resource-context contract remain prerequisites before activation.

@@ -157,6 +157,10 @@ pub(super) struct UnitReference{bus:Bus,path:CString,name:CString,invocation:[u8
 impl UnitReference{
  pub(super) fn acquire(name:&CStr,invocation:[u8;16],pid:u32,group:String,until:u64)->Probe<Self>{let bus=Bus::public(until)?;bus.ref_operation(name,c"RefUnit",until)?;let path=bus.unit_for_name(name,until)?;let result=Self{bus,path,name:name.to_owned(),invocation,pid,group,referenced:true};result.live(until)?;Ok(result)}
  pub(super) fn live(&self,until:u64)->Probe<()>{if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u32>(&self.path,SERVICE,c"MainPID",c"u",b'u',until)?!=self.pid||self.bus.text(&self.path,SERVICE,c"ControlGroup",until)?!=self.group{return Err("root unit reference identity differs".into());}let (pid,_,_)=self.bus.exec(&self.path,until)?;if pid!=self.pid{return Err("root ExecStart identity differs".into());}Ok(())}
+ pub(super) fn terminal_code(&self,until:u64)->Probe<i32>{
+  if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u32>(&self.path,SERVICE,c"ExecMainPID",c"u",b'u',until)?!=self.pid||self.bus.number::<i32>(&self.path,SERVICE,c"ExecMainCode",c"i",b'i',until)?!=1{return Err("unframed terminal incarnation/status is unverified".into());}
+  let status:i32=self.bus.number(&self.path,SERVICE,c"ExecMainStatus",c"i",b'i',until)?;if !(0..=255).contains(&status){return Err("unframed service status out of range".into());}Ok(status)
+ }
  pub(super) fn final_status(&self,reported:i32,retired:Option<&supervisor::native_activation::RetiredUnit>,until:u64)->Probe<FinalStatus>{
   let group=self.bus.text(&self.path,SERVICE,c"ControlGroup",until)?;
   if self.bus.invocation(&self.path,until)?!=self.invocation||!(group==self.group||group.is_empty()){return Err("terminal unit incarnation differs".into());}

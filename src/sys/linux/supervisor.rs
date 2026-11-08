@@ -248,14 +248,15 @@ pub(crate) use native_activation::{RunOutcome,VerifiedServiceScope};
 /// The received kernel-authenticated request supplies all caller IO/CWD/env;
 /// no privileged ambient or externally fabricated caller context is accepted.
 pub(crate) unsafe fn run_received(
-    connection:OwnedFd,
+    connection:OwnedFd,cancellation:super::entry::AuthenticatedCancellation,
     authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
 )->RunOutcome {
+    let cancellation=Arc::new(cancellation);
     let scope=match native_activation::capture_service_scope(){
         Ok(scope)=>scope,
-        Err(error)=>return native_activation::before_admission(None,NativeReceipt::default(),error),
+        Err(error)=>return native_activation::before_admission(None,Arc::clone(&cancellation),NativeReceipt::default(),error),
     };
-    unsafe{run_in_service(scope,connection,authorizes)}
+    unsafe{run_in_service_arc(scope,connection,cancellation,authorizes)}
 }
 
 /// Typed internal consuming path, exported only so the actual checked entry and
@@ -268,23 +269,25 @@ pub(crate) unsafe fn run_received(
 /// actual public dispatch/manager bootstrap still must call them before helpers.
 pub(crate) unsafe fn run_in_service(
     scope:VerifiedServiceScope,
-    connection:OwnedFd,
+    connection:OwnedFd,cancellation:super::entry::AuthenticatedCancellation,
     authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
-)->RunOutcome {
+)->RunOutcome {unsafe{run_in_service_arc(scope,connection,Arc::new(cancellation),authorizes)}}
+unsafe fn run_in_service_arc(scope:VerifiedServiceScope,connection:OwnedFd,cancellation:Arc<super::entry::AuthenticatedCancellation>,
+ authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool)->RunOutcome{
     let mut admission=NativeReceipt::default();
     if let Err(error)=scope.revalidate(){
-        return native_activation::before_admission(Some(scope),admission,error);
+        return native_activation::before_admission(Some(scope),Arc::clone(&cancellation),admission,error);
     }
     let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
         Ok(value)=>value,Err(error)=>{let code=match &error {Refusal::Invocation(e)=>e.exit_code(),_=>125};
-            return native_activation::before_admission_code(Some(scope),admission,format!("admission refused: {error:?}"),code);},
+            return native_activation::before_admission_code(Some(scope),Arc::clone(&cancellation),admission,format!("admission refused: {error:?}"),code);},
     };
-    unsafe{run_admitted_in_service(scope,admitted,admission,authorizes)}
+    unsafe{run_admitted_in_service(scope,admitted,admission,cancellation,authorizes)}
 }
-pub(super) unsafe fn run_admitted_in_service(scope:VerifiedServiceScope,admitted:Admitted,admission:NativeReceipt,
+pub(super) unsafe fn run_admitted_in_service(scope:VerifiedServiceScope,admitted:Admitted,admission:NativeReceipt,cancellation:Arc<super::entry::AuthenticatedCancellation>,
     authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool)->RunOutcome {
     let Admitted{peer,invocation,plan,io}=admitted;
-    let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec());
+    let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec(),plan.invocation().umask,cancellation);
     let program=plan.program().to_owned();
     let prepared=match prepare(peer,invocation,plan,
         |identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {

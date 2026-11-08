@@ -463,6 +463,7 @@ impl KilledDomain {
 }
 
 impl DrainedDomain {
+    pub(in super::super) fn peer_cancelled(&self)->c_int{self.controls.peer_cancelled()}
     pub(in super::super) fn receipt(&self) -> &DrainReceipt {
         &self.receipt
     }

@@ -11,10 +11,11 @@
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 2u
+#define PTG_PAYLOAD_SCHEMA 3u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
 #define PTG_PAYLOAD_CANCELLED 2
+#define PTG_PAYLOAD_PEER_CANCEL_FLAG UINT32_C(0x100)
 #define PTG_PAYLOAD_MAX_GROUPS 65536u
 #define PTG_PAYLOAD_MAX_VECTOR 65536u
 #define PTG_PAYLOAD_MAX_STRING_BYTES 131072u
@@ -29,6 +30,12 @@ struct ptg_payload_gate *ptg_payload_gate_create(int32_t *error);
 int32_t ptg_payload_gate_destroy(struct ptg_payload_gate *gate, int32_t *error);
 int32_t ptg_payload_gate_state(const struct ptg_payload_gate *gate);
 int32_t ptg_payload_gate_cancel(struct ptg_payload_gate *gate); /* previous state */
+/* Only a verified peer-readiness branch may make the FIRST cancellation carry
+ * this cause. A prior generic cancellation can never be relabelled. The public
+ * logical state remains CANCELLED and the opaque mapping layout is unchanged. */
+int32_t ptg_payload_gate_cancel_peer(struct ptg_payload_gate *gate);
+/* 1=first cancellation was peer-bound, 0=valid other state, -1=invalid. */
+int32_t ptg_payload_gate_peer_cancelled(const struct ptg_payload_gate *gate);
 /* 0=HELD->RELEASED performed, 1=already RELEASED, 2=CANCELLED, -1=null.
  * Does not deliver a permit. Duplicate commit is a refusal, not success. */
 int32_t ptg_payload_gate_commit(struct ptg_payload_gate *gate);
@@ -39,7 +46,7 @@ struct ptg_payload_spec {
     struct ptg_owner_watch owners;
     int32_t timer_fd, supervisor_fd, watchdog_fd;
     int32_t cwd_fd, stdio_fd[3], permit_reader, ready_writer, exec_writer;
-    uint32_t uid, gid, group_count, argc, envc;
+    uint32_t uid, gid, group_count, argc, envc, umask;
     uint64_t deadline_ns, original_mask;
     const uint32_t *groups;
     const char *program;
@@ -85,7 +92,7 @@ struct ptg_payload_ready {
     uint64_t child_mask, before_ns, after_ns;
     int32_t kill_result, kill_error;
 };
-/* READY wire is exactly16 bytes: schema:u32=2, token:u32='R', blocked_mask:u64.
+/* READY wire is exactly16 bytes: schema:u32=3, token:u32='R', blocked_mask:u64.
  * It follows FD scrub and verified groups/gid/uid/zero caps/NNP/CWD. It certifies
  * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion. setup_timer is an
  * independently armed finite readiness timer; no C-owned timer is introduced.

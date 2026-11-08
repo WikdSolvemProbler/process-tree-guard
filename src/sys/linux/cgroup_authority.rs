@@ -408,6 +408,8 @@ pub(super) fn provision(scope:&service_scope::VerifiedServiceScope) -> std::resu
     let mut created = CreatedLeaf { parent, name, anchor: None };
     match open_created(&mut created) {
         Ok(handles) => Ok(DomainControls {
+            cancellation:None,
+            peer_cancel:std::cell::Cell::new(None),
             gate: None,
             gate_cancel: std::cell::Cell::new(None),
             gate_release: None,

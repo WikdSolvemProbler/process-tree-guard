@@ -24,6 +24,7 @@ unsafe extern "C"{
  fn ptg_entry_timer_delete(owner:*mut c_void,out:*mut TimerObservation);
  pub(super) fn _exit(code:c_int)->!;
  fn write(fd:c_int,bytes:*const c_void,count:usize)->isize;
+ fn shutdown(fd:c_int,how:c_int)->c_int;
  fn socket(domain:c_int,kind:c_int,protocol:c_int)->c_int;
  fn bind(fd:c_int,address:*const c_void,length:u32)->c_int;
  fn connect(fd:c_int,address:*const c_void,length:u32)->c_int;
@@ -92,11 +93,15 @@ pub(super) fn connect_root(path:&str,until:u64)->Probe<OwnedFd>{
 }
 pub(super) fn send(fd:RawFd,bytes:&[u8],rights:&[RawFd],until:u64)->Probe<()>{loop{match send_packet(fd,bytes,rights){Ok(())=>return Ok(()),Err(Refusal::Os(Some(11)))=>wait(fd,POLLOUT,until,None)?,Err(e)=>return Err(format!("root channel send: {e:?}"))}}}
 pub(super) struct Packet{pub(super) bytes:Vec<u8>,pub(super) rights:Vec<OwnedFd>,pub(super) sender:Credentials}
-pub(super) fn packet(fd:RawFd,until:u64,cap:usize)->Probe<Packet>{
+#[derive(Default)]pub(super) struct PacketAttempt{pub(super) recv_attempted:bool,pub(super) returned:Option<isize>,pub(super) errno:Option<c_int>,pub(super) flags:c_int,pub(super) bytes:Vec<u8>}
+pub(super) fn packet(fd:RawFd,until:u64,cap:usize)->Probe<Packet>{packet_observed(fd,until,cap,&mut PacketAttempt::default())}
+pub(super) fn packet_observed(fd:RawFd,until:u64,cap:usize,receipt:&mut PacketAttempt)->Probe<Packet>{
  wait(fd,POLLIN,until,None)?;let mut bytes=vec![0;cap];let mut iov=IoVec{base:bytes.as_mut_ptr(),len:bytes.len()};let mut control=[0u64;CONTROL_WORDS];let mut msg=message(&mut iov,control.as_mut_ptr().cast(),CONTROL_BYTES);
- let count=os_result(unsafe{recvmsg(fd,&mut msg,MSG_CMSG_CLOEXEC|MSG_DONTWAIT)}).map_err(|e|format!("root receive: {e:?}"))?;
+ receipt.recv_attempted=true;let returned=unsafe{recvmsg(fd,&mut msg,MSG_CMSG_CLOEXEC|MSG_DONTWAIT)};let errno=if returned<0{io::Error::last_os_error().raw_os_error()}else{None};receipt.returned=Some(returned);receipt.errno=errno;receipt.flags=msg.flags;
+  let count=if returned<0{return Err(format!("root receive errno {errno:?}"));}else{returned as usize};
  let raw=unsafe{std::slice::from_raw_parts(control.as_ptr().cast::<u8>(),msg.control_len.min(CONTROL_BYTES))};let received=ancillary(raw).map_err(|e|format!("root ancillary: {e:?}"))?;
  // All delivered rights owned before ANY subsequent refusal.
+  receipt.bytes=bytes[..count.min(cap)].to_vec();
  if msg.control_len>CONTROL_BYTES||msg.flags&!MSG_CMSG_CLOEXEC!=0||count==0||count>cap||received.unexpected{return Err("root packet framing/flags refused".into());}
  bytes.truncate(count);let sender=received.credential.ok_or("root packet has no kernel credentials")?;Ok(Packet{bytes,rights:received.rights,sender})
 }
@@ -131,6 +136,37 @@ impl PrivateListener{
  fn unlink_exact(&self)->Probe<()>{if self.path_removed.get()||!self.bound{return Ok(());}self.require_exact()?;fs::remove_file(&self.path).map_err(|e|e.to_string())?;self.path_removed.set(true);Ok(())}
  fn cleanup_error(&self,primary:&str)->String{match self.unlink_exact(){Ok(())=>primary.to_owned(),Err(error)=>format!("{primary}; exact private socket cleanup: {error}; original owner retained for PID1 runtime cleanup")}}
 }
+#[derive(Clone,Copy,Debug)]
+pub(super) struct CancellationObservation{pub(super) returned:c_int,pub(super) errno:c_int,pub(super) revents:c_short}
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub(super) enum CancellationState{Clear,Peer,Fault}
+impl CancellationObservation{
+ pub(super) fn state(self)->CancellationState{
+  if self.returned==0&&self.errno==0&&self.revents==0{return CancellationState::Clear;}
+  if self.returned==1&&self.errno==0&&self.revents!=0&&self.revents&!(POLLIN|0x2000|0x10)==0{return CancellationState::Peer;}
+  CancellationState::Fault
+ }
+}
+// Constructor/fields stay private to the actual service entry. This is the
+// accepted final connection bound to the original requester, never a raw-FD token.
+pub(crate) struct AuthenticatedCancellation{fd:OwnedFd,peer:Credentials}
+impl AuthenticatedCancellation{
+ fn from_private(private:&OwnedFd,original:&invocation::VerifiedInvocation,peer:Credentials)->Probe<Self>{
+  validate_connection(private.as_raw_fd(),true).map_err(|e|format!("private cancellation channel: {e:?}"))?;
+  if kernel_peer_credentials(private.as_raw_fd()).map_err(|e|format!("{e:?}"))?!=peer||original.metadata().identities.first().map(|identity|identity.pid as c_int)!=Some(peer.pid){return Err("cancellation peer differs from original requester".into());}
+  validate_pidfd(original.requester(),peer.pid,&mut NativeReceipt::default()).map_err(|e|format!("cancellation requester: {e:?}"))?;
+  let fd=own_fd(unsafe{fcntl(private.as_raw_fd(),1030,3 as c_int)})?;let owner=Self{fd,peer};
+  validate_connection(owner.fd.as_raw_fd(),true).map_err(|e|format!("owned cancellation channel: {e:?}"))?;
+  if kernel_peer_credentials(owner.fd.as_raw_fd()).map_err(|e|format!("{e:?}"))?!=peer{return Err("duplicated cancellation peer differs".into());}Ok(owner)
+ }
+ pub(super) fn fd(&self)->RawFd{self.fd.as_raw_fd()}
+ pub(super) fn peer(&self)->Credentials{self.peer}
+ pub(super) fn shutdown_read(&self)->(c_int,c_int){let result=unsafe{shutdown(self.fd(),0)};let errno=if result<0{io::Error::last_os_error().raw_os_error().unwrap_or(0)}else{0};(result,errno)}
+ pub(super) fn sample(&self)->CancellationObservation{
+  let mut event=PollFd{fd:self.fd(),events:POLLIN|0x2000,revents:0};let returned=unsafe{poll(&mut event,1,0)};let errno=if returned<0{io::Error::last_os_error().raw_os_error().unwrap_or(0)}else{0};CancellationObservation{returned,errno,revents:event.revents}
+ }
+}
+
 #[derive(Clone)]pub(super) struct Hello{pub(super) pid:u32,pub(super) invocation:[u8;16],pub(super) cutoff:u64,pub(super) unit:String,pub(super) group:String,pub(super) socket:String,pub(super) early:i32}
 impl Hello{
  fn encode(&self)->Probe<Vec<u8>>{let mut out=b"PTGBOOT1".to_vec();out.extend_from_slice(&self.pid.to_le_bytes());out.extend_from_slice(&self.invocation);out.extend_from_slice(&self.cutoff.to_le_bytes());out.extend_from_slice(&self.early.to_le_bytes());for text in [&self.unit,&self.group,&self.socket]{if text.len()>4096{return Err("hello field bound".into());}out.extend_from_slice(&(text.len() as u16).to_le_bytes());out.extend_from_slice(text.as_bytes());}Ok(out)}
@@ -196,7 +232,7 @@ impl DecodedOutcome{
   let value=Self{code,settled,error,timers};
   // A positive completion can only come from the full bootstrap-to-sticky handoff.
   // Failed receipts remain available in the raw frame, never promoted to success.
-  if value.settled&&value.error.is_empty(){
+  if value.settled{
    if value.timers.len()!=2{return Err("completed result lacks both timer authorities".into());}
    for timer in &value.timers{if timer.abi!=[1,96,7,9,0,1,64,32,56]||!created_timer(&timer.create)||timer.first_failure.is_some()||timer.latest.is_some()!= (timer.checks!=0){return Err("completed timer evidence invalid".into());}if let Some(raw)=&timer.latest{if !observed_timer(raw,timer.create.deadline_ns){return Err("completed timer observation invalid".into());}}}
    let bootstrap=&value.timers[0];let cleanup=&value.timers[1];
@@ -272,7 +308,8 @@ pub(crate) fn root_service_main()->!{
  if let Err(error)=result{let error=listener.cleanup_error(&error);report_failure(&error);let frame=root_frame(invocation,125,false,&error,&bootstrap,Some(&cleanup));let _=send(private.as_raw_fd(),&frame,&[],cleanup.until);unsafe{_exit(125)}}
  // All original authenticated IO/cwd/environment and exact lease feed the
  // existing real controller. No rewritten/ambient caller context is introduced.
- let run=unsafe{supervisor::run_admitted_in_service(scope,first,admission,|uid,gid,groups,program|uid!=0&&gid!=0&&!groups.contains(&0)&&program.to_bytes().starts_with(b"/"))};
+ let cancellation=match AuthenticatedCancellation::from_private(&private,&first.invocation,first.peer){Ok(value)=>std::sync::Arc::new(value),Err(error)=>{let frame=root_frame(invocation,125,false,&error,&bootstrap,Some(&cleanup));let _send=send(private.as_raw_fd(),&frame,&[],cleanup.until);unsafe{_exit(125)}}};
+  let run=unsafe{supervisor::run_admitted_in_service(scope,first,admission,cancellation,|uid,gid,groups,program|uid!=0&&gid!=0&&!groups.contains(&0)&&program.to_bytes().starts_with(b"/"))};
  let mut code=run.exit_code();let mut error=run.guard_error().unwrap_or_default();if !error.is_empty(){code=125;}if !run.settled(){code=125;if error.is_empty(){error="native settlement is quarantined".into();}}
  if let Err(failure)=run.validate_final_scope(){code=125;error=failure;}
  let frame=root_frame(invocation,code,run.settled(),&error,&bootstrap,Some(&cleanup));
