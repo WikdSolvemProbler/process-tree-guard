@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "status": "Original-owner PTGEX4 graph rebuilt/linked all8steps + adapted8tests PASS; trusted origin mint/selector disabled; no native guard/protection/performance qualification; private entry timer separately compiled and passed3 ordinary native cases, not full entry activation",
+  "status": "Actual checked entry/client source rebuilt/linked all11steps and existing8 ordinarytests PASS; nativeprivileged/cancellation/publicactivation unqualified and selector disabled",
   "root": "src/sys/linux",
-  "baseline_commit": "a561bf7d9d1ba5f6d9fa7b9c6334ab4a528aa9b3",
-  "baseline_candidate_sha256": "ee27b5691186cf2aa06c1d8b3f6479ec03cac858a1603e97872c099baabd6b05",
-  "history": "target/codex-security/linux-product-integration-history-001/ee27-before-original-invocation-007",
-  "entry_signature": "unsafe fn(VerifiedServiceScope,OwnedFd,Policy)->RunOutcome = linux::run_in_service; Policy=fn(u32,u32,&[u32],&CStr)->bool",
+  "baseline_commit": "dfd6e8a968f462f737d43fb809f9b05ebe887bb0",
+  "baseline_candidate_sha256": "a6ce83a293db3ca86e85fcae585aee5cf19e4e784ff26bbf9edd9c12a6cab93f",
+  "history": "target/codex-security/linux-product-integration-history-001/entry-source-freeze-018",
+  "entry_signature": "root_main.rs -> linux::root_service_main(); client_main.rs -> linux::run_cli; library linux::run_library(command,seconds,OwnerMode) requires existing NNP1",
   "original_client": "OriginalInvocation::capture(OwnerMode::{Manual,Auto},seconds:f64) before manager/helpers; private fields/no raw verified constructor",
   "wire": "PTGEX4: 40Bheader + 16B ordered identity records; 2..249watchers +4IO/CWD rights <=253; aligned1088B ancillary; packet/native bytes cap131072",
   "deadline": "captured BOOTTIME + exact requested fractional duration preserved; receiver-owned absolute private timer; raw authenticated client time is a claim not privileged attestation",
@@ -31,15 +31,18 @@
     "new_framework": false,
     "runtime_effects": "7pure codec/numeric plus1ordinary own IPC/file test with actual manual/auto ancestry proc/pidfd reads; no fork/exec/signals/NNP/settings/cgroup/root",
     "control_truncation": "same recvmsg/adopt/flags code;96B aligned testprefix; production1088B",
-    "status": "PENDING exact review and actual build/test"
+    "status": "PASS exact847:8existing serial tests,0failed/ignored, unchangedbodies; no new testframework or privilegedentry execution"
   },
-  "origin_mint": "ABSENT: actual checked manager origin remains failclosed; no public Linux activation",
+  "origin_mint": "IMPLEMENTED in checked positive source path: protected installed sources/executable + kernel proc/nsfs origin + authenticated PID1 effective unit facts; runtime qualification PENDING",
   "unqualified": [
-    "trusted manager bootstrap and actual public dispatch before helpers",
-    "NNP/setuid activation ordering and root listener/outcome delivery",
-    "native multi-owner payload/watchdog/cgroup runtime",
-    "supported kernel-floor/failure/shared-escape/performance qualification",
-    "complete typed native-original-timer refusal classification at actual failure site; genericerrors125 pending implementation/qualification"
+    "exact full cancellation/native-runtime implementation review beforeactivation",
+    "temporary independently finite deployment/activation and exact cleanup",
+    "native privileged whole-owner/payload/watchdog/controller lifecycle/failure tests",
+    "complete typed original-native-timer124 classification",
+    "supported5.14 compatibility and native runtime",
+    "Cargo packaging/public selector wiring and performance",
+    "native bounded cancellation/join for post-presentation library error; current finite quarantine is not public parity",
+    "actual per-service RuntimeDirectory cleanup/manager terminal transition qualification"
   ],
   "selector_sha256": "55d0d8d6caa5d224b554cd6ace3b103142196ba3ef5bfa5cec0fc330d6c58d8a",
   "external": [
@@ -48,8 +51,7 @@
       "bytes": 1171,
       "sha256": "56252eb28270b4743d73e17e05ae933d3fad8168e7b4ba34405e859be9c85c53",
       "canonical_git_bytes": 1137,
-      "canonical_git_sha256": "6979e99e7bab5e73b1a1be076244c99480cdc4851d3cc82a1b243584f193f42e",
-      "raw_snapshot_line_endings": "CRLF; recorded bytes/sha256 retain exact earlier transferred build input"
+      "canonical_git_sha256": "6979e99e7bab5e73b1a1be076244c99480cdc4851d3cc82a1b243584f193f42e"
     }
   ],
   "files": [
@@ -57,6 +59,16 @@
       "path": ".gitattributes",
       "bytes": 14,
       "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
+    },
+    {
+      "path": "PROVENANCE.json",
+      "bytes": 19906,
+      "sha256": "89102b97d0acdb1052c32d2690f67e9873c36b28d446d57d3363284b192cc478"
+    },
+    {
+      "path": "README.md",
+      "bytes": 43452,
+      "sha256": "161203737b37d7572f3cf08a6b2548165300a1c754d1a7923b2506eb934e02d6"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -72,6 +84,36 @@
       "path": "child_reaper.rs",
       "bytes": 15306,
       "sha256": "cd71240834ecb1a9da099b6a917648b76e4b1f125ff4578df35e80546c820788"
+    },
+    {
+      "path": "client.rs",
+      "bytes": 13910,
+      "sha256": "5579bc1e0a18b764c839d466a5ba6d2d2653bdad8c60cc5575908cdf59465ca1"
+    },
+    {
+      "path": "client_main.rs",
+      "bytes": 879,
+      "sha256": "4dbe19a147bb37a8abc8aa08bc34b6b2fdfd89777afd6dc1388242186fb4c9ac"
+    },
+    {
+      "path": "deployment/README.md",
+      "bytes": 4198,
+      "sha256": "65917a9efbd1bc41cf53077a928eb6df75ab509d12ab7a6fcbc834e3b52538f6"
+    },
+    {
+      "path": "deployment/process-tree-guard.socket",
+      "bytes": 383,
+      "sha256": "88cb1f85fa7fa71fe82744b617d1846d6d0ff4e1f83d2989dc32ce1decd5bc42"
+    },
+    {
+      "path": "deployment/process-tree-guard@.service",
+      "bytes": 852,
+      "sha256": "31d4a3bf22c937dee7ec289a14ade3f50cafab27d0a7bd4563e18d1a6acb330b"
+    },
+    {
+      "path": "entry.rs",
+      "bytes": 31757,
+      "sha256": "4893452ecddeb24709c38b28fb8ef77a3eacdb72ad710c46b968cee15c7c004f"
     },
     {
       "path": "entry_timer.c",
@@ -94,14 +136,19 @@
       "sha256": "36bb4945359ea42d540161c3a85cf4e73ed22d8bf4eafa86535509abc250ae4a"
     },
     {
+      "path": "manager.rs",
+      "bytes": 24583,
+      "sha256": "f0c45df763b22b16832fc23e583304a0b849423a445c16327b0cbb3fbd6632ed"
+    },
+    {
       "path": "mod.rs",
-      "bytes": 29172,
-      "sha256": "84eee827df9b6d072be66c4b100b075054cca04a9cf878e1b03b4aa6feaa4378"
+      "bytes": 30923,
+      "sha256": "07bb2db3fb8e204f349a17aaad4afec357f665685988685798fedf6e4cf4c953"
     },
     {
       "path": "native_activation.rs",
-      "bytes": 13026,
-      "sha256": "990e97310de51e99cd6b9a1c7e49523f255d3a50a20e87507431502fad6549fc"
+      "bytes": 13921,
+      "sha256": "db0de8ed9a2f42a76fa8454a51247f2513a080c081aed4ee8b8f9ac78a77475b"
     },
     {
       "path": "native_arming.c",
@@ -120,8 +167,8 @@
     },
     {
       "path": "native_port.rs",
-      "bytes": 21113,
-      "sha256": "bc7f20e47d7046b827e44a915cc4a92434d2de57e852a50727d33c4bb5b61365"
+      "bytes": 23478,
+      "sha256": "f3549d1bcff3a993174ed9b54efcdbb11f934ed54aa15207e6e021bbffc865ed"
     },
     {
       "path": "owner_poll.h",
@@ -144,24 +191,19 @@
       "sha256": "724ab8b77544cca873c43f171feb494b5ec30afe2b03cb9f98c43dff30b713f2"
     },
     {
-      "path": "PROVENANCE.json",
-      "bytes": 14895,
-      "sha256": "77f6cb7c81b4bdced26aa71fad67fbfed9ea6ec275bcce6008f5b1cbb7c39d5a"
-    },
-    {
-      "path": "README.md",
-      "bytes": 38738,
-      "sha256": "4bd1a2a48d04914d5e8e2921314758ae6ec9bcb20175c126817f5fda5343f6ed"
-    },
-    {
       "path": "request.rs",
       "bytes": 16193,
       "sha256": "87548f2491a8bc374e3d05868f9bb7a6266de042a4b5e9a1c48d5f226a2eb9d2"
     },
     {
+      "path": "root_main.rs",
+      "bytes": 609,
+      "sha256": "47c7b6c37e2703be92869e1b8b6b224573c4e3fa8114eea69d870e2624cee372"
+    },
+    {
       "path": "service_scope.rs",
-      "bytes": 11093,
-      "sha256": "93fd4b8e5edc7d336d637d199de6f09455f85e940777111d8c0ac4445b08cd9a"
+      "bytes": 38369,
+      "sha256": "9a5f8442d838318a25560d8643c0c495639b4c737094e04b54a908218c149815"
     },
     {
       "path": "settlement.rs",
@@ -170,8 +212,8 @@
     },
     {
       "path": "supervisor.rs",
-      "bytes": 12123,
-      "sha256": "293e259d04887c6d923d25efb6682169466c982e2c2ef210abf6477fa20ef208"
+      "bytes": 13005,
+      "sha256": "a9226eda9d8df5a920b936ac7c7121ece7017a7f3af230aff053f9e4ce8c567e"
     },
     {
       "path": "terminal_bridge.c",
@@ -213,8 +255,8 @@
   ],
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
-  "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
-  "publication_change": "Documentation/publishing privacy only; executable source pins and prior actual implementation build identity unchanged. Raw evidence is withdrawn from the public checkout; no new qualification claimed.",
+  "implementation_build_candidate_sha256": "84762a4132e57a670d99a096899c7509de40140840b31d9caf87ebd90744594c",
+  "publication_change": "New source-only checked entry; earlier qualified timer/ordinary tests retain exact historical scope. No public raw archive is produced; privacy review required.",
   "entry_timer_component": {
     "source_qualified": true,
     "native_component_tests_passed": 3,
@@ -224,5 +266,46 @@
     "raw_receipts": "local-only for publication privacy"
   },
   "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
-  "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities."
+  "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities.",
+  "entry_compile_status": "PASS exact847 build008:6freshC+archive+normalRustobject+testlink+actualroot/clientlinks; all11commands0, no generatedroot/clientexecution",
+  "source_only": true,
+  "retirement": "typed original live/populated cgroup2 capabilities; terminal original pidfd; raw original events ENODEV + exact held-parent basename ENOENT; all replacement/other errors125; manager empty group accepted only typedRetired+same invocation/status",
+  "reviewed_predecessor_sha256": "d55e32d40fa1b9f1588c758aaddbf1c09cb681014969f9b5ae76f1a473318517",
+  "preserved_predecessor": "target/codex-security/linux-product-integration-history-001/entry-ffi-successor-021/source",
+  "review_repairs": [
+    "typed NeedsRetirement from final authoritative same-invocation status query; no separate preflight race",
+    "all post-bind exact unlink attempts plus verified per-service PID1 RuntimeDirectory preserve=no asynchronous cleanup",
+    "no inherited stderr F_SETFL/OFD mutation; dedicated exit timer covers write",
+    "protected public system-bus endpoint and kernel peer/pidfd before trusting bus replies"
+  ],
+  "client_postpresentation_failure": "explicit incomplete owning125 quarantine; live library host may leave service/payload until original cutoff; NOT settled teardown-on-error parity; native cancel/join remains required before enablement",
+  "compile_repair": "Actual ff3af607 compile007 found writeFFI *const u8 vs existing libc *const c_void signature conflict; declaration and explicit caller cast only; no lint suppression or behavior change",
+  "compile_export_repair": "Actual root/client main compile007 diagnosed unused pub imports; preserve concrete opaque type aliases and a same-contract consuming function wrapper instead of unused reexports; no lint suppression or API removal",
+  "predecessor_implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
+  "entry_source_validation": {
+    "implementation_build_candidate_sha256": "84762a4132e57a670d99a096899c7509de40140840b31d9caf87ebd90744594c",
+    "platform": "Linux6.8 aarch64 ordinary user",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "fresh_native_objects": 6,
+    "native_archive_reused": false,
+    "actual_root_and_client_executables_linked": true,
+    "existing_tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "existing_test_bodies_unchanged": true,
+    "native_ipc_refusals": 14,
+    "original_owners_deadline_io_preserved": true,
+    "artifact_files_preserved_verified": 89,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "privileged_entry_executed": false,
+    "payload_watchdog_controller_executed": false,
+    "public_backend_enabled": false,
+    "per_call_cancel_join_implemented": false,
+    "raw_receipts": "Local-only for publication privacy; public summary is not independently accessible raw runtime evidence.",
+    "limits": "Actual source compile/link and existing ordinary parser/IPC tests only; no containment, public-entry, cleanup transition, proposed-kernel-floor, cancellation or performance qualification."
+  }
 }

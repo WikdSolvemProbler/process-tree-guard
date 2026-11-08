@@ -1,39 +1,28 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Peter Shiller
 //! Held per-invocation service authority. No global payload cgroup is permitted.
-//! Entry-origin minting is deliberately absent until actual root-manager origin,
-//! original public parent/ancestor capabilities and pre-manager absolute lease
-//! are established. Path/env/nonce/PPID1 and an unsafe caller promise cannot mint.
+//! Entry authority comes from protected installation, kernel namespace/proc
+//! evidence and authenticated PID1 effective unit policy. Original public owners
+//! and the absolute invocation cutoff bind before placement; native qualification
+//! and default selector enablement remain pending. No path/env/PPID1-only mint.
 use super::*;
 use std::sync::Arc;
 
 // Only this module may construct either type. There is no public/unsafe raw-FD
 // constructor and no environment/request-path conversion into a trusted token.
+use super::super::super::super::{manager,entry,invocation};
+use std::rc::Rc;
 struct CheckedEntryOrigin {
-    unit_components: Vec<CString>,
-    main_pid: c_int,
-    runtime_ns: u64,
-    startup_ns: u64,
-    stop_ns: u64,
-    randomized_extra_ns: u64,
-    type_exec: bool,
-    delegate: bool,
-    subgroup_supervisor: bool,
-    recursive_kill: bool,
-    send_sigkill: bool,
-    kill_signal: c_int,
-    final_kill_signal: c_int,
-    restart_no: bool,
-    notifications_disabled: bool,
+    authority:manager::CheckedUnit,
+    unit_components:Vec<CString>,
+    original:Option<invocation::Metadata>,
+    cleanup:Option<Rc<entry::ExitTimer>>,
 }
-
-fn checked_entry_origin() -> Probe<CheckedEntryOrigin> {
-    // SUBSTANTIVE ENTRY BARRIER, not a synthetic successful receipt. The next
-    // real entry must verify authoritative manager properties/protected exec
-    // and bootstrap/namespace identity and retain the ORIGINAL API owner set
-    // plus original absolute admission timer BEFORE manager startup. Existing
-    // peer-only PTGEX3 authentication is not that public ownership contract.
-    Err("trusted root-manager entry, original parent/all-ancestor ownership and original absolute lease are not established".into())
+fn checked_entry_origin()->Probe<CheckedEntryOrigin>{
+    let until=boottime_ns()?.checked_add(10_000_000_000).ok_or("entry check deadline overflow")?;
+    let authority=manager::CheckedUnit::capture(until)?;
+    let unit_components=authority.group().split('/').filter(|n|!n.is_empty()).map(|n|CString::new(n).map_err(|_|"manager cgroup NUL")).collect::<std::result::Result<Vec<_>,_>>()?;
+    Ok(CheckedEntryOrigin{authority,unit_components,original:None,cleanup:None})
 }
 
 struct BoundDirectory { name: CString, directory: OwnedFd, identity: Identity,
@@ -75,23 +64,12 @@ fn bounded_membership() -> Probe<String> {
 }
 
 impl CheckedEntryOrigin {
-    fn require_fixed_policy(&self) -> Probe<()> {
-        check(self.main_pid>0 && self.main_pid as u32==std::process::id(),"manager MainPID differs from this service")?;
-        check(self.runtime_ns>0 && self.startup_ns>0 && self.stop_ns>0
-            && self.runtime_ns!=u64::MAX && self.startup_ns!=u64::MAX && self.stop_ns!=u64::MAX,
-            "service requires finite runtime/start/stop authority")?;
-        check(self.type_exec && self.delegate && self.subgroup_supervisor
-            && self.recursive_kill && self.send_sigkill && self.kill_signal==9
-            && self.final_kill_signal==9 && self.restart_no
-            && self.notifications_disabled && self.randomized_extra_ns==0,
-            "service is not the fixed independently bounded recursive-kill policy")?;
-        check(!self.unit_components.is_empty() && self.unit_components.len()<=64,"unit path component count exceeds bound or is hierarchy root")?;
-        let mut path_bytes=0usize;
-        for component in &self.unit_components {
-            let value=component.to_bytes();
-            check(!value.is_empty() && value.len()<=255 && value!=b"." && value!=b".." && !value.contains(&b'/'),"invalid authoritative unit path component")?;
-            path_bytes=path_bytes.checked_add(value.len()+1).filter(|n|*n<=4096).ok_or("unit path byte bound exceeded")?;
-        }
+    fn require_fixed_policy(&self)->Probe<()>{
+        let until=boottime_ns()?.checked_add(10_000_000_000).ok_or("entry validation deadline overflow")?;
+        self.authority.validate(until)?;
+        check(!self.unit_components.is_empty()&&self.unit_components.len()<=64,"unit path component bound")?;
+        let mut total=0usize;
+        for component in &self.unit_components{let value=component.to_bytes();check(!value.is_empty()&&value.len()<=255&&value!=b"."&&value!=b".."&&!value.contains(&b'/'),"manager cgroup component refused")?;total=total.checked_add(value.len()+1).filter(|n|*n<=4096).ok_or("manager cgroup byte bound")?;}
         Ok(())
     }
 }
@@ -102,9 +80,8 @@ impl VerifiedServiceScope {
         Self::open_verified(origin)
     }
 
-    // Private and currently unminted: only a future actual checked entry can
-    // supply CheckedEntryOrigin. This is real descriptor-relative validation,
-    // never permission to trust a user-provided unit path or property snapshot.
+    // Origin is minted only by actual private PID1 calls and held protected/
+    // kernel authority. Request paths and supplied property snapshots never enter.
     fn open_verified(origin:CheckedEntryOrigin) -> Probe<Self> {
         check(unsafe{geteuid()}==0,"service scope requires privileged root")?;
         origin.require_fixed_policy()?;
@@ -149,8 +126,30 @@ impl VerifiedServiceScope {
         Ok(Self{anchor})
     }
 
+    pub(crate) fn completion_capabilities(&self)->Probe<(CString,String,[u8;16],OwnedFd,OwnedFd)>{
+        let origin=&self.anchor.origin;
+        let pidfd=super::super::super::super::pidfd_for(std::process::id() as c_int).map_err(|e|format!("self pidfd: {e:?}"))?;
+        let events=fd_from_call(unsafe{fcntl(self.anchor.unit_events.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;
+        Ok((origin.authority.name().to_owned(),origin.authority.group().to_owned(),origin.authority.invocation(),pidfd,events))
+    }
+    pub(in super::super::super::super) fn bind_original(mut self,original:&invocation::VerifiedInvocation,cleanup:Rc<entry::ExitTimer>)->std::result::Result<Self,(Self,String)>{
+        let result=(||->Probe<()>{
+            original.check_live().map_err(|e|format!("{e:?}"))?;original.check_time().map_err(|e|format!("{e:?}"))?;
+            let until=original.metadata().deadline_ns.checked_add(entry::GRACE).ok_or("cleanup cutoff overflow")?;cleanup.confirmed_until(until)?;
+            let anchor=Arc::get_mut(&mut self.anchor).ok_or("service authority was shared before run binding")?;
+            check(anchor.origin.original.is_none()&&anchor.origin.cleanup.is_none(),"service original binding reused")?;
+            anchor.origin.authority.bind_runtime(until)?;
+            cleanup.confirmed_until(until)?;
+            anchor.origin.original=Some(original.metadata().clone());anchor.origin.cleanup=Some(cleanup);
+            anchor.revalidate()?;Ok(())
+        })();match result{Ok(())=>Ok(self),Err(error)=>Err((self,error))}
+    }
+    pub(in super::super) fn authorize_original(&self,metadata:&invocation::Metadata)->Probe<()>{
+        let origin=&self.anchor.origin;check(origin.original.as_ref()==Some(metadata),"original invocation differs from established root entry")?;
+        origin.cleanup.as_ref().ok_or("entry has no sticky cleanup authority")?.confirmed_until(metadata.deadline_ns.checked_add(entry::GRACE).ok_or("cleanup cutoff overflow")?)
+    }
     pub(in super::super) fn retain_anchor(&self) -> Arc<TrustedUnitAnchor> {Arc::clone(&self.anchor)}
-    pub(in super::super::super) fn revalidate(&self) -> Probe<()> {self.anchor.revalidate()}
+    pub(crate) fn revalidate(&self) -> Probe<()> {self.anchor.revalidate()}
     pub(in super::super) fn matches_anchor(&self,anchor:&Arc<TrustedUnitAnchor>)->bool {Arc::ptr_eq(&self.anchor,anchor)}
 }
 
@@ -203,4 +202,261 @@ impl TrustedUnitAnchor {
         check(identity==Identity::from(&descriptor_stat(source)?),"duplicated unit directory differs")?;
         Ok(InstallationRoot{directory,identity,scope:Arc::clone(self)})
     }
+}
+
+
+// Kernel/protected-file authority used BEFORE contacting PID1. The initial-map
+// rule is combined with nsfs owner/type relations and the authenticated manager;
+// NS_GET_PARENT/EPERM or visible-proc1 equality alone is never an origin proof.
+const PROC_MAGIC:i64=0x9fa0;
+const NSFS_MAGIC:i64=0x6e736673;
+const NS_GET_USERNS:u64=0xb701;
+const NS_GET_PARENT:u64=0xb702;
+const NS_GET_NSTYPE:u64=0xb703;
+const NS_GET_OWNER_UID:u64=0xb704;
+unsafe extern "C"{fn ioctl(fd:c_int,operation:u64,...)->c_int;fn readlinkat(fd:c_int,name:*const c_char,buffer:*mut u8,bytes:usize)->isize;}
+struct ProtectedEntry{fd:OwnedFd,identity:Identity,parent:Option<usize>,name:CString,kind:u16}
+pub(crate) struct EntryKernelAuthority{
+ protected:Vec<ProtectedEntry>,proc:OwnedFd,proc_identity:Identity,own_proc:OwnedFd,one_proc:OwnedFd,maps:[OwnedFd;2],
+ namespaces:Vec<OwnedFd>,namespace_identities:Vec<Identity>,manager:OwnedFd,
+}
+fn require_fs(fd:&OwnedFd,kind:i64)->Probe<()>{let mut value=Statfs::default();native(os_result(unsafe{fd_statfs(fd.as_raw_fd(),&mut value)} as isize))?;check(value.kind==kind,"entry file is on an unexpected filesystem")}
+fn bounded_fd_bytes(fd:&OwnedFd,cap:usize)->Probe<Vec<u8>>{
+ use std::io::{Read,Seek,SeekFrom};let duplicate=fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;
+ let mut file=fs::File::from(duplicate);io_result(file.seek(SeekFrom::Start(0)))?;let mut raw=Vec::new();io_result(file.take(cap as u64+1).read_to_end(&mut raw))?;check(raw.len()<=cap,"entry file exceeds its bound")?;Ok(raw)
+}
+fn open_protected(path:&str,held:&mut Vec<ProtectedEntry>)->Probe<usize>{
+ check(path.starts_with('/')&&path.len()<=4096,"invalid installation path")?;
+ let root=directory(AT_FDCWD,c"/")?;let identity=require_root_mode(&descriptor_stat(&root)?,S_IFDIR)?;
+ let mut parent=held.len();held.push(ProtectedEntry{fd:root,identity,parent:None,name:CString::new("/").expect("literal"),kind:S_IFDIR});
+ let names:Vec<_>=path.split('/').filter(|n|!n.is_empty()).collect();check(!names.is_empty()&&names.len()<=64,"installation path depth")?;
+ for (index,name) in names.iter().enumerate(){check(*name!="."&&*name!=".."&&name.len()<=255,"installation component refused")?;let name=CString::new(*name).map_err(|_|"installation NUL")?;
+  let last=index+1==names.len();let kind=if last{S_IFREG}else{S_IFDIR};
+  let fd=if last{fd_from_call(unsafe{fd_openat(held[parent].fd.as_raw_fd(),name.as_ptr(),O_CLOEXEC|O_NOFOLLOW)})?}else{directory(held[parent].fd.as_raw_fd(),&name)?};
+  let identity=require_root_mode(&descriptor_stat(&fd)?,kind)?;let next=held.len();held.push(ProtectedEntry{fd,identity,parent:Some(parent),name,kind});parent=next;
+ }Ok(parent)
+}
+fn require_proc_self(proc:&OwnedFd)->Probe<()>{
+ require_fs(proc,PROC_MAGIC)?;let identity=Identity::from(&descriptor_stat(proc)?);let link=metadata(proc.as_raw_fd(),c"self",AT_SYMLINK_NOFOLLOW)?;
+ check(link.mode&S_IFMT==0o120000&&Identity::from(&link).same_mount(identity),"proc self is not same-mount kernel magic link")?;
+ let mut bytes=[0u8;32];let count=native(os_result(unsafe{readlinkat(proc.as_raw_fd(),c"self".as_ptr(),bytes.as_mut_ptr(),bytes.len())}))?;
+ check(count<bytes.len()&&&bytes[..count]==std::process::id().to_string().as_bytes(),"procfs self PID space differs from actual caller")
+}
+fn proc_process(proc:&OwnedFd,pid:u32)->Probe<OwnedFd>{let name=CString::new(pid.to_string()).expect("decimalPID");let fd=directory(proc.as_raw_fd(),&name)?;require_fs(&fd,PROC_MAGIC)?;let root=Identity::from(&descriptor_stat(proc)?);let raw=descriptor_stat(&fd)?;check(raw.mode&S_IFMT==S_IFDIR&&Identity::from(&raw).same_mount(root),"proc task directory mount/type differs")?;Ok(fd)}
+fn proc_leaf(process:&OwnedFd,name:&CStr)->Probe<OwnedFd>{let fd=fd_from_call(unsafe{fd_openat(process.as_raw_fd(),name.as_ptr(),O_CLOEXEC|O_NOFOLLOW)})?;require_fs(&fd,PROC_MAGIC)?;let raw=descriptor_stat(&fd)?;check(raw.mode&S_IFMT==S_IFREG&&Identity::from(&raw).same_mount(Identity::from(&descriptor_stat(process)?)),"proc leaf mount/type differs")?;Ok(fd)}
+fn namespace(proc_process:&OwnedFd,name:&CStr,kind:c_int)->Probe<OwnedFd>{
+ let ns=directory(proc_process.as_raw_fd(),c"ns")?;require_fs(&ns,PROC_MAGIC)?;let mount=Identity::from(&descriptor_stat(proc_process)?);check(Identity::from(&descriptor_stat(&ns)?).same_mount(mount),"proc namespace directory mount differs")?;
+ let link=metadata(ns.as_raw_fd(),name,AT_SYMLINK_NOFOLLOW)?;check(link.mode&S_IFMT==0o120000&&Identity::from(&link).same_mount(mount),"namespace leaf is not same-mount proc magic link")?;
+ let fd=fd_from_call(unsafe{fd_openat(ns.as_raw_fd(),name.as_ptr(),O_CLOEXEC)})?;require_fs(&fd,NSFS_MAGIC)?;
+ let actual=unsafe{ioctl(fd.as_raw_fd(),NS_GET_NSTYPE)};native(os_result(actual as isize))?;check(actual==kind,"namespace type differs")?;Ok(fd)
+}
+fn checked_maps(process:&OwnedFd)->Probe<[OwnedFd;2]>{
+ let mut held=Vec::new();for name in [c"uid_map",c"gid_map"]{let fd=proc_leaf(process,name)?;let raw=bounded_fd_bytes(&fd,4096)?;require_full_map(&raw)?;held.push(fd);}
+ held.try_into().map_err(|_|"mapping descriptor count".into())
+}
+fn require_full_map(raw:&[u8])->Probe<()>{let text=std::str::from_utf8(raw).map_err(|_|"namespace mapping UTF8")?;let numbers:Vec<_>=text.split_whitespace().map(|n|n.parse::<u64>().map_err(|_|"namespace mapping number")).collect::<std::result::Result<_,_>>()?;check(numbers==[0,0,4_294_967_295],"entry requires full initial UID/GID identity mapping authority")}
+pub(in super::super::super) fn require_initial_mappings()->Probe<()>{
+ let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;let process=proc_process(&proc,std::process::id())?;let _held=checked_maps(&process)?;Ok(())
+}
+impl EntryKernelAuthority{
+ pub(in super::super::super) fn capture()->Probe<Self>{
+  let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;let proc_identity=require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;
+  let own=proc_process(&proc,std::process::id())?;let one=proc_process(&proc,1)?;let maps=checked_maps(&own)?;
+  let status_fd=proc_leaf(&own,c"status")?;let status=bounded_fd_bytes(&status_fd,65536)?;let status=std::str::from_utf8(&status).map_err(|_|"entry status UTF8")?;
+  check(status_ids(status,"Uid:")?==[0;4]&&status_ids(status,"Gid:")?==[0;4]&&status_field(status,"TracerPid:")?=="0"
+    &&unsafe{getuid()}==0&&unsafe{geteuid()}==0&&unsafe{getgid()}==0&&unsafe{getegid()}==0,"entry requires untraced all-root credentials")?;
+  let mut protected=Vec::new();let helper=open_protected(super::super::super::super::manager::HELPER,&mut protected)?;
+  let socket=open_protected(super::super::super::super::manager::SOCKET_FILE,&mut protected)?;
+  let template=open_protected(super::super::super::super::manager::TEMPLATE_FILE,&mut protected)?;
+  check(bounded_fd_bytes(&protected[socket].fd,65536)?==include_bytes!("deployment/process-tree-guard.socket"),"installed socket source differs")?;
+  check(bounded_fd_bytes(&protected[template].fd,65536)?==include_bytes!("deployment/process-tree-guard@.service"),"installed template source differs")?;
+
+  let exe_link=metadata(own.as_raw_fd(),c"exe",AT_SYMLINK_NOFOLLOW)?;check(exe_link.mode&S_IFMT==0o120000&&Identity::from(&exe_link).same_mount(proc_identity),"self exe link is not original proc mount")?;
+  let exe=fd_from_call(unsafe{fd_openat(own.as_raw_fd(),c"exe".as_ptr(),O_CLOEXEC)})?;
+  check(require_root_mode(&descriptor_stat(&exe)?,S_IFREG)?==protected[helper].identity,"running executable is not protected installed helper")?;
+  let manager=super::super::super::super::pidfd_for(1).map_err(|e|format!("PID1 authority: {e:?}"))?;
+  super::super::super::super::validate_pidfd(&manager,1,&mut NativeReceipt::default()).map_err(|e|format!("PID1 authority: {e:?}"))?;
+  let kinds=[(c"user",0x10000000),(c"pid",0x20000000),(c"mnt",0x00020000),(c"time",0x00000080),(c"cgroup",0x02000000)];
+  let mut namespaces=Vec::new();let mut namespace_identities=Vec::new();let mut initial_user=None;
+  for (name,kind) in kinds{
+   let current=namespace(&own,name,kind)?;let host=namespace(&one,name,kind)?;let identity=Identity::from(&descriptor_stat(&current)?);
+   check(identity==Identity::from(&descriptor_stat(&host)?),"service differs from authenticated manager namespace")?;
+   if kind==0x10000000{
+    let mut owner=u32::MAX;native(os_result(unsafe{ioctl(current.as_raw_fd(),NS_GET_OWNER_UID,&mut owner as *mut u32)} as isize))?;check(owner==0,"user namespace owner is not root")?;
+    let parent=unsafe{ioctl(current.as_raw_fd(),NS_GET_PARENT)};
+    if parent>=0{drop(unsafe{OwnedFd::from_raw_fd(parent)});return Err("entry user namespace has an accessible parent".into());}
+    check(io::Error::last_os_error().raw_os_error()==Some(1),"unexpected namespace parent result")?;initial_user=Some(identity);
+   }else{
+    let owner=fd_from_call(unsafe{ioctl(current.as_raw_fd(),NS_GET_USERNS)})?;require_fs(&owner,NSFS_MAGIC)?;
+    check(Some(Identity::from(&descriptor_stat(&owner)?))==initial_user,"namespace is owned outside checked initial user authority")?;
+    namespace_identities.push(Identity::from(&descriptor_stat(&owner)?));namespaces.push(owner);
+   }
+   for fd in [current,host]{namespace_identities.push(Identity::from(&descriptor_stat(&fd)?));namespaces.push(fd);}
+  }
+  namespace_identities.push(Identity::from(&descriptor_stat(&exe)?));namespaces.push(exe);
+  let result=Self{protected,proc,proc_identity,own_proc:own,one_proc:one,maps,namespaces,namespace_identities,manager};result.revalidate()?;Ok(result)
+ }
+ pub(crate) fn bind_runtime_overrides(&mut self,paths:&[String],unit:&CStr)->Probe<()>{
+  check(paths.len()<=1,"manager created unexpected additional run overrides")?;
+  let unit=unit.to_str().map_err(|_|"unit override UTF8")?;check(!unit.contains('/')&&unit.len()<=255,"unit override component refused")?;
+  let prefix=format!("/run/systemd/system.control/{unit}.d/");
+  for path in paths{let name=path.strip_prefix(&prefix).ok_or("runtime override is outside exact own-unit control directory")?;
+   check(!name.is_empty()&&name.len()<=255&&!name.contains('/')&&name.ends_with(".conf")&&name.bytes().all(|b|b.is_ascii_alphanumeric()||b"._-".contains(&b)),"runtime override filename refused")?;
+   let file=open_protected(path,&mut self.protected)?;let _raw=bounded_fd_bytes(&self.protected[file].fd,65536)?;
+  }Ok(())
+ }
+ pub(crate) fn revalidate(&self)->Probe<()>{
+  require_fs(&self.proc,PROC_MAGIC)?;require_proc_self(&self.proc)?;
+  let own_name=CString::new(std::process::id().to_string()).expect("decimalPID");require_name_matches(self.proc.as_raw_fd(),&own_name,&self.own_proc)?;require_name_matches(self.proc.as_raw_fd(),c"1",&self.one_proc)?;
+  for (name,fd) in [c"uid_map",c"gid_map"].into_iter().zip(&self.maps){require_fs(fd,PROC_MAGIC)?;let raw=descriptor_stat(fd)?;check(raw.mode&S_IFMT==S_IFREG&&Identity::from(&raw).same_mount(self.proc_identity),"held map file mount/type changed")?;require_name_matches(self.own_proc.as_raw_fd(),name,fd)?;require_full_map(&bounded_fd_bytes(fd,4096)?)?;}
+check(require_root_mode(&descriptor_stat(&self.proc)?,S_IFDIR)?==self.proc_identity,"trusted proc identity changed")?;
+  super::super::super::super::validate_pidfd(&self.manager,1,&mut NativeReceipt::default()).map_err(|e|format!("PID1 lost: {e:?}"))?;
+  for item in &self.protected{check(require_root_mode(&descriptor_stat(&item.fd)?,item.kind)?==item.identity,"protected entry identity changed")?;if let Some(parent)=item.parent{require_name_matches(self.protected[parent].fd.as_raw_fd(),&item.name,&item.fd)?;}}
+  for (fd,identity) in self.namespaces.iter().zip(&self.namespace_identities){check(Identity::from(&descriptor_stat(fd)?)==*identity,"held entry namespace/image identity changed")?;}
+  Ok(())
+ }
+}
+
+
+pub(in super::super::super) fn client_installation()->Probe<Vec<OwnedFd>>{
+ require_initial_mappings()?;let mut held=Vec::new();
+ let _helper=open_protected(manager::HELPER,&mut held)?;
+ for (path,expected) in [(manager::SOCKET_FILE,include_bytes!("deployment/process-tree-guard.socket").as_slice()),(manager::TEMPLATE_FILE,include_bytes!("deployment/process-tree-guard@.service").as_slice())]{let file=open_protected(path,&mut held)?;check(bounded_fd_bytes(&held[file].fd,65536)?==expected,"client installation source differs")?;}
+ let root=directory(AT_FDCWD,c"/")?;require_root_mode(&descriptor_stat(&root)?,S_IFDIR)?;let run=directory(root.as_raw_fd(),c"run")?;require_root_mode(&descriptor_stat(&run)?,S_IFDIR)?;let parent=directory(run.as_raw_fd(),c"process-tree-guard")?;require_root_mode(&descriptor_stat(&parent)?,S_IFDIR)?;
+ let socket=fd_from_call(unsafe{fd_openat(parent.as_raw_fd(),c"activate.sock".as_ptr(),O_PATH|O_CLOEXEC|O_NOFOLLOW)})?;let raw=descriptor_stat(&socket)?;
+ check(raw.uid==0&&raw.gid==0&&raw.mode&S_IFMT==0o140000,"activation node is not protected root socket")?;
+ let mut fds:Vec<_>=held.into_iter().map(|item|item.fd).collect();fds.extend([root,run,parent,socket]);Ok(fds)
+}
+// Client-side completion authority is captured while this exact service unit is
+// live/populated. No later pathname reopen can stand in for the original domain.
+struct CompletionNode{fd:OwnedFd,identity:Identity,name:Option<CString>,cgroup:bool}
+#[derive(Clone)]
+struct EventRead{bytes:Vec<u8>,seek_errno:Option<c_int>,read_errno:Option<c_int>}
+impl EventRead{
+ fn populated(&self)->Probe<bool>{
+  check(self.seek_errno.is_none()&&self.read_errno.is_none()&&!self.bytes.is_empty()&&self.bytes.len()<=4096,"completion event read not complete")?;
+  let text=std::str::from_utf8(&self.bytes).map_err(|_|"unit events UTF8")?;let mut populated=None;
+  for line in text.lines(){let mut words=line.split_whitespace();let key=words.next().ok_or("unit event key")?;let value=words.next().ok_or("unit event value")?;check(words.next().is_none(),"unit event shape")?;if key=="populated"{check(populated.is_none(),"duplicate populated event")?;populated=Some(match value{"0"=>false,"1"=>true,_=>return Err("unit populated value".into())});}}
+  populated.ok_or_else(||"unit events omitted populated".into())
+ }
+}
+fn read_completion_events(fd:&OwnedFd)->EventRead{
+ use std::io::{Seek,SeekFrom};
+ let duplicate=unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)};
+ if duplicate<0{return EventRead{bytes:Vec::new(),seek_errno:io::Error::last_os_error().raw_os_error(),read_errno:None};}
+ let mut file=fs::File::from(unsafe{OwnedFd::from_raw_fd(duplicate)});
+ if let Err(error)=file.seek(SeekFrom::Start(0)){return EventRead{bytes:Vec::new(),seek_errno:error.raw_os_error(),read_errno:None};}
+ let mut raw=Vec::with_capacity(4097);let mut chunk=[0u8;4097];
+ loop{let count=unsafe{fd_read(file.as_raw_fd(),chunk.as_mut_ptr().cast(),4097-raw.len())};
+  if count<0{return EventRead{bytes:raw,seek_errno:None,read_errno:io::Error::last_os_error().raw_os_error()};}
+  if count==0{return EventRead{bytes:raw,seek_errno:None,read_errno:None};}
+  raw.extend_from_slice(&chunk[..count as usize]);if raw.len()>=4097{return EventRead{bytes:raw,seek_errno:None,read_errno:None};}
+ }
+}
+struct RetirementLookup{result:c_int,errno:Option<c_int>,observed:Option<Identity>}
+#[must_use="original unit completion capabilities must remain held"]
+pub(crate) struct ClientCompletion{nodes:Vec<CompletionNode>,events:OwnedFd,event_identity:Identity,group:String,baseline:EventRead,last:Option<EventRead>,first_failure:Option<EventRead>,last_lookup:Option<RetirementLookup>,retired:Option<RetiredUnit>}
+// Private fields: only the exact ENODEV/held-parent ENOENT path below mints this.
+// It proves retirement/emptiness, not child reaping or CSS-reference release.
+pub(crate) struct RetiredUnit{group:String,unit:Identity,parent:Identity,name:CString,event:Identity,event_errno:c_int,lookup_result:c_int,lookup_errno:c_int,observed_ns:u64}
+impl RetiredUnit{pub(crate) fn matches_group(&self,group:&str)->bool{self.group==group}}
+impl ClientCompletion{
+ fn revalidate_ancestry(&self,bind_unit:bool)->Probe<()>{
+  let actual=directory(AT_FDCWD,c"/")?;check(require_root_mode(&descriptor_stat(&actual)?,S_IFDIR)?==self.nodes[0].identity,"completion root view changed")?;
+  let last=self.nodes.len()-1;
+  for(index,node)in self.nodes.iter().enumerate(){check(require_root_mode(&descriptor_stat(&node.fd)?,S_IFDIR)?==node.identity,"held completion directory changed")?;if node.cgroup{require_cgroup2(&node.fd)?;}if index>0&&(index!=last||bind_unit){require_name_matches(self.nodes[index-1].fd.as_raw_fd(),node.name.as_ref().ok_or("completion component name missing")?,&node.fd)?;}}
+  require_cgroup2(&self.events)?;check(require_root_mode(&descriptor_stat(&self.events)?,S_IFREG)?==self.event_identity,"held completion event identity changed")?;Ok(())
+ }
+ pub(crate) fn population_after_terminal(&mut self,service:&OwnedFd,pid:u32)->Probe<bool>{
+  // No retirement inference is permitted until this ORIGINAL service object is
+  // terminal. No pidfd_open or numeric-PID replacement occurs here.
+  let mut event=super::super::super::super::PollFd{fd:service.as_raw_fd(),events:1,revents:0};
+  let count=unsafe{super::super::super::super::poll(&mut event,1,0)};
+  check(count==1&&event.revents&(1|0x10)!=0&&event.revents&!(1|0x10)==0&&pid>1,"original service pidfd is not terminal")?;
+  self.revalidate_ancestry(false)?;
+  let raw=read_completion_events(&self.events);let decision=raw.populated();self.last=Some(raw.clone());
+  match decision{
+   Ok(value)=>{self.revalidate_ancestry(true)?;Ok(value)},
+   Err(error)=>{
+    if self.first_failure.is_none(){self.first_failure=Some(raw.clone());}
+    // Only the raw read ENODEV of the original, previously-live core file
+    // enables retirement lookup. Seek/parse/EOF/EACCES/ESTALE never do so.
+    check(raw.seek_errno.is_none()&&raw.read_errno==Some(19),&error)?;
+    let unit=self.nodes.last().ok_or("original completion unit missing")?;let parent=&self.nodes[self.nodes.len()-2];let name=unit.name.as_ref().ok_or("original unit basename missing")?;
+    let mut observed=Statx::default();let result=unsafe{fd_statx(parent.fd.as_raw_fd(),name.as_ptr(),AT_SYMLINK_NOFOLLOW,STATX_BASIC_STATS|STATX_MNT_ID,&mut observed)};
+    let errno=if result<0{io::Error::last_os_error().raw_os_error()}else{None};
+    self.last_lookup=Some(RetirementLookup{result,errno,observed:if result==0{Some(Identity::from(&observed))}else{None}});
+    // A replacement/different inode is NOT the original and cannot settle it.
+    check(result<0&&errno==Some(2),"original unit name is not strictly absent under held parent")?;
+    self.revalidate_ancestry(false)?;
+    self.retired=Some(RetiredUnit{group:self.group.clone(),unit:unit.identity,parent:parent.identity,name:name.clone(),event:self.event_identity,event_errno:19,lookup_result:result,lookup_errno:2,observed_ns:boottime_ns()?});Ok(false)
+   }
+  }
+ }
+ pub(crate) fn retired(&self)->Option<&RetiredUnit>{self.retired.as_ref()}
+}
+pub(in super::super::super) fn client_events(fd:&OwnedFd,group:&str)->Probe<ClientCompletion>{
+ check(group.starts_with('/')&&group.len()<=4096,"completion cgroup path bound")?;
+ let mut nodes=Vec::new();let root=directory(AT_FDCWD,c"/")?;let identity=require_root_mode(&descriptor_stat(&root)?,S_IFDIR)?;nodes.push(CompletionNode{fd:root,identity,name:None,cgroup:false});
+ for name in [c"sys",c"fs",c"cgroup"]{let parent=nodes.last().expect("root held");let child=directory(parent.fd.as_raw_fd(),name)?;let identity=require_root_mode(&descriptor_stat(&child)?,S_IFDIR)?;let cgroup=name==c"cgroup";if cgroup{require_cgroup2(&child)?;}nodes.push(CompletionNode{fd:child,identity,name:Some(name.to_owned()),cgroup});}
+ let mount=nodes.last().expect("hierarchy held").identity;let mut count=0;
+ for name in group.split('/').filter(|n|!n.is_empty()){
+  count+=1;check(count<=64&&name.len()<=255&&name!="."&&name!="..","completion cgroup component")?;
+  let name=CString::new(name).map_err(|_|"completion cgroup NUL")?;let parent=nodes.last().expect("hierarchy retained");let child=directory(parent.fd.as_raw_fd(),&name)?;require_cgroup2(&child)?;let identity=require_root_mode(&descriptor_stat(&child)?,S_IFDIR)?;check(identity.same_mount(mount),"completion unit changes mount")?;nodes.push(CompletionNode{fd:child,identity,name:Some(name),cgroup:true});
+ }
+ check(count>0,"completion unit cannot be hierarchy")?;require_cgroup2(fd)?;let event_identity=require_root_mode(&descriptor_stat(fd)?,S_IFREG)?;check(event_identity.same_mount(mount),"completion events mount differs")?;
+ require_name_matches(nodes.last().expect("unit held").fd.as_raw_fd(),c"cgroup.events",fd)?;super::super::super::super::close_on_exec(fd.as_raw_fd()).map_err(|e|format!("{e:?}"))?;
+ let flags=super::super::super::super::io_flags(fd.as_raw_fd(),0).map_err(|e|format!("{e:?}"))?;check(flags&3==0,"completion event capability is not read-only")?;
+ let events=fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;let baseline=read_completion_events(&events);check(baseline.populated()?,"original service was not live/populated at completion adoption")?;
+ let result=ClientCompletion{nodes,events,event_identity,group:group.to_owned(),baseline,last:None,first_failure:None,last_lookup:None,retired:None};result.revalidate_ancestry(true)?;Ok(result)
+}
+
+
+pub(in super::super::super) fn verify_runtime_parent(fds:&[OwnedFd])->Probe<()>{
+ check(fds.len()>=4,"runtime parent custody missing")?;let n=fds.len();let root=&fds[n-4];let run=&fds[n-3];let parent=&fds[n-2];
+ let actual=directory(AT_FDCWD,c"/")?;check(require_root_mode(&descriptor_stat(root)?,S_IFDIR)?==require_root_mode(&descriptor_stat(&actual)?,S_IFDIR)?,"held runtime root differs from actual root")?;
+ require_root_mode(&descriptor_stat(run)?,S_IFDIR)?;require_root_mode(&descriptor_stat(parent)?,S_IFDIR)?;
+ require_name_matches(root.as_raw_fd(),c"run",run)?;require_name_matches(run.as_raw_fd(),c"process-tree-guard",parent)?;Ok(())
+}
+
+// Protected fixed system-bus pathname is the trust root for its owner replies.
+// The daemon may legitimately run as a nonroot message-bus account.
+pub(crate) struct PublicBusEndpoint{root:OwnedFd,run:OwnedFd,parent:OwnedFd,socket:OwnedFd,identities:[Identity;4],peer:Option<OwnedFd>,peer_credentials:Option<Credentials>}
+impl PublicBusEndpoint{
+ pub(crate) fn capture()->Probe<Self>{
+  require_initial_mappings()?;let root=directory(AT_FDCWD,c"/")?;let run=directory(root.as_raw_fd(),c"run")?;let parent=directory(run.as_raw_fd(),c"dbus")?;
+  let socket=fd_from_call(unsafe{fd_openat(parent.as_raw_fd(),c"system_bus_socket".as_ptr(),O_PATH|O_CLOEXEC|O_NOFOLLOW)})?;
+  let mut identities=[Identity::from(&descriptor_stat(&root)?);4];
+  for(index,fd)in [&root,&run,&parent].into_iter().enumerate(){identities[index]=require_root_mode(&descriptor_stat(fd)?,S_IFDIR)?;}
+  let raw=descriptor_stat(&socket)?;check(raw.uid==0&&raw.gid==0&&raw.mode&S_IFMT==0o140000,"system bus socket is not a root-controlled socket")?;identities[3]=Identity::from(&raw);
+  let value=Self{root,run,parent,socket,identities,peer:None,peer_credentials:None};value.revalidate()?;Ok(value)
+ }
+ pub(crate) fn authenticate(&mut self,fd:RawFd)->Probe<()>{
+  self.revalidate()?;let peer=super::super::super::super::kernel_peer_credentials(fd).map_err(|e|format!("system bus peer: {e:?}"))?;
+  check(peer.pid>1||(peer.pid==1&&peer.uid==0&&peer.gid==0),"public bus peer identity refused")?;
+  let identity=super::super::super::super::pidfd_for(peer.pid).map_err(|e|format!("system bus daemon pidfd: {e:?}"))?;
+  self.peer=Some(identity);self.peer_credentials=Some(peer);
+  super::super::super::super::validate_pidfd(self.peer.as_ref().expect("daemon owned"),peer.pid,&mut NativeReceipt::default()).map_err(|e|format!("system bus daemon identity: {e:?}"))?;
+  check(super::super::super::super::kernel_peer_credentials(fd).map_err(|e|format!("{e:?}"))?==peer,"system bus peer changed")?;self.revalidate()
+ }
+ pub(crate) fn revalidate(&self)->Probe<()>{
+  let actual=directory(AT_FDCWD,c"/")?;check(require_root_mode(&descriptor_stat(&actual)?,S_IFDIR)?==self.identities[0],"public bus root view changed")?;
+  for(index,fd)in [&self.root,&self.run,&self.parent].into_iter().enumerate(){check(require_root_mode(&descriptor_stat(fd)?,S_IFDIR)?==self.identities[index],"public bus protected ancestry changed")?;}
+  require_name_matches(self.root.as_raw_fd(),c"run",&self.run)?;require_name_matches(self.run.as_raw_fd(),c"dbus",&self.parent)?;require_name_matches(self.parent.as_raw_fd(),c"system_bus_socket",&self.socket)?;
+  let raw=descriptor_stat(&self.socket)?;check(raw.uid==0&&raw.gid==0&&raw.mode&S_IFMT==0o140000&&Identity::from(&raw)==self.identities[3],"public bus socket identity changed")?;
+  if let(Some(fd),Some(peer))=(&self.peer,self.peer_credentials){super::super::super::super::validate_pidfd(fd,peer.pid,&mut NativeReceipt::default()).map_err(|e|format!("system bus daemon lost: {e:?}"))?;}Ok(())
+ }
+}
+
+// PID1 owns this per-service directory for the entire instance lifetime and
+// removes it after stop, including asynchronous SIGKILL before Rust can unlink.
+pub(crate) struct PrivateRuntimeDirectory{installation:Vec<OwnedFd>,directory:OwnedFd,identity:Identity,name:CString}
+impl PrivateRuntimeDirectory{
+ pub(crate) fn capture(unit:&str)->Probe<Self>{
+  check(unit.starts_with("process-tree-guard@")&&unit.ends_with(".service")&&unit.len()<=255&&!unit.contains('/')&&!unit.as_bytes().contains(&0),"runtime unit component refused")?;
+  let installation=client_installation()?;let parent=&installation[installation.len()-2];let name=CString::new(unit).map_err(|_|"runtime unit NUL")?;let directory=directory(parent.as_raw_fd(),&name)?;let identity=require_root_mode(&descriptor_stat(&directory)?,S_IFDIR)?;
+  let result=Self{installation,directory,identity,name};result.revalidate()?;Ok(result)
+ }
+ pub(crate) fn path(&self)->Probe<String>{Ok(format!("/run/process-tree-guard/{}/private.sock",self.name.to_str().map_err(|_|"runtime unit UTF8")?))}
+ pub(crate) fn revalidate(&self)->Probe<()>{verify_runtime_parent(&self.installation)?;check(require_root_mode(&descriptor_stat(&self.directory)?,S_IFDIR)?==self.identity,"held per-service runtime directory changed")?;let parent=&self.installation[self.installation.len()-2];require_name_matches(parent.as_raw_fd(),&self.name,&self.directory)?;Ok(())}
 }

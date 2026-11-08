@@ -1,5 +1,5 @@
 {
-  "status": "Original owner/deadline capture and full-vector native graph built/linked; eight adapted tests passed; trusted entry remains unminted and backend disabled",
+  "status": "Checked product client/root-service entry implemented in source; current entry compile/runtime pending; prior exact ordinary owner/IPC and timer-component qualifications remain historical; public selector disabled",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -50,7 +50,7 @@
       "sha256": "dab5eb3884ff1711d4396aa422b795cf5747c06a8d647f731e4250028dcd4091"
     }
   ],
-  "canonical_entry": "run_received: failclosed at absent origin mint; typed run_in_service(scope,connection,policy) -> real NativePort -> per-unit provision + unchanged controllers",
+  "canonical_entry": "root_main.rs -> root_service_main -> actual kernel/protected installation/PID1 CheckedUnit -> original-bound VerifiedServiceScope -> run_admitted_in_service -> real NativePort/controllers; ordinary client_main/run_library captures original invocation before activation",
   "source_extraction": {
     "transport": "production admission functions, no fixture main/client",
     "supervisor": "real cross-peer error/FD helpers + original lease + verified identity preparation, no scripted activation",
@@ -296,5 +296,79 @@
       "Component functionality only; not public Linux backend activation, whole-tree containment, precise expiry timing, performance or supported-kernel-floor runtime qualification.",
       "Raw host/transport/compiler receipts remain local for publication privacy; this summary is not independently accessible raw runtime evidence."
     ]
+  },
+  "entry_source": {
+    "baseline_commit": "cf1e8f4",
+    "baseline_preserved": "target/codex-security/linux-product-integration-history-001/6d9a-before-real-entry-011",
+    "source_only": true,
+    "compiled": false,
+    "executed": false,
+    "main_sources": [
+      "root_main.rs",
+      "client_main.rs"
+    ],
+    "deployment_sources": [
+      "deployment/process-tree-guard.socket",
+      "deployment/process-tree-guard@.service"
+    ],
+    "origin_checks": [
+      "same real procfs self PID space, no-follow/mount-bound maps and namespace links",
+      "full initial UID/GID mappings plus actual nsfs ownership/type and PID1 relationships",
+      "protected installed helper inode and exact fixed unit source bytes",
+      "authenticated root PID1 private-bus effective service/socket configuration",
+      "fixed per-invocation cgroup, finite Type=exec start/runtime/stop and recursive SIGKILL policy",
+      "sticky original cutoff+cleanup self timer bound before children; no early deletion"
+    ],
+    "ordinary_client": "original requester plus manual direct parent/all auto ancestors; unchanged absolute cutoff; existing NNP1 library precondition; standalone CLI self-only NNP/timer",
+    "result": "framed settled outcome + original held service pidfd terminal + original unit empty/strict typed retirement + retained manager InvocationID/ExecMainPID/code/status/Result",
+    "retirement": "Linux5.14/6.8 source inference: originally populated exact held unit/event, raw original event read ENODEV then same held protected parent and exact original basename strict ENOENT; replacement/other errno fails; no nlink shortcut; not child reaping/CSS-free proof",
+    "wire_version": "PTGEX4 request; PTGBOOT1 bootstrap; PTGOUTC1 exact bounded result with native timer receipts",
+    "remaining": [
+      "current entry compile/link and two exact source reviews",
+      "temporary independently finite socket/service/deployment custody and exact cleanup",
+      "native privileged full-owner/clock/payload/watchdog/bootstrap/terminal failure qualification",
+      "complete typed native timer-refusal124 parity",
+      "5.14 floor and public enablement/Cargo packaging/selector wiring",
+      "bounded native client cancellation/join after a post-presentation library failure; current owning125 quarantine may live until original cutoff"
+    ],
+    "framework_added": false,
+    "public_raw_evidence": "no new public raw archive; privacy review required",
+    "private_socket_cleanup": "all synchronous postbind refusals attempt exact unlink; per-service PID1 RuntimeDirectory=process-tree-guard/%n preserve=no covers asynchronous process death, with effective manager property and held protected directory checks; runtime unqualified",
+    "public_bus_authentication": "held root-controlled /run/dbus ancestry/socket identity before connection, actual kernel peer credentials plus held pidfd, then ordinary bus-owned PID1 name/UID replies; no assumption daemon UID0"
+  },
+  "entry_primary_sources": [
+    "https://www.freedesktop.org/software/systemd/man/255/systemd.socket.html",
+    "https://www.freedesktop.org/software/systemd/man/255/systemd.service.html",
+    "https://www.freedesktop.org/software/systemd/man/255/org.freedesktop.systemd1.html",
+    "https://raw.githubusercontent.com/systemd/systemd/v255/src/core/cgroup.c",
+    "https://raw.githubusercontent.com/torvalds/linux/v5.14/kernel/cgroup/cgroup.c",
+    "https://raw.githubusercontent.com/torvalds/linux/v6.8/kernel/cgroup/cgroup.c",
+    "https://raw.githubusercontent.com/systemd/systemd/v255/src/core/dbus-execute.c"
+  ],
+  "entry_source_validation": {
+    "implementation_build_candidate_sha256": "84762a4132e57a670d99a096899c7509de40140840b31d9caf87ebd90744594c",
+    "platform": "Linux6.8 aarch64 ordinary user",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "fresh_native_objects": 6,
+    "native_archive_reused": false,
+    "actual_root_and_client_executables_linked": true,
+    "existing_tests": 8,
+    "passed": 8,
+    "failed": 0,
+    "ignored": 0,
+    "existing_test_bodies_unchanged": true,
+    "native_ipc_refusals": 14,
+    "original_owners_deadline_io_preserved": true,
+    "artifact_files_preserved_verified": 89,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "privileged_entry_executed": false,
+    "payload_watchdog_controller_executed": false,
+    "public_backend_enabled": false,
+    "per_call_cancel_join_implemented": false,
+    "raw_receipts": "Local-only for publication privacy; public summary is not independently accessible raw runtime evidence.",
+    "limits": "Actual source compile/link and existing ordinary parser/IPC tests only; no containment, public-entry, cleanup transition, proposed-kernel-floor, cancellation or performance qualification."
   }
 }

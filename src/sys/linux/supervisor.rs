@@ -279,6 +279,10 @@ pub(crate) unsafe fn run_in_service(
         Ok(value)=>value,Err(error)=>{let code=match &error {Refusal::Invocation(e)=>e.exit_code(),_=>125};
             return native_activation::before_admission_code(Some(scope),admission,format!("admission refused: {error:?}"),code);},
     };
+    unsafe{run_admitted_in_service(scope,admitted,admission,authorizes)}
+}
+pub(super) unsafe fn run_admitted_in_service(scope:VerifiedServiceScope,admitted:Admitted,admission:NativeReceipt,
+    authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool)->RunOutcome {
     let Admitted{peer,invocation,plan,io}=admitted;
     let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec());
     let program=plan.program().to_owned();
@@ -288,3 +292,6 @@ pub(crate) unsafe fn run_in_service(
     };
     unsafe{native_activation::run_admitted(prepared,launch,scope,admission)}
 }
+
+pub(super) fn validate_received_identity(admitted:&Admitted)->Probe<()>{verify_identity(admitted.invocation.requester(),admitted.peer).map(|_|())}
+pub(super) fn monotonic_ns()->Probe<u64>{let mut time=Timespec::default();native(os_result(unsafe{clock_gettime(1,&mut time)} as isize))?;let seconds=u64::try_from(time.seconds).map_err(|_|"negative monotonic time")?;let nanos=u64::try_from(time.nanoseconds).map_err(|_|"negative monotonic fraction")?;check(nanos<NS_PER_SECOND,"invalid monotonic fraction")?;seconds.checked_mul(NS_PER_SECOND).and_then(|n|n.checked_add(nanos)).ok_or("monotonic overflow".into())}

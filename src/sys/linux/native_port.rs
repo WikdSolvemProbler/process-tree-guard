@@ -127,7 +127,7 @@ impl LaunchContext {
 // suid-dumpability transition before any cgroup/child resource is created.
 #[derive(Default)]
 struct ActivationHostReceipt {suid_dumpable:Option<Vec<u8>>,status:Option<String>,confirmed:bool}
-fn bounded_host_read(path:&str,cap:usize)->Probe<Vec<u8>> {
+pub(in super::super) fn bounded_host_read(path:&str,cap:usize)->Probe<Vec<u8>> {
     use std::io::Read;
     let file=io_result(fs::File::open(path))?;
     let mut bytes=Vec::new();
@@ -199,6 +199,7 @@ impl NativePort {
 impl OneShotPort for NativePort {
     fn authorize(&mut self,identity:&VerifiedIdentity,exec:&request::ExecPlan)->Probe<()> {
         self.scope.revalidate()?;
+        self.scope.authorize_original(exec.invocation())?;
         self.host_policy.check()?;
         check(self.launch.caller.uid==identity.uid && self.launch.caller.gid==identity.gid
             && exec.environment()==self.launch.environment,"authenticated launch context differs from prepared identity/environment")?;
@@ -288,7 +289,7 @@ impl OneShotPort for NativePort {
 enum Completion {
     RefusedBeforeActivation{error:String,code:i32,preparation:Option<PreparationFailure>},
     Terminal(std::result::Result<terminal_controller::SettledRun,terminal_controller::TerminalQuarantine>),
-    Arming{settled:std::result::Result<arming_failure_controller::ArmingSettled,arming_failure_controller::ArmingQuarantine>,primary_decision:Option<Decision>,diagnostic_sample:Probe<DecisionReceipt>},
+    Arming{settled:std::result::Result<arming_failure_controller::ArmingSettled,arming_failure_controller::ArmingQuarantine>,primary_decision:Option<Decision>,diagnostic_sample:Probe<DecisionReceipt>,error:String},
 }
 /// Owning outcome: preserves original plan/lease in the actual terminal or
 /// arming owner, all payload/bootstrap observations, and the caller launch context.
@@ -309,7 +310,8 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
                 ActivationFailure::Arming{prepared,..}=>(prepared,None),
             };
             let diagnostic_sample=prepared.lease.sample();
-            Completion::Arming{settled:failure.settle_arming_failure(),primary_decision,diagnostic_sample}
+            let error=match &failure{ActivationFailure::BeforeArm{error,..}=>error.clone(),ActivationFailure::Arming{failure,..}=>match failure{ArmFailure::BeforeProvision{error,..}|ArmFailure::VerifiedDomain{error,..}=>error.clone(),ArmFailure::Provision{failure,..}=>failure.error.clone()}};
+            Completion::Arming{settled:failure.settle_arming_failure(),primary_decision,diagnostic_sample,error}
         },
     };
     RunOutcome{completion,port:Some(port),early_scope:None,admission}
@@ -320,13 +322,32 @@ pub(in super::super) fn before_activation(launch:LaunchContext,scope:VerifiedSer
 }
 
 impl RunOutcome {
+    pub(crate) fn settled(&self)->bool{matches!(self.completion,Completion::RefusedBeforeActivation{..}|Completion::Terminal(Ok(_))|Completion::Arming{settled:Ok(_),..})}
+    pub(crate) fn validate_final_scope(&self)->Probe<()>{match self.port.as_ref(){Some(port)=>port.scope.revalidate(),None=>self.early_scope.as_ref().ok_or("missing entry scope")?.revalidate()}}
+    /// Distinguish a genuine payload exit125 from a guard/setup/exec failure.
+    /// This summary contains no command/environment/credential-plan contents.
+    pub(crate) fn guard_error(&self)->Option<String>{
+        match &self.completion{
+            Completion::RefusedBeforeActivation{error,code,..}=>if *code==124{None}else{Some(error.clone())},
+            Completion::Arming{error,..}=>if self.exit_code()==124{None}else{Some(format!("native arming refused: {error}"))},
+            Completion::Terminal(Err(_))=>Some("native settlement is quarantined; owning failure retained".into()),
+            Completion::Terminal(Ok(run))=>{
+                let facts=run.facts();
+                if facts.stop_reasons&1!=0{return Some("original invocation owner lost".into());}
+                if let Some(terminal_controller::ExecState::ReportedFailure{errno})=facts.exec_report{return Some(format!("payload setup/exec failed with errno {errno}"));}
+                if facts.stop_reasons&2!=0{return None;}
+                match facts.release{Some(Err(error))=>return Some(format!("native release refused: {error}")),Some(Ok(Decision::Permit))=>{},_=>return Some("native release was not permitted".into())}
+                match facts.exec_report{Some(terminal_controller::ExecState::ReportedFailure{errno})=>Some(format!("payload setup/exec failed with errno {errno}")),Some(terminal_controller::ExecState::NoExecErrorReport)=>if facts.payload_exit.is_some(){None}else{Some("payload exit receipt missing".into())},_=>Some("payload exec-report state unverified".into())}
+            }
+        }
+    }
     /// Fail closed on every unconfirmed setup/release/exec/settlement path.
     /// This is internal return mapping, not a public enabled Linux CLI.
     pub(crate) fn exit_code(&self)->i32 {
         match &self.completion {
             Completion::RefusedBeforeActivation{code,..}=>return *code,
             Completion::Arming{settled:Ok(_),primary_decision:Some(Decision::Deadline),
-                diagnostic_sample:Ok(DecisionReceipt{decision:Decision::Deadline,..})}=>return 124,
+                diagnostic_sample:Ok(DecisionReceipt{decision:Decision::Deadline,..}),..}=>return 124,
             _=>{},
         }
         let Completion::Terminal(Ok(run))=&self.completion else{return 125;};

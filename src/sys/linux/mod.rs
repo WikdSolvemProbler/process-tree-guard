@@ -135,6 +135,7 @@ pub(crate) enum Refusal {
     DeadPidfd,
     InvalidRequest(request::Refusal),
     Invocation(invocation::InvocationError),
+    Entry(String),
 }
 
 type Result<T> = std::result::Result<T, Refusal>;
@@ -408,6 +409,12 @@ fn receive_observed(socket:RawFd,receipt:&mut NativeReceipt)->Result<Admitted> {
 // One native receive/adopt/refuse path. Production always passes the full1088B;
 // the existing native regression supplies a smaller aligned prefix for CTRUNC.
 fn receive_with_control(socket:RawFd,receipt:&mut NativeReceipt,control:&mut [u64])->Result<Admitted> {
+    receive_with_control_hook(socket,receipt,control,None)
+}
+fn receive_entry(socket:RawFd,receipt:&mut NativeReceipt,hook:&mut dyn FnMut(u64)->Result<()>)->Result<Admitted>{
+    let mut control=[0u64;CONTROL_WORDS];receive_with_control_hook(socket,receipt,&mut control,Some(hook))
+}
+fn receive_with_control_hook(socket:RawFd,receipt:&mut NativeReceipt,control:&mut [u64],hook:Option<&mut dyn FnMut(u64)->Result<()>>)->Result<Admitted> {
     validate_connection(socket,true)?;
     receipt.connection_verified=true;
     let peer = peer_credentials(socket)?;
@@ -454,6 +461,9 @@ fn receive_with_control(socket:RawFd,receipt:&mut NativeReceipt,control:&mut [u6
     receipt.owner_mode=Some(plan.invocation().mode);
     receipt.claimed_invocation=Some((plan.invocation().captured_ns,plan.invocation().deadline_ns));
     if packet.rights.len()!=watchers+4 || packet.rights.len()>253 {return Err(Refusal::RightsCount(packet.rights.len()));}
+    // A root service may only NARROW its own bootstrap lifetime here, before
+    // potentially slower proc/ancestry checks. This grants no admission authority.
+    if let Some(hook)=hook{hook(plan.invocation().deadline_ns)?;}
     let mut owners=packet.rights;
     let [stdin,stdout,stderr,cwd]:[OwnedFd;4]=owners.split_off(watchers).try_into()
         .map_err(|rights:Vec<OwnedFd>|Refusal::RightsCount(rights.len()))?;
@@ -467,8 +477,25 @@ fn receive_with_control(socket:RawFd,receipt:&mut NativeReceipt,control:&mut [u6
 
 }
 
+mod manager;
+mod entry;
+mod client;
 mod supervisor;
-pub(crate) use supervisor::{run_in_service, VerifiedServiceScope, RunOutcome};
+pub(crate) type ClientOutcome=client::ClientOutcome;
+pub(crate) fn root_service_main()->!{entry::root_service_main()}
+pub(crate) fn run_library(command:&[std::ffi::OsString],seconds:f64,mode:OwnerMode)->ClientOutcome{client::run_library(command,seconds,mode)}
+pub(crate) fn run_cli(arguments:Vec<std::ffi::OsString>)->ClientOutcome{client::run_cli(arguments)}
+// Concrete aliases/wrapper preserve the internal API in both actual binaries;
+// a type alias grants no construction authority and avoids unused reexports.
+pub(crate) type VerifiedServiceScope=supervisor::VerifiedServiceScope;
+pub(crate) type RunOutcome=supervisor::RunOutcome;
+/// # Safety
+/// Preserve the checked scope and dedicated-supervisor preconditions of the
+/// consuming supervisor entry. No raw/unverified scope can enter this wrapper.
+pub(crate) unsafe fn run_in_service(scope:VerifiedServiceScope,connection:OwnedFd,
+ authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool)->RunOutcome{
+ unsafe{supervisor::run_in_service(scope,connection,authorizes)}
+}
 
 /// Unqualified privileged startup fails closed; there is no global cgroup
 /// fallback or caller-constructed service authority.
@@ -641,3 +668,5 @@ mod tests {
         println!("native_wire=PTGEX4 manual_rights=6 max_rights=253 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
     }
 }
+
+pub(crate) fn client_exit(result:ClientOutcome)->!{client::exit(result)}

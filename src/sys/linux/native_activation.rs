@@ -312,6 +312,20 @@ pub(super) use native_port::before_activation;
 pub(super) use native_port::{before_admission,before_admission_code};
 
 pub(crate) use cgroup_authority::service_scope::VerifiedServiceScope;
-pub(super) fn capture_service_scope()->Probe<VerifiedServiceScope> {
+pub(crate) fn capture_service_scope()->Probe<VerifiedServiceScope> {
     VerifiedServiceScope::capture_checked_entry()
 }
+
+pub(crate) use cgroup_authority::service_scope::EntryKernelAuthority;
+pub(crate) fn capture_entry_kernel_authority()->Probe<EntryKernelAuthority>{EntryKernelAuthority::capture()}
+pub(crate) fn require_initial_client_mapping()->Probe<()>{cgroup_authority::service_scope::require_initial_mappings()}
+
+pub(crate) fn client_installation()->Probe<Vec<OwnedFd>>{cgroup_authority::service_scope::client_installation()}
+pub(crate) use cgroup_authority::service_scope::{ClientCompletion,RetiredUnit};
+pub(crate) fn client_events(fd:&OwnedFd,group:&str)->Probe<ClientCompletion>{cgroup_authority::service_scope::client_events(fd,group)}
+
+pub(crate) fn verify_runtime_parent(fds:&[OwnedFd])->Probe<()>{cgroup_authority::service_scope::verify_runtime_parent(fds)}
+
+pub(crate) use cgroup_authority::service_scope::PublicBusEndpoint;
+
+pub(crate) use cgroup_authority::service_scope::PrivateRuntimeDirectory;
