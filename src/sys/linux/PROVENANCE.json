@@ -1,5 +1,5 @@
 {
-  "status": "Per-unit authority compiled/linked and unchanged8tests passed; trusted manager entry mint absent and backend disabled",
+  "status": "Original owner/deadline capture and full-vector native graph built/linked; eight adapted tests passed; trusted entry remains unminted and backend disabled",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -84,20 +84,18 @@
     "evidence": "tests/evidence/linux-authenticated-handoff.zip",
     "limits": "One-process kernelIPC and source reviewed handoff, not trustedmanager startup/cross-process admission, publicownerpolicies, realpayload or kernel-floor/sharedescape/performance qualification."
   },
-  "baseline_commit": "09a3e0c5f0b507eca5078b5d01086ceb33836331",
-  "baseline_candidate_sha256": "0f0f8924d1114e6ca335c66760b67b23316922fd2f4e2e5798d3a2ddb35dc1fd",
+  "baseline_commit": "a561bf7d9d1ba5f6d9fa7b9c6334ab4a528aa9b3",
+  "baseline_candidate_sha256": "ee27b5691186cf2aa06c1d8b3f6479ec03cac858a1603e97872c099baabd6b05",
   "wire": {
-    "version": "PTGEX3",
-    "header_bytes": 20,
-    "rights": [
-      "owner_pidfd",
-      "stdin",
-      "stdout",
-      "stderr",
-      "cwd"
-    ],
-    "ancillary_buffer_bytes": 96,
-    "required_aligned_ancillary_bytes": 72,
+    "version": "PTGEX4",
+    "header_bytes": 40,
+    "identity_record_bytes": 16,
+    "watcher_min": 2,
+    "watcher_max": 249,
+    "ancestor_max": 248,
+    "rights_max": 253,
+    "rights_order": "requester pidfd, ordered direct original parent/manual or ALL original ancestors/auto, stdin,stdout,stderr,CWD",
+    "ancillary_buffer_bytes": 1088,
     "packet_cap": 131072,
     "native_vector_cap": 131072,
     "argument_cap": 4096,
@@ -106,8 +104,8 @@
   },
   "native_test": {
     "name": "linux::tests::native_seqpacket_admission_and_refusals",
-    "ancestry": "existing ordinary native_seqpacket_admission_and_refusals from issue2-linux-arming-015/transport.rs; adapted to real5rights/env",
-    "executed": true,
+    "ancestry": "same existing8 tests, codec/native bodies adapted rather than byteunchanged",
+    "executed": false,
     "effects": [
       "ordinary self pidfd_open",
       "own AF_UNIX nonblocking socketpairs",
@@ -115,7 +113,8 @@
       "fresh0700 directory under caller TMPDIR",
       "three fresh own regular fixture files; bounded read/write/seek",
       "O_PATH directory/file descriptors",
-      "per-exchange /proc/self/fd counts"
+      "per-exchange /proc/self/fd counts",
+      "bounded current requester/original parent/allliveancestor proc stat and namespace reads; pidfd_open without signalling; full-set nonblocking poll"
     ],
     "prohibited_effects_not_present": [
       "fork",
@@ -126,7 +125,8 @@
       "global settings"
     ],
     "fixture_policy": "3normalfilefixtures insideprivate0700TMPDIR preserved/hashverified beforeexact2-root cleanup; originalscopesabsent.",
-    "result": "PASS: fivekernelrights/OFD/CWD/env positive and11refusals; every per-exchange descriptorcount restored"
+    "result": "PENDING; existing name/body assertions adapted for original full-owner/time wire; previous5rights run stays historical",
+    "control_truncation": "same production recvmsg/adopt/refuse helper,96B aligned testprefix to force genuine kernelCTRUNC; production1088B"
   },
   "handoff_primary_sources": [
     "https://raw.githubusercontent.com/torvalds/linux/v6.8/include/linux/socket.h",
@@ -197,5 +197,72 @@
     "https://docs.kernel.org/6.8/admin-guide/cgroup-v2.html#delegation-containment",
     "https://www.freedesktop.org/software/systemd/man/255/systemd.resource-control.html#DelegateSubgroup=",
     "https://www.freedesktop.org/software/systemd/man/255/systemd.service.html#RuntimeMaxSec="
-  ]
+  ],
+  "baseline_preserved": "target/codex-security/linux-product-integration-history-001/ee27-before-original-invocation-007",
+  "original_invocation": {
+    "source": "invocation.rs private OriginalInvocation::capture(mode,seconds)",
+    "clock": "CLOCK_BOOTTIME before helper/manager",
+    "duration": "exact f64 bits and crate::deadline policy; positive Duration rounded with existing std helper and at least1ns",
+    "owners": "held requester + manualdirectparent or completeautochain throughPID1; two complete pidfd/proc PID/PPID/start passes; no silent skipping/truncation",
+    "receiver": "independent kernel peer/packet+pidfd/chain/namespace/time validation",
+    "timer": "receiver-owned private timerfd armed TFD_TIMER_ABSTIME at transmitted validated cutoff, never caller timer",
+    "claim_boundary": "actual API privately captures original time; arbitrary authenticated replacement wire timestamp is a caller claim, not privileged attestation",
+    "native_abi": {
+      "owner_watch_bytes": 16,
+      "min": 2,
+      "max": 249,
+      "arming_schema": 3,
+      "arming_abi_words": 19,
+      "payload_schema": 2,
+      "payload_spec_bytes": 152,
+      "payload_owners_offset": 16,
+      "payload_gate_offset": 144,
+      "payload_abi_words": 16,
+      "terminal_poll_max": 254
+    },
+    "c_rebuild_required": false,
+    "qualified_runtime": false,
+    "bootstrap_nnp": "manager activation before clientNNP if relying on setuid elevation, or authenticated existing root manager; NNP-before-sudo invalid; no mutation here",
+    "activation_credentials": "read-only admissionhost check requires all4real/effective/saved/fsUID andGID root; a setuidmanager must transition before supervisor entry; client UID from kernel socket remains separate",
+    "timeout_mapping": "124 only valid admitted expiration or typed primary lease Deadline with confirmed settlement; late samples never upgrade genericerrors/clear primarymaskfault; ownerloss/uncertain quarantine125",
+    "native_timer_refusal_classification": "OPEN: remaining native failures need typed actual original-timer cause at refusal site before124; untyped errors remain125 even when laterexpired; full publictimeoutparity not claimed",
+    "header_isolation": "owner_watch.h purestdint/stddefABI only; owner_poll.h libc/helper implementation includedonlynative_arming/payload C; kernel_signal_abi receives no libc time/poll throughownerABI",
+    "c_rebuild_completed": {
+      "all5objects": true,
+      "stack_protector_retained": true,
+      "native_archive_sha256": "251e0e47d4f2ed1798a21146845e74d22aa88967c6e6526b6195b2eed71985b2",
+      "native_archive_bytes": 40886
+    }
+  },
+  "current_validation": {
+    "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
+    "platform": "6.8.0-147-generic aarch64",
+    "uid": 501,
+    "build_steps_passed": 8,
+    "tests": {
+      "passed": 8,
+      "failed": 0,
+      "ignored": 0,
+      "existing_names_preserved": true,
+      "bodies_adapted": true,
+      "original_owners": {
+        "manual_watchers": 2,
+        "auto_watchers": 7,
+        "captured_ns": "513101464506901",
+        "cutoff_ns": "513161714506901",
+        "requested_f64_bits": "4633676250982907904",
+        "duration_ns": "60250000000",
+        "absolute_unchanged": true
+      },
+      "native_refusals": 14,
+      "retained_fixture_files": 3
+    },
+    "artifacts_verified": 69,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "native_guard_functions_executed": false,
+    "backend_enabled": false,
+    "evidence": "tests/evidence/linux-original-owners.zip",
+    "limits": "Compilation/linking and ordinary capture/IPC/parser tests only. Actual privileged startup/public dispatch/native timeout-classification/lifecycle/kernel-floor and performance remain open."
+  }
 }

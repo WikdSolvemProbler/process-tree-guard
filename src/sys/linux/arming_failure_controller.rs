@@ -10,7 +10,7 @@ use super::terminal_controller::{ContextFailure, DedicatedSupervisor, EmptyConte
 
 // Preserve the real source failure; no synthetic release/exec/exit is attached.
 enum BeforeChildCause {
-    BeforeArm { error: String },
+    BeforeArm { error: String, decision:Option<Decision> },
     BeforeProvision { error: String },
     Provision(ProvisionFailure),
 }
@@ -154,9 +154,9 @@ impl BeforeChildOwner {
 impl ActivationFailure {
     pub(super) fn settle_arming_failure(self) -> Result<ArmingSettled, ArmingQuarantine> {
         match self {
-            ActivationFailure::BeforeArm { prepared, supervisor, cleanup, context_error, error } => {
+            ActivationFailure::BeforeArm { prepared, supervisor, cleanup, context_error, error, decision } => {
                 BeforeChildOwner::new(prepared, supervisor, context_error, cleanup,
-                    BeforeChildCause::BeforeArm { error }).settle()
+                    BeforeChildCause::BeforeArm { error, decision }).settle()
             }
             ActivationFailure::Arming { prepared, supervisor, cleanup, failure } => match failure {
                 ArmFailure::VerifiedDomain { controls, watchdog, error, arming } => {

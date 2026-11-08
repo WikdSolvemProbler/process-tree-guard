@@ -9,6 +9,11 @@
 
 #[path = "request.rs"]
 mod request;
+#[path="invocation.rs"]
+mod invocation;
+pub(crate) use invocation::OriginalInvocation;
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub(crate) enum OwnerMode {Manual,Auto}
 
 use std::ffi::{c_int, c_long, c_short, c_void};
 use std::fs;
@@ -49,8 +54,8 @@ const O_DIRECTORY: c_int = 0o200_000;
 const FD_CLOEXEC: c_int = 1;
 const POLLIN: c_short = 1;
 const SYS_PIDFD_OPEN: c_long = 434;
-// LP64 CMSG_SPACE(5*4)+CMSG_SPACE(12)=40+32=72; retain spare bounded room.
-const CONTROL_WORDS: usize = 12;
+// SCM_MAX_FD253: CMSG_SPACE(253*4)=1032, credentials32, optionalPIDFD24=1088.
+const CONTROL_WORDS: usize = 136;
 const CONTROL_BYTES: usize = CONTROL_WORDS * size_of::<u64>();
 const HEADER_BYTES: usize = 16;
 
@@ -80,6 +85,7 @@ struct Credentials {
 }
 
 #[repr(C)]
+#[derive(Clone,Copy)]
 struct PollFd {
     fd: c_int,
     events: c_short,
@@ -128,6 +134,7 @@ pub(crate) enum Refusal {
     WrongPidfd,
     DeadPidfd,
     InvalidRequest(request::Refusal),
+    Invocation(invocation::InvocationError),
 }
 
 type Result<T> = std::result::Result<T, Refusal>;
@@ -334,6 +341,9 @@ fn pidfd_for(pid: c_int) -> Result<OwnedFd> {
 struct NativeReceipt {
     connection_verified: bool,
     io_flags: Option<[c_int;4]>,
+    original_watchers: usize,
+    claimed_invocation: Option<(u64,u64)>,
+    owner_mode: Option<OwnerMode>,
     peer: Option<Credentials>,
     sender: Option<Credentials>,
     rights: usize,
@@ -344,7 +354,7 @@ struct NativeReceipt {
 
 fn validate_pidfd(
     descriptor: &OwnedFd,
-    credential: Credentials,
+    pid: c_int,
     receipt: &mut NativeReceipt,
 ) -> Result<()> {
     let fd = descriptor.as_raw_fd();
@@ -354,12 +364,12 @@ fn validate_pidfd(
         return Err(Refusal::NotPidfd);
     }
     let information = fs::read_to_string(format!("/proc/self/fdinfo/{fd}"))?;
-    let pid = information
+    let observed_pid = information
         .lines()
         .find_map(|line| line.strip_prefix("Pid:"))
         .and_then(|field| field.trim().parse().ok());
-    receipt.pidfd_pid = pid;
-    if pid != Some(credential.pid) {
+    receipt.pidfd_pid = observed_pid;
+    if observed_pid != Some(pid) {
         return Err(Refusal::WrongPidfd);
     }
     let mut watched = PollFd {
@@ -381,7 +391,7 @@ struct CallerIo {stdio:[OwnedFd;3],cwd:OwnedFd}
 #[derive(Debug)]
 struct Admitted {
     peer: Credentials,
-    owner: OwnedFd,
+    invocation: invocation::VerifiedInvocation,
     plan: request::ExecPlan,
     io: CallerIo,
 }
@@ -391,7 +401,13 @@ fn receive(socket: RawFd) -> Result<Admitted> {
     receive_observed(socket, &mut NativeReceipt::default())
 }
 
-fn receive_observed(socket: RawFd, receipt: &mut NativeReceipt) -> Result<Admitted> {
+fn receive_observed(socket:RawFd,receipt:&mut NativeReceipt)->Result<Admitted> {
+    let mut control=[0u64;CONTROL_WORDS];
+    receive_with_control(socket,receipt,&mut control)
+}
+// One native receive/adopt/refuse path. Production always passes the full1088B;
+// the existing native regression supplies a smaller aligned prefix for CTRUNC.
+fn receive_with_control(socket:RawFd,receipt:&mut NativeReceipt,control:&mut [u64])->Result<Admitted> {
     validate_connection(socket,true)?;
     receipt.connection_verified=true;
     let peer = peer_credentials(socket)?;
@@ -401,15 +417,16 @@ fn receive_observed(socket: RawFd, receipt: &mut NativeReceipt) -> Result<Admitt
         base: payload.as_mut_ptr(),
         len: payload.len(),
     };
-    let mut control = [0u64; CONTROL_WORDS];
-    let mut message = message(&mut vec, control.as_mut_ptr().cast(), CONTROL_BYTES);
+    let capacity=size_of_val(control);
+    if capacity>CONTROL_BYTES {return Err(Refusal::Ancillary);}
+    let mut message = message(&mut vec, control.as_mut_ptr().cast(), capacity);
     let count = os_result(unsafe { recvmsg(socket, &mut message, MSG_CMSG_CLOEXEC | MSG_DONTWAIT) })?;
     // Only native recvmsg writes these bytes. Own any delivered fds before
     // considering truncation flags, identity, descriptor count or request bytes.
     let raw =
-        unsafe { std::slice::from_raw_parts(control.as_ptr().cast::<u8>(), message.control_len.min(CONTROL_BYTES)) };
+        unsafe { std::slice::from_raw_parts(control.as_ptr().cast::<u8>(), message.control_len.min(capacity)) };
     let packet = ancillary(raw)?;
-    if message.control_len>CONTROL_BYTES {return Err(Refusal::Ancillary);}
+    if message.control_len>capacity {return Err(Refusal::Ancillary);}
     receipt.sender = packet.credential;
     receipt.rights = packet.rights.len();
     if message.flags & MSG_CTRUNC != 0 {
@@ -430,19 +447,24 @@ fn receive_observed(socket: RawFd, receipt: &mut NativeReceipt) -> Result<Admitt
     if packet.credential != Some(peer) {
         return Err(Refusal::PeerCredentials);
     }
-    if packet.rights.len() != 5 {
-        return Err(Refusal::RightsCount(packet.rights.len()));
-    }
-    let [owner,stdin,stdout,stderr,cwd]:[OwnedFd;5]=packet.rights.try_into()
+    let frame=payload.get(..count).ok_or(Refusal::PayloadTruncated)?;
+    let plan=request::decode(frame).map_err(Refusal::InvalidRequest)?;
+    let watchers=plan.invocation().identities.len();
+    receipt.original_watchers=watchers;
+    receipt.owner_mode=Some(plan.invocation().mode);
+    receipt.claimed_invocation=Some((plan.invocation().captured_ns,plan.invocation().deadline_ns));
+    if packet.rights.len()!=watchers+4 || packet.rights.len()>253 {return Err(Refusal::RightsCount(packet.rights.len()));}
+    let mut owners=packet.rights;
+    let [stdin,stdout,stderr,cwd]:[OwnedFd;4]=owners.split_off(watchers).try_into()
         .map_err(|rights:Vec<OwnedFd>|Refusal::RightsCount(rights.len()))?;
-    for fd in [&owner,&stdin,&stdout,&stderr,&cwd] {close_on_exec(fd.as_raw_fd())?;}
+    for fd in owners.iter().chain([&stdin,&stdout,&stderr,&cwd]){close_on_exec(fd.as_raw_fd())?;}
     let mut flags=[0;4];
-    for (index,fd) in [&stdin,&stdout,&stderr,&cwd].into_iter().enumerate() {flags[index]=io_flags(fd.as_raw_fd(),index)?;}
+    for (index,fd) in [&stdin,&stdout,&stderr,&cwd].into_iter().enumerate(){flags[index]=io_flags(fd.as_raw_fd(),index)?;}
     receipt.io_flags=Some(flags);
-    validate_pidfd(&owner, peer, receipt)?;
-    let frame = payload.get(..count).ok_or(Refusal::PayloadTruncated)?;
-    let plan = request::decode(frame).map_err(Refusal::InvalidRequest)?;
-    Ok(Admitted { peer, owner, plan, io:CallerIo{stdio:[stdin,stdout,stderr],cwd} })
+    validate_pidfd(&owners[0],peer.pid,receipt)?;
+    let invocation=invocation::VerifiedInvocation::receive(plan.invocation().clone(),owners,peer).map_err(Refusal::Invocation)?;
+    Ok(Admitted{peer,invocation,plan,io:CallerIo{stdio:[stdin,stdout,stderr],cwd}})
+
 }
 
 mod supervisor;
@@ -464,20 +486,21 @@ pub(crate) unsafe fn run_received(
 /// The client must already have NNP set (receiver verifies it); this routine
 /// does not mutate that process-wide policy, launch a helper or wait forever.
 pub(crate) fn send_request(
-    connection:&OwnedFd,seconds:f64,arguments:&[&[u8]],environment:&[&[u8]],
+    connection:&OwnedFd,original:&OriginalInvocation,arguments:&[&[u8]],environment:&[&[u8]],
     stdio:[BorrowedFd<'_>;3],cwd:BorrowedFd<'_>,
 )->Result<()> {
     validate_connection(connection.as_raw_fd(),false)?;
     let peer=kernel_peer_credentials(connection.as_raw_fd())?;
-    if peer.uid!=0 || peer.gid!=0 {return Err(Refusal::PeerCredentials);}
+    if peer.uid!=0||peer.gid!=0{return Err(Refusal::PeerCredentials);}
     let uid=unsafe{getuid()};let gid=unsafe{getgid()};
-    if uid==0 || gid==0 || unsafe{geteuid()}!=uid || unsafe{getegid()}!=gid {return Err(Refusal::PeerCredentials);}
-    for (index,fd) in stdio.iter().enumerate(){io_flags(fd.as_raw_fd(),index)?;}
-    io_flags(cwd.as_raw_fd(),3)?;
-    let packet=request::encode(seconds,arguments,environment).map_err(Refusal::InvalidRequest)?;
-    let owner=pidfd_for(std::process::id() as c_int)?;
-    send_packet(connection.as_raw_fd(),&packet,&[owner.as_raw_fd(),stdio[0].as_raw_fd(),
-        stdio[1].as_raw_fd(),stdio[2].as_raw_fd(),cwd.as_raw_fd()])
+    if uid==0||gid==0||unsafe{geteuid()}!=uid||unsafe{getegid()}!=gid{return Err(Refusal::PeerCredentials);}
+    original.revalidate().map_err(Refusal::Invocation)?;
+    for (index,fd) in stdio.iter().enumerate(){io_flags(fd.as_raw_fd(),index)?;}io_flags(cwd.as_raw_fd(),3)?;
+    let packet=request::encode(original.metadata(),arguments,environment).map_err(Refusal::InvalidRequest)?;
+    let mut rights:Vec<RawFd>=original.pidfds().iter().map(AsRawFd::as_raw_fd).collect();
+    rights.extend([stdio[0].as_raw_fd(),stdio[1].as_raw_fd(),stdio[2].as_raw_fd(),cwd.as_raw_fd()]);
+    if rights.len()>253{return Err(Refusal::RightsCount(rights.len()));}
+    send_packet(connection.as_raw_fd(),&packet,&rights)
 }
 
 #[cfg(test)]
@@ -514,7 +537,7 @@ mod tests {
         assert_ne!(uid,0,"ordinary user required");assert_ne!(gid,0,"ordinary group required");
         assert_eq!(unsafe{geteuid()},uid);assert_eq!(unsafe{getegid()},gid);
         let beginning=count_fds();
-        let root=std::env::temp_dir().join(format!("ptg-wire-v3-{}-{}",std::process::id(),
+        let root=std::env::temp_dir().join(format!("ptg-wire-v4-{}-{}",std::process::id(),
             SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
         fs::DirBuilder::new().mode(0o700).create(&root).unwrap();
         let meta=fs::symlink_metadata(&root).unwrap();
@@ -524,21 +547,30 @@ mod tests {
         let output=fs::OpenOptions::new().create_new(true).write(true).open(root.join("output")).unwrap();
         let error=fs::OpenOptions::new().create_new(true).write(true).open(root.join("error")).unwrap();
         let cwd=fs::OpenOptions::new().read(true).custom_flags(O_PATH|O_DIRECTORY).open(&root).unwrap();
-        let owner=pidfd_for(std::process::id() as c_int).unwrap();
-        let rights=[owner.as_raw_fd(),input.as_raw_fd(),output.as_raw_fd(),error.as_raw_fd(),cwd.as_raw_fd()];
-        let frame=request::encode(2.25,&[b"/never-executed",b"",b"\xff native"],&[b"KEY=\xfe value",b"EMPTY="]).unwrap();
+        // Real pre-bootstrap capture, including original direct parent and
+        // complete auto chain. No owner is signalled, cloned or executed.
+        let original=OriginalInvocation::capture(OwnerMode::Manual,60.25).unwrap();
+        assert_eq!(original.metadata().identities.len(),2);
+        assert_eq!(original.metadata().identities[0].pid,std::process::id());
+        assert_eq!(original.metadata().identities[0].ppid,original.metadata().identities[1].pid);
+        assert_eq!(original.metadata().deadline_ns-original.metadata().captured_ns,60_250_000_000);
+        original.revalidate().unwrap();
+        let mut rights:Vec<_>=original.pidfds().iter().map(AsRawFd::as_raw_fd).collect();
+        rights.extend([input.as_raw_fd(),output.as_raw_fd(),error.as_raw_fd(),cwd.as_raw_fd()]);
+        let owner_count=original.pidfds().len();
+        let frame=request::encode(original.metadata(),&[b"/never-executed",b"",b"\xff native"],&[b"KEY=\xfe value",b"EMPTY="]).unwrap();
         let before=count_fds();
         let (accepted,receipt)=exchange(&frame,&rights).unwrap();
-        assert_eq!(receipt.rights,5);assert!(receipt.connection_verified);
+        assert_eq!(receipt.rights,6);assert_eq!(receipt.original_watchers,2);assert!(receipt.connection_verified);
         assert_eq!(receipt.peer,Some(Credentials{pid:std::process::id() as c_int,uid,gid}));
         assert_eq!(receipt.sender,receipt.peer);assert!(receipt.io_flags.is_some());
+        assert_eq!(accepted.invocation.metadata(),original.metadata());
         assert_eq!(accepted.plan.environment()[0].as_bytes(),b"KEY=\xfe value");
         assert_eq!(accepted.plan.arguments()[2].as_bytes(),b"\xff native");
-        for fd in [&accepted.owner,&accepted.io.stdio[0],&accepted.io.stdio[1],&accepted.io.stdio[2],&accepted.io.cwd] {
-            close_on_exec(fd.as_raw_fd()).unwrap();
-            assert!(!rights.contains(&fd.as_raw_fd()));
+        for fd in accepted.invocation.owners().iter().chain([&accepted.io.stdio[0],&accepted.io.stdio[1],&accepted.io.stdio[2],&accepted.io.cwd]) {
+            close_on_exec(fd.as_raw_fd()).unwrap();assert!(!rights.contains(&fd.as_raw_fd()));
         }
-        let Admitted{owner:received_owner,io:CallerIo{stdio:[received_in,received_out,received_err],cwd:received_cwd},plan,..}=accepted;
+        let Admitted{invocation:received_owners,io:CallerIo{stdio:[received_in,received_out,received_err],cwd:received_cwd},plan,..}=accepted;
         let mut received_in=fs::File::from(received_in);
         let mut byte=[0];received_in.read_exact(&mut byte).unwrap();assert_eq!(&byte,b"B");
         assert_eq!(input.stream_position().unwrap(),2,"SCM transfer must preserve the open-file description");
@@ -546,26 +578,55 @@ mod tests {
         let mut received_err=fs::File::from(received_err);received_err.write_all(b"err").unwrap();
         let received_cwd=fs::File::from(received_cwd);let held=received_cwd.metadata().unwrap();
         assert_eq!((held.dev(),held.ino()),(meta.dev(),meta.ino()));
-        drop((received_owner,received_in,received_out,received_err,received_cwd,plan));
-        assert_eq!(count_fds(),before,"accepted five-right request leaked descriptors");
+        drop((received_owners,received_in,received_out,received_err,received_cwd,plan));
+        assert_eq!(count_fds(),before,"accepted original-owner/IO request leaked descriptors");
         assert_eq!(fs::read(root.join("output")).unwrap(),b"out");
         assert_eq!(fs::read(root.join("error")).unwrap(),b"err");
-        refusal("missing_right",&frame,&rights[..4],Refusal::RightsCount(4));
-        let six=[rights[0],rights[1],rights[2],rights[3],rights[4],rights[1]];
-        refusal("extra_right",&frame,&six,Refusal::RightsCount(6));
-        refusal("control_truncated",&frame,&[rights[0];32],Refusal::ControlTruncated);
-        let wrong_in=[rights[0],rights[2],rights[2],rights[3],rights[4]];
+        let auto=OriginalInvocation::capture(OwnerMode::Auto,60.25).unwrap();
+        assert_eq!(auto.metadata().identities.last().unwrap().pid,1);
+        assert_eq!(auto.metadata().identities.last().unwrap().ppid,0);
+        let mut auto_rights:Vec<_>=auto.pidfds().iter().map(AsRawFd::as_raw_fd).collect();auto_rights.extend_from_slice(&rights[owner_count..]);
+        let auto_frame=request::encode(auto.metadata(),&[b"/never-executed"],&[]).unwrap();
+        let auto_before=count_fds();let (accepted,receipt)=exchange(&auto_frame,&auto_rights).unwrap();
+        assert_eq!(receipt.original_watchers,auto.pidfds().len());
+        assert_eq!(accepted.invocation.metadata(),auto.metadata());drop(accepted);
+        assert_eq!(count_fds(),auto_before,"auto owner transfer leaked descriptors");
+        println!("native_original_owners manual=2 auto={} captured_ns={} cutoff_ns={} requested_bits={} absolute_unchanged=true",auto.pidfds().len(),original.metadata().captured_ns,original.metadata().deadline_ns,original.metadata().seconds.to_bits());
+        drop(auto);
+        refusal("missing_right",&frame,&rights[..rights.len()-1],Refusal::RightsCount(5));
+        let mut extra=rights.clone();extra.push(rights[owner_count]);
+        refusal("extra_right",&frame,&extra,Refusal::RightsCount(7));
+        // Preserve the genuine kernel CTRUNC/adopt/close assertion after the
+        // production capacity increased to1088B for253 rights. Only this call
+        // supplies a small natively aligned buffer to the SAME receive logic.
+        let trunc_before=count_fds();
+        let (tx,rx)=socket_pair().unwrap();send_packet(tx.as_raw_fd(),&frame,&[rights[0];32]).unwrap();
+        let mut small=[0u64;12];
+        assert_eq!(receive_with_control(rx.as_raw_fd(),&mut NativeReceipt::default(),&mut small).unwrap_err(),Refusal::ControlTruncated);
+        drop((tx,rx));assert_eq!(count_fds(),trunc_before,"control_truncated leaked a received descriptor");
+        println!("native_wire_refused=control_truncated test_control_bytes=96 production_control_bytes={CONTROL_BYTES} descriptors=settled");
+        let mut wrong_in=rights.clone();wrong_in[owner_count]=output.as_raw_fd();
         refusal("write_only_stdin",&frame,&wrong_in,Refusal::IoAccess);
         let readonly=fs::File::open(root.join("output")).unwrap();
-        let wrong_out=[rights[0],rights[1],readonly.as_raw_fd(),rights[3],rights[4]];
+        let mut wrong_out=rights.clone();wrong_out[owner_count+1]=readonly.as_raw_fd();
         refusal("read_only_stdout",&frame,&wrong_out,Refusal::IoAccess);
-        let wrong_err=[rights[0],rights[1],rights[2],readonly.as_raw_fd(),rights[4]];
+        let mut wrong_err=rights.clone();wrong_err[owner_count+2]=readonly.as_raw_fd();
         refusal("read_only_stderr",&frame,&wrong_err,Refusal::IoAccess);
         let regular_path=fs::OpenOptions::new().read(true).custom_flags(O_PATH).open(root.join("input")).unwrap();
-        let wrong_cwd=[rights[0],rights[1],rights[2],rights[3],regular_path.as_raw_fd()];
+        let mut wrong_cwd=rights.clone();wrong_cwd[owner_count+3]=regular_path.as_raw_fd();
         refusal("regular_cwd",&frame,&wrong_cwd,Refusal::WorkingDirectory);
-        let wrong_owner=[rights[1],rights[1],rights[2],rights[3],rights[4]];
+        let mut wrong_owner=rights.clone();wrong_owner[0]=input.as_raw_fd();
         refusal("file_instead_of_owner_pidfd",&frame,&wrong_owner,Refusal::NotPidfd);
+        let mut wrong_ancestor=rights.clone();wrong_ancestor[1]=rights[0];
+        refusal("self_instead_of_parent_pidfd",&frame,&wrong_ancestor,Refusal::Invocation(invocation::InvocationError::Kernel("WrongPidfd".into())));
+        let mut expired=original.metadata().clone();expired.captured_ns=1;expired.deadline_ns=60_250_000_001;
+        let expired=request::encode(&expired,&[b"/never-executed"],&[]).unwrap();
+        refusal("original_deadline_expired",&expired,&rights,Refusal::Invocation(invocation::InvocationError::Expired));
+        assert_eq!(invocation::InvocationError::Expired.exit_code(),124);
+        let mut future=original.metadata().clone();future.captured_ns=supervisor::boottime_ns().unwrap()+3_600_000_000_000;
+        future.deadline_ns=future.captured_ns+60_250_000_000;
+        let future=request::encode(&future,&[b"/never-executed"],&[]).unwrap();
+        refusal("future_original_start",&future,&rights,Refusal::Invocation(invocation::InvocationError::InvalidTime));
         let mut malformed=frame.clone();malformed[5]=b'2';
         refusal("wrong_version",&malformed,&rights,Refusal::InvalidRequest(request::Refusal::Version));
         let mut malformed=frame.clone();malformed.push(0);
@@ -573,11 +634,10 @@ mod tests {
         let large=vec![b'x';request::MAX_PACKET_BYTES+1];
         refusal("payload_truncated",&large,&rights,Refusal::PayloadTruncated);
         let (tx,rx)=socket_pair().unwrap();drop(tx);
-        let before_eof=count_fds();
-        assert_eq!(receive(rx.as_raw_fd()).unwrap_err(),Refusal::EmptyPacket);
+        let before_eof=count_fds();assert_eq!(receive(rx.as_raw_fd()).unwrap_err(),Refusal::EmptyPacket);
         assert_eq!(count_fds(),before_eof);drop(rx);
-        drop((readonly,regular_path,owner,input,output,error,cwd));
+        drop((readonly,regular_path,original,input,output,error,cwd));
         assert_eq!(count_fds(),beginning,"native test left owned descriptors");
-        println!("native_wire=PTGEX3 rights=5 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
+        println!("native_wire=PTGEX4 manual_rights=6 max_rights=253 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
     }
 }

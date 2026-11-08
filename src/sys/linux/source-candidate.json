@@ -1,17 +1,51 @@
 {
   "schema": 1,
-  "status": "Per-unit authority Rust build/link + unchanged8tests PASS; entry origin mint absent; backend disabled; no runtime topology or protection/performance qualification",
+  "status": "Original-owner PTGEX4 graph rebuilt/linked all8steps + adapted8tests PASS; trusted origin mint/selector disabled; no native guard/protection/performance qualification",
   "root": "src/sys/linux",
-  "baseline_commit": "3cfd005",
-  "baseline_candidate_sha256": "c1a2840e256e18ecc033e138c8a065234f6fed7e901491b9bead404af05d4b34",
-  "history": "target/codex-security/linux-product-integration-history-001/c1a-before-unit-authority-006",
+  "baseline_commit": "a561bf7d9d1ba5f6d9fa7b9c6334ab4a528aa9b3",
+  "baseline_candidate_sha256": "ee27b5691186cf2aa06c1d8b3f6479ec03cac858a1603e97872c099baabd6b05",
+  "history": "target/codex-security/linux-product-integration-history-001/ee27-before-original-invocation-007",
   "entry_signature": "unsafe fn(VerifiedServiceScope,OwnedFd,Policy)->RunOutcome = linux::run_in_service; Policy=fn(u32,u32,&[u32],&CStr)->bool",
-  "origin_mint": "ABSENT: checked_entry_origin returns Err; no public/unsafe caller-derived constructor and no test mint",
-  "global_cgroup_fallback": false,
-  "scope_ownership": "NativePort/earlyRunOutcome; shared exact held anchor in all leaf parent/provision/refused-create/quarantine paths",
-  "public_owner_time_unqualified": "peer auth/locally-admitted timer do not replace original manual parent, auto ALL live original ancestors, and pre-manager absolute timeout; full goal remains required",
-  "tests": "existing8 bodies unchanged; no new tests/framework/effects",
+  "original_client": "OriginalInvocation::capture(OwnerMode::{Manual,Auto},seconds:f64) before manager/helpers; private fields/no raw verified constructor",
+  "wire": "PTGEX4: 40Bheader + 16B ordered identity records; 2..249watchers +4IO/CWD rights <=253; aligned1088B ancillary; packet/native bytes cap131072",
+  "deadline": "captured BOOTTIME + exact requested fractional duration preserved; receiver-owned absolute private timer; raw authenticated client time is a claim not privileged attestation",
+  "native_abi": {
+    "owner_watch_bytes": 16,
+    "min": 2,
+    "max": 249,
+    "arming_schema": 3,
+    "arming_words": 19,
+    "payload_schema": 2,
+    "payload_spec_bytes": 152,
+    "payload_owners_offset": 16,
+    "payload_gate_offset": 144,
+    "payload_words": 16,
+    "terminal_poll_max": 254
+  },
+  "tests": {
+    "existing_names": 8,
+    "bodies": "ADAPTED in place, prior numeric/framing/native assertions retained and full-owner/time boundaries added",
+    "new_framework": false,
+    "runtime_effects": "7pure codec/numeric plus1ordinary own IPC/file test with actual manual/auto ancestry proc/pidfd reads; no fork/exec/signals/NNP/settings/cgroup/root",
+    "control_truncation": "same recvmsg/adopt/flags code;96B aligned testprefix; production1088B",
+    "status": "PENDING exact review and actual build/test"
+  },
+  "origin_mint": "ABSENT: actual checked manager origin remains failclosed; no public Linux activation",
+  "unqualified": [
+    "trusted manager bootstrap and actual public dispatch before helpers",
+    "NNP/setuid activation ordering and root listener/outcome delivery",
+    "native multi-owner payload/watchdog/cgroup runtime",
+    "supported kernel-floor/failure/shared-escape/performance qualification",
+    "complete typed native-original-timer refusal classification at actual failure site; genericerrors125 pending implementation/qualification"
+  ],
   "selector_sha256": "55d0d8d6caa5d224b554cd6ace3b103142196ba3ef5bfa5cec0fc330d6c58d8a",
+  "external": [
+    {
+      "path": "src/deadline.rs",
+      "bytes": 1171,
+      "sha256": "56252eb28270b4743d73e17e05ae933d3fad8168e7b4ba34405e859be9c85c53"
+    }
+  ],
   "files": [
     {
       "path": ".gitattributes",
@@ -20,18 +54,18 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 9043,
-      "sha256": "a1c2f4369609a31cb5c3c4fa141d4215c31461785b6f4f25dea985705ff81f17"
+      "bytes": 13302,
+      "sha256": "5c47160644f4f49430f056c442ec19ce65d9cec1daf196c8e30690b61c106b73"
     },
     {
       "path": "README.md",
-      "bytes": 34972,
-      "sha256": "c28927c1c4695741b25f1c39a6fc957f989ae0edc7252d843912f15b357e6468"
+      "bytes": 36508,
+      "sha256": "17dfef5abce82cbe3461a8998f87023c737f7aa858e5d624a19de577d0b4d190"
     },
     {
       "path": "arming_failure_controller.rs",
-      "bytes": 8062,
-      "sha256": "6a77466a948c04217c0311475eda2a84bdf465bc009d8e093ce4afe40ff93db6"
+      "bytes": 8109,
+      "sha256": "7e163e3960f97f33abe28bb1e241b90c781ff006de1773d3800ee769d073794a"
     },
     {
       "path": "cgroup_authority.rs",
@@ -44,54 +78,69 @@
       "sha256": "cd71240834ecb1a9da099b6a917648b76e4b1f125ff4578df35e80546c820788"
     },
     {
+      "path": "invocation.rs",
+      "bytes": 9933,
+      "sha256": "d5ee4c060a040018b8af41c87aa499802cddd029dbaf265c6693e73dad83cbb8"
+    },
+    {
       "path": "kernel_signal_abi.c",
       "bytes": 2944,
       "sha256": "36bb4945359ea42d540161c3a85cf4e73ed22d8bf4eafa86535509abc250ae4a"
     },
     {
       "path": "mod.rs",
-      "bytes": 24124,
-      "sha256": "6f84cb05e38b033f144852b571c4e13e30b3638c7b0126148befc868b33c7d2d"
+      "bytes": 29172,
+      "sha256": "84eee827df9b6d072be66c4b100b075054cca04a9cf878e1b03b4aa6feaa4378"
     },
     {
       "path": "native_activation.rs",
-      "bytes": 12468,
-      "sha256": "71129197ed3bc0bc9390c47b85837a732e189242fee254b983194b628defdb5c"
+      "bytes": 13026,
+      "sha256": "990e97310de51e99cd6b9a1c7e49523f255d3a50a20e87507431502fad6549fc"
     },
     {
       "path": "native_arming.c",
-      "bytes": 12231,
-      "sha256": "6c365c27805a6625e396c529e130481bf5815991dd5d625cb4184f925ca9b413"
+      "bytes": 13448,
+      "sha256": "8b494dfb77aede4ba3e1f8d9c42bf91e63ec666e21c01d37f5012e9254e2d03a"
     },
     {
       "path": "native_arming.h",
-      "bytes": 1605,
-      "sha256": "65fbb746e90657033378fcd9ce169b1195d7f774ce52e976eae4cc24268c85fb"
+      "bytes": 1676,
+      "sha256": "eda6fde4b5514133d502a4166b39302d902d2c5c78c8cac805903449b8ebdef1"
     },
     {
       "path": "native_arming.rs",
-      "bytes": 10142,
-      "sha256": "91a17984b0b84fc8481b62c0c3efeae72b29b592c2586df97842b4fe24d46775"
+      "bytes": 10171,
+      "sha256": "b90f94c2817553419533f3c46004c5fc07df8e149d920ed3c3e6c1e2879ff8b3"
     },
     {
       "path": "native_port.rs",
-      "bytes": 19677,
-      "sha256": "0fcd6fb9a394cbf0ae184b802eb2a06f5e6b1dde8fd49ac2738cf5752c2aeb18"
+      "bytes": 21113,
+      "sha256": "bc7f20e47d7046b827e44a915cc4a92434d2de57e852a50727d33c4bb5b61365"
+    },
+    {
+      "path": "owner_poll.h",
+      "bytes": 2767,
+      "sha256": "d5ccecec05afe8ef28d6bae04c3285d23227ef6fe3ba1d083883113ead58e89c"
+    },
+    {
+      "path": "owner_watch.h",
+      "bytes": 845,
+      "sha256": "0f6795ae591096680847dd955c00f606377a810681afdd512cb56e4d0715beee"
     },
     {
       "path": "payload_bootstrap.c",
-      "bytes": 24342,
-      "sha256": "1e96667df37586dd4a102644ff9a7ad081bf96da33f253a1901e7e41c2855f46"
+      "bytes": 26602,
+      "sha256": "f8446c9028fbe85c7fcb343cf5c034033185467bdde8d4c5f9f3f1403eba001d"
     },
     {
       "path": "payload_bootstrap.h",
-      "bytes": 6253,
-      "sha256": "edc8fc5b3eb061d8751d007ed939e4e3c0df0a400351158a2dc93d566c5d3d09"
+      "bytes": 6391,
+      "sha256": "724ab8b77544cca873c43f171feb494b5ec30afe2b03cb9f98c43dff30b713f2"
     },
     {
       "path": "request.rs",
-      "bytes": 12331,
-      "sha256": "3a364ef8d026d5412dbe17a5c2f0c258f2af1a86ce96b7377a67330c3d7d528b"
+      "bytes": 16193,
+      "sha256": "87548f2491a8bc374e3d05868f9bb7a6266de042a4b5e9a1c48d5f226a2eb9d2"
     },
     {
       "path": "service_scope.rs",
@@ -105,13 +154,13 @@
     },
     {
       "path": "supervisor.rs",
-      "bytes": 11403,
-      "sha256": "9cc241896cb723b1db050b26079f1b29ef543938658983b2525d45b03e2ff520"
+      "bytes": 12123,
+      "sha256": "293e259d04887c6d923d25efb6682169466c982e2c2ef210abf6477fa20ef208"
     },
     {
       "path": "terminal_bridge.c",
-      "bytes": 4300,
-      "sha256": "432ebe70077eb6311030ec8d22b0dfb45da380e9f387a7f244675d670ac71bd4"
+      "bytes": 4347,
+      "sha256": "b93c722e2f278a0cdb3b7ed76c0a1f23b2dabbcb84dc7338917b9e949d06d8ac"
     },
     {
       "path": "terminal_bridge.h",
@@ -120,8 +169,8 @@
     },
     {
       "path": "terminal_controller.rs",
-      "bytes": 42397,
-      "sha256": "902eaf114563ca1c2ca9cc9607832ce54b53e3ba3dd0c50334b9f5f948262de2"
+      "bytes": 43759,
+      "sha256": "0ed071df179f0b6ffc31741b931a2ac3dca7daf0362e4220a7959fee39530800"
     },
     {
       "path": "waitid_bridge.c",
@@ -134,5 +183,19 @@
       "sha256": "4b3562bd4e0e8fe9540f7986fbd125859906e0462a136075e32baf6c10ffb851"
     }
   ],
-  "implementation_build_candidate_sha256": "dfd3b75f18a0a9c801e89b7d6b7c28dea775072e162c440fce8a02b61d1669be"
+  "revisions": [
+    {
+      "source_candidate_sha256": "b3020205ffa3774a247bb3f6e32bfd5362d8a7288c5b9e46bb258abf33fe5f8f",
+      "history": "target/codex-security/linux-product-integration-history-001/b302-before-all-root-009",
+      "reason": "require all4 supervisor root credential IDs; no callerUID signal permission"
+    },
+    {
+      "source_candidate_sha256": "2c09708c4976d185f39cba613dbe45496609d79f6df13a72dc68783db9ea4b5d",
+      "history": "target/codex-security/linux-product-integration-history-001/2c-before-timeout-primary-010",
+      "reason": "preserve typed original refusalboundary cause; late diagnostics cannot mint124 or erase primarymaskfault; isolate pureowner ABI headers from libc helpers for x86kernelheaderportability"
+    }
+  ],
+  "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
+  "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
+  "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984"
 }

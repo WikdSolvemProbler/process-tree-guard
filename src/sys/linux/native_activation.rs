@@ -9,7 +9,7 @@ const SIGCHLD: u64 = 17;
 
 struct LeaseWatch<'a> {
     owner_pid: c_int,
-    owner: &'a OwnedFd,
+    owners: &'a Arc<VerifiedInvocation>,
     timer: &'a OwnedFd,
     deadline_ns: u64,
     supervisor: &'a OwnedFd,
@@ -19,7 +19,7 @@ impl<'a> LeaseWatch<'a> {
     fn original(prepared: &'a PreparedRun, supervisor: &'a terminal_controller::DedicatedSupervisor) -> Self {
         Self {
             owner_pid: prepared.owner_pid,
-            owner: &prepared.lease.owner,
+            owners: &prepared.lease.invocation,
             timer: &prepared.lease.timer,
             deadline_ns: prepared.lease.deadline_ns,
             supervisor: supervisor.self_pidfd(),
@@ -204,6 +204,7 @@ enum ActivationFailure {
         cleanup: Option<cgroup_authority::settlement::Deadline>,
         context_error: Option<terminal_controller::ContextFailure>,
         error: String,
+        decision: Option<Decision>,
     },
     Arming {
         prepared: PreparedRun,
@@ -211,6 +212,13 @@ enum ActivationFailure {
         cleanup: cgroup_authority::settlement::Deadline,
         failure: ArmFailure,
     },
+}
+
+// Only this actual refusal-boundary observation creates a typed pre-arm stop.
+// Later diagnostic samples cannot replace a primary ABI/policy/context error.
+fn require_original_live(prepared:&PreparedRun,error:&str)->std::result::Result<(),(String,Option<Decision>)> {
+    let decision=prepared.lease.sample().map_err(|error|(error,None))?.decision;
+    if decision==Decision::Permit{Ok(())}else{Err((error.into(),Some(decision)))}
 }
 
 /// # Safety
@@ -224,47 +232,39 @@ unsafe fn activate(
     prepared: PreparedRun,
     port: &mut impl OneShotPort,
 ) -> std::result::Result<PendingSettlement, ActivationFailure> {
-    let before_arm = (|| -> Probe<()> {
-        port.authorize(&prepared.identity, &prepared.plan)?;
-        check(
-            prepared.lease.sample()?.decision == Decision::Permit,
-            "owner or deadline inactive before cgroup arming",
-        )
+    let before_arm=(||->std::result::Result<(),(String,Option<Decision>)>{
+        port.authorize(&prepared.identity,&prepared.plan).map_err(|error|(error,None))?;
+        require_original_live(&prepared,"owner or deadline inactive before cgroup arming")
     })();
-    if let Err(error) = before_arm {
-        return Err(ActivationFailure::BeforeArm {
-            prepared, supervisor: None, cleanup: None, context_error: None, error,
-        });
+    if let Err((error,decision))=before_arm {
+        return Err(ActivationFailure::BeforeArm{prepared,supervisor:None,cleanup:None,context_error:None,error,decision});
     }
     let supervisor = match unsafe { terminal_controller::DedicatedSupervisor::establish() } {
         Ok(value) => value,
         Err(failure) => return Err(ActivationFailure::BeforeArm {
             prepared, supervisor: None, cleanup: None, context_error: Some(failure),
-            error: "dedicated supervisor setup refused".into(),
+            error: "dedicated supervisor setup refused".into(), decision:None,
         }),
     };
     let cleanup_until = match prepared.lease.deadline_ns.checked_add(terminal_controller::CLEANUP_GRACE_NS) {
         Some(value) => value,
         None => return Err(ActivationFailure::BeforeArm {
             prepared, supervisor: Some(supervisor), cleanup: None, context_error: None,
-            error: "cleanup hard cutoff overflow".into(),
+            error: "cleanup hard cutoff overflow".into(), decision:None,
         }),
     };
     let cleanup = match cgroup_authority::settlement::Deadline::arm_before_placement(cleanup_until) {
         Ok(value) => value,
         Err(error) => return Err(ActivationFailure::BeforeArm {
-            prepared, supervisor: Some(supervisor), cleanup: None, context_error: None, error,
+            prepared, supervisor: Some(supervisor), cleanup: None, context_error: None, error, decision:None,
         }),
     };
-    let final_before_arm = (|| -> Probe<()> {
-        cleanup.check()?;
-        check(prepared.lease.sample()?.decision == Decision::Permit,
-              "original owner/deadline inactive before native arming")
+    let final_before_arm=(||->std::result::Result<(),(String,Option<Decision>)>{
+        cleanup.check().map_err(|error|(error,None))?;
+        require_original_live(&prepared,"original owner/deadline inactive before native arming")
     })();
-    if let Err(error) = final_before_arm {
-        return Err(ActivationFailure::BeforeArm {
-            prepared, supervisor: Some(supervisor), cleanup: Some(cleanup), context_error: None, error,
-        });
+    if let Err((error,decision))=final_before_arm {
+        return Err(ActivationFailure::BeforeArm{prepared,supervisor:Some(supervisor),cleanup:Some(cleanup),context_error:None,error,decision});
     }
     // Original execution owner/timer/deadline are never retargeted. The cleanup
     // timer exists before arm can create a watchdog or place any payload.
@@ -309,7 +309,7 @@ pub(super) use native_port::LaunchContext;
 pub(crate) use native_port::RunOutcome;
 pub(super) use native_port::run_admitted;
 pub(super) use native_port::before_activation;
-pub(super) use native_port::before_admission;
+pub(super) use native_port::{before_admission,before_admission_code};
 
 pub(crate) use cgroup_authority::service_scope::VerifiedServiceScope;
 pub(super) fn capture_service_scope()->Probe<VerifiedServiceScope> {

@@ -2,6 +2,7 @@
 // Copyright 2026 Peter Shiller
 #define _GNU_SOURCE 1
 #include "payload_bootstrap.h"
+#include "owner_poll.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -28,8 +29,9 @@
 _Static_assert(sizeof(void *)==8 && sizeof(unsigned long)==8,"LP64 private ABI");
 _Static_assert(sizeof(struct clone_args)==88 && offsetof(struct clone_args,cgroup)==80,"clone3 v2 ABI");
 _Static_assert(sizeof(struct pollfd)==8,"native pollfd ABI");
-_Static_assert(sizeof(struct ptg_payload_spec)==136,"payload spec ABI");
-_Static_assert(offsetof(struct ptg_payload_spec,gate)==128,"payload gate offset");
+_Static_assert(sizeof(struct ptg_payload_spec)==152,"payload spec ABI");
+_Static_assert(offsetof(struct ptg_payload_spec,gate)==144,"payload gate offset");
+_Static_assert(offsetof(struct ptg_payload_spec,owners)==16,"payload original owner-set offset");
 _Static_assert(sizeof(struct ptg_payload_spawn)==128,"payload spawn ABI");
 _Static_assert(sizeof(struct ptg_payload_ready)==96,"payload readiness ABI");
 _Static_assert(sizeof(struct ptg_payload_release)==80,"payload release ABI");
@@ -58,6 +60,9 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 10:return CLOCK_BOOTTIME;
     case 11:return PTG_BLOCKED_MASK;
     case 12:return offsetof(struct ptg_payload_spec,gate);
+    case 13:return sizeof(struct ptg_owner_watch);
+    case 14:return PTG_OWNER_WATCH_MAX;
+    case 15:return offsetof(struct ptg_payload_spec,owners);
     default:return UINT64_MAX;
     }
 }
@@ -108,11 +113,6 @@ static uint64_t now_ns(int *error) {
     }
     *error=0;return (uint64_t)t.tv_sec*UINT64_C(1000000000)+(uint64_t)t.tv_nsec;
 }
-static int sample(struct pollfd *fds,unsigned int count,int block) {
-    struct timespec zero={0,0};
-    for(unsigned int i=0;i<count;i++)fds[i].revents=0;
-    return (int)syscall(SYS_ppoll,fds,count,block?NULL:&zero,NULL,sizeof(uint64_t));
-}
 static void cancel_kill(const struct ptg_payload_spec *s,int32_t *result,int32_t *error) {
     /* Irreversible shared cancellation always precedes this held kill write. */
     if(s) (void)ptg_payload_gate_cancel(s->gate);
@@ -160,19 +160,27 @@ static int nonblocking_permit(int fd) {
     return length>=sizeof(peer.sa_family) && peer.sa_family==AF_UNIX?0:EINVAL;
 }
 static int watch_spec_valid(const struct ptg_payload_spec *s) {
-    return !s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
-        || !gate_valid(s->gate) || !s->deadline_ns || s->kill_fd<0
-        || s->owner_fd<0 || s->timer_fd<0 || s->supervisor_fd<0 || s->watchdog_fd<0?EINVAL:0;
+    if(!s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
+       || !gate_valid(s->gate) || !s->deadline_ns)return EINVAL;
+    const int32_t other[4]={s->kill_fd,s->timer_fd,s->supervisor_fd,s->watchdog_fd};
+    return ptg_owner_watch_disjoint(&s->owners,other,4)?0:EINVAL;
 }
 static int spec_valid(const struct ptg_payload_spec *s) {
-    if(!s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
-       || !gate_valid(s->gate) || s->uid==0 || s->gid==0
+    if(watch_spec_valid(s) || s->uid==0 || s->gid==0
        || s->uid==UINT32_MAX || s->gid==UINT32_MAX || s->deadline_ns==0
        || s->group_count>PTG_PAYLOAD_MAX_GROUPS || (s->group_count && !s->groups)
        || s->argc==0 || !s->program || s->program[0]==0)return EINVAL;
-    const int controls[9]={s->cgroup_fd,s->kill_fd,s->owner_fd,s->timer_fd,
+    const int32_t controls[8]={s->cgroup_fd,s->kill_fd,s->timer_fd,
         s->supervisor_fd,s->watchdog_fd,s->permit_reader,s->ready_writer,s->exec_writer};
-    for(unsigned int i=0;i<9;i++) {
+    if(!ptg_owner_watch_disjoint(&s->owners,controls,8))return EINVAL;
+    for(uint32_t i=0;i<s->owners.count;i++) {
+        const int fd=s->owners.fds[i];
+        const int flags=fcntl(fd,F_GETFD);
+        if(flags<0)return EBADF;
+        if(!(flags&FD_CLOEXEC) || s->cwd_fd==fd)return EINVAL;
+        for(unsigned j=0;j<3;j++)if(s->stdio_fd[j]==fd)return EINVAL;
+    }
+    for(unsigned int i=0;i<8;i++) {
         if(controls[i]<0 || fcntl(controls[i],F_GETFD)<0)return EBADF;
         for(unsigned int j=0;j<i;j++)if(controls[i]==controls[j])return EINVAL;
         if(s->cwd_fd==controls[i])return EINVAL;
@@ -202,9 +210,9 @@ static _Noreturn void child_fail(int report,int error,int code) {
 }
 static int child_live(const struct ptg_payload_spec *s) {
     if(ptg_payload_gate_state(s->gate)!=PTG_PAYLOAD_RELEASED)return ECANCELED;
-    struct pollfd fds[4]={{.fd=3,.events=POLLIN},{.fd=4,.events=POLLIN},
-        {.fd=5,.events=POLLIN},{.fd=6,.events=POLLIN}};
-    const int r=sample(fds,4,0);if(r!=0)return r<0?errno:ECANCELED;
+    struct pollfd fds[4]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+        {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN}};
+    const int r=ptg_owner_poll(&s->owners,fds,4,0,0);if(r!=0)return r<0?errno:ECANCELED;
     int e=0;const uint64_t now=now_ns(&e);
     return e?e:(now>=s->deadline_ns?ETIMEDOUT:0);
 }
@@ -217,77 +225,94 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     uint64_t mask=0;
     if(raw_mask(NULL,&mask)!=0 || mask!=PTG_BLOCKED_MASK)child_fail(s->exec_writer,EPROTO,125);
     if(ptg_payload_gate_state(s->gate)!=PTG_PAYLOAD_HELD)child_fail(s->exec_writer,ECANCELED,125);
+    if(!ptg_owner_watch_valid(&s->owners))child_fail(s->exec_writer,EINVAL,125);
     /* Duplicate all sources high BEFORE replacing low descriptors. */
-    const int source[11]={s->stdio_fd[0],s->stdio_fd[1],s->stdio_fd[2],s->owner_fd,
-        s->timer_fd,s->supervisor_fd,s->watchdog_fd,s->permit_reader,s->ready_writer,s->exec_writer,s->cwd_fd};
-    int staged[11];for(unsigned int i=0;i<11;i++)staged[i]=-1;
-    staged[9]=(int)syscall(SYS_fcntl,source[9],F_DUPFD_CLOEXEC,64);
-    if(staged[9]<0)child_fail(s->exec_writer,errno,125);
-    for(unsigned int i=0;i<11;i++)if(i!=9) {
-        staged[i]=(int)syscall(SYS_fcntl,source[i],F_DUPFD_CLOEXEC,64);
-        if(staged[i]<0)child_fail(staged[9],errno,125);
+    const uint32_t owner_count=s->owners.count,base=owner_count+3,count=owner_count+10;
+    const uint32_t report_index=base+5;
+    const int floor=count>64?(int)count:64;
+    int source[PTG_OWNER_WATCH_MAX+10],staged[PTG_OWNER_WATCH_MAX+10];
+    for(uint32_t i=0;i<3;i++)source[i]=s->stdio_fd[i];
+    for(uint32_t i=0;i<owner_count;i++)source[i+3]=s->owners.fds[i];
+    source[base]=s->timer_fd;source[base+1]=s->supervisor_fd;
+    source[base+2]=s->watchdog_fd;source[base+3]=s->permit_reader;
+    source[base+4]=s->ready_writer;source[base+5]=s->exec_writer;source[base+6]=s->cwd_fd;
+    for(uint32_t i=0;i<count;i++)staged[i]=-1;
+    staged[report_index]=(int)syscall(SYS_fcntl,source[report_index],F_DUPFD_CLOEXEC,floor);
+    if(staged[report_index]<0)child_fail(s->exec_writer,errno,125);
+    for(uint32_t i=0;i<count;i++)if(i!=report_index) {
+        staged[i]=(int)syscall(SYS_fcntl,source[i],F_DUPFD_CLOEXEC,floor);
+        if(staged[i]<0)child_fail(staged[report_index],errno,125);
     }
-    for(unsigned int i=0;i<11;i++)if(syscall(SYS_dup3,staged[i],(int)i,i<3?0:O_CLOEXEC)<0)
-        child_fail(staged[9],errno,125);
-    if(syscall(SYS_close_range,11U,UINT_MAX,0U)!=0)child_fail(9,errno,125);
+    for(uint32_t i=0;i<count;i++)if(syscall(SYS_dup3,staged[i],(int)i,i<3?0:O_CLOEXEC)<0)
+        child_fail(staged[report_index],errno,125);
+    if(syscall(SYS_close_range,count,UINT_MAX,0U)!=0)child_fail((int)report_index,errno,125);
+    int32_t local_owners[PTG_OWNER_WATCH_MAX];
+    for(uint32_t i=0;i<owner_count;i++)local_owners[i]=(int32_t)i+3;
+    struct ptg_payload_spec remapped=*s;
+    remapped.owners=(struct ptg_owner_watch){.fds=local_owners,.count=owner_count,.reserved=0};
+    remapped.timer_fd=(int32_t)base;remapped.supervisor_fd=(int32_t)base+1;
+    remapped.watchdog_fd=(int32_t)base+2;remapped.permit_reader=(int32_t)base+3;
+    remapped.ready_writer=(int32_t)base+4;remapped.exec_writer=(int32_t)report_index;
+    remapped.cwd_fd=(int32_t)base+6;remapped.cgroup_fd=remapped.kill_fd=-1;
+    s=&remapped;
     /* Parent/watchdog retain RW. Only THIS child's VMA becomes read-only. */
-    if(syscall(SYS_mprotect,s->gate,sizeof(*s->gate),PROT_READ)!=0)child_fail(9,errno,125);
+    if(syscall(SYS_mprotect,s->gate,sizeof(*s->gate),PROT_READ)!=0)child_fail(s->exec_writer,errno,125);
     /* Irreversible exec privilege barrier precedes every credential change. */
-    if(syscall(SYS_prctl,PR_SET_NO_NEW_PRIVS,1,0,0,0)!=0)child_fail(9,errno,125);
-    if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(9,EPERM,125);
-    if(syscall(SYS_prctl,PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,0,0,0)!=0)child_fail(9,errno,125);
-    if(syscall(SYS_prctl,PR_SET_KEEPCAPS,0,0,0,0)!=0)child_fail(9,errno,125);
-    if(syscall(SYS_setgroups,s->group_count,s->groups)!=0)child_fail(9,errno,125);
-    if(syscall(SYS_setresgid,s->gid,s->gid,s->gid)!=0)child_fail(9,errno,125);
-    if(syscall(SYS_setresuid,s->uid,s->uid,s->uid)!=0)child_fail(9,errno,125);
+    if(syscall(SYS_prctl,PR_SET_NO_NEW_PRIVS,1,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
+    if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(s->exec_writer,EPERM,125);
+    if(syscall(SYS_prctl,PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
+    if(syscall(SYS_prctl,PR_SET_KEEPCAPS,0,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
+    if(syscall(SYS_setgroups,s->group_count,s->groups)!=0)child_fail(s->exec_writer,errno,125);
+    if(syscall(SYS_setresgid,s->gid,s->gid,s->gid)!=0)child_fail(s->exec_writer,errno,125);
+    if(syscall(SYS_setresuid,s->uid,s->uid,s->uid)!=0)child_fail(s->exec_writer,errno,125);
     const struct __user_cap_header_struct cap_header={.version=_LINUX_CAPABILITY_VERSION_3,.pid=0};
     struct __user_cap_data_struct caps[2]={{0,0,0},{0,0,0}};
-    if(syscall(SYS_capset,&cap_header,caps)!=0 || syscall(SYS_capget,&cap_header,caps)!=0)child_fail(9,errno,125);
-    for(unsigned int i=0;i<2;i++)if(caps[i].effective || caps[i].permitted || caps[i].inheritable)child_fail(9,EPERM,125);
+    if(syscall(SYS_capset,&cap_header,caps)!=0 || syscall(SYS_capget,&cap_header,caps)!=0)child_fail(s->exec_writer,errno,125);
+    for(unsigned int i=0;i<2;i++)if(caps[i].effective || caps[i].permitted || caps[i].inheritable)child_fail(s->exec_writer,EPERM,125);
     uint32_t r=0,e=0,saved=0;
-    if(syscall(SYS_getresgid,&r,&e,&saved)!=0)child_fail(9,errno,125);
-    if(r!=s->gid || e!=s->gid || saved!=s->gid || (uint32_t)syscall(SYS_setfsgid,UINT32_MAX)!=s->gid)child_fail(9,EPERM,125);
-    if(syscall(SYS_getresuid,&r,&e,&saved)!=0)child_fail(9,errno,125);
-    if(r!=s->uid || e!=s->uid || saved!=s->uid || (uint32_t)syscall(SYS_setfsuid,UINT32_MAX)!=s->uid)child_fail(9,EPERM,125);
+    if(syscall(SYS_getresgid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
+    if(r!=s->gid || e!=s->gid || saved!=s->gid || (uint32_t)syscall(SYS_setfsgid,UINT32_MAX)!=s->gid)child_fail(s->exec_writer,EPERM,125);
+    if(syscall(SYS_getresuid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
+    if(r!=s->uid || e!=s->uid || saved!=s->uid || (uint32_t)syscall(SYS_setfsuid,UINT32_MAX)!=s->uid)child_fail(s->exec_writer,EPERM,125);
     const long group_count=syscall(SYS_getgroups,s->group_count,readback_groups);
-    if(group_count<0)child_fail(9,errno,125);
-    if((uint64_t)group_count!=s->group_count)child_fail(9,EPERM,125);
-    for(uint32_t i=0;i<s->group_count;i++)if(readback_groups[i]!=s->groups[i])child_fail(9,EPERM,125);
-    if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(9,EPERM,125);
+    if(group_count<0)child_fail(s->exec_writer,errno,125);
+    if((uint64_t)group_count!=s->group_count)child_fail(s->exec_writer,EPERM,125);
+    for(uint32_t i=0;i<s->group_count;i++)if(readback_groups[i]!=s->groups[i])child_fail(s->exec_writer,EPERM,125);
+    if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(s->exec_writer,EPERM,125);
     /* ID/capability changes can reset dumpability to host policy: explicitly
      * deny unprivileged ptrace before declaring preparation. Activation must
      * separately exclude an already attached tracer/hostile same-UID bootstrap
      * interference; this check cannot retroactively exclude such a tracer. */
-    if(syscall(SYS_prctl,PR_SET_DUMPABLE,0,0,0,0)!=0)child_fail(9,errno,125);
-    if(syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(9,EPERM,125);
+    if(syscall(SYS_prctl,PR_SET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
+    if(syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,EPERM,125);
     /* Caller credentials, not root, must be able to enter the trusted CWD. */
-    if(syscall(SYS_fchdir,10)!=0 || syscall(SYS_close,10)!=0)child_fail(9,errno,125);
-    if(raw_mask(NULL,&mask)!=0 || mask!=PTG_BLOCKED_MASK)child_fail(9,EPROTO,125);
-    if(ptg_payload_gate_state(s->gate)!=PTG_PAYLOAD_HELD)child_fail(9,ECANCELED,125);
+    if(syscall(SYS_fchdir,s->cwd_fd)!=0 || syscall(SYS_close,s->cwd_fd)!=0)child_fail(s->exec_writer,errno,125);
+    if(raw_mask(NULL,&mask)!=0 || mask!=PTG_BLOCKED_MASK)child_fail(s->exec_writer,EPROTO,125);
+    if(ptg_payload_gate_state(s->gate)!=PTG_PAYLOAD_HELD)child_fail(s->exec_writer,ECANCELED,125);
     const struct ready_message ready={.schema=PTG_PAYLOAD_SCHEMA,.token='R',.mask=mask};
-    const long ready_sent=syscall(SYS_write,8,&ready,sizeof(ready));
-    if(ready_sent!=(long)sizeof(ready))child_fail(9,ready_sent<0?errno:EIO,125);
-    if(syscall(SYS_close,8)!=0)child_fail(9,errno,125);
-    struct pollfd fds[5]={{.fd=3,.events=POLLIN},{.fd=4,.events=POLLIN},
-        {.fd=5,.events=POLLIN},{.fd=6,.events=POLLIN},{.fd=7,.events=POLLIN}};
-    const int polled=sample(fds,5,1);
-    if(polled<=0)child_fail(9,polled<0?errno:EIO,125);
-    for(unsigned int i=0;i<4;i++)if(fds[i].revents)child_fail(9,ECANCELED,125);
-    if(!(fds[4].revents&POLLIN) || fds[4].revents&~(POLLIN|POLLHUP))child_fail(9,EPROTO,125);
+    const long ready_sent=syscall(SYS_write,s->ready_writer,&ready,sizeof(ready));
+    if(ready_sent!=(long)sizeof(ready))child_fail(s->exec_writer,ready_sent<0?errno:EIO,125);
+    if(syscall(SYS_close,s->ready_writer)!=0)child_fail(s->exec_writer,errno,125);
+    struct pollfd fds[5]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+        {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},{.fd=s->permit_reader,.events=POLLIN}};
+    const int polled=ptg_owner_poll(&s->owners,fds,5,0,1);
+    if(polled<=0)child_fail(s->exec_writer,polled<0?errno:EIO,125);
+    for(unsigned int i=0;i<4;i++)if(fds[i].revents)child_fail(s->exec_writer,ECANCELED,125);
+    if(!(fds[4].revents&POLLIN) || fds[4].revents&~(POLLIN|POLLHUP))child_fail(s->exec_writer,EPROTO,125);
     unsigned char permit=0;
-    const long count=syscall(SYS_recvfrom,7,&permit,1,MSG_TRUNC|MSG_DONTWAIT,NULL,0);
-    if(count!=1 || permit!='G')child_fail(9,count<0?errno:EPROTO,125);
-    if(syscall(SYS_close,7)!=0)child_fail(9,errno,125);
-    int live=child_live(s);if(live)child_fail(9,live,125);
+    const long permit_count=syscall(SYS_recvfrom,s->permit_reader,&permit,1,MSG_TRUNC|MSG_DONTWAIT,NULL,0);
+    if(permit_count!=1 || permit!='G')child_fail(s->exec_writer,permit_count<0?errno:EPROTO,125);
+    if(syscall(SYS_close,s->permit_reader)!=0)child_fail(s->exec_writer,errno,125);
+    int live=child_live(s);if(live)child_fail(s->exec_writer,live,125);
     int32_t failed_signal=0,signal_error=0;
     if(ptg_payload_reset_dispositions(&failed_signal,&signal_error)!=0)
-        child_fail(9,signal_error>0?signal_error:EPROTO,125);
-    if(raw_mask(&s->original_mask,NULL)!=0 || raw_mask(NULL,&mask)!=0)child_fail(9,errno,125);
-    if(mask!=s->original_mask)child_fail(9,EPROTO,125);
+        child_fail(s->exec_writer,signal_error>0?signal_error:EPROTO,125);
+    if(raw_mask(&s->original_mask,NULL)!=0 || raw_mask(NULL,&mask)!=0)child_fail(s->exec_writer,errno,125);
+    if(mask!=s->original_mask)child_fail(s->exec_writer,EPROTO,125);
     /* The live independent watchdog covers the unavoidable poll->exec race. */
-    live=child_live(s);if(live)child_fail(9,live,125);
+    live=child_live(s);if(live)child_fail(s->exec_writer,live,125);
     (void)syscall(SYS_execve,s->program,s->argv,s->envp);
-    child_fail(9,errno,127);
+    child_fail(s->exec_writer,errno,127);
 }
 static void restore_mask(const struct ptg_payload_spec *s,struct ptg_payload_spawn *out) {
     out->mask_restore_result=raw_mask(&out->original_mask,NULL);
@@ -309,9 +334,9 @@ void ptg_payload_spawn(const struct ptg_payload_spec *s,struct ptg_payload_spawn
     if(error){out->error=error;cancel_kill(s,&out->kill_result,&out->kill_error);return;}
     out->gate_state=ptg_payload_gate_state(s->gate);
     if(out->gate_state!=PTG_PAYLOAD_HELD){out->error=ECANCELED;cancel_kill(s,&out->kill_result,&out->kill_error);return;}
-    struct pollfd fds[4]={{.fd=s->owner_fd,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+    struct pollfd fds[4]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
         {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN}};
-    const int polled=sample(fds,4,0);const int poll_error=polled<0?errno:0;
+    const int polled=ptg_owner_poll(&s->owners,fds,4,0,0);const int poll_error=polled<0?errno:0;
     out->initial_poll_result=polled;
     for(unsigned int i=0;i<4;i++)out->initial_revents[i]=fds[i].revents;
     out->before_clone_ns=now_ns(&error);
@@ -360,10 +385,10 @@ void ptg_payload_wait_ready(const struct ptg_payload_spec *s,int32_t reader,int3
     int error=0;out->before_ns=now_ns(&error);
     if(error || out->before_ns>=until){out->error=error?error:ETIMEDOUT;goto refused;}
     struct pollfd fds[7]={{.fd=reader,.events=POLLIN},{.fd=child,.events=POLLIN},
-        {.fd=s->owner_fd,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+        {.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
         {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},
         {.fd=setup_timer,.events=POLLIN}};
-    out->stage=2;out->poll_result=sample(fds,7,1);
+    out->stage=2;out->poll_result=ptg_owner_poll(&s->owners,fds,7,2,1);
     for(unsigned int i=0;i<7;i++)out->revents[i]=fds[i].revents;
     if(out->poll_result<=0){out->error=out->poll_result<0?errno:EIO;goto refused;}
     for(unsigned int i=1;i<7;i++)if(fds[i].revents){out->error=ECANCELED;goto refused;}
@@ -374,7 +399,7 @@ void ptg_payload_wait_ready(const struct ptg_payload_spec *s,int32_t reader,int3
     out->message_token=message.token;out->child_mask=message.mask;
     if(count!=(long)sizeof(message) || message.schema!=PTG_PAYLOAD_SCHEMA || message.token!='R'
        || message.mask!=PTG_BLOCKED_MASK){out->error=count<0?errno:EPROTO;goto refused;}
-    const int after=sample(fds,7,0);
+    const int after=ptg_owner_poll(&s->owners,fds,7,2,0);
     if(after<0){out->error=errno;goto refused;}
     for(unsigned int i=1;i<7;i++)if(fds[i].revents){out->error=ECANCELED;goto refused;}
     out->after_ns=now_ns(&error);
@@ -393,9 +418,9 @@ void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t w
     out->error=nonblocking_permit(writer);if(out->error)goto refused;
     out->gate_before=ptg_payload_gate_state(s->gate);
     if(out->gate_before!=PTG_PAYLOAD_HELD){out->error=ECANCELED;goto refused;}
-    struct pollfd fds[5]={{.fd=s->owner_fd,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+    struct pollfd fds[5]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
         {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},{.fd=child,.events=POLLIN}};
-    out->poll_result=sample(fds,5,0);
+    out->poll_result=ptg_owner_poll(&s->owners,fds,5,0,0);
     for(unsigned int i=0;i<5;i++)out->revents[i]=fds[i].revents;
     if(out->poll_result!=0){out->error=out->poll_result<0?errno:ECANCELED;goto refused;}
     int error=0;out->before_ns=now_ns(&error);

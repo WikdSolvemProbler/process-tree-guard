@@ -441,6 +441,16 @@ The [complete source/build/test/review/cleanup archive](linux-per-unit-authority
 
 This establishes compilation and the unchanged ordinary parser/kernel-IPC tests only. The per-unit topology was not executed. Actual manager/service/client startup, full original parent/all-ancestor ownership, the pre-manager absolute deadline, native payload/lifecycle/shared escape/kernel-floor qualification and performance remain open. No protection or comparative performance claim follows.
 
+## Original Linux owners and absolute cutoff
+
+The staged code captures original invocation time and kernel owner capabilities before helper startup: requester plus the manual parent, or requester plus every live auto ancestor. PTGEX4 transfers the complete ordered set and native caller context. The receiver validates identities and ancestry and arms its own private timer at the unchanged absolute cutoff. Every native/Rust watch path now receives the full set; capacity overflow refuses the request rather than dropping owners. The trusted entry remains unminted and Linux stays disabled.
+
+Both independent Sol reviewers cleared exact build candidate `04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984` for the ordinary ARM64 rebuild and eight adapted existing serial tests. All eight build steps passed: five hardened C objects, static library, normal Rust object and linked test harness. All eight tests passed, zero failed or ignored. Native output recorded two manual watchers, seven auto watchers, the exact unchanged 60.25-second cutoff, original IO/CWD/environment, and 14 refusal cases with descriptor settlement. The truncation case exercises the same receive/adoption logic with a disclosed 96-byte test prefix; production uses 1,088 bytes. The three file fixtures were preserved. These tests do not execute payload, watchdog, arming or terminal C functions.
+
+The [complete source/build/test/review/history/cleanup archive](linux-original-owners.zip) includes the corrected C draft, full pre-repair source snapshots, signal-mask/error-classification objections and fixes, both independent clearances and SPEC_Benchmark. All 69 downloaded artifacts were verified before exact cleanup of the two owned scratch roots; both roots and original scopes were absent. No shared runtime or worker was reset. Archive SHA-256 `5d35946a867ff696be7fc6eb7d50f8d3862821ac5d79cfbbba6410ea123541d1`. Status metadata changed afterward; all Rust/C/header implementation bytes remain the exact build inputs.
+
+Privileged manager/service/client entry, public dispatch and actual before-manager call ordering, native timer failure-site classification, native lifecycle/owner-loss/deadline/escape/kernel-floor validation and performance remain open. Generic guard errors remain 125 even if time later expires; a later sample cannot erase a signal-mask fault. Compile and IPC results establish no Linux protection or comparative win. Windows/Cargo/build/selector and the Mac workflow were unchanged.
+
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)

@@ -2,6 +2,7 @@
 // Copyright 2026 Peter Shiller
 #define _GNU_SOURCE 1
 #include "native_arming.h"
+#include "owner_poll.h"
 #include "payload_bootstrap.h"
 #include <errno.h>
 #include <fcntl.h>
@@ -45,7 +46,7 @@ _Static_assert(offsetof(struct ptg_arm_ready,child_mask)==96,"child mask observa
 
 uint64_t ptg_arm_abi(uint32_t word) {
     switch(word) {
-    case 0:return 2;
+    case 0:return 3;
     case 1:return sizeof(struct ptg_arm_spawn);
     case 2:return sizeof(struct ptg_arm_ready);
     case 3:return sizeof(struct ptg_arm_kill);
@@ -62,6 +63,8 @@ uint64_t ptg_arm_abi(uint32_t word) {
     case 14:return ptg_arm_kernel_signal_abi(5);
     case 15:return ptg_arm_kernel_signal_abi(6);
     case 16:return PTG_BLOCKED_MASK;
+    case 17:return sizeof(struct ptg_owner_watch);
+    case 18:return PTG_OWNER_WATCH_MAX;
     default:return UINT64_MAX;
     }
 }
@@ -85,38 +88,49 @@ static _Noreturn void cancel_exit(struct ptg_payload_gate *gate,int kill_fd) {
     const ssize_t result=syscall(SYS_write,kill_fd,"1",1);
     _exit(result==1?124:125); // attempt result only; never an empty-domain receipt.
 }
-static _Noreturn void watchdog_child(struct ptg_payload_gate *gate,int owner,int timer,int supervisor,int kill_fd,int ready) {
+static _Noreturn void watchdog_child(struct ptg_payload_gate *gate,const struct ptg_owner_watch *owners,int timer,int supervisor,int kill_fd,int ready) {
     // Raw kernel readback BEFORE clone covered signals1..64 except KILL/STOP,
     // including the two signals libc reserves. Recheck this child's inheritance.
     // No libc cancellation-point wrappers, Rust, heap, stdio or exec path.
     uint64_t inherited_mask=0;
     if(kernel_mask(NULL,&inherited_mask)!=0 || inherited_mask!=PTG_BLOCKED_MASK)cancel_exit(gate,kill_fd);
-    const int source[5]={owner,timer,supervisor,kill_fd,ready};
-    int staged[5]={-1,-1,-1,-1,-1};
-    for(unsigned i=0;i<5;i++) {
-        staged[i]=(int)syscall(SYS_fcntl,source[i],F_DUPFD_CLOEXEC,64);
-        if(staged[i]<0)cancel_exit(gate,staged[3]>=0?staged[3]:kill_fd);
+    if(!ptg_owner_watch_valid(owners))cancel_exit(gate,kill_fd);
+    const uint32_t owner_count=owners->count;
+    const uint32_t count=owner_count+4;
+    const int timer_target=(int)owner_count+3,supervisor_target=(int)owner_count+4;
+    const int kill_target=(int)owner_count+5,ready_target=(int)owner_count+6;
+    int source[PTG_OWNER_WATCH_MAX+4],staged[PTG_OWNER_WATCH_MAX+4];
+    for(uint32_t i=0;i<owner_count;i++)source[i]=owners->fds[i];
+    source[owner_count]=timer;source[owner_count+1]=supervisor;
+    source[owner_count+2]=kill_fd;source[owner_count+3]=ready;
+    for(uint32_t i=0;i<count;i++)staged[i]=-1;
+    // Stage ALL sources above ALL destinations before replacing any descriptor.
+    for(uint32_t i=0;i<count;i++) {
+        staged[i]=(int)syscall(SYS_fcntl,source[i],F_DUPFD_CLOEXEC,ready_target+1);
+        if(staged[i]<0)cancel_exit(gate,staged[owner_count+2]>=0?staged[owner_count+2]:kill_fd);
     }
-    for(unsigned i=0;i<5;i++)if(syscall(SYS_dup3,staged[i],(int)i+3,O_CLOEXEC)<0)cancel_exit(gate,staged[3]);
-    // Exact child-local retained layout:3=owner,4=original timer,5=exact
-    // supervisor pidfd,6=held cgroup.kill,7=sole readiness writer.
-    if(syscall(SYS_close_range,8U,UINT_MAX,0U)!=0)cancel_exit(gate,6);
-    if(syscall(SYS_close_range,0U,2U,0U)!=0)cancel_exit(gate,6);
-    struct pollfd watched[3]={{.fd=3,.events=POLLIN},{.fd=4,.events=POLLIN},{.fd=5,.events=POLLIN}};
-    struct timespec zero={0,0};
-    const int initial=(int)syscall(SYS_ppoll,watched,3,&zero,NULL,sizeof(uint64_t));
-    if(initial!=0 || watched[0].revents || watched[1].revents || watched[2].revents)cancel_exit(gate,6);
+    for(uint32_t i=0;i<count;i++)
+        if(syscall(SYS_dup3,staged[i],(int)i+3,O_CLOEXEC)<0)cancel_exit(gate,staged[owner_count+2]);
+    if(syscall(SYS_close_range,(unsigned)ready_target+1U,UINT_MAX,0U)!=0)cancel_exit(gate,kill_target);
+    if(syscall(SYS_close_range,0U,2U,0U)!=0)cancel_exit(gate,kill_target);
+    int32_t local_fds[PTG_OWNER_WATCH_MAX];
+    for(uint32_t i=0;i<owner_count;i++)local_fds[i]=(int32_t)i+3;
+    const struct ptg_owner_watch local={.fds=local_fds,.count=owner_count,.reserved=0};
+    struct pollfd watched[3]={{.fd=-1,.events=POLLIN},{.fd=timer_target,.events=POLLIN},
+        {.fd=supervisor_target,.events=POLLIN}};
+    const int initial=ptg_owner_poll(&local,watched,3,0,0);
+    if(initial!=0 || watched[0].revents || watched[1].revents || watched[2].revents)cancel_exit(gate,kill_target);
     uint64_t ready_mask=0;
-    if(kernel_mask(NULL,&ready_mask)!=0 || ready_mask!=PTG_BLOCKED_MASK)cancel_exit(gate,6);
-    const struct ready_message message={.schema=2,.token='R',.mask=ready_mask};
-    if(syscall(SYS_write,7,&message,sizeof(message))!=(long)sizeof(message))cancel_exit(gate,6);
-    if(syscall(SYS_close,7)!=0)cancel_exit(gate,6);
+    if(kernel_mask(NULL,&ready_mask)!=0 || ready_mask!=PTG_BLOCKED_MASK)cancel_exit(gate,kill_target);
+    const struct ready_message message={.schema=3,.token='R',.mask=ready_mask};
+    if(syscall(SYS_write,ready_target,&message,sizeof(message))!=(long)sizeof(message))cancel_exit(gate,kill_target);
+    if(syscall(SYS_close,ready_target)!=0)cancel_exit(gate,kill_target);
     // Never read/disarm/retarget the execution timer. Any owner/supervisor
     // readiness, expiry, unexpected poll state or EINTR cancels immediately.
     // The original finite BOOTTIME timer bounds the otherwise blocking poll.
     for(unsigned i=0;i<3;i++)watched[i].revents=0;
-    (void)syscall(SYS_ppoll,watched,3,NULL,NULL,sizeof(uint64_t));
-    cancel_exit(gate,6);
+    (void)ptg_owner_poll(&local,watched,3,0,1);
+    cancel_exit(gate,kill_target);
 }
 static void failure_kill(struct ptg_payload_gate *gate,int fd,struct ptg_arm_spawn *out) {
     (void)ptg_payload_gate_cancel(gate);
@@ -133,16 +147,20 @@ static void restore_parent_mask(struct ptg_payload_gate *gate,int kill_fd,struct
     if(out->mask_restore_query_result!=0 || out->restored_mask!=out->original_signal_mask)
         failure_kill(gate,kill_fd,out);
 }
-void ptg_arm_spawn_watchdog(struct ptg_payload_gate *gate,int32_t owner,int32_t timer,int32_t supervisor,
+void ptg_arm_spawn_watchdog(struct ptg_payload_gate *gate,const struct ptg_owner_watch *owners,int32_t timer,int32_t supervisor,
     int32_t kill_fd,int32_t ready,uint64_t until,struct ptg_arm_spawn *out) {
-    memset(out,0,sizeof(*out));out->schema=2;out->pid=out->pidfd=-1;
+    memset(out,0,sizeof(*out));out->schema=3;out->pid=out->pidfd=-1;
     out->mask_restore_result=out->initial_poll_result=out->clone_result=INT32_MIN;
     out->mask_set_result=out->mask_query_result=out->mask_restore_query_result=INT32_MIN;
     out->failure_kill_result=INT32_MIN;out->stage=1;
     if(!kernel_abi_ok()){out->call_errno=EPROTO;return;}
-    if(gate==NULL||ptg_payload_gate_state(gate)!=PTG_PAYLOAD_HELD||owner<0||timer<0||supervisor<0||kill_fd<0||ready<0){out->call_errno=EBADF;return;}
-    struct pollfd initial[3]={{.fd=owner,.events=POLLIN},{.fd=timer,.events=POLLIN},{.fd=supervisor,.events=POLLIN}};
-    const int sampled=poll(initial,3,0);out->initial_poll_result=sampled;
+    const int32_t other[4]={timer,supervisor,kill_fd,ready};
+    if(gate==NULL||ptg_payload_gate_state(gate)!=PTG_PAYLOAD_HELD
+       || !ptg_owner_watch_disjoint(owners,other,4)){out->call_errno=EBADF;return;}
+    for(unsigned i=0;i<4;i++)for(unsigned j=0;j<i;j++)
+        if(other[i]==other[j]){out->call_errno=EINVAL;return;}
+    struct pollfd initial[3]={{.fd=-1,.events=POLLIN},{.fd=timer,.events=POLLIN},{.fd=supervisor,.events=POLLIN}};
+    const int sampled=ptg_owner_poll(owners,initial,3,0,0);out->initial_poll_result=sampled;
     for(unsigned i=0;i<3;i++)out->initial_revents[i]=initial[i].revents;
     if(sampled!=0){out->call_errno=sampled<0?errno:ECANCELED;return;}
     int error=0;out->before_clone_ns=now_ns(&error);
@@ -163,7 +181,7 @@ void ptg_arm_spawn_watchdog(struct ptg_payload_gate *gate,int32_t owner,int32_t 
     args.flags=CLONE_PIDFD;args.pidfd=(uint64_t)(uintptr_t)&out->pidfd;args.exit_signal=SIGCHLD;
     out->stage=2;
     const long result=syscall(SYS_clone3,&args,sizeof(args));
-    if(result==0)watchdog_child(gate,owner,timer,supervisor,kill_fd,ready);
+    if(result==0)watchdog_child(gate,owners,timer,supervisor,kill_fd,ready);
     const int clone_error=result<0?errno:0;out->clone_result=(int32_t)result;
     // Publish positive-clone custody BEFORE restoration or clock operations.
     if(result>0){out->pid=(int32_t)result;out->child_created=1;}
@@ -179,15 +197,15 @@ void ptg_arm_spawn_watchdog(struct ptg_payload_gate *gate,int32_t owner,int32_t 
     if(error){failure_kill(gate,kill_fd,out);return;}
     out->stage=4;
 }
-void ptg_arm_wait_ready(int32_t ready,int32_t child,int32_t owner,int32_t timer,
+void ptg_arm_wait_ready(int32_t ready,int32_t child,const struct ptg_owner_watch *owners,int32_t timer,
     int32_t supervisor,int32_t setup_timer,uint64_t until,struct ptg_arm_ready *out) {
     memset(out,0,sizeof(*out));out->result=-1;out->read_count=-1;out->poll_result=out->after_poll_result=INT32_MIN;
     int error=0;out->before_ns=now_ns(&error);
     if(error||out->before_ns>=until){out->call_errno=error?error:ETIMEDOUT;return;}
     struct pollfd watched[6]={{.fd=ready,.events=POLLIN},{.fd=child,.events=POLLIN},
-        {.fd=owner,.events=POLLIN},{.fd=timer,.events=POLLIN},{.fd=supervisor,.events=POLLIN},
+        {.fd=-1,.events=POLLIN},{.fd=timer,.events=POLLIN},{.fd=supervisor,.events=POLLIN},
         {.fd=setup_timer,.events=POLLIN}};
-    int result=poll(watched,6,-1);out->poll_result=result;
+    int result=ptg_owner_poll(owners,watched,6,2,1);out->poll_result=result;
     for(unsigned i=0;i<6;i++)out->revents[i]=watched[i].revents;
     if(result<=0){out->call_errno=result<0?errno:EIO;return;}
     for(unsigned i=1;i<6;i++)if(watched[i].revents){out->call_errno=ECANCELED;return;}
@@ -196,11 +214,11 @@ void ptg_arm_wait_ready(int32_t ready,int32_t child,int32_t owner,int32_t timer,
     const ssize_t count=read(ready,&message,sizeof(message));
     out->read_count=(int32_t)count;out->token=message.token;
     out->message_schema=message.schema;out->child_mask=message.mask;
-    if(count!=(ssize_t)sizeof(message)||message.schema!=2||message.token!='R'||message.mask!=PTG_BLOCKED_MASK){
+    if(count!=(ssize_t)sizeof(message)||message.schema!=3||message.token!='R'||message.mask!=PTG_BLOCKED_MASK){
         out->call_errno=count<0?errno:EPROTO;return;
     }
     for(unsigned i=0;i<6;i++)watched[i].revents=0;
-    result=poll(watched,6,0);out->after_poll_result=result;
+    result=ptg_owner_poll(owners,watched,6,2,0);out->after_poll_result=result;
     for(unsigned i=0;i<6;i++)out->after_revents[i]=watched[i].revents;
     if(result<0){out->call_errno=errno;return;}
     for(unsigned i=1;i<6;i++)if(watched[i].revents){out->call_errno=ECANCELED;return;}

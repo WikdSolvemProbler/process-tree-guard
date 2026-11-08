@@ -5,12 +5,13 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "owner_watch.h"
 
 /* Product integration in progress: no backend activation or runtime qualification.
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 1u
+#define PTG_PAYLOAD_SCHEMA 2u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
 #define PTG_PAYLOAD_CANCELLED 2
@@ -34,7 +35,9 @@ int32_t ptg_payload_gate_commit(struct ptg_payload_gate *gate);
 
 struct ptg_payload_spec {
     uint32_t schema, bytes;
-    int32_t cgroup_fd, kill_fd, owner_fd, timer_fd, supervisor_fd, watchdog_fd;
+    int32_t cgroup_fd, kill_fd;
+    struct ptg_owner_watch owners;
+    int32_t timer_fd, supervisor_fd, watchdog_fd;
     int32_t cwd_fd, stdio_fd[3], permit_reader, ready_writer, exec_writer;
     uint32_t uid, gid, group_count, argc, envc;
     uint64_t deadline_ns, original_mask;
@@ -82,7 +85,7 @@ struct ptg_payload_ready {
     uint64_t child_mask, before_ns, after_ns;
     int32_t kill_result, kill_error;
 };
-/* READY wire is exactly16 bytes: schema:u32=1, token:u32='R', blocked_mask:u64.
+/* READY wire is exactly16 bytes: schema:u32=2, token:u32='R', blocked_mask:u64.
  * It follows FD scrub and verified groups/gid/uid/zero caps/NNP/CWD. It certifies
  * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion. setup_timer is an
  * independently armed finite readiness timer; no C-owned timer is introduced.
@@ -116,7 +119,8 @@ int ptg_payload_reset_dispositions(int32_t *failed_signal, int32_t *error);
 
 /* Scalar layout/constants reporter: 0=schema,1=spec,2=spawn,3=ready,4=release,
  * 5=READY bytes,6=exec bytes,7=clone flags,8=SIGCHLD,9=clone3 syscall,
- * 10=CLOCK_BOOTTIME,11=kernel blocked mask,12=spec.gate offset.
+ * 10=CLOCK_BOOTTIME,11=kernel blocked mask,12=spec.gate offset,
+ * 13=owner-watch bytes,14=maximum owner-watch count,15=spec.owners offset.
  */
 uint64_t ptg_payload_abi(uint32_t word);
 #endif

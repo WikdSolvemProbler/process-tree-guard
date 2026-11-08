@@ -2,6 +2,7 @@
 // Copyright 2026 Peter Shiller
 #define _GNU_SOURCE 1
 #include "terminal_bridge.h"
+#include "owner_watch.h"
 #include <errno.h>
 #include <poll.h>
 #include <signal.h>
@@ -73,7 +74,7 @@ uint32_t ptg_terminal_errno_kind(int32_t error) {
 }
 
 int32_t ptg_terminal_poll(void *fds, uint32_t count, int32_t timeout, int32_t *error) {
-    if (fds == NULL || count == 0 || count > 6 || timeout < -1) {
+    if (fds == NULL || count == 0 || count > PTG_OWNER_WATCH_MAX + 5 || timeout < -1) {
         *error = EINVAL;
         return -1;
     }

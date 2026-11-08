@@ -45,9 +45,9 @@ const _: () = {
 };
 unsafe extern "C" {
     fn ptg_arm_abi(word:u32)->u64;
-    fn ptg_arm_spawn_watchdog(gate:*mut c_void,owner:c_int,timer:c_int,supervisor:c_int,kill:c_int,
+    fn ptg_arm_spawn_watchdog(gate:*mut c_void,owners:*const OwnerWatch,timer:c_int,supervisor:c_int,kill:c_int,
         ready:c_int,deadline_ns:u64,out:*mut SpawnObservation);
-    fn ptg_arm_wait_ready(ready:c_int,child:c_int,owner:c_int,timer:c_int,supervisor:c_int,
+    fn ptg_arm_wait_ready(ready:c_int,child:c_int,owners:*const OwnerWatch,timer:c_int,supervisor:c_int,
         setup_timer:c_int,setup_until_ns:u64,out:*mut ReadinessObservation);
     fn ptg_arm_kill_held(kill:c_int,out:*mut KillObservation);
 }
@@ -59,7 +59,7 @@ unsafe extern "C" {
 #[derive(Default)]
 pub(super) struct ArmingReceipt {
     started: bool,
-    abi: Option<[u64;17]>,
+    abi: Option<[u64;19]>,
     original_deadline_ns: Option<u64>,
     setup: Option<Deadline>,
     spawn: Option<SpawnObservation>,
@@ -103,7 +103,7 @@ fn prepare(watch:&LeaseWatch<'_>, receipt:&mut ArmingReceipt)->Probe<(OwnedFd,Ow
     receipt.started=true;
     let abi=std::array::from_fn(|i|unsafe{ptg_arm_abi(i as u32)});
     receipt.abi=Some(abi);
-    check(abi==[2,128,104,8,CLONE_PIDFD,SIGCHLD,435,7,8,8,64,2,RT_SIGPROCMASK_NUMBER,9,19,8,BLOCKED_KERNEL_MASK],"native watchdog bridge ABI differs")?;
+    check(abi==[3,128,104,8,CLONE_PIDFD,SIGCHLD,435,7,8,8,64,2,RT_SIGPROCMASK_NUMBER,9,19,8,BLOCKED_KERNEL_MASK,16,249],"native watchdog bridge ABI differs")?;
     check(watch.owner_pid>0,"native armer lacks original owner identity")?;
     let now=boottime_ns()?;
     let setup_until=now.checked_add(READINESS_BOUND_NS).ok_or("readiness deadline overflow")?
@@ -139,7 +139,7 @@ pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_s
         Err(error)=>{receipt.gate_error=Some(error);return Err(refuse_verified(controls,None,receipt,"shared cancellation allocation refused"));},
     };
     let mut raw=SpawnObservation::default();
-    unsafe { ptg_arm_spawn_watchdog(controls.gate.as_ref().expect("installed shared gate").as_ptr(),watch.owner.as_raw_fd(),watch.timer.as_raw_fd(),
+    unsafe { ptg_arm_spawn_watchdog(controls.gate.as_ref().expect("installed shared gate").as_ptr(),&watch.owners.watch(),watch.timer.as_raw_fd(),
         watch.supervisor.as_raw_fd(),controls.watchdog_kill.as_raw_fd(),writer.as_raw_fd(),
         watch.deadline_ns,&mut raw) };
     // Trusted C's positive-clone contract: CLONE_PIDFD installed this new fd
@@ -154,7 +154,7 @@ pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_s
     if raw.child_created!=1 {
         return Err(refuse_verified(controls,watchdog,receipt,"native watchdog clone refused"));
     }
-    if raw.schema!=2 || raw.stage!=4 || raw.pid<=0 || raw.pidfd<0 || raw.clone_result!=raw.pid
+    if raw.schema!=3 || raw.stage!=4 || raw.pid<=0 || raw.pidfd<0 || raw.clone_result!=raw.pid
         || raw.call_errno!=0 || raw.mask_restore_result!=0 || raw.mask_restore_errno!=0
         || raw.mask_set_result!=0 || raw.mask_set_errno!=0 || raw.mask_query_result!=0 || raw.mask_query_errno!=0
         || raw.blocked_mask!=BLOCKED_KERNEL_MASK || raw.mask_restore_query_result!=0 || raw.mask_restore_query_errno!=0
@@ -168,11 +168,11 @@ pub(super) unsafe fn arm(watch:LeaseWatch<'_>,scope:&cgroup_authority::service_s
     let setup=receipt.setup.as_ref().expect("readiness timer precedes provision");
     let mut ready=ReadinessObservation::default();
     unsafe {ptg_arm_wait_ready(reader.as_raw_fd(),watchdog.pidfd.as_raw_fd(),
-        watch.owner.as_raw_fd(),watch.timer.as_raw_fd(),watch.supervisor.as_raw_fd(),
+        &watch.owners.watch(),watch.timer.as_raw_fd(),watch.supervisor.as_raw_fd(),
         setup.timer_fd(),setup.effective_until_ns(),&mut ready)};
     receipt.readiness=Some(ready);
     if ready.result!=0 || ready.call_errno!=0 || ready.read_count!=16 || ready.token!=u32::from(b'R')
-        || ready.message_schema!=2 || ready.child_mask!=BLOCKED_KERNEL_MASK
+        || ready.message_schema!=3 || ready.child_mask!=BLOCKED_KERNEL_MASK
         || ready.before_ns<raw.after_clone_ns || ready.after_ns<ready.before_ns
         || ready.after_ns>=setup.effective_until_ns() {
         return Err(refuse_verified(controls,Some(watchdog),receipt,"native watchdog readiness refused"));

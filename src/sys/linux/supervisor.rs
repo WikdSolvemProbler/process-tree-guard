@@ -3,7 +3,8 @@
 
 //! Owned one-shot supervisor; no fixture clients or child drivers.
 use super::*;
-use std::time::Duration;
+use std::sync::Arc;
+use super::invocation::{VerifiedInvocation,OwnerWatch,MAX_WATCHERS};
 use std::ffi::c_char;
 const POLICY_REFUSAL: &str = "verified identity refused by activation policy";
 type Probe<T> = std::result::Result<T, String>;
@@ -59,7 +60,7 @@ unsafe extern "C" {
     fn pipe2(fds: *mut c_int, flags: c_int) -> c_int;
 }
 
-fn boottime_ns() -> Probe<u64> {
+pub(super) fn boottime_ns() -> Probe<u64> {
     let mut time = Timespec::default();
     native(os_result(
         unsafe { clock_gettime(CLOCK_BOOTTIME, &mut time) } as isize,
@@ -73,89 +74,46 @@ fn boottime_ns() -> Probe<u64> {
         .ok_or_else(|| "boot time overflow".into())
 }
 
+// Own a receiver-private, absolute timer. The sender never supplies timer authority.
 struct RetainedLease {
-    owner: OwnedFd,
-    timer: OwnedFd,
-    admitted_ns: u64,
-    deadline_ns: u64,
+    invocation: Arc<VerifiedInvocation>, timer:OwnedFd,
+    captured_ns:u64, deadline_ns:u64,
+    observed:std::cell::Cell<Option<Decision>>,
 }
-
 impl RetainedLease {
-    fn arm(admitted: Admitted) -> Probe<Self> {
-        Self::from_owner(admitted.owner, admitted.plan.duration(), boottime_ns()?)
-    }
-
-    fn from_owner(owner: OwnedFd, duration: Duration, admitted_ns: u64) -> Probe<Self> {
-        let duration_ns =
-            u64::try_from(duration.as_nanos()).map_err(|_| "request duration overflow")?;
-        check(duration_ns > 0, "decoded deadline became zero")?;
-        let deadline_ns = admitted_ns
-            .checked_add(duration_ns)
-            .ok_or("absolute deadline overflow")?;
-        let timer =
-            fd_from_call(unsafe { timerfd_create(CLOCK_BOOTTIME, SOCK_NONBLOCK | SOCK_CLOEXEC) })?;
+    fn from_invocation(invocation:Arc<VerifiedInvocation>)->Probe<Self> {
+        let captured_ns=invocation.metadata().captured_ns;
+        let deadline_ns=invocation.metadata().deadline_ns;
+        let timer=fd_from_call(unsafe{timerfd_create(CLOCK_BOOTTIME,SOCK_NONBLOCK|SOCK_CLOEXEC)})?;
         native(close_on_exec(timer.as_raw_fd()))?;
-        let value = ItimerSpec {
-            interval: Timespec::default(),
-            value: Timespec {
-                seconds: (deadline_ns / NS_PER_SECOND) as i64,
-                nanoseconds: (deadline_ns % NS_PER_SECOND) as i64,
-            },
-        };
-        native(os_result(unsafe {
-            timerfd_settime(
-                timer.as_raw_fd(),
-                TFD_TIMER_ABSTIME,
-                &value,
-                ptr::null_mut(),
-            )
-        } as isize))?;
-        Ok(Self {
-            owner,
-            timer,
-            admitted_ns,
-            deadline_ns,
-        })
+        let value=ItimerSpec{interval:Timespec::default(),value:Timespec{
+            seconds:(deadline_ns/NS_PER_SECOND) as i64,nanoseconds:(deadline_ns%NS_PER_SECOND) as i64}};
+        native(os_result(unsafe{timerfd_settime(timer.as_raw_fd(),TFD_TIMER_ABSTIME,&value,ptr::null_mut())} as isize))?;
+        Ok(Self{invocation,timer,captured_ns,deadline_ns,observed:std::cell::Cell::new(None)})
     }
-
-    fn sample(&self) -> Probe<DecisionReceipt> {
-        let mut watched = [
-            PollFd {
-                fd: self.owner.as_raw_fd(),
-                events: POLLIN,
-                revents: 0,
-            },
-            PollFd {
-                fd: self.timer.as_raw_fd(),
-                events: POLLIN,
-                revents: 0,
-            },
-        ];
-        let count = native(os_result(
-            unsafe { poll(watched.as_mut_ptr(), watched.len(), 0) } as isize,
-        ))?;
-        let sampled_ns = boottime_ns()?;
-        let owner_events = watched[0].revents;
-        let timer_events = watched[1].revents;
-        check(
-            count == watched.iter().filter(|fd| fd.revents != 0).count()
-                && owner_events & !(POLLIN | POLLHUP) == 0
-                && timer_events & !POLLIN == 0,
-            "unexpected release sample poll result",
-        )?;
-        let decision = if owner_events != 0 {
-            Decision::OwnerLost
-        } else if timer_events != 0 || sampled_ns >= self.deadline_ns {
-            Decision::Deadline
-        } else {
-            Decision::Permit
+    fn sample(&self)->Probe<DecisionReceipt> {
+        let owners=self.invocation.numbers();
+        let mut watched=[PollFd{fd:-1,events:POLLIN,revents:0};MAX_WATCHERS+1];
+        for (entry,fd) in watched.iter_mut().zip(owners){entry.fd=*fd;}
+        watched[owners.len()].fd=self.timer.as_raw_fd();
+        let watched=&mut watched[..owners.len()+1];
+        let count=native(os_result(unsafe{poll(watched.as_mut_ptr(),watched.len(),0)} as isize))?;
+        let sampled_ns=boottime_ns()?;
+        let owner_events=watched[..owners.len()].iter().fold(0,|bits,p|bits|p.revents);
+        let timer_events=watched[owners.len()].revents;
+        check(count==watched.iter().filter(|fd|fd.revents!=0).count()
+            && owner_events & !(POLLIN|POLLHUP)==0 && timer_events & !POLLIN==0,
+            "unexpected original-owner sample poll result")?;
+        let decision=if owner_events!=0 {Decision::OwnerLost}
+            else if timer_events!=0||sampled_ns>=self.deadline_ns {Decision::Deadline}else{Decision::Permit};
+        // An observed owner loss/deadline is irreversible, even if cleanup runs later.
+        let latched=match (self.observed.get(),decision){
+            (Some(Decision::OwnerLost),_)|(_,Decision::OwnerLost)=>Decision::OwnerLost,
+            (Some(Decision::Deadline),_)|(_,Decision::Deadline)=>Decision::Deadline,
+            _=>Decision::Permit,
         };
-        Ok(DecisionReceipt {
-            decision,
-            owner_events,
-            timer_events,
-            sampled_ns,
-        })
+        self.observed.set(Some(latched));
+        Ok(DecisionReceipt{decision:latched,owner_events,timer_events,sampled_ns})
     }
 }
 
@@ -219,7 +177,7 @@ fn status_ids(status: &str, name: &str) -> Probe<Vec<u32>> {
 }
 
 fn verify_identity(owner: &OwnedFd, peer: Credentials) -> Probe<VerifiedIdentity> {
-    native(validate_pidfd(owner, peer, &mut NativeReceipt::default()))?;
+    native(validate_pidfd(owner, peer.pid, &mut NativeReceipt::default()))?;
     let status = io_result(fs::read_to_string(format!("/proc/{}/status", peer.pid)))?;
     check(
         peer.uid != 0
@@ -241,7 +199,7 @@ fn verify_identity(owner: &OwnedFd, peer: Credentials) -> Probe<VerifiedIdentity
     let groups = status_ids(&status, "Groups:")?;
     check(!groups.contains(&0), "owner has a root supplementary group")?;
     // A PID exit or replacement during the numeric procfs lookup refuses preparation.
-    native(validate_pidfd(owner, peer, &mut NativeReceipt::default()))?;
+    native(validate_pidfd(owner, peer.pid, &mut NativeReceipt::default()))?;
     Ok(VerifiedIdentity {
         uid: peer.uid,
         gid: peer.gid,
@@ -249,26 +207,29 @@ fn verify_identity(owner: &OwnedFd, peer: Credentials) -> Probe<VerifiedIdentity
     })
 }
 
-fn prepare(
-    peer:Credentials,
-    owner:OwnedFd,
-    plan:request::ExecPlan,
-    admitted_ns: u64,
-    authorizes: impl FnOnce(&VerifiedIdentity) -> bool,
-) -> Probe<PreparedRun> {
-    let identity = verify_identity(&owner, peer)?;
-    check(authorizes(&identity), POLICY_REFUSAL)?;
-    let lease = RetainedLease::from_owner(owner, plan.duration(), admitted_ns)?;
-    check(
-        lease.sample()?.decision == Decision::Permit,
-        "owner or deadline became inactive during preparation",
-    )?;
-    Ok(PreparedRun {
-        owner_pid: peer.pid,
-        identity,
-        plan,
-        lease,
-    })
+// Retain the actual original objects/plan on preparation refusal. No child exists.
+struct PreparationFailure {
+    invocation:Arc<VerifiedInvocation>,plan:request::ExecPlan,
+    lease:Option<RetainedLease>,error:String,code:i32,
+}
+fn prepare(peer:Credentials,invocation:VerifiedInvocation,plan:request::ExecPlan,
+    authorizes:impl FnOnce(&VerifiedIdentity)->bool)->std::result::Result<PreparedRun,PreparationFailure> {
+    let invocation=Arc::new(invocation);
+    let mut lease=None;
+    let result=(||->std::result::Result<VerifiedIdentity,(String,i32)>{
+        invocation.check_live().map_err(|e|(format!("{e:?}"),e.exit_code()))?;
+        invocation.check_time().map_err(|e|(format!("{e:?}"),e.exit_code()))?;
+        let identity=verify_identity(invocation.requester(),peer).map_err(|e|(e,125))?;
+        check(authorizes(&identity),POLICY_REFUSAL).map_err(|e|(e,125))?;
+        lease=Some(RetainedLease::from_invocation(Arc::clone(&invocation)).map_err(|e|(e,125))?);
+        let decision=lease.as_ref().expect("stored private timer").sample().map_err(|e|(e,125))?.decision;
+        match decision {Decision::Permit=>Ok(identity),Decision::Deadline=>Err(("original invocation expired during preparation".into(),124)),
+            Decision::OwnerLost=>Err(("original invocation owner lost during preparation".into(),125))}
+    })();
+    match result {
+        Ok(identity)=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer")}),
+        Err((error,code))=>Err(PreparationFailure{invocation,plan,lease,error,code}),
+    }
 }
 
 
@@ -303,28 +264,25 @@ pub(crate) unsafe fn run_received(
 /// # Safety
 /// Real entry must already establish the full public original owner set and
 /// pre-manager absolute lease as well as all dedicated supervisor invariants.
-/// This preserved internal peer-lease code does not claim that public parity.
+/// OriginalInvocation capture and PTGEX4 import preserve that set/cutoff here;
+/// actual public dispatch/manager bootstrap still must call them before helpers.
 pub(crate) unsafe fn run_in_service(
     scope:VerifiedServiceScope,
     connection:OwnedFd,
     authorizes:impl FnOnce(u32,u32,&[u32],&std::ffi::CStr)->bool,
 )->RunOutcome {
     let mut admission=NativeReceipt::default();
-    // Preserve the internal peer lease start before added scope/packet checks.
-    // This local sample still does not mint the required pre-manager public lease.
-    let admitted_ns=match boottime_ns(){
-        Ok(value)=>value,Err(error)=>return native_activation::before_admission(Some(scope),admission,error),
-    };
     if let Err(error)=scope.revalidate(){
         return native_activation::before_admission(Some(scope),admission,error);
     }
     let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
-        Ok(value)=>value,Err(error)=>return native_activation::before_admission(Some(scope),admission,format!("admission refused: {error:?}")),
+        Ok(value)=>value,Err(error)=>{let code=match &error {Refusal::Invocation(e)=>e.exit_code(),_=>125};
+            return native_activation::before_admission_code(Some(scope),admission,format!("admission refused: {error:?}"),code);},
     };
-    let Admitted{peer,owner,plan,io}=admitted;
+    let Admitted{peer,invocation,plan,io}=admitted;
     let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec());
     let program=plan.program().to_owned();
-    let prepared=match prepare(peer,owner,plan,admitted_ns,
+    let prepared=match prepare(peer,invocation,plan,
         |identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {
         Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,scope,admission,error),
     };

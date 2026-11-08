@@ -395,8 +395,9 @@ enum DomainOwner {
     Quarantined(SettlementQuarantine),
 }
 
-#[derive(Clone, Copy, Debug, Default)]
-pub(super) struct PollObservation { returned: c_int, errno: c_int, events: [c_short; 6] }
+#[derive(Clone, Copy, Debug)]
+pub(super) struct PollObservation { returned:c_int,errno:c_int,events:[c_short;6],owner_count:u32,owner_events:[c_short;MAX_WATCHERS] }
+impl Default for PollObservation {fn default()->Self{Self{returned:0,errno:0,events:[0;6],owner_count:0,owner_events:[0;MAX_WATCHERS]}}}
 
 const STOP_OWNER: u32 = 1;
 const STOP_DEADLINE: u32 = 2;
@@ -441,6 +442,7 @@ pub(super) enum ExecutionOrigin {
 pub(super) struct TerminalRun {
     arming: native_arming::ArmingReceipt,
     payload_mask: Option<native_port::ParentMaskObservation>,
+    release_failure_sample:Option<Probe<DecisionReceipt>>,
     prepared: PreparedRun,
     origin: ExecutionOrigin,
     supervisor: DedicatedSupervisor,
@@ -465,6 +467,7 @@ pub(super) struct TerminalRun {
 pub(super) struct SettledParts {
     arming: native_arming::ArmingReceipt,
     payload_mask: Option<native_port::ParentMaskObservation>,
+    release_failure_sample:Option<Probe<DecisionReceipt>>,
     prepared: PreparedRun,
     origin: ExecutionOrigin,
     supervisor: DedicatedSupervisor,
@@ -504,7 +507,7 @@ impl TerminalRun {
             Some(PayloadChild { identity, exec_report, .. }) => (Some(ChildOwner::Live(identity)), Some(exec_report)),
             None => (None, None),
         };
-        Self { arming, payload_mask, prepared, origin: ExecutionOrigin::Release(release), supervisor, domain: Some(DomainOwner::Active(controls)),
+        Self { arming, payload_mask, release_failure_sample:None, prepared, origin: ExecutionOrigin::Release(release), supervisor, domain: Some(DomainOwner::Active(controls)),
             cleanup: Some(cleanup), payload, watchdog: Some(ChildOwner::Live(watchdog)), exec,
             stop: None, latched_reasons: None, last_poll: PollObservation::default(), poll_observed: false,
             interrupted_polls: 0, last_pending: [None, None], pending_count: [0, 0],
@@ -532,7 +535,7 @@ impl TerminalRun {
     fn supervise(&mut self) -> Result<(), TerminalFault> {
         let early = match &self.origin {
             ExecutionOrigin::ArmingFailure { .. } => return Err(TerminalFault::Invariant),
-            ExecutionOrigin::Release(Err(_)) => { self.semantic_fault = Some(TerminalFault::Release); Some(STOP_RELEASE) }
+            ExecutionOrigin::Release(Err(_)) => { if self.semantic_fault.is_none(){self.semantic_fault=Some(TerminalFault::Release);} Some(STOP_RELEASE) }
             ExecutionOrigin::Release(Ok(Decision::OwnerLost)) => Some(STOP_OWNER),
             ExecutionOrigin::Release(Ok(Decision::Deadline)) => Some(STOP_DEADLINE),
             ExecutionOrigin::Release(Ok(Decision::Permit)) if self.payload.is_none() || self.exec.is_none() => {
@@ -540,22 +543,38 @@ impl TerminalRun {
             }
             ExecutionOrigin::Release(Ok(Decision::Permit)) => None,
         };
-        if let Some(reasons) = early { return self.latch_stop(reasons); }
+        if let Some(reasons)=early {
+            self.latch_stop(reasons)?; // original held kill precedes fresh sampling
+            if reasons==STOP_RELEASE {
+                let sample=self.prepared.lease.sample();
+                // Diagnostic only: never convert a primary protocol/ABI/mask
+                // failure into a timeout merely because the clock later expired.
+                self.release_failure_sample=Some(sample);
+            }
+            return Ok(());
+        }
         loop {
             let cleanup = self.cleanup.as_ref().ok_or(TerminalFault::Invariant)?;
-            let mut watched = [
-                PollFd { fd: self.prepared.lease.owner.as_raw_fd(), events: POLLIN, revents: 0 },
-                PollFd { fd: self.prepared.lease.timer.as_raw_fd(), events: POLLIN, revents: 0 },
-                PollFd { fd: self.payload.as_ref().map_or(-1, ChildOwner::fd), events: POLLIN, revents: 0 },
-                PollFd { fd: self.watchdog.as_ref().map_or(-1, ChildOwner::fd), events: POLLIN, revents: 0 },
-                PollFd { fd: self.exec.as_ref().map_or(-1, ExecReport::fd), events: POLLIN, revents: 0 },
-                PollFd { fd: cleanup.timer_fd(), events: POLLIN, revents: 0 },
-            ];
-            // Both original execution timer and separately prearmed cleanup
-            // timer are real owned FDs. This is never an unarmed infinite wait.
-            let mut errno = 0;
-            let returned = unsafe { ptg_terminal_poll(watched.as_mut_ptr().cast(), watched.len() as u32, -1, &mut errno) };
-            self.last_poll = PollObservation { returned, errno, events: watched.map(|value| value.revents) };
+            let owners=self.prepared.lease.invocation.numbers();
+            let owner_count=owners.len();
+            let mut watched=[PollFd{fd:-1,events:POLLIN,revents:0};MAX_WATCHERS+5];
+            for (entry,fd) in watched.iter_mut().zip(owners){entry.fd=*fd;}
+            let other=[self.prepared.lease.timer.as_raw_fd(),
+                self.payload.as_ref().map_or(-1,ChildOwner::fd),self.watchdog.as_ref().map_or(-1,ChildOwner::fd),
+                self.exec.as_ref().map_or(-1,ExecReport::fd),cleanup.timer_fd()];
+            for (entry,fd) in watched[owner_count..].iter_mut().zip(other){entry.fd=fd;}
+            let watched=&mut watched[..owner_count+5];
+            // Full original set, not a relay/aggregate whose event can be consumed.
+            // Both absolute execution and prearmed cleanup timers remain held.
+            let mut errno=0;
+            let returned=unsafe{ptg_terminal_poll(watched.as_mut_ptr().cast(),watched.len() as u32,-1,&mut errno)};
+            let expanded_ready=watched.iter().filter(|p|p.revents!=0).count();
+            let mut owner_events=[0;MAX_WATCHERS];
+            for (slot,entry) in owner_events.iter_mut().zip(&watched[..owner_count]){*slot=entry.revents;}
+            let events=[owner_events[..owner_count].iter().fold(0,|bits,event|bits|event),
+                watched[owner_count].revents,watched[owner_count+1].revents,watched[owner_count+2].revents,
+                watched[owner_count+3].revents,watched[owner_count+4].revents];
+            self.last_poll=PollObservation{returned,errno,events,owner_count:owner_count as u32,owner_events};
             self.poll_observed = true;
             if returned < 0 && unsafe { ptg_terminal_errno_kind(errno) } == 1 {
                 self.interrupted_polls = self.interrupted_polls.saturating_add(1);
@@ -569,7 +588,7 @@ impl TerminalRun {
             let allowed = [POLLIN | POLLHUP, POLLIN, POLLIN | POLLHUP,
                            POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN];
             let invalid = returned <= 0
-                || returned as usize != self.last_poll.events.iter().filter(|value| **value != 0).count()
+                || returned as usize != expanded_ready
                 || self.last_poll.events.iter().zip(allowed).any(|(event, mask)| event & !mask != 0);
             if invalid {
                 self.semantic_fault = Some(TerminalFault::Poll(self.last_poll));
@@ -658,7 +677,7 @@ impl TerminalRun {
         let returned = unsafe { ptg_terminal_poll(watched.as_mut_ptr().cast(), watched.len() as u32,
                                                   if adopted_pending { 10 } else { -1 }, &mut errno) };
         let events = [watched[0].revents, watched[1].revents, watched[2].revents, watched[3].revents, 0, 0];
-        self.last_poll = PollObservation { returned, errno, events };
+        self.last_poll = PollObservation { returned, errno, events, ..PollObservation::default() };
         self.poll_observed = true;
         if returned < 0 && unsafe { ptg_terminal_errno_kind(errno) } == 1 { return Ok(()); }
         let allowed = [POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN | POLLHUP, POLLIN, 0, 0];
@@ -788,7 +807,7 @@ impl TerminalRun {
             }
         };
         let parts = SettledParts {
-            arming: self.arming, payload_mask: self.payload_mask, prepared: self.prepared, origin: self.origin, supervisor: self.supervisor,
+            arming: self.arming, payload_mask: self.payload_mask, release_failure_sample:self.release_failure_sample, prepared: self.prepared, origin: self.origin, supervisor: self.supervisor,
             payload, watchdog, exec: self.exec, stop, watchdog_kill, adopted: self.adopted,
             echild_index: self.echild_index.expect("checked actual ECHILD receipt"),
             last_pending: self.last_pending, pending_count: self.pending_count,
@@ -901,7 +920,7 @@ pub(super) fn settle_verified_arming_failure(
     // or fresh allocation occurs before the original held kill below.
     let mask_fault=arming.parent_mask_uncertain().then_some(TerminalFault::ParentSignalMask);
     let mut owner = TerminalRun {
-        arming, payload_mask: None, prepared, origin: ExecutionOrigin::ArmingFailure { error }, supervisor,
+        arming, payload_mask: None, release_failure_sample:None, prepared, origin: ExecutionOrigin::ArmingFailure { error }, supervisor,
         domain: Some(DomainOwner::Active(controls)), cleanup: Some(cleanup),
         payload: None, watchdog: watchdog.map(ChildOwner::Live), exec: None,
         stop: None, latched_reasons: None, last_poll: PollObservation::default(), poll_observed: false,
