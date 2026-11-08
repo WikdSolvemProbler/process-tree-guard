@@ -212,8 +212,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 47135,
-      "sha256": "c9dfd636a5e0826ee1107b698c2c017fcf75ba8755c6a3a3cf97365d3257b335"
+      "bytes": 47130,
+      "sha256": "c0b473f3d0555ed9a0f2c5c952788828f8f2aa0f6577766b52aa0c620d0c258c"
     },
     {
       "path": "request.rs",
@@ -281,7 +281,7 @@
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
   "implementation_build_candidate_sha256": "40a9010d0b2b32f2ef08780b8bff838d2ea8a0630ca0eb68208732eb328c7dda",
-  "publication_change": "Metadata-only ordinary qualification successor of exact40a; all35 nonmetadata pins unchanged. No native lifecycle/context/parity/activation claim.",
+  "publication_change": "Documentation privacy cleanup: remove a private transport description and refresh only the README pin. Production source and unit-template pins are unchanged. Earlier ordinary qualification and all native lifecycle/context/parity/activation limits remain unchanged.",
   "entry_timer_component": {
     "source_qualified": true,
     "native_component_tests_passed": 3,
