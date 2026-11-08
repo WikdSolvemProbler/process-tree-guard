@@ -142,6 +142,7 @@ impl VerifiedServiceScope {
         anchor.origin.delegation=Some(DelegationGrant::capture(uid));
         anchor.origin.delegation.as_ref().ok_or("delegation owner missing")?.revalidate(uid)
     }
+    pub(in super::super) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{self.anchor.origin.authority.protected_current_elf()}
     pub(in super::super) fn require_delegation(&self,uid:u32)->Probe<()>{
         self.anchor.origin.delegation.as_ref().ok_or("service has no administrator delegation grant")?.revalidate(uid)
     }
@@ -283,6 +284,8 @@ impl DelegationGrant {
   self.check_provenance()?;check(self.read_stable()?==self.bytes,"delegation policy differs from admission snapshot")?;self.check_grant(uid)
  }
 }
+#[derive(Debug)]
+pub(crate) struct ProtectedElfObservation {pub(crate) header:[u8;64],device:(u32,u32),mount:u64,inode:u64}
 pub(crate) struct EntryKernelAuthority{
  protected:Vec<ProtectedEntry>,proc:OwnedFd,proc_identity:Identity,own_proc:OwnedFd,one_proc:OwnedFd,maps:[OwnedFd;2],
  namespaces:Vec<OwnedFd>,namespace_identities:Vec<Identity>,manager:OwnedFd,
@@ -336,6 +339,18 @@ pub(in super::super::super) fn require_initial_mappings()->Probe<()>{
  let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;let process=proc_process(&proc,std::process::id())?;let _held=checked_maps(&process)?;Ok(())
 }
 impl EntryKernelAuthority{
+ pub(crate) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{
+  use std::io::{Read,Seek,SeekFrom};self.revalidate()?;
+  let link=metadata(self.own_proc.as_raw_fd(),c"exe",AT_SYMLINK_NOFOLLOW)?;
+  check(link.mode&S_IFMT==0o120000&&Identity::from(&link).same_mount(self.proc_identity),"current image link is not genuine held procfs")?;
+  let exe=fd_from_call(unsafe{fd_openat(self.own_proc.as_raw_fd(),c"exe".as_ptr(),O_CLOEXEC)})?;
+  let identity=require_root_mode(&descriptor_stat(&exe)?,S_IFREG)?;
+  let original=self.namespaces.last().ok_or("entry did not retain its original executable")?;
+  check(identity==require_root_mode(&descriptor_stat(original)?,S_IFREG)?,"current executable differs from held protected entry image")?;
+  let mut file=fs::File::from(exe);io_result(file.seek(SeekFrom::Start(0)))?;let mut header=[0u8;64];io_result(file.read_exact(&mut header))?;
+  self.revalidate()?;Ok(ProtectedElfObservation{header,device:identity.device,mount:identity.mount,inode:identity.inode})
+ }
+
  pub(in super::super::super) fn capture()->Probe<Self>{
   let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;let proc_identity=require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;
   let own=proc_process(&proc,std::process::id())?;let one=proc_process(&proc,1)?;let maps=checked_maps(&own)?;

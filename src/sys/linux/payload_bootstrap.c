@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/prctl.h>
+#include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/syscall.h>
@@ -29,10 +30,17 @@
 _Static_assert(sizeof(void *)==8 && sizeof(unsigned long)==8,"LP64 private ABI");
 _Static_assert(sizeof(struct clone_args)==88 && offsetof(struct clone_args,cgroup)==80,"clone3 v2 ABI");
 _Static_assert(sizeof(struct pollfd)==8,"native pollfd ABI");
-_Static_assert(sizeof(struct ptg_payload_spec)==152,"payload spec ABI");
+_Static_assert(sizeof(struct ptg_payload_spec)==160,"payload spec ABI");
 _Static_assert(offsetof(struct ptg_payload_spec,gate)==144,"payload gate offset");
 _Static_assert(offsetof(struct ptg_payload_spec,owners)==16,"payload original owner-set offset");
 _Static_assert(offsetof(struct ptg_payload_spec,umask)==92,"explicit caller umask offset");
+_Static_assert(offsetof(struct ptg_payload_spec,host_dumpability)==152
+    && offsetof(struct ptg_payload_spec,core_reserved)==156,"trusted core policy offsets");
+struct ptg_core_limits {uint64_t soft,hard;};
+_Static_assert(sizeof(struct ptg_core_limits)==16
+    && offsetof(struct ptg_core_limits,soft)==0
+    && offsetof(struct ptg_core_limits,hard)==8,"Linux prlimit64 tuple ABI");
+_Static_assert(RLIMIT_CORE==4,"Linux core resource ABI");
 _Static_assert(sizeof(struct ptg_payload_spawn)==128,"payload spawn ABI");
 _Static_assert(sizeof(struct ptg_payload_ready)==96,"payload readiness ABI");
 _Static_assert(sizeof(struct ptg_payload_release)==80,"payload release ABI");
@@ -68,6 +76,15 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 15:return offsetof(struct ptg_payload_spec,owners);
     case 16:return offsetof(struct ptg_payload_spec,umask);
     case 17:return UINT32_C(0777);
+    case 18:return offsetof(struct ptg_payload_spec,host_dumpability);
+    case 19:return offsetof(struct ptg_payload_spec,core_reserved);
+    case 20:return UINT32_C(5);
+    case 21:return sizeof(struct ptg_core_limits);
+    case 22:return offsetof(struct ptg_core_limits,soft);
+    case 23:return offsetof(struct ptg_core_limits,hard);
+    case 24:return RLIMIT_CORE;
+    case 25:return SYS_prlimit64;
+    case 26:return 1;
     default:return UINT64_MAX;
     }
 }
@@ -195,7 +212,8 @@ static int nonblocking_permit(int fd) {
 }
 static int watch_spec_valid(const struct ptg_payload_spec *s) {
     if(!s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
-       || !gate_valid(s->gate) || !s->deadline_ns || (s->umask&~UINT32_C(0777)))return EINVAL;
+       || !gate_valid(s->gate) || !s->deadline_ns || (s->umask&~UINT32_C(0777))
+       || (s->host_dumpability!=0 && s->host_dumpability!=2) || s->core_reserved)return EINVAL;
     const int32_t other[4]={s->kill_fd,s->timer_fd,s->supervisor_fd,s->watchdog_fd};
     return ptg_owner_watch_disjoint(&s->owners,other,4)?0:EINVAL;
 }
@@ -250,6 +268,49 @@ static int child_live(const struct ptg_payload_spec *s) {
     int e=0;const uint64_t now=now_ns(&e);
     return e?e:(now>=s->deadline_ns?ETIMEDOUT:0);
 }
+static int core_limits_read(struct ptg_core_limits *out) {
+    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,NULL,out)!=0)return errno;
+    return out->soft<=out->hard?0:EPROTO;
+}
+/* Linux 5.14/6.8 abort pipe cores at literal1 before starting a helper, and
+ * ELF file cores below ELF_EXEC_PAGESIZE. This is a reviewed kernel contract,
+ * not a portable setrlimit API promise. Never raise the original hard limit.
+ * Real/saved UID0 MUST remain until this tuple has been restored at dumpable0:
+ * dumpability alone does not stop a same-credential peer's remote prlimit.
+ */
+static int core_fence_begin(struct ptg_core_limits *original) {
+    int error=core_limits_read(original);if(error)return error;
+    if(original->hard<1)return EPERM;
+    const struct ptg_core_limits guarded={.soft=1,.hard=original->hard};
+    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,&guarded,NULL)!=0)return errno;
+    struct ptg_core_limits observed={0,0};
+    error=core_limits_read(&observed);if(error)return error;
+    return observed.soft==1 && observed.hard==original->hard?0:EPROTO;
+}
+static int core_fence_restore(const struct ptg_core_limits *original) {
+    struct ptg_core_limits observed={0,0};
+    int error=core_limits_read(&observed);if(error)return error;
+    if(observed.soft!=1 || observed.hard!=original->hard)return EPROTO;
+    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,original,NULL)!=0)return errno;
+    error=core_limits_read(&observed);if(error)return error;
+    return observed.soft==original->soft && observed.hard==original->hard?0:EPROTO;
+}
+static int zero_capabilities_confirmed(void) {
+    const struct __user_cap_header_struct header={.version=_LINUX_CAPABILITY_VERSION_3,.pid=0};
+    struct __user_cap_data_struct caps[2]={{0,0,0},{0,0,0}};
+    if(syscall(SYS_capget,&header,caps)!=0)return errno;
+    for(unsigned i=0;i<2;i++)
+        if(caps[i].effective || caps[i].permitted || caps[i].inheritable)return EPERM;
+    const long keep=syscall(SYS_prctl,PR_GET_KEEPCAPS,0,0,0,0);
+    if(keep<0)return errno;
+    if(keep!=0)return EPERM;
+    for(unsigned cap=0;cap<=CAP_LAST_CAP;cap++) {
+        const long ambient=syscall(SYS_prctl,PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,cap,0,0);
+        if(ambient<0)return errno;
+        if(ambient!=0)return EPERM;
+    }
+    return 0;
+}
 static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     /* All buffers below are fixed C stack/storage. No Rust, allocator, stdio,
      * environment builder, path reopen, libc credential wrapper or exec wrapper.
@@ -294,31 +355,71 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     /* Irreversible exec privilege barrier precedes every credential change. */
     if(syscall(SYS_prctl,PR_SET_NO_NEW_PRIVS,1,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(s->exec_writer,EPERM,125);
+    struct ptg_core_limits original_core={0,0};
+    uint32_t r=0,e=0,saved=0;
+    if(s->host_dumpability==2) {
+        if(syscall(SYS_getresuid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
+        if(r!=0 || e!=0 || saved!=0 || (uint32_t)syscall(SYS_setfsuid,UINT32_MAX)!=0)
+            child_fail(s->exec_writer,EPERM,125);
+        const int error=core_fence_begin(&original_core);
+        if(error)child_fail(s->exec_writer,error,125);
+    }
     if(syscall(SYS_prctl,PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_prctl,PR_SET_KEEPCAPS,0,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_setgroups,s->group_count,s->groups)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_setresgid,s->gid,s->gid,s->gid)!=0)child_fail(s->exec_writer,errno,125);
-    if(syscall(SYS_setresuid,s->uid,s->uid,s->uid)!=0)child_fail(s->exec_writer,errno,125);
+    /* The mode2 intermediate real/saved IDs keep external prlimit UID matching
+     * false while effective/fs UID changes can reset dumpability to host policy.
+     * No untrusted code, callback or READY is reachable with these saved IDs. */
+    if(syscall(SYS_setresuid,s->host_dumpability==2?0:s->uid,s->uid,
+               s->host_dumpability==2?0:s->uid)!=0)child_fail(s->exec_writer,errno,125);
     const struct __user_cap_header_struct cap_header={.version=_LINUX_CAPABILITY_VERSION_3,.pid=0};
     struct __user_cap_data_struct caps[2]={{0,0,0},{0,0,0}};
     if(syscall(SYS_capset,&cap_header,caps)!=0 || syscall(SYS_capget,&cap_header,caps)!=0)child_fail(s->exec_writer,errno,125);
     for(unsigned int i=0;i<2;i++)if(caps[i].effective || caps[i].permitted || caps[i].inheritable)child_fail(s->exec_writer,EPERM,125);
-    uint32_t r=0,e=0,saved=0;
     if(syscall(SYS_getresgid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
     if(r!=s->gid || e!=s->gid || saved!=s->gid || (uint32_t)syscall(SYS_setfsgid,UINT32_MAX)!=s->gid)child_fail(s->exec_writer,EPERM,125);
     if(syscall(SYS_getresuid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
-    if(r!=s->uid || e!=s->uid || saved!=s->uid || (uint32_t)syscall(SYS_setfsuid,UINT32_MAX)!=s->uid)child_fail(s->exec_writer,EPERM,125);
+    const uint32_t protected_uid=s->host_dumpability==2?0:s->uid;
+    if(r!=protected_uid || e!=s->uid || saved!=protected_uid || (uint32_t)syscall(SYS_setfsuid,UINT32_MAX)!=s->uid)child_fail(s->exec_writer,EPERM,125);
     const long group_count=syscall(SYS_getgroups,s->group_count,readback_groups);
     if(group_count<0)child_fail(s->exec_writer,errno,125);
     if((uint64_t)group_count!=s->group_count)child_fail(s->exec_writer,EPERM,125);
     for(uint32_t i=0;i<s->group_count;i++)if(readback_groups[i]!=s->groups[i])child_fail(s->exec_writer,EPERM,125);
     if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(s->exec_writer,EPERM,125);
+    if(s->host_dumpability==2) {
+        const int error=zero_capabilities_confirmed();
+        if(error)child_fail(s->exec_writer,error,125);
+    }
     /* ID/capability changes can reset dumpability to host policy: explicitly
      * deny unprivileged ptrace before declaring preparation. Activation must
      * separately exclude an already attached tracer/hostile same-UID bootstrap
      * interference; this check cannot retroactively exclude such a tracer. */
     if(syscall(SYS_prctl,PR_SET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,EPERM,125);
+    if(s->host_dumpability==2) {
+        const int error=core_fence_restore(&original_core);
+        if(error)child_fail(s->exec_writer,error,125);
+        /* Only real/saved IDs change now: effective/fs IDs and all capability
+         * sets already match. Reviewed setresuid/commoncap/commit_creds leaves
+         * dumpable0 unchanged. Full peer-credential matching begins only here. */
+        if(syscall(SYS_setresuid,s->uid,s->uid,s->uid)!=0)child_fail(s->exec_writer,errno,125);
+        if(syscall(SYS_getresuid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
+        if(r!=s->uid || e!=s->uid || saved!=s->uid || (uint32_t)syscall(SYS_setfsuid,UINT32_MAX)!=s->uid)
+            child_fail(s->exec_writer,EPERM,125);
+        if(syscall(SYS_getresgid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
+        if(r!=s->gid || e!=s->gid || saved!=s->gid || (uint32_t)syscall(SYS_setfsgid,UINT32_MAX)!=s->gid)
+            child_fail(s->exec_writer,EPERM,125);
+        const long final_groups=syscall(SYS_getgroups,s->group_count,readback_groups);
+        if(final_groups<0)child_fail(s->exec_writer,errno,125);
+        if((uint64_t)final_groups!=s->group_count)child_fail(s->exec_writer,EPERM,125);
+        for(uint32_t i=0;i<s->group_count;i++)
+            if(readback_groups[i]!=s->groups[i])child_fail(s->exec_writer,EPERM,125);
+        const int cap_error=zero_capabilities_confirmed();
+        if(cap_error)child_fail(s->exec_writer,cap_error,125);
+        if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1
+           || syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,EPERM,125);
+    }
     /* Caller credentials, not root, must be able to enter the trusted CWD. */
     if(syscall(SYS_fchdir,s->cwd_fd)!=0 || syscall(SYS_close,s->cwd_fd)!=0)child_fail(s->exec_writer,errno,125);
     /* clone3 did not share fs_struct. Change only this already-contained child,

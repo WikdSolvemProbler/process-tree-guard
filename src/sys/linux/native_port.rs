@@ -15,7 +15,7 @@ struct PayloadSpec {
     uid:u32, gid:u32, group_count:u32, argc:u32, envc:u32,umask:u32,
     deadline_ns:u64, original_mask:u64,
     groups:*const u32, program:*const c_char, argv:*const *const c_char, envp:*const *const c_char,
-    gate:*mut c_void,
+    gate:*mut c_void,host_dumpability:u32,core_reserved:u32,
 }
 #[repr(C)]
 #[derive(Clone,Copy,Debug,Default)]
@@ -58,7 +58,8 @@ struct Release {
 }
 const _:()={
     assert!(std::mem::offset_of!(PayloadSpec,umask)==92);
-    assert!(size_of::<PayloadSpec>()==152 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
+    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,core_reserved)==156);
+    assert!(size_of::<PayloadSpec>()==160 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
     assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==80);
 };
 unsafe extern "C" {
@@ -76,6 +77,9 @@ unsafe extern "C" {
     fn ptg_payload_wait_ready(spec:*const PayloadSpec,reader:c_int,child:c_int,setup:c_int,until:u64,out:*mut Ready);
     fn ptg_payload_commit(spec:*const PayloadSpec,child:c_int,permit:c_int,out:*mut Release);
 }
+
+fn sample_payload_abi()->[u64;27]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
+fn require_payload_abi(abi:&[u64;27])->Probe<()>{check(*abi==[4,160,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,156,5,16,0,8,4,SYS_PRLIMIT64 as u64,1],"payload C/Rust bridge ABI differs")}
 
 // No Drop cleanup promise: the actual mapping stays with controls/quarantine,
 // or the terminal receipt after all direct/adopted children are reaped.
@@ -131,10 +135,37 @@ impl LaunchContext {
 }
 // Read-only host preconditions, never a sysctl write or ptrace workaround.
 // The trusted privileged entry must establish its root/namespace/origin policy;
-// these actual checks additionally refuse an observed tracer or permissive
-// suid-dumpability transition before any cgroup/child resource is created.
+// these checks select strict mode0 or a reviewed protected mode2 path before
+// any cgroup/child resource. No request field selects this host authority.
 #[derive(Default)]
-struct ActivationHostReceipt {suid_dumpable:Option<Vec<u8>>,status:Option<String>,confirmed:bool}
+struct ActivationHostReceipt {suid_dumpable:Option<Vec<u8>>,status:Option<String>,confirmed:bool,mode:Option<u32>,
+    kernel_release:Option<Vec<u8>>,kernel_family:Option<ReviewedKernelFamily>,core:Option<CoreObservation>,
+    image:Option<cgroup_authority::service_scope::ProtectedElfObservation>}
+#[repr(C)]
+#[derive(Clone,Copy,Debug,Default)]
+struct CoreLimit {soft:u64,hard:u64}
+#[derive(Debug)]
+struct CoreObservation {result:c_long,error:c_int,limit:CoreLimit}
+const _:()={assert!(size_of::<CoreLimit>()==16);assert!(std::mem::offset_of!(CoreLimit,soft)==0);assert!(std::mem::offset_of!(CoreLimit,hard)==8);};
+#[cfg(target_arch="x86_64")]const SYS_PRLIMIT64:c_long=302;
+#[cfg(target_arch="aarch64")]const SYS_PRLIMIT64:c_long=261;
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+enum ReviewedKernelFamily {Linux5_14,Linux6_8}
+fn host_mode(raw:&[u8])->Probe<u32>{match raw{b"0"|b"0\n"=>Ok(0),b"2"|b"2\n"=>Ok(2),_=>Err("host dumpability mode is not supported".into())}}
+fn reviewed_mode2_family(raw:&[u8])->Probe<ReviewedKernelFamily>{
+    let raw=raw.strip_suffix(b"\n").unwrap_or(raw);
+    check(!raw.is_empty()&&raw.len()<=256&&raw.iter().all(|b|b.is_ascii_alphanumeric()||b".-+_".contains(b)),"kernel release syntax is not reviewed")?;
+    let (family,tail)=if let Some(tail)=raw.strip_prefix(b"5.14."){(ReviewedKernelFamily::Linux5_14,tail)}else if let Some(tail)=raw.strip_prefix(b"6.8."){(ReviewedKernelFamily::Linux6_8,tail)}else{return Err("mode2 requires a reviewed Linux5.14 or6.8 family".into())};
+    check(tail.first().is_some_and(u8::is_ascii_digit)&&!raw.windows(3).any(|part|part==b"-rc"),"unreviewed kernel development release")?;Ok(family)
+}
+fn valid_current_elf(raw:&[u8])->bool{
+    if raw.len()!=64||&raw[..7]!=b"\x7fELF\x02\x01\x01"||!matches!(raw[7],0|3){return false;}
+    let kind=u16::from_le_bytes([raw[16],raw[17]]);let machine=u16::from_le_bytes([raw[18],raw[19]]);
+    let expected=if cfg!(target_arch="aarch64"){183}else{62};
+    matches!(kind,2|3)&&machine==expected&&u32::from_le_bytes(raw[20..24].try_into().expect("fixed ELF range"))==1&&u16::from_le_bytes([raw[52],raw[53]])==64
+}
+fn mode2_core_permitted(hard:u64)->bool{hard>=1}
+
 pub(in super::super) fn bounded_host_read(path:&str,cap:usize)->Probe<Vec<u8>> {
     use std::io::Read;
     let file=io_result(fs::File::open(path))?;
@@ -144,20 +175,43 @@ pub(in super::super) fn bounded_host_read(path:&str,cap:usize)->Probe<Vec<u8>> {
     Ok(bytes)
 }
 impl ActivationHostReceipt {
-    fn check(&mut self)->Probe<()> {
+    fn mode(&self)->Probe<u32>{check(self.confirmed,"host policy was not confirmed")?;self.mode.ok_or_else(||"host dumpability observation missing".into())}
+    fn check(&mut self,scope:&VerifiedServiceScope)->Probe<()> {
+        self.confirmed=false;self.mode=None;
         self.suid_dumpable=Some(bounded_host_read("/proc/sys/fs/suid_dumpable",64)?);
-        let raw=self.suid_dumpable.as_ref().expect("actual sysctl bytes stored");
-        check(raw.as_slice()==b"0\n" || raw.as_slice()==b"0","activation requires fs.suid_dumpable=0")?;
+        let mode=host_mode(self.suid_dumpable.as_ref().expect("actual sysctl bytes stored"))?;
         self.status=Some(String::from_utf8(bounded_host_read("/proc/self/status",65536)?)
             .map_err(|_|"activation status is not UTF-8")?);
         let status=self.status.as_ref().expect("actual status stored");
-        let uid=status_ids(status,"Uid:")?;
-        let gid=status_ids(status,"Gid:")?;
-        check(uid==[0,0,0,0] && gid==[0,0,0,0]
-            && unsafe{geteuid()}==0 && unsafe{getegid()}==0,"activation requires trusted real/effective/saved/filesystem root credentials")?;
+        let uid=status_ids(status,"Uid:")?;let gid=status_ids(status,"Gid:")?;
+        check(uid==[0,0,0,0]&&gid==[0,0,0,0]&&unsafe{geteuid()}==0&&unsafe{getegid()}==0,
+            "activation requires trusted real/effective/saved/filesystem root credentials")?;
         check(status_field(status,"TracerPid:")?=="0","activation refuses a traced privileged entry")?;
-        self.confirmed=true;Ok(())
+        if mode==2{
+            self.kernel_release=Some(bounded_host_read("/proc/sys/kernel/osrelease",256)?);
+            self.kernel_family=Some(reviewed_mode2_family(self.kernel_release.as_ref().expect("kernel bytes stored"))?);
+            self.image=Some(scope.protected_current_elf()?);
+            check(valid_current_elf(&self.image.as_ref().expect("protected image stored").header),"mode2 requires the actual protected current LP64 ELF")?;
+            let mut limit=CoreLimit::default();let result=unsafe{syscall(SYS_PRLIMIT64,0 as c_int,4 as c_int,std::ptr::null::<CoreLimit>(),&mut limit as *mut CoreLimit)};
+            let error=if result<0{io::Error::last_os_error().raw_os_error().unwrap_or(-1)}else{0};
+            self.core=Some(CoreObservation{result,error,limit});
+            let observed=self.core.as_ref().expect("actual CORE observation stored");
+            check(observed.result==0&&observed.error==0&&observed.limit.soft<=observed.limit.hard&&mode2_core_permitted(observed.limit.hard),"mode2 requires a readable current hard CORE limit of at least1")?;
+        }
+        self.mode=Some(mode);self.confirmed=true;Ok(())
     }
+}
+#[cfg(test)]pub(crate) fn mode2_host_policy_regression(){
+    for raw in [b"0".as_slice(),b"0\n".as_slice()]{assert_eq!(host_mode(raw).unwrap(),0);}
+    for raw in [b"2".as_slice(),b"2\n".as_slice()]{assert_eq!(host_mode(raw).unwrap(),2);}
+    for raw in [b"1".as_slice(),b"3".as_slice(),b"02".as_slice(),b"2\r\n".as_slice(),b"".as_slice()]{assert!(host_mode(raw).is_err());}
+    assert_eq!(reviewed_mode2_family(b"5.14.0-reviewed\n").unwrap(),ReviewedKernelFamily::Linux5_14);
+    assert_eq!(reviewed_mode2_family(b"6.8.0-reviewed\n").unwrap(),ReviewedKernelFamily::Linux6_8);
+    for release in [b"5.13.0".as_slice(),b"5.140.0".as_slice(),b"6.80.0".as_slice(),b"6.9.0".as_slice(),b"6.8.0-rc1".as_slice(),b"6.8.".as_slice(),b"6.8.0\r\n".as_slice()]{assert!(reviewed_mode2_family(release).is_err());}
+    assert!(!mode2_core_permitted(0));assert!(mode2_core_permitted(1));assert!(mode2_core_permitted(u64::MAX));
+    let mut elf=[0u8;64];elf[..7].copy_from_slice(b"\x7fELF\x02\x01\x01");elf[16..18].copy_from_slice(&3u16.to_le_bytes());let machine=if cfg!(target_arch="aarch64"){183u16}else{62u16};elf[18..20].copy_from_slice(&machine.to_le_bytes());elf[20..24].copy_from_slice(&1u32.to_le_bytes());elf[52..54].copy_from_slice(&64u16.to_le_bytes());assert!(valid_current_elf(&elf));
+    for offset in [0,4,5,6,16,18,20,52]{let mut bad=elf;bad[offset]=0;assert!(!valid_current_elf(&bad));}
+    assert!(!valid_current_elf(&elf[..63]));
 }
 struct OriginalWatch { owners:Arc<VerifiedInvocation>,timer:OwnedFd,supervisor:OwnedFd,deadline_ns:u64 }
 fn permit_pair()->Probe<(OwnedFd,OwnedFd)> {
@@ -170,7 +224,7 @@ fn duplicate(fd:&OwnedFd)->Probe<OwnedFd> {
     fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})
 }
 #[derive(Default)]
-struct PayloadReceipt {cancellation_authorize:Option<super::super::super::entry::CancellationObservation>,abi:Option<[u64;18]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
+struct PayloadReceipt {cancellation_authorize:Option<super::super::super::entry::CancellationObservation>,abi:Option<[u64;27]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
 struct NativePort {
     scope:VerifiedServiceScope,
     launch:LaunchContext, watch:Option<OriginalWatch>, receipt:PayloadReceipt, host_policy:ActivationHostReceipt,
@@ -184,7 +238,7 @@ impl NativePort {
         let watch=self.watch.as_ref().ok_or("missing original retained watch")?;
         let gate=domain.controls.gate.as_ref().ok_or("missing shared cancellation authority")?;
         Ok(PayloadSpec{
-            schema:3,bytes:size_of::<PayloadSpec>() as u32,cgroup_fd:domain.controls.directory.as_raw_fd(),
+            schema:4,bytes:size_of::<PayloadSpec>() as u32,cgroup_fd:domain.controls.directory.as_raw_fd(),
             kill_fd:domain.controls.supervisor_kill.as_raw_fd(),owners:watch.owners.watch(),timer_fd:watch.timer.as_raw_fd(),
             supervisor_fd:watch.supervisor.as_raw_fd(),watchdog_fd:domain.watchdog.pidfd.as_raw_fd(),
             cwd_fd:self.launch.cwd.as_raw_fd(),stdio_fd:self.launch.stdio.each_ref().map(AsRawFd::as_raw_fd),
@@ -192,7 +246,7 @@ impl NativePort {
             group_count:self.groups.len() as u32,argc:self.arguments.len() as u32,envc:self.launch.environment.len() as u32,umask:u32::from(self.launch.umask),
             deadline_ns:watch.deadline_ns,original_mask:domain.arming.original_mask().ok_or("watchdog lacks original raw mask proof")?,
             groups:self.groups.as_ptr(),program:self.arguments.first().ok_or("missing authorized program")?.as_ptr(),
-            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),
+            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,core_reserved:0,
         })
     }
     fn cancel(&mut self,domain:&ArmedDomain) {
@@ -211,15 +265,13 @@ impl OneShotPort for NativePort {
         check(cancellation.state()==super::super::super::entry::CancellationState::Clear,"caller cancellation observed before arming")?;
         self.scope.revalidate()?;
         self.scope.authorize_original(exec.invocation(),identity.uid)?;
-        self.host_policy.check()?;
+        self.host_policy.check(&self.scope)?;
         check(self.launch.cancellation.peer()==self.launch.caller,"caller cancellation capability differs from authenticated launch")?;
         check(self.launch.caller.uid==identity.uid && self.launch.caller.gid==identity.gid
             && exec.environment()==self.launch.environment&&exec.invocation().umask==self.launch.umask,"authenticated launch context differs from prepared identity/environment")?;
         check(identity.uid!=0 && identity.gid!=0 && !identity.groups.contains(&0),"native payload refuses privileged identity")?;
         check(exec.program().to_bytes().starts_with(b"/"),"native payload requires an absolute program")?;
-        let abi=std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)});
-        self.receipt.abi=Some(abi);
-        check(abi==[3,152,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511],"payload C/Rust bridge ABI differs")?;
+        let abi=sample_payload_abi();self.receipt.abi=Some(abi);require_payload_abi(&abi)?;
         self.arguments=exec.arguments().to_vec();
         self.argv=self.arguments.iter().map(|value|value.as_ptr()).chain(std::iter::once(ptr::null())).collect();
         self.groups=identity.groups.clone();self.uid=identity.uid;self.gid=identity.gid;
@@ -264,7 +316,7 @@ impl OneShotPort for NativePort {
         let Some(child)=child else {self.cancel(domain);return Err("payload clone did not succeed".into());};
         let exec_report=unsafe{terminal_controller::ExecReport::from_trusted_child(exec_reader)};
         let ready_permit=(||->Probe<OwnedFd>{
-            check(raw.schema==3 && raw.child_created==1 && raw.pid>0 && raw.pidfd>=0 && raw.clone_result==raw.pid
+            check(raw.schema==4 && raw.child_created==1 && raw.pid>0 && raw.pidfd>=0 && raw.clone_result==raw.pid
                 && raw.error==0 && raw.mask_set_result==0 && raw.mask_set_error==0
                 && raw.mask_restore_result==0 && raw.mask_restore_error==0
                 && raw.blocked_mask==BLOCKED_MASK && raw.restored_mask==raw.original_mask
@@ -274,8 +326,8 @@ impl OneShotPort for NativePort {
             let mut ready=Ready::default();
             unsafe{ptg_payload_wait_ready(&spec,ready_reader.as_raw_fd(),child.pidfd.as_raw_fd(),setup.timer_fd(),until,&mut ready)};
             self.receipt.ready=Some(ready);
-            check(ready.schema==3 && ready.result==0 && ready.error==0 && ready.read_count==16
-                && ready.message_schema==3 && ready.message_token==u32::from(b'R') && ready.child_mask==BLOCKED_MASK
+            check(ready.schema==4 && ready.result==0 && ready.error==0 && ready.read_count==16
+                && ready.message_schema==4 && ready.message_token==u32::from(b'R') && ready.child_mask==BLOCKED_MASK
                 && ready.before_ns>=raw.after_clone_ns && ready.after_ns>=ready.before_ns && ready.after_ns<until,
                 "payload readiness refused")?;
             Ok(permit_writer)
@@ -292,7 +344,7 @@ impl OneShotPort for NativePort {
         let mut release=Release::default();
         unsafe{ptg_payload_commit(&spec,child.pidfd.as_raw_fd(),permit.as_raw_fd(),&mut release)};
         self.receipt.release=Some(release);
-        let valid=release.schema==3 && release.result==0 && release.error==0 && release.gate_before==0
+        let valid=release.schema==4 && release.result==0 && release.error==0 && release.gate_before==0
             && release.gate_after==1 && release.write_result==1 && release.write_error==0
             && release.before_ns>0 && release.after_ns>=release.before_ns && release.after_ns<spec.deadline_ns;
         if !valid {self.cancel(domain);return Err("payload release refused".into());}
@@ -391,6 +443,7 @@ pub(in super::super) fn before_admission_code(scope:Option<VerifiedServiceScope>
 }
 
 #[cfg(test)]pub(super) fn gate_first_cause_regression(){
+ let abi=sample_payload_abi();require_payload_abi(&abi).expect("actual compiled payload ABI27 must match production validator");
  let observe=|released:bool,generic_first:bool|{
   let gate=SharedGate::create().expect("actual native gate allocation");let mut raw=[-9;8];
   raw[0]=gate.state();raw[1]=gate.peer_cancelled();
@@ -404,6 +457,7 @@ pub(in super::super) fn before_admission_code(scope:Option<VerifiedServiceScope>
  assert_eq!(held,([0,0,-1,-1,0,2,1,2],1,2));
  assert_eq!(released,([0,0,0,-1,1,2,1,2],1,2));
  assert_eq!(generic,([0,0,-1,0,2,2,0,2],0,2));
+ println!("native_payload_abi schema={} spec={} words={} prlimit64={} core_guard_soft={} verified=true",abi[0],abi[1],abi.len(),abi[25],abi[26]);
  println!("native_gate_first_cause held_peer=preserved released_peer=preserved generic_first=not_relabelled gates=3 mappings_destroyed=3");
 }
 

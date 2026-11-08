@@ -11,7 +11,7 @@
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 3u
+#define PTG_PAYLOAD_SCHEMA 4u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
 #define PTG_PAYLOAD_CANCELLED 2
@@ -53,6 +53,7 @@ struct ptg_payload_spec {
     const char *const *argv;
     const char *const *envp;
     struct ptg_payload_gate *gate;
+    uint32_t host_dumpability, core_reserved;
 };
 /* All FDs are BORROWED by C. Parent Rust owns every endpoint and closes its own
  * child-only writers/readers immediately after spawn. No C function closes a
@@ -92,9 +93,14 @@ struct ptg_payload_ready {
     uint64_t child_mask, before_ns, after_ns;
     int32_t kill_result, kill_error;
 };
-/* READY wire is exactly16 bytes: schema:u32=3, token:u32='R', blocked_mask:u64.
+/* READY wire is exactly16 bytes: schema:u32=4, token:u32='R', blocked_mask:u64.
  * It follows FD scrub and verified groups/gid/uid/zero caps/NNP/CWD. It certifies
- * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion. setup_timer is an
+ * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion.
+ * host_dumpability is trusted host policy, never request data. Mode0 retains the
+ * legacy path. Mode2 uses the reviewed ELF/kernel CORE1 barrier while real/saved
+ * UID0 prevents nonroot prlimit changes, restores exact original core limits at
+ * dumpable0, and drops every root identity before READY. Unknown modes and a
+ * nonzero core_reserved refuse. setup_timer is an
  * independently armed finite readiness timer; no C-owned timer is introduced.
  */
 void ptg_payload_wait_ready(const struct ptg_payload_spec *spec,
@@ -127,7 +133,11 @@ int ptg_payload_reset_dispositions(int32_t *failed_signal, int32_t *error);
 /* Scalar layout/constants reporter: 0=schema,1=spec,2=spawn,3=ready,4=release,
  * 5=READY bytes,6=exec bytes,7=clone flags,8=SIGCHLD,9=clone3 syscall,
  * 10=CLOCK_BOOTTIME,11=kernel blocked mask,12=spec.gate offset,
- * 13=owner-watch bytes,14=maximum owner-watch count,15=spec.owners offset.
+ * 13=owner-watch bytes,14=maximum owner-watch count,15=spec.owners offset,
+ * 16=umask offset,17=umask maximum,18=host-dumpability offset,
+ * 19=core-reserved offset,20=allowed host-mode bitset,21=core-limit ABI bytes,
+ * 22=core soft offset,23=core hard offset,24=RLIMIT_CORE,25=prlimit64 syscall,
+ * 26=the reviewed pipe-recursion/file-size barrier value.
  */
 uint64_t ptg_payload_abi(uint32_t word);
 #endif

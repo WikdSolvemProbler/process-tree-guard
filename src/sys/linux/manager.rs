@@ -143,6 +143,7 @@ if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u3
   self.protected.bind_runtime_overrides(&overrides,&self.name)?;
   self.runtime_usec=runtime;self.overrides=overrides;self.validate(cleanup_until)
  }
+ pub(super) fn protected_current_elf(&self)->Probe<supervisor::native_activation::ProtectedElfObservation>{self.protected.protected_current_elf()}
  pub(super) fn group(&self)->&str{&self.control_group}
  pub(super) fn name(&self)->&CStr{&self.name}
  pub(super) fn invocation(&self)->[u8;16]{self.invocation}

@@ -701,6 +701,7 @@ mod tests {
         let transparent=run_library(&[],f64::NAN,OwnerMode::Manual);assert_eq!(transparent.exit_code(),125);
         assert!(transparent.error().unwrap().contains("transparent Linux execution context"));assert!(!transparent.complete());assert!(!transparent.may_have_active_service());assert_eq!(transparent.wire_evidence(),(&[][..],&[][..]));
         let cli=run_cli(vec!["auto".into(),"--timeout".into(),"invalid".into()]);assert_eq!(cli.exit_code(),125);assert!(cli.error().unwrap().contains("--separate-service-context"));assert!(!cli.may_have_active_service());assert_eq!(cli.wire_evidence(),(&[][..],&[][..]));
+        supervisor::native_activation::mode2_host_policy_regression();
         let acknowledged=run_library_delegated(&[],0.0,OwnerMode::Manual,SeparateService::Acknowledged);assert_eq!(acknowledged.exit_code(),125);assert!(acknowledged.error().unwrap().contains("InvalidDuration"));assert!(!acknowledged.may_have_active_service());
     }
 }

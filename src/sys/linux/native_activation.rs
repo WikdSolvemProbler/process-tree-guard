@@ -325,6 +325,7 @@ pub(crate) fn capture_service_scope()->Probe<VerifiedServiceScope> {
 }
 
 pub(crate) use cgroup_authority::service_scope::EntryKernelAuthority;
+pub(crate) type ProtectedElfObservation=cgroup_authority::service_scope::ProtectedElfObservation;
 pub(crate) fn capture_entry_kernel_authority()->Probe<EntryKernelAuthority>{EntryKernelAuthority::capture()}
 pub(crate) fn require_initial_client_mapping()->Probe<()>{cgroup_authority::service_scope::require_initial_mappings()}
 
@@ -343,3 +344,5 @@ pub(crate) use cgroup_authority::service_scope::PrivateRuntimeDirectory;
 #[cfg(test)]pub(crate) fn watchdog_fault_regression(){terminal_controller::watchdog_fault_regression();native_port::watchdog_mapping_regression()}
 
 pub(crate) fn capture_calling_umask()->Probe<u16>{cgroup_authority::service_scope::capture_calling_umask()}
+
+#[cfg(test)]pub(crate) fn mode2_host_policy_regression(){native_port::mode2_host_policy_regression()}
