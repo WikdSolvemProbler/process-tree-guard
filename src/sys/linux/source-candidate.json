@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Original-owner PTGEX4 graph rebuilt/linked all8steps + adapted8tests PASS; trusted origin mint/selector disabled; no native guard/protection/performance qualification",
+  "status": "Original-owner PTGEX4 graph rebuilt/linked all8steps + adapted8tests PASS; trusted origin mint/selector disabled; no native guard/protection/performance qualification; private entry timer separately compiled and passed3 ordinary native cases, not full entry activation",
   "root": "src/sys/linux",
   "baseline_commit": "a561bf7d9d1ba5f6d9fa7b9c6334ab4a528aa9b3",
   "baseline_candidate_sha256": "ee27b5691186cf2aa06c1d8b3f6479ec03cac858a1603e97872c099baabd6b05",
@@ -20,7 +20,10 @@
     "payload_owners_offset": 16,
     "payload_gate_offset": 144,
     "payload_words": 16,
-    "terminal_poll_max": 254
+    "terminal_poll_max": 254,
+    "entry_timer_schema": 1,
+    "entry_timer_observation_bytes": 96,
+    "entry_timer_words": 9
   },
   "tests": {
     "existing_names": 8,
@@ -43,7 +46,10 @@
     {
       "path": "src/deadline.rs",
       "bytes": 1171,
-      "sha256": "56252eb28270b4743d73e17e05ae933d3fad8168e7b4ba34405e859be9c85c53"
+      "sha256": "56252eb28270b4743d73e17e05ae933d3fad8168e7b4ba34405e859be9c85c53",
+      "canonical_git_bytes": 1137,
+      "canonical_git_sha256": "6979e99e7bab5e73b1a1be076244c99480cdc4851d3cc82a1b243584f193f42e",
+      "raw_snapshot_line_endings": "CRLF; recorded bytes/sha256 retain exact earlier transferred build input"
     }
   ],
   "files": [
@@ -51,16 +57,6 @@
       "path": ".gitattributes",
       "bytes": 14,
       "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
-    },
-    {
-      "path": "PROVENANCE.json",
-      "bytes": 13667,
-      "sha256": "5d4d5dc69186ad060c86e6b86f9905b921a4e5751b59bc99255f264dbb14c0e4"
-    },
-    {
-      "path": "README.md",
-      "bytes": 37260,
-      "sha256": "94d30900e28abc2bf67405ec951aececefb64d13eac667d3b6f4998e0add6e97"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -76,6 +72,16 @@
       "path": "child_reaper.rs",
       "bytes": 15306,
       "sha256": "cd71240834ecb1a9da099b6a917648b76e4b1f125ff4578df35e80546c820788"
+    },
+    {
+      "path": "entry_timer.c",
+      "bytes": 6488,
+      "sha256": "f9cb3f32ecad20490f0f857acd31ea39a03c05a6ee85097ccdf2a561ac6532e5"
+    },
+    {
+      "path": "entry_timer.h",
+      "bytes": 2328,
+      "sha256": "3d0bc3f2f16ad3c67db4ea92f48813583da9740d16804b14f1bef751dcc912d8"
     },
     {
       "path": "invocation.rs",
@@ -138,6 +144,16 @@
       "sha256": "724ab8b77544cca873c43f171feb494b5ec30afe2b03cb9f98c43dff30b713f2"
     },
     {
+      "path": "PROVENANCE.json",
+      "bytes": 14895,
+      "sha256": "77f6cb7c81b4bdced26aa71fad67fbfed9ea6ec275bcce6008f5b1cbb7c39d5a"
+    },
+    {
+      "path": "README.md",
+      "bytes": 38738,
+      "sha256": "4bd1a2a48d04914d5e8e2921314758ae6ec9bcb20175c126817f5fda5343f6ed"
+    },
+    {
       "path": "request.rs",
       "bytes": 16193,
       "sha256": "87548f2491a8bc374e3d05868f9bb7a6266de042a4b5e9a1c48d5f226a2eb9d2"
@@ -198,5 +214,15 @@
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
   "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
-  "publication_change": "Documentation/publishing privacy only; executable source pins and prior actual implementation build identity unchanged. Raw evidence is withdrawn from the public checkout; no new qualification claimed."
+  "publication_change": "Documentation/publishing privacy only; executable source pins and prior actual implementation build identity unchanged. Raw evidence is withdrawn from the public checkout; no new qualification claimed.",
+  "entry_timer_component": {
+    "source_qualified": true,
+    "native_component_tests_passed": 3,
+    "full_entry_link_qualified": false,
+    "public_backend_enabled": false,
+    "component_manifest_sha256": "d4eb8810737ba066a55ffdd3fcb0f8b636446a01d0e38ba54bd270408a1abee3",
+    "raw_receipts": "local-only for publication privacy"
+  },
+  "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
+  "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities."
 }

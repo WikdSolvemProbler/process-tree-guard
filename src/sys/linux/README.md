@@ -183,3 +183,11 @@ Archive SHA-256 cdb04781716f2ae29b2cf5a21fa83f949ded244af3b409008abbbb7d7a56e1e0
 **Next:** The wiki Platform Support page states the tier of each named place.
 
 [↑ Back to Contents](#contents)
+
+## Private entry deadline timer
+
+`entry_timer.c` and `entry_timer.h` provide an opaque owner for an absolute `CLOCK_BOOTTIME` timer that delivers `SIGKILL` to its own process. Callers must establish cleanup coverage before retiring the startup timer. The cleanup timer rejects deletion. Ownership survives partial creation or observation failure, and the 96-byte receipt retains the native call results and the two clock observations around timer readback. No timer handle representation crosses the C boundary.
+
+A hardened GCC C11 build linked with `librt` passed three ordinary-user checks on Linux 6.8 ARM64: startup expiry, cleanup-deletion refusal with the timer still active, and handoff that survived the old startup cutoff before cleanup expiry. All three ended with the expected signal, with zero parent fallback kills or timeouts. Fifteen artifacts were verified locally before the exact scratch directory was removed; the original execution scope was absent. Both independent reviewers cleared the exact component and bounded test scope.
+
+This qualifies the timer component only. It establishes no whole-tree containment, precise expiry bound, performance result, supported-kernel-floor runtime result, or public Linux activation. Raw host and transport receipts remain local for publication privacy; this summary does not replace publicly accessible raw evidence. Trusted service entry remains under implementation and the public backend selector remains disabled.

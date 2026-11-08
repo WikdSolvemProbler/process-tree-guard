@@ -269,5 +269,32 @@
     "status": "withdrawn-from-current-public-tree",
     "index": "tests/evidence/withdrawn-artifacts.json",
     "limits": "Historical artifact identities remain unchanged; raw originals are retained locally and are unavailable in the public checkout. Source/readiness summaries do not replace independently accessible raw evidence."
+  },
+  "entry_timer_component": {
+    "component": "private native Linux entry timer",
+    "source": {
+      "entry_timer.c": "f9cb3f32ecad20490f0f857acd31ea39a03c05a6ee85097ccdf2a561ac6532e5",
+      "entry_timer.h": "3d0bc3f2f16ad3c67db4ea92f48813583da9740d16804b14f1bef751dcc912d8"
+    },
+    "platform": "Linux6.8 aarch64, ordinary user",
+    "compiler": "GCC13.3 hardened C11 build linked with librt",
+    "compile_link_passed": true,
+    "tests": {
+      "bootstrap_expiry": "passed",
+      "cleanup_deletion_refused_and_timer_active": "passed",
+      "bootstrap_to_cleanup_handoff": "passed",
+      "count": 3,
+      "failed": 0,
+      "timeouts": 0,
+      "parent_fallback_kills": 0
+    },
+    "artifacts_verified_locally": 15,
+    "owned_remote_scratch_removed": true,
+    "original_remote_scope_absent": true,
+    "reviewers_zero_unresolved_objections": 2,
+    "scope_limits": [
+      "Component functionality only; not public Linux backend activation, whole-tree containment, precise expiry timing, performance or supported-kernel-floor runtime qualification.",
+      "Raw host/transport/compiler receipts remain local for publication privacy; this summary is not independently accessible raw runtime evidence."
+    ]
   }
 }
