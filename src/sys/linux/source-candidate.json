@@ -67,8 +67,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 43452,
-      "sha256": "161203737b37d7572f3cf08a6b2548165300a1c754d1a7923b2506eb934e02d6"
+      "bytes": 43390,
+      "sha256": "e5886143c0cf28e5fe4a8618cd424da7fe642d0d47469dbf3d197d0529b5ce12"
     },
     {
       "path": "arming_failure_controller.rs",
