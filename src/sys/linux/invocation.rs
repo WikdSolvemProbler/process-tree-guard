@@ -16,7 +16,7 @@ const _:()={assert!(size_of::<OwnerWatch>()==16);assert!(std::mem::offset_of!(Ow
 pub(super) struct ProcessIdentity {pub(super) pid:u32,pub(super) ppid:u32,pub(super) start_ticks:u64}
 #[derive(Clone,Debug,PartialEq)]
 pub(super) struct Metadata {
-    pub(super) mode:OwnerMode,pub(super) umask:u16,pub(super) seconds:f64,pub(super) captured_ns:u64,pub(super) deadline_ns:u64,
+    pub(super) mode:OwnerMode,pub(super) separate_service:bool,pub(super) umask:u16,pub(super) seconds:f64,pub(super) captured_ns:u64,pub(super) deadline_ns:u64,
     pub(super) identities:Vec<ProcessIdentity>,
 }
 #[derive(Debug,PartialEq,Eq)]
@@ -101,6 +101,7 @@ pub(crate) struct OriginalInvocation {
     metadata:Metadata,pidfds:Vec<OwnedFd>,namespaces:(std::path::PathBuf,std::path::PathBuf),
 }
 impl OriginalInvocation {
+    pub(super) fn acknowledge_separate_service(mut self,_acknowledgment:SeparateService)->Self {self.metadata.separate_service=true;self}
     pub(crate) fn capture(mode:OwnerMode,seconds:f64)->CaptureResult<Self> {
         let duration=requested_ns(seconds)?;
         let captured_ns=clock()?;
@@ -122,7 +123,7 @@ impl OriginalInvocation {
             if mode==OwnerMode::Manual || next==1 {break;}
             next=identity.ppid;
         }
-        let metadata=Metadata{mode,umask,seconds,captured_ns,deadline_ns,identities};
+        let metadata=Metadata{mode,separate_service:false,umask,seconds,captured_ns,deadline_ns,identities};
         metadata.validate()?;
         let result=Self{metadata,pidfds,namespaces:captured_namespaces};
         result.revalidate()?;

@@ -7,10 +7,14 @@ The normal cross-platform selector remains fail-closed for Linux.
   `/usr/libexec/process-tree-guard-root`. Its only accepted role is `--service`.
 - `../client_main.rs` builds the ordinary standalone client. It captures the
   original parent/all-ancestor capabilities and absolute BOOTTIME cutoff before
-  activation, then sets NNP only on its own process.
-- The in-process library client requires existing NNP=1 and never changes the
-  caller's process policy. It retains the original requester in addition to the
-  manual parent or complete auto ancestor set.
+  activation, then sets NNP only on its own process. It requires the explicit
+  first flag `--separate-service-context`; no default context acknowledgment exists.
+- `run_library` refuses125 before capture/settings/activation because transparent
+  caller confinement/resource inheritance is not implemented. The distinct
+  `run_library_delegated(command,seconds,mode,SeparateService::Acknowledged)`
+  requires existing NNP=1 and never changes the caller's process policy. It keeps
+  the original requester plus manual parent or complete auto ancestor set.
+  Acknowledgment discloses a separate service context; it grants no authority.
 - `process-tree-guard.socket` and `process-tree-guard@.service` are exact checked
   runtime configuration sources. They have no installation hooks. PID1 owns the
   activation listener; each accepted connection creates one finite Type=exec
@@ -56,6 +60,21 @@ Every synchronous post-bind refusal attempts exact private socket unlink and ret
 
 The prior847 checkpoint returned incomplete owning125 quarantine without a post-presentation cancellation/join. Cancellation v2 below implements the missing path; unconfirmed outcomes still retain quarantine and runtime qualification remains required.
 
-Cancellation v2 is now present in source: the same accepted private connection is directly watched by the native watchdog and terminal controller, with a first-cancellation cause and bounded client shutdown/join. The prior quarantine gap remains historical; current behavior still needs fresh compile/native qualification. Only a valid native frame plus exact service/domain/manager join can complete a failed call; otherwise the125 outcome retains quarantine.
+Cancellation v2 is now present in source: the same accepted private connection is directly watched by the native watchdog and terminal controller, with a first-cancellation cause and bounded client shutdown/join. The prior quarantine gap remains historical; current behavior compiles and its ordinary tests pass; native lifecycle qualification remains required. Only a valid native frame plus exact service/domain/manager join can complete a failed call; otherwise the125 outcome retains quarantine.
 
-The latest handoff also contains PTGEX5 caller-thread umask and source-only natural watchdog stop (internal SHUT_RD after domain empty, natural124 only,1s cap, every forced signal uncertain). Nothing in these source files installs or activates a socket/service. An explicit deny-by-default administrative execution-delegation policy and confinement/resource-context contract remain prerequisites before activation.
+The previous d6 source passed11 ordinary build/link steps and10 tests, including read-only caller-thread umask capture and three parent-only gate mappings. Child umask/watchdog/terminal/root-client lifecycles remain unexecuted. Tested78 adds deny-default administrative delegation and PTGEX6 acknowledgment; its11 build/link steps and12 ordinary tests passed. Parser/default-refusal/IPC checks did not open a real /etc policy or exercise privileged enforcement. Nothing installs or activates a socket/service.
+
+The fixed policy `/etc/process-tree-guard/delegation.policy` is at most4096 bytes:
+`PTG-DELEGATION-1\ncontext separate-service\n` followed by0..64 strictly increasing
+`uid N\n` lines, canonical decimal1..4294967294. Empty grants deny; comments, CR,
+unknown text, duplicates and wildcards refuse. The service retains the protected
+root-owned nofollow directory/file chain and exact bytes. The actual authenticated
+requester UID must be granted before RuntimeMax extension, private listener or
+provisioning; the same held snapshot is revalidated before provision, payload
+creation and permit. Snapshot changes refuse admission/release, not an atomic
+promise to revoke an already executing run. Both requests bind byte7=1 in the
+40-byte PTGEX6 header; mask remains at38.
+
+No caller seccomp/LSM/Landlock/rlimit/cgroup-ancestry replay is provided. The
+separate-service grant is an explicit administrative capability and does not
+complete transparent-context requirements. Default dispatch remains disabled.

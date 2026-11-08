@@ -210,7 +210,7 @@ impl OneShotPort for NativePort {
         let cancellation=self.launch.cancellation.sample();self.receipt.cancellation_authorize=Some(cancellation);
         check(cancellation.state()==super::super::super::entry::CancellationState::Clear,"caller cancellation observed before arming")?;
         self.scope.revalidate()?;
-        self.scope.authorize_original(exec.invocation())?;
+        self.scope.authorize_original(exec.invocation(),identity.uid)?;
         self.host_policy.check()?;
         check(self.launch.cancellation.peer()==self.launch.caller,"caller cancellation capability differs from authenticated launch")?;
         check(self.launch.caller.uid==identity.uid && self.launch.caller.gid==identity.gid
@@ -243,6 +243,7 @@ impl OneShotPort for NativePort {
         check(child.directory.as_raw_fd()==domain.controls.directory.as_raw_fd()
             && child.identity.uid==self.uid && child.identity.gid==self.gid && child.identity.groups==self.groups
             && child.exec.arguments()==self.arguments,"placement differs from original authorized plan")?;
+        self.scope.require_delegation(self.launch.caller.uid)?;
         let now=boottime_ns()?;
         let until=now.checked_add(1_000_000_000).ok_or("payload readiness cutoff overflow")?
             .min(self.watch.as_ref().ok_or("missing retained original watch")?.deadline_ns);
@@ -286,6 +287,7 @@ impl OneShotPort for NativePort {
         self.receipt.spawn.zip(self.receipt.expected_mask).map(|(raw,expected)|ParentMaskObservation::from_spawn(raw,expected))
     }
     fn commit_permit(&mut self,domain:&ArmedDomain,child:&DirectChild,permit:&OwnedFd)->Probe<()> {
+        if let Err(error)=self.scope.require_delegation(self.launch.caller.uid){self.cancel(domain);return Err(error);}
         let spec=self.spec(domain,-1,-1,-1)?;
         let mut release=Release::default();
         unsafe{ptg_payload_commit(&spec,child.pidfd.as_raw_fd(),permit.as_raw_fd(),&mut release)};

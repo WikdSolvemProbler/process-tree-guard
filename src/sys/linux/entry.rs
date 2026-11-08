@@ -288,6 +288,7 @@ pub(crate) fn root_service_main()->!{
  if let Err(error)=supervisor::validate_received_identity(&first){refuse_activation(activation.as_raw_fd(),&error,&bootstrap,cleanup.as_deref())}
  let cleanup=match cleanup{Some(owner)=>owner,None=>refuse_activation(activation.as_raw_fd(),"missing cleanup self timer",&bootstrap,None)};
  let mut scope=match supervisor::native_activation::capture_service_scope(){Ok(scope)=>scope,Err(error)=>refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))};
+ if let Err(error)=scope.bind_delegation(first.peer.uid,first.invocation.metadata()){refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}
  scope=match scope.bind_original(&first.invocation,Rc::clone(&cleanup)){Ok(scope)=>scope,Err((held,error))=>{let _retained=held;refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}};
  let (unit,group,invocation,service_pidfd,events)=match scope.completion_capabilities(){Ok(info)=>info,Err(error)=>refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))};
  let listener=match PrivateListener::create(unit.to_str().unwrap_or("")){Ok(value)=>value,Err(failure)=>{let retained=failure.owner;let _attempted_path=failure.path;let primary=match retained.as_ref(){Some(owner)=>owner.cleanup_error(&failure.error),None=>failure.error};let _quarantine=retained;refuse_activation(activation.as_raw_fd(),&primary,&bootstrap,Some(&cleanup))}};

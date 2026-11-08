@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Peter Shiller
-//! Private PTGEX5: original invocation owners/time plus native argv/environment.
+//! Private PTGEX6: original invocation owners/time plus native argv/environment.
 use crate::deadline;
 use super::{OwnerMode,invocation::{Metadata,ProcessIdentity,MAX_WATCHERS}};
 use std::ffi::{c_char,CStr,CString};
 use std::ptr;
 use std::time::Duration;
-const MAGIC:&[u8;6]=b"PTGEX5";
+const MAGIC:&[u8;6]=b"PTGEX6";
 const HEADER_SIZE:usize=40;
 const IDENTITY_BYTES:usize=16;
 pub const MAX_PACKET_BYTES:usize=128*1024;
@@ -15,7 +15,7 @@ const MAX_ARGS:usize=4096;
 const MAX_ENV:usize=4096;
 #[derive(Debug,PartialEq,Eq)]
 pub enum Refusal {PacketSize,Header,Version,Timeout,ArgumentCount,ArgumentLength,EmptyProgram,ArgumentNul,
-    EnvironmentCount,EnvironmentEntry,NativeBytes,OwnerMetadata,Umask,TrailingBytes}
+    EnvironmentCount,EnvironmentEntry,NativeBytes,OwnerMetadata,Umask,Context,TrailingBytes}
 #[derive(Debug)]
 pub struct ExecPlan {duration:Duration,arguments:Vec<CString>,pointers:Vec<*const c_char>,environment:Vec<CString>,invocation:Metadata}
 impl ExecPlan {
@@ -49,11 +49,12 @@ fn sizes(owners:usize,arguments:&[&[u8]],environment:&[&[u8]])->Result<usize,Ref
 }
 pub(super) fn encode(metadata:&Metadata,arguments:&[&[u8]],environment:&[&[u8]])->Result<Vec<u8>,Refusal>{
     duration(metadata.seconds)?;
+    if !metadata.separate_service{return Err(Refusal::Context);}
     if metadata.umask>0o777{return Err(Refusal::Umask);}
     metadata.validate().map_err(|_|Refusal::OwnerMetadata)?;
     let size=sizes(metadata.identities.len(),arguments,environment)?;
     let mut packet=Vec::with_capacity(size);
-    packet.extend_from_slice(MAGIC);packet.push(match metadata.mode{OwnerMode::Manual=>0,OwnerMode::Auto=>1});packet.push(0);
+    packet.extend_from_slice(MAGIC);packet.push(match metadata.mode{OwnerMode::Manual=>0,OwnerMode::Auto=>1});packet.push(1);
     packet.extend_from_slice(&metadata.seconds.to_le_bytes());
     packet.extend_from_slice(&metadata.captured_ns.to_le_bytes());packet.extend_from_slice(&metadata.deadline_ns.to_le_bytes());
     packet.extend_from_slice(&(metadata.identities.len() as u16).to_le_bytes());
@@ -73,7 +74,8 @@ pub fn decode(packet:&[u8])->Result<ExecPlan,Refusal>{
     let (header,mut rest)=packet.split_first_chunk::<HEADER_SIZE>().ok_or(Refusal::Header)?;
     if &header[..6]!=MAGIC{return Err(Refusal::Version);}
     let mode=match header[6]{0=>OwnerMode::Manual,1=>OwnerMode::Auto,_=>return Err(Refusal::OwnerMetadata)};
-    if header[7]!=0{return Err(Refusal::Header);}
+    if header[7]!=1{return Err(Refusal::Context);}
+    let separate_service=true;
     let umask=u16::from_le_bytes(header[38..40].try_into().map_err(|_|Refusal::Header)?);if umask>0o777{return Err(Refusal::Umask);}
     let seconds=f64::from_le_bytes(header[8..16].try_into().map_err(|_|Refusal::Header)?);let duration=duration(seconds)?;
     let captured_ns=u64::from_le_bytes(header[16..24].try_into().map_err(|_|Refusal::Header)?);
@@ -89,7 +91,7 @@ pub fn decode(packet:&[u8])->Result<ExecPlan,Refusal>{
         identities.push(ProcessIdentity{pid:u32::from_le_bytes(record[..4].try_into().map_err(|_|Refusal::OwnerMetadata)?),
             ppid:u32::from_le_bytes(record[4..8].try_into().map_err(|_|Refusal::OwnerMetadata)?),start_ticks:u64::from_le_bytes(record[8..16].try_into().map_err(|_|Refusal::OwnerMetadata)?)});
     }
-    let invocation=Metadata{mode,umask,seconds,captured_ns,deadline_ns,identities};invocation.validate().map_err(|_|Refusal::OwnerMetadata)?;
+    let invocation=Metadata{mode,separate_service,umask,seconds,captured_ns,deadline_ns,identities};invocation.validate().map_err(|_|Refusal::OwnerMetadata)?;
     if argc.checked_add(envc).is_none_or(|n|n>rest.len()/4){return Err(Refusal::ArgumentLength);}
     let mut arguments=Vec::with_capacity(argc);let mut environment=Vec::with_capacity(envc);
     for index in 0..argc{let value=take_string(&mut rest)?;if index==0&&value.is_empty(){return Err(Refusal::EmptyProgram);}arguments.push(CString::new(value).map_err(|_|Refusal::ArgumentNul)?);}
@@ -108,7 +110,7 @@ mod tests {
     fn metadata(seconds:f64)->Metadata{
         let captured_ns:u64=1_000_000_000;
         let deadline_ns=super::super::invocation::requested_ns(seconds).ok().and_then(|n|captured_ns.checked_add(n)).unwrap_or(0);
-        Metadata{mode:OwnerMode::Manual,umask:0o027,seconds,captured_ns,deadline_ns,identities:vec![
+        Metadata{mode:OwnerMode::Manual,separate_service:true,umask:0o027,seconds,captured_ns,deadline_ns,identities:vec![
             ProcessIdentity{pid:100,ppid:101,start_ticks:20},ProcessIdentity{pid:101,ppid:1,start_ticks:10}]}
     }
     fn encode(seconds:f64,args:&[&[u8]],env:&[&[u8]])->Result<Vec<u8>,Refusal>{super::encode(&metadata(seconds),args,env)}
@@ -122,6 +124,7 @@ mod tests {
         assert_eq!(plan.duration(), Duration::from_millis(2250));
         assert_eq!(plan.invocation().seconds.to_bits(),2.25f64.to_bits());
         assert_eq!(plan.invocation().umask,0o027);
+        assert!(plan.invocation().separate_service);
         assert_eq!(plan.invocation().deadline_ns-plan.invocation().captured_ns,2_250_000_000);
         assert_eq!(plan.program().to_bytes(), arguments[0]);
         assert_eq!(plan.arguments().iter().map(|v| v.to_bytes()).collect::<Vec<_>>(), arguments);
@@ -148,7 +151,9 @@ mod tests {
         for len in 0..packet.len() {assert!(decode(&packet[..len]).is_err(),"accepted truncation at {len}");}
         let mut changed=packet.clone();changed[5]=b'2';
         assert_eq!(decode(&changed).unwrap_err(),Refusal::Version);
-        let mut old=packet.clone();old[5]=b'4';assert_eq!(decode(&old).unwrap_err(),Refusal::Version);
+        for version in [b'4',b'5']{let mut old=packet.clone();old[5]=version;assert_eq!(decode(&old).unwrap_err(),Refusal::Version);}
+        let mut unacknowledged=metadata(1.0);unacknowledged.separate_service=false;assert_eq!(super::encode(&unacknowledged,&[b"one"],&[]),Err(Refusal::Context));
+        for ack in [0,2,255]{let mut changed=packet.clone();changed[7]=ack;assert_eq!(decode(&changed).unwrap_err(),Refusal::Context);}
         for mask in [0u16,0o022,0o027,0o077,0o777]{let mut metadata=metadata(1.0);metadata.umask=mask;let frame=super::encode(&metadata,&[b"one"],&[]).unwrap();assert_eq!(decode(&frame).unwrap().invocation().umask,mask);}
         let mut changed=packet.clone();changed[34..36].copy_from_slice(&1u16.to_le_bytes());
         assert_eq!(decode(&changed).unwrap_err(),Refusal::TrailingBytes);
@@ -166,7 +171,7 @@ mod tests {
         assert_eq!(decode(&bad_owner).unwrap_err(),Refusal::OwnerMetadata);
         let mut bad_time=packet.clone();bad_time[24..32].copy_from_slice(&0u64.to_le_bytes());
         assert_eq!(decode(&bad_time).unwrap_err(),Refusal::OwnerMetadata);
-        for (offset,value) in [(6,2),(7,1)] {let mut bad=packet.clone();bad[offset]=value;assert!(decode(&bad).is_err());}
+        for (offset,value) in [(6,2),(7,2)] {let mut bad=packet.clone();bad[offset]=value;assert!(decode(&bad).is_err());}
         let mut duplicate=packet.clone();duplicate[HEADER_SIZE+IDENTITY_BYTES..HEADER_SIZE+IDENTITY_BYTES+4].copy_from_slice(&100u32.to_le_bytes());
         assert_eq!(decode(&duplicate).unwrap_err(),Refusal::OwnerMetadata);
         let mut broken_chain=packet.clone();broken_chain[HEADER_SIZE+4..HEADER_SIZE+8].copy_from_slice(&999u32.to_le_bytes());

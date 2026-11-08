@@ -150,14 +150,21 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
  match result{Ok(code)=>outcome.code=code,Err(primary)=>{outcome.code=125;outcome.error=Some(primary);if outcome.presentation_attempted{cancel_and_join(&mut outcome);}}}
  outcome
 }
-/// Library host policy is read-only. Capture precedes every activation attempt.
-pub(crate) fn run_library(command:&[OsString],seconds:f64,mode:OwnerMode)->ClientOutcome{
- match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original,command,false),Err(error)=>{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.error=Some(format!("original invocation: {error:?}"));result}}
+/// Transparent caller confinement/resource inheritance is not implemented.
+/// Refuse before capture, settings, connection or activation.
+pub(crate) fn run_library(_command:&[OsString],_seconds:f64,_mode:OwnerMode)->ClientOutcome{
+ let mut result=ClientOutcome::empty();result.error=Some("transparent Linux execution context is not implemented; explicit separate-service acknowledgment and an administrator UID grant are required".into());result
+}
+/// Explicit separate-service capability. Host policy remains read-only; capture
+/// precedes activation. Acknowledgment is disclosure, never an administrator grant.
+pub(crate) fn run_library_delegated(command:&[OsString],seconds:f64,mode:OwnerMode,acknowledgment:SeparateService)->ClientOutcome{
+ match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(acknowledgment),command,false),Err(error)=>{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.error=Some(format!("original invocation: {error:?}"));result}}
 }
 /// Dedicated standalone CLI only: its own NNP may be set; no host is changed.
 pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
- let mut mode=OwnerMode::Manual;let mut index=0;let mut seconds=None;
- if arguments.first().is_some_and(|v|v=="auto"){mode=OwnerMode::Auto;index=1;}
+ if !arguments.first().is_some_and(|value|value=="--separate-service-context"){let mut result=ClientOutcome::empty();result.error=Some("explicit --separate-service-context acknowledgment is required; transparent Linux execution remains unavailable".into());return result;}
+ let mut mode=OwnerMode::Manual;let mut index=1;let mut seconds=None;
+ if arguments.get(index).is_some_and(|v|v=="auto"){mode=OwnerMode::Auto;index+=1;}
  if arguments.get(index).is_some_and(|v|v=="--timeout"){
   seconds=arguments.get(index+1).and_then(|v|v.to_str()).and_then(|v|v.parse::<f64>().ok());index+=2;
  }else if mode==OwnerMode::Auto{
@@ -167,8 +174,8 @@ pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
 
  }
  if arguments.get(index).is_some_and(|v|v=="--"){index+=1;}
- let Some(seconds)=seconds else{let mut result=ClientOutcome::empty();result.error=Some("usage: --timeout SECONDS -- PROGRAM ARGS, or auto [--timeout SECONDS] -- PROGRAM ARGS".into());return result;};
- match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original,&arguments[index..],true),Err(error)=>{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.error=Some(format!("original invocation: {error:?}"));result}}
+ let Some(seconds)=seconds else{let mut result=ClientOutcome::empty();result.error=Some("usage: --separate-service-context [auto] --timeout SECONDS -- PROGRAM ARGS".into());return result;};
+ match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(SeparateService::Acknowledged),&arguments[index..],true),Err(error)=>{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.error=Some(format!("original invocation: {error:?}"));result}}
 }
 
 /// Dedicated CLI only; retained owners are kept live until actual kernel exit.

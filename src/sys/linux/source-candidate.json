@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "status": "ORDINARY SOURCE QUALIFIED: tested d6 build11PASS/tests10PASS; metadata-only successor, no privileged activation or public enablement",
+  "status": "ORDINARY SOURCE QUALIFIED: tested78 passed11 compile/link steps and12 ordinary tests; no real policy-file enforcement or privileged lifecycle qualification",
   "root": "src/sys/linux",
-  "baseline_commit": "d81331e2332362531e2c9c3cf1f2cc4cab3e0b2c",
-  "baseline_candidate_sha256": "e7a3244c623af8d50d00dec502eab4f27cabebf461923cea7ebfb1eb72adfb64",
-  "history": "target/codex-security/linux-product-integration-history-001/d813-before-caller-cancel-023",
+  "baseline_commit": "e72c517fbfb352cd5f9c8c43814784152a70aaa2",
+  "baseline_candidate_sha256": "b79adcfee2c40ac5f8fcf7d7cd7d2ab8526d960c5740075fb95ba09ef1872650",
+  "history": "target/codex-security/linux-product-integration-history-001/b79-before-delegation-035",
   "entry_signature": "unsafe fn(VerifiedServiceScope,OwnedFd,AuthenticatedCancellation,Policy)->RunOutcome; opaque AuthenticatedCancellation constructor only actual accepted finalprivate entry; realroot/clientmains unchanged",
   "original_client": "OriginalInvocation::capture(OwnerMode::{Manual,Auto},seconds:f64) before manager/helpers; private fields/no raw verified constructor",
-  "wire": "PTGEX5:40B header, immutable callerthreadumask LE16@38; originalowner/time/IO/CWD/env capabilities unchanged; oldPTGEX4refused",
+  "wire": "PTGEX6 header40 byte7==1 required, mask38 unchanged; bool retained in full immutable Metadata equality across first/final request",
   "deadline": "captured BOOTTIME + exact requested fractional duration preserved; receiver-owned absolute private timer; raw authenticated client time is a claim not privileged attestation",
   "native_abi": {
     "owner_watch_bytes": 16,
@@ -37,23 +37,23 @@
     "payload_umask_max": 511
   },
   "tests": {
-    "existing_names": 8,
-    "bodies": "ADAPTEDinplace forPTGEX5; prior numeric/owner/time/IO/codec assertions preserved; readonlythreadumaskcapture andnativeinvalidmaskrefusal added",
+    "existing_names": 10,
+    "bodies": "ADAPTED in place only for explicit PTGEX6 acknowledgment; all prior numeric/mask/owner/time/IO/framing/gate/watchdog assertions retained",
     "added_names": [
-      "native_gate_first_cancellation_cause_is_irreversible",
-      "watchdog_fault125_is_not_hidden_by_later_cancellation"
+      "delegation_policy_is_exact_bounded_and_deny_default",
+      "separate_context_ack_precedes_client_capture_and_activation"
     ],
-    "total": 10,
+    "total": 12,
     "new_framework": false,
-    "status": "PASSED same10 existing ordinary tests on d6:10PASS/0FAIL/0ignored; previous d0 actual9PASS/1FAIL retained",
-    "effects": "prior ordinaryIPC/proc/pidfd/3privatefiles +readonlyownthreadprocfs/gettid/statx/fstatfs/readlink +3nativeanonymousgate mappings; purefault/classificationmatrix; NOchild/signal/NNP/setting/cgroup"
+    "status": "PASSED tested78 ordinary12/12; actual /etc grant enforcement and privileged lifecycle not executed",
+    "effects": "prior own proc/pidfd/IPC/3private files and3 parent-only gate mappings; added strict policy grammar/deny-default decision and early client refusal are pure. No /etc policy opens, activation, NNP/settings, child/exec/signal/cgroup/root/native payload effects in added tests"
   },
   "origin_mint": "IMPLEMENTED in checked positive source path: protected installed sources/executable + kernel proc/nsfs origin + authenticated PID1 effective unit facts; runtime qualification PENDING",
   "unqualified": [
-    "privileged root/client entry and payload/watchdog/terminal lifecycle, cancellation/natural-stop/child-umask/cleanup qualification",
-    "administrative delegation policy and transparent caller confinement/resource-context inheritance",
-    "actual native timer124 cause and supported Linux5.14 kernel floor",
-    "Cargo/public selector wiring, enablement and comparative performance"
+    "actual protected /etc delegation enforcement and privileged root/client/payload/watchdog/terminal lifecycle qualification",
+    "full transparent caller confinement/resource-context preservation",
+    "native timer124 cause and supported Linux5.14 floor",
+    "Cargo/public selector wiring/enablement and performance"
   ],
   "selector_sha256": "55d0d8d6caa5d224b554cd6ace3b103142196ba3ef5bfa5cec0fc330d6c58d8a",
   "external": [
@@ -93,8 +93,13 @@
     },
     {
       "path": "client.rs",
-      "bytes": 17983,
-      "sha256": "8519db7b4bd8cc3ef696144f512a9c7b00a30b92f9bf4d787bb7179937e0f63d"
+      "bytes": 18929,
+      "sha256": "5b919ca632dd18f94b92b18d122e62665c8c7a645de7a984822620048441677a"
+    },
+    {
+      "path": "delegation.rs",
+      "bytes": 1710,
+      "sha256": "e8d3e5845c691d05ab7da7b6190f0b37539efb0fd7c3c5bcff375338666c9157"
     },
     {
       "path": "deployment/process-tree-guard.socket",
@@ -108,8 +113,8 @@
     },
     {
       "path": "deployment/README.md",
-      "bytes": 5029,
-      "sha256": "21dc7b5b230462580f0cc7208c20db65cd72ec0615d65c7c81a607d1bd244906"
+      "bytes": 6542,
+      "sha256": "9b88b15aa58628d03e5dd9d093ea55242cd268bc40b80f24b7b3c92816687aa0"
     },
     {
       "path": "entry_timer.c",
@@ -123,13 +128,13 @@
     },
     {
       "path": "entry.rs",
-      "bytes": 35149,
-      "sha256": "06f3516d801c658782b3ccdc829947482094dbae55c8281700a51941fcf1440d"
+      "bytes": 35310,
+      "sha256": "3c48c9944228110793de8acd2fcceb681051acc1afba9a905375fe0d9e160001"
     },
     {
       "path": "invocation.rs",
-      "bytes": 10153,
-      "sha256": "1763c3ac8143cbf36f4645c9814509c6f6fd9119b53fd42b31dcf23e6aa96919"
+      "bytes": 10347,
+      "sha256": "931a73e2e4de7c88f09d8e77d0f1cef4f0ad427a707edada9a80c82411e127e5"
     },
     {
       "path": "kernel_signal_abi.c",
@@ -143,8 +148,8 @@
     },
     {
       "path": "mod.rs",
-      "bytes": 31614,
-      "sha256": "3f83ebd19e9c8218bdd9e3588815bf9d4c53daa480f50aaeb769cd2bb0a14d44"
+      "bytes": 34938,
+      "sha256": "a3601999f6ec87c428ff4b0f334785d7504576af2cb9238f99665dc7542f651d"
     },
     {
       "path": "native_activation.rs",
@@ -168,8 +173,8 @@
     },
     {
       "path": "native_port.rs",
-      "bytes": 27271,
-      "sha256": "af121920fc4dfb69e4d14572e199bc1e1ba8d15c179f962d94d4f48fed6c8e97"
+      "bytes": 27468,
+      "sha256": "7358c425f9f2f3aed6baec44c2242d213e16df7b8f3cb51399da4cfb447e96cc"
     },
     {
       "path": "owner_poll.h",
@@ -193,18 +198,18 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 32520,
-      "sha256": "20d1639c029c23fa1e8e883cd7ff0baf1b1208a7f4a8912a143bd8cf4f3c6770"
+      "bytes": 40319,
+      "sha256": "0c191e9dc7cbbbcc75f4e285590ab15de9748b22348a110e07037daa92973414"
     },
     {
       "path": "README.md",
-      "bytes": 42698,
-      "sha256": "652456ef5be8b760467a23af4ca7d59eb20d2d800baeb31c586042aeb734aa9b"
+      "bytes": 42615,
+      "sha256": "444d4bde91ec4a701c89186cd86504cbc0dbe0a5f41ce1d49bc0ab39a8a80e34"
     },
     {
       "path": "request.rs",
-      "bytes": 16813,
-      "sha256": "a4ae0556ddfcf55140d73958bfafc3b1a57e050d0855f01435e8bb60bd67b40c"
+      "bytes": 17340,
+      "sha256": "922ad9fd0d6777f2274e48f4a809885f7be7ac6def78c5922f895b6c56ba70c8"
     },
     {
       "path": "root_main.rs",
@@ -213,8 +218,8 @@
     },
     {
       "path": "service_scope.rs",
-      "bytes": 41259,
-      "sha256": "3b7a7cf37cc7f97ddda08da2af8a7231ab931ce4554554534d74bf44ff3be018"
+      "bytes": 46077,
+      "sha256": "cf654684dd84f273ae359c4c1da6292980301c876f9549ba613410496dfeace5"
     },
     {
       "path": "settlement.rs",
@@ -224,7 +229,7 @@
     {
       "path": "supervisor.rs",
       "bytes": 13648,
-      "sha256": "280d4dc3bd0088168971a843f3041e7c60b166b1501f38edc414001184776212"
+      "sha256": "1b647643972369aea7ab9f00293dffd5998f4a8ce6bb6f6688e3c80977cc4bc6"
     },
     {
       "path": "terminal_bridge.c",
@@ -266,7 +271,7 @@
   ],
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
-  "implementation_build_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
+  "implementation_build_candidate_sha256": "78c81cf7ce646ada8137a259a35f37d913eab014f7bed5586a6f578f22133784",
   "publication_change": "New source-only checked entry; earlier qualified timer/ordinary tests retain exact historical scope. No public raw archive is produced; privacy review required.",
   "entry_timer_component": {
     "source_qualified": true,
@@ -279,7 +284,7 @@
   },
   "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
   "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities.",
-  "entry_compile_status": "Tested d6 all11 ordinary compile/link steps passed; all10 ordinary tests passed; whole entry/native lifecycle not executed",
+  "entry_compile_status": "Tested78 all11 ordinary compile/link steps and12 ordinary tests passed; protected policy-file enforcement and privileged/native lifecycle remain unexecuted",
   "source_only": false,
   "retirement": "typed original live/populated cgroup2 capabilities; terminal original pidfd; raw original events ENODEV + exact held-parent basename ENOENT; all replacement/other errors125; manager empty group accepted only typedRetired+same invocation/status",
   "reviewed_predecessor_sha256": "d55e32d40fa1b9f1588c758aaddbf1c09cb681014969f9b5ae76f1a473318517",
@@ -295,7 +300,8 @@
   "compile_export_repair": "Actual root/client main compile007 diagnosed unused pub imports; preserve concrete opaque type aliases and a same-contract consuming function wrapper instead of unused reexports; no lint suppression or API removal",
   "predecessor_implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
   "entry_source_validation": {
-    "implementation_build_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
+    "implementation_build_candidate_sha256": "78c81cf7ce646ada8137a259a35f37d913eab014f7bed5586a6f578f22133784",
+    "baseline_commit": "e72c517fbfb352cd5f9c8c43814784152a70aaa2",
     "platform": "Linux 6.8 aarch64 ordinary user",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
@@ -303,47 +309,39 @@
     "fresh_native_objects": 6,
     "native_archive_reused": false,
     "actual_root_and_client_executables_linked": true,
-    "build_receipt_sha256": "2252d72a9551ff460a4637df3743abe14f1535c54ffd82d8075a054ba551de17",
-    "tests": 10,
-    "passed": 10,
+    "build_receipt_sha256": "46e8d704230965cb7828318e6620064e7fdeaea904f13bb918eec9ccc89d1724",
+    "tests": 12,
+    "passed": 12,
     "failed": 0,
     "ignored": 0,
     "timed_out": false,
-    "unit_receipt_sha256": "c2c6ded6e857a5e38a5f10ee7ae67f3339912e4c83f6658c882eb936c381c5bb",
-    "harness_sha256": "52d42f5a131225eeade643cc566eba0ec794ef288aa30a7737fd9c4b5f76698e",
-    "harness_bytes": 9630568,
-    "build_artifact_files": 81,
-    "unit_artifact_files": 8,
-    "test_scope": "Existing eight adapted parser/numeric/IPC tests plus two focused regressions: three parent-only native gate mappings and pure watchdog125 fault classification. IPC reads genuine caller-thread umask and ordinary owner/proc/pidfd/socket capabilities.",
-    "test_bodies_changed_from_tested_candidate": false,
-    "author_processes_launched": 0,
-    "privileged_entry_executed": false,
-    "root_client_entry_lifecycle_executed": false,
-    "payload_executed": false,
-    "child_umask_executed": false,
-    "watchdog_controller_executed": false,
-    "terminal_controller_executed": false,
-    "public_backend_enabled": false,
-    "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
-    "limits": "Compile/link and ten ordinary tests only. No privileged activation, payload/child-umask/watchdog/terminal lifecycle, complete cancellation/cleanup, native timer124 cause, supported-kernel-floor, transparent confinement/resource-context inheritance, public wiring or performance qualification.",
-    "native_ipc_refusals": 15,
+    "unit_receipt_sha256": "2f57ede48d1eb5f93160a19def9cdda824211c3762e5f43aa90d9e380f3a08e0",
+    "harness_sha256": "6a64720163072967f1a8f995b3dda7949b9e08a71d3a7636ff42de835b9556f7",
+    "harness_bytes": 9664064,
+    "native_ipc_refusals": 17,
     "native_ipc_refusals_descriptors_settled": true,
-    "manual_watchers": 2,
-    "auto_watchers": 7,
-    "absolute_interval_seconds": 60.25,
-    "absolute_interval_unchanged": true,
+    "wire": "PTGEX6",
     "native_gate_mappings_created": 3,
     "native_gate_mappings_destroyed": 3,
-    "artifact_files_preserved_and_verified": 89,
+    "build_artifact_files": 82,
+    "unit_artifact_files": 8,
+    "artifact_files_preserved_and_verified": 90,
     "owned_scratch_roots_removed": 2,
     "original_scopes_absent": true,
-    "cleanup_receipt_sha256": "360a7f9e17db459a65ce1498fd67be839791d771869e6c6b172fb79e640e3560",
-    "local_preservation_receipt_sha256": "b9da490ebd430b93aef8f7d82bdf95d444f1a009bf8365a4070502dbf98c1e16"
+    "cleanup_receipt_sha256": "bb5cd68dd0b8f1f4725a600ca38a06750fbcd68655d169b30d13a5e870f198e7",
+    "test_scope": "Pure policy grammar/default-refusal checks and prior ordinary parser/numeric/IPC/gate/classifier checks. No actual /etc policy file opened and no privileged grant enforcement.",
+    "real_policy_file_enforcement_executed": false,
+    "privileged_entry_executed": false,
+    "root_client_entry_lifecycle_executed": false,
+    "payload_child_umask_watchdog_terminal_lifecycle_executed": false,
+    "public_backend_enabled": false,
+    "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
+    "limits": "Ordinary source compilation/link and12 tests only. Administrative default-deny hardening does not preserve the caller seccomp/LSM/Landlock/rlimit/cgroup-ancestry context; that full requirement remains OPEN. Privileged enforcement/lifecycle, native timer124, supported kernel floor, public wiring and performance remain unqualified."
   },
   "cancellation_design_sha256": "81748885f8249642c4083ad9f5c7740d9d36c94c19cb5cf422b6f9deb0e59434",
   "cancellation_source_status": "Compiled in d6; native gate first-cause and pure watchdog-fault regression passed; whole cancellation lifecycle unexecuted",
-  "preceding_frozen_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
-  "preserved_preceding": "target/codex-security/linux-product-integration-history-001/proc-caller-ownership-fix-033/source",
+  "preceding_frozen_candidate_sha256": "78c81cf7ce646ada8137a259a35f37d913eab014f7bed5586a6f578f22133784",
+  "preserved_preceding": "target/codex-security/linux-product-integration-history-001/delegation-source-036/source",
   "natural_stop_design_sha256": "96286f342081b17eea627647534abaf0e3906d3478340ec0128048fb85bab626",
   "umask_claim": "genuinecallingthreadreadonlysnapshotbeforeactivation, validatedauthcaller-contextdata, notprivilegedTIDattestation; service077unchanged; childonlySYS_umask",
   "procfs_caller_directory_repair": {
@@ -463,5 +461,121 @@
     "per_call_cancel_join_implemented": false,
     "raw_receipts": "Local-only for publication privacy; public summary is not independently accessible raw runtime evidence.",
     "limits": "Actual source compile/link and existing ordinary parser/IPC tests only; no containment, public-entry, cleanup transition, proposed-kernel-floor, cancellation or performance qualification."
+  },
+  "administrative_delegation": {
+    "status": "SOURCE COMPILED; strict parser/default-refusal/IPC tests passed; actual protected /etc grant enforcement and privileged lifecycle remain unexecuted",
+    "design": "target/codex-security/linux-product-integration-history-001/delegated-context-policy-design-030/PROPOSAL.txt",
+    "policy_path": "/etc/process-tree-guard/delegation.policy",
+    "max_bytes": 4096,
+    "max_grants": 64,
+    "grammar": "PTG-DELEGATION-1\\ncontext separate-service\\n then zero to64 strictly increasing unique uid N\\n lines; canonical decimal1..4294967294 only; no comments/CR/wildcards/trailing text",
+    "deny_default": true,
+    "authority": "held protected UID0 non-group/other-writable nofollow /->etc->process-tree-guard->regular policy file, actual type/mount/name/inode identities plus exact bounded stable bytes",
+    "uid_binding": "actual kernel-authenticated first.peer.uid after original requester verification; no claimed request UID",
+    "custody": "DelegationGrant including failed/denied capture retained on CheckedEntryOrigin within shared TrustedUnitAnchor and every scope/port/leaf/refusal/terminal outcome",
+    "admission_order": "after first kernel identity validation and checked service scope; BEFORE bind_original RuntimeMax extension/private listener/provision",
+    "revalidation": [
+      "before RuntimeMax extension",
+      "before NativePort authorization",
+      "before exact unit leaf provision",
+      "before payload clone",
+      "immediately before payload permit; failure cancels and follows original cleanup"
+    ],
+    "snapshot_semantics": "exact admission snapshot revalidated at declared pre-creation/release boundaries; no atomic active-run immediate-revocation claim",
+    "acknowledgment": "run_library_delegated(command,seconds,mode,SeparateService::Acknowledged), or first CLI flag --separate-service-context; disclosure only, root policy grants authority",
+    "default_library": "run_library returns125 before capture/settings/connect/activation",
+    "wire": "PTGEX6 header40 byte7==1 required, mask38 unchanged; bool retained in full immutable Metadata equality across first/final request",
+    "confinement": "Separate service has its own authority/resource context. Transparent caller seccomp/LSM/Landlock/rlimit/cgroup-ancestry preservation remains OPEN; no default/public activation",
+    "new_test_names": [
+      "delegation_policy_is_exact_bounded_and_deny_default",
+      "separate_context_ack_precedes_client_capture_and_activation"
+    ],
+    "tests": "12/12 ordinary tests passed: prior10 adapted PTGEX6 checks plus2 pure grammar/early-refusal tests; actual IPC17 descriptor-settled refusals. No real /etc policy file, activation, privileged or payload lifecycle effects.",
+    "unchanged": "all C/H, socket/service templates, deadline/owner/containment/cleanup/console algorithms, Windows/default selector/Cargo/build",
+    "ordinary_validation": {
+      "implementation_build_candidate_sha256": "78c81cf7ce646ada8137a259a35f37d913eab014f7bed5586a6f578f22133784",
+      "baseline_commit": "e72c517fbfb352cd5f9c8c43814784152a70aaa2",
+      "platform": "Linux 6.8 aarch64 ordinary user",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "fresh_native_objects": 6,
+      "native_archive_reused": false,
+      "actual_root_and_client_executables_linked": true,
+      "build_receipt_sha256": "46e8d704230965cb7828318e6620064e7fdeaea904f13bb918eec9ccc89d1724",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "timed_out": false,
+      "unit_receipt_sha256": "2f57ede48d1eb5f93160a19def9cdda824211c3762e5f43aa90d9e380f3a08e0",
+      "harness_sha256": "6a64720163072967f1a8f995b3dda7949b9e08a71d3a7636ff42de835b9556f7",
+      "harness_bytes": 9664064,
+      "native_ipc_refusals": 17,
+      "native_ipc_refusals_descriptors_settled": true,
+      "wire": "PTGEX6",
+      "native_gate_mappings_created": 3,
+      "native_gate_mappings_destroyed": 3,
+      "build_artifact_files": 82,
+      "unit_artifact_files": 8,
+      "artifact_files_preserved_and_verified": 90,
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true,
+      "cleanup_receipt_sha256": "bb5cd68dd0b8f1f4725a600ca38a06750fbcd68655d169b30d13a5e870f198e7",
+      "test_scope": "Pure policy grammar/default-refusal checks and prior ordinary parser/numeric/IPC/gate/classifier checks. No actual /etc policy file opened and no privileged grant enforcement.",
+      "real_policy_file_enforcement_executed": false,
+      "privileged_entry_executed": false,
+      "root_client_entry_lifecycle_executed": false,
+      "payload_child_umask_watchdog_terminal_lifecycle_executed": false,
+      "public_backend_enabled": false,
+      "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
+      "limits": "Ordinary source compilation/link and12 tests only. Administrative default-deny hardening does not preserve the caller seccomp/LSM/Landlock/rlimit/cgroup-ancestry context; that full requirement remains OPEN. Privileged enforcement/lifecycle, native timer124, supported kernel floor, public wiring and performance remain unqualified."
+    }
+  },
+  "delegation_predecessor_validation": {
+    "implementation_build_candidate_sha256": "d6c52becc2e8add08d34a99923e6228ded94c7613fa433749cb68433ef6261cf",
+    "platform": "Linux 6.8 aarch64 ordinary user",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "compile_link_failed": 0,
+    "fresh_native_objects": 6,
+    "native_archive_reused": false,
+    "actual_root_and_client_executables_linked": true,
+    "build_receipt_sha256": "2252d72a9551ff460a4637df3743abe14f1535c54ffd82d8075a054ba551de17",
+    "tests": 10,
+    "passed": 10,
+    "failed": 0,
+    "ignored": 0,
+    "timed_out": false,
+    "unit_receipt_sha256": "c2c6ded6e857a5e38a5f10ee7ae67f3339912e4c83f6658c882eb936c381c5bb",
+    "harness_sha256": "52d42f5a131225eeade643cc566eba0ec794ef288aa30a7737fd9c4b5f76698e",
+    "harness_bytes": 9630568,
+    "build_artifact_files": 81,
+    "unit_artifact_files": 8,
+    "test_scope": "Existing eight adapted parser/numeric/IPC tests plus two focused regressions: three parent-only native gate mappings and pure watchdog125 fault classification. IPC reads genuine caller-thread umask and ordinary owner/proc/pidfd/socket capabilities.",
+    "test_bodies_changed_from_tested_candidate": false,
+    "author_processes_launched": 0,
+    "privileged_entry_executed": false,
+    "root_client_entry_lifecycle_executed": false,
+    "payload_executed": false,
+    "child_umask_executed": false,
+    "watchdog_controller_executed": false,
+    "terminal_controller_executed": false,
+    "public_backend_enabled": false,
+    "raw_receipts": "Local only under publication privacy policy; no raw archive published.",
+    "limits": "Compile/link and ten ordinary tests only. No privileged activation, payload/child-umask/watchdog/terminal lifecycle, complete cancellation/cleanup, native timer124 cause, supported-kernel-floor, transparent confinement/resource-context inheritance, public wiring or performance qualification.",
+    "native_ipc_refusals": 15,
+    "native_ipc_refusals_descriptors_settled": true,
+    "manual_watchers": 2,
+    "auto_watchers": 7,
+    "absolute_interval_seconds": 60.25,
+    "absolute_interval_unchanged": true,
+    "native_gate_mappings_created": 3,
+    "native_gate_mappings_destroyed": 3,
+    "artifact_files_preserved_and_verified": 89,
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "cleanup_receipt_sha256": "360a7f9e17db459a65ce1498fd67be839791d771869e6c6b172fb79e640e3560",
+    "local_preservation_receipt_sha256": "b9da490ebd430b93aef8f7d82bdf95d444f1a009bf8365a4070502dbf98c1e16"
   }
 }

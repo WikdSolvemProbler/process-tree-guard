@@ -9,6 +9,9 @@
 
 #[path = "request.rs"]
 mod request;
+#[path="delegation.rs"]
+mod delegation;
+pub(crate) type SeparateService=delegation::SeparateService;
 #[path="invocation.rs"]
 mod invocation;
 pub(crate) use invocation::OriginalInvocation;
@@ -484,6 +487,8 @@ mod supervisor;
 pub(crate) type ClientOutcome=client::ClientOutcome;
 pub(crate) fn root_service_main()->!{entry::root_service_main()}
 pub(crate) fn run_library(command:&[std::ffi::OsString],seconds:f64,mode:OwnerMode)->ClientOutcome{client::run_library(command,seconds,mode)}
+/// Explicit administrative capability; does not promise caller sandbox inheritance.
+pub(crate) fn run_library_delegated(command:&[std::ffi::OsString],seconds:f64,mode:OwnerMode,acknowledgment:SeparateService)->ClientOutcome{client::run_library_delegated(command,seconds,mode,acknowledgment)}
 pub(crate) fn run_cli(arguments:Vec<std::ffi::OsString>)->ClientOutcome{client::run_cli(arguments)}
 // Concrete aliases/wrapper preserve the internal API in both actual binaries;
 // a type alias grants no construction authority and avoids unused reexports.
@@ -583,7 +588,7 @@ mod tests {
         let cwd=fs::OpenOptions::new().read(true).custom_flags(O_PATH|O_DIRECTORY).open(&root).unwrap();
         // Real pre-bootstrap capture, including original direct parent and
         // complete auto chain. No owner is signalled, cloned or executed.
-        let original=OriginalInvocation::capture(OwnerMode::Manual,60.25).unwrap();
+        let original=OriginalInvocation::capture(OwnerMode::Manual,60.25).unwrap().acknowledge_separate_service(SeparateService::Acknowledged);
         assert_eq!(original.metadata().identities.len(),2);
         assert_eq!(original.metadata().identities[0].pid,std::process::id());
         assert_eq!(original.metadata().identities[0].ppid,original.metadata().identities[1].pid);
@@ -616,7 +621,7 @@ mod tests {
         assert_eq!(count_fds(),before,"accepted original-owner/IO request leaked descriptors");
         assert_eq!(fs::read(root.join("output")).unwrap(),b"out");
         assert_eq!(fs::read(root.join("error")).unwrap(),b"err");
-        let auto=OriginalInvocation::capture(OwnerMode::Auto,60.25).unwrap();
+        let auto=OriginalInvocation::capture(OwnerMode::Auto,60.25).unwrap().acknowledge_separate_service(SeparateService::Acknowledged);
         assert_eq!(auto.metadata().identities.last().unwrap().pid,1);
         assert_eq!(auto.metadata().identities.last().unwrap().ppid,0);
         let mut auto_rights:Vec<_>=auto.pidfds().iter().map(AsRawFd::as_raw_fd).collect();auto_rights.extend_from_slice(&rights[owner_count..]);
@@ -661,6 +666,7 @@ mod tests {
         future.deadline_ns=future.captured_ns+60_250_000_000;
         let future=request::encode(&future,&[b"/never-executed"],&[]).unwrap();
         refusal("future_original_start",&future,&rights,Refusal::Invocation(invocation::InvocationError::InvalidTime));
+        for ack in [0,2]{let mut unacknowledged=frame.clone();unacknowledged[7]=ack;refusal("missing_or_invalid_context_ack",&unacknowledged,&rights,Refusal::InvalidRequest(request::Refusal::Context));}
         let mut invalid_umask=frame.clone();invalid_umask[38..40].copy_from_slice(&0o1000u16.to_le_bytes());
         refusal("invalid_caller_umask",&invalid_umask,&rights,Refusal::InvalidRequest(request::Refusal::Umask));
         let mut malformed=frame.clone();malformed[5]=b'2';
@@ -674,7 +680,28 @@ mod tests {
         assert_eq!(count_fds(),before_eof);drop(rx);
         drop((readonly,regular_path,original,input,output,error,cwd));
         assert_eq!(count_fds(),beginning,"native test left owned descriptors");
-        println!("native_wire=PTGEX5 manual_rights=6 max_rights=253 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
+        println!("native_wire=PTGEX6 manual_rights=6 max_rights=253 io_ofd=preserved cwd_identity=verified env_native_bytes=preserved fixture={} fixtures_retained=true",root.display());
+    }
+    #[test]
+    fn delegation_policy_is_exact_bounded_and_deny_default(){
+        let header=b"PTG-DELEGATION-1\ncontext separate-service\n";
+        let empty=delegation::parse(header).unwrap();assert!(!empty.permits(1));assert!(!empty.permits(501));
+        let policy=delegation::parse(b"PTG-DELEGATION-1\ncontext separate-service\nuid 1\nuid 501\nuid 4294967294\n").unwrap();
+        for uid in [1,501,4294967294]{assert!(policy.permits(uid));}for uid in [0,2,500,502,u32::MAX]{assert!(!policy.permits(uid));}
+        for suffix in ["uid 0\n","uid 01\n","uid +1\n","uid -1\n","uid 4294967295\n","uid 4294967296\n","uid 99999999999999999999\n","uid 1","uid 1\r\n","uid 1 \n","uid 1\n\n","uid 1\nuid 1\n","uid 2\nuid 1\n","uid *\n","# comment\n","unknown 1\n","uid \n","uid １\n"]{
+            let mut bytes=header.to_vec();bytes.extend_from_slice(suffix.as_bytes());assert!(delegation::parse(&bytes).is_err(),"accepted {suffix:?}");
+        }
+        for bytes in [&b""[..],&b"PTG-DELEGATION-1\ncontext inherited\n"[..],&b"PTG-DELEGATION-1\r\ncontext separate-service\n"[..],&b"PTG-DELEGATION-1\ncontext separate-service"[..]]{assert!(delegation::parse(bytes).is_err());}
+        let mut maximum=header.to_vec();for uid in 1..=64{maximum.extend_from_slice(format!("uid {uid}\n").as_bytes());}assert!(delegation::parse(&maximum).unwrap().permits(64));
+        maximum.extend_from_slice(b"uid 65\n");assert_eq!(delegation::parse(&maximum).unwrap_err(),delegation::Refusal::Count);
+        let mut oversized=header.to_vec();oversized.resize(4097,b'x');assert_eq!(delegation::parse(&oversized).unwrap_err(),delegation::Refusal::Size);
+    }
+    #[test]
+    fn separate_context_ack_precedes_client_capture_and_activation(){
+        let transparent=run_library(&[],f64::NAN,OwnerMode::Manual);assert_eq!(transparent.exit_code(),125);
+        assert!(transparent.error().unwrap().contains("transparent Linux execution context"));assert!(!transparent.complete());assert!(!transparent.may_have_active_service());assert_eq!(transparent.wire_evidence(),(&[][..],&[][..]));
+        let cli=run_cli(vec!["auto".into(),"--timeout".into(),"invalid".into()]);assert_eq!(cli.exit_code(),125);assert!(cli.error().unwrap().contains("--separate-service-context"));assert!(!cli.may_have_active_service());assert_eq!(cli.wire_evidence(),(&[][..],&[][..]));
+        let acknowledged=run_library_delegated(&[],0.0,OwnerMode::Manual,SeparateService::Acknowledged);assert_eq!(acknowledged.exit_code(),125);assert!(acknowledged.error().unwrap().contains("InvalidDuration"));assert!(!acknowledged.may_have_active_service());
     }
 }
 

@@ -265,7 +265,7 @@ pub(crate) unsafe fn run_received(
 /// # Safety
 /// Real entry must already establish the full public original owner set and
 /// pre-manager absolute lease as well as all dedicated supervisor invariants.
-/// OriginalInvocation capture and PTGEX4 import preserve that set/cutoff here;
+/// OriginalInvocation capture and PTGEX6 import preserve that set/cutoff here;
 /// actual public dispatch/manager bootstrap still must call them before helpers.
 pub(crate) unsafe fn run_in_service(
     scope:VerifiedServiceScope,

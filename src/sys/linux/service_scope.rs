@@ -10,19 +10,20 @@ use std::sync::Arc;
 
 // Only this module may construct either type. There is no public/unsafe raw-FD
 // constructor and no environment/request-path conversion into a trusted token.
-use super::super::super::super::{manager,entry,invocation};
+use super::super::super::super::{manager,entry,invocation,delegation};
 use std::rc::Rc;
 struct CheckedEntryOrigin {
     authority:manager::CheckedUnit,
     unit_components:Vec<CString>,
     original:Option<invocation::Metadata>,
     cleanup:Option<Rc<entry::ExitTimer>>,
+    delegation:Option<DelegationGrant>,
 }
 fn checked_entry_origin()->Probe<CheckedEntryOrigin>{
     let until=boottime_ns()?.checked_add(10_000_000_000).ok_or("entry check deadline overflow")?;
     let authority=manager::CheckedUnit::capture(until)?;
     let unit_components=authority.group().split('/').filter(|n|!n.is_empty()).map(|n|CString::new(n).map_err(|_|"manager cgroup NUL")).collect::<std::result::Result<Vec<_>,_>>()?;
-    Ok(CheckedEntryOrigin{authority,unit_components,original:None,cleanup:None})
+    Ok(CheckedEntryOrigin{authority,unit_components,original:None,cleanup:None,delegation:None})
 }
 
 struct BoundDirectory { name: CString, directory: OwnedFd, identity: Identity,
@@ -132,19 +133,34 @@ impl VerifiedServiceScope {
         let events=fd_from_call(unsafe{fcntl(self.anchor.unit_events.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;
         Ok((origin.authority.name().to_owned(),origin.authority.group().to_owned(),origin.authority.invocation(),pidfd,events))
     }
+    // Called only after actual kernel peer/packet/requester validation, before
+    // RuntimeMax extension, private listener creation or any payload provision.
+    pub(in super::super::super::super) fn bind_delegation(&mut self,uid:u32,metadata:&invocation::Metadata)->Probe<()>{
+        check(metadata.separate_service,"explicit separate-service acknowledgment missing")?;
+        let anchor=Arc::get_mut(&mut self.anchor).ok_or("service authority shared before delegation binding")?;
+        check(anchor.origin.delegation.is_none()&&anchor.origin.original.is_none(),"delegation admission reused")?;
+        anchor.origin.delegation=Some(DelegationGrant::capture(uid));
+        anchor.origin.delegation.as_ref().ok_or("delegation owner missing")?.revalidate(uid)
+    }
+    pub(in super::super) fn require_delegation(&self,uid:u32)->Probe<()>{
+        self.anchor.origin.delegation.as_ref().ok_or("service has no administrator delegation grant")?.revalidate(uid)
+    }
     pub(in super::super::super::super) fn bind_original(mut self,original:&invocation::VerifiedInvocation,cleanup:Rc<entry::ExitTimer>)->std::result::Result<Self,(Self,String)>{
         let result=(||->Probe<()>{
             original.check_live().map_err(|e|format!("{e:?}"))?;original.check_time().map_err(|e|format!("{e:?}"))?;
             let until=original.metadata().deadline_ns.checked_add(entry::GRACE).ok_or("cleanup cutoff overflow")?;cleanup.confirmed_until(until)?;
             let anchor=Arc::get_mut(&mut self.anchor).ok_or("service authority was shared before run binding")?;
             check(anchor.origin.original.is_none()&&anchor.origin.cleanup.is_none(),"service original binding reused")?;
+            let grant=anchor.origin.delegation.as_ref().ok_or("delegation must precede runtime extension")?;
+            check(original.metadata().separate_service,"original invocation lacks separate-service acknowledgment")?;grant.revalidate(grant.uid)?;
             anchor.origin.authority.bind_runtime(until)?;
             cleanup.confirmed_until(until)?;
             anchor.origin.original=Some(original.metadata().clone());anchor.origin.cleanup=Some(cleanup);
             anchor.revalidate()?;Ok(())
         })();match result{Ok(())=>Ok(self),Err(error)=>Err((self,error))}
     }
-    pub(in super::super) fn authorize_original(&self,metadata:&invocation::Metadata)->Probe<()>{
+    pub(in super::super) fn authorize_original(&self,metadata:&invocation::Metadata,uid:u32)->Probe<()>{
+        self.require_delegation(uid)?;check(metadata.separate_service,"separate-service acknowledgment missing at native admission")?;
         let origin=&self.anchor.origin;check(origin.original.as_ref()==Some(metadata),"original invocation differs from established root entry")?;
         origin.cleanup.as_ref().ok_or("entry has no sticky cleanup authority")?.confirmed_until(metadata.deadline_ns.checked_add(entry::GRACE).ok_or("cleanup cutoff overflow")?)
     }
@@ -195,6 +211,7 @@ impl TrustedUnitAnchor {
         require_name_matches(parent.as_raw_fd(),c"cgroup.procs",fd)?;Ok(())
     }
     pub(super) fn duplicate_leaf_parent(self:&Arc<Self>) -> Probe<InstallationRoot> {
+        let grant=self.origin.delegation.as_ref().ok_or("delegation missing before payload provision")?;grant.revalidate(grant.uid)?;
         self.revalidate()?;
         let source=self.unit_directory()?;
         let directory=fd_from_call(unsafe{fcntl(source.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;
@@ -216,6 +233,56 @@ const NS_GET_NSTYPE:u64=0xb703;
 const NS_GET_OWNER_UID:u64=0xb704;
 unsafe extern "C"{fn ioctl(fd:c_int,operation:u64,...)->c_int;fn readlinkat(fd:c_int,name:*const c_char,buffer:*mut u8,bytes:usize)->isize;}
 struct ProtectedEntry{fd:OwnedFd,identity:Identity,parent:Option<usize>,name:CString,kind:u16}
+// Admission snapshot only: no promise of immediate active-run revocation.
+// Even a denied/failed capture remains owned by the original unit anchor.
+struct DelegationGrant {
+ uid:u32,held:Vec<ProtectedEntry>,file:Option<usize>,bytes:Vec<u8>,error:Option<String>,
+}
+impl DelegationGrant {
+ fn capture(uid:u32)->Self{
+  let mut value=Self{uid,held:Vec::new(),file:None,bytes:Vec::new(),error:None};
+  let result=(||->Probe<()>{
+   check(uid!=0&&uid!=u32::MAX,"delegation requester UID refused")?;
+   let root=directory(AT_FDCWD,c"/")?;let identity=require_root_mode(&descriptor_stat(&root)?,S_IFDIR)?;
+   value.held.push(ProtectedEntry{fd:root,identity,parent:None,name:CString::new("/").expect("literal"),kind:S_IFDIR});
+   let mut parent=0;
+   for (name,kind) in [(c"etc",S_IFDIR),(c"process-tree-guard",S_IFDIR),(c"delegation.policy",S_IFREG)]{
+    let fd=if kind==S_IFDIR{directory(value.held[parent].fd.as_raw_fd(),name)?}else{open_relative(value.held[parent].fd.as_raw_fd(),name,O_NONBLOCK,S_IFREG)?};
+    let identity=require_root_mode(&descriptor_stat(&fd)?,kind)?;let next=value.held.len();
+    value.held.push(ProtectedEntry{fd,identity,parent:Some(parent),name:name.to_owned(),kind});parent=next;
+   }
+   value.file=Some(parent);value.check_provenance()?;
+   value.bytes=value.read_stable()?;
+   value.check_grant(uid)?;value.revalidate(uid)
+  })();if let Err(error)=result{value.error=Some(error);}value
+ }
+ fn check_provenance(&self)->Probe<()>{
+  check(self.held.len()==4&&self.file==Some(3),"delegation policy authority incomplete")?;
+  for item in &self.held{
+   check(require_root_mode(&descriptor_stat(&item.fd)?,item.kind)?==item.identity,"delegation policy held type/mode/mount/identity changed")?;
+   if let Some(parent)=item.parent{check(require_name_matches(self.held[parent].fd.as_raw_fd(),&item.name,&item.fd)?==item.identity,"delegation policy name binding changed")?;}
+  }Ok(())
+ }
+ fn read_stable(&self)->Probe<Vec<u8>>{
+  let fd=&self.held[self.file.ok_or("delegation policy file missing")?].fd;
+  let before=descriptor_stat(fd)?;check(before.size<=delegation::MAX_BYTES as u64,"delegation policy exceeds byte bound")?;
+  let bytes=bounded_fd_bytes(fd,delegation::MAX_BYTES)?;let again=bounded_fd_bytes(fd,delegation::MAX_BYTES)?;
+  let after=descriptor_stat(fd)?;
+  check(bytes==again&&before.size==after.size&&after.size==bytes.len() as u64
+   &&before.change.seconds==after.change.seconds&&before.change.nanoseconds==after.change.nanoseconds
+   &&before.modified.seconds==after.modified.seconds&&before.modified.nanoseconds==after.modified.nanoseconds,
+   "delegation policy changed during capture")?;self.check_provenance()?;Ok(bytes)
+ }
+ fn check_grant(&self,uid:u32)->Probe<()>{
+  check(uid==self.uid,"delegation UID differs from authenticated admission")?;
+  let policy=delegation::parse(&self.bytes).map_err(|error|format!("delegation policy grammar: {error:?}"))?;
+  check(policy.permits(uid),"no administrator separate-service grant for authenticated UID")
+ }
+ fn revalidate(&self,uid:u32)->Probe<()>{
+  if let Some(error)=&self.error{return Err(error.clone());}
+  self.check_provenance()?;check(self.read_stable()?==self.bytes,"delegation policy differs from admission snapshot")?;self.check_grant(uid)
+ }
+}
 pub(crate) struct EntryKernelAuthority{
  protected:Vec<ProtectedEntry>,proc:OwnedFd,proc_identity:Identity,own_proc:OwnedFd,one_proc:OwnedFd,maps:[OwnedFd;2],
  namespaces:Vec<OwnedFd>,namespace_identities:Vec<Identity>,manager:OwnedFd,
