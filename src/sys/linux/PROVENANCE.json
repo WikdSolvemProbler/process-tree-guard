@@ -264,5 +264,10 @@
     "backend_enabled": false,
     "evidence": "tests/evidence/linux-original-owners.zip",
     "limits": "Compilation/linking and ordinary capture/IPC/parser tests only. Actual privileged startup/public dispatch/native timeout-classification/lifecycle/kernel-floor and performance remain open."
+  },
+  "public_raw_evidence": {
+    "status": "withdrawn-from-current-public-tree",
+    "index": "tests/evidence/withdrawn-artifacts.json",
+    "limits": "Historical artifact identities remain unchanged; raw originals are retained locally and are unavailable in the public checkout. Source/readiness summaries do not replace independently accessible raw evidence."
   }
 }

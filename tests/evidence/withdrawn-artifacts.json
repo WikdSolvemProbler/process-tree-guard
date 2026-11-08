@@ -1,0 +1,541 @@
+{
+  "schema": 1,
+  "publication_status": "withdrawn-from-current-tree",
+  "notice": "Exact raw archives are withheld from the public checkout because they contain developer-specific machine metadata, were not cleared for publication, or belong to a removed standalone experiment. Hashes identify the unchanged local originals; they are not publicly downloadable evidence. Historical Git commits are not rewritten by this change.",
+  "files": [
+    {
+      "path": "tests/evidence/correctness-ee885c6-20261106.zip",
+      "bytes": 727951,
+      "sha256": "f733a493ec7a4b8bbc9297b6e635e4832e26682b6d413101dd971634d86b5fb7",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/deadline-numeric-integration-20261106.zip",
+      "bytes": 84302,
+      "sha256": "42c198d61fb70b57014973f0a3f64e03b14354b78d16471d0a73688e49f70e72",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/deadline-policy-qualification-20261106.zip",
+      "bytes": 216997,
+      "sha256": "f81115f9f0be2185a58553fc462e1076fb8456307771bd17c473e3a515c8ed85",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-admission-20261106.zip",
+      "bytes": 43485,
+      "sha256": "1b383b7d935848073450976a526cee630286aed92877382a278a141804c87bb8",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-arming-custody.zip",
+      "bytes": 1653425,
+      "sha256": "c19869448c84258d15f47ebef214e38c6b57d1d1817d23e89f55eaad3d65a155",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-arming-failure-controller-objects.zip",
+      "bytes": 4124752,
+      "sha256": "cdb04781716f2ae29b2cf5a21fa83f949ded244af3b409008abbbb7d7a56e1e0",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-authenticated-handoff.zip",
+      "bytes": 6889022,
+      "sha256": "42446f658b5423d224eeebc0651252083ccc3c9fa59761bb15121212ec53dce3",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-cgroup-authority.zip",
+      "bytes": 278077,
+      "sha256": "87901397e99a762094f561470a468adad142da62994a7c91a134cd99f61dd031",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-contained-launch-build.zip",
+      "bytes": 6783381,
+      "sha256": "428eb7ff832731b341240c959761d097ef6c58f282d9e207c64c76f5c0a023a0",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-correctness-20261106.zip",
+      "bytes": 30786,
+      "sha256": "722b975c984c56bfc4222d49bf021a69b4a470212593be1d05fec09d47ec31ed",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-cross-peer-20261106.zip",
+      "bytes": 43101,
+      "sha256": "74dcc490fd933acf6abf32fc0d15851f193ab11b1f7b821bcabcac616461c058",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-direct-child-reaper-abi.zip",
+      "bytes": 1833306,
+      "sha256": "7f890abddee02d8a0c14e9f9b2fd0ac7456667926750dfba0172263f29d3b67a",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-direct-child-reaper-sequential.zip",
+      "bytes": 3303513,
+      "sha256": "a2e04ba953e7974a23b44164bc07e6ce3236d90f6abdabe811811c30588c2b14",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-direct-child-reaper-static-link.zip",
+      "bytes": 10342173,
+      "sha256": "f546645adef6e0b470837f5a68a124cb073f5a92c7ec8b9626fac4eeb6d7ea34",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-domain-drain-ownership.zip",
+      "bytes": 1680036,
+      "sha256": "9f7532dc455e73b8b82d0f7e73fcbbea0c5b4788613d9286f4a39e48ac7051f1",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-domain-settlement.zip",
+      "bytes": 2006913,
+      "sha256": "609e1812f40f0387680f2e8e7686ddb8f1262469e47581cf752dffb0d4a69b35",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-domain-termination-first.zip",
+      "bytes": 7271657,
+      "sha256": "eda65f3210dbdc12a72b9e0f9ec4ca76ab10f94aaf348b674e446d9075e5df12",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-external-admission-20261106.zip",
+      "bytes": 45259,
+      "sha256": "177eb3f666cd9a2a35cdeaf77b1422cce8ccef1f92aa5e366db1f2dd2962e49c",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-generic-request-20261106.zip",
+      "bytes": 13085,
+      "sha256": "e125eb1799c78d1176db349c254d5c2720eed14e3dedea26ad1d569ec2488699",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-native-activation-seam.zip",
+      "bytes": 56363,
+      "sha256": "a093c2af157eb2148c241adfff6d5be540b8a2097f37e8cdaf33a8f21f9b5a32",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-original-owners.zip",
+      "bytes": 7972687,
+      "sha256": "5d35946a867ff696be7fc6eb7d50f8d3862821ac5d79cfbbba6410ea123541d1",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-per-unit-authority.zip",
+      "bytes": 7154406,
+      "sha256": "1430333ed86a0c1f293b18fac7867dd4b13013b2239fb4a4edc319956627d832",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-prepared-child-bridge.zip",
+      "bytes": 46781,
+      "sha256": "c7acd929cc66914d16ed3ba30d662b56b71178b8ca986cf1f413d5b2c6f79f70",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-prepared-run-20261107.zip",
+      "bytes": 54780,
+      "sha256": "3156198c716cfe05ccbf4b97e43e34997286fde1b64ab51025147bb4f1fc7288",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-release-lease-20261106.zip",
+      "bytes": 80144,
+      "sha256": "cad4eed91e99b814be23b8a67ae0af6139c27e05e9ae86953781e1287985c364",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-request-transport-20261106.zip",
+      "bytes": 32116,
+      "sha256": "b871b3200ee4b9d34342d29b29929c3548d7aeeaed2267ced51ad2e7d5b4744c",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-rust-supervision-20261106.zip",
+      "bytes": 23817,
+      "sha256": "88227c29ce3fa11d22b206989ce682d463d13eb903229412b430df69fdc9037a",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-scripted-child-launch.zip",
+      "bytes": 8706,
+      "sha256": "51095f8862bffad087ef183d515ea3eb8ff28b2b5bc2acce97306b09d6a3d3e1",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-terminal-controller-objects.zip",
+      "bytes": 4562494,
+      "sha256": "0848ccef7232bb14df277ab4e0ad4a65a637f7b020af3eb1ff1ad3da64b7c4eb",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/linux-watchdog-arming-objects.zip",
+      "bytes": 9208753,
+      "sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/macos-admin-validation-preparation.zip",
+      "bytes": 222344,
+      "sha256": "487ec5a2899c4312ea2a15c0cc35ade3bcc6ece106ddd5cee310bf80690459bd",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/macos-dedicated-uid-20261106.zip",
+      "bytes": 5250,
+      "sha256": "7faf729617253b158520819cbf0c3baa6e670f28054b3758135b70408948b140",
+      "reason": "removed-standalone-experiment"
+    },
+    {
+      "path": "tests/evidence/macos-fork-churn-20261106.zip",
+      "bytes": 23336,
+      "sha256": "f1300cbe49fbb1aecad115c3298c2cd809f00c7a9e06ec20149cb97090f58790",
+      "reason": "removed-standalone-experiment"
+    },
+    {
+      "path": "tests/evidence/macos-nproc-accounting.zip",
+      "bytes": 14271,
+      "sha256": "edcf989f29c5769973ab339c9ea07eede811fe38d636245d7ceb931bec085610",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/macos-reserve-custody.zip",
+      "bytes": 20368,
+      "sha256": "470527f7e8fd5f95c74404638035da5c082fc41a775b3e0ba14c4ff19dad34eb",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/macos-uid-witness-20261106.zip",
+      "bytes": 2193,
+      "sha256": "c6dcbe66d7d074150a20dc84577928d7556dc239afea5289630888cdbaafc889",
+      "reason": "removed-standalone-experiment"
+    },
+    {
+      "path": "tests/evidence/resolver-native-replay-20261106.zip",
+      "bytes": 15801,
+      "sha256": "ff6a7061733d4b5eb7d8d4632708d5874365e8c75b14d2b5a2c400adb71794cc",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/survivor-probe-census-rerun-20261107.zip",
+      "bytes": 649175,
+      "sha256": "c2e94681a5e2fb08de685e1339636e9150c1442e363006920a023a95417aa03d",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/survivor-report-correctness-20261106.zip",
+      "bytes": 1473693,
+      "sha256": "29752be7051c6561dca2bb43ba4ffa8a36e35b76d0e57282863c450b3773631e",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/sysprims-profile-correctness.zip",
+      "bytes": 1094237,
+      "sha256": "7ba2860543706f065009052c0763d0598757ef65bed5e3ea3392a383a8808295",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/unsupported-platform-refusal-20261106.zip",
+      "bytes": 14558,
+      "sha256": "4b6f54d1e650a8066ae3c05468e14e203d6ca47506e42c1b9205f25487553312",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-campaign-20261106.zip",
+      "bytes": 625852,
+      "sha256": "ef653c4fb2921adc9e466f767225ba257b26e0b9adecf354b8000f30ccf751bd",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-cleanup-verdict-repair.zip",
+      "bytes": 2978955,
+      "sha256": "cc62ab5842f2139fd057af42f5f72a0c38bd2aa419f0287eaf9d23d2bc0af3c8",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-correctness-20261106.zip",
+      "bytes": 640797,
+      "sha256": "b6254fc68a59ac7d53aa6d4a906e1cc3cf34c72c4ef36cad176bc7358998cc55",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-cpu-calibration-20261106.zip",
+      "bytes": 38269,
+      "sha256": "0e6dae0c86b1e37ada4d5598d094d926382c236441f85a591a24b7242d808a17",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-event-reader-cycle-repair.zip",
+      "bytes": 720199,
+      "sha256": "5b4a91c2dca3c01e2878a4da99a98214a00a727926e480fe4ccebff318099b80",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-event-reader-native-controls.zip",
+      "bytes": 418835,
+      "sha256": "50daad2a0f0b61feff37d1c7b152109a0cbd5adc1b521bab80b04eca8c75cc87",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-grouped-census-native-pipeline.zip",
+      "bytes": 220425,
+      "sha256": "34fa7babbdba6d5124fd88ea434cc9b4845e64700b9924f92579c794138b24d2",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-grouped-census-preparation.zip",
+      "bytes": 85705,
+      "sha256": "24ac9a06a804e7d229fb5eae7a0cdd59a3208d3d133ab3ffad9fdfdc757896d2",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-grouped-native-pipeline-002.zip",
+      "bytes": 5561389,
+      "sha256": "be73309a694f63a408e63560c2c6c123fe22ee52b298cab30047b9799f4a46a3",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-host-session-preparation-001.zip",
+      "bytes": 814381,
+      "sha256": "72fcac301fd3ea3279bed07fd18d25d37d8e2750bf9702d5267a0a6be602cacb",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-host-session-preparation-history-001.zip",
+      "bytes": 176079,
+      "sha256": "96b2b20929a592ca4518aaa55193d82c390a6960fa785c754ce218d8244a0990",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-image-by-name-diagnostic.zip",
+      "bytes": 271943,
+      "sha256": "52c85969003200e5f8c19b44db9e8428c8b8a5a821333afc1a40c2fc7a4769a1",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-image-mutation-observation.zip",
+      "bytes": 44251,
+      "sha256": "b9cf0c747815c29f409ced6f7772c8328a5e11d10faf615e4f928ad99e9f9993",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-job-events-20261106.zip",
+      "bytes": 189561,
+      "sha256": "7c39ff924b6e9c1f8e99a22a2940c8f7427992501e14e33e283e76ee5204fd8d",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-attempt-011.zip",
+      "bytes": 573582,
+      "sha256": "db31b44814b8e9250b8a4e88174a03da481f00212427695469859b4033421171",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-attempt-012.zip",
+      "bytes": 627776,
+      "sha256": "766f52661cd8362d32e15bde3d890c17cdcf56418c99d7718fed6de384c683d7",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-attempt-013.zip",
+      "bytes": 520260,
+      "sha256": "3686ef75656a67fbe7dc27dc4e873d32326440b33112c5a8d471aad48c0206ac",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-attempt-015.zip",
+      "bytes": 159548,
+      "sha256": "1293357f1527a4a4efa096a5fbedecd29ed0c654ccdbd6eac9ea332a2afb813b",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-attempt-016.zip",
+      "bytes": 152385,
+      "sha256": "f6628a3b57ea1e34f2bc5f77548887d74b6392f97c389d66df4990455009cff3",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-protocol-011.zip",
+      "bytes": 5289184,
+      "sha256": "f8770781e11b87c2ed592ab8e56ae6487a86c56e9ce11c4de738965bb53cf5a0",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-protocol-012.zip",
+      "bytes": 5502486,
+      "sha256": "45520e84d07098dc814a449772b2583c76051c95b271aaa2ff2627412940e582",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-protocol-013.zip",
+      "bytes": 5540190,
+      "sha256": "77ef0d6eca6835f087b77114c871373684134b6b4464b35a0f3e37e52427722a",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-protocol-015.zip",
+      "bytes": 5738193,
+      "sha256": "972f1377d839a1db9246c07bd6dd9a10b6bd570f607aef59fe960e52ee4b2f69",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-laptop-exploratory-protocol-016.zip",
+      "bytes": 5689465,
+      "sha256": "1d9b5b4e1c8deb97e20fe68043bfb6b15aefdfdf9db28562e448d725fab375a9",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-native-bulk-enumeration-001.zip",
+      "bytes": 314805,
+      "sha256": "c4dcc4578071029c9da39a02fae4091eb3929b5296e0a30a2aad96f99cf289b6",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-native-byte-decoder-capture.zip",
+      "bytes": 301028,
+      "sha256": "5bf81a8a64698206faa48b60e7d55c7b21721ad0c25c91baa2f7f06e99a46b12",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-native-c-image-api-cost-001.zip",
+      "bytes": 149936,
+      "sha256": "df75877895e00a5271d3ea1e7bcc70289054b95b2cc80a090365fdf44ffd9f9e",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-native-image-api-cost-001.zip",
+      "bytes": 46608,
+      "sha256": "73420df6a90917ef7d63e026f8a8bb1662bcfa0af14a64a89d4e64717427a40d",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-native-image-pipeline-001.zip",
+      "bytes": 83641,
+      "sha256": "045952810870af384f49a7d9872135a70e63ec358a33b59da54cde860609baaa",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-native-image-qualification-001.zip",
+      "bytes": 134762,
+      "sha256": "989ad9d5d57887db6af8d78ea909d71baf884b7e931dbf5d19c0289a0e8afa8f",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-observer-inventory-calibration.zip",
+      "bytes": 41705,
+      "sha256": "e0a812fae07dfc176231c5e4bda54ed152441e41b3eeea6a2f27b226868703cb",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-observer-inventory-cost.zip",
+      "bytes": 85259,
+      "sha256": "f092428723c692770f1977c6e95a9f4b6c1164842a84b7f9bd7f3c46522be413",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-own-handle-diagnostic-004.zip",
+      "bytes": 844089,
+      "sha256": "cc77040b21458e7dd2facef3039bf26df3544871a1cfa7322e755b79cf9af47d",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-quiet-host-sampler.zip",
+      "bytes": 27139,
+      "sha256": "de38e7ba32962d6850060c57d54865e1fcd33019d112b02631370140ccd66a11",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-quiet-launch-qualification.zip",
+      "bytes": 454907,
+      "sha256": "22297e02b935643b11d4a58fdd01895021f4b3e41edd77541c35fcc30e9c9de6",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-resolver-valid-launch-20261106.zip",
+      "bytes": 2483787,
+      "sha256": "e7bdc5ff85068e8ed03176628db5a4ad60014cbc9973577b1891f381404c1293",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-slot-close-ownership.zip",
+      "bytes": 28291,
+      "sha256": "d9e31eb96f82052e9df42a591be592b7644940d3bcc4bf1b665398152bf43091",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-survivor-report-replay-20261106.zip",
+      "bytes": 60634,
+      "sha256": "03d40c2964ee48306489117daaab66b0b43a25f2b9879b0888d045086fc8f7ea",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-survivor-suite-count-failures-20261106.zip",
+      "bytes": 620241,
+      "sha256": "fbcc99dea9b2d7cf8cff6f034dedc10be9b11a862006b6ff1e530f9cb02bfc7c",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-sysprims-fast-profile-review.zip",
+      "bytes": 2084579,
+      "sha256": "f3601f500f8a0e146ba9afdf00aa45d360ae793b25265d8e7b790597ce4dbc98",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-sysprims-output-20261106.zip",
+      "bytes": 119225,
+      "sha256": "2b4cadd95f5e75ef46aaf6278c56c6eae771c99dcaa3c646f63603692d8fc7fa",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-system-counter-diagnostic.zip",
+      "bytes": 254604,
+      "sha256": "7969fcdca2d147984fe19e90dd672d1583fcaccde5884c0a73d3e059381a36e8",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-two-read-image-controls-002.zip",
+      "bytes": 28508,
+      "sha256": "72d2a97b6fdd6e863f63df93ca174156ed47fb7f94cf22930c6ff5b8c5591a33",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-two-read-image-qualification-001.zip",
+      "bytes": 53125,
+      "sha256": "e02164c5d081970bf833ecf0fe60ff07a63b6f8ac2057e35d048626a2669e0ef",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-wake-anchor-20261106.zip",
+      "bytes": 4391122,
+      "sha256": "d6427f0343c829dff858cf850fee22b86cf8352e3047c7946c79ea8f2b33cf4c",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-wake-build-audit-20261106.zip",
+      "bytes": 8061,
+      "sha256": "c55348b5ef619488c2cd3ce62677a5df8da64ad317f8358c4753cd0fefbacbaa",
+      "reason": "personal-data"
+    },
+    {
+      "path": "tests/evidence/windows-wake-directional-20261106.zip",
+      "bytes": 18422383,
+      "sha256": "56d7e8282ce249dc5bfc3ab984ea03e97d99b463bb85e96db1684a7992f47038",
+      "reason": "not-cleared-for-publication"
+    },
+    {
+      "path": "tests/evidence/windows-wake-phase-20261106.zip",
+      "bytes": 3151922,
+      "sha256": "f13a78229c9b66c963dca3748c32fdbd813a6dfcbd95eb0e1c5bf37973c802a0",
+      "reason": "personal-data"
+    }
+  ]
+}

@@ -4,13 +4,13 @@ PROCESS-TREE-GUARD BENCHMARK CAMPAIGN
 platform: Linux-7.0.0-39-generic-x86_64-with-glibc2.39
 
 Anchor arm (current gauntlet binary):
-  /home/hatch/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112
+  /home/REDACTED/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112
 
 Arm identities (every arm's fingerprint and probed version):
-  guard: /home/hatch/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
-  processkit: /home/hatch/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
-  nuewframe: /home/hatch/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
-  sysprims: /home/hatch/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
+  guard: /home/REDACTED/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
+  processkit: /home/REDACTED/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
+  nuewframe: /home/REDACTED/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
+  sysprims: /home/REDACTED/workspace/pgl-gauntlet/hidden_files/p4-r32-land/reduced/stubcfg/stub-arm sha256=6f0429492d37ec1c92bbd02ccbaf37da352d33fd1f0960a9fb236295e05fa13b size=112 version=not probed
 
 The pairing "66.5 ms vs 50.9 ms" (N=5) cites a 66.5 ms anchor that predates the gauntlet: it is the retained pre-gauntlet binary, not the current gauntlet binary. It is recorded here for provenance only and is not a measurement of the current tree.
 

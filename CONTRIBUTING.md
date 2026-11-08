@@ -128,3 +128,7 @@ git commit -s
 ```
 
 [↑ Back to Contents](#contents)
+
+## Publication privacy
+
+Keep SSH targets, private network addresses, personal account names, home-directory paths, and machine ownership details in local configuration. Do not commit raw transport commands, local connection files, or unreviewed execution archives. Publish only artifacts reviewed for these details. Preserve original evidence locally; label any redacted public copy and retain its relationship to the original hash. Use neutral environment descriptions for reproducibility.

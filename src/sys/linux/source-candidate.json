@@ -54,13 +54,13 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 13302,
-      "sha256": "5c47160644f4f49430f056c442ec19ce65d9cec1daf196c8e30690b61c106b73"
+      "bytes": 13667,
+      "sha256": "5d4d5dc69186ad060c86e6b86f9905b921a4e5751b59bc99255f264dbb14c0e4"
     },
     {
       "path": "README.md",
-      "bytes": 36508,
-      "sha256": "17dfef5abce82cbe3461a8998f87023c737f7aa858e5d624a19de577d0b4d190"
+      "bytes": 37260,
+      "sha256": "94d30900e28abc2bf67405ec951aececefb64d13eac667d3b6f4998e0add6e97"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -197,5 +197,6 @@
   ],
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
-  "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984"
+  "implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
+  "publication_change": "Documentation/publishing privacy only; executable source pins and prior actual implementation build identity unchanged. Raw evidence is withdrawn from the public checkout; no new qualification claimed."
 }

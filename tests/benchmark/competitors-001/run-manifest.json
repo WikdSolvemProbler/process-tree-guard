@@ -4,7 +4,7 @@
   "seed": 20261102,
   "fast_reps": 5,
   "kill_reps": 3,
-  "guard": "C:/Users/Peter/process-guard-lab/benchmark/bootstrap/process-tree-guard.exe",
+  "guard": "C:/Users/REDACTED/process-guard-lab/benchmark/bootstrap/process-tree-guard.exe",
   "guard_sha256": "1899137f687541256fb89749b2fe6a2940f2e420faaf2330fc84f32cfd7fae43",
   "per_trial_guard_timeout_seconds": 45,
   "kill_grace_policy": "each competitor run with its own defaults (timeout.exe kill-after 5s, sysprims kill-after 10s, processkit default grace); elapsed times are raw and not normalized",
@@ -12,25 +12,25 @@
   "arms": [
     {
       "name": "anchor-current-code",
-      "exe": "C:/Users/Peter/process-guard-lab/benchmark/reference-artifacts/current-code/process-tree-guard.exe",
+      "exe": "C:/Users/REDACTED/process-guard-lab/benchmark/reference-artifacts/current-code/process-tree-guard.exe",
       "sha256": "65c1350dd315f3311880dac2ed72bee712fcf277b3561e139115b5d87d168608",
       "size": 658432
     },
     {
       "name": "processkit-cli",
-      "exe": "C:/Users/Peter/process-guard-lab/benchmark/competitors-001/bins/processkit-cli/processkit-cli.exe",
+      "exe": "C:/Users/REDACTED/process-guard-lab/benchmark/competitors-001/bins/processkit-cli/processkit-cli.exe",
       "sha256": "a79542cfe449f6916921845c2d7e02ea425c496c1a12d6359f7ca6b5f75141bb",
       "size": 3508736
     },
     {
       "name": "timeout-nuewframe",
-      "exe": "C:/Users/Peter/process-guard-lab/benchmark/competitors-001/bins/timeout-nuewframe/timeout.exe",
+      "exe": "C:/Users/REDACTED/process-guard-lab/benchmark/competitors-001/bins/timeout-nuewframe/timeout.exe",
       "sha256": "765a364afd529c10b58b7cfa1cd9f13cf955e7a053f1e4a2d467038f064d16e9",
       "size": 1276928
     },
     {
       "name": "sysprims",
-      "exe": "C:/Users/Peter/process-guard-lab/benchmark/competitors-001/bins/sysprims/sysprims.exe",
+      "exe": "C:/Users/REDACTED/process-guard-lab/benchmark/competitors-001/bins/sysprims/sysprims.exe",
       "sha256": "0a3144a6ca7b2df7ee382bbbac85d89f5ed75ee2643e1036356a8eaa4d490867",
       "size": 6129282
     }

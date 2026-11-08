@@ -74,7 +74,7 @@ The shipped gate holds pin-match. The gate checks that the pinned files match th
 
 Revival has one form. Restore the full census computation from its recorded commit. Use the commit that the graph records: `d7d64f6516df9f6df98fdfe9b531e2799ec5ae85`, the head of the `ptg-gauntlet-instruments` branch. That branch is kept outside this repository. Run that computation against the current tree. Revival is mandatory before a change that reopens the shape. Revival is also mandatory before a pure claim for a file outside the recorded pin.
 
-The numeric deadline extraction revived the exact historical census against a reconciled current baseline and the candidate. Its only added pure member was `src/deadline.rs`. The evidence preserves the raw graphs and a separate prose-only rendering that distinguishes current derivation from the historical gate. The older D43 occurrence pins still require reconciliation. [Current census and exact source pins](../tests/evidence/deadline-numeric-integration-20261106.zip)
+The numeric deadline extraction revived the exact historical census against a reconciled current baseline and the candidate. Its only added pure member was `src/deadline.rs`. The evidence preserves the raw graphs and a separate prose-only rendering that distinguishes current derivation from the historical gate. The older D43 occurrence pins still require reconciliation. [Current census and exact source pins — raw archive withdrawn](../tests/evidence/README.md#withdrawn-private-evidence)
 
 [↑ Back to Contents](#contents)
 
