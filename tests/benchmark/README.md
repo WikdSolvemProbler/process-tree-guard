@@ -265,3 +265,12 @@ Archive SHA-256 5bf81a8a64698206faa48b60e7d55c7b21721ad0c25c91baa2f7f06e99a46b12
 **Next:** The [competitors-001 folder](competitors-001/README.md) holds the set itself.
 
 [↑ Back to Contents](#contents)
+
+
+## Prospective observed-accounting campaign017
+
+This preregisters one attempt of the existing 1,940-slot Windows campaign: 36 controls, 224 warmups and 1,680 measured trials, with seed 20261029. The seven measurement modules, 20 qualified inputs, guard image `8fa4e58b`, SlotJob `94f31bff`, rivals, workloads, console contexts and numerical gates remain unchanged from campaign016. Only the run identity and destination change. The attempt retains the 6,900-second campaign deadline, 6,920-second outer envelope and 6,600-second observation limit. It may start only after this preregistration is pushed, with other test workers stopped throughout capture.
+
+Exact manifest SHA-256: `01ce85eb03ecdd6790378da3aa9f6ee413900acc912459bcc677fa76ca9737f2`. Source snapshot: `f86a918ac26e984954a4d74c74be2795ae74ae6e006e2f6564dc5916bd47b5ae`. Both independent Sol reviewers approved the same manifest with zero unresolved objections: reviewer2 receipt `97bd1b430b8c5db0abceec7ccea48c97482fa99f2daa2acdc6c98633c171a663`; critic receipt `f86158f67caa5722aad88ceb74144a19070553e756b503345ab3a1225d5eb112`.
+
+Earlier campaign015 and campaign016 failures remain preserved; campaign016 recorded no measured trials. This authorizes one fresh attempt, with no automatic retry, overwritten capture, waived gate or rescoring of earlier data. It is an exploratory observed-accounting run. This preregistration establishes no performance result, equivalence, leadership or strict issue #7 completion. Raw machine and transport records remain local under the publication privacy policy; hashes do not substitute for independently accessible evidence.
