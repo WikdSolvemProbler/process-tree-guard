@@ -613,6 +613,11 @@ mod tests {
         let mut received_in=fs::File::from(received_in);
         let mut byte=[0];received_in.read_exact(&mut byte).unwrap();assert_eq!(&byte,b"B");
         assert_eq!(input.stream_position().unwrap(),2,"SCM transfer must preserve the open-file description");
+        received_in.seek(SeekFrom::Start(1)).unwrap();assert_eq!(input.stream_position().unwrap(),1);
+        supervisor::native_activation::completion_read_regression(received_in.as_raw_fd());
+        assert_eq!(input.stream_position().unwrap(),1,"reader changed original sender cursor");assert_eq!(received_in.stream_position().unwrap(),1,"reader changed SCM receiver cursor");
+        received_in.read_exact(&mut byte).unwrap();assert_eq!(&byte,b"B");assert_eq!(input.stream_position().unwrap(),2);
+
         let mut received_out=fs::File::from(received_out);received_out.write_all(b"out").unwrap();
         let mut received_err=fs::File::from(received_err);received_err.write_all(b"err").unwrap();
         let received_cwd=fs::File::from(received_cwd);let held=received_cwd.metadata().unwrap();

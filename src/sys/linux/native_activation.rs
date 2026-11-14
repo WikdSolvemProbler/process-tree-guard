@@ -339,6 +339,8 @@ pub(crate) fn require_initial_client_mapping()->Probe<()>{cgroup_authority::serv
 pub(crate) fn client_installation()->Probe<Vec<OwnedFd>>{cgroup_authority::service_scope::client_installation()}
 pub(crate) use cgroup_authority::service_scope::{ClientCompletion,RetiredUnit};
 pub(crate) fn client_events(fd:&OwnedFd,group:&str)->Probe<ClientCompletion>{cgroup_authority::service_scope::client_events(fd,group)}
+#[cfg(test)]pub(crate) fn completion_read_regression(fd:RawFd){cgroup_authority::service_scope::completion_read_regression(fd)}
+
 
 pub(crate) fn verify_runtime_parent(fds:&[OwnedFd])->Probe<()>{cgroup_authority::service_scope::verify_runtime_parent(fds)}
 

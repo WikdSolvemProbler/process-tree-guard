@@ -421,27 +421,33 @@ pub(in super::super::super) fn client_installation()->Probe<Vec<OwnedFd>>{
 // live/populated. No later pathname reopen can stand in for the original domain.
 struct CompletionNode{fd:OwnedFd,identity:Identity,name:Option<CString>,cgroup:bool}
 #[derive(Clone)]
-struct EventRead{bytes:Vec<u8>,seek_errno:Option<c_int>,read_errno:Option<c_int>}
+struct EventRead{bytes:Vec<u8>,seek_errno:Option<c_int>,read_errno:Option<c_int>,read_failed:bool}
+#[derive(Clone,Copy)]enum CompletionReadStage{Adoption,AfterTerminal}
 impl EventRead{
+ fn read_error(bytes:Vec<u8>,error:io::Error)->Self{Self{bytes,seek_errno:None,read_errno:error.raw_os_error(),read_failed:true}}
+ fn failure(&self,stage:CompletionReadStage,error:String)->String{
+  let mut end=error.len().min(256);while !error.is_char_boundary(end){end-=1;}
+  let stage=match stage{CompletionReadStage::Adoption=>"adoption",CompletionReadStage::AfterTerminal=>"after_terminal"};
+  format!("{}; completion_stage={stage} setup_errno={:?} read_failed={} read_errno={:?} bytes={}",&error[..end],self.seek_errno,self.read_failed,self.read_errno,self.bytes.len())
+ }
  fn populated(&self)->Probe<bool>{
-  check(self.seek_errno.is_none()&&self.read_errno.is_none()&&!self.bytes.is_empty()&&self.bytes.len()<=4096,"completion event read not complete")?;
+  check(!self.read_failed&&self.seek_errno.is_none()&&self.read_errno.is_none()&&!self.bytes.is_empty()&&self.bytes.len()<=4096,"completion event read not complete")?;
   let text=std::str::from_utf8(&self.bytes).map_err(|_|"unit events UTF8")?;let mut populated=None;
   for line in text.lines(){let mut words=line.split_whitespace();let key=words.next().ok_or("unit event key")?;let value=words.next().ok_or("unit event value")?;check(words.next().is_none(),"unit event shape")?;if key=="populated"{check(populated.is_none(),"duplicate populated event")?;populated=Some(match value{"0"=>false,"1"=>true,_=>return Err("unit populated value".into())});}}
   populated.ok_or_else(||"unit events omitted populated".into())
  }
 }
 fn read_completion_events(fd:&OwnedFd)->EventRead{
- use std::io::{Seek,SeekFrom};
+ use std::os::unix::fs::FileExt;
  let duplicate=unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)};
- if duplicate<0{return EventRead{bytes:Vec::new(),seek_errno:io::Error::last_os_error().raw_os_error(),read_errno:None};}
- let mut file=fs::File::from(unsafe{OwnedFd::from_raw_fd(duplicate)});
- if let Err(error)=file.seek(SeekFrom::Start(0)){return EventRead{bytes:Vec::new(),seek_errno:error.raw_os_error(),read_errno:None};}
+ if duplicate<0{return EventRead{bytes:Vec::new(),seek_errno:io::Error::last_os_error().raw_os_error(),read_errno:None,read_failed:false};}
+ let file=fs::File::from(unsafe{OwnedFd::from_raw_fd(duplicate)});
  let mut raw=Vec::with_capacity(4097);let mut chunk=[0u8;4097];
- loop{let count=unsafe{fd_read(file.as_raw_fd(),chunk.as_mut_ptr().cast(),4097-raw.len())};
-  if count<0{return EventRead{bytes:raw,seek_errno:None,read_errno:io::Error::last_os_error().raw_os_error()};}
-  if count==0{return EventRead{bytes:raw,seek_errno:None,read_errno:None};}
-  raw.extend_from_slice(&chunk[..count as usize]);if raw.len()>=4097{return EventRead{bytes:raw,seek_errno:None,read_errno:None};}
- }
+ loop{match file.read_at(&mut chunk[..4097-raw.len()],raw.len() as u64){
+  Err(error)=>return EventRead::read_error(raw,error),
+  Ok(0)=>return EventRead{bytes:raw,seek_errno:None,read_errno:None,read_failed:false},
+  Ok(count)=>{raw.extend_from_slice(&chunk[..count]);if raw.len()>=4097{return EventRead{bytes:raw,seek_errno:None,read_errno:None,read_failed:false};}}
+ }}
 }
 struct RetirementLookup{result:c_int,errno:Option<c_int>,observed:Option<Identity>}
 #[must_use="original unit completion capabilities must remain held"]
@@ -465,13 +471,13 @@ impl ClientCompletion{
   check(count==1&&event.revents&(1|0x10)!=0&&event.revents&!(1|0x10)==0&&pid>1,"original service pidfd is not terminal")?;
   self.revalidate_ancestry(false)?;
   let raw=read_completion_events(&self.events);let decision=raw.populated();self.last=Some(raw.clone());
-  match decision{
+  let result=(||->Probe<bool>{match decision{
    Ok(value)=>{self.revalidate_ancestry(true)?;Ok(value)},
    Err(error)=>{
     if self.first_failure.is_none(){self.first_failure=Some(raw.clone());}
     // Only the raw read ENODEV of the original, previously-live core file
     // enables retirement lookup. Seek/parse/EOF/EACCES/ESTALE never do so.
-    check(raw.seek_errno.is_none()&&raw.read_errno==Some(19),&error)?;
+    check(raw.seek_errno.is_none()&&raw.read_failed&&raw.read_errno==Some(19),&error)?;
     let unit=self.nodes.last().ok_or("original completion unit missing")?;let parent=&self.nodes[self.nodes.len()-2];let name=unit.name.as_ref().ok_or("original unit basename missing")?;
     let mut observed=Statx::default();let result=unsafe{fd_statx(parent.fd.as_raw_fd(),name.as_ptr(),AT_SYMLINK_NOFOLLOW,STATX_BASIC_STATS|STATX_MNT_ID,&mut observed)};
     let errno=if result<0{io::Error::last_os_error().raw_os_error()}else{None};
@@ -481,7 +487,7 @@ impl ClientCompletion{
     self.revalidate_ancestry(false)?;
     self.retired=Some(RetiredUnit{group:self.group.clone(),unit:unit.identity,parent:parent.identity,name:name.clone(),event:self.event_identity,event_errno:19,lookup_result:result,lookup_errno:2,observed_ns:boottime_ns()?});Ok(false)
    }
-  }
+  }})();result.map_err(|error|raw.failure(CompletionReadStage::AfterTerminal,error))
  }
  pub(crate) fn retired(&self)->Option<&RetiredUnit>{self.retired.as_ref()}
 }
@@ -497,7 +503,7 @@ pub(in super::super::super) fn client_events(fd:&OwnedFd,group:&str)->Probe<Clie
  check(count>0,"completion unit cannot be hierarchy")?;require_cgroup2(fd)?;let event_identity=require_root_mode(&descriptor_stat(fd)?,S_IFREG)?;check(event_identity.same_mount(mount),"completion events mount differs")?;
  require_name_matches(nodes.last().expect("unit held").fd.as_raw_fd(),c"cgroup.events",fd)?;super::super::super::super::close_on_exec(fd.as_raw_fd()).map_err(|e|format!("{e:?}"))?;
  let flags=super::super::super::super::io_flags(fd.as_raw_fd(),0).map_err(|e|format!("{e:?}"))?;check(flags&3==0,"completion event capability is not read-only")?;
- let events=fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;let baseline=read_completion_events(&events);check(baseline.populated()?,"original service was not live/populated at completion adoption")?;
+ let events=fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})?;let baseline=read_completion_events(&events);baseline.populated().and_then(|value|check(value,"original service was not live/populated at completion adoption")).map_err(|error|baseline.failure(CompletionReadStage::Adoption,error))?;
  let result=ClientCompletion{nodes,events,event_identity,group:group.to_owned(),baseline,last:None,first_failure:None,last_lookup:None,retired:None};result.revalidate_ancestry(true)?;Ok(result)
 }
 
@@ -587,4 +593,20 @@ pub(in super::super::super) fn capture_calling_umask()->Probe<u16>{
  let text=std::str::from_utf8(&raw).map_err(|_|"calling-thread status UTF8")?;let value=status_field(text,"Umask:")?;
  check(!value.is_empty()&&value.len()<=4&&value.bytes().all(|byte|(b'0'..=b'7').contains(&byte)),"calling-thread umask format refused")?;
  let mask=u16::from_str_radix(value,8).map_err(|_|"calling-thread umask octal")?;check(mask<=0o777,"calling-thread umask exceeds0777")?;Ok(mask)
+}
+
+#[cfg(test)]pub(in super::super::super) fn completion_read_regression(source:RawFd){
+ use std::io::Seek;
+ let alias=fd_from_call(unsafe{fcntl(source,F_DUPFD_CLOEXEC,3 as c_int)}).unwrap();
+ let mut cursor=fs::File::from(fd_from_call(unsafe{fcntl(source,F_DUPFD_CLOEXEC,3 as c_int)}).unwrap());
+ assert_eq!(cursor.stream_position().unwrap(),1,"regression must begin away from EOF");
+ for _ in 0..2{let raw=read_completion_events(&alias);assert_eq!(raw.bytes,b"AB");assert!(!raw.read_failed);assert_eq!(raw.seek_errno,None);assert_eq!(raw.read_errno,None);assert_eq!(cursor.stream_position().unwrap(),1,"completion read changed the shared open-file cursor");}
+ let oversized:OwnedFd=fs::File::open("/proc/self/exe").unwrap().into();let capped=read_completion_events(&oversized);assert_eq!(capped.bytes.len(),4097);assert!(!capped.read_failed);assert!(capped.populated().is_err());
+ let path=fd_from_call(unsafe{fd_openat(AT_FDCWD,c"/proc/self/exe".as_ptr(),O_PATH|O_CLOEXEC)}).unwrap();let unreadable=read_completion_events(&path);assert!(unreadable.read_failed);assert_eq!(unreadable.seek_errno,None);assert_eq!(unreadable.read_errno,Some(9));assert!(unreadable.populated().is_err());
+ for bytes in [Vec::new(),vec![0xff],b"populated 1\npopulated 0\n".to_vec(),b"frozen 0\n".to_vec(),b"populated 2\n".to_vec(),b"populated 0 extra\n".to_vec()]{let raw=EventRead{bytes,seek_errno:None,read_errno:None,read_failed:false};assert!(raw.populated().is_err());}
+ let failed=EventRead::read_error(b"populated 0\n".to_vec(),io::Error::from(io::ErrorKind::Other));assert!(failed.read_failed);assert_eq!(failed.read_errno,None);assert!(failed.populated().is_err());let diagnostic=failed.failure(CompletionReadStage::AfterTerminal,"completion event read not complete".into());assert!(diagnostic.contains("read_failed=true read_errno=None"));assert!(diagnostic.contains("completion_stage=after_terminal"));assert!(diagnostic.len()<=512);
+ let missing=EventRead::read_error(b"populated 0\n".to_vec(),io::Error::from_raw_os_error(19));assert!(missing.read_failed);assert_eq!(missing.read_errno,Some(19));assert!(missing.populated().is_err());
+ for populated in [b"populated 0\n".as_slice(),b"populated 1\nfrozen 0\n".as_slice()]{let raw=EventRead{bytes:populated.to_vec(),seek_errno:None,read_errno:None,read_failed:false};assert_eq!(raw.populated().unwrap(),populated.contains(&b'1'));}
+ let long=failed.failure(CompletionReadStage::Adoption,"é".repeat(300));assert!(long.len()<=512);assert!(long.contains("completion_stage=adoption"));
+ eprintln!("completion_read_same_ofd_cursor1_repeat_fullEOF4097_faults_verified");
 }
