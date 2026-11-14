@@ -902,6 +902,51 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         }
         let refusal = collect_owner_handles(&simulated_owner_chain(MAX_WATCHED_OWNERS + 1), 1000, 1000, r"C:\Windows", |id| Ok(simulated_owner(id)));
         assert!(refusal.is_err(), "continuing ancestry is refused rather than silently truncated");
+
+        // The production direct walk must spend its budget on exited levels too.
+        for case in ["exact", "over", "boundary", "reuse", "unwatchable", "cycle"] {
+            let count = if matches!(case, "exact" | "cycle") { MAX_WATCHED_OWNERS } else { MAX_WATCHED_OWNERS + 1 };
+            let observations = std::cell::Cell::new(0usize);
+            let exited_polls = std::cell::Cell::new(0usize);
+            let parent_queries = std::cell::Cell::new(0usize);
+            let mut levels = None;
+            let result = super::owners::direct_owner_chain_with(10_000, 1001, &[], None, &mut levels, r"C:\Windows", (
+                |id, kept| {
+                    assert!(kept.is_none());
+                    observations.set(observations.get() + 1);
+                    let index = (id - 1001) as usize;
+                    let lookahead = index == MAX_WATCHED_OWNERS;
+                    Ok(OwnerObservation {
+                        handle: id as usize as Handle,
+                        started: if lookahead && case == "boundary" { None }
+                            else if lookahead && case == "reuse" { Some(20_000) }
+                            else { Some(10_000 - index as u64) },
+                        image: if lookahead && case == "boundary" { r"C:\Windows\explorer.exe".into() } else { r"C:\tools\worker.exe".into() },
+                        waitable: !(lookahead && matches!(case, "boundary" | "reuse" | "unwatchable")),
+                    })
+                },
+                |handle| {
+                    assert_ne!(handle as usize, 1001, "the required direct parent is never skipped as exited");
+                    exited_polls.set(exited_polls.get() + 1);
+                    true
+                },
+                |handle| {
+                    parent_queries.set(parent_queries.get() + 1);
+                    let id = handle as usize as u32;
+                    Some(if (id - 1001) as usize + 1 == count { if case == "cycle" { 1001 } else { 0 } } else { id + 1 })
+                },
+            ));
+            match case {
+                "over" => assert_eq!(result.expect_err("an exited continuation past the traversal limit must refuse").message(),
+                    "ancestor chain continues past the owner watch limit"),
+                "unwatchable" => assert_eq!(result.unwrap_err().message(), "a live ancestor cannot be watched"),
+                "cycle" => assert_eq!(result.unwrap_err().message(), "ancestor chain contains a cycle"),
+                _ => assert_eq!(result.unwrap().unwrap(), vec![1001usize as Handle]),
+            }
+            assert_eq!(observations.get(), count, "{case}");
+            assert_eq!(parent_queries.get(), MAX_WATCHED_OWNERS, "{case}");
+            assert_eq!(exited_polls.get(), MAX_WATCHED_OWNERS - 1, "{case}");
+        }
     }
 
     #[test]

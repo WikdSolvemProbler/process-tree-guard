@@ -406,16 +406,13 @@ pub(super) fn observed_owner(id: u32, kept: Option<Handle>, cleanup: &mut Handle
 /// Toolhelp snapshot. Native link-query failure takes the existing verified
 /// snapshot fallback; required identity/access failures remain fail-closed.
 pub(super) fn direct_owner_chain(ours: u64, kept: &[Handle], cleanup: &mut HandleList, seed: Option<&ParentFacts>, levels: &mut Option<SmallList<ConsoleOwner, 16>>, windows: &mut Option<String>, process: Option<Handle>) -> Result<Option<HandleList>, GuardError> {
-    let mut parent = match seed {
+    let parent = match seed {
         Some(seed) => seed.id,
         None => match process {
             Some(handle) => parent_process_id_on(handle)?,
             None => parent_process_id()?,
         },
     };
-    let mut child_started = ours;
-    let mut ids: SmallList<u32, 16> = SmallList::new();
-    let mut owners = HandleList::new();
     // The one Windows folder string of the run is built here and moved
     // into the caller's slot at once, so every return path below —
     // success, refusal and the snapshot fallback alike — leaves it
@@ -423,12 +420,41 @@ pub(super) fn direct_owner_chain(ours: u64, kept: &[Handle], cleanup: &mut Handl
     // instead of querying and converting the folder again.
     *windows = Some(windows_folder());
     let windows = windows.as_deref().unwrap_or("");
+    direct_owner_chain_with(ours, parent, kept, seed, levels, windows, (
+        |id, kept| observed_owner(id, kept, cleanup),
+        |handle| unsafe { WaitForSingleObject(handle, 0) == 0 },
+        |handle| {
+            let mut basic: ProcessBasicInformation = unsafe { std::mem::zeroed() };
+            if unsafe { NtQueryInformationProcess(handle, 0, &mut basic as *mut _ as *mut c_void,
+                std::mem::size_of::<ProcessBasicInformation>() as u32, std::ptr::null_mut()) } != 0 {
+                None
+            } else {
+                Some(basic.parent_process_id as u32)
+            }
+        },
+    ))
+}
+
+/// The direct walk, with lazy native operations shared by the production caller and tests.
+pub(super) fn direct_owner_chain_with<O, E, P>(
+    ours: u64, mut parent: u32, kept: &[Handle], seed: Option<&ParentFacts>,
+    levels: &mut Option<SmallList<ConsoleOwner, 16>>, windows: &str, operations: (O, E, P),
+) -> Result<Option<HandleList>, GuardError>
+where
+    O: FnMut(u32, Option<Handle>) -> Result<OwnerObservation, GuardError>,
+    E: FnMut(Handle) -> bool,
+    P: FnMut(Handle) -> Option<u32>,
+{
+    let (mut observe, mut is_exited, mut parent_of) = operations;
+    let mut child_started = ours;
+    let mut ids: SmallList<u32, 16> = SmallList::new();
+    let mut owners = HandleList::new();
     while parent != 0 && parent != 4 {
         if ids.contains(&parent) { return Err(GuardError("ancestor chain contains a cycle".into())); }
         let first = if owners.is_empty() { seed } else { None };
         let facts = match first {
             Some(seed) => OwnerObservation { handle: seed.handle, started: Some(seed.started), image: String::new(), waitable: true },
-            None => observed_owner(parent, if owners.is_empty() { kept.first().copied() } else { None }, cleanup)?,
+            None => observe(parent, if owners.is_empty() { kept.first().copied() } else { None })?,
         };
         let image = first.map_or(facts.image.as_str(), |seed| seed.image.as_str());
         let name = crate::file_name_of(image);
@@ -439,7 +465,8 @@ pub(super) fn direct_owner_chain(ours: u64, kept: &[Handle], cleanup: &mut Handl
         let started = facts.started.ok_or_else(|| GuardError("ancestor creation time cannot be verified".into()))?;
         if started > child_started { break; }
         if !facts.waitable { return Err(GuardError("a live ancestor cannot be watched".into())); }
-        if owners.len() == MAX_WATCHED_OWNERS {
+        // Every admitted level spends the traversal budget, including exited ancestors.
+        if ids.len() == MAX_WATCHED_OWNERS {
             return Err(GuardError("ancestor chain continues past the owner watch limit".into()));
         }
         // Only live ancestors are watched. Above the direct parent, an
@@ -449,19 +476,17 @@ pub(super) fn direct_owner_chain(ours: u64, kept: &[Handle], cleanup: &mut Handl
         // read from its record as for any other level; watching it would
         // end the run at once as if its owner had just exited. A direct
         // parent that has exited is still watched, and ends the run.
-        let exited = !owners.is_empty() && unsafe { WaitForSingleObject(facts.handle, 0) } == 0;
+        let exited = !owners.is_empty() && is_exited(facts.handle);
         if !exited {
             owners.push(facts.handle);
             if let Some(levels) = levels.as_mut().filter(|levels| levels.len() < MAX_CONSOLE_LEVELS) { levels.push(ConsoleOwner { id: parent, handle: facts.handle, boundary: stop, recheck_boundary: image.is_empty() || windows.is_empty() }); }
         }
         ids.push(parent);
         if stop { break; }
-        let mut basic: ProcessBasicInformation = unsafe { std::mem::zeroed() };
-        if unsafe { NtQueryInformationProcess(facts.handle, 0, &mut basic as *mut _ as *mut c_void,
-            std::mem::size_of::<ProcessBasicInformation>() as u32, std::ptr::null_mut()) } != 0 {
-            return Ok(None);
-        }
-        parent = basic.parent_process_id as u32;
+        parent = match parent_of(facts.handle) {
+            Some(parent) => parent,
+            None => return Ok(None),
+        };
         child_started = started;
     }
     if owners.is_empty() { return Err(GuardError("no live ancestor could be watched".into())); }
