@@ -790,5 +790,58 @@ mod tests {
             assert_eq!(scanned(input.as_bytes(), false, EXE), *want, "token {}", token);
             assert_eq!(dom_verdict(&input, false, EXE), *want, "parsed token {}", token);
         }
+
+        // Derive 5^1075 independently with little-endian decimal digits.
+        // Every intermediate is at most 9*5+4 = 49, so u8 is sufficient.
+        let mut digits = vec![1u8];
+        for _ in 0..1075 {
+            let mut carry = 0u8;
+            for digit in &mut digits {
+                let product = *digit * 5 + carry;
+                *digit = product % 10;
+                carry = product / 10;
+            }
+            if carry != 0 { digits.push(carry); }
+        }
+        let integer: String = digits.iter().rev().map(|digit| (b'0' + *digit) as char).collect();
+        assert_eq!(integer.len(), 752);
+        let midpoint = format!("0.{}{}", "0".repeat(1075 - integer.len()), integer);
+        assert_eq!(midpoint.as_bytes().last(), Some(&b'5'));
+        let mut below = midpoint.clone();
+        assert_eq!(below.pop(), Some('5'));
+        below.push('4');
+        let mut above = midpoint.clone();
+        assert_eq!(above.pop(), Some('5'));
+        above.push('6');
+        // After the first 341 matching places, zero at place 343 is below
+        // the exact bound's 8. A zero-run shortcut must not skip that fact.
+        let bulk_gap = format!("0.{}{}1", &midpoint[2..2 + 341], "0".repeat(1075 - 341));
+        let boundary_cases = [
+            ("original343byte_falsepositive", format!("0.{}247032822920623271", "0".repeat(323)), 0u64, false),
+            ("midpoint_minus_one_decimal_unit", below, 0, false),
+            ("exact_midpoint_tie", midpoint.clone(), 0, false),
+            ("midpoint_plus_one_decimal_unit", above, 1, true),
+            ("midpoint_zero_suffix", format!("{}0000", midpoint), 0, false),
+            ("midpoint_late_positive_suffix", format!("{}0001", midpoint), 1, true),
+            ("bulk_zero_skip_gap", bulk_gap, 0, false),
+        ];
+        for (name, token, bits, want) in boundary_cases {
+            let parsed = token.parse::<f64>().expect("independently derived decimal token");
+            assert_eq!(parsed.to_bits(), bits, "{}: actual f64 parser bits", name);
+            let input = with_token(&token);
+            assert_eq!(scanned(input.as_bytes(), false, EXE), want, "{}: raw production scan", name);
+            assert_eq!(dom_verdict(&input, false, EXE), want, "{}: whole-string production verdict", name);
+
+            // Force decoded character delivery rather than a contiguous
+            // timeout run, using the production scanner's JSON escape path.
+            use std::fmt::Write as _;
+            let mut escaped = String::with_capacity(token.len() * 6);
+            for byte in token.bytes() {
+                write!(&mut escaped, "\\u{:04x}", byte).expect("encode ASCII token escape");
+            }
+            assert_eq!(input.match_indices(token.as_str()).count(), 1, "one exact timeout token");
+            let escaped_input = input.replacen(token.as_str(), escaped.as_str(), 1);
+            assert_eq!(scanned(escaped_input.as_bytes(), false, EXE), want, "{}: escaped production scan", name);
+        }
     }
 }

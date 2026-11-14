@@ -24,10 +24,10 @@ pub(crate) const SHELL_NAMES: [&str; 3] = ["powershell", "bash", "cmd"];
 /// This midpoint alone is derived from `crate::MAX_SECONDS` at its
 /// current value; the comparisons themselves read that constant.
 pub(super) const TIMEOUT_MID: &[u8] = b"0000000000072759576141834259033203125";
-/// The leading significant digits of 2^-1075, half of the smallest
-/// subnormal above zero, whose first digit sits at fraction place 324:
-/// a smaller fraction parses to zero.
-pub(crate) const ZERO_MID: &[u8] = b"24703282292062327";
+/// All significant decimal digits of 2^-1075 = 5^1075 / 10^1075,
+/// half of the smallest subnormal above zero. The first digit sits at
+/// fraction place 324; a fraction at or below this midpoint parses to zero.
+pub(crate) const ZERO_MID: &[u8] = b"24703282292062327208828439643411068618252990130716238221279284125033775363510437593264991818081799618989828234772285886546332835517796989819938739800539093906315035659515570226392290858392449105184435931802849936536152500319370457678249219365623669863658480757001585769269903706311928279558551332927834338409351978015531246597263579574622766465272827220056374006485499977096599470454020828166226237857393450736339007967761930577506740176324673600968951340535537458516661134223766678604162159680461914467291840300530057530849048765391711386591646239524912623653881879636239373280423891018672348497668235089863388587925628302755995657524455507255189313690836254779186948667994968324049705821028513185451396213837722826145437693412532098591327667236328125";
 
 /// The `--timeout` token of an envelope, checked as its characters
 /// arrive. A token of at most 32 bytes is kept whole and handed to
@@ -134,14 +134,12 @@ impl TimeoutCheck {
     ///   one to `bytes` and one to `whole_digits` and nothing
     ///   else — a nonzero digit is not of that shape, so the
     ///   maximal zero run is consumed whole.
-    /// - In the fraction phase at or past place 341, both bounds
-    ///   a zero step consults are zero — the midpoint bound past
-    ///   its 37 places, and the subnormal bound past its last
-    ///   place, 340 — and a zero digit equals a zero bound, so
-    ///   the step decides neither comparison however they stand,
-    ///   and adds one to `bytes` and one to `fraction_digits`
-    ///   and nothing else; the maximal zero run is consumed
-    ///   whole.
+    /// - In the fraction phase at or past 324 + ZERO_MID.len(),
+    ///   both consulted bounds are zero: the midpoint bound is
+    ///   past its 37 places and the subnormal bound is past
+    ///   323 + ZERO_MID.len(). A zero digit therefore decides
+    ///   neither comparison and adds one to `bytes` and one to
+    ///   `fraction_digits`; the maximal zero run is consumed whole.
     ///
     /// The runs are scanned as bytes: the digits the
     /// per-character feed steps on are the characters
@@ -157,7 +155,7 @@ impl TimeoutCheck {
         let n = if self.dot {
             if self.fraction_mid != 0 && self.fraction_sub != 0 {
                 bytes.iter().position(|&b| !b.is_ascii_digit()).unwrap_or(bytes.len())
-            } else if self.fraction_digits >= 341 {
+            } else if self.fraction_digits >= 324 + ZERO_MID.len() {
                 bytes.iter().position(|&b| b != b'0').unwrap_or(bytes.len())
             } else {
                 return 0;
