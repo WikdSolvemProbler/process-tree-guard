@@ -160,13 +160,13 @@ impl std::io::Read for StandardInput {
     }
 }
 
-/// The whole of a file as bytes, read through its raw handle: the
-/// handle is opened with `CreateFileW` and read with `ReadFile`, and
-/// is never closed — process exit reclaims it, exactly as it does the
-/// standard handles above. For a one-shot read on a path that exits
-/// soon after, the close is a call that buys nothing. Any failure —
-/// the file missing, an open or read error — gives `None`.
+/// The whole of a file as bytes. Returning callers use an owned file,
+/// closed before this helper returns. A process-owning CLI reads through
+/// its raw handle and leaves closure to process exit. Any failure gives None.
 pub(crate) fn read_file_bytes(path: &str) -> Option<Vec<u8>> {
+    if !active() {
+        return std::fs::read(path).ok();
+    }
     let wide = wide(path);
     // Shares include delete (4), as the standard file open shares it.
     let handle = unsafe {

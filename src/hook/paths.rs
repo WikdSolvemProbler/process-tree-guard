@@ -377,13 +377,11 @@ pub(crate) fn policy_path(exe: &str) -> Option<String> {
 pub(crate) const POLICY_NOT_FOUND: &str = "POLICY.md not found beside the installed process guard.";
 
 /// Append the policy text found relative to this executable alone to
-/// `out`, as a quoted JSON string escaped directly into the buffer
-/// being built. The file bytes come through a raw handle that is
-/// never closed (see `cli_process::read_file_bytes`) and are
-/// validated as UTF-8 here, with exactly the strictness the standard
-/// string read applied: any failure — no executable path, no policy
-/// path, a missing file, a read error, invalid UTF-8 — writes the
-/// fallback text instead, as the standard read's failure did.
+/// `out`, as a quoted JSON string escaped directly into the buffer.
+/// Returning calls close the owned file; a one-shot CLI reclaims its raw
+/// handle at process exit. Bytes are validated as strict UTF-8 here. Any
+/// failure — no executable or policy path, a missing file, a read error,
+/// or invalid UTF-8 — writes the same fallback text.
 pub(crate) fn write_policy(out: &mut String) {
     // The stack spelling first, as in the vendors of `main`: this
     // function's only use of the executable path is to derive the
@@ -486,5 +484,30 @@ mod tests {
             Some("//server/share/POLICY.md")
         );
         assert!(policy_path("//server/share/process-tree-guard.exe").is_none());
+
+        use std::os::windows::fs::OpenOptionsExt;
+        let dir = crate::test_temp::fresh_dir("ptg-policy-reader-owner");
+        let path = dir.join("POLICY.md");
+        let bytes = "policy \u{00e9}\n".as_bytes();
+        std::fs::write(&path, bytes).expect("write the owned policy fixture");
+        let exclusive = || std::fs::OpenOptions::new().read(true).share_mode(0).open(&path);
+        let held = std::fs::File::open(&path).expect("hold the oracle read handle");
+        assert_eq!(exclusive().expect_err("an existing read handle prevents exclusive access").raw_os_error(), Some(32));
+        drop(held);
+        drop(exclusive().expect("exclusive access succeeds after the oracle handle closes"));
+        let spelling = path.to_str().expect("the owned fixture path is Unicode");
+        for _ in 0..2 {
+            let read = crate::cli_process::returning(|| {
+                assert!(!crate::cli_process::active());
+                crate::cli_process::returning(|| {
+                    assert!(!crate::cli_process::active());
+                    crate::cli_process::read_file_bytes(spelling)
+                })
+            });
+            assert_eq!(read.as_deref(), Some(bytes), "return the full policy bytes");
+            drop(exclusive().expect("a returning policy read releases its file handle"));
+        }
+        std::fs::remove_file(&path).expect("remove the owned policy fixture");
+        std::fs::remove_dir(&dir).expect("remove its empty owned directory");
     }
 }
