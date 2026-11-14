@@ -332,6 +332,17 @@ The four programs stand in `target\release\`. The build needs no crates and no r
 
 [↑ Back to Contents](#contents)
 
+### Opt-in Linux separate-service components
+
+Native GNU Linux builds for x86-64 and ARM64 can select the acknowledged separate-service components explicitly:
+
+```sh
+cargo build --locked --release --features linux-separate-service --bin process-tree-guard-root --bin process-tree-guard-client
+cargo test --locked --release --features linux-separate-service --bin process-tree-guard-client
+```
+
+This build path requires existing `cc` and `ar` tools and `HOST == TARGET`; it does not support cross-compilation or non-GNU targets. Select these two binaries rather than a bare feature-enabled build, which also selects the Windows programs. The executables do not install protected service files, configure an account or policy, or enable a socket. [Linux deployment requirements](src/sys/linux/README.md) still apply. On ARM64 GNU Linux with Rust 1.99, the selected-bin build, the same 12 existing component tests, source packaging and a fresh rebuild from the extracted package passed. The default no-feature library check produced the exact unsupported-backend refusal without native outputs. Rust 1.88 and x86-64 remain unverified. These results do not qualify a live Linux lifecycle or performance, or enable the default Linux backend or a transparent Linux library execution API.
+
 ## Results
 
 Results of the release test run for 0.5.0, Wednesday, 04NOV2026. The logs are attached to the v0.5.0 release.

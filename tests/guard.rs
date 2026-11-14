@@ -2561,7 +2561,8 @@ fn g93_no_test_runs_over_the_cap_without_the_console_method_and_a_release_has_no
     }
     let manifest = include_str!("../Cargo.toml").replace("\r\n", "\n");
     let features = manifest.split("[features]\n").nth(1).unwrap_or("").split("\n[").next().unwrap_or("").trim().to_string();
-    checks.check("G93", "Cargo.toml declares no feature but the test helper's, so no feature can build a stub into a program", features == "testkit = []", features.clone());
+    checks.check("G93", "Cargo.toml declares exactly the test helper and opt-in separate-service build features, without a default or a Windows decision feature",
+        features == "testkit = []\nlinux-separate-service = []", features.clone());
     // And no other part of a program can differ between a test build and a release: nothing is compiled by a feature or by the
     // debug setting, and the only items compiled for a build that is not a test are the wait and the choice of the thread
     // whose buffers the panic hook zeroes, both in `src/auth.rs`, which the unit tests replace with their own and which decide nothing.
@@ -2571,6 +2572,7 @@ fn g93_no_test_runs_over_the_cap_without_the_console_method_and_a_release_has_no
         paths.sort();
         let mut programs: Vec<(String, String)> = paths.iter().filter(|path| path.extension().map_or(false, |extension| extension == "rs"))
             .filter_map(|path| path.file_stem().map(|stem| stem.to_string_lossy().to_string())).map(|stem| (stem.clone(), module_source(&stem))).collect();
+        programs.push(("sys".to_string(), module_source("sys")));
         let mut bins: Vec<std::path::PathBuf> = std::fs::read_dir(src.join("bin")).map(|entries| entries.flatten().map(|entry| entry.path()).collect()).unwrap_or_default();
         bins.sort();
         programs.extend(bins.iter().filter(|path| path.extension().map_or(false, |extension| extension == "rs"))
@@ -2583,6 +2585,40 @@ fn g93_no_test_runs_over_the_cap_without_the_console_method_and_a_release_has_no
     };
     checks.check("G93", "src/: no file is compiled by a feature or by the debug setting, so no branch can skip the decision in a release",
         counted(&["cfg(feature", "cfg!(feature", "feature = \"", "debug_assert"]).is_empty(), format!("{:?}", counted(&["cfg(feature", "cfg!(feature", "feature = \"", "debug_assert"])));
+    let selector = include_str!("../src/sys/mod.rs").replace("\r\n", "\n");
+    let expected_selector = r#"// SPDX-License-Identifier: Apache-2.0
+// Copyright 2026 Peter Shiller
+
+//! This module selects the backend; it declares nothing; a declaration found here is a defect by definition.
+
+#[cfg(target_os = "windows")]
+pub(crate) mod windows;
+
+#[cfg(all(not(target_os = "windows"), not(ptg_linux_separate_service_build)))]
+compile_error!("this build has no proven backend for its target; the proven backend at this version is Windows");
+"#;
+    checks.check("G93", "the sole non-Windows build selector preserves the exact unsupported error and Windows module",
+        selector == expected_selector, selector.clone());
+    checks.check("G93", "the separate-service build cfg occurs only once in the backend selector, never in a Windows decision",
+        counted(&["ptg_linux_separate_service_build"]) == [("sys".to_string(), 1)],
+        format!("{:?}", counted(&["ptg_linux_separate_service_build"])));
+    let build_source = include_str!("../build.rs").replace("\r\n", "\n");
+    let native_gate = r#"    if !is_windows && env::var_os("CARGO_FEATURE_LINUX_SEPARATE_SERVICE").is_some() {
+        let target = env::var("TARGET").expect("TARGET");
+        let host = env::var("HOST").expect("HOST");
+        assert!(matches!(target.as_str(), "x86_64-unknown-linux-gnu" | "aarch64-unknown-linux-gnu") && host == target,
+            "linux-separate-service requires a native x86_64/aarch64 GNU Linux build (HOST == TARGET)");
+        build_linux_native();
+        println!("cargo:rustc-cfg=ptg_linux_separate_service_build");
+        return;
+    }
+"#;
+    checks.check("G93", "the build script activates that cfg only after explicit opt-in, exact native GNU target and successful native build",
+        build_source.contains(native_gate)
+            && build_source.matches("CARGO_FEATURE_LINUX_SEPARATE_SERVICE").count() == 1
+            && build_source.matches("cargo:rustc-cfg=").count() == 1
+            && build_source.matches("cargo:rustc-check-cfg=cfg(ptg_linux_separate_service_build)").count() == 1
+            && build_source.matches("build_linux_native();").count() == 1, "");
     let not_test = counted(&["cfg(not(test))", "cfg!(not(test"]);
     let auth_source = module_source("auth");
     checks.check("G93", "src/: the only items compiled for a build that is not a test are the wait and the choice of the thread for the panic hook in src/auth (`fn wait_ms`, `fn only_this_thread`), which decide nothing",

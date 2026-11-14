@@ -130,9 +130,81 @@ fn number(name: &str) -> u16 {
     env::var(name).ok().and_then(|text| text.parse().ok()).unwrap_or(0)
 }
 
+/// Fixed native assets for the opt-in separate-service binaries only.
+const LINUX_NATIVE_OBJECTS: [&str; 6] = [
+    "kernel_signal_abi", "native_arming", "payload_bootstrap",
+    "terminal_bridge", "waitid_bridge", "entry_timer",
+];
+const LINUX_NATIVE_HEADERS: [&str; 7] = [
+    "native_arming.h", "owner_poll.h", "owner_watch.h", "payload_bootstrap.h",
+    "terminal_bridge.h", "waitid_bridge.h", "entry_timer.h",
+];
+
+fn directive_path(path: &std::path::Path) -> &str {
+    let text = path.to_str().expect("native build path must be UTF-8");
+    assert!(!text.contains(['\r', '\n']), "native build path must be one line");
+    text
+}
+
+fn native_tool(name: &str) -> PathBuf {
+    env::split_paths(&env::var_os("PATH").expect("PATH for native cc and ar"))
+        .map(|folder| folder.join(name)).find(|path| path.is_file())
+        .unwrap_or_else(|| panic!("native Linux build requires existing {name} on PATH"))
+}
+
+fn build_linux_native() {
+    let source = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
+        .join("src/sys/linux");
+    let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
+    assert!(out.is_absolute() && out.is_dir(), "OUT_DIR must be an existing absolute directory");
+    let archive = out.join("libptg_linux_native.a");
+    directive_path(&archive);
+    let cc = native_tool("cc");
+    let ar = native_tool("ar");
+    // Check every source/header before starting the first compiler.
+    for asset in LINUX_NATIVE_OBJECTS.iter().map(|name| format!("{name}.c"))
+        .chain(LINUX_NATIVE_HEADERS.iter().map(|name| (*name).to_string())) {
+        let path = source.join(asset);
+        assert!(path.is_file(), "missing native asset: {}", path.display());
+        println!("cargo:rerun-if-changed={}", directive_path(&path));
+    }
+    for asset in ["50-process-tree-guard-ref.rules.in", "process-tree-guard.socket", "process-tree-guard@.service"] {
+        let path = source.join("deployment").join(asset);
+        assert!(path.is_file(), "missing deployment asset: {}", path.display());
+        println!("cargo:rerun-if-changed={}", directive_path(&path));
+    }
+    println!("cargo:rerun-if-env-changed=PATH");
+    let mut objects = Vec::with_capacity(LINUX_NATIVE_OBJECTS.len());
+    for name in LINUX_NATIVE_OBJECTS {
+        let object = out.join(format!("{name}.o"));
+        let status = std::process::Command::new(&cc)
+            .args(["-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-fstack-protector-strong", "-c"])
+            .arg(source.join(format!("{name}.c"))).arg("-o").arg(&object)
+            .status().expect("run native C compiler");
+        assert!(status.success(), "native C compiler failed for {name}: {status}");
+        objects.push(object);
+    }
+    let status = std::process::Command::new(&ar).arg("rcs").arg(&archive).args(&objects)
+        .status().expect("run native archive tool");
+    assert!(status.success(), "native archive tool failed: {status}");
+    // The two adapter crates own the static native dependency; rustc orders it
+    // with native libraries before its upstream Rust/runtime libraries.
+    println!("cargo:rustc-link-search=native={}", directive_path(&out));
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rustc-check-cfg=cfg(ptg_linux_separate_service_build)");
     let is_windows = env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "windows");
+    if !is_windows && env::var_os("CARGO_FEATURE_LINUX_SEPARATE_SERVICE").is_some() {
+        let target = env::var("TARGET").expect("TARGET");
+        let host = env::var("HOST").expect("HOST");
+        assert!(matches!(target.as_str(), "x86_64-unknown-linux-gnu" | "aarch64-unknown-linux-gnu") && host == target,
+            "linux-separate-service requires a native x86_64/aarch64 GNU Linux build (HOST == TARGET)");
+        build_linux_native();
+        println!("cargo:rustc-cfg=ptg_linux_separate_service_build");
+        return;
+    }
     let is_msvc = env::var("CARGO_CFG_TARGET_ENV").is_ok_and(|abi| abi == "msvc");
     // The GNU linker does not accept a `.res` file, so that target (unsupported)
     // builds the same programs without a version resource.

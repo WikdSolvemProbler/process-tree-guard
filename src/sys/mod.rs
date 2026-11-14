@@ -6,5 +6,5 @@
 #[cfg(target_os = "windows")]
 pub(crate) mod windows;
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), not(ptg_linux_separate_service_build)))]
 compile_error!("this build has no proven backend for its target; the proven backend at this version is Windows");

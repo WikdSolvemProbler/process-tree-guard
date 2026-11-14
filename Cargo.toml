@@ -12,7 +12,24 @@ repository = "https://github.com/WikdSolvemProbler/process-tree-guard"
 readme = "README.md"
 keywords = ["process", "deadline", "process-tree", "windows", "job-object"]
 categories = ["command-line-utilities"]
-include = ["/src/**/*.rs", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/NOTICE", "/POLICY.md", "/tests/support/testkit.rs"]
+include = ["/src/**/*.rs", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.md", "/LICENSE", "/NOTICE", "/POLICY.md", "/tests/support/testkit.rs",
+    "/src/sys/linux/deployment/50-process-tree-guard-ref.rules.in",
+    "/src/sys/linux/deployment/process-tree-guard.socket",
+    "/src/sys/linux/deployment/process-tree-guard@.service",
+    "/src/sys/linux/entry_timer.c",
+    "/src/sys/linux/entry_timer.h",
+    "/src/sys/linux/kernel_signal_abi.c",
+    "/src/sys/linux/native_arming.c",
+    "/src/sys/linux/native_arming.h",
+    "/src/sys/linux/owner_poll.h",
+    "/src/sys/linux/owner_watch.h",
+    "/src/sys/linux/payload_bootstrap.c",
+    "/src/sys/linux/payload_bootstrap.h",
+    "/src/sys/linux/terminal_bridge.c",
+    "/src/sys/linux/terminal_bridge.h",
+    "/src/sys/linux/waitid_bridge.c",
+    "/src/sys/linux/waitid_bridge.h"
+]
 build = "build.rs"
 autobins = false
 
@@ -51,8 +68,24 @@ name = "testkit"
 path = "tests/support/testkit.rs"
 required-features = ["testkit"]
 
+# Dedicated acknowledged separate-service Linux components; never a default backend.
+[[bin]]
+name = "process-tree-guard-root"
+path = "src/bin/process-tree-guard-linux-root.rs"
+edition = "2024"
+required-features = ["linux-separate-service"]
+test = false
+
+[[bin]]
+name = "process-tree-guard-client"
+path = "src/bin/process-tree-guard-linux-client.rs"
+edition = "2024"
+required-features = ["linux-separate-service"]
+test = true
+
 [features]
 testkit = []
+linux-separate-service = []
 
 [dev-dependencies]
 process-tree-guard = { path = ".", features = ["testkit"] }

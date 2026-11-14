@@ -39,6 +39,7 @@ mod sys;
 
 #[cfg(windows)]
 mod auth;
+#[cfg(windows)]
 mod base64;
 #[cfg(windows)]
 mod cli;
@@ -68,12 +69,14 @@ mod timing;
 /// the console cleanup's flushed-process list holds 64. This is the one home
 /// of the type, at the crate root both its users (the engine and the CLI
 /// process policy) descend from; `sys.rs` holds Windows declarations only.
+#[cfg(windows)]
 #[derive(Debug)]
 pub(crate) struct SmallList<T: Copy + Default, const N: usize> {
     inline: [T; N],
     len: usize,
     spill: Vec<T>,
 }
+#[cfg(windows)]
 impl<T: Copy + Default, const N: usize> SmallList<T, N> {
     pub(crate) fn new() -> Self { Self { inline: [T::default(); N], len: 0, spill: Vec::new() } }
     pub(crate) fn from_slice(values: &[T]) -> Self {
@@ -92,10 +95,12 @@ impl<T: Copy + Default, const N: usize> SmallList<T, N> {
     }
     pub(crate) fn extend_from_slice(&mut self, values: &[T]) { for &value in values { self.push(value); } }
 }
+#[cfg(windows)]
 impl<T: Copy + Default, const N: usize> std::ops::Deref for SmallList<T, N> {
     type Target = [T];
     fn deref(&self) -> &[T] { if self.spill.is_empty() { &self.inline[..self.len] } else { &self.spill } }
 }
+#[cfg(windows)]
 impl<T: Copy + Default + PartialEq, const N: usize> PartialEq<Vec<T>> for SmallList<T, N> {
     fn eq(&self, other: &Vec<T>) -> bool { &**self == other.as_slice() }
 }
@@ -106,6 +111,7 @@ impl<T: Copy + Default + PartialEq, const N: usize> PartialEq<Vec<T>> for SmallL
 /// engine's owner walk, the extension state and the approval all read a file
 /// name out of an image path, and the rule (either separator; the whole path
 /// when there is none) cannot drift between them.
+#[cfg(windows)]
 pub(crate) fn file_name_of(image: &str) -> &str {
     image.rsplit(['\\', '/']).next().unwrap_or("")
 }
@@ -170,20 +176,25 @@ pub use extend::{Grant, CHANNEL_VARIABLE, DEFAULT_MAX_EXTENSION};
 pub(crate) use dispatch::{entry_contain, entry_deadline, entry_full, entry_gate};
 use std::fmt;
 
+#[cfg(windows)]
 mod deadline;
+#[cfg(windows)]
 pub use deadline::MAX_SECONDS;
 
 /// The exit code of a run whose deadline passed: the run's own result
 /// when its process tree was terminated at the deadline, and the code
 /// the job's members are terminated with.
+#[cfg(windows)]
 pub(crate) const EXIT_TIMEOUT: i32 = 124;
 
 /// The exit code of a guard error, and of a run ended because the
 /// process that launched the guard exited.
+#[cfg(windows)]
 pub(crate) const EXIT_GUARD_ERROR: i32 = 125;
 
 /// The exit code of a hook denial: the one code with which a host
 /// hook blocks a tool call.
+#[cfg(windows)]
 pub(crate) const EXIT_HOOK_DENY: i32 = 2;
 
 /// A guard error: invalid arguments, a program that is not found, or a failed
