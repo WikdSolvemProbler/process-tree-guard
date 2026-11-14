@@ -200,7 +200,7 @@ impl Console {
             let windows_wide: &[u16] = folder_units.as_slice();
             // Inline storage of 64 identifiers, spilling only past that:
             // an ordinary finish allocates nothing for this list.
-            let mut flushed: SmallList<u32, 64> = SmallList::new();
+            let mut flushed = FlushedConsoles::new();
             if self.attached {
                 if !self.input.is_null() { FlushConsoleInputBuffer(self.input); }
                 else { flush_attached(); }
@@ -209,7 +209,7 @@ impl Console {
             }
             if let Some(levels) = levels {
                 flush_verified_owners(levels, |handle| boundary(handle, windows_wide), |pid| {
-                    if !flushed.contains(&pid) && AttachConsole(pid) != 0 {
+                    if !flushed.can_skip(pid) && AttachConsole(pid) != 0 {
                         flush_attached();
                         note_console_members(&mut flushed);
                         FreeConsole();
@@ -227,7 +227,7 @@ impl Console {
                 if boundary(current, windows_wide) { break; }
                 let pid = GetProcessId(current);
                 if pid == 0 || pid == 4 { break; }
-                if !flushed.contains(&pid) && AttachConsole(pid) != 0 {
+                if !flushed.can_skip(pid) && AttachConsole(pid) != 0 {
                     flush_attached();
                     note_console_members(&mut flushed);
                     FreeConsole();
@@ -289,14 +289,37 @@ fn flush_verified_owners(
     }
 }
 
-fn note_console_members(members: &mut SmallList<u32, 64>) {
+/// A complete census permits duplicate suppression; any uncertain census
+/// disables it for this entire finish, even after a later complete query.
+struct FlushedConsoles {
+    members: SmallList<u32, 64>,
+    reliable: bool,
+}
+impl FlushedConsoles {
+    fn new() -> Self { Self { members: SmallList::new(), reliable: true } }
+    fn can_skip(&self, pid: u32) -> bool { self.reliable && self.members.contains(&pid) }
+
+    /// # Safety
+    /// When count is in 1..=list.len(), that prefix must be initialized by the
+    /// query. Invalid counts require no initialized entries and read none.
+    unsafe fn record_query(&mut self, count: usize, list: &[std::mem::MaybeUninit<u32>]) {
+        if count == 0 || count > list.len() {
+            self.reliable = false;
+            return;
+        }
+        // The native query initialized exactly this returned prefix. No slice
+        // is formed on its failure or overflow paths above.
+        for &pid in unsafe { std::slice::from_raw_parts(list.as_ptr() as *const u32, count) } {
+            if !self.members.contains(&pid) { self.members.push(pid); }
+        }
+    }
+}
+
+fn note_console_members(members: &mut FlushedConsoles) {
     let mut list = [std::mem::MaybeUninit::<u32>::uninit(); 1024];
     let count = unsafe { GetConsoleProcessList(list.as_mut_ptr() as *mut u32, list.len() as u32) } as usize;
-    // Failure/overflow disables only the duplicate-flush optimization.
-    if count > 0 && count <= list.len() {
-        // The call wrote the `count` identifiers the read is confined to.
-        for &pid in unsafe { std::slice::from_raw_parts(list.as_ptr() as *const u32, count) } { if !members.contains(&pid) { members.push(pid); } }
-    }
+    // The API initializes the returned prefix only when the count fits.
+    unsafe { members.record_query(count, &list) };
 }
 fn flush_attached() {
     let handle = unsafe { CreateFileW(CONIN_NAME.as_ptr(), 0xc000_0000, 3,
@@ -506,6 +529,39 @@ mod tests {
         flush_verified_owners(&levels, |handle| { queried.push(handle); true }, |pid| flushed.push(pid));
         assert_eq!(queried, vec![112usize as Handle]);
         assert_eq!(flushed, vec![11]);
+        // Valid censuses still suppress duplicates. A failed or overflowing
+        // census must invalidate earlier PID membership for the whole finish;
+        // a later successful query cannot restore that lost authority.
+        let dedupe_levels: Vec<_> = (11..=13).map(|id| ConsoleOwner {
+            id, handle: std::ptr::null_mut(), boundary: false, recheck_boundary: false,
+        }).collect();
+        let initial = [std::mem::MaybeUninit::new(12)];
+        let later = [std::mem::MaybeUninit::new(13)];
+        let mut known = FlushedConsoles::new();
+        unsafe { known.record_query(1, &initial) };
+        let mut attempts = Vec::new();
+        flush_verified_owners(&dedupe_levels, |_| panic!("no boundary requery"), |pid| {
+            if !known.can_skip(pid) {
+                attempts.push(pid);
+                unsafe { known.record_query(1, &later) };
+            }
+        });
+        assert_eq!(attempts, vec![11], "complete censuses preserve duplicate suppression");
+        for invalid_count in [0, 1025] {
+            let unread = [std::mem::MaybeUninit::<u32>::uninit(); 1024];
+            let mut known = FlushedConsoles::new();
+            unsafe { known.record_query(1, &initial) };
+            attempts.clear();
+            flush_verified_owners(&dedupe_levels, |_| panic!("no boundary requery"), |pid| {
+                if !known.can_skip(pid) {
+                    attempts.push(pid);
+                    if pid == 11 { unsafe { known.record_query(invalid_count, &unread) }; }
+                    if pid == 12 { unsafe { known.record_query(1, &later) }; }
+                }
+            });
+            assert_eq!(attempts, vec![11, 12, 13],
+                "count {invalid_count} invalidates old membership and later success cannot heal it");
+        }
         let many: Vec<_> = (0..100).map(|id| ConsoleOwner { id, handle: std::ptr::null_mut(), boundary: false, recheck_boundary: false }).collect();
         flushed.clear();
         flush_verified_owners(&many, |_| panic!("verified levels never need a native boundary query"), |pid| flushed.push(pid));
