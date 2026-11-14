@@ -190,7 +190,18 @@ pub(super) fn poll_all_owner_windows(
 /// The owner-rotation window interval both wait paths share.
 const ROTATE_INTERVAL_MS: u32 = 50;
 
-pub(super) fn wait_with_deadline_observed(mut remaining: impl FnMut() -> Option<u64>, wake: Option<Handle>, waits: &[Handle], mut decision: Option<&mut DecisionEvidence>) -> u32 {
+pub(super) fn wait_with_deadline_observed(remaining: impl FnMut() -> Option<u64>, wake: Option<Handle>, waits: &[Handle], decision: Option<&mut DecisionEvidence>) -> u32 {
+    wait_with_deadline_using(remaining, wake, waits, decision, |handles, milliseconds| unsafe {
+        WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 0, milliseconds)
+    })
+}
+
+/// Share the complete production wait loop with focused native-boundary tests.
+/// The production callback is the unchanged Win32 WaitAny call above.
+pub(super) fn wait_with_deadline_using(
+    mut remaining: impl FnMut() -> Option<u64>, wake: Option<Handle>, waits: &[Handle],
+    mut decision: Option<&mut DecisionEvidence>, mut wait: impl FnMut(&[Handle], u32) -> u32,
+) -> u32 {
     if waits.is_empty() || waits.len() > MAX_WATCHED_OWNERS + 1 {
         return WAIT_FAILED;
     }
@@ -204,11 +215,9 @@ pub(super) fn wait_with_deadline_observed(mut remaining: impl FnMut() -> Option<
     handles[1..1 + first.len()].copy_from_slice(first);
     let mut ordinary_count = 1 + first.len();
     let mut timer = DeadlineTimer(std::ptr::null_mut());
-    // The waitable timer exists for the suspend-inclusive wake on long waits.
-    // The first passes wait plainly in short slices and re-read the deadline
-    // each pass, so a run that ends inside them never creates, arms or closes
-    // a timer at all; the timer is created on the fourth pass at the latest.
-    let mut plain_passes = 0usize;
+    let mut initial_passes = 0u8;
+    // Every blocking pass needs an absolute wake, including the first one:
+    // relative Win32 waits stop counting down while Windows 8+ is asleep.
     loop {
         if rotating {
             let window = owner_window(owners, subset);
@@ -222,23 +231,14 @@ pub(super) fn wait_with_deadline_observed(mut remaining: impl FnMut() -> Option<
         // once, so a poll first would only double the wait calls of every
         // pass. Deadline expiry keeps its own final poll in the branch
         // below, which is where exit-before-expiry precedence is decided.
-        // A plain pass cannot consume the wall clock — only a timer-armed
-        // pass turns it into an absolute due time — so a plain pass samples
-        // the remaining time alone and never calls for the wall clock. A
-        // timer pass keeps the documented order of `sampled_wait_plan`: the
-        // wall clock is sampled first and the remaining time after it, so
-        // the remaining time a due time is computed from is the one sampled
-        // after its wall clock, never one sampled before it.
-        let plain = timer.0.is_null() && plain_passes < 3;
-        let (file_time, milliseconds) = match if plain {
-            remaining().filter(|left| *left > 0).map(|left| (0, left))
-        } else {
-            sampled_wait_plan(|| {
-                let mut file_time = 0u64;
-                unsafe { GetSystemTimeAsFileTime(&mut file_time) };
-                file_time
-            }, &mut remaining)
-        } {
+        // Sample wall time before interrupt time on every pass. A suspend
+        // between those samples then expires or advances the existing deadline
+        // rather than starting a fresh relative delay after resume.
+        let (file_time, milliseconds) = match sampled_wait_plan(|| {
+            let mut file_time = 0u64;
+            unsafe { GetSystemTimeAsFileTime(&mut file_time) };
+            file_time
+        }, &mut remaining) {
             Some(plan) => plan,
             None => {
                 // For a deep owner set, an expired clock read must check every
@@ -246,35 +246,16 @@ pub(super) fn wait_with_deadline_observed(mut remaining: impl FnMut() -> Option<
                 // their original one-window 50 ms rotation and native call count.
                 if rotating {
                     let selected = poll_all_owner_windows(waits[0], owners, &mut handles, |window, _, _| {
-                        observed_wait(&mut decision, || unsafe {
-                            WaitForMultipleObjects(window.len() as u32, window.as_ptr(), 0, 0)
-                        })
+                        observed_wait(&mut decision, || wait(window, 0))
                     }).expect("validated deep owner list is nonempty");
                     return if selected.status == WAIT_FAILED {
                         wait_failed_after_cleanup(|| drop(timer))
                     } else { selected.status };
                 }
-                let status = observed_wait(&mut decision, || unsafe {
-                    WaitForMultipleObjects(ordinary_count as u32, handles.as_ptr(), 0, 0)
-                });
+                let status = observed_wait(&mut decision, || wait(&handles[..ordinary_count], 0));
                 return if status == WAIT_FAILED { wait_failed_after_cleanup(|| drop(timer)) } else { status };
             }
         };
-        if plain {
-            plain_passes += 1;
-            let plain_wake_index = wake.map(|handle| { handles[ordinary_count] = handle; ordinary_count });
-            let plain_count = ordinary_count + usize::from(wake.is_some());
-            let mut plain_interval = if wake.is_some() { wait_slice_wake(milliseconds) } else { milliseconds.min(250) as u32 };
-            if rotating { plain_interval = plain_interval.min(ROTATE_INTERVAL_MS); }
-            let status = observed_wait(&mut decision, || unsafe {
-                WaitForMultipleObjects(plain_count as u32, handles.as_ptr(), 0, plain_interval)
-            });
-            if status == WAIT_TIMEOUT || Some(status as usize) == plain_wake_index {
-                if rotating { subset = (subset + 1) % subsets; }
-                continue;
-            }
-            return if status == WAIT_FAILED { wait_failed_after_cleanup(|| drop(timer)) } else { status };
-        }
         if timer.0.is_null() {
             timer.0 = unsafe { CreateWaitableTimerExW(std::ptr::null_mut(), std::ptr::null(), 2, TIMER_ALL_ACCESS) };
             if timer.0.is_null() {
@@ -285,15 +266,16 @@ pub(super) fn wait_with_deadline_observed(mut remaining: impl FnMut() -> Option<
         let wake_index = wake.map(|handle| { handles[ordinary_count] = handle; ordinary_count });
         let timer_index = ordinary_count + usize::from(wake.is_some());
         handles[timer_index] = timer.0;
-        let mut interval = if wake.is_some() { wait_slice_wake(milliseconds) } else { milliseconds.min(10_000) as u32 };
+        // Retain the original short fixed-run rechecks as well as the later
+        // cap, including when a backward wall-clock step postpones this timer.
+        let fixed_cap = if initial_passes < 3 { initial_passes += 1; 250 } else { 10_000 };
+        let mut interval = if wake.is_some() { wait_slice_wake(milliseconds) } else { milliseconds.min(fixed_cap) as u32 };
         if rotating { interval = interval.min(ROTATE_INTERVAL_MS); }
         let due = absolute_timer_due(file_time, interval as u64);
         if unsafe { SetWaitableTimer(timer.0, &due, 0, None, std::ptr::null_mut(), 0) } == 0 {
             return wait_failed_after_cleanup(|| drop(timer));
         }
-        let status = observed_wait(&mut decision, || unsafe {
-            WaitForMultipleObjects((timer_index + 1) as u32, handles.as_ptr(), 0, interval)
-        });
+        let status = observed_wait(&mut decision, || wait(&handles[..timer_index + 1], interval));
         if status != WAIT_TIMEOUT && status as usize != timer_index && Some(status as usize) != wake_index {
             return if status == WAIT_FAILED { wait_failed_after_cleanup(|| drop(timer)) } else { status };
         }
@@ -304,8 +286,8 @@ pub(super) fn wait_with_deadline_observed(mut remaining: impl FnMut() -> Option<
 /// How long to wait before the deadline is calculated again: no longer than the time
 /// left, and never longer than the backstop, which is what finds an exit whose message
 /// from the job was lost. Waits that carry the wake event use `wait_slice_wake`
-/// instead. Tests only: production plain passes cap at 250 ms inline in
-/// `wait_with_deadline_observed`; no production wait uses 100 ms.
+/// instead. Tests only: production timer-backed waits use their explicit
+/// finite caps in `wait_with_deadline_observed`.
 #[cfg(test)]
 pub(super) fn wait_slice(remaining_milliseconds: u64) -> u32 {
     remaining_milliseconds.min(BACKSTOP_MS) as u32

@@ -139,9 +139,65 @@ fn deep_owner_expiry_timeout_is_the_final_real_native_receipt() {
 }
 
 #[test]
+fn first_blocking_wait_has_an_absolute_timer_before_simulated_resume_expiry() {
+    for owner_count in [0, OWNERS_PER_WINDOW + 1] {
+        for extendable in [false, true] {
+            let owned = DeepOwnerEvents::new(owner_count + 1);
+            let wake = DeepOwnerEvents::new(1);
+            let wake_handle = extendable.then_some(wake.0[0]);
+            let expired = std::cell::Cell::new(false);
+            let mut blocking_calls = 0;
+            let mut final_polls = 0;
+            let mut decision = DecisionEvidence::default();
+            let status = wait_with_deadline_using(
+                || if expired.get() { None } else { Some(5_000) },
+                wake_handle, &owned.0, Some(&mut decision), |handles, milliseconds| {
+                    if milliseconds > 0 {
+                        blocking_calls += 1;
+                        assert_eq!(blocking_calls, 1);
+                        let ordinary = 1 + owner_count.min(OWNERS_PER_WINDOW);
+                        let timer_index = ordinary + usize::from(extendable);
+                        let first_cap = if extendable { wait_slice_wake(5_000) } else { 250 };
+                        assert_eq!(milliseconds, if owner_count > OWNERS_PER_WINDOW { first_cap.min(50) } else { first_cap });
+                        assert_eq!(handles.len(), timer_index + 1,
+                            "the first blocking wait must already carry its absolute timer");
+                        assert_eq!(&handles[..ordinary], &owned.0[..ordinary]);
+                        if extendable { assert_eq!(handles[ordinary], wake.0[0]); }
+                        let timer = handles[timer_index];
+                        assert!(!timer.is_null());
+                        assert!(!owned.0.contains(&timer) && timer != wake.0[0]);
+                        // Move this real timer into the past to exercise the wake
+                        // boundary without changing the machine's clock or power.
+                        let past_absolute = 1i64;
+                        assert_ne!(unsafe { crate::sys::windows::SetWaitableTimer(
+                            timer, &past_absolute, 0, None, std::ptr::null_mut(), 0,
+                        ) }, 0);
+                        let native = unsafe { WaitForMultipleObjects(
+                            handles.len() as u32, handles.as_ptr(), 0, milliseconds,
+                        ) };
+                        assert_eq!(native, timer_index as u32);
+                        expired.set(true);
+                        native
+                    } else {
+                        final_polls += 1;
+                        assert!(expired.get());
+                        assert!(handles.iter().all(|handle| owned.0.contains(handle)));
+                        unsafe { WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 0, 0) }
+                    }
+                },
+            );
+            assert_eq!(blocking_calls, 1);
+            assert_eq!(final_polls, owner_count.div_ceil(OWNERS_PER_WINDOW).max(1));
+            assert_eq!(status, WAIT_TIMEOUT);
+            assert_eq!(decision.recorded_wait_status(), Some(WAIT_TIMEOUT));
+        }
+    }
+}
+
+#[test]
 fn deep_owner_expiry_after_existing_timer_preserves_native_last_error() {
-    // Three plain waits and one armed-timer wait each rotate to the
-    // next owner window, whether the timer or the relative timeout wins.
+    // Four armed-timer waits rotate through the first four owner windows,
+    // whether the absolute timer or the finite relative timeout wins.
     const LIVE_PASSES: usize = 4;
     let owned = DeepOwnerEvents::new(1 + LIVE_PASSES * OWNERS_PER_WINDOW);
     let mut waits = owned.0.clone();
