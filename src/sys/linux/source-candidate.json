@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "One genuine fixed mode 2 acknowledged separate-service normal-exit basic entry and native-join smoke passed with unassisted original-family-empty PRESTOP; full matrix, default enablement and performance remain unqualified",
+  "status": "Exact c2f64084 typed timeout-cause source passed 11 ordinary build/link steps and the same 12 tests; privileged C2 runtime, CLI markers and G18 remain unqualified",
   "root": "src/sys/linux",
   "baseline_commit": "8f7fd60a245f5cbdd6b33789aade61a35fec2cb1",
   "baseline_candidate_sha256": "4f414679ccfe662cd17b1141200f63d180c1bc0af1f516039a698c404fadc406",
@@ -82,13 +82,13 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 102289,
-      "sha256": "7f4c12687f6859e0a3808133b908242dc4246e151f782c6f2ec34f64780f17a8"
+      "bytes": 106636,
+      "sha256": "b7a6232866afe2044385a04abe3d8e7d190b8010729cca61030075fac24769bd"
     },
     {
       "path": "README.md",
-      "bytes": 55455,
-      "sha256": "ff1ad7d6f15e9132fe8082343e984219e1b7ff5b4de4002b1722b252d78beba2"
+      "bytes": 56902,
+      "sha256": "032616f02dac48b8af80914e7a27816bf24073fe869c2232a0205171e37da727"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -107,8 +107,8 @@
     },
     {
       "path": "client.rs",
-      "bytes": 18929,
-      "sha256": "5b919ca632dd18f94b92b18d122e62665c8c7a645de7a984822620048441677a"
+      "bytes": 20950,
+      "sha256": "09c80ac9a0bef5a7193a1505c459bdda1cd3e67076a0882f51a55af6f377af12"
     },
     {
       "path": "client_main.rs",
@@ -127,8 +127,8 @@
     },
     {
       "path": "deployment/README.md",
-      "bytes": 16561,
-      "sha256": "21da66d7d467d23d65deae64e2436395d919936af86eac2154be9a4f57a19983"
+      "bytes": 17572,
+      "sha256": "5efeb23c1c7802aef9499cb2c66cd6d8c894246728e300f372dc8c6f740306b3"
     },
     {
       "path": "deployment/process-tree-guard.socket",
@@ -142,8 +142,8 @@
     },
     {
       "path": "entry.rs",
-      "bytes": 39296,
-      "sha256": "64b90bb2eb0b7f5111a6da9b5cb191b017b5470f3684cb5fa6fe5d582c507b23"
+      "bytes": 44020,
+      "sha256": "304375b5bffa73d165d8679454ef5f0eb8c107493cd7b13ed74c8927b0f1927e"
     },
     {
       "path": "entry_timer.c",
@@ -172,13 +172,13 @@
     },
     {
       "path": "mod.rs",
-      "bytes": 35619,
-      "sha256": "e85a200abb20a2b063feb1dc2c30ebd011e9dcf3e62caf582596176627e2fa6e"
+      "bytes": 36323,
+      "sha256": "f470ecb8f3399b361d2e1a014cdeef7171147b9e81ee58e7a306fa803e8121d6"
     },
     {
       "path": "native_activation.rs",
-      "bytes": 15557,
-      "sha256": "b204db883a0b6aac6e72962a7ea12c3340f32ee5204e4cd0432047a5a130ec87"
+      "bytes": 15558,
+      "sha256": "a4af3518affeff6f41a4cede5c32cfc825d909df86e4cc8cf6af05e2a17a46d0"
     },
     {
       "path": "native_arming.c",
@@ -197,8 +197,8 @@
     },
     {
       "path": "native_port.rs",
-      "bytes": 34392,
-      "sha256": "041048b2b11624457cc304c8b9e0b57fc57763650595fbaacc54868f5ad0c3ea"
+      "bytes": 37080,
+      "sha256": "9c699370beaa4ff6adfee67663036eda9f914d42b0406e23548506d560bf0f94"
     },
     {
       "path": "owner_poll.h",
@@ -242,8 +242,8 @@
     },
     {
       "path": "supervisor.rs",
-      "bytes": 13648,
-      "sha256": "1b647643972369aea7ab9f00293dffd5998f4a8ce6bb6f6688e3c80977cc4bc6"
+      "bytes": 14158,
+      "sha256": "895371fad559487b654734b838e3b1628d8905494a7a5a368d210781d324915d"
     },
     {
       "path": "terminal_bridge.c",
@@ -299,9 +299,9 @@
     }
   ],
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
-  "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
-  "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-  "publication_change": "Metadata-only one fixed mode 2 acknowledged separate-service normal-exit basic entry and native-join milestone with unassisted pre-stop original-family-empty proof. All 36 code/template files unchanged; no raw internal branch or tuple, causation, revocation, full matrix, timeout exit 124, mode 0, floor, default enablement or performance claim.",
+  "timeout_mapping": "Genuine typed original deadline remains124 only after existing vetoes/settlement; natural payload exits124/125 remain unmarked payload outcomes; generic faults/quarantine remain125.",
+  "implementation_build_candidate_sha256": "c2f6408482c69bc905b00bcc72fac9bc6b9c7a460764a1d68a106268376fb47f",
+  "publication_change": "Metadata-only ordinary-validation successor of exact c2f64084; all 36 implementation/template files unchanged. Records actual 11-step build and same twelve tests only; no current privileged C2 lifecycle, CLI marker or G18 qualification.",
   "entry_timer_component": {
     "source_qualified": true,
     "native_component_tests_passed": 3,
@@ -313,10 +313,10 @@
   },
   "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
   "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities.",
-  "entry_compile_status": "Exact db383 passed 11 ordinary build/link steps and the same 12 tests; one fixed genuine mode 2 normal-exit basic entry and native-join case passed. Raw internal branch and tuple were not exported; full matrix remains open and default dispatch remains disabled.",
+  "entry_compile_status": "Exact c2f64084 typed timeout-cause source passed 11 ordinary build/link steps and the same 12 tests; privileged C2 runtime, CLI markers and G18 remain unqualified",
   "source_only": true,
   "retirement": "typed original live/populated cgroup2 capabilities; terminal original pidfd; raw original events ENODEV + exact held-parent basename ENOENT; all replacement/other errors125; manager empty group accepted only typedRetired+same invocation/status",
-  "reviewed_predecessor_sha256": "6b5b1ec28a0ce67f6a46e39e96ae2a5dcb67b74504f9387f78840bdf6315f3d4",
+  "reviewed_predecessor_sha256": "c2f6408482c69bc905b00bcc72fac9bc6b9c7a460764a1d68a106268376fb47f",
   "preserved_predecessor": "target/codex-security/linux-product-integration-history-001/entry-ffi-successor-021/source",
   "review_repairs": [
     "typed NeedsRetirement from final authoritative same-invocation status query; no separate preflight race",
@@ -330,7 +330,7 @@
   "predecessor_implementation_build_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
   "entry_source_validation": {
     "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-    "status": "ORDINARY BUILD/TEST RECORD ONLY; SEPARATE REAL SINGLE-CASE MILESTONE IS RECORDED IN single_fixed_mode2_normal_exit_smoke",
+    "status": "HISTORICAL db383 ORDINARY BUILD/TEST RECORD BEFORE THE c2f64084 ORDINARY VALIDATION",
     "scope": "Ordinary native compile/link and same twelve existing tests. Actual read-only descriptor regression uses real SCM_RIGHTS sharedcursor1/production positional reads, repeated content/cursor checks, selfexe4097/O_PATHnegative plus pure parser/rawNone/diagnostic checks. No livecgroup retirement, privileged payload or guard0 result.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
@@ -1014,7 +1014,7 @@
       "private_evidence_only": true
     }
   },
-  "tested_implementation_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
+  "tested_implementation_candidate_sha256": "c2f6408482c69bc905b00bcc72fac9bc6b9c7a460764a1d68a106268376fb47f",
   "unit_reference_predecessor_validation": {
     "entry_source_validation": {
       "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
@@ -1426,5 +1426,52 @@
     "limits": "One fixed normal-exit mode 2 case only. No prior-failure cause or rescoring, sole-grant causality, future authorization revocation, mode 0, kernel floor, full lifecycle matrix, timeout exit 124, transparent caller context or performance and ranking qualification. Raw machine and transport evidence remains private.",
     "qualified_competitive_measurements": 0,
     "public_backend_enabled": false
+  },
+  "typed_timeout_cause_repair": {
+    "status": "Exact c2f64084 typed timeout-cause source passed 11 ordinary build/link steps and the same 12 tests; privileged C2 runtime, CLI markers and G18 remain unqualified",
+    "predecessor_publication_sha256": "4541727d68d98b29c66077411278b47a641440227b3cc804de3da5144434f686",
+    "predecessor_tested_implementation_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
+    "classification": "Typed original preparation/admission Expired, arming primary-deadline plus existing settlement/veto predicates, or terminal original deadline. One effective classifier preserves owner, cancellation, exec, independent fault and quarantine refusals. Natural payload exits 124 and 125 remain non-timeout.",
+    "wire": "PTGOUTC2 adds cause 0..3 and exact original deadline; non-timeout requires zero deadline. Deadline requires code124, settled, empty error, exact original metadata deadline and unchanged timer evidence; old/unknown/malformed/trailing/mismatched records refuse.",
+    "client": "Timeout origin is provisional until the original service/domain/retained-manager/status/Unref joins finish. Any first failure remains125 and cancellation cleanup cannot promote timeout. Capture Expired is separately typed NoLaunch without native/payload completion.",
+    "notice": "CLI-only fixed PROCESS_TIMEOUT line after joins or distinct pre-activation NoLaunch line, under the unchanged confirmed timer; one best-effort poll/write, no retries or inherited FD/mask changes. Notice failure does not reclassify the native outcome. Library writes nothing.",
+    "tests": "Focused classification, strict-wire and postjoin/capture controls ran within the same twelve existing tests/helpers; no current privileged C2 root/client runtime or CLI marker execution.",
+    "compiled": true,
+    "executed": false,
+    "public_backend_enabled": false,
+    "limits": "No genuine timeout/marker, full lifecycle matrix, mode0, kernel-floor, future authorization revocation, default enablement or performance qualification follows. Prior failed attempts remain failed; raw machine and transport evidence remains private."
+  },
+  "typed_timeout_cause_ordinary_validation": {
+    "implementation_candidate_sha256": "c2f6408482c69bc905b00bcc72fac9bc6b9c7a460764a1d68a106268376fb47f",
+    "status": "ACTUAL ORDINARY BUILD AND EXISTING TESTS PASSED; CURRENT PRODUCT RUNTIME UNEXECUTED",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "build_terminal_exit": 0,
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "unit_terminal_exit": 0,
+    "build_receipt_sha256": "0416868bd87dc9cabab957c280fd2d34fe434e49292b2bee2a19e0da5b114920",
+    "unit_receipt_sha256": "347cd1495cff24c3cb687ffc457741329b408a2f9b704431bf06852b7c9543b4",
+    "artifact_files": 91,
+    "artifact_bytes": 31655543,
+    "build_artifacts": 83,
+    "unit_artifacts": 8,
+    "executed_assertions": "Pure typed original-deadline classification with natural payload124/125 and fault veto controls; strict PTGOUTC2 original-deadline/enum/framing negatives; postjoin latch and capture NoLaunch negatives, plus the existing read-only SCM_RIGHTS positional-reader controls. Same twelve test names; no new framework.",
+    "assertion_labels": [
+      "typed_original_timeout_classification_payload124_125_vetoes_verified",
+      "typed_timeout_PTGOUTC2_original_deadline_negative_controls_verified",
+      "typed_timeout_postjoin_latch_and_capture_no_launch_verified",
+      "completion_read_same_ofd_cursor1_repeat_fullEOF4097_faults_verified"
+    ],
+    "cleanup_status": "Completed: all 83 build and 8 unit-test artifacts verified before removal; both exact owned scratch roots removed and both original scopes confirmed absent. Local artifacts remain preserved.",
+    "cleanup_receipt_sha256": "a53df1c7c6c305f13cce4065905876b895b37605a20e8555e26b923331b480a7",
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "current_root_client_runtime_executed": false,
+    "CLI_marker_runtime_qualified": false,
+    "G18_qualified": false,
+    "limits": "Ordinary descriptor and pure controls do not prove a live deadline, emitted CLI marker or privileged C2 root/client lifecycle. The db383 runtime006 normal-exit success remains historical, without rescoring. Linux default dispatch remains disabled; no performance qualification."
   }
 }

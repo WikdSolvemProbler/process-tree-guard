@@ -18,6 +18,18 @@ pub(crate) use invocation::OriginalInvocation;
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
 pub(crate) enum OwnerMode {Manual,Auto}
 
+// Original-deadline origin is retained before integer exit-code erasure.
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub(crate) enum TimeoutCause {PreLaunch,Arming,Terminal}
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub(crate) enum ClientTimeout {NoLaunch,Joined(TimeoutCause)}
+pub(crate) struct RunClassification {pub(crate) code:i32,pub(crate) timeout:Option<TimeoutCause>,pub(crate) error:Option<String>}
+impl RunClassification {
+ fn failure(error:String)->Self{Self{code:125,timeout:None,error:Some(error)}}
+ fn deadline(cause:TimeoutCause)->Self{Self{code:124,timeout:Some(cause),error:None}}
+ fn payload(code:i32)->Self{Self{code,timeout:None,error:None}}
+}
+
 use std::ffi::{c_int, c_long, c_short, c_void};
 use std::fs;
 use std::io;
@@ -703,7 +715,7 @@ mod tests {
     }
     #[test]
     fn separate_context_ack_precedes_client_capture_and_activation(){
-        super::manager::notify_handoff_regression();super::entry::original_deadline_readback_regression();
+        super::manager::notify_handoff_regression();super::entry::original_deadline_readback_regression();super::client::timeout_cause_regression();
         let transparent=run_library(&[],f64::NAN,OwnerMode::Manual);assert_eq!(transparent.exit_code(),125);
         assert!(transparent.error().unwrap().contains("transparent Linux execution context"));assert!(!transparent.complete());assert!(!transparent.may_have_active_service());assert_eq!(transparent.wire_evidence(),(&[][..],&[][..]));
         let cli=run_cli(vec!["auto".into(),"--timeout".into(),"invalid".into()]);assert_eq!(cli.exit_code(),125);assert!(cli.error().unwrap().contains("--separate-service-context"));assert!(!cli.may_have_active_service());assert_eq!(cli.wire_evidence(),(&[][..],&[][..]));

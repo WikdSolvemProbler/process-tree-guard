@@ -208,27 +208,32 @@ fn verify_identity(owner: &OwnedFd, peer: Credentials) -> Probe<VerifiedIdentity
 }
 
 // Retain the actual original objects/plan on preparation refusal. No child exists.
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+enum PrelaunchCause {Failure,OriginalDeadline}
+impl PrelaunchCause {
+ fn invocation(error:&super::invocation::InvocationError)->Self{if matches!(error,super::invocation::InvocationError::Expired){Self::OriginalDeadline}else{Self::Failure}}
+}
 struct PreparationFailure {
     invocation:Arc<VerifiedInvocation>,plan:request::ExecPlan,
-    lease:Option<RetainedLease>,error:String,code:i32,
+    lease:Option<RetainedLease>,error:String,cause:PrelaunchCause,
 }
 fn prepare(peer:Credentials,invocation:VerifiedInvocation,plan:request::ExecPlan,
     authorizes:impl FnOnce(&VerifiedIdentity)->bool)->std::result::Result<PreparedRun,PreparationFailure> {
     let invocation=Arc::new(invocation);
     let mut lease=None;
-    let result=(||->std::result::Result<VerifiedIdentity,(String,i32)>{
-        invocation.check_live().map_err(|e|(format!("{e:?}"),e.exit_code()))?;
-        invocation.check_time().map_err(|e|(format!("{e:?}"),e.exit_code()))?;
-        let identity=verify_identity(invocation.requester(),peer).map_err(|e|(e,125))?;
-        check(authorizes(&identity),POLICY_REFUSAL).map_err(|e|(e,125))?;
-        lease=Some(RetainedLease::from_invocation(Arc::clone(&invocation)).map_err(|e|(e,125))?);
-        let decision=lease.as_ref().expect("stored private timer").sample().map_err(|e|(e,125))?.decision;
-        match decision {Decision::Permit=>Ok(identity),Decision::Deadline=>Err(("original invocation expired during preparation".into(),124)),
-            Decision::OwnerLost=>Err(("original invocation owner lost during preparation".into(),125))}
+    let result=(||->std::result::Result<VerifiedIdentity,(String,PrelaunchCause)>{
+        invocation.check_live().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
+        invocation.check_time().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
+        let identity=verify_identity(invocation.requester(),peer).map_err(|e|(e,PrelaunchCause::Failure))?;
+        check(authorizes(&identity),POLICY_REFUSAL).map_err(|e|(e,PrelaunchCause::Failure))?;
+        lease=Some(RetainedLease::from_invocation(Arc::clone(&invocation)).map_err(|e|(e,PrelaunchCause::Failure))?);
+        let decision=lease.as_ref().expect("stored private timer").sample().map_err(|e|(e,PrelaunchCause::Failure))?.decision;
+        match decision {Decision::Permit=>Ok(identity),Decision::Deadline=>Err(("original invocation expired during preparation".into(),PrelaunchCause::OriginalDeadline)),
+            Decision::OwnerLost=>Err(("original invocation owner lost during preparation".into(),PrelaunchCause::Failure))}
     })();
     match result {
         Ok(identity)=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer")}),
-        Err((error,code))=>Err(PreparationFailure{invocation,plan,lease,error,code}),
+        Err((error,cause))=>Err(PreparationFailure{invocation,plan,lease,error,cause}),
     }
 }
 
@@ -279,8 +284,8 @@ unsafe fn run_in_service_arc(scope:VerifiedServiceScope,connection:OwnedFd,cance
         return native_activation::before_admission(Some(scope),Arc::clone(&cancellation),admission,error);
     }
     let admitted=match receive_observed(connection.as_raw_fd(),&mut admission){
-        Ok(value)=>value,Err(error)=>{let code=match &error {Refusal::Invocation(e)=>e.exit_code(),_=>125};
-            return native_activation::before_admission_code(Some(scope),Arc::clone(&cancellation),admission,format!("admission refused: {error:?}"),code);},
+        Ok(value)=>value,Err(error)=>{let cause=match &error {Refusal::Invocation(e)=>PrelaunchCause::invocation(e),_=>PrelaunchCause::Failure};
+            return native_activation::before_admission_cause(Some(scope),Arc::clone(&cancellation),admission,format!("admission refused: {error:?}"),cause);},
     };
     unsafe{run_admitted_in_service(scope,admitted,admission,cancellation,authorizes)}
 }

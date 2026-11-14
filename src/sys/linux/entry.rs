@@ -206,7 +206,7 @@ impl Hello{
  fn encode(&self)->Probe<Vec<u8>>{let mut out=b"PTGBOOT1".to_vec();out.extend_from_slice(&self.pid.to_le_bytes());out.extend_from_slice(&self.invocation);out.extend_from_slice(&self.cutoff.to_le_bytes());out.extend_from_slice(&self.early.to_le_bytes());for text in [&self.unit,&self.group,&self.socket]{if text.len()>4096{return Err("hello field bound".into());}out.extend_from_slice(&(text.len() as u16).to_le_bytes());out.extend_from_slice(text.as_bytes());}Ok(out)}
  pub(super) fn decode(bytes:&[u8])->Probe<Self>{if bytes.len()<40||&bytes[..8]!=b"PTGBOOT1"{return Err("root hello version".into());}let pid=u32::from_le_bytes(bytes[8..12].try_into().expect("fixed"));let invocation=bytes[12..28].try_into().expect("fixed");let cutoff=u64::from_le_bytes(bytes[28..36].try_into().expect("fixed"));let early=i32::from_le_bytes(bytes[36..40].try_into().expect("fixed"));let mut rest=&bytes[40..];let mut texts=Vec::new();for _ in 0..3{let (size,tail)=rest.split_first_chunk::<2>().ok_or("hello length")?;let n=usize::from(u16::from_le_bytes(*size));if n>4096{return Err("hello bound".into());}let (text,tail)=tail.split_at_checked(n).ok_or("hello truncation")?;texts.push(String::from_utf8(text.to_vec()).map_err(|_|"hello UTF8")?);rest=tail;}if !rest.is_empty()||pid==0||invocation==[0;16]||!matches!(early,0|124|125){return Err("hello facts refused".into());}Ok(Self{pid,invocation,cutoff,unit:texts.remove(0),group:texts.remove(0),socket:texts.remove(0),early})}
 }
-pub(super) fn outcome(invocation:[u8;16],code:i32,settled:bool)->Vec<u8>{let mut frame=b"PTGOUTC1".to_vec();frame.extend_from_slice(&invocation);frame.extend_from_slice(&code.to_le_bytes());frame.extend_from_slice(&u32::from(settled).to_le_bytes());frame}
+pub(super) fn outcome(invocation:[u8;16],code:i32,settled:bool,timeout:Option<TimeoutCause>,original_deadline:u64)->Vec<u8>{let mut frame=b"PTGOUTC2".to_vec();frame.extend_from_slice(&invocation);frame.extend_from_slice(&code.to_le_bytes());frame.extend_from_slice(&u32::from(settled).to_le_bytes());frame.push(match timeout{None=>0,Some(TimeoutCause::PreLaunch)=>1,Some(TimeoutCause::Arming)=>2,Some(TimeoutCause::Terminal)=>3});frame.extend_from_slice(&if timeout.is_some(){original_deadline}else{0}.to_le_bytes());frame}
 
 
 fn adopted_activation()->Probe<OwnedFd>{
@@ -235,8 +235,8 @@ fn append_timer(frame:&mut Vec<u8>,timer:&ExitTimer){
   for n in [raw.deadline_ns,raw.observed_ns,raw.remaining_ns,raw.interval_ns,raw.before_ns]{frame.extend_from_slice(&n.to_le_bytes());}
  }}
 }
-fn root_frame(invocation:[u8;16],code:i32,settled:bool,error:&str,bootstrap:&ExitTimer,cleanup:Option<&ExitTimer>)->Vec<u8>{
- let mut frame=outcome(invocation,code,settled);let bytes=error.as_bytes();let mut n=bytes.len().min(1024);while !error.is_char_boundary(n){n-=1;}frame.extend_from_slice(&(n as u16).to_le_bytes());frame.extend_from_slice(&bytes[..n]);frame.push(if cleanup.is_some(){2}else{1});append_timer(&mut frame,bootstrap);if let Some(timer)=cleanup{append_timer(&mut frame,timer);}frame
+fn root_frame(invocation:[u8;16],code:i32,settled:bool,error:&str,timeout:Option<TimeoutCause>,original_deadline:u64,bootstrap:&ExitTimer,cleanup:Option<&ExitTimer>)->Vec<u8>{
+ let mut frame=outcome(invocation,code,settled,timeout,original_deadline);let bytes=error.as_bytes();let mut n=bytes.len().min(1024);while !error.is_char_boundary(n){n-=1;}frame.extend_from_slice(&(n as u16).to_le_bytes());frame.extend_from_slice(&bytes[..n]);frame.push(if cleanup.is_some(){2}else{1});append_timer(&mut frame,bootstrap);if let Some(timer)=cleanup{append_timer(&mut frame,timer);}frame
 }
 
 // Private root-to-client protocol: bounded, exact, and losslessly retained.
@@ -251,19 +251,21 @@ impl<'a> WireCursor<'a>{
  fn optional_observation(&mut self)->Probe<Option<TimerObservation>>{match self.byte()?{0=>Ok(None),1=>self.observation().map(Some),_=>Err("root timer slot marker invalid".into())}}
 }
 struct TimerEvidence{sticky:bool,abi:[u64;9],checks:u64,create:TimerObservation,latest:Option<TimerObservation>,first_failure:Option<TimerObservation>,delete:Option<TimerObservation>}
-pub(super) struct DecodedOutcome{pub(super) code:i32,pub(super) settled:bool,pub(super) error:String,timers:Vec<TimerEvidence>}
+pub(super) struct DecodedOutcome{pub(super) code:i32,pub(super) settled:bool,pub(super) timeout:Option<TimeoutCause>,pub(super) error:String,timers:Vec<TimerEvidence>}
 fn created_timer(raw:&TimerObservation)->bool{timer_readback(raw,raw.deadline_ns)&&raw.create_result==0&&raw.create_errno==0&&raw.set_result==0&&raw.set_errno==0&&raw.delete_result==c_int::MIN&&raw.delete_errno==0}
 fn observed_timer(raw:&TimerObservation,until:u64)->bool{timer_readback(raw,until)&&raw.create_result==c_int::MIN&&raw.create_errno==0&&raw.set_result==c_int::MIN&&raw.set_errno==0&&raw.delete_result==c_int::MIN&&raw.delete_errno==0}
 fn deleted_timer(raw:&TimerObservation,until:u64)->bool{raw.schema==1&&raw.stage==5&&raw.result==0&&raw.call_errno==0&&raw.created==1&&raw.armed==0&&raw.delete_result==0&&raw.delete_errno==0&&raw.deadline_ns==until&&raw.create_result==c_int::MIN&&raw.create_errno==0&&raw.set_result==c_int::MIN&&raw.set_errno==0&&raw.get_result==c_int::MIN&&raw.get_errno==0&&raw.before_ns==0&&raw.observed_ns==0&&raw.remaining_ns==0&&raw.interval_ns==0}
 impl DecodedOutcome{
- pub(super) fn decode(bytes:&[u8],invocation:[u8;16],cleanup_until:u64)->Probe<Self>{
-  let mut cursor=WireCursor{rest:bytes};if cursor.take::<8>()?!=*b"PTGOUTC1"||cursor.take::<16>()?!=invocation{return Err("root result identity/version differs".into());}
+ pub(super) fn decode(bytes:&[u8],invocation:[u8;16],cleanup_until:u64,original_deadline:u64)->Probe<Self>{
+  let mut cursor=WireCursor{rest:bytes};if cursor.take::<8>()?!=*b"PTGOUTC2"||cursor.take::<16>()?!=invocation{return Err("root result identity/version differs".into());}
   let code=cursor.i32()?;let settled=match cursor.u32()?{0=>false,1=>true,_=>return Err("root settlement flag invalid".into())};if !(0..=255).contains(&code){return Err("root result exit code invalid".into());}
+  let timeout=match cursor.byte()?{0=>None,1=>Some(TimeoutCause::PreLaunch),2=>Some(TimeoutCause::Arming),3=>Some(TimeoutCause::Terminal),_=>return Err("root timeout cause invalid".into())};let reported_deadline=cursor.u64()?;
   let length=usize::from(u16::from_le_bytes(cursor.take()?));if length>1024{return Err("root result error bound".into());}let (error,rest)=cursor.rest.split_at_checked(length).ok_or("root result error truncated")?;let error=std::str::from_utf8(error).map_err(|_|"root result error UTF8")?.to_owned();cursor.rest=rest;
+  if timeout.is_some(){if code!=124||!settled||!error.is_empty()||original_deadline==0||reported_deadline!=original_deadline||original_deadline.checked_add(GRACE)!=Some(cleanup_until){return Err("root timeout cause/deadline differs".into());}}else if reported_deadline!=0{return Err("non-timeout result contains deadline".into());}
   let count=cursor.byte()?;if !(1..=2).contains(&count){return Err("root timer count invalid".into());}let mut timers=Vec::with_capacity(usize::from(count));
   for index in 0..count{let sticky=match cursor.byte()?{0=>false,1=>true,_=>return Err("root timer role invalid".into())};if sticky!=(index==1){return Err("root timer role/order differs".into());}let mut abi=[0;9];for word in &mut abi{*word=cursor.u64()?;}let checks=cursor.u64()?;let create=cursor.optional_observation()?.ok_or("root timer creation receipt missing")?;let latest=cursor.optional_observation()?;let first_failure=cursor.optional_observation()?;let delete=cursor.optional_observation()?;timers.push(TimerEvidence{sticky,abi,checks,create,latest,first_failure,delete});}
   if !cursor.rest.is_empty(){return Err("root result has trailing bytes".into());}
-  let value=Self{code,settled,error,timers};
+  let value=Self{code,settled,timeout,error,timers};
   // A positive completion can only come from the full bootstrap-to-sticky handoff.
   // Failed receipts remain available in the raw frame, never promoted to success.
   if value.settled{
@@ -278,27 +280,32 @@ impl DecodedOutcome{
 
 // Dedicated process diagnostics only. Native sticky/bootstrap/PID1 authority is
 // still armed; no library host stream flags or environment are modified.
-fn report_failure(error:&str){
+fn write_diagnostic(bytes:&[u8]){
  // Never F_SETFL on inherited stderr: its OFD may also belong to the parent.
  // The dedicated process's independently armed self timer bounds the write,
  // including a readiness race or a slow regular-file/device write.
  let mut ready=PollFd{fd:2,events:POLLOUT,revents:0};if unsafe{poll(&mut ready,1,0)}!=1||ready.revents!=POLLOUT{return;}
- let text=format!("process-tree-guard: {error}\n");let bytes=text.as_bytes();let _raw_write=unsafe{write(2,bytes.as_ptr().cast(),bytes.len().min(2048))};
+ let _raw_write=unsafe{write(2,bytes.as_ptr().cast(),bytes.len().min(2048))};
 }
+fn report_failure(error:&str){let text=format!("process-tree-guard: {error}\n");write_diagnostic(text.as_bytes());}
+fn timeout_notice(cause:ClientTimeout)->&'static [u8]{match cause{
+ ClientTimeout::Joined(_)=>b"PROCESS_TIMEOUT: original invocation deadline expired\n",
+ ClientTimeout::NoLaunch=>b"PROCESS_TIMEOUT: original invocation deadline expired before activation; no payload launched\n",
+}}
 fn refuse_activation(fd:RawFd,error:&str,bootstrap:&ExitTimer,cleanup:Option<&ExitTimer>)->!{
- let frame=root_frame([0;16],125,false,error,bootstrap,cleanup);
+ let frame=root_frame([0;16],125,false,error,None,0,bootstrap,cleanup);
  let until=cleanup.map_or(bootstrap.until,|timer|timer.until.min(bootstrap.until));
  let send_result=send(fd,&frame,&[],until);report_failure(error);if let Err(error)=send_result{report_failure(&error);}
  unsafe{_exit(125)}
 }
 pub(super) fn cli_timer(until:u64)->std::result::Result<Rc<ExitTimer>,(Rc<ExitTimer>,String)>{ExitTimer::create(until,true).map_err(|failure|(failure.owner,failure.error))}
-pub(super) fn cli_exit(code:i32,error:Option<&str>,timer:Option<&ExitTimer>)->!{
+pub(super) fn cli_exit(code:i32,error:Option<&str>,timer:Option<&ExitTimer>,timeout:Option<ClientTimeout>)->!{
  let _early_exit_authority=if let Some(timer)=timer{if timer.confirmed_until(timer.until).is_err(){unsafe{_exit(125)}}None}else{
   // Only pre-capture/usage refusals lack the original standalone authority.
   let until=match supervisor::boottime_ns().ok().and_then(|now|now.checked_add(1_000_000_000)){Some(value)=>value,None=>unsafe{_exit(125)}};
   match ExitTimer::create(until,true){Ok(owner)=>Some(owner),Err(failure)=>{let _retained=failure.owner;unsafe{_exit(125)}}}
  };
- if let Some(error)=error{report_failure(error);}unsafe{_exit(code)}
+ if let Some(cause)=timeout{write_diagnostic(timeout_notice(cause));}else if let Some(error)=error{report_failure(error);}unsafe{_exit(code)}
 }
 
 /// Actual dedicated root binary entry. It never returns into an arbitrary host.
@@ -342,14 +349,16 @@ pub(crate) fn root_service_main()->!{
   drop(second);listener.unlink_exact()?;scope.revalidate()?;
   Rc::get_mut(&mut bootstrap).ok_or("bootstrap timer unexpectedly shared")?.delete_bootstrap(&cleanup)?;Ok(())
  })();
- if let Err(error)=result{let error=listener.cleanup_error(&error);report_failure(&error);let frame=root_frame(invocation,125,false,&error,&bootstrap,Some(&cleanup));let _=send(private.as_raw_fd(),&frame,&[],cleanup.until);unsafe{_exit(125)}}
+ if let Err(error)=result{let error=listener.cleanup_error(&error);report_failure(&error);let frame=root_frame(invocation,125,false,&error,None,0,&bootstrap,Some(&cleanup));let _=send(private.as_raw_fd(),&frame,&[],cleanup.until);unsafe{_exit(125)}}
  // All original authenticated IO/cwd/environment and exact lease feed the
  // existing real controller. No rewritten/ambient caller context is introduced.
- let cancellation=match AuthenticatedCancellation::from_private(&private,&first.invocation,first.peer){Ok(value)=>std::sync::Arc::new(value),Err(error)=>{let frame=root_frame(invocation,125,false,&error,&bootstrap,Some(&cleanup));let _send=send(private.as_raw_fd(),&frame,&[],cleanup.until);unsafe{_exit(125)}}};
-  let run=unsafe{supervisor::run_admitted_in_service(scope,first,admission,cancellation,|uid,gid,groups,program|uid!=0&&gid!=0&&!groups.contains(&0)&&program.to_bytes().starts_with(b"/"))};
- let mut code=run.exit_code();let mut error=run.guard_error().unwrap_or_default();if !error.is_empty(){code=125;}if !run.settled(){code=125;if error.is_empty(){error="native settlement is quarantined".into();}}
- if let Err(failure)=run.validate_final_scope(){code=125;error=failure;}
- let frame=root_frame(invocation,code,run.settled(),&error,&bootstrap,Some(&cleanup));
+ let cancellation=match AuthenticatedCancellation::from_private(&private,&first.invocation,first.peer){Ok(value)=>std::sync::Arc::new(value),Err(error)=>{let frame=root_frame(invocation,125,false,&error,None,0,&bootstrap,Some(&cleanup));let _send=send(private.as_raw_fd(),&frame,&[],cleanup.until);unsafe{_exit(125)}}};
+ let original_deadline=first.invocation.metadata().deadline_ns;
+ let run=unsafe{supervisor::run_admitted_in_service(scope,first,admission,cancellation,|uid,gid,groups,program|uid!=0&&gid!=0&&!groups.contains(&0)&&program.to_bytes().starts_with(b"/"))};
+ let mut classified=run.classify();if !run.settled(){classified=RunClassification::failure("native settlement is quarantined".into());}
+ if let Err(failure)=run.validate_final_scope(){classified=RunClassification::failure(failure);}
+ let code=classified.code;let error=classified.error.as_deref().unwrap_or("");
+ let frame=root_frame(invocation,code,run.settled(),error,classified.timeout,original_deadline,&bootstrap,Some(&cleanup));
  if let Err(error)=send(private.as_raw_fd(),&frame,&[],cleanup.until){report_failure(&error);unsafe{_exit(125)}}
  // No exec, destructor flush, timer disarm or unbounded diagnostic tail follows.
  // Native owners/namespace/unit/timers stay live until the kernel closes them.
@@ -360,5 +369,27 @@ pub(crate) fn root_service_main()->!{
  let until=1000;let mut raw=TimerObservation{schema:1,stage:4,result:0,call_errno:0,created:1,armed:1,get_result:0,get_errno:0,deadline_ns:until,remaining_ns:100,interval_ns:0,before_ns:899,observed_ns:901,..TimerObservation::default()};
  assert!(timer_readback(&raw,until));assert!(!timer_readback(&raw,until+1));
  raw.interval_ns=1;assert!(!timer_readback(&raw,until));raw.interval_ns=0;raw.remaining_ns=0;assert!(!timer_readback(&raw,until));raw.remaining_ns=100;raw.before_ns=902;assert!(!timer_readback(&raw,until));raw.before_ns=899;raw.get_errno=5;assert!(!timer_readback(&raw,until));
+ timeout_wire_regression();
  eprintln!("notify_original_timer_raw_readback_rejections_verified");
+}
+
+#[cfg(test)]fn timeout_wire_regression(){
+ // Synthetic records exercise the production serializer/parser only; no timer
+ // owner, native settlement, cgroup or invocation authority is minted here.
+ let original=10_000;let cleanup_until=original+GRACE;let invocation=[7;16];
+ let created=|until|TimerObservation{schema:1,stage:4,result:0,call_errno:0,created:1,armed:1,create_result:0,create_errno:0,set_result:0,set_errno:0,get_result:0,get_errno:0,deadline_ns:until,remaining_ns:100,before_ns:until-101,observed_ns:until-99,..TimerObservation::default()};
+ let bootstrap_until=2000;let deleted=TimerObservation{schema:1,stage:5,result:0,call_errno:0,created:1,armed:0,delete_result:0,delete_errno:0,deadline_ns:bootstrap_until,..TimerObservation::default()};
+ let bootstrap=ExitTimer{abi:[1,96,7,9,0,1,64,32,56],pointer:None,sticky:false,until:bootstrap_until,observations:RefCell::new(TimerJournal{create:created(bootstrap_until),latest:None,first_failure:None,delete:Some(deleted),checks:0})};
+ let mut latest=created(cleanup_until);latest.create_result=c_int::MIN;latest.set_result=c_int::MIN;
+ let cleanup=ExitTimer{abi:[1,96,7,9,0,1,64,32,56],pointer:None,sticky:true,until:cleanup_until,observations:RefCell::new(TimerJournal{create:created(cleanup_until),latest:Some(latest),first_failure:None,delete:None,checks:1})};
+ for cause in [TimeoutCause::PreLaunch,TimeoutCause::Arming,TimeoutCause::Terminal]{let bytes=root_frame(invocation,124,true,"",Some(cause),original,&bootstrap,Some(&cleanup));let decoded=DecodedOutcome::decode(&bytes,invocation,cleanup_until,original).unwrap();assert_eq!(decoded.timeout,Some(cause));
+  assert!(DecodedOutcome::decode(&bytes,invocation,cleanup_until,cleanup_until).is_err());assert!(DecodedOutcome::decode(&bytes,[8;16],cleanup_until,original).is_err());
+  for n in 0..bytes.len(){assert!(DecodedOutcome::decode(&bytes[..n],invocation,cleanup_until,original).is_err());}
+  for (offset,value) in [(0,b'X'),(7,b'1'),(32,255),(33,0)]{let mut bad=bytes.clone();bad[offset]=value;assert!(DecodedOutcome::decode(&bad,invocation,cleanup_until,original).is_err());}
+  let mut trailing=bytes.clone();trailing.push(0);assert!(DecodedOutcome::decode(&trailing,invocation,cleanup_until,original).is_err());
+  for (code,settled,error) in [(125,true,""),(124,false,""),(124,true,"fault")]{let bad=root_frame(invocation,code,settled,error,Some(cause),original,&bootstrap,Some(&cleanup));assert!(DecodedOutcome::decode(&bad,invocation,cleanup_until,original).is_err());}
+ }
+ for code in [124,125]{let bytes=root_frame(invocation,code,true,"",None,original,&bootstrap,Some(&cleanup));assert_eq!(DecodedOutcome::decode(&bytes,invocation,cleanup_until,original).unwrap().timeout,None);let mut bad=bytes;bad[33..41].copy_from_slice(&original.to_le_bytes());assert!(DecodedOutcome::decode(&bad,invocation,cleanup_until,original).is_err());}
+ assert_eq!(timeout_notice(ClientTimeout::Joined(TimeoutCause::Terminal)),b"PROCESS_TIMEOUT: original invocation deadline expired\n");assert!(timeout_notice(ClientTimeout::NoLaunch).len()<128);
+ eprintln!("typed_timeout_PTGOUTC2_original_deadline_negative_controls_verified");
 }

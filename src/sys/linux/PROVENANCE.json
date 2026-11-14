@@ -1,5 +1,5 @@
 {
-  "status": "One genuine fixed mode 2 acknowledged separate-service normal-exit basic entry and native-join smoke passed with unassisted original-family-empty PRESTOP; full matrix, default enablement and performance remain unqualified",
+  "status": "Exact c2f64084 typed timeout-cause source passed 11 ordinary build/link steps and the same 12 tests; privileged C2 runtime, CLI markers and G18 remain unqualified",
   "origin_archive": "tests/evidence/linux-watchdog-arming-objects.zip",
   "origin_sha256": "69a5892782910cd9ea2033e9349b53911496b21f2b93efb0f806386c1f055213",
   "source_directory": "target/codex-security/issue2-linux-arming-015",
@@ -251,7 +251,7 @@
   },
   "current_validation": {
     "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-    "status": "ORDINARY BUILD/TEST RECORD ONLY; SEPARATE REAL SINGLE-CASE MILESTONE IS RECORDED IN single_fixed_mode2_normal_exit_smoke",
+    "status": "HISTORICAL db383 ORDINARY BUILD/TEST RECORD BEFORE THE c2f64084 ORDINARY VALIDATION",
     "scope": "Ordinary native compile/link and same twelve existing tests. Actual read-only descriptor regression uses real SCM_RIGHTS sharedcursor1/production positional reads, repeated content/cursor checks, selfexe4097/O_PATHnegative plus pure parser/rawNone/diagnostic checks. No livecgroup retirement, privileged payload or guard0 result.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
@@ -336,7 +336,7 @@
     "baseline_preserved": "target/codex-security/linux-product-integration-history-001/6d9a-before-real-entry-011",
     "source_only": true,
     "compiled": true,
-    "executed": true,
+    "executed": false,
     "main_sources": [
       "root_main.rs",
       "client_main.rs"
@@ -357,7 +357,7 @@
     "ordinary_client": "original requester plus manual direct parent/all auto ancestors; unchanged absolute cutoff; existing NNP1 library precondition; standalone CLI self-only NNP/timer",
     "result": "framed settled outcome + original held service pidfd terminal + original unit empty/strict typed retirement + retained manager InvocationID/ExecMainPID/code/status/Result",
     "retirement": "Linux5.14/6.8 source inference: originally populated exact held unit/event, raw original event read ENODEV then same held protected parent and exact original basename strict ENOENT; replacement/other errno fails; no nlink shortcut; not child reaping/CSS-free proof",
-    "wire_version": "PTGEX6 request; PTGBOOT1 bootstrap; PTGOUTC1 exact bounded result with unchanged native timer receipts",
+    "wire_version": "PTGEX6 request; PTGBOOT1 bootstrap; strict PTGOUTC2 result with typed original-deadline cause and unchanged native timer receipts",
     "remaining": [
       "temporary independently finite socket/service/deployment custody and exact cleanup",
       "native privileged full-owner/clock/payload/watchdog/bootstrap/terminal failure qualification",
@@ -369,7 +369,7 @@
     "public_raw_evidence": "no new public raw archive; privacy review required",
     "private_socket_cleanup": "all synchronous postbind refusals attempt exact unlink; per-service PID1 RuntimeDirectory=process-tree-guard/%n preserve=no covers asynchronous process death, with effective manager property and held protected directory checks; runtime unqualified",
     "public_bus_authentication": "held root-controlled /run/dbus ancestry/socket identity before connection, actual kernel peer credentials plus held pidfd, then ordinary bus-owned PID1 name/UID replies; no assumption daemon UID0",
-    "execution_scope": "One fixed acknowledged separate-service mode 2 normal-exit smoke; full matrix and default backend qualification remain open."
+    "execution_scope": "Exact c2f64084 ordinary compilation and the same twelve tests passed. Current privileged C2 root/client runtime remains unexecuted; earlier db383 normal-exit smoke is historical."
   },
   "entry_primary_sources": [
     "https://www.freedesktop.org/software/systemd/man/255/systemd.socket.html",
@@ -382,7 +382,7 @@
   ],
   "entry_source_validation": {
     "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-    "status": "ORDINARY BUILD/TEST RECORD ONLY; SEPARATE REAL SINGLE-CASE MILESTONE IS RECORDED IN single_fixed_mode2_normal_exit_smoke",
+    "status": "HISTORICAL db383 ORDINARY BUILD/TEST RECORD BEFORE THE c2f64084 ORDINARY VALIDATION",
     "scope": "Ordinary native compile/link and same twelve existing tests. Actual read-only descriptor regression uses real SCM_RIGHTS sharedcursor1/production positional reads, repeated content/cursor checks, selfexe4097/O_PATHnegative plus pure parser/rawNone/diagnostic checks. No livecgroup retirement, privileged payload or guard0 result.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
@@ -1673,5 +1673,52 @@
     "limits": "One fixed normal-exit mode 2 case only. No prior-failure cause or rescoring, sole-grant causality, future authorization revocation, mode 0, kernel floor, full lifecycle matrix, timeout exit 124, transparent caller context or performance and ranking qualification. Raw machine and transport evidence remains private.",
     "qualified_competitive_measurements": 0,
     "public_backend_enabled": false
+  },
+  "typed_timeout_cause_repair": {
+    "status": "Exact c2f64084 typed timeout-cause source passed 11 ordinary build/link steps and the same 12 tests; privileged C2 runtime, CLI markers and G18 remain unqualified",
+    "predecessor_publication_sha256": "4541727d68d98b29c66077411278b47a641440227b3cc804de3da5144434f686",
+    "predecessor_tested_implementation_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
+    "classification": "Typed original preparation/admission Expired, arming primary-deadline plus existing settlement/veto predicates, or terminal original deadline. One effective classifier preserves owner, cancellation, exec, independent fault and quarantine refusals. Natural payload exits 124 and 125 remain non-timeout.",
+    "wire": "PTGOUTC2 adds cause 0..3 and exact original deadline; non-timeout requires zero deadline. Deadline requires code124, settled, empty error, exact original metadata deadline and unchanged timer evidence; old/unknown/malformed/trailing/mismatched records refuse.",
+    "client": "Timeout origin is provisional until the original service/domain/retained-manager/status/Unref joins finish. Any first failure remains125 and cancellation cleanup cannot promote timeout. Capture Expired is separately typed NoLaunch without native/payload completion.",
+    "notice": "CLI-only fixed PROCESS_TIMEOUT line after joins or distinct pre-activation NoLaunch line, under the unchanged confirmed timer; one best-effort poll/write, no retries or inherited FD/mask changes. Notice failure does not reclassify the native outcome. Library writes nothing.",
+    "tests": "Focused classification, strict-wire and postjoin/capture controls ran within the same twelve existing tests/helpers; no current privileged C2 root/client runtime or CLI marker execution.",
+    "compiled": true,
+    "executed": false,
+    "public_backend_enabled": false,
+    "limits": "No genuine timeout/marker, full lifecycle matrix, mode0, kernel-floor, future authorization revocation, default enablement or performance qualification follows. Prior failed attempts remain failed; raw machine and transport evidence remains private."
+  },
+  "typed_timeout_cause_ordinary_validation": {
+    "implementation_candidate_sha256": "c2f6408482c69bc905b00bcc72fac9bc6b9c7a460764a1d68a106268376fb47f",
+    "status": "ACTUAL ORDINARY BUILD AND EXISTING TESTS PASSED; CURRENT PRODUCT RUNTIME UNEXECUTED",
+    "compile_link_steps": 11,
+    "compile_link_passed": 11,
+    "build_terminal_exit": 0,
+    "tests": 12,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "unit_terminal_exit": 0,
+    "build_receipt_sha256": "0416868bd87dc9cabab957c280fd2d34fe434e49292b2bee2a19e0da5b114920",
+    "unit_receipt_sha256": "347cd1495cff24c3cb687ffc457741329b408a2f9b704431bf06852b7c9543b4",
+    "artifact_files": 91,
+    "artifact_bytes": 31655543,
+    "build_artifacts": 83,
+    "unit_artifacts": 8,
+    "executed_assertions": "Pure typed original-deadline classification with natural payload124/125 and fault veto controls; strict PTGOUTC2 original-deadline/enum/framing negatives; postjoin latch and capture NoLaunch negatives, plus the existing read-only SCM_RIGHTS positional-reader controls. Same twelve test names; no new framework.",
+    "assertion_labels": [
+      "typed_original_timeout_classification_payload124_125_vetoes_verified",
+      "typed_timeout_PTGOUTC2_original_deadline_negative_controls_verified",
+      "typed_timeout_postjoin_latch_and_capture_no_launch_verified",
+      "completion_read_same_ofd_cursor1_repeat_fullEOF4097_faults_verified"
+    ],
+    "cleanup_status": "Completed: all 83 build and 8 unit-test artifacts verified before removal; both exact owned scratch roots removed and both original scopes confirmed absent. Local artifacts remain preserved.",
+    "cleanup_receipt_sha256": "a53df1c7c6c305f13cce4065905876b895b37605a20e8555e26b923331b480a7",
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
+    "current_root_client_runtime_executed": false,
+    "CLI_marker_runtime_qualified": false,
+    "G18_qualified": false,
+    "limits": "Ordinary descriptor and pure controls do not prove a live deadline, emitted CLI marker or privileged C2 root/client lifecycle. The db383 runtime006 normal-exit success remains historical, without rescoring. Linux default dispatch remains disabled; no performance qualification."
   }
 }

@@ -324,7 +324,7 @@ pub(super) use native_port::LaunchContext;
 pub(crate) use native_port::RunOutcome;
 pub(super) use native_port::run_admitted;
 pub(super) use native_port::before_activation;
-pub(super) use native_port::{before_admission,before_admission_code};
+pub(super) use native_port::{before_admission,before_admission_cause};
 
 pub(crate) use cgroup_authority::service_scope::VerifiedServiceScope;
 pub(crate) fn capture_service_scope()->Probe<VerifiedServiceScope> {

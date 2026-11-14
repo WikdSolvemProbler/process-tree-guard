@@ -361,7 +361,7 @@ impl OneShotPort for NativePort {
 }
 
 enum Completion {
-    RefusedBeforeActivation{error:String,code:i32,preparation:Option<PreparationFailure>},
+    RefusedBeforeActivation{error:String,cause:PrelaunchCause,preparation:Option<PreparationFailure>},
     Terminal(std::result::Result<terminal_controller::SettledRun,terminal_controller::TerminalQuarantine>),
     Arming{settled:std::result::Result<arming_failure_controller::ArmingSettled,arming_failure_controller::ArmingQuarantine>,primary_decision:Option<Decision>,diagnostic_sample:Probe<DecisionReceipt>,error:String},
 }
@@ -391,63 +391,55 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
     RunOutcome{completion,port:Some(port),early_scope:None,early_cancellation:None,admission}
 }
 pub(in super::super) fn before_activation(launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt,failure:PreparationFailure)->RunOutcome {
-    let code=failure.code;let error=failure.error.clone();
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error,code,preparation:Some(failure)},port:Some(NativePort::new(launch,scope)),early_scope:None,early_cancellation:None,admission}
+    let cause=failure.cause;let error=failure.error.clone();
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope)),early_scope:None,early_cancellation:None,admission}
 }
 
 fn unknown_watchdog_stop(reasons:u32)->bool{reasons&8!=0&&reasons&(1|2|512)==0}
 impl RunOutcome {
     pub(crate) fn settled(&self)->bool{matches!(self.completion,Completion::RefusedBeforeActivation{..}|Completion::Terminal(Ok(_))|Completion::Arming{settled:Ok(_),..})}
     pub(crate) fn validate_final_scope(&self)->Probe<()>{match self.port.as_ref(){Some(port)=>port.scope.revalidate(),None=>self.early_scope.as_ref().ok_or("missing entry scope")?.revalidate()}}
-    /// Distinguish a genuine payload exit125 from a guard/setup/exec failure.
-    /// This summary contains no command/environment/credential-plan contents.
-    pub(crate) fn guard_error(&self)->Option<String>{
-        match &self.completion{
-            Completion::RefusedBeforeActivation{error,code,..}=>if *code==124{None}else{Some(error.clone())},
-            Completion::Arming{error,..}=>if self.exit_code()==124{None}else{Some(format!("native arming refused: {error}"))},
-            Completion::Terminal(Err(_))=>Some("native settlement is quarantined; owning failure retained".into()),
-            Completion::Terminal(Ok(run))=>{
-                let facts=run.facts();
-                if facts.stop_reasons&1!=0{return Some("original invocation owner lost".into());}
-                if facts.stop_reasons&512!=0{return Some("authenticated caller canceled the invocation".into());}
-                if unknown_watchdog_stop(facts.stop_reasons){return Some("watchdog stopped without a primary verified owner/deadline/cancellation cause".into());}
-                if let Some(terminal_controller::ExecState::ReportedFailure{errno})=facts.exec_report{return Some(format!("payload setup/exec failed with errno {errno}"));}
-                if facts.stop_reasons&2!=0{return None;}
-                match facts.release{Some(Err(error))=>return Some(format!("native release refused: {error}")),Some(Ok(Decision::Permit))=>{},_=>return Some("native release was not permitted".into())}
-                match facts.exec_report{Some(terminal_controller::ExecState::ReportedFailure{errno})=>Some(format!("payload setup/exec failed with errno {errno}")),Some(terminal_controller::ExecState::NoExecErrorReport)=>if facts.payload_exit.is_some(){None}else{Some("payload exit receipt missing".into())},_=>Some("payload exec-report state unverified".into())}
-            }
+    /// One effective classification retains cause independently of payload codes.
+    pub(crate) fn classify(&self)->RunClassification {
+        match &self.completion {
+            Completion::RefusedBeforeActivation{cause,error,..}=>classify_prelaunch(*cause,error),
+            Completion::Arming{settled,primary_decision,diagnostic_sample,error}=>classify_arming(*primary_decision,diagnostic_sample,settled.as_ref().is_ok_and(|value|value.permits_timeout()),error),
+            Completion::Terminal(Err(_))=>RunClassification::failure("native settlement is quarantined; owning failure retained".into()),
+            Completion::Terminal(Ok(run))=>{let facts=run.facts();classify_terminal(facts.stop_reasons,facts.release,facts.exec_report,facts.payload_exit)},
         }
     }
-    /// Fail closed on every unconfirmed setup/release/exec/settlement path.
-    /// This is internal return mapping, not a public enabled Linux CLI.
-    pub(crate) fn exit_code(&self)->i32 {
-        match &self.completion {
-            Completion::RefusedBeforeActivation{code,..}=>return *code,
-            Completion::Arming{settled:Ok(settled),primary_decision:Some(Decision::Deadline),
-                diagnostic_sample:Ok(DecisionReceipt{decision:Decision::Deadline,..}),..} if settled.permits_timeout()=>return 124,
-            _=>{},
-        }
-        let Completion::Terminal(Ok(run))=&self.completion else{return 125;};
-        let facts=run.facts();
-        if facts.stop_reasons & (1|512) != 0 {return 125;}
-        if facts.stop_reasons&8!=0&&facts.stop_reasons&(1|2|512)==0{return 125;}
-        if facts.stop_reasons & 2 != 0 {return 124;}
-        if !matches!(facts.release,Some(Ok(Decision::Permit)))
-            || facts.exec_report!=Some(terminal_controller::ExecState::NoExecErrorReport) {return 125;}
-        match facts.payload_exit {
-            Some(child_reaper::ExitOutcome::Exited{code})=>i32::from(code),
-            Some(child_reaper::ExitOutcome::Signaled{signal,..})=>128+signal,
-            None=>125,
-        }
+    pub(crate) fn guard_error(&self)->Option<String>{self.classify().error}
+    pub(crate) fn exit_code(&self)->i32{self.classify().code}
+}
+
+fn classify_prelaunch(cause:PrelaunchCause,error:&str)->RunClassification{match cause{PrelaunchCause::OriginalDeadline=>RunClassification::deadline(TimeoutCause::PreLaunch),PrelaunchCause::Failure=>RunClassification::failure(error.into())}}
+fn classify_arming(primary:Option<Decision>,diagnostic:&Probe<DecisionReceipt>,settled_permits:bool,error:&str)->RunClassification{
+ if primary==Some(Decision::Deadline)&&matches!(diagnostic,Ok(DecisionReceipt{decision:Decision::Deadline,..}))&&settled_permits{RunClassification::deadline(TimeoutCause::Arming)}else{RunClassification::failure(format!("native arming refused: {error}"))}
+}
+// Called only with fault-free SettledRun facts; independent release faults are
+// quarantined by the terminal controller and also refused defensively here.
+fn classify_terminal(reasons:u32,release:Option<&Probe<Decision>>,exec:Option<terminal_controller::ExecState>,payload:Option<child_reaper::ExitOutcome>)->RunClassification {
+    if reasons&1!=0{return RunClassification::failure("original invocation owner lost".into());}
+    if reasons&512!=0{return RunClassification::failure("authenticated caller canceled the invocation".into());}
+    if unknown_watchdog_stop(reasons){return RunClassification::failure("watchdog stopped without a primary verified owner/deadline/cancellation cause".into());}
+    if let Some(terminal_controller::ExecState::ReportedFailure{errno})=exec{return RunClassification::failure(format!("payload setup/exec failed with errno {errno}"));}
+    if let Some(Err(error))=release{return RunClassification::failure(format!("native release refused: {error}"));}
+    if reasons&2!=0{return RunClassification::deadline(TimeoutCause::Terminal);}
+    match release{Some(Err(error))=>return RunClassification::failure(format!("native release refused: {error}")),Some(Ok(Decision::Permit))=>{},_=>return RunClassification::failure("native release was not permitted".into())}
+    if exec!=Some(terminal_controller::ExecState::NoExecErrorReport){return RunClassification::failure("payload exec-report state unverified".into());}
+    match payload{
+        Some(child_reaper::ExitOutcome::Exited{code})=>RunClassification::payload(i32::from(code)),
+        Some(child_reaper::ExitOutcome::Signaled{signal,..})=>RunClassification::payload(128+signal),
+        None=>RunClassification::failure("payload exit receipt missing".into()),
     }
 }
 
 pub(in super::super) fn before_admission(scope:Option<VerifiedServiceScope>,cancellation:Arc<super::super::super::entry::AuthenticatedCancellation>,admission:NativeReceipt,error:String)->RunOutcome {
-    before_admission_code(scope,cancellation,admission,error,125)
+    before_admission_cause(scope,cancellation,admission,error,PrelaunchCause::Failure)
 }
 
-pub(in super::super) fn before_admission_code(scope:Option<VerifiedServiceScope>,cancellation:Arc<super::super::super::entry::AuthenticatedCancellation>,admission:NativeReceipt,error:String,code:i32)->RunOutcome {
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error,code,preparation:None},port:None,early_scope:scope,early_cancellation:Some(cancellation),admission}
+pub(in super::super) fn before_admission_cause(scope:Option<VerifiedServiceScope>,cancellation:Arc<super::super::super::entry::AuthenticatedCancellation>,admission:NativeReceipt,error:String,cause:PrelaunchCause)->RunOutcome {
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:None},port:None,early_scope:scope,early_cancellation:Some(cancellation),admission}
 }
 
 #[cfg(test)]pub(super) fn gate_first_cause_regression(){
@@ -479,4 +471,20 @@ pub(in super::super) fn before_admission_code(scope:Option<VerifiedServiceScope>
  for value in [-1,1,3,9]{assert!(!arming_gate_cancel_valid(value));}for value in [0,2]{assert!(arming_gate_cancel_valid(value));}
  println!("arming_gate_cancel every_attempt_recorded=true first_invalid_sticky=true valid_invalid_valid_veto=true pure=true");
 }
-#[cfg(test)]pub(super) fn watchdog_mapping_regression(){gate_cancel_recording_regression();for other in [0,4,32]{assert!(unknown_watchdog_stop(8|other));}for primary in [1,2,512]{assert!(!unknown_watchdog_stop(8|primary));}assert!(!unknown_watchdog_stop(4));}
+#[cfg(test)]pub(super) fn watchdog_mapping_regression(){timeout_cause_regression();gate_cancel_recording_regression();for other in [0,4,32]{assert!(unknown_watchdog_stop(8|other));}for primary in [1,2,512]{assert!(!unknown_watchdog_stop(8|primary));}assert!(!unknown_watchdog_stop(4));}
+
+#[cfg(test)]fn timeout_cause_regression(){
+ let permit=Ok(Decision::Permit);let before_release=Ok(Decision::Deadline);let fault=Err("independent release fault".into());
+ let exec=Some(terminal_controller::ExecState::NoExecErrorReport);
+ for code in [0,124,125]{let value=classify_terminal(0,Some(&permit),exec,Some(child_reaper::ExitOutcome::Exited{code}));assert_eq!(value.code,i32::from(code));assert_eq!(value.timeout,None);assert!(value.error.is_none());}
+ for release in [Some(&permit),Some(&before_release)]{let value=classify_terminal(2,release,exec,None);assert_eq!(value.code,124);assert_eq!(value.timeout,Some(TimeoutCause::Terminal));assert!(value.error.is_none());}
+ for reasons in [1|2,512|2,8]{let value=classify_terminal(reasons,Some(&permit),exec,None);assert_eq!(value.code,125);assert_eq!(value.timeout,None);}
+ for (release,state) in [(Some(&fault),exec),(Some(&permit),Some(terminal_controller::ExecState::ReportedFailure{errno:2}))]{let value=classify_terminal(2,release,state,None);assert_eq!(value.code,125);assert_eq!(value.timeout,None);assert!(value.error.is_some());}
+ let deadline=Ok(DecisionReceipt{decision:Decision::Deadline,owner_events:0,timer_events:POLLIN,sampled_ns:1});
+ let permit_sample=Ok(DecisionReceipt{decision:Decision::Permit,owner_events:0,timer_events:0,sampled_ns:1});let bad:Probe<DecisionReceipt>=Err("sample fault".into());
+ let good=classify_arming(Some(Decision::Deadline),&deadline,true,"");assert_eq!(good.timeout,Some(TimeoutCause::Arming));assert_eq!(good.code,124);
+ for (primary,sample,settled) in [(None,&deadline,true),(Some(Decision::Permit),&deadline,true),(Some(Decision::Deadline),&permit_sample,true),(Some(Decision::Deadline),&bad,true),(Some(Decision::Deadline),&deadline,false)]{let value=classify_arming(primary,sample,settled,"");assert_eq!(value.code,125);assert_eq!(value.timeout,None);}
+ for error in [super::super::super::invocation::InvocationError::OwnerLost,super::super::super::invocation::InvocationError::Kernel("124".into())]{let value=classify_prelaunch(PrelaunchCause::invocation(&error),"124");assert_eq!(value.code,125);assert_eq!(value.timeout,None);}
+ let value=classify_prelaunch(PrelaunchCause::invocation(&super::super::super::invocation::InvocationError::Expired),"");assert_eq!(value.timeout,Some(TimeoutCause::PreLaunch));assert_eq!(value.code,124);
+ eprintln!("typed_original_timeout_classification_payload124_125_vetoes_verified");
+}

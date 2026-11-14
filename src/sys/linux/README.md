@@ -1,4 +1,10 @@
-# Linux staged backend: one normal-exit mode 2 smoke
+# Linux staged backend: typed timeout-cause ordinary checks passed
+
+The current Rust-only repair retains a typed original-deadline cause through preparation, native classification and the authenticated private PTGOUTC2 result. The ordinary client records that cause only after all existing service, domain, manager and reference-release joins. Natural payload exits 124 and 125 do not acquire it. The dedicated CLI then attempts one fixed `PROCESS_TIMEOUT` notice under its unchanged timer; the library writes nothing. A capture-time expiry has a distinct no-launch cause.
+
+Exact c2f64084 passed 11 ordinary native build/link steps and the same 12 existing tests (0 failed or ignored). The executed controls cover typed classification and natural payload exits 124/125, strict PTGOUTC2 decoding, post-join marker eligibility and capture-time no-launch refusal. These are pure controls alongside the existing read-only descriptor checks; they do not execute a privileged C2 root/client lifecycle or emit a CLI timeout marker. All 91 artifacts totaling 31,655,543 bytes were preserved and verified. Cleanup then verified the 83 build and 8 unit-test artifacts, removed both exact owned scratch roots and confirmed both original scopes absent; local artifacts remain preserved. G18 and genuine runtime markers remain unqualified; the following smoke belongs to the exact db383 predecessor. No default, native C, Windows, timer, policy or containment change is made.
+
+## Last qualified predecessor smoke
 
 One genuine acknowledged separate-service normal-exit case passed on Linux 6.8 ARM64 under mode 2. The client returned 0 without a timeout in 6.09 seconds with empty standard output and error. A persisted unassisted pre-stop witness proved the original guard family empty while the original fixture was still live, before teardown. Exact owned temporary rule removal and the independently bounded host process-tree stop and join completed without errors. This establishes one fixed basic entry and native-join contract; Linux default dispatch remains disabled.
 

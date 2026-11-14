@@ -17,21 +17,26 @@ fn before(until:u64)->std::result::Result<(),String>{if supervisor::boottime_ns(
 
 #[must_use="inspect completion versus retained uncertain service capabilities"]
 pub(crate) struct ClientOutcome{
- code:i32,error:Option<String>,original:Option<OriginalInvocation>,
+ code:i32,error:Option<String>,timeout:Option<ClientTimeout>,original:Option<OriginalInvocation>,
  activation:Option<OwnedFd>,private:Option<OwnedFd>,service:Option<OwnedFd>,events:Option<fs::File>,
  unit:Option<manager::UnitReference>,completion:Option<supervisor::native_activation::ClientCompletion>,private_runtime:Option<supervisor::native_activation::PrivateRuntimeDirectory>,protected:Vec<OwnedFd>,hello:Option<entry::Hello>,
  raw_hello:Vec<u8>,raw_result:Vec<u8>,result_read:entry::PacketAttempt,cancellation_join:Option<CancellationJoin>,join_facts:JoinFacts,result:Option<entry::DecodedOutcome>,exit_timer:Option<std::rc::Rc<entry::ExitTimer>>,presentation_attempted:bool,completed:bool,
 }
 impl ClientOutcome{
- fn empty()->Self{Self{code:125,error:None,original:None,activation:None,private:None,service:None,events:None,unit:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result_read:entry::PacketAttempt::default(),cancellation_join:None,join_facts:JoinFacts::default(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
+ fn empty()->Self{Self{code:125,error:None,timeout:None,original:None,activation:None,private:None,service:None,events:None,unit:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result_read:entry::PacketAttempt::default(),cancellation_join:None,join_facts:JoinFacts::default(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
  pub(crate) fn exit_code(&self)->i32{self.code}
  pub(crate) fn error(&self)->Option<&str>{self.error.as_deref()}
+ pub(crate) fn timeout_cause(&self)->Option<ClientTimeout>{self.timeout}
  pub(crate) fn complete(&self)->bool{self.completed}
  /// A failed bounded cancellation/join retains unresolved capabilities. A valid
  /// native frame plus exact terminal/domain/manager join closes this obligation.
  pub(crate) fn may_have_active_service(&self)->bool{self.presentation_attempted&&!self.completed}
  pub(crate) fn wire_evidence(&self)->(&[u8],&[u8]){(&self.raw_hello,&self.raw_result)}
 }
+fn joined_timeout(cause:Option<TimeoutCause>,settled:bool,error_free:bool,facts:JoinFacts)->Option<ClientTimeout>{
+ if settled&&error_free&&facts.service_terminal&&facts.domain_empty&&facts.manager_status==Some(124)&&facts.manager_verified&&facts.unit_unreferenced{cause.map(ClientTimeout::Joined)}else{None}
+}
+fn capture_failure(error:invocation::InvocationError)->ClientOutcome{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.timeout=matches!(error,invocation::InvocationError::Expired).then_some(ClientTimeout::NoLaunch);result.error=Some(format!("original invocation: {error:?}"));result}
 fn error<T>(value:super::Result<T>)->std::result::Result<T,String>{value.map_err(|e|format!("{e:?}"))}
 fn caller_io()->std::result::Result<CallerIo,String>{
  let mut fds=Vec::new();for number in 0..3{let duplicate=error(os_result(unsafe{fcntl(number,1030,3 as c_int)} as isize))? as RawFd;let fd=unsafe{OwnedFd::from_raw_fd(duplicate)};error(io_flags(fd.as_raw_fd(),number as usize))?;fds.push(fd);}
@@ -85,7 +90,7 @@ fn cancel_and_join(outcome:&mut ClientOutcome){
    let read=(||->std::result::Result<entry::DecodedOutcome,String>{let hello=outcome.hello.as_ref().ok_or("missing service hello")?;before(until)?;
     let packet=entry::packet_observed(outcome.private.as_ref().ok_or("missing private channel")?.as_raw_fd(),until,8192,&mut receipt.read)?;
     outcome.raw_result=packet.bytes;if !packet.rights.is_empty()||packet.sender!=(Credentials{pid:hello.pid as c_int,uid:0,gid:0}){return Err("cancel-join root frame sender/rights differ".into());}
-    entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,hello.cutoff)
+    entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,hello.cutoff,outcome.original.as_ref().ok_or("missing original deadline")?.metadata().deadline_ns)
    })();match read{Ok(frame)=>outcome.result=Some(frame),Err(error)=>receipt.read_error=Some(error)}
   }
   let expected=outcome.result.as_ref().map(|frame|frame.code);join_service(outcome,expected,until,&mut receipt.facts)?;
@@ -117,7 +122,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   let activation=outcome.activation.as_ref().expect("activation owned");
   error(send_request(activation,original,&args,&env,io.stdio.each_ref().map(|fd|fd.as_fd()),io.cwd.as_fd()))?;
   let packet=entry::packet(activation.as_raw_fd(),end,8192)?;outcome.raw_hello=packet.bytes.clone();
-  if packet.bytes.starts_with(b"PTGOUTC1"){if packet.sender.pid<=1||packet.sender.uid!=0||packet.sender.gid!=0||!packet.rights.is_empty(){return Err("bootstrap refusal sender/rights invalid".into());}let refusal=entry::DecodedOutcome::decode(&packet.bytes,[0;16],0)?;if refusal.code!=125||refusal.settled||refusal.error.is_empty(){return Err("bootstrap refusal framing invalid".into());}let error=format!("root bootstrap: {}",refusal.error);outcome.result=Some(refusal);return Err(error);}
+  if packet.bytes.starts_with(b"PTGOUTC2"){if packet.sender.pid<=1||packet.sender.uid!=0||packet.sender.gid!=0||!packet.rights.is_empty(){return Err("bootstrap refusal sender/rights invalid".into());}let refusal=entry::DecodedOutcome::decode(&packet.bytes,[0;16],0,0)?;if refusal.code!=125||refusal.settled||refusal.error.is_empty(){return Err("bootstrap refusal framing invalid".into());}let error=format!("root bootstrap: {}",refusal.error);outcome.result=Some(refusal);return Err(error);}
   let hello=entry::Hello::decode(&packet.bytes)?;
   if packet.sender!=(Credentials{pid:hello.pid as c_int,uid:0,gid:0})||packet.rights.len()!=2||hello.cutoff!=end{return Err("root hello sender/capability/cutoff mismatch".into());}
   let [service,events]:[OwnedFd;2]=packet.rights.try_into().map_err(|_|"root hello rights")?;
@@ -140,14 +145,14 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   error(send_request(private,original,&args,&env,io.stdio.each_ref().map(|fd|fd.as_fd()),io.cwd.as_fd()))?;
   let packet=entry::packet_observed(private.as_raw_fd(),observation_end,8192,&mut outcome.result_read)?;outcome.raw_result=packet.bytes;
   if !packet.rights.is_empty()||packet.sender!=peer{return Err("root result sender/capabilities differ".into());}
-  outcome.result=Some(entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,end)?);
-  let decoded=outcome.result.as_ref().expect("owned root result");let code=decoded.code;let settled=decoded.settled;let root_error=decoded.error.clone();
+  outcome.result=Some(entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,end,absolute)?);
+  let decoded=outcome.result.as_ref().expect("owned root result");let code=decoded.code;let settled=decoded.settled;let root_error=decoded.error.clone();let timeout=decoded.timeout;
   let mut facts=JoinFacts::default();let joined=join_service(&mut outcome,Some(code),observation_end,&mut facts);outcome.join_facts=facts;joined?;
   outcome.completed=settled;
   if !settled||!root_error.is_empty(){return Err(if root_error.is_empty(){"root native settlement is unverified".into()}else{root_error});}
-  outcome.completed=true;Ok(code)
+  outcome.completed=true;outcome.timeout=joined_timeout(timeout,settled,root_error.is_empty(),facts);Ok(code)
  })();
- match result{Ok(code)=>outcome.code=code,Err(primary)=>{outcome.code=125;outcome.error=Some(primary);if outcome.presentation_attempted{cancel_and_join(&mut outcome);}}}
+ match result{Ok(code)=>outcome.code=code,Err(primary)=>{outcome.code=125;outcome.timeout=None;outcome.error=Some(primary);if outcome.presentation_attempted{cancel_and_join(&mut outcome);}}}
  outcome
 }
 /// Transparent caller confinement/resource inheritance is not implemented.
@@ -158,7 +163,7 @@ pub(crate) fn run_library(_command:&[OsString],_seconds:f64,_mode:OwnerMode)->Cl
 /// Explicit separate-service capability. Host policy remains read-only; capture
 /// precedes activation. Acknowledgment is disclosure, never an administrator grant.
 pub(crate) fn run_library_delegated(command:&[OsString],seconds:f64,mode:OwnerMode,acknowledgment:SeparateService)->ClientOutcome{
- match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(acknowledgment),command,false),Err(error)=>{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.error=Some(format!("original invocation: {error:?}"));result}}
+ match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(acknowledgment),command,false),Err(error)=>capture_failure(error)}
 }
 /// Dedicated standalone CLI only: its own NNP may be set; no host is changed.
 pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
@@ -175,8 +180,19 @@ pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
  }
  if arguments.get(index).is_some_and(|v|v=="--"){index+=1;}
  let Some(seconds)=seconds else{let mut result=ClientOutcome::empty();result.error=Some("usage: --separate-service-context [auto] --timeout SECONDS -- PROGRAM ARGS".into());return result;};
- match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(SeparateService::Acknowledged),&arguments[index..],true),Err(error)=>{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.error=Some(format!("original invocation: {error:?}"));result}}
+ match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(SeparateService::Acknowledged),&arguments[index..],true),Err(error)=>capture_failure(error)}
 }
 
 /// Dedicated CLI only; retained owners are kept live until actual kernel exit.
-pub(crate) fn exit(result:ClientOutcome)->!{entry::cli_exit(result.exit_code(),result.error(),result.exit_timer.as_deref())}
+pub(crate) fn exit(result:ClientOutcome)->!{entry::cli_exit(result.exit_code(),result.error(),result.exit_timer.as_deref(),result.timeout_cause())}
+
+#[cfg(test)]pub(super) fn timeout_cause_regression(){
+ let facts=JoinFacts{service_terminal:true,domain_empty:true,manager_status:Some(124),manager_verified:true,unit_unreferenced:true};
+ assert_eq!(joined_timeout(Some(TimeoutCause::Terminal),true,true,facts),Some(ClientTimeout::Joined(TimeoutCause::Terminal)));
+ assert_eq!(joined_timeout(None,true,true,facts),None);
+ for (settled,error_free) in [(false,true),(true,false)]{assert_eq!(joined_timeout(Some(TimeoutCause::Terminal),settled,error_free,facts),None);}
+ for index in 0..5{let mut bad=facts;match index{0=>bad.service_terminal=false,1=>bad.domain_empty=false,2=>bad.manager_status=Some(125),3=>bad.manager_verified=false,_=>bad.unit_unreferenced=false}assert_eq!(joined_timeout(Some(TimeoutCause::Terminal),true,true,bad),None);}
+ let expired=capture_failure(invocation::InvocationError::Expired);assert_eq!(expired.timeout_cause(),Some(ClientTimeout::NoLaunch));assert_eq!(expired.exit_code(),124);assert!(!expired.may_have_active_service());assert!(!expired.complete());
+ let failure=capture_failure(invocation::InvocationError::Kernel("124".into()));assert_eq!(failure.timeout_cause(),None);assert_eq!(failure.exit_code(),125);
+ eprintln!("typed_timeout_postjoin_latch_and_capture_no_launch_verified");
+}
