@@ -460,3 +460,16 @@ Privileged manager/service/client entry, public dispatch and actual before-manag
 **Next:** The [`reduced-run` folder](reduced-run/README.md) holds the preserved package.
 
 [↑ Back to Contents](#contents)
+
+
+## Linux C2 normal-exit regression
+
+The rebuilt root and client from [78508a6](https://github.com/WikdSolvemProbler/process-tree-guard/commit/78508a6edef4f4c6df986111b8da0e9a961cc3fa) passed one acknowledged separate-service normal-exit case on Linux 6.8 ARM64 in a disposable emulated VM under mode 2. The fixed `/usr/bin/true` call used a 10-second deadline and 20-second observation bound; the client returned 0 in 5.646174992 seconds with empty stdout and stderr. Two independent Sol reviewers verified all 211 returned artifacts totaling 123,586 bytes.
+
+The persisted unassisted pre-stop witness showed the same live controller, socket and original timer, one accepted connection, zero current connections or queued product jobs, and an empty original guard family before teardown. The configured temporary rule retained its original identity through that witness; its exact final and staging entries were subsequently removed. The original VM was stopped and joined within its declared bound, with no cleanup errors or membership anomalies.
+
+Native settlement, original-service/domain, retained-manager and reference-release joins are supported by the exact audited client-success source path. Internal raw result frames, product manager tuples and the client retirement branch were not exported. Bootstrap retirement evidence does not identify the product read branch. This is one normal-exit C2 regression; natural-exit-124, live timeout markers, G18, the full failure matrix, transparent caller context, the kernel floor and performance remain unqualified. The duration is descriptive; there are zero qualified competitive measurements. Linux default dispatch remains disabled, and every earlier failed attempt retains its original outcome.
+
+A preliminary local audit used an incomplete derived witness hash. That record was retained; both independent reviewers recomputed the published hash from the complete original witness. The raw observations and test outcome were unchanged.
+
+Receipt SHA-256: `9e99a440853e7a3f3d6525ff74cc73462a0114b23a871a6a1bae919726adf267`; raw collection: `5e9e877eaf5ba7c3ca2c618b4d826e5ceb19398ea2652247bdab9a7d1ceb7bd1`; canonical pre-stop witness: `0db225d82ad0148493e45d90c489801ea81a7f9e01efeff09d8253b2bb603267`. Exact machine and SSH records remain local under the publication privacy policy; these hashes and this summary do not replace publicly accessible raw evidence.
