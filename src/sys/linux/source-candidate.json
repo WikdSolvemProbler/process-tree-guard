@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Exactdb383 positional completion-reader source passed ordinary build01811/11 and unit013same12/12 descriptor+pure checks; livecgroup retirement/payload lifecycle remains unqualified",
+  "status": "One genuine fixed mode 2 acknowledged separate-service normal-exit basic entry and native-join smoke passed with unassisted original-family-empty PRESTOP; full matrix, default enablement and performance remain unqualified",
   "root": "src/sys/linux",
   "baseline_commit": "8f7fd60a245f5cbdd6b33789aade61a35fec2cb1",
   "baseline_candidate_sha256": "4f414679ccfe662cd17b1141200f63d180c1bc0af1f516039a698c404fadc406",
@@ -82,13 +82,13 @@
     },
     {
       "path": "PROVENANCE.json",
-      "bytes": 99199,
-      "sha256": "f6b942a02b496bbef012d54240d1053b1b31f9db53a66c734c00470f7f874926"
+      "bytes": 102289,
+      "sha256": "7f4c12687f6859e0a3808133b908242dc4246e151f782c6f2ec34f64780f17a8"
     },
     {
       "path": "README.md",
-      "bytes": 53465,
-      "sha256": "fe22ec8e603645ef9abb0a6aab8b69354e4444da48c105306fa0c81d19f1bb86"
+      "bytes": 55455,
+      "sha256": "ff1ad7d6f15e9132fe8082343e984219e1b7ff5b4de4002b1722b252d78beba2"
     },
     {
       "path": "arming_failure_controller.rs",
@@ -127,8 +127,8 @@
     },
     {
       "path": "deployment/README.md",
-      "bytes": 15268,
-      "sha256": "b63c543624e1036d796f0edc72f21192f46466fd80373536e32459b7d8f099c9"
+      "bytes": 16561,
+      "sha256": "21da66d7d467d23d65deae64e2436395d919936af86eac2154be9a4f57a19983"
     },
     {
       "path": "deployment/process-tree-guard.socket",
@@ -301,7 +301,7 @@
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
   "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-  "publication_change": "Metadata-only successor records exacttesteddb383 ordinary11/11 and same12/12 descriptor+pure tests,91preserved artifacts. All36 implementation/template files unchanged. No Cleanup018 postcondition, realcgroup retirement/payloadguard0 claim or rescoring005FAILED164.",
+  "publication_change": "Metadata-only one fixed mode 2 acknowledged separate-service normal-exit basic entry and native-join milestone with unassisted pre-stop original-family-empty proof. All 36 code/template files unchanged; no raw internal branch or tuple, causation, revocation, full matrix, timeout exit 124, mode 0, floor, default enablement or performance claim.",
   "entry_timer_component": {
     "source_qualified": true,
     "native_component_tests_passed": 3,
@@ -313,10 +313,10 @@
   },
   "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
   "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities.",
-  "entry_compile_status": "Exactdb383 positional completion-reader source passed ordinary build01811/11 and unit013same12/12 descriptor+pure checks; livecgroup retirement/payload lifecycle remains unqualified",
+  "entry_compile_status": "Exact db383 passed 11 ordinary build/link steps and the same 12 tests; one fixed genuine mode 2 normal-exit basic entry and native-join case passed. Raw internal branch and tuple were not exported; full matrix remains open and default dispatch remains disabled.",
   "source_only": true,
   "retirement": "typed original live/populated cgroup2 capabilities; terminal original pidfd; raw original events ENODEV + exact held-parent basename ENOENT; all replacement/other errors125; manager empty group accepted only typedRetired+same invocation/status",
-  "reviewed_predecessor_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
+  "reviewed_predecessor_sha256": "6b5b1ec28a0ce67f6a46e39e96ae2a5dcb67b74504f9387f78840bdf6315f3d4",
   "preserved_predecessor": "target/codex-security/linux-product-integration-history-001/entry-ffi-successor-021/source",
   "review_repairs": [
     "typed NeedsRetirement from final authoritative same-invocation status query; no separate preflight race",
@@ -330,7 +330,7 @@
   "predecessor_implementation_build_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
   "entry_source_validation": {
     "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-    "status": "ACTUAL ORDINARY BUILD/TEST PASSED; LIVE CGROUP/RETIREMENT LIFECYCLE UNQUALIFIED",
+    "status": "ORDINARY BUILD/TEST RECORD ONLY; SEPARATE REAL SINGLE-CASE MILESTONE IS RECORDED IN single_fixed_mode2_normal_exit_smoke",
     "scope": "Ordinary native compile/link and same twelve existing tests. Actual read-only descriptor regression uses real SCM_RIGHTS sharedcursor1/production positional reads, repeated content/cursor checks, selfexe4097/O_PATHnegative plus pure parser/rawNone/diagnostic checks. No livecgroup retirement, privileged payload or guard0 result.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
@@ -354,10 +354,10 @@
     "artifact_files_preserved_and_verified": 91,
     "build_artifacts": 83,
     "unit_artifacts": 8,
-    "cleanup_status": "Cleanup018 had not executed at this metadata-preparation checkpoint; no root/scope/worker absence or artifact removal postcondition is claimed.",
-    "cleanup_receipt_sha256": null,
-    "owned_scratch_roots_removed": null,
-    "original_scopes_absent": null,
+    "cleanup_status": "Completed before publication: all 83 build and 8 unit-test artifacts verified locally and remotely; both exact owned scratch roots removed and both original scopes confirmed absent.",
+    "cleanup_receipt_sha256": "24dcb6aafbe47bce3fba64838da32bcfbfa6dcfc2eac134fc2f8433b77b5e715",
+    "owned_scratch_roots_removed": 2,
+    "original_scopes_absent": true,
     "linked_entry_ELFs": [
       {
         "name": "process-tree-guard-root",
@@ -1264,7 +1264,7 @@
   "completion_event_read_repair": {
     "design_sha256": "fcf754396d46552deee24970368c7c7c59a6df57b803ae04fa3a8c35cccbbfff",
     "implementation_authorization_sha256": "881db1c8b38d39c144ed107ab8d9cbfa6bd4b6cfdda536d80ca85fa9261621f2",
-    "status": "Exactdb383 positional completion-reader source passed ordinary build01811/11 and unit013same12/12 descriptor+pure checks; livecgroup retirement/payload lifecycle remains unqualified",
+    "status": "One genuine fixed mode2 acknowledged separate-service normal-exit basic entry/native-join smoke and unassisted original-family-empty PRESTOP passed; fullmatrix/default/performance remain unqualified",
     "predecessor_publication_sha256": "ab1ba0f2f1a53af8b5892e8d97247fe9526733ea0a2194dd10549673a1ad6750",
     "predecessor_tested_implementation_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
     "reader": "OwnedF_DUPFD_CLOEXEC/fsFileRAII; FileExt.read_at explicit offset0+accumulated bytes, positive shortreads toEOF/4097, no seek/shared cursor/pathname reopen/error retry.",
@@ -1288,7 +1288,7 @@
     "unchanged": "All remaining source/owner/originaldeadline/timers/policy/reference/native/retirement/manager/wire/Windows/Cargo/default behavior outside narrowreader/diagnosticdelta remains.",
     "current_validation": {
       "implementation_build_candidate_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
-      "status": "ACTUAL ORDINARY BUILD/TEST PASSED; LIVE CGROUP/RETIREMENT LIFECYCLE UNQUALIFIED",
+      "status": "ORDINARY BUILD/TEST RECORD ONLY; SEPARATE REAL SINGLE-CASE MILESTONE IS RECORDED IN single_fixed_mode2_normal_exit_smoke",
       "scope": "Ordinary native compile/link and same twelve existing tests. Actual read-only descriptor regression uses real SCM_RIGHTS sharedcursor1/production positional reads, repeated content/cursor checks, selfexe4097/O_PATHnegative plus pure parser/rawNone/diagnostic checks. No livecgroup retirement, privileged payload or guard0 result.",
       "compile_link_steps": 11,
       "compile_link_passed": 11,
@@ -1312,10 +1312,10 @@
       "artifact_files_preserved_and_verified": 91,
       "build_artifacts": 83,
       "unit_artifacts": 8,
-      "cleanup_status": "Cleanup018 had not executed at this metadata-preparation checkpoint; no root/scope/worker absence or artifact removal postcondition is claimed.",
-      "cleanup_receipt_sha256": null,
-      "owned_scratch_roots_removed": null,
-      "original_scopes_absent": null,
+      "cleanup_status": "Completed before publication: all 83 build and 8 unit-test artifacts verified locally and remotely; both exact owned scratch roots removed and both original scopes confirmed absent.",
+      "cleanup_receipt_sha256": "24dcb6aafbe47bce3fba64838da32bcfbfa6dcfc2eac134fc2f8433b77b5e715",
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true,
       "linked_entry_ELFs": [
         {
           "name": "process-tree-guard-root",
@@ -1363,10 +1363,10 @@
       "artifact_files_preserved_and_verified": 91,
       "build_artifacts": 83,
       "unit_artifacts": 8,
-      "cleanup_status": "Cleanup018 had not executed at this metadata-preparation checkpoint; no root/scope/worker absence or artifact removal postcondition is claimed.",
-      "cleanup_receipt_sha256": null,
-      "owned_scratch_roots_removed": null,
-      "original_scopes_absent": null,
+      "cleanup_status": "Completed before publication: all 83 build and 8 unit-test artifacts verified locally and remotely; both exact owned scratch roots removed and both original scopes confirmed absent.",
+      "cleanup_receipt_sha256": "24dcb6aafbe47bce3fba64838da32bcfbfa6dcfc2eac134fc2f8433b77b5e715",
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true,
       "linked_entry_ELFs": [
         {
           "name": "process-tree-guard-root",
@@ -1395,6 +1395,36 @@
     "privileged_lifecycle_qualified": false,
     "public_backend_enabled": false,
     "scope": "Same-held-FD positional read, private read_failed bit, failure-only bounded stage/errno/length diagnostics and existing12-test readonly semantic regression. No new authority/pathname fallback, ABI/nativeC/wire/Windows/Cargo/default/timer changes.",
-    "limits": "Historical4b34 ordinary11/12 and44pure template decisions do not validate this repair. Actual005164-file failure remains failed; exact stage/syscall cause unproven. No new tests or genuine lifecycle/retirement validation executed."
+    "limits": "Historical pre-ordinary, pre-smoke checkpoint only: the earlier 4b34 ordinary 11/12 results and 44 pure template decisions did not validate this repair. The 164-file runtime005 failure remained failed, with its exact stage and syscall cause unproven. No new tests or genuine lifecycle or retirement validation had executed at that checkpoint. Later ordinary checks and the single normal-exit smoke are recorded separately; the product retirement branch remains unlogged."
+  },
+  "single_fixed_mode2_normal_exit_smoke": {
+    "status": "ONE FIXED MODE 2 NORMAL-EXIT ACKNOWLEDGED SEPARATE-SERVICE CASE PASSED",
+    "tested_implementation_sha256": "db3831d5adeed724cb2ccba8e541b5266a2cbc0fd865b2fa40464acd565413c7",
+    "platform": "Linux 6.8 ARM64",
+    "mode": 2,
+    "cases": 1,
+    "client": {
+      "exit": 0,
+      "timed_out": false,
+      "elapsed_ns": 6087038592,
+      "stdout_empty": true,
+      "stderr_empty": true
+    },
+    "proof_scope": "Persisted unassisted original-family-empty pre-stop witness while original fixture remained live before teardown; exact owned temporary rule final/stage removal and independently bounded original host process-tree stop/join passed without errors.",
+    "basic_entry_native_join_contract_passed": true,
+    "source_bound_inference": "Under exact audited code, a client exit of 0 requires native settlement plus the original service, domain, retained-manager and reference-release checks. These internal raw details were not separately exported.",
+    "recording_limit": "Raw native frame, internal client completion/retirement branch or errno and product manager tuple were not exported; pre-stop product-units map was empty. Collector retirement covers only the administrative bootstrap.",
+    "evidence": {
+      "files": 211,
+      "bytes": 123415,
+      "receipt_sha256": "fe019e7670b92308ce3f310bd21b92c7a97124a46515411504e0875f321da5b0",
+      "collection_sha256": "b63cd7c395e005c9192fdcc16bdb8aab020b56c6b40b2d12370041a0c0ce497e",
+      "pre_stop_sha256": "3874adfe93eec03f21934dd5d189e7cc8c55048e06fcdf4a3c4c759371c715e7",
+      "independent_audits": 2
+    },
+    "host_stop_join_elapsed_seconds": 745.703,
+    "limits": "One fixed normal-exit mode 2 case only. No prior-failure cause or rescoring, sole-grant causality, future authorization revocation, mode 0, kernel floor, full lifecycle matrix, timeout exit 124, transparent caller context or performance and ranking qualification. Raw machine and transport evidence remains private.",
+    "qualified_competitive_measurements": 0,
+    "public_backend_enabled": false
   }
 }
