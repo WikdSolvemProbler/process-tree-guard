@@ -304,23 +304,6 @@ impl Sink {
     }
 }
 
-/// Write a line to standard error with a call on its handle, not through Rust's lock on
-/// it: a write that cannot finish then holds up the log thread only, and the guard's own
-/// notices, which share the stream, can still be written. The line is one call, so a line
-/// of the log cannot land inside it, nor it inside one (Common Weakness Enumeration,
-/// CWE-362); the notices and the errors of the guard are written the same way.
-/// True when the whole line was written.
-/// The write itself is the counted form of the standard line writer,
-/// which keeps this copy's former accounting branch by branch (see
-/// `write_line_counted` there). Its callers write on a thread
-/// dedicated to this run's standard error for its whole life (the
-/// sink thread above), so the write goes through the per-thread
-/// cached form there: the thread's first line probes its handle and
-/// console verdict, and later lines pay neither probe again.
-pub(super) fn try_write_standard_error(line: &str) -> bool {
-    crate::cli_process::try_write_stderr_line_cached(line)
-}
-
 /// True when standard error can hold a record: it is open and is a console, a file or a
 /// pipe. A character device that is not a console (the null device) takes every write and
 /// keeps none of it, so a log written there is a log nowhere.
@@ -395,8 +378,13 @@ impl Log {
     pub(crate) fn start(path: Option<Arc<Path>>, limit: u64, keep: Option<std::fs::File>) -> Result<Log, GuardError> {
         let last_written = Arc::new(AtomicBool::new(true));
         let seen = last_written.clone();
+        // Select this run's stderr on its invoking thread, before the lazy
+        // worker exists. Console cleanup can later change the live table.
+        // This borrows the target; a detached or closed target can fail normally.
+        let (stderr_handle, stderr_console) = crate::cli_process::standard_error_target();
+        let stderr_handle = stderr_handle as usize;
         let stderr = Arc::new(Sink::start("extension-log-stderr", Box::new(move |line: &str| {
-            let written = try_write_standard_error(line);
+            let written = crate::cli_process::try_write_line_counted_to(stderr_handle as Handle, stderr_console, line);
             seen.store(written, Ordering::SeqCst);
             written
         }), LOG_QUEUE)?);

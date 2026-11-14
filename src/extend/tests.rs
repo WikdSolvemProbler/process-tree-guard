@@ -778,6 +778,148 @@
 
     #[test]
     fn a_sink_thread_started_behind_its_gate_writes_the_line_that_started_it() {
+        use crate::sys::windows::{
+            ExtendedLimitInformation, GetStdHandle, KILL_ON_JOB_CLOSE, PeekNamedPipe,
+            SetInformationJobObject, STD_ERROR_HANDLE, STD_INPUT_HANDLE, TerminateProcess,
+            WaitForSingleObject, EXTENDED_LIMIT_CLASS, WAIT_OBJECT_0,
+        };
+        use crate::sys::windows::test_api::SetStdHandle;
+        use std::io::{Read, Write};
+        use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
+        use std::process::{Child, Command, Stdio};
+
+        const CHILD: &str = "PTG_UNIT_STDERR_TARGET_CHILD";
+        const CHILD_WAIT_MS: u32 = 15_000;
+
+        fn fail_without_unwinding(code: u32) -> ! {
+            // Targets borrowed by a nonterminal worker must not be dropped.
+            unsafe { TerminateProcess(GetCurrentProcess(), code) };
+            std::process::abort();
+        }
+
+        struct RestoreStderr { original: Handle, changed: bool }
+        impl RestoreStderr {
+            fn set(&mut self, handle: Handle) -> std::io::Result<()> {
+                if unsafe { SetStdHandle(STD_ERROR_HANDLE, handle) } == 0 {
+                    return Err(std::io::Error::last_os_error());
+                }
+                self.changed = true;
+                Ok(())
+            }
+            fn restore(&mut self) -> std::io::Result<()> {
+                if self.changed {
+                    if unsafe { SetStdHandle(STD_ERROR_HANDLE, self.original) } == 0 {
+                        return Err(std::io::Error::last_os_error());
+                    }
+                    self.changed = false;
+                }
+                Ok(())
+            }
+        }
+        impl Drop for RestoreStderr {
+            fn drop(&mut self) {
+                if self.restore().is_err() {
+                    fail_without_unwinding(122);
+                }
+            }
+        }
+
+        fn child_target_check() {
+            let folder = scratch_folder("stderr-target");
+            let a_path = folder.join("a.log");
+            let b_path = folder.join("b.log");
+            let a = std::fs::OpenOptions::new().create_new(true).read(true).write(true).open(&a_path).expect("own file A");
+            let b = std::fs::OpenOptions::new().create_new(true).read(true).write(true).open(&b_path).expect("own file B");
+            // Declared after A/B, so restoration precedes their Drop even on unwind.
+            let original = unsafe { GetStdHandle(STD_ERROR_HANDLE) };
+            let mut restore = RestoreStderr { original, changed: false };
+            let mut log: Option<Log> = None;
+            const LINE: &str = "captured first line \u{e9}";
+            // Keep both real targets outside the caught operation: any assertion
+            // after enqueue still reaches native worker cleanup before File Drop.
+            let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                restore.set(a.as_raw_handle()).expect("select file A");
+                assert_eq!(unsafe { GetStdHandle(STD_ERROR_HANDLE) }, a.as_raw_handle());
+                log = Some(Log::start(None, LOG_LIMIT, None).expect("start the real stderr log"));
+                let log = log.as_ref().unwrap();
+                let sink = &log.only.as_ref().expect("stderr is the record").sink;
+                assert!(!sink.started.load(Ordering::SeqCst) && relock(&sink.pending).is_some(), "no first line or worker yet");
+                restore.set(b.as_raw_handle()).expect("select file B before first enqueue");
+                assert_eq!(unsafe { GetStdHandle(STD_ERROR_HANDLE) }, b.as_raw_handle());
+                let failed = sink.failed_writes();
+                let number = sink.enqueue(LINE).expect("queue the first line");
+                let recorded = sink.wait_recorded(number, failed, 5_000);
+                (recorded, sink.failed_writes() == failed, log.only.as_ref().unwrap().last_written.load(Ordering::SeqCst))
+            }));
+            let mut joined = None;
+            if let Some(log) = log.as_ref() {
+                let sink = &log.only.as_ref().expect("stderr sink").sink;
+                // Never call Sink::finish here: its done-channel path can join.
+                // Take the original creation handle and require physical terminal.
+                let thread = relock(&sink.thread).take();
+                relock(&sink.queue).take();
+                if let Some(thread) = thread {
+                    let wait = unsafe { WaitForSingleObject(thread.as_raw_handle(), 5_000) };
+                    let _wait_error = (wait == crate::sys::windows::WAIT_FAILED).then(std::io::Error::last_os_error);
+                    if wait != WAIT_OBJECT_0 {
+                        // A/B and the worker handle remain owned until process exit.
+                        let _restored = restore.restore();
+                        fail_without_unwinding(121);
+                    }
+                    joined = Some(thread.join());
+                }
+            }
+            if restore.restore().is_err() {
+                fail_without_unwinding(122);
+            }
+            assert_eq!(unsafe { GetStdHandle(STD_ERROR_HANDLE) }, original, "restore the child's original stderr before reporting");
+            let (recorded, no_failures, last_written) = match outcome {
+                Ok(facts) => facts,
+                Err(panic) => std::panic::resume_unwind(panic),
+            };
+            assert!(joined.is_some_and(|result| result.is_ok()), "the original worker ended and joined without panic");
+            assert!(recorded && no_failures && last_written, "the original counted record completed without a failure");
+            assert_eq!(std::fs::read(&a_path).unwrap(), format!("{LINE}\n").as_bytes(), "the delayed first line belongs to captured file A");
+            assert!(std::fs::read(&b_path).unwrap().is_empty(), "the later standard-error target receives no log line");
+        }
+
+        struct ChildInJob { child: Child, job: Option<OwnedHandle> }
+        impl Drop for ChildInJob {
+            fn drop(&mut self) {
+                // Closing the Job kills the tree. Direct kill also covers an
+                // assignment failure while the child was still behind its gate.
+                drop(self.job.take());
+                let _ = self.child.kill();
+                if unsafe { WaitForSingleObject(self.child.as_raw_handle(), CHILD_WAIT_MS) } == WAIT_OBJECT_0 {
+                    let _ = self.child.wait();
+                }
+            }
+        }
+
+        if let Some(nonce) = std::env::var_os(CHILD) {
+            let nonce = nonce.to_str().expect("child nonce is text");
+            let (parent, stamp) = nonce.split_once('-').expect("isolated child nonce");
+            assert!(!parent.is_empty() && !stamp.is_empty() && parent.bytes().chain(stamp.bytes()).all(|b| b.is_ascii_digit()), "strict child sentinel");
+            // Only this exact child test changes its table, and only after the
+            // parent has assigned its kill-on-close Job and released this gate.
+            let input = unsafe { GetStdHandle(STD_INPUT_HANDLE) };
+            let until = std::time::Instant::now() + Duration::from_millis(CHILD_WAIT_MS as u64);
+            loop {
+                let mut available = 0;
+                if unsafe { PeekNamedPipe(input, std::ptr::null_mut(), 0, std::ptr::null_mut(), &mut available, std::ptr::null_mut()) } == 0 {
+                    panic!("inspect child launch gate: {}", std::io::Error::last_os_error());
+                }
+                if available != 0 { break; }
+                assert!(std::time::Instant::now() < until, "child launch gate deadline");
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            let mut go = [0];
+            std::io::stdin().read_exact(&mut go).expect("read child launch gate");
+            assert_eq!(go, *b"1");
+            child_target_check();
+            return;
+        }
+
         // The first line starts the sink's thread behind its gate:
         // the thread is hardened through its creation handle and
         // released before it takes a line, and the line that started
@@ -793,6 +935,33 @@
         assert!(sink.wait_recorded(number, failed_before, 5_000), "the line that started the sink is written once the gate is released");
         sink.finish(1_000);
         assert_eq!(written.lock().unwrap().as_slice(), ["first line"]);
+        // A separate exact test process owns both real file targets. No other
+        // test thread, the parent test runner, or its caller changes stdio.
+        let raw_job = unsafe { CreateJobObjectW(std::ptr::null_mut(), std::ptr::null()) };
+        assert!(!raw_job.is_null(), "create child Job: {}", std::io::Error::last_os_error());
+        let job = unsafe { OwnedHandle::from_raw_handle(raw_job) };
+        let mut limits = ExtendedLimitInformation::default();
+        limits.basic.limit_flags = KILL_ON_JOB_CLOSE;
+        if unsafe { SetInformationJobObject(job.as_raw_handle(), EXTENDED_LIMIT_CLASS, (&mut limits as *mut ExtendedLimitInformation).cast(), std::mem::size_of::<ExtendedLimitInformation>() as u32) } == 0 {
+            panic!("set child Job cleanup: {}", std::io::Error::last_os_error());
+        }
+        let module = module_path!().split_once("::").expect("test module path").1;
+        let test = format!("{module}::a_sink_thread_started_behind_its_gate_writes_the_line_that_started_it");
+        let child = Command::new(std::env::current_exe().expect("this test executable"))
+            .args(["--exact", &test, "--nocapture", "--test-threads=1"])
+            .env(CHILD, format!("{}-{}", std::process::id(), tick()))
+            .stdin(Stdio::piped()).stdout(Stdio::inherit()).stderr(Stdio::inherit())
+            .spawn().expect("spawn isolated target test");
+        let mut worker = ChildInJob { child, job: Some(job) };
+        if unsafe { AssignProcessToJobObject(worker.job.as_ref().unwrap().as_raw_handle(), worker.child.as_raw_handle()) } == 0 {
+            panic!("assign isolated child before releasing gate: {}", std::io::Error::last_os_error());
+        }
+        worker.child.stdin.take().expect("child launch pipe").write_all(b"1").expect("release child");
+        let terminal = unsafe { WaitForSingleObject(worker.child.as_raw_handle(), CHILD_WAIT_MS) };
+        let terminal_error = (terminal == crate::sys::windows::WAIT_FAILED).then(std::io::Error::last_os_error);
+        assert_eq!(terminal, WAIT_OBJECT_0, "isolated child deadline/native wait: {terminal_error:?}");
+        let status = worker.child.wait().expect("reap terminal child");
+        assert!(status.success(), "isolated captured-target test failed: {status}");
     }
 
     #[test]

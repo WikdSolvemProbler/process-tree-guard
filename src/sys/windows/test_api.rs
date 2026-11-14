@@ -17,6 +17,7 @@ extern "system" {
 
 #[link(name = "kernel32")]
 extern "system" {
+    pub(crate) fn SetStdHandle(which: u32, handle: Handle) -> Bool;
     pub(crate) fn CreatePipe(read: *mut Handle, write: *mut Handle, attributes: *mut c_void, size: u32) -> Bool;
 }
 

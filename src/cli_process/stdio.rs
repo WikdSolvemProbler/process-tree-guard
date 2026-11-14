@@ -286,33 +286,11 @@ pub(crate) fn write_text_to(handle: Handle, console: bool, text: &str, append_ne
     }
 }
 
-thread_local! {
-    /// The standard-error target of a dedicated writer thread (the
-    /// extension log's standard-error sink), resolved on that thread's
-    /// first line and read back for every later one. The sink thread
-    /// serves one process-owning run for its whole life, so its stream
-    /// is the run's stream, exactly as the entering thread's cached
-    /// verdicts are the run's; resolving it per line paid a
-    /// `GetStdHandle` and a `GetConsoleMode` for information that
-    /// cannot change under the run. Other threads hold no entry and
-    /// are never read through this slot.
-    static STDERR_LINE_TARGET: std::cell::Cell<Option<(Handle, bool)>> = const { std::cell::Cell::new(None) };
-}
-
-/// The counted stderr line writer for a caller that writes on one
-/// dedicated thread for the life of a process-owning run (the extension log's
-/// standard-error sink thread): the first line on the thread probes
-/// its target live, and every later line writes through
-/// `write_line_counted` on the probed handle and verdict directly.
-pub(crate) fn try_write_stderr_line_cached(text: &str) -> bool {
-    let (handle, console) = STDERR_LINE_TARGET.with(|slot| match slot.get() {
-        Some(target) => target,
-        None => {
-            let target = probe_console_handle(STD_ERROR_HANDLE);
-            slot.set(Some(target));
-            target
-        }
-    });
+/// Write a counted line to the target captured by this invocation before its
+/// dedicated log worker starts. A later console attachment or standard-handle
+/// replacement must not select another destination on the worker's first line.
+/// The handle is borrowed: a detached or closed target may reject the write.
+pub(crate) fn try_write_line_counted_to(handle: Handle, console: bool, text: &str) -> bool {
     if handle.is_null() || handle == INVALID_HANDLE {
         return false;
     }
@@ -320,7 +298,7 @@ pub(crate) fn try_write_stderr_line_cached(text: &str) -> bool {
 }
 
 /// The counted write itself, on a handle and a console verdict the
-/// caller has already resolved (the per-thread cached form above),
+/// caller has already resolved (the captured-target form above),
 /// for a caller whose grant stands only when its line was recorded.
 /// The returned flag keeps the accounting of the extension log's
 /// former private copy of this writer, branch by branch: on a
