@@ -69,15 +69,6 @@ pub(crate) fn cached_std_handle(which: u32) -> Option<Handle> {
     if active() { Some(probed_handle(which).handle) } else { None }
 }
 
-/// Whether a write to the standard stream `which` can wait for ever:
-/// a pipe waits while it is full and nobody reads it. A console, a
-/// file, the null device and a missing handle take a line without
-/// waiting on another process.
-pub(crate) fn std_target_is_pipe(which: u32) -> bool {
-    let (handle, _) = line_target(which);
-    !handle.is_null() && handle != INVALID_HANDLE && unsafe { GetFileType(handle) } == FILE_TYPE_PIPE
-}
-
 /// The standard stream `which` as this invocation resolved it at entry,
 /// for a writer on another thread: `GetStdHandle` read after a run can
 /// name another object once the console cleanup has freed and attached
@@ -206,19 +197,25 @@ const STACK_LINE: usize = 512;
 /// UTF-16 conversion.
 fn write_std_line(which: u32, text: &str) {
     let (handle, console) = line_target(which);
+    let _ = write_text_to(handle, console, text, true);
+}
+
+/// Write complete UTF-8 text to a captured target, optionally appending one LF.
+/// The caller owns the handle's lifetime; no standard stream is fetched here.
+pub(crate) fn write_text_to(handle: Handle, console: bool, text: &str, append_newline: bool) -> bool {
     unsafe {
         if handle.is_null() || handle == INVALID_HANDLE {
-            return;
+            return false;
         }
         if console {
-            // The text's units and the newline are written into stack
+            // The text and any requested newline are written into stack
             // storage unit by unit; every unit is written before the
             // slice over the prefix is formed, so no unit is read
             // before the write that produced it.
             let mut storage = [std::mem::MaybeUninit::<u16>::uninit(); STACK_LINE];
             let mut count = 0usize;
             let mut fits = true;
-            for unit in text.encode_utf16().chain(std::iter::once(b'\n' as u16)) {
+            for unit in text.encode_utf16().chain(std::iter::once(b'\n' as u16).take(usize::from(append_newline))) {
                 if count == storage.len() {
                     fits = false;
                     break;
@@ -232,11 +229,11 @@ fn write_std_line(which: u32, text: &str) {
                 while done < units.len() {
                     let mut written = 0u32;
                     if WriteConsoleW(handle, units[done..].as_ptr() as *const c_void, (units.len() - done) as u32, &mut written, std::ptr::null_mut()) == 0 || written == 0 {
-                        return;
+                        return false;
                     }
                     done += written as usize;
                 }
-                return;
+                return true;
             }
             // The units are collected from the text directly, as
             // the stack form above encodes them: building the
@@ -244,46 +241,48 @@ fn write_std_line(which: u32, text: &str) {
             // copy of the whole text only to be encoded again
             // into the units that are written.
             let mut units: Vec<u16> = text.encode_utf16().collect();
-            units.push(b'\n' as u16);
+            if append_newline { units.push(b'\n' as u16); }
             let mut done = 0usize;
             while done < units.len() {
                 let mut written = 0u32;
                 if WriteConsoleW(handle, units[done..].as_ptr() as *const c_void, (units.len() - done) as u32, &mut written, std::ptr::null_mut()) == 0 || written == 0 {
-                    return;
+                    return false;
                 }
                 done += written as usize;
             }
-            return;
+            return true;
         }
-        if text.len() < STACK_LINE {
+        let length = text.len() + usize::from(append_newline);
+        if length <= STACK_LINE {
             let mut storage = [std::mem::MaybeUninit::<u8>::uninit(); STACK_LINE];
             for (slot, &byte) in storage.iter_mut().zip(text.as_bytes()) {
                 slot.write(byte);
             }
-            storage[text.len()].write(b'\n');
-            // The copy above wrote the text's bytes and the newline:
-            // exactly the `text.len() + 1` bytes the slice covers.
-            let bytes = std::slice::from_raw_parts(storage.as_ptr() as *const u8, text.len() + 1);
+            if append_newline { storage[text.len()].write(b'\n'); }
+            // The copy wrote the text and, when requested, its newline:
+            // exactly the initialized `length` bytes the slice covers.
+            let bytes = std::slice::from_raw_parts(storage.as_ptr() as *const u8, length);
             let mut done = 0usize;
             while done < bytes.len() {
                 let mut written = 0u32;
                 if WriteFile(handle, bytes[done..].as_ptr() as *const c_void, (bytes.len() - done) as u32, &mut written, std::ptr::null_mut()) == 0 || written == 0 {
-                    return;
+                    return false;
                 }
                 done += written as usize;
             }
-            return;
+            return true;
         }
-        let line = format!("{}\n", text);
-        let bytes = line.as_bytes();
+        let line = append_newline.then(|| format!("{}\n", text));
+        let bytes = line.as_deref().unwrap_or(text).as_bytes();
         let mut done = 0usize;
         while done < bytes.len() {
             let mut written = 0u32;
             if WriteFile(handle, bytes[done..].as_ptr() as *const c_void, (bytes.len() - done) as u32, &mut written, std::ptr::null_mut()) == 0 || written == 0 {
-                return;
+                return false;
             }
             done += written as usize;
         }
+        true
     }
 }
 
