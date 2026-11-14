@@ -1256,7 +1256,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
 
     fn cleanup_observation() -> CleanupObservation {
         CleanupObservation {
-            assigned: true, job_proven_empty: true, member_wait_uncertainty: None, child_created: true,
+            assigned: true, job_proven_empty: true, member_wait_uncertainty: None, member_capture_failure: None, child_created: true,
             child_exited: true, original_child_wait: None, original_child_wait_error: None,
         }
     }
@@ -1272,6 +1272,59 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             assert!(error.message().contains("cleanup could not be confirmed"));
             assert!(error.message().contains(&format!("exit code {code}")));
         }
+        // A failed enumeration is a capture fault, not a fabricated wait or
+        // missing-member count. The production callback reads LastError here.
+        let event = DeepOwnerEvents::new(1);
+        let mut native_members = HandleList::new();
+        let mut native_capture_failure = None;
+        let mut query_error = None;
+        // A real event is not a Job. NULL would query the caller's own Job.
+        with_job_process_ids(event.0[0], |ids| {
+            if ids.is_none() { query_error = Some(unsafe { GetLastError() }); }
+            capture_job_members(ids, &mut native_members, &mut native_capture_failure,
+                |_| panic!("a failed native Job query has no IDs to open"));
+        });
+        let query_error = query_error.expect("querying an event as a Job must fail");
+        assert_ne!(query_error, 0);
+        assert_eq!(native_capture_failure,
+            Some(MemberCaptureFailure::Query { win32_error: query_error }),
+            "the final native query failure must survive the callback boundary");
+        assert!(native_members.is_empty());
+        assert!(!finalize_cleanup(Ok(124), CleanupObservation {
+            member_capture_failure: native_capture_failure, ..cleanup_observation()
+        }).1, "root terminal and Job zero cannot heal the native query failure");
+        let mut members = HandleList::new();
+        let mut capture_failure = None;
+        unsafe { SetLastError(0x13572468) };
+        capture_job_members(None, &mut members, &mut capture_failure,
+            |_| panic!("a failed query has no IDs to open"));
+        let first = capture_failure.expect("failed enumeration must remain unconfirmed");
+        assert_eq!(first, MemberCaptureFailure::Query { win32_error: 0x13572468 });
+        assert!(members.is_empty());
+        unsafe { SetLastError(0x24681357) };
+        capture_job_members(Some(&[17]), &mut members, &mut capture_failure, |id| {
+            assert_eq!(id, 17);
+            event.0[0]
+        });
+        assert_eq!(&*members, &event.0[..]);
+        assert_eq!(capture_failure, Some(first), "later success cannot erase query failure");
+        for code in [0, 37, 124, 125, u32::MAX] {
+            let (result, confirmed) = finalize_cleanup(Ok(code), CleanupObservation {
+                member_capture_failure: capture_failure, ..cleanup_observation()
+            });
+            assert!(!confirmed, "root terminal and Job zero cannot heal failed enumeration");
+            let error = result.unwrap_err();
+            assert!(error.message().contains("member_capture_failure=Some(Query"));
+            assert!(error.message().contains(&format!("exit code {code}")));
+        }
+        let mut good_members = HandleList::new();
+        let mut good_capture = None;
+        capture_job_members(Some(&[19, 23]), &mut good_members, &mut good_capture, |_| event.0[0]);
+        assert_eq!(&*good_members, &[event.0[0], event.0[0]]);
+        assert_eq!(good_capture, None, "successful capture keeps the original handle order");
+        assert_eq!(finalize_cleanup(Ok(37), CleanupObservation {
+            member_capture_failure: good_capture, ..cleanup_observation()
+        }), (Ok(37), true));
     }
 
     #[test]
@@ -1356,7 +1409,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             |_, _| panic!("no extra wait after an actual observed child exit"));
         assert_eq!((status, error), (None, None));
         assert_eq!(finalize_cleanup(Err(GuardError("not started".into())), CleanupObservation {
-            assigned: false, job_proven_empty: false, member_wait_uncertainty: None, child_created: false,
+            assigned: false, job_proven_empty: false, member_wait_uncertainty: None, member_capture_failure: None, child_created: false,
             child_exited: false, original_child_wait: None, original_child_wait_error: None,
         }), (Err(GuardError("not started".into())), true));
     }
@@ -1410,6 +1463,39 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         });
         assert!(!confirmed);
         assert!(result.unwrap_err().message().contains(&format!("win32_error: {:?}", first.win32_error)));
+
+        // OpenProcess(0) is a real ERROR_INVALID_PARAMETER failure. A later
+        // successful capture must still be kept and cannot erase that fault.
+        let event = DeepOwnerEvents::new(1);
+        let mut members = HandleList::new();
+        let mut capture_failure = None;
+        let mut opened = 0;
+        capture_job_members(Some(&[0, 29]), &mut members, &mut capture_failure, |id| {
+            opened += 1;
+            if id == 0 {
+                unsafe { crate::sys::windows::OpenProcess(crate::sys::windows::SYNCHRONIZE, 0, 0) }
+            } else {
+                assert_eq!(id, 29);
+                event.0[0]
+            }
+        });
+        assert_eq!(opened, 2, "failed open must not skip remaining capture work");
+        assert_eq!(&*members, &event.0[..], "only the successful handle is retained");
+        let first_capture = capture_failure.expect("failed native member open must remain unconfirmed");
+        assert_eq!(first_capture, MemberCaptureFailure::Open { reported_pid: 0, win32_error: 87 });
+        unsafe { SetLastError(0x31415926) };
+        capture_job_members(Some(&[]), &mut members, &mut capture_failure,
+            |_| panic!("empty successful list needs no open"));
+        assert_eq!(capture_failure, Some(first_capture));
+        for code in [0, 124, 37] {
+            let (result, confirmed) = finalize_cleanup(Ok(code), CleanupObservation {
+                member_capture_failure: capture_failure, ..cleanup_observation()
+            });
+            assert!(!confirmed, "root terminal and Job zero cannot heal a failed member open");
+            let error = result.unwrap_err();
+            assert!(error.message().contains("member_capture_failure=Some(Open"));
+            assert!(error.message().contains(&format!("exit code {code}")));
+        }
     }
 
     #[test]

@@ -2221,14 +2221,23 @@ fn g87_a_run_over_the_cap_is_refused_when_standard_input_is_not_a_console_and_it
     let marker = dir.join("ran.txt");
     let marker_text = text(&marker);
     let log = text(&dir.join("extension.log"));
-    let child = [testkit(), "mark", marker_text.as_str(), "20"];
+    // Keep the command spelling short without changing the built helper or the
+    // process-wide CWD: audit command text intentionally keeps only its start.
+    let helper_dir = Path::new(testkit()).parent().expect("built helper folder");
+    let command = |args: &[&str]| {
+        let mut made = guard_cmd(args);
+        made.current_dir(helper_dir);
+        made
+    };
+    let run = |args: &[&str]| exec(command(args));
+    let child = [r".\testkit.exe", "mark", marker_text.as_str(), "20"];
     let typed: &[u8] = b"hunter2\r\nhunter2\r\n";
     // Standard input that is null, a pipe holding what a person would type, and a file holding it.
     let file_input = dir.join("input.txt");
     std::fs::write(&file_input, typed).expect("write the input file");
-    let from_null = run_guard(&over_cap("86400", &[], &child));
-    let from_pipe = exec_with(guard_cmd(&over_cap("86400", &[], &child)), Opts { input: Some(typed.to_vec()), ..Opts::default() });
-    let mut from_file_command = guard_cmd(&over_cap("86400", &[], &child));
+    let from_null = run(&over_cap("86400", &[], &child));
+    let from_pipe = exec_with(command(&over_cap("86400", &[], &child)), Opts { input: Some(typed.to_vec()), ..Opts::default() });
+    let mut from_file_command = command(&over_cap("86400", &[], &child));
     from_file_command.stdin(Stdio::from(std::fs::File::open(&file_input).expect("open the input file"))).stdout(Stdio::piped()).stderr(Stdio::piped());
     let from_file_output = from_file_command.output().expect("run the guard");
     let from_file = Out { code: from_file_output.status.code().unwrap_or(-1) as u32, stdout: from_file_output.stdout, stdout_len: 0, stderr: from_file_output.stderr,
@@ -2258,23 +2267,23 @@ fn g87_a_run_over_the_cap_is_refused_when_standard_input_is_not_a_console_and_it
     }
     checks.timing("G87", "the refusal is at once: nobody is waited for", from_null.elapsed.as_secs_f64() < 5.0 * UNIT + GRACE, exception_summary(&from_null));
     // The same line is in the audit file, and the file is the record when there is one.
-    let filed = run_guard(&over_cap("86400", &["--extension-log", log.as_str()], &child));
+    let filed = run(&over_cap("86400", &["--extension-log", log.as_str()], &child));
     let contents = std::fs::read_to_string(&log).unwrap_or_default();
     checks.check("G87", "the audit file holds the same line as standard error",
         filed.code == 125 && !marker.exists() && contents.lines().eq(extension_lines(&filed.err()).iter().map(String::as_str)) && contents.lines().count() == 1, format!("{} / {} audit lines", exception_summary(&filed), contents.lines().count()));
     // Every cap over the default is an exception, down to the smallest step over it.
     for value in ["21600.5", "21601", "43200", "86399", "86400"] {
-        let result = run_guard(&over_cap(value, &[], &child));
+        let result = run(&over_cap(value, &[], &child));
         checks.check("G87", &format!("a cap of {} is over the default and is refused the same way", value),
             result.code == 125 && !marker.exists() && exception_refusal(&result.err()).map_or(false, |line| line.contains("decision=exception-refused")), exception_summary(&result));
     }
     // A shell run is an exception too: the encoded command is not run.
     let payload = base64(b"echo SHOULD_NOT_RUN");
-    let via_shell = run_guard(&["--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "5", "--shell", "cmd", "--command-b64", payload.as_str()]);
+    let via_shell = run(&["--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "5", "--shell", "cmd", "--command-b64", payload.as_str()]);
     checks.check("G87", "the shell form of a run over the cap is refused with 125 and its command never runs",
         via_shell.code == 125 && !via_shell.out().contains("SHOULD_NOT_RUN") && exception_refusal(&via_shell.err()).is_some(), exception_summary(&via_shell));
     // The widest request there is: the largest first deadline under the largest cap goes through the argument checks to the decision.
-    let widest = run_guard(&["--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "86400", "--", testkit(), "mark", marker_text.as_str(), "20"]);
+    let widest = run(&["--extendable", "--max-extension", "86400", "--authenticate", "console", "--timeout", "86400", "--", r".\testkit.exe", "mark", marker_text.as_str(), "20"]);
     checks.check("G87", "the largest deadline under the largest cap passes the argument checks and is refused as an exception for its standard input",
         widest.code == 125 && !marker.exists() && !widest.err().contains("is over --max-extension")
             && exception_refusal(&widest.err()).map_or(false, |line| line.contains("requested=86400 hours=24") && line.contains(nobody_reason())), exception_summary(&widest));

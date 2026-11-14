@@ -649,16 +649,17 @@ fn run_job_core<D: Decisions>(
     D::close(&extension);
     let mut job_proven_empty = false;
     let mut member_wait_uncertainty = None;
+    let mut member_capture_failure = None;
     // One teardown budget: what terminating the job did not spend of it is
     // all the wait on the child that follows may spend.
     let mut teardown_remainder = TEARDOWN_BUDGET_MS;
     let original_child_cleanup;
     unsafe {
         if assigned {
-            let (empty, remainder) = terminate_and_wait(job, EXIT_TIMEOUT as u32, TEARDOWN_BUDGET_MS, &mut member_wait_uncertainty);
+            let (empty, remainder) = terminate_and_wait(job, EXIT_TIMEOUT as u32, TEARDOWN_BUDGET_MS, &mut member_wait_uncertainty, &mut member_capture_failure);
             job_proven_empty = empty;
             teardown_remainder = remainder;
-            trace(if empty && member_wait_uncertainty.is_none() { "job empty" } else { "job cleanup unconfirmed" });
+            trace(if empty && member_wait_uncertainty.is_none() && member_capture_failure.is_none() { "job empty" } else { "job cleanup unconfirmed" });
         } else if !info.process.is_null() {
             TerminateProcess(info.process, EXIT_GUARD_ERROR as u32);
         }
@@ -687,7 +688,7 @@ fn run_job_core<D: Decisions>(
         }
     }
     let (outcome, cleanup_confirmed) = finalize_cleanup(outcome, CleanupObservation {
-        assigned, job_proven_empty, member_wait_uncertainty, child_created: !info.process.is_null(),
+        assigned, job_proven_empty, member_wait_uncertainty, member_capture_failure, child_created: !info.process.is_null(),
         child_exited, original_child_wait: original_child_cleanup.0,
         original_child_wait_error: original_child_cleanup.1,
     });
