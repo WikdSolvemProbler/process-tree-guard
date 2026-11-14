@@ -1448,6 +1448,42 @@
 
     #[test]
     fn a_gated_thread_runs_its_body_only_after_a_live_release() {
+        // Exercise the production startup pair at both failure boundaries.
+        // Native last-error is thread-local; a later creation or close overwrites it.
+        for failed_at in [Some(0usize), Some(1), None] {
+            let calls = std::cell::Cell::new(0usize);
+            let closed = std::cell::RefCell::new(Vec::new());
+            let first_error = 0x2000_0011u32;
+            let second_error = 0x2000_0022u32;
+            let result = super::server::create_events_with(
+                |manual_reset| {
+                    let index = calls.get();
+                    assert_eq!(manual_reset, index as i32);
+                    calls.set(index + 1);
+                    unsafe { crate::sys::windows::SetLastError(if index == 0 { first_error } else { second_error }); }
+                    if failed_at == Some(index) { std::ptr::null_mut() }
+                    else { (0x100usize + index) as Handle }
+                },
+                |event| {
+                    closed.borrow_mut().push(event as usize);
+                    unsafe { crate::sys::windows::SetLastError(0x2000_0033); }
+                },
+            );
+            match failed_at {
+                Some(index) => {
+                    let error = result.expect_err("the failed startup event refuses the pair");
+                    let expected = if index == 0 { first_error } else { second_error };
+                    assert!(error.message().starts_with(&format!("[WinError {expected}]")), "{error}");
+                    assert_eq!(calls.get(), index + 1, "no later event is created after failure");
+                    assert_eq!(*closed.borrow(), if index == 0 { vec![] } else { vec![0x100] });
+                }
+                None => {
+                    assert_eq!(result.unwrap(), (0x100usize as Handle, 0x101usize as Handle));
+                    assert_eq!(calls.get(), 2);
+                    assert!(closed.borrow().is_empty(), "the successful pair retains both handles");
+                }
+            }
+        }
         let (sender, receiver) = std::sync::mpsc::channel::<()>();
         let (handle, gate) = spawn_gated("test-gated", move || {
             let _ = sender.send(());

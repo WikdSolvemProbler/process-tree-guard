@@ -63,6 +63,25 @@ pub(super) fn channel_name() -> Result<String, GuardError> {
     Ok(out)
 }
 
+/// Create the startup pair, capturing each failure before another native call.
+/// Ownership of the first event is released here if the second cannot be made.
+pub(super) fn create_events_with(
+    mut create: impl FnMut(i32) -> Handle,
+    mut close: impl FnMut(Handle),
+) -> Result<(Handle, Handle), GuardError> {
+    let wake = create(0);
+    if wake.is_null() {
+        return Err(os_error());
+    }
+    let stop = create(1);
+    if stop.is_null() {
+        let error = os_error();
+        close(wake);
+        return Err(error);
+    }
+    Ok((wake, stop))
+}
+
 impl Extension {
     /// Open the channel of a run whose own deadline is `timeout_seconds` from now.
     /// `job` is the run's job object, which stays open for as long as the extension. `log` is
@@ -88,22 +107,19 @@ impl Extension {
             }
         };
         let started = tick();
-        let (wake, stop) = unsafe { (CreateEventW(std::ptr::null_mut(), 0, 0, std::ptr::null()), CreateEventW(std::ptr::null_mut(), 1, 0, std::ptr::null())) };
-        if wake.is_null() || stop.is_null() {
-            let error = os_error();
-            unsafe {
-                for event in [wake, stop] {
-                    if !event.is_null() {
-                        CloseHandle(event);
-                    }
+        let (wake, stop) = match create_events_with(
+            |manual_reset| unsafe { CreateEventW(std::ptr::null_mut(), manual_reset, 0, std::ptr::null()) },
+            |event| unsafe { let _ = CloseHandle(event); },
+        ) {
+            Ok(events) => events,
+            Err(error) => {
+                if announce {
+                    log.note(&not_started_text(&error));
                 }
+                log.finish(LOG_FLUSH_MS);
+                return Err(error);
             }
-            if announce {
-                log.note(&not_started_text(&error));
-            }
-            log.finish(LOG_FLUSH_MS);
-            return Err(error);
-        }
+        };
         let shared = Arc::new(Shared {
             state: Mutex::new(State::new(started + millis(timeout_seconds), settings.max_seconds)),
             cap_seconds: settings.max_seconds,
