@@ -52,12 +52,18 @@ retired domain, not child-reaping or all CSS references released.
 
 Completion snapshots retain the same authenticated held read-only cgroup.events capability, CGROUP2 identity/mount/name checks and original unit ancestry. Owned duplicates use FileExt.read_at from explicit0 plus accumulated length to EOF/4097; no lseek, mutable cursor or pathname replacement is used. Any read Err sets a private read_failed bit while retaining raw errno or None. Complete/UTF8/parser predicates still apply. Only an actual read fault19 after original service terminal and prior live adoption may enter the unchanged same-parent/nameENOENT retirement proof; empty EOF, missing errno, parse and truncation never do. Static bounded failure-only stage/errno/flag/length diagnostics format only on returned failure, never success or accepted retirement. The readonly semantic regression executed within the same12-test suite: realSCM ABcursor1/readerrepeat/aliasesstill1,4097 cap/O_PATHerror and pure parser/rawNone/diagnostic checks passed. It opens no cgroup or privileged fixture and proves no livecgroup retirement, payload or guard0 result.
 
-Normal Cargo wiring is intentionally pending: declare the Linux root/client
-binary targets, package the C/headers and these unit sources, compile six native
-C objects into one archive, and link libsystemd.so.0 plus librt on Linux. None of
-those changes or the public selector is enabled by these source files. Windows
-build/selector files are unchanged. The existing bounded native build route can
-compile the two actual main sources and complete module graph first.
+Cargo now exposes the root/client component binaries through the explicit
+`linux-separate-service` feature on native x86-64 or AArch64 GNU/Linux:
+
+```sh
+cargo build --release --features linux-separate-service --bin process-tree-guard-root --bin process-tree-guard-client
+```
+
+Cargo packages the C/headers and deployment units; the build script compiles six
+C objects into the native archive. The default Linux guard selector remains
+unsupported. Native AArch64 GNU build, 12 component tests, source package and
+extracted-source build checks passed with Rust 1.99; native minimum-Rust,
+x86-64 Linux and privileged entry/lifecycle qualification remain pending.
 
 No installer, daemon, sudoers rule or permanent listener is created here. Native
 entry/bootstrap/unit and full lifecycle qualification remains pending. Temporary
