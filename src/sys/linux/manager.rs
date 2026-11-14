@@ -17,6 +17,31 @@ const PREFIX:&str="process-tree-guard@";
 type Probe<T>=std::result::Result<T,String>;
 #[repr(C)]struct SdBus{_opaque:[u8;0]}
 #[repr(C)]struct SdMessage{_opaque:[u8;0]}
+#[repr(C)]struct SdBusError{name:*const c_char,message:*const c_char,_need_free:c_int}
+struct BusError(SdBusError);
+impl BusError{
+ fn new()->Self{Self(SdBusError{name:ptr::null(),message:ptr::null(),_need_free:0})}
+}
+impl Drop for BusError{fn drop(&mut self){unsafe{sd_bus_error_free(&mut self.0);}}}
+fn escaped_error_bytes(bytes:&[u8],truncated:bool)->String{
+ let mut value=String::from("\"");
+ for &byte in bytes{if (0x20..=0x7e).contains(&byte)&&byte!=b'"'&&byte!=b'\\'{value.push(char::from(byte));}else{value.push_str(&format!("\\x{byte:02x}"));}}
+ value.push('"');if truncated{value.push_str("<truncated>");}value
+}
+fn bounded_error_field(pointer:*const c_char,limit:usize)->String{
+ if pointer.is_null(){return "<null>".into();}
+ let mut bytes=Vec::with_capacity(limit);
+ // libsystemd owns a valid NUL-terminated string until BusError is dropped.
+ // Stop at NUL or the fixed copy limit; never scan the full error string.
+ for index in 0..limit{let byte=unsafe{pointer.add(index).read()} as u8;if byte==0{return escaped_error_bytes(&bytes,false);}bytes.push(byte);}
+ escaped_error_bytes(&bytes,true)
+}
+fn bounded_error_argument(value:&CStr,limit:usize)->String{let bytes=value.to_bytes();escaped_error_bytes(&bytes[..bytes.len().min(limit)],bytes.len()>limit)}
+fn reference_operation(member:&CStr,name:&CStr,error:&SdBusError)->String{
+ let mut value=format!("unit reference operation member={} unit={} error_name={} error_message={}",bounded_error_argument(member,16),bounded_error_argument(name,255),bounded_error_field(error.name,256),bounded_error_field(error.message,1024));
+ if value.len()>8192{value.truncate(8176);value.push_str("<truncated>");}value
+}
+
 #[link(name="libsystemd.so.0",kind="dylib",modifiers="+verbatim")]
 unsafe extern "C" {
  fn sd_bus_new(bus:*mut *mut SdBus)->c_int;
@@ -27,7 +52,8 @@ unsafe extern "C" {
  fn sd_bus_set_method_call_timeout(bus:*mut SdBus,usec:u64)->c_int;
  fn sd_bus_unref(bus:*mut SdBus)->*mut SdBus;
  fn sd_bus_message_unref(message:*mut SdMessage)->*mut SdMessage;
- fn sd_bus_call_method(bus:*mut SdBus,destination:*const c_char,path:*const c_char,interface:*const c_char,member:*const c_char,error:*mut c_void,reply:*mut *mut SdMessage,types:*const c_char,...)->c_int;
+ fn sd_bus_error_free(error:*mut SdBusError);
+ fn sd_bus_call_method(bus:*mut SdBus,destination:*const c_char,path:*const c_char,interface:*const c_char,member:*const c_char,error:*mut SdBusError,reply:*mut *mut SdMessage,types:*const c_char,...)->c_int;
  fn sd_bus_get_property(bus:*mut SdBus,destination:*const c_char,path:*const c_char,interface:*const c_char,member:*const c_char,error:*mut c_void,reply:*mut *mut SdMessage,kind:*const c_char)->c_int;
  fn sd_bus_message_read_basic(message:*mut SdMessage,kind:c_char,value:*mut c_void)->c_int;
  fn sd_bus_message_read_array(message:*mut SdMessage,kind:c_char,value:*mut *const c_void,size:*mut usize)->c_int;
@@ -92,7 +118,7 @@ impl Bus{
  fn number<T:Default>(&self,path:&CStr,interface:&CStr,name:&CStr,signature:&CStr,kind:u8,until:u64)->Probe<T>{self.property(path,interface,name,signature,until)?.basic(kind)}
  fn unit_for_pid(&self,pid:u32,until:u64)->Probe<CString>{self.bound(until)?;let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),c"GetUnitByPID".as_ptr(),ptr::null_mut(),&mut reply,c"u".as_ptr(),pid)};CString::new(owned_reply(status,reply,"unit for actual PID")?.text(b'o')?).map_err(|_|"unit object NUL".into())}
  fn unit_for_name(&self,name:&CStr,until:u64)->Probe<CString>{self.bound(until)?;let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),c"GetUnit".as_ptr(),ptr::null_mut(),&mut reply,c"s".as_ptr(),name.as_ptr())};CString::new(owned_reply(status,reply,"get referenced unit")?.text(b'o')?).map_err(|_|"unit object NUL".into())}
- fn ref_operation(&self,name:&CStr,member:&CStr,until:u64)->Probe<()>{self.bound(until)?;let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),member.as_ptr(),ptr::null_mut(),&mut reply,c"s".as_ptr(),name.as_ptr())};drop(owned_reply(status,reply,"unit reference operation")?);Ok(())}
+ fn ref_operation(&self,name:&CStr,member:&CStr,until:u64)->Probe<()>{self.bound(until)?;let mut error=BusError::new();let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),member.as_ptr(),&mut error.0,&mut reply,c"s".as_ptr(),name.as_ptr())};let owned=NonNull::new(reply).map(Message);let operation=reference_operation(member,name,&error.0);if status<0{drop(owned);return Err(format!("{operation}: libsystemd error {status}"));}drop(owned.ok_or_else(||format!("{operation}: missing systemd reply"))?);Ok(())}
  fn invocation(&self,path:&CStr,until:u64)->Probe<[u8;16]>{self.property(path,UNIT,c"InvocationID",c"ay",until)?.bytes16()}
  fn exec(&self,path:&CStr,until:u64)->Probe<(u32,i32,i32)>{let reply=self.property(path,SERVICE,c"ExecStart",c"a(sasbttttuii)",until)?;if reply.enter(b'a',c"(sasbttttuii)")?!=1||reply.enter(b'r',c"sasbttttuii")?!=1{return Err("missing exact ExecStart".into());}if reply.text(b's')?!=HELPER{return Err("unit ExecStart path differs".into());}if reply.enter(b'a',c"s")?!=1{return Err("missing ExecStart argv".into());}let a=reply.text(b's')?;let b=reply.text(b's')?;let mut extra:*const c_char=ptr::null();if a!=HELPER||b!="--service"||call(unsafe{sd_bus_message_read_basic(reply.0.as_ptr(),b's' as c_char,(&mut extra as *mut *const c_char).cast())},"ExecStart tail")?!=0{return Err("unit ExecStart argv differs".into());}reply.leave()?;let ignore:i32=reply.basic(b'b')?;for _ in 0..4{let _:u64=reply.basic(b't')?;}let pid=reply.basic(b'u')?;let code=reply.basic(b'i')?;let status=reply.basic(b'i')?;reply.leave()?;if ignore!=0||reply.enter(b'r',c"sasbttttuii")?!=0{return Err("unit has extra/ignored ExecStart".into());}reply.leave()?;Ok((pid,code,status))}
 }
@@ -157,7 +183,8 @@ if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u3
  pub(super) fn main_pid(&self)->u32{self.main_pid}
 }
 
-// Ordinary client owns this PUBLIC/read-authorized bus reference. No root bus
+// Ordinary client owns this public-bus reference under an explicit administrator
+// ref-only authorization; property read access alone does not grant RefUnit. No root bus
 // descriptor or command capability crosses the privilege boundary.
 pub(super) enum FinalStatus{Verified,NeedsRetirement}
 pub(super) struct UnitReference{bus:Bus,path:CString,name:CString,invocation:[u8;16],pid:u32,group:String,referenced:bool}
@@ -179,6 +206,16 @@ impl UnitReference{
 }
 
 #[cfg(test)]pub(super) fn notify_handoff_regression(){
+ let pointer=std::mem::size_of::<*const c_char>();let alignment=std::mem::align_of::<*const c_char>();
+ assert_eq!(std::mem::offset_of!(SdBusError,name),0);assert_eq!(std::mem::offset_of!(SdBusError,message),pointer);assert_eq!(std::mem::offset_of!(SdBusError,_need_free),2*pointer);
+ assert_eq!(std::mem::align_of::<SdBusError>(),alignment);assert_eq!(std::mem::size_of::<SdBusError>(),(2*pointer+std::mem::size_of::<c_int>()).div_ceil(alignment)*alignment);
+ let raw=SdBusError{name:c"org.freedesktop.DBus.Error.AccessDenied".as_ptr(),message:c"denied\n\"\\".as_ptr(),_need_free:0};
+ let diagnostic=reference_operation(c"RefUnit",c"process-tree-guard@0-2-1000.service",&raw);assert!(diagnostic.contains("member=\"RefUnit\""));assert!(diagnostic.contains("error_name=\"org.freedesktop.DBus.Error.AccessDenied\""));assert!(diagnostic.contains("error_message=\"denied\\x0a\\x22\\x5c\""));assert!(!diagnostic.contains('\n'));
+ assert_eq!(bounded_error_field(ptr::null(),256),"<null>");assert_eq!(bounded_error_field(c"".as_ptr(),1024),"\"\"");
+ let long=[b'x';1024];let truncated=bounded_error_field(long.as_ptr().cast(),1024);assert_eq!(truncated.len(),1024+2+"<truncated>".len());assert!(truncated.ends_with("<truncated>"));
+ let invalid=[0xffu8,0];assert_eq!(bounded_error_field(invalid.as_ptr().cast(),1024),"\"\\xff\"");assert!(reference_operation(c"UnrefUnit",c"unit",&raw).contains("member=\"UnrefUnit\""));
+ eprintln!("unit_reference_error_layout_bounded_format_pure_verified");
+
  assert_eq!(MAX_RUNTIME_USEC,((crate::deadline::MAX_SECONDS as u64)+30)*1_000_000);
  for(phase,active,sub,expected)in [(UnitPhase::Starting,"activating","start",true),(UnitPhase::Running,"active","running",true),(UnitPhase::Starting,"active","running",false),(UnitPhase::Running,"activating","start",false),(UnitPhase::Running,"active","exited",false),(UnitPhase::Running,"failed","failed",false),(UnitPhase::Starting,"deactivating","stop-sigkill",false),(UnitPhase::Running,"active","reload",false)]{assert_eq!(phase_allows(phase,active,sub),expected);}
  eprintln!("notify_phase_regression exact_starting_running_ceiling_verified");

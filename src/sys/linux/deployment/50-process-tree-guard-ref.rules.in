@@ -1,0 +1,40 @@
+/* Inactive deployment TEMPLATE. Administrator must configure both values and verify their UID/name mapping before installation. */
+polkit.addRule(function(action, subject) {
+    var configuredUser = null;
+    var configuredUid = null; /* canonical decimal STRING, never a JS numeric UID */
+    if (!action || action.id !== "org.freedesktop.systemd1.manage-units")
+        return polkit.Result.NOT_HANDLED;
+    var verb = action.lookup("verb");
+    if (verb !== "ref")
+        return polkit.Result.NOT_HANDLED;
+    var unit = action.lookup("unit");
+    if (typeof unit !== "string")
+        return polkit.Result.NO;
+    if (unit.indexOf("process-tree-guard@") !== 0)
+        return polkit.Result.NOT_HANDLED;
+    function fullMatch(pattern, s) {
+        var m = pattern.exec(s);
+        return m !== null && m[0] === s;
+    }
+    function decimalWithin(s, maximum) {
+        return typeof s === "string" && s.length >= 1 && s.length <= maximum.length &&
+            fullMatch(/^(0|[1-9][0-9]*)$/, s) &&
+            (s.length < maximum.length || (s.length === maximum.length && s <= maximum));
+    }
+    if (typeof configuredUser !== "string" || configuredUser.length < 1 ||
+        configuredUser.length > 64 || !fullMatch(/^[A-Za-z_][A-Za-z0-9_.-]*[$]?$/, configuredUser) ||
+        !decimalWithin(configuredUid, "4294967294") || configuredUid === "0")
+        return polkit.Result.NO;
+    if (!subject || typeof subject.user !== "string" || subject.user !== configuredUser ||
+        typeof subject.pid !== "number" || !isFinite(subject.pid) ||
+        Math.floor(subject.pid) !== subject.pid || subject.pid < 2 || subject.pid > 2147483647)
+        return polkit.Result.NO;
+    if (unit.length > 255)
+        return polkit.Result.NO;
+    var m = /^process-tree-guard@(0|[1-9][0-9]*)-([1-9][0-9]*)-(0|[1-9][0-9]*)[.]service$/.exec(unit);
+    if (!m || m[0] !== unit || !decimalWithin(m[1], "4294967295") ||
+        !decimalWithin(m[2], "2147483647") || m[2] !== String(subject.pid) ||
+        !decimalWithin(m[3], "4294967294") || m[3] !== configuredUid)
+        return polkit.Result.NO;
+    return polkit.Result.YES;
+});

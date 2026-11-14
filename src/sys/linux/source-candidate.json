@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Exact d16 notify source passed ordinary build01611/11 and unit01112/12; actual privileged notify/payload/timer lifecycle remains unexecuted/unqualified",
+  "status": "Exact4b34 unit-reference source passed ordinary build01711/11 and unit01212/12;44 pure template decisions passed; live authorization/configured grant/full native lifecycle remain unqualified",
   "root": "src/sys/linux",
   "baseline_commit": "8f7fd60a245f5cbdd6b33789aade61a35fec2cb1",
   "baseline_candidate_sha256": "4f414679ccfe662cd17b1141200f63d180c1bc0af1f516039a698c404fadc406",
@@ -81,6 +81,16 @@
       "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
     },
     {
+      "path": "PROVENANCE.json",
+      "bytes": 82776,
+      "sha256": "b19b9bf92340ac0d8e431dd824b642ea9de9169d5480a14c18836ca5d56a5bd5"
+    },
+    {
+      "path": "README.md",
+      "bytes": 50639,
+      "sha256": "1c6e28b4985a3bd2eeafadad629d2458a2aa4360cd0ab4c8a52c71cf90ad1193"
+    },
+    {
       "path": "arming_failure_controller.rs",
       "bytes": 15902,
       "sha256": "d34c98f813a7a60b7d822451f81a3bf496fe5c8e58c6fac4999c4915da6aaf3f"
@@ -96,14 +106,14 @@
       "sha256": "cd71240834ecb1a9da099b6a917648b76e4b1f125ff4578df35e80546c820788"
     },
     {
-      "path": "client_main.rs",
-      "bytes": 879,
-      "sha256": "4dbe19a147bb37a8abc8aa08bc34b6b2fdfd89777afd6dc1388242186fb4c9ac"
-    },
-    {
       "path": "client.rs",
       "bytes": 18929,
       "sha256": "5b919ca632dd18f94b92b18d122e62665c8c7a645de7a984822620048441677a"
+    },
+    {
+      "path": "client_main.rs",
+      "bytes": 879,
+      "sha256": "4dbe19a147bb37a8abc8aa08bc34b6b2fdfd89777afd6dc1388242186fb4c9ac"
     },
     {
       "path": "delegation.rs",
@@ -111,9 +121,19 @@
       "sha256": "e8d3e5845c691d05ab7da7b6190f0b37539efb0fd7c3c5bcff375338666c9157"
     },
     {
+      "path": "deployment/50-process-tree-guard-ref.rules.in",
+      "bytes": 2123,
+      "sha256": "c9b6919404754ad626027e336f322e1e9af5de5872539ae42776ec07af977433"
+    },
+    {
+      "path": "deployment/README.md",
+      "bytes": 13162,
+      "sha256": "641d37b1915b52194e13ba537775deb56e895dd16c02998e3d426a0c387784de"
+    },
+    {
       "path": "deployment/process-tree-guard.socket",
-      "bytes": 383,
-      "sha256": "88cb1f85fa7fa71fe82744b617d1846d6d0ff4e1f83d2989dc32ce1decd5bc42"
+      "bytes": 347,
+      "sha256": "a935a247a3438fea27a993def7968edcbc8bf516424449b7faf7f681d5839516"
     },
     {
       "path": "deployment/process-tree-guard@.service",
@@ -121,9 +141,9 @@
       "sha256": "191a66ea6c5a0e223830dc5b7d11d1fe74c5dad6e440698383d00e9d03d63d13"
     },
     {
-      "path": "deployment/README.md",
-      "bytes": 8232,
-      "sha256": "bc43455d7ed58dd70afcc9e925ebb6813c779743d47964161d0ecbfd231c6ba5"
+      "path": "entry.rs",
+      "bytes": 39296,
+      "sha256": "64b90bb2eb0b7f5111a6da9b5cb191b017b5470f3684cb5fa6fe5d582c507b23"
     },
     {
       "path": "entry_timer.c",
@@ -134,11 +154,6 @@
       "path": "entry_timer.h",
       "bytes": 2328,
       "sha256": "3d0bc3f2f16ad3c67db4ea92f48813583da9740d16804b14f1bef751dcc912d8"
-    },
-    {
-      "path": "entry.rs",
-      "bytes": 39296,
-      "sha256": "64b90bb2eb0b7f5111a6da9b5cb191b017b5470f3684cb5fa6fe5d582c507b23"
     },
     {
       "path": "invocation.rs",
@@ -152,8 +167,8 @@
     },
     {
       "path": "manager.rs",
-      "bytes": 25905,
-      "sha256": "9473498243802158cef159de4eebcc4213a6807941f31f8b88ab45df5fd9268f"
+      "bytes": 29432,
+      "sha256": "cf993e0f1cffc3dca176dd91ca3de30f4941276902dd33b4c99154db3f08d2ec"
     },
     {
       "path": "mod.rs",
@@ -204,16 +219,6 @@
       "path": "payload_bootstrap.h",
       "bytes": 7600,
       "sha256": "d89237d82d8772be407741f202affa788236ef4d9f724a1eb3146d119165c559"
-    },
-    {
-      "path": "PROVENANCE.json",
-      "bytes": 65066,
-      "sha256": "d3350d945229d6da6dc645f177793be6d25ec59651684b2a164f5f7f50219bf2"
-    },
-    {
-      "path": "README.md",
-      "bytes": 48491,
-      "sha256": "2df35417672cb4df4bebaf03e7b1b0dea5e1aaa0da434fd6724abec13ed839ea"
     },
     {
       "path": "request.rs",
@@ -295,8 +300,8 @@
   ],
   "native_header_isolation": "owner_watch.h pureABI, owner_poll.h implementation onlynative arming/payload translationunits",
   "timeout_mapping": "124 only actual typedprimarydeadline +confirmedsettlement; late diagnostics cannotvalidate; ownerloss/unknown/quarantine125",
-  "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
-  "publication_change": "Metadata-only successor: same35 implementation/template pins as actual tested d16. Updates README/deploymentREADME/PROVENANCE validation only; no privileged notify/lifecycle or broader qualification claim.",
+  "implementation_build_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
+  "publication_change": "Metadata-only successor records exact tested4b34 ordinary11/11+12/12 and44 pure template decisions,91preserved artifacts. No36 implementation/template bytes changed; Cleanup017 postconditions and new live grant/native lifecycle are not claimed.",
   "entry_timer_component": {
     "source_qualified": true,
     "native_component_tests_passed": 3,
@@ -308,10 +313,10 @@
   },
   "selector_canonical_git_sha256": "ce49e79ba323fcec4abe2f78d91b4d375d16e6c0dfb020920a30aee62892a685",
   "external_pin_policy": "Linux directory pins bind canonical LF Git bytes; external bytes/sha256 and selector_sha256 retain exact raw earlier build snapshot. Additional canonical Git hashes distinguish checkout line endings without changing source or prior build identities.",
-  "entry_compile_status": "Exact d16 notify source passed ordinary build01611/11 and unit01112/12; actual privileged notify/payload/timer lifecycle remains unexecuted/unqualified",
+  "entry_compile_status": "Exact4b34 unit-reference source passed ordinary build01711/11 and unit01212/12;44 pure template decisions passed; live authorization/configured grant/full native lifecycle remain unqualified",
   "source_only": true,
   "retirement": "typed original live/populated cgroup2 capabilities; terminal original pidfd; raw original events ENODEV + exact held-parent basename ENOENT; all replacement/other errors125; manager empty group accepted only typedRetired+same invocation/status",
-  "reviewed_predecessor_sha256": "d55e32d40fa1b9f1588c758aaddbf1c09cb681014969f9b5ae76f1a473318517",
+  "reviewed_predecessor_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
   "preserved_predecessor": "target/codex-security/linux-product-integration-history-001/entry-ffi-successor-021/source",
   "review_repairs": [
     "typed NeedsRetirement from final authoritative same-invocation status query; no separate preflight race",
@@ -322,47 +327,56 @@
   "client_postpresentation_failure": "shutdownWR actualresult/errno then boundedjoin under min(originalobservationend,currentBOOT+5s); preserve primary125 and valid consumed rootframe/code; only actual full nativeframe/service/domain/manager join completes; otherwise explicitowningquarantine",
   "compile_repair": "Actual ff3af607 compile007 found writeFFI *const u8 vs existing libc *const c_void signature conflict; declaration and explicit caller cast only; no lint suppression or behavior change",
   "compile_export_repair": "Actual root/client main compile007 diagnosed unused pub imports; preserve concrete opaque type aliases and a same-contract consuming function wrapper instead of unused reexports; no lint suppression or API removal",
-  "predecessor_implementation_build_candidate_sha256": "04cf084698a5d244f0af8d39a89ca6fc6b646dc0503a9b58cea7d53ae3020984",
+  "predecessor_implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
   "entry_source_validation": {
-    "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
-    "scope": "Ordinary native compilation/linking and twelve existing tests only; pure notify phase/readback additions do not execute notification or entry timers.",
+    "implementation_build_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
+    "status": "ACTUAL ORDINARY VALIDATION PASSED; NO PRIVILEGED GRANT/LIFECYCLE QUALIFICATION",
+    "scope": "Actual ordinary native compile/link and twelve existing tests; new formatter/ABI assertions are pure, plus44 mocked pure policy decisions. No real manager authorization, rule installation/loading, native error-freeing RefUnit failure path or privileged product lifecycle.",
     "compile_link_steps": 11,
     "compile_link_passed": 11,
     "compile_link_failed": 0,
-    "build_receipt_sha256": "68d67aafe73df6d5475de440e12db464ff3c155e956f73fbccfcd005ba779b2b",
+    "build_receipt_sha256": "2f323b096dc9bc1f6769b863b5d7c7205461258f41bcd27f73c87d57c408bc52",
     "tests": 12,
     "passed": 12,
     "failed": 0,
     "ignored": 0,
-    "timed_out": false,
-    "unit_receipt_sha256": "1650f243016c61e462eebba8ce0648c2cfc205681a0222f8dc0461f016ae28d6",
-    "harness_sha256": "98b50a7c66444363a9cfcb77fcc300b5fa773641ea49ad649bea2f3f3340eb36",
-    "harness_bytes": 9865656,
-    "notify_phase_pure_regression_passed": true,
-    "original_timer_raw_readback_pure_rejections_passed": true,
-    "native_ipc_refusals": 17,
-    "native_gate_mappings_destroyed": 3,
-    "cleanup_status": "Actual cleanup016 terminal0;90files verified locally/remotely, two exact scratch roots removed and both original scopes absent.",
+    "unit_terminal_exit": 0,
+    "unit_receipt_sha256": "822914d6fa84a501222b5b39ca8e865aa4a39a50a01b45f5c74a58d558a6894d",
+    "harness_sha256": "9178938486e7e85aaf062a6916dca8f3fc6f676a0de2cc373abc74792d902d9b",
+    "harness_bytes": 9869312,
+    "formatter_ABI_pure_label_confirmed": true,
+    "pure_policy_cases": 44,
+    "pure_policy_all_pass": true,
+    "pure_policy_template_sha256": "c9b6919404754ad626027e336f322e1e9af5de5872539ae42776ec07af977433",
+    "pure_policy_receipt_sha256": "609d6fd6498dfc38b470d39f5c4f39369d74110329bf2bda72b4f144626a0bfb",
+    "pure_policy_per_case_vm_deadline_ms": 100,
+    "pure_policy_limit": "Pure decision function mocked polkit objects only; no live authorization/grant/rule loading/daemon or product execution",
+    "artifact_files_preserved_and_verified": 91,
+    "build_artifacts": 83,
+    "unit_artifacts": 8,
+    "cleanup_status": "Cleanup017 not executed at this metadata-preparation checkpoint; no scratch-root/scope/worker absence postcondition is claimed.",
+    "cleanup_receipt_sha256": null,
+    "owned_scratch_roots_removed": null,
+    "original_scopes_absent": null,
     "linked_entry_ELFs": [
       {
         "name": "process-tree-guard-root",
-        "bytes": 6384248,
-        "sha256": "f8b392223d82cf951231d0996052c2767bd3bd19bc417bf1a2d44656887b3dd5"
+        "bytes": 6384264,
+        "sha256": "5f930dd05e80bd318784695f14c5eaeb298295762fcc6e56ef0bc040d58ee8b2"
       },
       {
         "name": "process-tree-guard-client",
-        "bytes": 5569144,
-        "sha256": "736d1b02dec3d2c53eb59b5713f4780c57226b4a9dfbf0e5c71bec7eeb72d6a0"
+        "bytes": 5572416,
+        "sha256": "ed6ee15183db43df2ab9dcca2910506ffeacd705bdb5ed8950dd561bc7cbf6b0"
       }
     ],
-    "privileged_notify_payload_timer_lifecycle_executed": false,
+    "live_polkit_or_rule_install_executed": false,
+    "new_grant_runtime_executed": false,
+    "privileged_native_lifecycle_qualified": false,
     "public_backend_enabled": false,
-    "limits": "No real READY notification, POSIX timer create/expire, root entry/manager lifecycle, payload/credentials, original-timer124 qualification, transparent caller context, kernel floor, public wiring or performance run. Private predecessor015 remains failed125 at unsupported setter; no rescoring.",
-    "raw_receipts": "Private only; no raw machine/account/connection data or archive published.",
-    "cleanup_receipt_sha256": "962e1453654877aedbcd59e9a97be56046dbc43d9a758cd2db72e5f2fef3c7eb",
-    "artifact_files_preserved_and_verified": 90,
-    "owned_scratch_roots_removed": 2,
-    "original_scopes_absent": true
+    "prior_runtime004": "FAILED before private presentation; client125 at public RefUnit,166files preserved, no rescoring.",
+    "limits": "Compilation/pure mocks do not establish actual authorization, rulechain behavior, configured policy/resource retention or product lifetime/native settlement/PRESTOP success. Native error ownership/freeing is compiled but not runtime-tested by pure formatting assertions. Resource-scope/default/transparent-context/kernel-floor/performance requirements remain open.",
+    "raw_receipts": "Private only; no account/host/route/connection material published."
   },
   "cancellation_design_sha256": "81748885f8249642c4083ad9f5c7740d9d36c94c19cb5cf422b6f9deb0e59434",
   "cancellation_source_status": "Compiled in d6; native gate first-cause and pure watchdog-fault regression passed; whole cancellation lifecycle unexecuted",
@@ -932,7 +946,7 @@
   },
   "notify_handoff": {
     "design_sha256": "b6a6cfeab2f4a1f8fc64630dd8c738a42b2143becf2c43524de134be596b1358",
-    "status": "Exact d16 notify source passed ordinary build01611/11 and unit01112/12; actual privileged notify/payload/timer lifecycle remains unexecuted/unqualified",
+    "status": "Historical d16 ordinary build/tests passed; actual predecessor smoke reached PID1 Started then failed at RefUnit before payload. Full native lifecycle remains unqualified.",
     "bootstrap_seconds": 15,
     "startup_and_job_seconds": 20,
     "static_runtime_ceiling_seconds": 86430,
@@ -988,7 +1002,210 @@
       "artifact_files_preserved_and_verified": 90,
       "owned_scratch_roots_removed": 2,
       "original_scopes_absent": true
+    },
+    "actual_runtime_smoke": {
+      "client_exit": 125,
+      "libsystemd_error": -13,
+      "stage": "ordinary public Manager.RefUnit before private presentation",
+      "journal": "PID1 Started, then client refusal, root OwnerLost/channel send failure and root125",
+      "cause_limit": "Exact broker/manager/polkit/MAC layer unproven because error name/message discarded",
+      "saved_files": 166,
+      "qualified": false,
+      "private_evidence_only": true
     }
   },
-  "tested_implementation_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e"
+  "tested_implementation_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
+  "unit_reference_predecessor_validation": {
+    "entry_source_validation": {
+      "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
+      "scope": "Ordinary native compilation/linking and twelve existing tests only; pure notify phase/readback additions do not execute notification or entry timers.",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "build_receipt_sha256": "68d67aafe73df6d5475de440e12db464ff3c155e956f73fbccfcd005ba779b2b",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "timed_out": false,
+      "unit_receipt_sha256": "1650f243016c61e462eebba8ce0648c2cfc205681a0222f8dc0461f016ae28d6",
+      "harness_sha256": "98b50a7c66444363a9cfcb77fcc300b5fa773641ea49ad649bea2f3f3340eb36",
+      "harness_bytes": 9865656,
+      "notify_phase_pure_regression_passed": true,
+      "original_timer_raw_readback_pure_rejections_passed": true,
+      "native_ipc_refusals": 17,
+      "native_gate_mappings_destroyed": 3,
+      "cleanup_status": "Actual cleanup016 terminal0;90files verified locally/remotely, two exact scratch roots removed and both original scopes absent.",
+      "linked_entry_ELFs": [
+        {
+          "name": "process-tree-guard-root",
+          "bytes": 6384248,
+          "sha256": "f8b392223d82cf951231d0996052c2767bd3bd19bc417bf1a2d44656887b3dd5"
+        },
+        {
+          "name": "process-tree-guard-client",
+          "bytes": 5569144,
+          "sha256": "736d1b02dec3d2c53eb59b5713f4780c57226b4a9dfbf0e5c71bec7eeb72d6a0"
+        }
+      ],
+      "privileged_notify_payload_timer_lifecycle_executed": false,
+      "public_backend_enabled": false,
+      "limits": "No real READY notification, POSIX timer create/expire, root entry/manager lifecycle, payload/credentials, original-timer124 qualification, transparent caller context, kernel floor, public wiring or performance run. Private predecessor015 remains failed125 at unsupported setter; no rescoring.",
+      "raw_receipts": "Private only; no raw machine/account/connection data or archive published.",
+      "cleanup_receipt_sha256": "962e1453654877aedbcd59e9a97be56046dbc43d9a758cd2db72e5f2fef3c7eb",
+      "artifact_files_preserved_and_verified": 90,
+      "owned_scratch_roots_removed": 2,
+      "original_scopes_absent": true
+    },
+    "status": "Exact d16 notify source passed ordinary build01611/11 and unit01112/12; actual privileged notify/payload/timer lifecycle remains unexecuted/unqualified",
+    "implementation_build_candidate_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e"
+  },
+  "unit_reference_repair": {
+    "design_sha256": "18ea0158c9f6bbae4045896c2ce971c5ca74b12e24b769dd4bb4f41a365d4915",
+    "implementation_authorization_sha256": "e381fd0b031edf06ea632fdadf30469b1c036e7f35e24861a5520bdf8f3abf59",
+    "status": "Exact4b34 unit-reference source passed ordinary build01711/11 and unit01212/12;44 pure template decisions passed; live authorization/configured grant/full native lifecycle remain unqualified",
+    "predecessor_publication_sha256": "dd4b1686d42455e96ee796a1295a85b879333a9acc346fcfb5da4d23b60d5f15",
+    "predecessor_tested_implementation_sha256": "d16cef4ab76ccde5bf8b47df30cff1f36847ddb747da9ab13a8b96d5cbf2f33e",
+    "changes": [
+      "RefUnit/UnrefUnit typed reprC sd_bus_error, zero-init nonClone RAII/free, immediate returned-reply adoption and bounded escaped member/unit/error fields; same original remaining/500ms call bound and negative refusal status",
+      "Inactive unconfigured ES5 administrator ref-only template with full canonical bounded counter/PID/UID parsing, exact action/verb/account/subjectPID, noKEEP/spawn or implicit grant from delegation.policy",
+      "Remove only ignored socket Service=process-tree-guard@.service override; Accept=yes implicit same-basename template remains"
+    ],
+    "source_delta_limits": "No changes to client, original deadline/owner/pidfd/cgroup/native cleanup/timer/request/wire/Windows/Cargo/selector. All live/terminal manager checks and same public sender reference through verified join/release remain unchanged.",
+    "diagnostic_bounds": {
+      "member_bytes": 16,
+      "unit_bytes": 255,
+      "error_name_bytes": 256,
+      "error_message_bytes": 1024,
+      "formatted_bytes": 8192
+    },
+    "new_test_scope": "Same12 existing test names passed; added formatter/error-layout assertions are pure and do not call a live bus or free an actual libsystemd error.44 pure mocked policy cases passed; actual policy authorization/loading/install remains unexecuted.",
+    "actual_predecessor_failure": {
+      "client_exit": 125,
+      "libsystemd_error": -13,
+      "stage": "ordinary public Manager.RefUnit before private presentation",
+      "journal": "PID1 Started, then client refusal, root OwnerLost/channel send failure and root125",
+      "cause_limit": "Exact broker/manager/polkit/MAC layer unproven because error name/message discarded",
+      "saved_files": 166,
+      "qualified": false,
+      "private_evidence_only": true
+    },
+    "grant_contract": "Separate explicit administrator username-to-numericUID binding and protected root-owned rule installation/revoke/readback. No subject.uid API, no implicit grant from delegation policy, no automatic daemon/package/rule install or permanent host mutation. Existing OS support and actual effective rule/authorization required.",
+    "resource_limits": [
+      "RefUnit can load fabricated counter-PID-UID template instances before authorization; policy does not prove socket creation/InvocationID or enforce one reference per PID",
+      "Sender references remain until same sender Unref/disconnect; no quota or reference lease. Failed library outcomes may retain public connection beyond SUT deadline",
+      "Removing rule revokes future grants, not existing references; account remap/rename requires revoke+regenerate; earlier OS policy may decide first",
+      "No all-resource confinement, actual configured-grant/runtime or default backend qualification follows"
+    ],
+    "public_backend_enabled": false,
+    "current_validation": {
+      "implementation_build_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
+      "status": "ACTUAL ORDINARY VALIDATION PASSED; NO PRIVILEGED GRANT/LIFECYCLE QUALIFICATION",
+      "scope": "Actual ordinary native compile/link and twelve existing tests; new formatter/ABI assertions are pure, plus44 mocked pure policy decisions. No real manager authorization, rule installation/loading, native error-freeing RefUnit failure path or privileged product lifecycle.",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "build_receipt_sha256": "2f323b096dc9bc1f6769b863b5d7c7205461258f41bcd27f73c87d57c408bc52",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "unit_terminal_exit": 0,
+      "unit_receipt_sha256": "822914d6fa84a501222b5b39ca8e865aa4a39a50a01b45f5c74a58d558a6894d",
+      "harness_sha256": "9178938486e7e85aaf062a6916dca8f3fc6f676a0de2cc373abc74792d902d9b",
+      "harness_bytes": 9869312,
+      "formatter_ABI_pure_label_confirmed": true,
+      "pure_policy_cases": 44,
+      "pure_policy_all_pass": true,
+      "pure_policy_template_sha256": "c9b6919404754ad626027e336f322e1e9af5de5872539ae42776ec07af977433",
+      "pure_policy_receipt_sha256": "609d6fd6498dfc38b470d39f5c4f39369d74110329bf2bda72b4f144626a0bfb",
+      "pure_policy_per_case_vm_deadline_ms": 100,
+      "pure_policy_limit": "Pure decision function mocked polkit objects only; no live authorization/grant/rule loading/daemon or product execution",
+      "artifact_files_preserved_and_verified": 91,
+      "build_artifacts": 83,
+      "unit_artifacts": 8,
+      "cleanup_status": "Cleanup017 not executed at this metadata-preparation checkpoint; no scratch-root/scope/worker absence postcondition is claimed.",
+      "cleanup_receipt_sha256": null,
+      "owned_scratch_roots_removed": null,
+      "original_scopes_absent": null,
+      "linked_entry_ELFs": [
+        {
+          "name": "process-tree-guard-root",
+          "bytes": 6384264,
+          "sha256": "5f930dd05e80bd318784695f14c5eaeb298295762fcc6e56ef0bc040d58ee8b2"
+        },
+        {
+          "name": "process-tree-guard-client",
+          "bytes": 5572416,
+          "sha256": "ed6ee15183db43df2ab9dcca2910506ffeacd705bdb5ed8950dd561bc7cbf6b0"
+        }
+      ],
+      "live_polkit_or_rule_install_executed": false,
+      "new_grant_runtime_executed": false,
+      "privileged_native_lifecycle_qualified": false,
+      "public_backend_enabled": false,
+      "prior_runtime004": "FAILED before private presentation; client125 at public RefUnit,166files preserved, no rescoring.",
+      "limits": "Compilation/pure mocks do not establish actual authorization, rulechain behavior, configured policy/resource retention or product lifetime/native settlement/PRESTOP success. Native error ownership/freeing is compiled but not runtime-tested by pure formatting assertions. Resource-scope/default/transparent-context/kernel-floor/performance requirements remain open.",
+      "raw_receipts": "Private only; no account/host/route/connection material published."
+    },
+    "ordinary_validation": {
+      "implementation_build_candidate_sha256": "4b34cd94f309ce30b5732bc95d35d4bffcbc88e43358084d0713cbe1e3ff1fc4",
+      "status": "ACTUAL ORDINARY VALIDATION PASSED; NO PRIVILEGED GRANT/LIFECYCLE QUALIFICATION",
+      "scope": "Actual ordinary native compile/link and twelve existing tests; new formatter/ABI assertions are pure, plus44 mocked pure policy decisions. No real manager authorization, rule installation/loading, native error-freeing RefUnit failure path or privileged product lifecycle.",
+      "compile_link_steps": 11,
+      "compile_link_passed": 11,
+      "compile_link_failed": 0,
+      "build_receipt_sha256": "2f323b096dc9bc1f6769b863b5d7c7205461258f41bcd27f73c87d57c408bc52",
+      "tests": 12,
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0,
+      "unit_terminal_exit": 0,
+      "unit_receipt_sha256": "822914d6fa84a501222b5b39ca8e865aa4a39a50a01b45f5c74a58d558a6894d",
+      "harness_sha256": "9178938486e7e85aaf062a6916dca8f3fc6f676a0de2cc373abc74792d902d9b",
+      "harness_bytes": 9869312,
+      "formatter_ABI_pure_label_confirmed": true,
+      "pure_policy_cases": 44,
+      "pure_policy_all_pass": true,
+      "pure_policy_template_sha256": "c9b6919404754ad626027e336f322e1e9af5de5872539ae42776ec07af977433",
+      "pure_policy_receipt_sha256": "609d6fd6498dfc38b470d39f5c4f39369d74110329bf2bda72b4f144626a0bfb",
+      "pure_policy_per_case_vm_deadline_ms": 100,
+      "pure_policy_limit": "Pure decision function mocked polkit objects only; no live authorization/grant/rule loading/daemon or product execution",
+      "artifact_files_preserved_and_verified": 91,
+      "build_artifacts": 83,
+      "unit_artifacts": 8,
+      "cleanup_status": "Cleanup017 not executed at this metadata-preparation checkpoint; no scratch-root/scope/worker absence postcondition is claimed.",
+      "cleanup_receipt_sha256": null,
+      "owned_scratch_roots_removed": null,
+      "original_scopes_absent": null,
+      "linked_entry_ELFs": [
+        {
+          "name": "process-tree-guard-root",
+          "bytes": 6384264,
+          "sha256": "5f930dd05e80bd318784695f14c5eaeb298295762fcc6e56ef0bc040d58ee8b2"
+        },
+        {
+          "name": "process-tree-guard-client",
+          "bytes": 5572416,
+          "sha256": "ed6ee15183db43df2ab9dcca2910506ffeacd705bdb5ed8950dd561bc7cbf6b0"
+        }
+      ],
+      "live_polkit_or_rule_install_executed": false,
+      "new_grant_runtime_executed": false,
+      "privileged_native_lifecycle_qualified": false,
+      "public_backend_enabled": false,
+      "prior_runtime004": "FAILED before private presentation; client125 at public RefUnit,166files preserved, no rescoring.",
+      "limits": "Compilation/pure mocks do not establish actual authorization, rulechain behavior, configured policy/resource retention or product lifetime/native settlement/PRESTOP success. Native error ownership/freeing is compiled but not runtime-tested by pure formatting assertions. Resource-scope/default/transparent-context/kernel-floor/performance requirements remain open.",
+      "raw_receipts": "Private only; no account/host/route/connection material published."
+    }
+  },
+  "unit_reference_pre_ordinary_validation": {
+    "status": "UNCOMPILED SOURCE ONLY",
+    "compiled": false,
+    "tests_executed": false,
+    "privileged_lifecycle_executed": false,
+    "public_backend_enabled": false,
+    "scope": "Typed bounded error diagnostics/ownership and inactive explicit administrator ref-only template; socket removes one ignored override. No new live bus calls/test framework/defaults/native C/wire/Cargo/Windows changes.",
+    "limits": "Historical d16 ordinary11/11+12/12 is not validation of this repair. Actual predecessor smoke reached PID1 Started then client125 at RefUnit before private presentation; no full lifecycle/PRESTOP success. Current implementation requires relevant native checks and genuine configured-grant/runtime qualification before enablement."
+  }
 }

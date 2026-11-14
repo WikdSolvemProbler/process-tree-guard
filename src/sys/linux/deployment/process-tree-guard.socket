@@ -7,7 +7,6 @@ JobRunningTimeoutSec=20
 [Socket]
 ListenSequentialPacket=/run/process-tree-guard/activate.sock
 Accept=yes
-Service=process-tree-guard@.service
 PassCredentials=yes
 SocketMode=0666
 DirectoryMode=0755

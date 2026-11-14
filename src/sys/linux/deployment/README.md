@@ -1,7 +1,7 @@
 # Staged Linux product entry
 
 These are product source entry points, not installed services or a test framework.
-The normal cross-platform selector remains fail-closed for Linux. Exact d16 notify source passed11 ordinary build/link steps and12 tests. Added phase/timer-readback checks are pure; actual READY/timer/privileged lifecycle remains unqualified.
+The normal cross-platform selector remains fail-closed for Linux. Historical d16 source passed11 ordinary build/link steps and12 tests. An actual run reached PID1 Started, then failed125 at ordinary public RefUnit before private presentation. Exact4b34 diagnostic/ref-template/socket-warning source passed11 ordinary build/link steps and12 existing tests (0 failed/ignored). The added formatter/ABI assertions are pure;44 actual-template decisions used mocked polkit objects only. All91 artifacts were preserved/verified; Cleanup017 had not executed at this metadata-preparation checkpoint, so no cleanup postcondition is claimed. Live rule loading/authorization/configured grants and full native lifecycle remain unqualified.
 
 - `../root_main.rs` builds the protected root-service executable installed as
   `/usr/libexec/process-tree-guard-root`. Its only accepted role is `--service`.
@@ -28,7 +28,8 @@ and binds the original cutoff before it creates any watchdog or payload child.
 It creates one private root listener for the same live requester and full request.
 The fixed15s bootstrap timer stays armed during the checked STARTING→RUNNING handoff. Only after the original sticky cleanup timer is confirmed may the held protected `/run/systemd/notify` channel send nonblocking `READY=1`; same-unit RUNNING readback precedes private admission or child creation. Type=notify/NotifyAccess=main, startup20s, stop5s, static RuntimeMax86430s and recursive SIGKILL are checked. The static runtime is only a ceiling: exact original deadline+5s kernel timer ownership survives through result writes and `_exit`. No loaded-unit property setter, extension message or timer reset is used.
 No root-manager bus descriptor is transferred to the ordinary client. The client
-uses its own public read-authorized manager connection/reference.
+uses its own authenticated public manager connection. Property reads do not grant
+RefUnit: a separate explicit administrator ref-only authorization is required.
 
 Completion requires a matching settled root frame, exact service pidfd terminal,
 original unit empty or narrowly proved retired, and retained manager invocation,
@@ -84,3 +85,22 @@ separate-service grant is an explicit administrative capability and does not
 complete transparent-context requirements. Default dispatch remains disabled.
 
 The mode2 CORE-window source compiles and its12 ordinary tests pass; its actual native protection remains unqualified: it accepts host2 only through the reviewed family/protected-current-ELF/hard-limit gate and protected credential choreography. No sysctl or caller/parent limit is changed. The existing private runtime001 capsule remains frozen0-only and is incompatible with the observed host2 until root explicitly reviews/replaces its inputs after qualification. No installation is authorized by this source work.
+
+
+## Explicit unit-reference authorization
+
+The inactive [50-process-tree-guard-ref.rules.in](50-process-tree-guard-ref.rules.in) template grants nothing until an administrator configures both constants. It is a separate capability from /etc/process-tree-guard/delegation.policy, which still controls numeric requester admission. The application does not install or configure the rule. Existing compatible OS polkit/systemd support is required; no daemon, package, authentication agent or global policy is added. Package presence or PID1 Started does not establish effective authorization or a qualified lifecycle.
+
+The rule accepts only action org.freedesktop.systemd1.manage-units with verb=ref, the configured account, and a full canonical process-tree-guard@COUNTER-PID-UID.service name. Counter is unsigned32, PID is2..2147483647 and equals trusted subject.pid, UID is1..4294967294 and equals the configured decimal UID string. Every match consumes the full input; malformed, overlong, leading-zero, out-of-range or unconfigured product ref requests deny. Other actions/verbs/units receive no grant from this rule. YES is noncached; no KEEP, spawned lookup, shell or external helper is used.
+
+Polkit exposes subject.user and subject.pid, not subject.uid. Before an explicit install, the administrator must use trusted OS account information to prove the configured username maps exactly to the selected numeric UID. Account rename/remapping requires revoke and regeneration. Preserve that mapping/configuration proof privately; the rule alone does not attest a numeric UID or an actual socket-created invocation.
+
+For an explicitly authorized deployment, render only those two constants with proper string escaping and validate the exact reviewed bytes. The intended path is /etc/polkit-1/rules.d/50-process-tree-guard-ref.rules: protected root-owned nonwritable nofollow ancestry and a root-owned regular0644 file. Reject existing unknown files/symlinks, unprotected parents, malformed configuration or conflicting rules. Publish no-replace/atomically with an exact owned inode/hash ledger. Rules are ordered and monitored: verify actual load and narrow positive/negative authorization; file presence is insufficient and an earlier rule may decide first. Do not restart or install polkit automatically. Any future smoke grant is temporary and confined to an explicitly reviewed fresh disposable guest; no permanent host install is authorized here.
+
+Revoke by removing only that exact original owned file after identity/hash verification, then verify removal and future narrow refusal. Do not remove unrelated rules. Revocation affects future grants; existing references persist until their same sender calls UnrefUnit or disconnects.
+
+The grant has a resource-retention cost: Manager.RefUnit loads named template instances before handler authorization. Even with exact subject PID/UID matching, an authorized caller can fabricate many counters and retain manager objects. No per-PID quota, reference lease, actual InvocationID/provenance proof or all-resource confinement follows. A failed library ClientOutcome can retain the bus connection past the SUT deadline. Those limits remain open deployment/default-qualification questions; the existing original timers bound the product invocation, not arbitrary account reference lifetimes.
+
+The client retains its same public-bus reference through the unchanged exact pidfd terminal, original group/native settlement and manager InvocationID/ExecMainPID/code/status/Result join, then releases it. It never treats unit GC as success or imports a privileged bus descriptor. RefUnit/UnrefUnit refusals retain125 and bounded escaped member/unit/error-name/error-message diagnostics with typed RAII freeing, under the same original remaining/500ms call bound.
+
+Accept=yes now relies on implicit same-basename template activation. Only the redundant ignored Service=process-tree-guard@.service line was removed; all security/socket options remain unchanged. This warning correction does not explain the RefUnit failure. [systemd255 socket semantics](https://www.freedesktop.org/software/systemd/man/255/systemd.socket.html#Service=), [Ref authorization](https://github.com/systemd/systemd/blob/v255/src/core/dbus-unit.c#L584-L623), [polkit API](https://polkit.pages.freedesktop.org/polkit/polkit.8.html).
