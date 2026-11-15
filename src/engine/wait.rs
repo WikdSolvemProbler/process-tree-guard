@@ -391,7 +391,7 @@ fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(
 /// Returns whether the job emptied, and the unspent remainder of the one
 /// teardown budget: the wait on the child shares that budget, it does not
 /// start a second one.
-pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32, member_wait_uncertainty: &mut Option<MemberWaitUncertainty>, member_capture_failure: &mut Option<MemberCaptureFailure>) -> (bool, u32) {
+pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32, member_wait_uncertainty: &mut Option<MemberWaitUncertainty>, member_capture_failure: &mut Option<MemberCaptureFailure>, job_termination_error: &mut Option<u32>) -> (bool, u32) {
     if active_processes(job) == Some(0) { return (true, milliseconds); }
     let start = std::time::Instant::now();
     let deadline = start + std::time::Duration::from_millis(u64::from(milliseconds));
@@ -407,7 +407,7 @@ pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32, memb
             OpenProcess(SYNCHRONIZE, 0, id as u32)
         });
     });
-    unsafe { TerminateJobObject(job, code) };
+    observe_job_termination(job_termination_error, || unsafe { TerminateJobObject(job, code) });
     // Wait on the members in windows of the native wait's handle
     // limit, every member of a window at once: one wait and one
     // clock read per window replace one wait and one clock read per
@@ -431,6 +431,16 @@ pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32, memb
     }
     let empty = wait_until_empty(job, deadline);
     (empty, deadline.saturating_duration_since(std::time::Instant::now()).as_millis() as u32)
+}
+
+/// Retain a failed kill request separately from wait or member-capture facts.
+/// Read LastError immediately on failure; successful requests add no native call.
+#[inline]
+pub(super) fn observe_job_termination(error: &mut Option<u32>, terminate: impl FnOnce() -> i32) {
+    if terminate() == 0 {
+        let win32_error = unsafe { GetLastError() };
+        if error.is_none() { *error = Some(win32_error); }
+    }
 }
 
 /// A failed capture is not a native wait receipt or a count of missing members.
@@ -519,6 +529,7 @@ pub(super) struct CleanupObservation {
     pub(super) job_proven_empty: bool,
     pub(super) member_wait_uncertainty: Option<MemberWaitUncertainty>,
     pub(super) member_capture_failure: Option<MemberCaptureFailure>,
+    pub(super) job_termination_error: Option<u32>,
     pub(super) child_created: bool,
     pub(super) child_exited: bool,
     pub(super) original_child_wait: Option<u32>,
@@ -536,7 +547,7 @@ pub(super) fn finalize_cleanup(
     let child_confirmed = !observed.child_created || observed.child_exited
         || observed.original_child_wait == Some(WAIT_OBJECT_0);
     if job_confirmed && child_confirmed && observed.member_wait_uncertainty.is_none()
-        && observed.member_capture_failure.is_none() {
+        && observed.member_capture_failure.is_none() && observed.job_termination_error.is_none() {
         (outcome, true)
     } else {
         (Err(unconfirmed_cleanup_error(outcome, observed)), false)
@@ -550,8 +561,8 @@ fn unconfirmed_cleanup_error(outcome: Result<u32, GuardError>, observed: Cleanup
         Err(error) => format!("original run error: {}", error.message()),
     };
     GuardError(format!(
-        "process-tree cleanup could not be confirmed (job_assigned={}, job_empty={}, member_wait_uncertainty={:?}, member_capture_failure={:?}, child_created={}, child_previously_exited={}, original_child_wait={:?}, native_wait_error={:?}); {original}",
-        observed.assigned, observed.job_proven_empty, observed.member_wait_uncertainty, observed.member_capture_failure, observed.child_created, observed.child_exited,
+        "process-tree cleanup could not be confirmed (job_assigned={}, job_empty={}, member_wait_uncertainty={:?}, member_capture_failure={:?}, job_termination_error={:?}, child_created={}, child_previously_exited={}, original_child_wait={:?}, native_wait_error={:?}); {original}",
+        observed.assigned, observed.job_proven_empty, observed.member_wait_uncertainty, observed.member_capture_failure, observed.job_termination_error, observed.child_created, observed.child_exited,
         observed.original_child_wait, observed.original_child_wait_error,
     ))
 }

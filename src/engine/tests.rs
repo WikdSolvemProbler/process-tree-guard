@@ -1256,7 +1256,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
 
     fn cleanup_observation() -> CleanupObservation {
         CleanupObservation {
-            assigned: true, job_proven_empty: true, member_wait_uncertainty: None, member_capture_failure: None, child_created: true,
+            assigned: true, job_proven_empty: true, member_wait_uncertainty: None, member_capture_failure: None, job_termination_error: None, child_created: true,
             child_exited: true, original_child_wait: None, original_child_wait_error: None,
         }
     }
@@ -1324,6 +1324,39 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         assert_eq!(good_capture, None, "successful capture keeps the original handle order");
         assert_eq!(finalize_cleanup(Ok(37), CleanupObservation {
             member_capture_failure: good_capture, ..cleanup_observation()
+        }), (Ok(37), true));
+        // A real owned event is not a Job. A failed kill request must not be
+        // healed by subsequent natural exits, accounting zero or successful waits.
+        let wrong_job = DeepOwnerEvents::new(1);
+        let mut termination_error = None;
+        let mut actual_termination_error = None;
+        observe_job_termination(&mut termination_error, || unsafe {
+            let status = crate::sys::windows::TerminateJobObject(wrong_job.0[0], 124);
+            if status == 0 { actual_termination_error = Some(GetLastError()); }
+            status
+        });
+        let first_error = termination_error.expect("native Job termination failure must be retained");
+        assert_eq!(termination_error, actual_termination_error, "observer retains the actual native error");
+        assert_ne!(first_error, 0, "failed native request supplies its actual LastError");
+        drop(wrong_job); // Real CloseHandle after the error was captured.
+        unsafe { SetLastError(0x13572468) };
+        observe_job_termination(&mut termination_error, || 1);
+        assert_eq!(termination_error, Some(first_error), "later success cannot erase failed kill");
+        assert_eq!(unsafe { GetLastError() }, 0x13572468, "successful observer leaves caller native error untouched");
+        for code in [0, 37, 124, 125, u32::MAX] {
+            let (result, confirmed) = finalize_cleanup(Ok(code), CleanupObservation {
+                job_termination_error: termination_error, ..cleanup_observation()
+            });
+            assert!(!confirmed, "root terminal and Job zero cannot heal failed kill");
+            let error = result.expect_err("known failed kill cannot preserve a successful result");
+            assert!(error.message().contains(&format!("job_termination_error=Some({first_error})")));
+            assert!(error.message().contains(&format!("exit code {code}")));
+        }
+        let mut success_error = None;
+        observe_job_termination(&mut success_error, || 1);
+        assert_eq!(success_error, None);
+        assert_eq!(finalize_cleanup(Ok(37), CleanupObservation {
+            job_termination_error: success_error, ..cleanup_observation()
         }), (Ok(37), true));
     }
 
@@ -1409,7 +1442,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             |_, _| panic!("no extra wait after an actual observed child exit"));
         assert_eq!((status, error), (None, None));
         assert_eq!(finalize_cleanup(Err(GuardError("not started".into())), CleanupObservation {
-            assigned: false, job_proven_empty: false, member_wait_uncertainty: None, member_capture_failure: None, child_created: false,
+            assigned: false, job_proven_empty: false, member_wait_uncertainty: None, member_capture_failure: None, job_termination_error: None, child_created: false,
             child_exited: false, original_child_wait: None, original_child_wait_error: None,
         }), (Err(GuardError("not started".into())), true));
     }
