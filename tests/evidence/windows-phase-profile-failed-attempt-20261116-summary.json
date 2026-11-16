@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "preserved failed fixed-sample phase diagnostic; zero qualifying measurements",
+  "diagnostic_source_sha256": "027a75be15c0bf367aeebb4195eaa259103ba97f84b204e17c1e0198ce59dae9",
+  "plan_sha256": "e974651ea76732296241657988a384bea773198073326d81df924116a58b293e",
+  "root_failed_actual_audit_sha256": "d27512cbd2f218c11564deffa297cf0261f4eedc66063e6597dbcc21b15ac268",
+  "raw_receipt_sha256": "c2cc9f75221d27dc22d5ac678cf9bb6c6f71f643c9789484b04e037f8e28608d",
+  "independent_failed_audit_sha256": "127284b07fa898e06c5319ca7185ebdd1939f2ec14c94a9f22dab11fd478d066",
+  "author_failed_audit_sha256": "a5ee393840ddfda789ba249b2cd323420baf57aba360b58d8bd2aa0312b15ee1",
+  "protocol": {
+    "planned_pairs": 20,
+    "schedule": "AABB repeated five times; A=current/reference, B=reference/current",
+    "product_deadline_seconds": 2,
+    "slot_deadline_seconds": 3,
+    "guardian_deadline_seconds": 55,
+    "backup_deadline_seconds": 60,
+    "outer_whole_tree_deadline_seconds": 60,
+    "prior_successful_profile_preflight_excluded": true,
+    "automatic_retries": 0
+  },
+  "actual": {
+    "original_tool_exit_code": 1,
+    "profiled_guards_launched": 1,
+    "first_role": "current",
+    "completed_slots": 0,
+    "completed_pairs": 0,
+    "passed": false,
+    "source_roles_rehashed": 42,
+    "held_distinct_roles": 48,
+    "held_identity_records_rehashed": 144,
+    "raw_final_matches_receipt": true,
+    "original_guard_launched_suspended_in_job_and_resumed": true,
+    "original_failure": "PermissionError(13, 'Permission denied')",
+    "failure_region": "Marker polling/read in the payload observer, before recording marker bytes or acquiring the payload handle.",
+    "exact_failing_operation_known": false,
+    "original_winerror_recorded": false,
+    "original_traceback_recorded": false,
+    "cause_established": false,
+    "raw_stdin_stdout_stderr_bytes_each": 0,
+    "payload_identity_bound": false,
+    "first_original_payload_poll_available": false,
+    "natural_guard_completion_endpoint_available": false,
+    "profile_line_available": false,
+    "assisted_job_cleanup": {
+      "requested": true,
+      "active_before": 3,
+      "active_after": 0,
+      "guard_exit_code_u32": "0xE0000071"
+    },
+    "profiled_image_exposures_after_attempt": {
+      "current": 2,
+      "reference": 1
+    },
+    "private_full_inventory_at_root_audit_cutoff": {
+      "files": 35,
+      "bytes": 268356,
+      "sha256": "131c9f71d7bfbf3e1e60a269cdfbb33e1544a52b304f905aafd9bd4d7379c891"
+    }
+  },
+  "qualification": {
+    "primary_qualifying_competitive_measurements": 0,
+    "canonical_product_source_changed": false,
+    "guard_security_or_performance_defect_established": false,
+    "experiment_replayed": false,
+    "limitations": [
+      "The guard and payload were terminated by trusted cleanup after the observer error. Their natural completion and the guard's profile output were not observed.",
+      "The raw PermissionError representation cannot distinguish the final stat/is_file call from opening or reading the marker. ACL, sharing, filtering or another cause is unproven.",
+      "The pinned fixture closes its temporary-file write before atomically renaming the marker. An in-progress fixture write handle is not an established explanation.",
+      "The now-present marker was not bound to a retained original payload handle. Reading it after cleanup cannot establish the missing live custody evidence.",
+      "This attempt is preserved as a failure. It is not a warmup, complete sample, speed/parity result or evidence of equivalence.",
+      "Any fresh diagnostic must disclose the failed attempt and changed per-image exposure counts. No access denial will be silently retried or swallowed.",
+      "The next source-only change adds bounded operation/errno/WinError/traceback recording and still fails closed. A successful later call would not by itself explain this failure.",
+      "Raw machine and transport originals remain private; the public reproducibility package is still incomplete."
+    ]
+  }
+}
