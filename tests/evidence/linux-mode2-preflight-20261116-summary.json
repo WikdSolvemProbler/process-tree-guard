@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "Passed read-only Linux guest policy and previous-fixture retirement preflight; zero product invocations",
+  "purpose": "Select the next credential/CORE qualification case using observed host policy, without changing global limits or product assets.",
+  "evidence_sha256": {
+    "source_manifest": "45bc7ba1bf9138d6f60866efa8e0da682a2ebf285108f344b4191cc6c8b2ee6b",
+    "prospective_invocation": "017a6e79b2f8f1fe4325ebc0b207aed5ed82bfe3dda50cfb579145a25b1ea395",
+    "raw_result": "84a164076639b00fb432e834177616f0172f31bd5730effbd3681c73e5393fb4",
+    "root_actual": "2da3d81a77c253eae10e157f15e262e71663d16689f761146bde69f767fb06f1",
+    "independent_actual": [
+      "7b5a8e13a751a4f7ab127cde77b3c9c9ed63428a11393fa3115608f428390515",
+      "dbce237d3bb858dcee54ed0d7b2a1c0272bb36cbd2e1e3330ae045f4d3843977"
+    ]
+  },
+  "protocol": {
+    "one_call": true,
+    "retries": 0,
+    "windows_whole_tree_seconds": 65,
+    "local_transport_seconds": 60,
+    "remote_transport_seconds": 55,
+    "guest_timeout_seconds": 45,
+    "guest_user_scope_seconds": 35,
+    "read_only_manager_query_seconds": 4,
+    "read_only_privileged_asset_query_seconds": 5,
+    "product_invocations": 0,
+    "global_or_product_mutations": false
+  },
+  "observations": {
+    "native_transport_exit": 0,
+    "local_timeout": false,
+    "source_postpins": 11,
+    "nested_raw_byte_hash_records": 6,
+    "guest_result_equals_unique_raw_frame": true,
+    "architecture": "Linux ARM64",
+    "host_suid_dumpable_literal": "2\n",
+    "reviewed_kernel_family": "6.8",
+    "prior_policy_denial_scope": {
+      "load_state": "not-found",
+      "active_state": "inactive",
+      "sub_state": "dead",
+      "control_group_empty": true,
+      "exact_original_cgroup_path_absent": true
+    },
+    "exact_product_asset_paths_checked_absent_by_privileged_lstat": 6,
+    "ordinary_query_rlimit_core_raw": [
+      0,
+      -1
+    ],
+    "privileged_query_rlimit_core_raw": [
+      0,
+      0
+    ],
+    "core_units": "bytes; Python -1 represents RLIM_INFINITY",
+    "actual_product_service_rlimit_core": "UNVERIFIED",
+    "top_transport_stderr_bytes": 72,
+    "top_transport_stderr_classification": "Preserved pseudo-terminal allocation notice; both embedded query stderr streams empty"
+  },
+  "next_gate": "Read CORE from the retained live original product service PID before ACK/GO in a fresh bounded mode2 credential case; compare post-exec payload CORE with that actual service tuple. Treat service hard CORE zero or activation refusal as readiness failure.",
+  "limits": [
+    "The host sysctl/kernel observations allow a mode2 test proposal; they do not qualify the mode2 product path.",
+    "The privileged read-only query is a sudo subprocess, not the PID1 product service. Its hard CORE zero does not establish the service limit.",
+    "This independently verifies retirement of the preceding policy-denial fixture scope and absence of six exact product asset paths. It is not an exhaustive host process or filesystem inventory.",
+    "No retrospective mode2 claim for earlier cases, no payload/credential-transition proof, no full Linux qualification, no default backend enablement and no performance result.",
+    "Exact transport and machine records remain private. Summaries and hashes do not substitute for publicly accessible raw evidence."
+  ],
+  "backend_default_dispatch": "disabled",
+  "primary_qualifying_performance_measurements": 0
+}
