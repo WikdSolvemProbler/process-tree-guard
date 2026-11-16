@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "ONE_LINUX_MODE2_ROOT_SUPPLEMENTARY_GROUP_BOOTSTRAP_REFUSAL",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "product_source_or_defaults_changed": false,
+  "platform": {
+    "os": "Linux",
+    "architecture": "aarch64",
+    "release": "6.8.0-147-generic",
+    "literal_suid_dumpable_hex": "320a"
+  },
+  "method": {
+    "attempts": 1,
+    "retries": 0,
+    "case": "Non-root UID501/GID1000 caller requesting supplementarygroups[0,999,1000], with UID501-allowing protected product policy assets installed. The root bootstrap must reject group0 before delegation/READY/payload.",
+    "credential_readback_limit": "The requested preexec credentials are source-enforced, not independently exported as a raw preexec status frame.",
+    "prerequisite_preflight": "Literal mode2, reviewed kernel, prior consumed scope/cgroup retirement and six privileged lstat absences were independently observed. The fixture independently verified that read-only preflight scope retired before staging.",
+    "temporary_product_assets": 6,
+    "whole_tree_deadlines_seconds": {
+      "local_job": 135,
+      "transport_subprocess": 130,
+      "remote_carrier": 125,
+      "guest": 115,
+      "guest_scope": 105,
+      "root_fixture": 95,
+      "cleanup_timer_after": 65,
+      "cleanup_service_start": 40,
+      "product": 10,
+      "client_observer": 20,
+      "manager_settlement_max": 3
+    }
+  },
+  "observed": {
+    "original_outer_tool_exit": 0,
+    "transport_exit": 0,
+    "local_timeout": false,
+    "client_exit": 125,
+    "client_stdout_bytes": 0,
+    "client_stderr_bytes": 73,
+    "client_stderr": "process-tree-guard: root bootstrap: owner has a root supplementary group\n",
+    "client_stderr_sha256": "f944e0d3aff0ede47228bb52512aa5cd0a56186dbb4aae14b761d697d9024a54",
+    "retained_original_client_pidfd_terminal": true,
+    "manager_samples": 1,
+    "first_manager_sample": {
+      "active": "failed",
+      "sub": "failed",
+      "result": "exit-code",
+      "execution_status": 125,
+      "main_pid": 0,
+      "control_pid": 0,
+      "control_group": "",
+      "invocation_present": true,
+      "unit_client_pid_matched": true
+    },
+    "manager_sample_before_cleanup": true,
+    "original_service_domain": "No original live PID1 cgroup capability was held. Empty ControlGroup produced null cgroup path/events/absence fields; this is manager settlement evidence, not kernel-native domain-empty proof.",
+    "precleanup_socket": "active/listening, zero current connections",
+    "sentinel": "The sentinel absence check passed. No independent payload process capability or native exec-event stream was captured.",
+    "cleanup": {
+      "bounded_commands": 7,
+      "native_exits_all_zero": true,
+      "owned_product_assets_and_policy_directory_removed": 7,
+      "retained_owned_assets": 0,
+      "errors": 0,
+      "fallback_timer_fired": false,
+      "fallback_timer_cancelled": true
+    },
+    "source_postpins": 30,
+    "embedded_package_members": 7,
+    "raw_triplets_checked_in_guest_bundle": 32,
+    "additional_prior_scope_triplets": 2,
+    "fully_recursive_raw_triplets": 34
+  },
+  "source_mapped_conclusion": "The exact bootstrap diagnostic maps to the activated root service rejecting the root supplementary group before delegation bind, READY, private listener or payload. Those internal events are source-inferred, not separately exported.",
+  "qualification_limits": [
+    "One credential-refusal case under literal mode2; not the full refusal, race, escape, revocation or arbitrary-caller-context matrix.",
+    "A single first manager sample already reported failed125. This is not a repeated stability observation over a three-second interval.",
+    "No independent held original PID1 cgroup or kernel-native domain-empty claim. Sentinel absence alone does not prove no process was created.",
+    "UID-allowing policy bytes were installed and verified, but the group0 path rejects before delegation-policy evaluation; no delegation-authorization success follows.",
+    "No payload final credentials, CORE restoration, general platform floor, speed comparison, production default activation or complete academic-package qualification follows.",
+    "The new fixture scope retirement remains for the next independent preflight; exact raw endpoint/user/path/identity originals remain private."
+  ],
+  "evidence_sha256": {
+    "source": "439eac0320f0999c6a5a6aefc4e7e01a76637325e682ed6da7383980181eb600",
+    "freeze": "2ef17be9a37eb5297796be6da92f3c65e23368d4c5229e741e1425ff640a640b",
+    "native_static": "9659ca1d369d9c823217eb17e1b01eb8391ad768f580671cfea71a13cda4367f",
+    "root_actual": "10592435f82fbcc358807747aaa11eeb64f8a25cb6f0f66a7c77b673aac9138a",
+    "raw_result": "14b173608a987237d47d6365237c2b13eb0f8bdf4d733212be4622589b50f5b6",
+    "raw_guest_bundle": "10f947a73dcbd132d132b6f5fa83c1d89edf8356d0c61478dd61b167e08d35a4",
+    "independent_actual_reviews": [
+      "fc94a00f844ea4ab8f5e2664f3afc8ceddc33a3e806076b3f995169df7e940b1",
+      "b4c7e6dc9cf841565755d412e0e1bfb7aa3cc2653ef5471a022789bc8654a9b1"
+    ],
+    "domain_qualification": "c8d5aa15d6b9ca3c17105edeb7a812266baf7eb295dcf859e02fde0c57d51c33",
+    "readonly_preflight_root_actual": "76f49449ab6876c6e550f13892c6df85dbcd5b66f9d8f0daf4f530f8754b8899"
+  },
+  "linux_default_dispatch": "DISABLED",
+  "issue_qualification": "Linux backend issue remains OPEN",
+  "primary_qualifying_performance_measurements": 0
+}
