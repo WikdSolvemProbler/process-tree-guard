@@ -23,7 +23,7 @@ The native arm64 probe on macOS 27.0.1 first forked and reaped a baseline child.
 
 ## Native kqueue process events
 
-An ordinary-user probe on physical macOS ARM64 observed an ordinary fork event with a zero data field. On the same gated child, separate recursive tracking registrations using NOTE_TRACK, NOTE_TRACKERR and NOTE_CHILD each returned ENOTSUP. An exit-status subscription on that child succeeded, and its event agreed with waitpid on exit 7. The child was reaped naturally and a separate check found the process group gone. This rules out the tested kqueue registration path as a source of recursive child identity on this kernel. [Source, raw native receipts, and cleanup](../../../tests/evidence/macos-kqueue-native-20261106.zip)
+An ordinary-user probe on physical macOS ARM64 observed an ordinary fork event with a zero data field. On the same gated child, separate recursive tracking registrations using NOTE_TRACK, NOTE_TRACKERR and NOTE_CHILD each returned ENOTSUP. An exit-status subscription on that child succeeded, and its event agreed with waitpid on exit 7. The child was reaped naturally and a separate check found the process group gone. This rules out the tested kqueue registration path as a source of recursive child identity on this kernel. [Source, raw native receipts, and cleanup — raw archive withdrawn](../../../tests/evidence/README.md#withdrawn-private-evidence)
 
 ## Teardown requirements
 
