@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "one-pair instrumented correctness, custody and clock feasibility diagnostic; no product performance acceptance",
+  "current_product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "diagnostic_source_sha256": "044914e60c762bd5135b551e2d14a83c281df154ad785e3123c0393c5ad4a9e7",
+  "independent_source_review_sha256": "4152b3dcf569a1d677b643eac7247612a809e7e0e08f76b0afd870f6c742ea94",
+  "root_actual_audit_sha256": "f05fc8b7008be75d08445a613424e25ee3b4364c3f36fa1dea90fd1a1f13c954",
+  "raw_receipt_sha256": "163948e2c5fb4c85b5e7f76025be7c370e4dd0f36fd9018b9fa11b40f185260c",
+  "build_evidence": "windows-phase-profile-build-20261116-summary.json",
+  "protocol": {
+    "planned_pairs": 1,
+    "completed_pairs": 1,
+    "completed_slots": 2,
+    "order": [
+      "current",
+      "reference"
+    ],
+    "payload": "fixed pinned testkit: write PID marker then hold for 0.05 seconds",
+    "product_deadline_seconds": 2,
+    "slot_deadline_seconds": 3,
+    "guardian_deadline_seconds": 55,
+    "backup_deadline_seconds": 60,
+    "outer_whole_tree_deadline_seconds": 60,
+    "previous_executions_of_each_profiled_image_in_this_diagnostic_sequence": 0,
+    "automatic_retries": 0,
+    "os_cache_state_controlled": false,
+    "source_and_executable_bytes_pinned": true,
+    "ambient_and_sanitized_environment_five_trace_profile_keys_rejected_before_guardian": true,
+    "profile_nonce_inherited_by_fixed_payload": true
+  },
+  "validation": {
+    "original_tool_exit_code": 0,
+    "errors": 0,
+    "source_roles_rehashed": 35,
+    "held_distinct_roles": 41,
+    "held_before_after_reopened_identity_records": 123,
+    "lossless_original_pid_creation_filetime_matches": true,
+    "complete_raw_stdin_stdout_stderr_validated": true,
+    "exactly_one_bounded_ascii_lf_profile_line_per_slot": true,
+    "profile_line_bytes_each": 387,
+    "original_payload_identified_live_before_completion": true,
+    "first_original_payload_poll_terminal_before_assistance": true,
+    "original_guard_and_payload_native_exit_zero": true,
+    "job_empty_before_and_after_cleanup": true,
+    "watchdog_or_trusted_cleanup_assistance": false,
+    "raw_finals_and_first_poll_sidecars_match_receipt": true,
+    "role_specific_stamp_masks_and_native_api_success_flags_valid": true,
+    "direct_parent_subject_qpc_frequency_and_chronology_valid": true,
+    "both_seven_endpoint_partitions_complete": true,
+    "private_full_inventory_at_root_audit_cutoff": {
+      "files": 41,
+      "bytes": 205316,
+      "sha256": "db287b12bd6230711901acca727e34f3a08c9cddf2d1535dbb870344875dd8b1"
+    }
+  },
+  "slot_meanings": {
+    "s0": "Current: physical admission after checked CLI hardening. Reference: physical admission after early best-effort hardening.",
+    "s1": "Reference checked admission only; absent for current.",
+    "s2": "Before guarded payload CreateProcessW.",
+    "s3": "After checked guarded payload CreateProcessW; current follows assignment bookkeeping.",
+    "s4": "Current after ResumeThread only; reference payload starts runnable and this stamp is absent.",
+    "s5": "First postlaunch native wait invocation: current timed wait, reference zero-time poll.",
+    "s6": "Selected outcome.",
+    "s7": "Cleanup complete before the optional profile diagnostics writer."
+  },
+  "observations": [
+    {
+      "arm": "current",
+      "elapsed_ns": 327577300,
+      "parent_guard_create_ns_floor": 218223400,
+      "whole_original_payload_observer_ns_floor": 59431400,
+      "qpc_frequency": 10000000,
+      "phase_intervals": [
+        {
+          "from": 0,
+          "to": 2,
+          "qpc_ticks": 2598,
+          "nanoseconds_floor": 259800,
+          "whole_guard_process_cycles": 470657
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "qpc_ticks": 100384,
+          "nanoseconds_floor": 10038400,
+          "whole_guard_process_cycles": 10899358
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "qpc_ticks": 483,
+          "nanoseconds_floor": 48300,
+          "whole_guard_process_cycles": 76646
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "qpc_ticks": 272,
+          "nanoseconds_floor": 27200,
+          "whole_guard_process_cycles": 57485
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "qpc_ticks": 659852,
+          "nanoseconds_floor": 65985200,
+          "whole_guard_process_cycles": 174250
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "qpc_ticks": 34429,
+          "nanoseconds_floor": 3442900,
+          "whole_guard_process_cycles": 3216154
+        }
+      ]
+    },
+    {
+      "arm": "reference",
+      "elapsed_ns": 194368800,
+      "parent_guard_create_ns_floor": 88591100,
+      "whole_original_payload_observer_ns_floor": 57414200,
+      "qpc_frequency": 10000000,
+      "phase_intervals": [
+        {
+          "from": 0,
+          "to": 1,
+          "qpc_ticks": 1039,
+          "nanoseconds_floor": 103900,
+          "whole_guard_process_cycles": 173253
+        },
+        {
+          "from": 1,
+          "to": 2,
+          "qpc_ticks": 1593,
+          "nanoseconds_floor": 159300,
+          "whole_guard_process_cycles": 270458
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "qpc_ticks": 91387,
+          "nanoseconds_floor": 9138700,
+          "whole_guard_process_cycles": 11359437
+        },
+        {
+          "from": 3,
+          "to": 5,
+          "qpc_ticks": 418,
+          "nanoseconds_floor": 41800,
+          "whole_guard_process_cycles": 60479
+        },
+        {
+          "from": 5,
+          "to": 6,
+          "qpc_ticks": 628221,
+          "nanoseconds_floor": 62822100,
+          "whole_guard_process_cycles": 129739
+        },
+        {
+          "from": 6,
+          "to": 7,
+          "qpc_ticks": 31738,
+          "nanoseconds_floor": 3173800,
+          "whole_guard_process_cycles": 3031726
+        }
+      ]
+    }
+  ],
+  "qualification": {
+    "instrumented_normal_fixture_cases_passed": 2,
+    "comprehensive_correctness_battery_completed": false,
+    "primary_qualifying_competitive_measurements": 0,
+    "canonical_product_source_changed": false,
+    "canonical_product_security_contract_changed": false,
+    "canonical_speed_acceptance_proven": false,
+    "limitations": [
+      "A single fixed-order pair qualifies this diagnostic's custody/output path; it cannot establish product speed, parity, equivalence, a ranking or the original slowdown's cause.",
+      "The first recorded execution of each instrumented image is not a controlled cold-cache experiment. The parent launch bracket dominates much of this pair's elapsed difference; repeated data and controlled factors are still needed for diagnosis.",
+      "Instrumentation changes imports, code layout and output, starting an optional bounded writer after the final internal stamp. Outer elapsed includes that writer. Stock-to-profile subtraction is not a valid product speedup claim.",
+      "Physical-admission call sites and first-wait semantics differ between source versions. Intervals are labelled by source position rather than treated as identical operations.",
+      "Cycle deltas cover the whole guard process and are not exclusive CPU attribution to a function, API, payload or loader. Parent observer brackets cover the whole original callback, including polling, marker acquisition, identity checks and scheduling.",
+      "QPC ticks and integer-derived nanoseconds are representations, not a precision or synchronization calibration claim. No Python raw-clock-axis splice was used.",
+      "Only the normal 50 ms fixture case ran here. Deadline expiry, owner loss, escapes and console behavior are not newly qualified by this pair.",
+      "Rejected unrun drafts and a Root metadata-reader failure before authorization remain preserved; no failed or incomplete SUT attempt was omitted.",
+      "Original raw evidence remains private. Sanitized summaries and hashes are not the completed public reproducibility package."
+    ]
+  }
+}
