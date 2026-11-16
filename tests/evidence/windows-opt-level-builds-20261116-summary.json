@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "Four successful private compiler-profile builds and static PE qualification; no runtime or speed acceptance",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "question": "Compiler-policy sensitivity of current and exact Windows-repaired archived reference at release opt-level3 versus s.",
+  "method": {
+    "factorial_cells": 4,
+    "source_endpoints": 2,
+    "profile_levels": [
+      "3",
+      "s"
+    ],
+    "fresh_sequential_builds": 4,
+    "same_common_source_and_target_paths": true,
+    "source_changes_within_endpoint": false,
+    "changed_profile_environment_field": "CARGO_PROFILE_RELEASE_OPT_LEVEL",
+    "current_cargo_features": "all-features; selected main only",
+    "reference_cargo_features": "none declared",
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "llvm": "22.1.8",
+    "target": "x86_64-pc-windows-msvc",
+    "msvc": "14.51.36231",
+    "sdk": "10.0.28000.0",
+    "unchanged_profile": {
+      "lto": "fat",
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "symbols"
+    },
+    "jobs": 2,
+    "incremental": false,
+    "offline_locked": true,
+    "warnings_denied": true,
+    "per_arm_build_whole_tree_deadline_seconds": 600,
+    "per_arm_preservation_whole_tree_deadline_seconds": 300,
+    "full_source_target_logs_archived_before_path_reuse": true,
+    "build_retries": 0,
+    "product_invocations": 0
+  },
+  "evidence_sha256": {
+    "frozen_source_manifest": "d3bd8db6d230a466e4d9b0aeaa8092277fac43862b1b1efb32b7de4a321f8498",
+    "freeze": "653249cb32fd152190bc947a4fb6cdbdb143bb4f9652145825e88e02e4af525a",
+    "plan": "7db5a7e460134437ddda286a7cd8cfa9cf6e64d0cc0081d62c85cc39213d74b1",
+    "native_static_gate": "bf4be4213dd96dc81927d53bebf827433b09a6687f5aa2be423aafebe5ab6ed0",
+    "native_original_tool": "15ce80d4845b35c1201aefbffb770dac97a7e67367544f382cdf16f5b2f28f24",
+    "independent_source": "3861f502b90daffe12bef2c77b1d35d3233eae505db2c51bdf23e103b8e96a2b",
+    "independent_four_archive_PE_audit": "e0f449ace27d09aa1c5a2a38e7f0ad6eaa417148ee49e73fe4a5c73a98d20a0b",
+    "source_manifests": {
+      "current": "3a170f2e6467ff95db6747d221aa3dc30bd65174148aeef6c600b803d32d0631",
+      "reference": "98062eb4d9dbd28f54b43bca12efd9edf907b306f77f6b164e2e169e3e7ad675"
+    }
+  },
+  "validation": {
+    "canonical_compiled_source_files_matched": 102,
+    "root_build_inputs_matched": [
+      "Cargo.toml",
+      "Cargo.lock",
+      "build.rs"
+    ],
+    "selected_tool_hashes_checked": 4,
+    "carrier_files_checked": 24,
+    "encoded_invocations_checked": 8,
+    "all_original_build_terminals_zero": true,
+    "all_original_preservation_terminals_zero": true,
+    "current_import_multiset_each": "11 DLLs / 175 symbols",
+    "reference_import_multiset_each": "10 DLLs / 127 symbols",
+    "import_order_layout_equal": false,
+    "current_RT_VERSION_payload_bytes": 648,
+    "current_RT_VERSION_payload_equal_across_levels": true,
+    "architecture_subsystem_DLL_flags_equal_across_levels": true,
+    "fresh_opt3_controls_vs_prior_stock": "Each differs at24 file-byte positions confined to timestamp/debug identity fields; non-debug code/section content and imports match."
+  },
+  "arms": [
+    {
+      "arm": "current-o3",
+      "source_endpoint": "current",
+      "opt_level": "3",
+      "archived_source_files": 943,
+      "archive_files": 991,
+      "archive_bytes": 33582849,
+      "build_native_exit": 0,
+      "effective_selected_rustc_commands": 2,
+      "postbuild_report_sha256": "7d210a58d65602813ae48dd0066b86088506465a5133f44384503af15befd96a",
+      "pe": {
+        "bytes": 820736,
+        "sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d",
+        "machine": "x64",
+        "subsystem": 3,
+        "dll_characteristics": 33120,
+        "image_base": "5368709120",
+        "size_image": 835584,
+        "stack_reserve": "1048576",
+        "heap_reserve": "1048576",
+        "sections": [
+          {
+            "name": ".text",
+            "virtual_bytes": 699246,
+            "raw_bytes": 699392,
+            "sha256": "3fb0303ae9a897d60d206b9f0270983a67e7e38b993403265f3fa52c1ec32101"
+          },
+          {
+            "name": ".rdata",
+            "virtual_bytes": 105056,
+            "raw_bytes": 105472,
+            "sha256": "711b05af3880f80e5c2dd55e442b9bcedf579f9fbde39772f46ac149e1191e74"
+          },
+          {
+            "name": ".data",
+            "virtual_bytes": 1360,
+            "raw_bytes": 1024,
+            "sha256": "6651d280cde30ce58c859c9deae02011ebd0f0e28d784a801402153d974361ff"
+          },
+          {
+            "name": ".pdata",
+            "virtual_bytes": 10956,
+            "raw_bytes": 11264,
+            "sha256": "96417d883700288e4a02d3476f333155bb95c39bdb1bc1ea433dd50b3282ac1f"
+          },
+          {
+            "name": ".rsrc",
+            "virtual_bytes": 744,
+            "raw_bytes": 1024,
+            "sha256": "dd25e1d19fa81d3a2288bafdc804288581eaa7275522ae2567ac22745247d2b2"
+          },
+          {
+            "name": ".reloc",
+            "virtual_bytes": 1408,
+            "raw_bytes": 1536,
+            "sha256": "7dff7782aa8625710b81008c153373c9e19bfb09e0ce240d84dc6c136d21bd64"
+          }
+        ]
+      }
+    },
+    {
+      "arm": "reference-o3",
+      "source_endpoint": "reference",
+      "opt_level": "3",
+      "archived_source_files": 14,
+      "archive_files": 35,
+      "archive_bytes": 3466779,
+      "build_native_exit": 0,
+      "effective_selected_rustc_commands": 1,
+      "postbuild_report_sha256": "3e47900b520e1e319c8634e8e54d43b88d46b02e97aa68b9cde6aadf574bfe83",
+      "pe": {
+        "bytes": 371712,
+        "sha256": "cbfd2c164ed3fc228a1ccfaba09eef8825efb5857bb0a32ab4f78c9817c9de78",
+        "machine": "x64",
+        "subsystem": 3,
+        "dll_characteristics": 33120,
+        "image_base": "5368709120",
+        "size_image": 385024,
+        "stack_reserve": "1048576",
+        "heap_reserve": "1048576",
+        "sections": [
+          {
+            "name": ".text",
+            "virtual_bytes": 290750,
+            "raw_bytes": 290816,
+            "sha256": "bf7460e5ebdd067d02e1f88bf1db703c31210afae28b9deac3eace2a7fc8f978"
+          },
+          {
+            "name": ".rdata",
+            "virtual_bytes": 70250,
+            "raw_bytes": 70656,
+            "sha256": "6e9963e63de83aa784fb983dec4c030e7b0bac7a8510a4478f2488a9563aaa31"
+          },
+          {
+            "name": ".data",
+            "virtual_bytes": 1648,
+            "raw_bytes": 1536,
+            "sha256": "3a61a01bae99248a487799f33a2cf24ab30355977f396664ea041737e43bf743"
+          },
+          {
+            "name": ".pdata",
+            "virtual_bytes": 6564,
+            "raw_bytes": 6656,
+            "sha256": "c7d6e922996788ab965705023479d6628d9b80a5c806678062bde080a5eef20e"
+          },
+          {
+            "name": ".reloc",
+            "virtual_bytes": 956,
+            "raw_bytes": 1024,
+            "sha256": "6621ffcaef6f201d8c0d52f34f8285c5c00ce8ae919513dcd5461279248f4041"
+          }
+        ]
+      }
+    },
+    {
+      "arm": "current-os",
+      "source_endpoint": "current",
+      "opt_level": "s",
+      "archived_source_files": 943,
+      "archive_files": 991,
+      "archive_bytes": 35143018,
+      "build_native_exit": 0,
+      "effective_selected_rustc_commands": 2,
+      "postbuild_report_sha256": "232e6be78046443c47cf211356757df4138a9cf32ce418da1a50aa18c4f36bf4",
+      "pe": {
+        "bytes": 645120,
+        "sha256": "dac1fbfdc4d99b2c6e6c7ca2b5ef7dfe53a3c0a31b1c39ddfde8e7063531710e",
+        "machine": "x64",
+        "subsystem": 3,
+        "dll_characteristics": 33120,
+        "image_base": "5368709120",
+        "size_image": 663552,
+        "stack_reserve": "1048576",
+        "heap_reserve": "1048576",
+        "sections": [
+          {
+            "name": ".text",
+            "virtual_bytes": 527230,
+            "raw_bytes": 527360,
+            "sha256": "2be61bbdc10f81c8dc051896f0f927fca767e00e6d5f12746535d0519ac51739"
+          },
+          {
+            "name": ".rdata",
+            "virtual_bytes": 99984,
+            "raw_bytes": 100352,
+            "sha256": "ab752b33214d9557f9d503744f726122670ab95dd82e85fdfae8a870a2d24d20"
+          },
+          {
+            "name": ".data",
+            "virtual_bytes": 1360,
+            "raw_bytes": 1024,
+            "sha256": "c6ad7d386f45e875102e03c334a69f6b83bb214fe9addee31daf2431ff6ecae5"
+          },
+          {
+            "name": ".pdata",
+            "virtual_bytes": 12792,
+            "raw_bytes": 12800,
+            "sha256": "dc8f8d21c2341f7605597e2966038e16b979aafd6dd11cc86fe6ae5e0028bdff"
+          },
+          {
+            "name": ".rsrc",
+            "virtual_bytes": 744,
+            "raw_bytes": 1024,
+            "sha256": "b27007441f9e6db32da29be5291544193597336d6520696d4f9588cb5cd0b8b2"
+          },
+          {
+            "name": ".reloc",
+            "virtual_bytes": 1520,
+            "raw_bytes": 1536,
+            "sha256": "f6baa400f5849809454589c9ba9b5a913bec793017103ce947ccfc6f8d607f1d"
+          }
+        ]
+      }
+    },
+    {
+      "arm": "reference-os",
+      "source_endpoint": "reference",
+      "opt_level": "s",
+      "archived_source_files": 14,
+      "archive_files": 35,
+      "archive_bytes": 3312155,
+      "build_native_exit": 0,
+      "effective_selected_rustc_commands": 1,
+      "postbuild_report_sha256": "0611040b6ea43729c190feaee59ea8b1e638ee78371441b6695d2e8dbcca5a49",
+      "pe": {
+        "bytes": 302592,
+        "sha256": "c24e8c61606a79ba420d9d9e16cf61be9aa0661d4199dbefd238abd47897db03",
+        "machine": "x64",
+        "subsystem": 3,
+        "dll_characteristics": 33120,
+        "image_base": "5368709120",
+        "size_image": 315392,
+        "stack_reserve": "1048576",
+        "heap_reserve": "1048576",
+        "sections": [
+          {
+            "name": ".text",
+            "virtual_bytes": 225102,
+            "raw_bytes": 225280,
+            "sha256": "a3d197ab3bc2650f48e252bac3829c2fc4698c2c4b31052c1c8ac22afe6f5684"
+          },
+          {
+            "name": ".rdata",
+            "virtual_bytes": 66194,
+            "raw_bytes": 66560,
+            "sha256": "b32705bb39db2971a426cafdcb2506e613d5072d406f0a2aad2bf7bebef0efdb"
+          },
+          {
+            "name": ".data",
+            "virtual_bytes": 1648,
+            "raw_bytes": 1536,
+            "sha256": "fb4a3cd693dd9bfebcc6d9f9902eed7f03e93907ae3cb0c652b7e6acd7a7d260"
+          },
+          {
+            "name": ".pdata",
+            "virtual_bytes": 6996,
+            "raw_bytes": 7168,
+            "sha256": "50aa18ca5b5a2b68e676bdd4c4272bf841b84e792d4aa68141c469bc416e2b8d"
+          },
+          {
+            "name": ".reloc",
+            "virtual_bytes": 988,
+            "raw_bytes": 1024,
+            "sha256": "55b1a90e700f863852c995ec602ba390bd27b0301939c976dc71287c159ce1fd"
+          }
+        ]
+      }
+    }
+  ],
+  "static_size_change_bytes": {
+    "current": -175616,
+    "reference": -69120
+  },
+  "canonical_release_opt_level": "3 (unchanged)",
+  "limits": [
+    "Changing opt-level affects broad compiler code generation, layout and inlining; this does not isolate image-size, import, loader or CPU cost.",
+    "File size is not latency. No guard/payload was invoked and these private opt=s images have not yet passed runtime correctness or performance qualification.",
+    "Reference source is the preserved Windows-repaired endpoint, not its broken original. Known broader reference-qualification failures remain unresolved; no general eligible-baseline claim.",
+    "Complete tool/stdlib/CRT/OS closure is not independently reproduced; selected pinned tools, settings and source/target/log evidence are recorded.",
+    "No source/default/guarantee change, performance ranking, parity, speed improvement or optimization promotion follows.",
+    "Exact machine paths and raw build records remain private; this summary is not the complete public reproducibility package."
+  ],
+  "primary_qualifying_performance_measurements": 0,
+  "compiler_profile_documentation": [
+    "https://doc.rust-lang.org/cargo/reference/profiles.html#opt-level",
+    "https://doc.rust-lang.org/rustc/codegen-options/index.html#opt-level"
+  ]
+}
