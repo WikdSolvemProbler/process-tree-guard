@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "summary_only": true,
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "case": "protected-policy refusal of an ungranted ordinary caller",
+  "environment": {
+    "os": "Linux",
+    "architecture": "aarch64"
+  },
+  "fixture_contract": {
+    "caller_uid": 501,
+    "protected_policy": "PTG-DELEGATION-1\ncontext separate-service\nuid 502\n",
+    "product_deadline_seconds": 10,
+    "expected_refusal_before_payload_provision": true
+  },
+  "observed": {
+    "client_native_exit": 125,
+    "client_stdout_bytes": 0,
+    "client_stderr": "process-tree-guard: root bootstrap: no administrator separate-service grant for authenticated UID\n",
+    "retained_client_pidfd_terminal_poll": true,
+    "guest_fixture_sentinel_absence_check_passed": true,
+    "manager_samples": 1,
+    "first_manager_sample": {
+      "active_state": "failed",
+      "sub_state": "failed",
+      "exec_main_status": 125,
+      "main_pid": 0,
+      "control_pid": 0,
+      "control_group": ""
+    },
+    "active_to_failed_transition_observed": false,
+    "precleanup_socket": {
+      "active": true,
+      "connections": 0
+    },
+    "prior_natural_exit_scope_inactive_dead": true,
+    "prior_natural_exit_scope_cgroup_path_absent": true,
+    "six_product_paths_absent_before_setup": true,
+    "normal_cleanup": {
+      "removed_owned_paths": 7,
+      "errors": 0,
+      "fallback_timer_fired": false,
+      "timer_canceled_after_cleanup": true,
+      "effective_oneshot_timeout_start_seconds": 40,
+      "retained_product_paths": 0
+    }
+  },
+  "evidence": {
+    "raw_bundle_sha256": "e5ed39be195a16731e0ddc1a4785ac58e5d407ba49d13fbd6268eff3e30c539d",
+    "raw_transport_result_sha256": "34f5744acc4bf4d4cb696faad466d80fa7fbf8aa93aa87c5c1a53e3ada18675c",
+    "root_audit_sha256": "3475a0ace8bf470a43a525ee0b5e948fd401685d0de8b508d3ef4f1858cd7b58",
+    "independent_raw_audit_sha256": "ec076f19b3229e29c1de4ea5d2563d42182e8e30acc08f47f84d378fb6a44046",
+    "independent_custody_audit_sha256": "a888a1409b0088ad96cd25ee0c5cd54564f10066377a3e78c8f1ae1bc575356d",
+    "independent_full_inventory_audit_sha256": "7d06e3ad96bb45dd1c1fd70430c726bf50e34198be7097fc8fd6138b75f66878",
+    "source_tool_product_prior_bindings_rehashed": 35,
+    "embedded_package_members_rehashed": 7,
+    "nested_raw_capture_records_rehashed": 30,
+    "preserved_cutoff_files": 33,
+    "preserved_cutoff_bytes": 1644029
+  },
+  "preserved_unrun_attempts": [
+    "First draft declared60s while client argv used10s; superseded without execution.",
+    "Second draft assumed the root service had exited when the client received refusal; superseded without execution. The actual fixture preserves its first manager sample and permits a separate bounded unassisted settlement poll."
+  ],
+  "limits": [
+    "One policy-denial case, not full Linux qualification or performance.",
+    "Caller UID501 is supported by fixture source and authenticated service-name derivation; UID502 policy bytes are the pinned package and installation source. No separate raw peer-credential or post-install policy-file readback frame exists.",
+    "The sentinel check is a guest fixture assertion without its own lstat frame. No-READY, private-listener and payload-provisioning conclusions are source inferred from the exact bootstrap refusal path.",
+    "The first manager sample was already failed125, so the service transition and repeated settlement were not exercised. Empty ControlGroup is not a retained original-domain emptiness proof.",
+    "This preflight independently completed the prior natural-exit scope-retirement check; the current fixture user-scope retirement remains a next-preflight check.",
+    "Credential/CORE transitions, policy changes and revocation, arming faults, full escapes, transparent caller context, platform floor, packaging and performance remain open. Linux default dispatch remains disabled.",
+    "Exact environment and transport records remain private. This summary and hashes do not replace independently accessible raw evidence."
+  ]
+}

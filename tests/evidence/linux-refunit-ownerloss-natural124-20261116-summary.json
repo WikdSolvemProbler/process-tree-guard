@@ -60,15 +60,20 @@
       "preserved_files": 27,
       "preserved_bytes": 1937687,
       "nested_raw_records_rehashed": 37,
-      "source_product_tool_postpins": 29
+      "source_product_tool_postpins": 29,
+      "later_independent_scope_and_asset_absence_preflight": {
+        "case": "protected-policy denial",
+        "raw_transport_result_sha256": "34f5744acc4bf4d4cb696faad466d80fa7fbf8aa93aa87c5c1a53e3ada18675c",
+        "raw_bundle_sha256": "e5ed39be195a16731e0ddc1a4785ac58e5d407ba49d13fbd6268eff3e30c539d"
+      }
     }
   ],
   "limits": [
     "Two fixed separate-service cases, not full Linux qualification.",
     "Signal calls, the natural primary-child exit status and internal product joins rely on pinned source together with external kernel and manager records; internal result frames were not exported.",
     "Timings include the acknowledged test fixture and are descriptive, not qualified competitive measurements.",
-    "Final natural-exit test scope and postcall product absence remain a separate next-preflight check.",
-    "Credential/CORE transitions, policy changes/refusals, arming faults, the escape matrix, transparent caller context, platform floor, packaging and performance remain open.",
+    "A later protected-policy denial preflight observed the natural-exit scope inactive/dead, its configured cgroup path absent and all six product asset paths absent before setup.",
+    "Credential/CORE transitions, other policy refusal, change and revocation cases, arming faults, the escape matrix, transparent caller context, platform floor, packaging and performance remain open.",
     "Linux default dispatch remains disabled.",
     "Exact originals remain local under the publication privacy policy; this summary and hashes do not replace publicly accessible raw evidence."
   ]
