@@ -928,5 +928,42 @@
     "interpretation": "Traced overall difference is order-sensitive. The positive untraced pre-handle-open component does not recur consistently under trace; this does not erase the prior untraced residual or establish a cause, zero effect, equivalence or ranking.",
     "clock_join_limits": "Fields labelled inferred join CPython perf_counter_ns to source V1 QPC using CPython3.12 implementation and the Windows same-system QPC contract. The installed Python exact source-build provenance and simultaneous calibration remain unproven; no offset is fitted. These joins are source-grounded inference, not primary evidence.",
     "next": "A product repair needs a low-perturbation method that can reproduce and localize the untraced excess; this sample supports no speculative optimization."
+  },
+  "launch_order_context": {
+    "audits": [
+      {
+        "sample": "untraced",
+        "raw_sha256": "cee2493b51f5abcb8c533b6ccd7a30ea2361418594a5944ed63d59755da335ee",
+        "sequence": "CRRCCRRCCRRCCRRCCRRCCRRCCRRCCRRCCRRCCRRC",
+        "cells": {
+          "current_first_outside_capture": 1,
+          "reference_second_switch": 10,
+          "reference_first_repeat": 10,
+          "current_second_switch": 10,
+          "current_first_repeat": 9
+        }
+      },
+      {
+        "sample": "traced",
+        "raw_sha256": "bfd4ed65913c74dae07a962c7ce18b20eb626db506d2d6a5571e8a3768717ff4",
+        "sequence": "CRRCCRRCCRRCCRRCCRRCCRRCCRRCCRRCCRRCCRRC",
+        "cells": {
+          "current_first_outside_capture": 1,
+          "reference_second_switch": 10,
+          "reference_first_repeat": 10,
+          "current_second_switch": 10,
+          "current_first_repeat": 9
+        }
+      }
+    ],
+    "definition": "Repeat/switch refers only to the preceding selected guard image within these captured slots; it is not a measured cache state. The first slot prior context is outside each capture.",
+    "finding": "Each image appears ten times first and ten times second, but after the first pair first position always repeats the previous selected image and second always switches. Position and immediate repeat context cannot be separated in these records.",
+    "estimand_limits": "Recorded paired medians remain descriptions of this fixed schedule. Missing image-by-position-by-prior-context cells prevent testing image-specific carryover and time interactions, so the schedule does not isolate intrinsic or cold/warm image speed.",
+    "additive_model_note": "Under an assumed stable additive model with common position and repeat effects for both images, balanced CR/RC pair orders cancel those terms in the arithmetic mean apart from the initial slot. The missing cells do not test that assumption; medians have no corresponding cancellation guarantee.",
+    "cause": "No cache, antivirus, scheduler or other carryover mechanism is established.",
+    "independent_audits_sha256": [
+      "c579cb333b72e2c815b8b81e49cc4d489ec3f6cf3ea5b8e99b45b2c6f2269e78",
+      "2f657d1eee460585c74fce7659771de66928cb1e15a37d9fa0d353987e3010a5"
+    ]
   }
 }
