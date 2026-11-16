@@ -1,0 +1,1008 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "completed private profiled phase and native marker-reader diagnostic; zero primary performance acceptance measurements",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "purpose": "Report one precommitted fixed 20-pair normal-case phase diagnostic after qualifying a native share-DELETE marker observer.",
+  "evidence_sha256": {
+    "diagnostic_source": "fd388e7953e6c58e04d0da72eea5843380b477f53cf3d5dc748e58320a198a5f",
+    "source_manifest": "68d83d657f66f09c6a41bb928ccc0d746b3b736244a4800a8b3a9171c14dc274",
+    "plan": "5a7512deba9d54447d42accf909e6abb6adda4e5314339bd1c8e55ec7468c302",
+    "canonical_observer": "d4982594d8789e3027156d1a0bff458568177e414c606f09b7101c8bb5de219f",
+    "canonical_observer_regression": "2690c5ce3cb1761eaaedda6acbe380df7d9619fdab016343ccdbb16d787076f4",
+    "profiled_current_executable": "396dbc37f9bffe80af57991b05ce802d2c82de7e2c3401b3a841f9b5f0025da7",
+    "profiled_reference_executable": "8d19a77dd4e12c903eb79a36427249a7d49c53503ed5dfbbb8c7ff61730a7e5e",
+    "fixture_executable": "bdac8b60e109bafdfb2c6507010605ece5e849845153d9c61bb9714af67f6ef0",
+    "raw_receipt": "e1c54a9e8c97ef8b393b2a0342a0c6eaef6b4151b30315fa2f1c337562066171",
+    "root_actual_audit": "e003b0c543f0e40bc960abed41d2a9ec77e81daf68a50ff429f8933e748cbe32",
+    "independent_actual_audits": [
+      "8c573d82ac3d56e913c431d9c72982b0bc23e2a1d633674aba8b9187f1cb0593",
+      "cfc3f85c4a435c09ef6fc5042cdc119b53ebbffece91b705a85d37ddc06d80da"
+    ],
+    "root_descriptive_phases": "3f209030e5fc7acda25ec36a13fee3657e309c56521348ca9098cb074d95cebc",
+    "independent_15_metric_recomputation": "9d3c656eb7b6d40ba13401d56d57f9f2b67c6f3817ac06d78be8b6fd931798e5",
+    "postrun_contract_wording_qualification": "1c8aa9e9abd1d47ed4c2b6d284544b3156d46d081131836c83eefa8baf8e90c3"
+  },
+  "protocol": {
+    "planned_pairs": 20,
+    "order": "AABB repeated five times; A=current/reference, B=reference/current",
+    "completed_pairs": 20,
+    "completed_slots": 40,
+    "product_deadline_seconds": 2,
+    "slot_deadline_seconds": 3,
+    "guardian_deadline_seconds": 55,
+    "backup_deadline_seconds": 60,
+    "outer_whole_tree_deadline_seconds": 60,
+    "reserve_seconds": 11,
+    "automatic_retries": 0,
+    "profiled_image_exposures_before_sample": {
+      "current": 10,
+      "reference": 10
+    },
+    "prior_successful_one_pair_diagnostics_excluded": 2,
+    "prior_failed_fixed20_samples_preserved": [
+      {
+        "observer": "original",
+        "completed_slots": 0,
+        "completed_pairs": 0,
+        "cause_established": false
+      },
+      {
+        "observer": "derived Python open",
+        "completed_slots": 14,
+        "completed_pairs": 7,
+        "cause_established": false
+      }
+    ]
+  },
+  "validation": {
+    "original_tool_exit_code": 0,
+    "source_roles_rehashed": 67,
+    "held_distinct_roles": 73,
+    "held_before_after_reopened_identity_records": 219,
+    "full_inventory_files_rehashed": 301,
+    "full_inventory_bytes": 1310537,
+    "raw_final_and_first_poll_records_equal": 40,
+    "raw_profile_nonce_subject_identity_and_bounded_grammar_valid": 40,
+    "normal_first_poll_job_empty_natural_unassisted_cases": 40,
+    "complete_boundary_partitions": 40,
+    "marker_access_faults": 0,
+    "raw_io_and_same_machine_qpc_chronology_valid": true
+  },
+  "metrics": {
+    "direction": "current minus reference; positive means larger current value",
+    "time_unit": "nanoseconds",
+    "cycle_unit": "raw whole-process cycles; not elapsed time or exclusive CPU",
+    "definitions": {
+      "elapsed_ns": "Original parent Python perf_counter_ns measurement_end_ns immediately after the guarded root WaitForSingleObject returns, minus start_ns immediately before guard CreateProcessW. It includes parent launch, observer and scheduling, plus guard cleanup and any guard profile emission/writer before process termination. It excludes the parent after_wait callback and parent cleanup. It is not asserted equal to a direct native QPC interval.",
+      "parent_guard_create_ns": "Direct parent QPC bracket around the original CreateProcessW guard launch, before later ResumeThread; includes ctypes/parent/native work.",
+      "after_guard_create_to_payload_create_entry_ns": "Direct parent CreateProcess return through guard pre-child-create stamp; includes parent identity/resume, guard startup/admission and scheduling. Physical/checked stamps differ between arms, so this common outer boundary is used.",
+      "guarded_payload_create_ns": "s2→s3: checked payload creation; current suspended plus assignment bookkeeping, reference runnable. Not identical operations.",
+      "after_payload_create_to_first_wait_ns": "s3→s5: setup through invocation of the first native wait; current includes ResumeThread before invocation, while reference invokes an initial zero-timeout poll. The wait call itself lies in s5→s6.",
+      "first_wait_to_outcome_ns": "s5→s6: payload/work/wait and scheduling overlap; not exclusive guard CPU.",
+      "outcome_to_cleanup_done_ns": "s6→s7: outcome selection through cleanup before optional diagnostics writer.",
+      "parent_create_entry_to_cleanup_done_ns": "Exact native-QPC six-part bracket; not the original full outer elapsed endpoint.",
+      "whole_native_observer_ns": "Whole native-reader observer callback; overlaps other intervals and must not be added to them.",
+      "pre_payload_create_self_cycles": "Cumulative whole guard self cycles at s2, including startup and prior instrumentation; not exclusive CLI/function CPU.",
+      "self_cycles_at_cleanup": "Cumulative whole guard self cycles at s7, before optional profile writer. Raw cycles are not normalized time.",
+      "payload_create_self_cycles": "Whole-guard self-cycle delta s2→s3, not exclusive payload creation CPU.",
+      "after_payload_create_to_wait_self_cycles": "Whole-guard self-cycle delta s3→s5; current and reference paths differ.",
+      "wait_to_outcome_self_cycles": "Whole-guard self-cycle delta s5→s6; includes supervision and scheduling overlap.",
+      "outcome_to_cleanup_self_cycles": "Whole-guard self-cycle delta s6→s7 before optional profile writer."
+    },
+    "paired_relative_values": [
+      {
+        "pair": 0,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": 12647100,
+          "parent_guard_create_ns": 2184600,
+          "after_guard_create_to_payload_create_entry_ns": 6155300,
+          "guarded_payload_create_ns": 2569800,
+          "after_payload_create_to_first_wait_ns": 45700,
+          "first_wait_to_outcome_ns": 1002700,
+          "outcome_to_cleanup_done_ns": 655800,
+          "parent_create_entry_to_cleanup_done_ns": 12613900,
+          "whole_native_observer_ns": 11080900,
+          "pre_payload_create_self_cycles": 4649681,
+          "payload_create_self_cycles": 389818,
+          "after_payload_create_to_wait_self_cycles": 72455,
+          "wait_to_outcome_self_cycles": 33933,
+          "outcome_to_cleanup_self_cycles": 435528,
+          "self_cycles_at_cleanup": 5581415
+        }
+      },
+      {
+        "pair": 1,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": -27968900,
+          "parent_guard_create_ns": -3364800,
+          "after_guard_create_to_payload_create_entry_ns": 1222000,
+          "guarded_payload_create_ns": -542000,
+          "after_payload_create_to_first_wait_ns": 207500,
+          "first_wait_to_outcome_ns": -25411600,
+          "outcome_to_cleanup_done_ns": 212900,
+          "parent_create_entry_to_cleanup_done_ns": -27676000,
+          "whole_native_observer_ns": -1277500,
+          "pre_payload_create_self_cycles": -471452,
+          "payload_create_self_cycles": -1294006,
+          "after_payload_create_to_wait_self_cycles": 440318,
+          "wait_to_outcome_self_cycles": 18761,
+          "outcome_to_cleanup_self_cycles": 102996,
+          "self_cycles_at_cleanup": -1203383
+        }
+      },
+      {
+        "pair": 2,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": -35998900,
+          "parent_guard_create_ns": 2349100,
+          "after_guard_create_to_payload_create_entry_ns": -38894000,
+          "guarded_payload_create_ns": 793000,
+          "after_payload_create_to_first_wait_ns": 27400,
+          "first_wait_to_outcome_ns": -413800,
+          "outcome_to_cleanup_done_ns": -145200,
+          "parent_create_entry_to_cleanup_done_ns": -36283500,
+          "whole_native_observer_ns": -41354000,
+          "pre_payload_create_self_cycles": -93436755,
+          "payload_create_self_cycles": 1220357,
+          "after_payload_create_to_wait_self_cycles": 69861,
+          "wait_to_outcome_self_cycles": 7784,
+          "outcome_to_cleanup_self_cycles": 40917,
+          "self_cycles_at_cleanup": -92097836
+        }
+      },
+      {
+        "pair": 3,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": 4631900,
+          "parent_guard_create_ns": 408600,
+          "after_guard_create_to_payload_create_entry_ns": 2488600,
+          "guarded_payload_create_ns": 595100,
+          "after_payload_create_to_first_wait_ns": -22400,
+          "first_wait_to_outcome_ns": 772600,
+          "outcome_to_cleanup_done_ns": 37100,
+          "parent_create_entry_to_cleanup_done_ns": 4279600,
+          "whole_native_observer_ns": 3255000,
+          "pre_payload_create_self_cycles": 1587816,
+          "payload_create_self_cycles": -39125,
+          "after_payload_create_to_wait_self_cycles": 77246,
+          "wait_to_outcome_self_cycles": 34530,
+          "outcome_to_cleanup_self_cycles": 313570,
+          "self_cycles_at_cleanup": 1974037
+        }
+      },
+      {
+        "pair": 4,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": 12961300,
+          "parent_guard_create_ns": 2612600,
+          "after_guard_create_to_payload_create_entry_ns": 6220200,
+          "guarded_payload_create_ns": 1381800,
+          "after_payload_create_to_first_wait_ns": 40100,
+          "first_wait_to_outcome_ns": 1900400,
+          "outcome_to_cleanup_done_ns": 484300,
+          "parent_create_entry_to_cleanup_done_ns": 12639400,
+          "whole_native_observer_ns": 8313500,
+          "pre_payload_create_self_cycles": 2864459,
+          "payload_create_self_cycles": 914368,
+          "after_payload_create_to_wait_self_cycles": 78243,
+          "wait_to_outcome_self_cycles": 305987,
+          "outcome_to_cleanup_self_cycles": 412176,
+          "self_cycles_at_cleanup": 4575233
+        }
+      },
+      {
+        "pair": 5,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": -41682200,
+          "parent_guard_create_ns": -48654200,
+          "after_guard_create_to_payload_create_entry_ns": 5341200,
+          "guarded_payload_create_ns": 1504500,
+          "after_payload_create_to_first_wait_ns": 55300,
+          "first_wait_to_outcome_ns": 89000,
+          "outcome_to_cleanup_done_ns": 192700,
+          "parent_create_entry_to_cleanup_done_ns": -41471500,
+          "whole_native_observer_ns": 8130300,
+          "pre_payload_create_self_cycles": 3948284,
+          "payload_create_self_cycles": 1711372,
+          "after_payload_create_to_wait_self_cycles": 54890,
+          "wait_to_outcome_self_cycles": -30739,
+          "outcome_to_cleanup_self_cycles": 285828,
+          "self_cycles_at_cleanup": 5969635
+        }
+      },
+      {
+        "pair": 6,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": 111431500,
+          "parent_guard_create_ns": 103857300,
+          "after_guard_create_to_payload_create_entry_ns": 5027700,
+          "guarded_payload_create_ns": 1071000,
+          "after_payload_create_to_first_wait_ns": 26700,
+          "first_wait_to_outcome_ns": 446700,
+          "outcome_to_cleanup_done_ns": 1182900,
+          "parent_create_entry_to_cleanup_done_ns": 111612300,
+          "whole_native_observer_ns": 6974000,
+          "pre_payload_create_self_cycles": -1263266,
+          "payload_create_self_cycles": 1017762,
+          "after_payload_create_to_wait_self_cycles": 79040,
+          "wait_to_outcome_self_cycles": 9979,
+          "outcome_to_cleanup_self_cycles": 1148098,
+          "self_cycles_at_cleanup": 991613
+        }
+      },
+      {
+        "pair": 7,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": 88883700,
+          "parent_guard_create_ns": 51565300,
+          "after_guard_create_to_payload_create_entry_ns": 46205500,
+          "guarded_payload_create_ns": -3565800,
+          "after_payload_create_to_first_wait_ns": 42200,
+          "first_wait_to_outcome_ns": -5947800,
+          "outcome_to_cleanup_done_ns": 522900,
+          "parent_create_entry_to_cleanup_done_ns": 88822300,
+          "whole_native_observer_ns": 36616100,
+          "pre_payload_create_self_cycles": -11281790,
+          "payload_create_self_cycles": -5595987,
+          "after_payload_create_to_wait_self_cycles": 70259,
+          "wait_to_outcome_self_cycles": 16567,
+          "outcome_to_cleanup_self_cycles": 590614,
+          "self_cycles_at_cleanup": -16200337
+        }
+      },
+      {
+        "pair": 8,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": 46558900,
+          "parent_guard_create_ns": 1392800,
+          "after_guard_create_to_payload_create_entry_ns": 2256900,
+          "guarded_payload_create_ns": 50086300,
+          "after_payload_create_to_first_wait_ns": 41500,
+          "first_wait_to_outcome_ns": -929300,
+          "outcome_to_cleanup_done_ns": -6032100,
+          "parent_create_entry_to_cleanup_done_ns": 46816100,
+          "whole_native_observer_ns": 46689800,
+          "pre_payload_create_self_cycles": 984827,
+          "payload_create_self_cycles": 97812980,
+          "after_payload_create_to_wait_self_cycles": 101796,
+          "wait_to_outcome_self_cycles": 19361,
+          "outcome_to_cleanup_self_cycles": -592612,
+          "self_cycles_at_cleanup": 98326352
+        }
+      },
+      {
+        "pair": 9,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": 87014900,
+          "parent_guard_create_ns": 27937800,
+          "after_guard_create_to_payload_create_entry_ns": 5645200,
+          "guarded_payload_create_ns": 54569400,
+          "after_payload_create_to_first_wait_ns": 37800,
+          "first_wait_to_outcome_ns": -636400,
+          "outcome_to_cleanup_done_ns": -529400,
+          "parent_create_entry_to_cleanup_done_ns": 87024400,
+          "whole_native_observer_ns": 57389300,
+          "pre_payload_create_self_cycles": 3637310,
+          "payload_create_self_cycles": 108576812,
+          "after_payload_create_to_wait_self_cycles": 85030,
+          "wait_to_outcome_self_cycles": 2794,
+          "outcome_to_cleanup_self_cycles": -42316,
+          "self_cycles_at_cleanup": 112259630
+        }
+      },
+      {
+        "pair": 10,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": -56708700,
+          "parent_guard_create_ns": 2138400,
+          "after_guard_create_to_payload_create_entry_ns": -57966100,
+          "guarded_payload_create_ns": -2487700,
+          "after_payload_create_to_first_wait_ns": 28800,
+          "first_wait_to_outcome_ns": 1029500,
+          "outcome_to_cleanup_done_ns": 650200,
+          "parent_create_entry_to_cleanup_done_ns": -56606900,
+          "whole_native_observer_ns": -57311500,
+          "pre_payload_create_self_cycles": 2915954,
+          "payload_create_self_cycles": -1470853,
+          "after_payload_create_to_wait_self_cycles": 35528,
+          "wait_to_outcome_self_cycles": 16767,
+          "outcome_to_cleanup_self_cycles": 1114567,
+          "self_cycles_at_cleanup": 2611963
+        }
+      },
+      {
+        "pair": 11,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": 14181000,
+          "parent_guard_create_ns": 4249500,
+          "after_guard_create_to_payload_create_entry_ns": 4740400,
+          "guarded_payload_create_ns": 2039500,
+          "after_payload_create_to_first_wait_ns": 42500,
+          "first_wait_to_outcome_ns": 2872000,
+          "outcome_to_cleanup_done_ns": 229600,
+          "parent_create_entry_to_cleanup_done_ns": 14173500,
+          "whole_native_observer_ns": 11313100,
+          "pre_payload_create_self_cycles": 5019935,
+          "payload_create_self_cycles": 1103589,
+          "after_payload_create_to_wait_self_cycles": 66468,
+          "wait_to_outcome_self_cycles": 38923,
+          "outcome_to_cleanup_self_cycles": -153088,
+          "self_cycles_at_cleanup": 6075827
+        }
+      },
+      {
+        "pair": 12,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": 97742800,
+          "parent_guard_create_ns": 48570500,
+          "after_guard_create_to_payload_create_entry_ns": 49617800,
+          "guarded_payload_create_ns": -1728900,
+          "after_payload_create_to_first_wait_ns": 48800,
+          "first_wait_to_outcome_ns": 196200,
+          "outcome_to_cleanup_done_ns": 648400,
+          "parent_create_entry_to_cleanup_done_ns": 97352800,
+          "whole_native_observer_ns": 47680600,
+          "pre_payload_create_self_cycles": -2309573,
+          "payload_create_self_cycles": -2350688,
+          "after_payload_create_to_wait_self_cycles": 96007,
+          "wait_to_outcome_self_cycles": -598,
+          "outcome_to_cleanup_self_cycles": 921755,
+          "self_cycles_at_cleanup": -3643097
+        }
+      },
+      {
+        "pair": 13,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": -12183600,
+          "parent_guard_create_ns": -2088900,
+          "after_guard_create_to_payload_create_entry_ns": -8652100,
+          "guarded_payload_create_ns": -553800,
+          "after_payload_create_to_first_wait_ns": 38500,
+          "first_wait_to_outcome_ns": -541500,
+          "outcome_to_cleanup_done_ns": -29900,
+          "parent_create_entry_to_cleanup_done_ns": -11827700,
+          "whole_native_observer_ns": -9755800,
+          "pre_payload_create_self_cycles": 156887,
+          "payload_create_self_cycles": -438919,
+          "after_payload_create_to_wait_self_cycles": 63872,
+          "wait_to_outcome_self_cycles": -21756,
+          "outcome_to_cleanup_self_cycles": -63475,
+          "self_cycles_at_cleanup": -303391
+        }
+      },
+      {
+        "pair": 14,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": 13827600,
+          "parent_guard_create_ns": 2376000,
+          "after_guard_create_to_payload_create_entry_ns": 5920400,
+          "guarded_payload_create_ns": 2152400,
+          "after_payload_create_to_first_wait_ns": 30900,
+          "first_wait_to_outcome_ns": 3444900,
+          "outcome_to_cleanup_done_ns": -134000,
+          "parent_create_entry_to_cleanup_done_ns": 13790600,
+          "whole_native_observer_ns": 12166400,
+          "pre_payload_create_self_cycles": 6511550,
+          "payload_create_self_cycles": 1842907,
+          "after_payload_create_to_wait_self_cycles": 60080,
+          "wait_to_outcome_self_cycles": 11577,
+          "outcome_to_cleanup_self_cycles": 117764,
+          "self_cycles_at_cleanup": 8543878
+        }
+      },
+      {
+        "pair": 15,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": -45629200,
+          "parent_guard_create_ns": -48929900,
+          "after_guard_create_to_payload_create_entry_ns": 1487600,
+          "guarded_payload_create_ns": 1628200,
+          "after_payload_create_to_first_wait_ns": 32200,
+          "first_wait_to_outcome_ns": -255000,
+          "outcome_to_cleanup_done_ns": 30900,
+          "parent_create_entry_to_cleanup_done_ns": -46006000,
+          "whole_native_observer_ns": 2759500,
+          "pre_payload_create_self_cycles": -785626,
+          "payload_create_self_cycles": -1548300,
+          "after_payload_create_to_wait_self_cycles": 68662,
+          "wait_to_outcome_self_cycles": -22156,
+          "outcome_to_cleanup_self_cycles": -72249,
+          "self_cycles_at_cleanup": -2359669
+        }
+      },
+      {
+        "pair": 16,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": -2957700,
+          "parent_guard_create_ns": -364700,
+          "after_guard_create_to_payload_create_entry_ns": -1803300,
+          "guarded_payload_create_ns": 14900,
+          "after_payload_create_to_first_wait_ns": 18400,
+          "first_wait_to_outcome_ns": -778000,
+          "outcome_to_cleanup_done_ns": 3600,
+          "parent_create_entry_to_cleanup_done_ns": -2909100,
+          "whole_native_observer_ns": -2753700,
+          "pre_payload_create_self_cycles": 94205,
+          "payload_create_self_cycles": -1067661,
+          "after_payload_create_to_wait_self_cycles": 51697,
+          "wait_to_outcome_self_cycles": 40120,
+          "outcome_to_cleanup_self_cycles": 327748,
+          "self_cycles_at_cleanup": -553891
+        }
+      },
+      {
+        "pair": 17,
+        "order": "current-first",
+        "current_minus_reference": {
+          "elapsed_ns": -109059000,
+          "parent_guard_create_ns": 1647200,
+          "after_guard_create_to_payload_create_entry_ns": -111639700,
+          "guarded_payload_create_ns": 97200,
+          "after_payload_create_to_first_wait_ns": 42200,
+          "first_wait_to_outcome_ns": 361200,
+          "outcome_to_cleanup_done_ns": 131400,
+          "parent_create_entry_to_cleanup_done_ns": -109360500,
+          "whole_native_observer_ns": -110383400,
+          "pre_payload_create_self_cycles": 3660459,
+          "payload_create_self_cycles": 2498794,
+          "after_payload_create_to_wait_self_cycles": 76247,
+          "wait_to_outcome_self_cycles": -24152,
+          "outcome_to_cleanup_self_cycles": 348902,
+          "self_cycles_at_cleanup": 6560250
+        }
+      },
+      {
+        "pair": 18,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": 2737700,
+          "parent_guard_create_ns": 862600,
+          "after_guard_create_to_payload_create_entry_ns": -427900,
+          "guarded_payload_create_ns": -293400,
+          "after_payload_create_to_first_wait_ns": 29400,
+          "first_wait_to_outcome_ns": 1761400,
+          "outcome_to_cleanup_done_ns": 259500,
+          "parent_create_entry_to_cleanup_done_ns": 2191600,
+          "whole_native_observer_ns": 3217000,
+          "pre_payload_create_self_cycles": 997399,
+          "payload_create_self_cycles": -396207,
+          "after_payload_create_to_wait_self_cycles": 78842,
+          "wait_to_outcome_self_cycles": -28742,
+          "outcome_to_cleanup_self_cycles": 237921,
+          "self_cycles_at_cleanup": 889213
+        }
+      },
+      {
+        "pair": 19,
+        "order": "reference-first",
+        "current_minus_reference": {
+          "elapsed_ns": -103326900,
+          "parent_guard_create_ns": 2140000,
+          "after_guard_create_to_payload_create_entry_ns": -473400,
+          "guarded_payload_create_ns": -393700,
+          "after_payload_create_to_first_wait_ns": 40100,
+          "first_wait_to_outcome_ns": -106830000,
+          "outcome_to_cleanup_done_ns": 1369400,
+          "parent_create_entry_to_cleanup_done_ns": -104147600,
+          "whole_native_observer_ns": 316000,
+          "pre_payload_create_self_cycles": 1691611,
+          "payload_create_self_cycles": 316368,
+          "after_payload_create_to_wait_self_cycles": 75050,
+          "wait_to_outcome_self_cycles": 7384,
+          "outcome_to_cleanup_self_cycles": 1996795,
+          "self_cycles_at_cleanup": 4087208
+        }
+      }
+    ],
+    "aggregate_by_metric_and_order": {
+      "elapsed_ns": {
+        "all": {
+          "n": 20,
+          "median": 3684800,
+          "mean": 2855165,
+          "min": -109059000,
+          "max": 111431500,
+          "current_longer_or_more": 11,
+          "current_shorter_or_less": 9,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 4844700,
+          "mean": 6307360,
+          "min": -109059000,
+          "max": 97742800,
+          "current_longer_or_more": 5,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 3684800,
+          "mean": -597030,
+          "min": -103326900,
+          "max": 111431500,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        }
+      },
+      "parent_guard_create_ns": {
+        "all": {
+          "n": 20,
+          "median": 2139200,
+          "mean": 7544490,
+          "min": -48929900,
+          "max": 103857300,
+          "current_longer_or_more": 15,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 1520000,
+          "mean": 2987290,
+          "min": -48654200,
+          "max": 48570500,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 2244550,
+          "mean": 12101690,
+          "min": -48929900,
+          "max": 103857300,
+          "current_longer_or_more": 9,
+          "current_shorter_or_less": 1,
+          "exact_equal": 0
+        }
+      },
+      "after_guard_create_to_payload_create_entry_ns": {
+        "all": {
+          "n": 20,
+          "median": 2372750,
+          "mean": -3876385,
+          "min": -111639700,
+          "max": 49617800,
+          "current_longer_or_more": 13,
+          "current_shorter_or_less": 7,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 3799050,
+          "mean": -4563650,
+          "min": -111639700,
+          "max": 49617800,
+          "current_longer_or_more": 7,
+          "current_shorter_or_less": 3,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 1988100,
+          "mean": -3189120,
+          "min": -57966100,
+          "max": 46205500,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        }
+      },
+      "guarded_payload_create_ns": {
+        "all": {
+          "n": 20,
+          "median": 694050,
+          "mean": 5446890,
+          "min": -3565800,
+          "max": 54569400,
+          "current_longer_or_more": 13,
+          "current_shorter_or_less": 7,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 739500,
+          "mean": 10739920,
+          "min": -1728900,
+          "max": 54569400,
+          "current_longer_or_more": 7,
+          "current_shorter_or_less": 3,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 694050,
+          "mean": 153860,
+          "min": -3565800,
+          "max": 2152400,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        }
+      },
+      "after_payload_create_to_first_wait_ns": {
+        "all": {
+          "n": 20,
+          "median": 39300,
+          "mean": 42680,
+          "min": -22400,
+          "max": 207500,
+          "current_longer_or_more": 19,
+          "current_shorter_or_less": 1,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 41850,
+          "mean": 57580,
+          "min": 18400,
+          "max": 207500,
+          "current_longer_or_more": 10,
+          "current_shorter_or_less": 0,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 30150,
+          "mean": 27780,
+          "min": -22400,
+          "max": 42500,
+          "current_longer_or_more": 9,
+          "current_shorter_or_less": 1,
+          "exact_equal": 0
+        }
+      },
+      "first_wait_to_outcome_ns": {
+        "all": {
+          "n": 20,
+          "median": 142600,
+          "mean": -6393340,
+          "min": -106830000,
+          "max": 3444900,
+          "current_longer_or_more": 11,
+          "current_shorter_or_less": 9,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": -226250,
+          "mean": -2474730,
+          "min": -25411600,
+          "max": 1900400,
+          "current_longer_or_more": 5,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 609650,
+          "mean": -10311950,
+          "min": -106830000,
+          "max": 3444900,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        }
+      },
+      "outcome_to_cleanup_done_ns": {
+        "all": {
+          "n": 20,
+          "median": 202800,
+          "mean": -12950,
+          "min": -6032100,
+          "max": 1369400,
+          "current_longer_or_more": 15,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 162050,
+          "mean": -426230,
+          "min": -6032100,
+          "max": 655800,
+          "current_longer_or_more": 7,
+          "current_shorter_or_less": 3,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 244550,
+          "mean": 400330,
+          "min": -145200,
+          "max": 1369400,
+          "current_longer_or_more": 8,
+          "current_shorter_or_less": 2,
+          "exact_equal": 0
+        }
+      },
+      "parent_create_entry_to_cleanup_done_ns": {
+        "all": {
+          "n": 20,
+          "median": 3235600,
+          "mean": 2751385,
+          "min": -109360500,
+          "max": 111612300,
+          "current_longer_or_more": 11,
+          "current_shorter_or_less": 9,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 4852400,
+          "mean": 6320180,
+          "min": -109360500,
+          "max": 97352800,
+          "current_longer_or_more": 5,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 3235600,
+          "mean": -817410,
+          "min": -104147600,
+          "max": 111612300,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        }
+      },
+      "whole_native_observer_ns": {
+        "all": {
+          "n": 20,
+          "median": 5114500,
+          "mean": 1653280,
+          "min": -110383400,
+          "max": 57389300,
+          "current_longer_or_more": 14,
+          "current_shorter_or_less": 6,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 8221900,
+          "mean": 5511400,
+          "min": -110383400,
+          "max": 57389300,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 3236000,
+          "mean": -2204840,
+          "min": -57311500,
+          "max": 36616100,
+          "current_longer_or_more": 8,
+          "current_shorter_or_less": 2,
+          "exact_equal": 0
+        }
+      },
+      "pre_payload_create_self_cycles": {
+        "all": {
+          "n": 20,
+          "median": 1292607.5,
+          "mean": -3541404.25,
+          "min": -93436755,
+          "max": 6511550,
+          "current_longer_or_more": 14,
+          "current_shorter_or_less": 6,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 1924643,
+          "mean": 1721508.7,
+          "min": -2309573,
+          "max": 4649681,
+          "current_longer_or_more": 8,
+          "current_shorter_or_less": 2,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 1292607.5,
+          "mean": -8804317.2,
+          "min": -93436755,
+          "max": 6511550,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        }
+      },
+      "payload_create_self_cycles": {
+        "all": {
+          "n": 20,
+          "median": 353093,
+          "mean": 10160169.05,
+          "min": -5595987,
+          "max": 108576812,
+          "current_longer_or_more": 11,
+          "current_shorter_or_less": 9,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 652093,
+          "mean": 20675287,
+          "min": -2350688,
+          "max": 108576812,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 138621.5,
+          "mean": -354948.9,
+          "min": -5595987,
+          "max": 1842907,
+          "current_longer_or_more": 5,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        }
+      },
+      "after_payload_create_to_wait_self_cycles": {
+        "all": {
+          "n": 20,
+          "median": 73752.5,
+          "mean": 90079.55,
+          "min": 35528,
+          "max": 440318,
+          "current_longer_or_more": 20,
+          "current_shorter_or_less": 0,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 77245,
+          "mean": 112055.5,
+          "min": 51697,
+          "max": 440318,
+          "current_longer_or_more": 10,
+          "current_shorter_or_less": 0,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 70060,
+          "mean": 68103.6,
+          "min": 35528,
+          "max": 79040,
+          "current_longer_or_more": 10,
+          "current_shorter_or_less": 0,
+          "exact_equal": 0
+        }
+      },
+      "wait_to_outcome_self_cycles": {
+        "all": {
+          "n": 20,
+          "median": 10778,
+          "mean": 21816.2,
+          "min": -30739,
+          "max": 305987,
+          "current_longer_or_more": 14,
+          "current_shorter_or_less": 6,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 10777.5,
+          "mean": 34371.1,
+          "min": -30739,
+          "max": 305987,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 10778,
+          "mean": 9261.3,
+          "min": -28742,
+          "max": 38923,
+          "current_longer_or_more": 8,
+          "current_shorter_or_less": 2,
+          "exact_equal": 0
+        }
+      },
+      "outcome_to_cleanup_self_cycles": {
+        "all": {
+          "n": 20,
+          "median": 299699,
+          "mean": 373571.95,
+          "min": -592612,
+          "max": 1996795,
+          "current_longer_or_more": 15,
+          "current_shorter_or_less": 5,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 306788,
+          "mean": 213653,
+          "min": -592612,
+          "max": 921755,
+          "current_longer_or_more": 7,
+          "current_shorter_or_less": 3,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 275745.5,
+          "mean": 533490.9,
+          "min": -153088,
+          "max": 1996795,
+          "current_longer_or_more": 8,
+          "current_shorter_or_less": 2,
+          "exact_equal": 0
+        }
+      },
+      "self_cycles_at_cleanup": {
+        "all": {
+          "n": 20,
+          "median": 2293000,
+          "mean": 7104232.5,
+          "min": -92097836,
+          "max": 112259630,
+          "current_longer_or_more": 13,
+          "current_shorter_or_less": 7,
+          "exact_equal": 0
+        },
+        "current_first": {
+          "n": 10,
+          "median": 5078324,
+          "mean": 22756875.3,
+          "min": -3643097,
+          "max": 112259630,
+          "current_longer_or_more": 6,
+          "current_shorter_or_less": 4,
+          "exact_equal": 0
+        },
+        "reference_first": {
+          "n": 10,
+          "median": 1482825,
+          "mean": -8548410.3,
+          "min": -92097836,
+          "max": 8543878,
+          "current_longer_or_more": 7,
+          "current_shorter_or_less": 3,
+          "exact_equal": 0
+        }
+      }
+    }
+  },
+  "observer_and_contract_qualification": "The canonical native reader uses one GENERIC_READ/share READ|WRITE|DELETE marker open, reads at most 11 bytes, closes the handle and does not retry. This changes observer work and timing versus earlier Python-open samples. A frozen contract field incorrectly says the observer callback was byte-exact to the original; an append-only post-run qualification corrects it to the whole derived native-reader callback. No raw result, endpoint or required stamp changed.",
+  "limits": [
+    "The two earlier fixed20 samples remain failed; this completion does not establish why their marker access failed. Controlled private DELETE-handle compatibility is evidence for the reader, not historical cause.",
+    "This epoch uses profiled executables and an optional profile writer. Whole observer and parent CreateProcess intervals include parent/native work and scheduling; component medians are not additive.",
+    "The parent CreateProcess bracket precedes ResumeThread, so the primary Rust CLI is not directly executing in it. Image, path, NTFS state, OS, cache, security filters and scheduling remain confounded.",
+    "Current and reference child-creation/first-wait paths differ. Raw whole-process cycles are cumulative or interval differences as defined and do not isolate a function.",
+    "The AABB order balances within-pair position, but second positions always switch image; context effects remain unidentifiable.",
+    "No profiled-minus-untraced subtraction, product speed acceptance, canonical parity, causal attribution, ranking or optimization warrant."
+  ],
+  "primary_qualifying_performance_measurements": 0
+}
