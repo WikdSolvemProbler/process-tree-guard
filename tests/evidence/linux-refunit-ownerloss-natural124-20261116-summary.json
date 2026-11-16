@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "summary_only": true,
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "environment": {
+    "os": "Linux",
+    "architecture": "aarch64",
+    "systemd": "255.4-1ubuntu8.18"
+  },
+  "shared_observations": {
+    "original_payload_and_descendant_observed_live": true,
+    "both_original_payload_pidfds_terminal_at_first_client_completion_sample": true,
+    "same_original_service_and_domain_verified": true,
+    "prestop_before_assistance": true,
+    "normal_cleanup_exit": 0,
+    "exact_owned_paths_removed_per_case": 7,
+    "retained_product_assets": [],
+    "cleanup_errors": [],
+    "fallback_timer_fired": false
+  },
+  "cases": [
+    {
+      "case_id": "original-direct-owner-loss",
+      "status": "pass",
+      "original_product_deadline_seconds": 60,
+      "trigger": "Original direct owner killed through its retained pidfd only after root ACK; subreaper controller survives.",
+      "client_exit": 125,
+      "client_stderr": "process-tree-guard: original invocation owner lost\n",
+      "client_began_to_ended_ns": "388530743",
+      "ack_before_owner_kill_ns": "7274388",
+      "owner_wait_status": 9,
+      "adopted_client_wait_status": 32000,
+      "original_controller_live_at_first_client_sample": true,
+      "prior_deadline_test_scope_inactive_and_cgroup_absent": true,
+      "raw_bundle_sha256": "88c726ab7657b2684f66a1f1dda64860f31eeb51397250ef473ef15099c6abb6",
+      "root_audit_sha256": "a7233a8080606a7a252281c5cd7fdc971f2365468be5a1f1cf7ccbbe7900a132",
+      "independent_raw_audit_sha256": "a685a5fe0d47f5a89ec0d3072aacec13e182a8d6f346691f4b2162b8cd2846ed",
+      "independent_custody_audit_sha256": "742f6b760eeca0b6c96ed3bf36f6cea684d148559a0a64a6a3875b44201cce75",
+      "preserved_files": 26,
+      "preserved_bytes": 1983792,
+      "nested_raw_records_rehashed": 36,
+      "source_product_tool_postpins": 27
+    },
+    {
+      "case_id": "natural-program-exit124-descendant",
+      "status": "pass",
+      "original_product_deadline_seconds": 60,
+      "trigger": "Controlled payload parent exits124 on GO after root ACK; descendant remains live before GO and original owner survives.",
+      "client_exit": 124,
+      "client_stderr": "",
+      "client_began_to_ended_ns": "143574381",
+      "ack_before_go_ns": "4295210",
+      "original_owner_live_at_first_client_sample": true,
+      "no_timeout_notice": true,
+      "prior_owner_loss_test_scope_inactive_and_cgroup_absent": true,
+      "raw_bundle_sha256": "b5876bfd93cb16159b79ec14590f9badb5095fe12ea4f3b17dddb3ec037751ef",
+      "root_audit_sha256": "d138ccdf0a0de1f466c73a583d20c3380f8be0fcc643e26ca5a5bfbe123bcadb",
+      "independent_raw_audit_sha256": "03558099c913efef03c7b5ec2283649fe97745a4c6e14b1d6a49edf5fee3aaf7",
+      "independent_custody_audit_sha256": "6f05adf67706b179a3270690eeaee5758a5763e4d3c12fda09f8be029b4c2ebb",
+      "preserved_files": 27,
+      "preserved_bytes": 1937687,
+      "nested_raw_records_rehashed": 37,
+      "source_product_tool_postpins": 29
+    }
+  ],
+  "limits": [
+    "Two fixed separate-service cases, not full Linux qualification.",
+    "Signal calls, the natural primary-child exit status and internal product joins rely on pinned source together with external kernel and manager records; internal result frames were not exported.",
+    "Timings include the acknowledged test fixture and are descriptive, not qualified competitive measurements.",
+    "Final natural-exit test scope and postcall product absence remain a separate next-preflight check.",
+    "Credential/CORE transitions, policy changes/refusals, arming faults, the escape matrix, transparent caller context, platform floor, packaging and performance remain open.",
+    "Linux default dispatch remains disabled.",
+    "Exact originals remain local under the publication privacy policy; this summary and hashes do not replace publicly accessible raw evidence."
+  ]
+}
