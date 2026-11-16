@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "EXISTING_WINDOWS_CORRECTNESS_READINESS_AND_PRESERVED_FAILED_DIAGNOSTIC",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "product_source_or_defaults_changed": false,
+  "readiness": {
+    "same_compiled_drivers_and_helpers": true,
+    "driver_build": "release opt=s, all-features, pinned toolchain from previous four-build summary",
+    "selected_main_images": {
+      "current_o3": {
+        "bytes": 820736,
+        "sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d"
+      },
+      "current_os": {
+        "bytes": 645120,
+        "sha256": "dac1fbfdc4d99b2c6e6c7ca2b5ef7dfe53a3c0a31b1c39ddfde8e7063531710e"
+      }
+    },
+    "whole_tree_deadline_seconds_each": 900,
+    "calls": [
+      {
+        "slot": "lib",
+        "top_level_passed": 300,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 0,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": null,
+        "effective_environment_sha256_without_override": "29c60496e574ccf7fd73947e816e2f23dbfa1a45fa5c43efc8c86c9eb0e99ce4",
+        "not_asserted_count": 0,
+        "raw": {
+          "result": {
+            "bytes": 1016,
+            "sha256": "e4302e55e78a1b53cbcf421f4bbc4923f3533923326fa8a1db9dd3c21811cc83"
+          },
+          "stdout": {
+            "bytes": 28650,
+            "sha256": "972275425d1974854dbf889e6b66573189b8654c333d498eb314e8bc34020ac0"
+          },
+          "stderr": {
+            "bytes": 6400,
+            "sha256": "66399a78e70d1af0b3b727bc4834b82c6a296c641ea79eaf5e875611fd01f63b"
+          },
+          "original_terminal": {
+            "bytes": 152,
+            "sha256": "753af34eafb3e2929955b81d40cd19450f7ef6a2cc47a163b330aad94ba6d365"
+          }
+        }
+      },
+      {
+        "slot": "guard-current-o3",
+        "top_level_passed": 82,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 0,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d",
+        "effective_environment_sha256_without_override": "23567c70d56529748672a921e529d5003446224867886563a96ed9320fc26c76",
+        "not_asserted_count": 5,
+        "raw": {
+          "result": {
+            "bytes": 1270,
+            "sha256": "befabc3038e05f1f9432a95c2a80aca8e30686a8de8d18bde39402c05c177a62"
+          },
+          "stdout": {
+            "bytes": 246363,
+            "sha256": "89419b72c89fd980f608e4fef5cbf227e10501f46804f9bc3beba4c87ed66e0e"
+          },
+          "stderr": {
+            "bytes": 6228,
+            "sha256": "60dcc2f4e3aeeeee1a8aaff037747f9549e0e4e30500d24d78ff6868199a744a"
+          },
+          "original_terminal": {
+            "bytes": 166,
+            "sha256": "8d2ab6585057731e8d4344cdc10572b75b5fd4e6f5154460fbca26ffa4c31915"
+          }
+        }
+      },
+      {
+        "slot": "guard-current-os",
+        "top_level_passed": 82,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 0,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": "dac1fbfdc4d99b2c6e6c7ca2b5ef7dfe53a3c0a31b1c39ddfde8e7063531710e",
+        "effective_environment_sha256_without_override": "1a964b49b19a788305b97a894187d01b328f88b746dbfaf14455d53e28ecb63a",
+        "not_asserted_count": 5,
+        "raw": {
+          "result": {
+            "bytes": 1270,
+            "sha256": "af246f139d83ab47c59ac29212a6ad48932747eaf601cecf661819dcafd26629"
+          },
+          "stdout": {
+            "bytes": 246378,
+            "sha256": "3c144c492121f7ac610c6d29b46a3bb795c9a1bdd7ac0fcd2803367282c49fda"
+          },
+          "stderr": {
+            "bytes": 6228,
+            "sha256": "46bc7a398fdaf3a64352bafb07ee2c819e0b2e05ee08ff3ef8509bd627b2ea96"
+          },
+          "original_terminal": {
+            "bytes": 165,
+            "sha256": "601fa1dc281aedb42e4c41129bbb1cbe57fc61d952336d5733295e19362fc945"
+          }
+        }
+      },
+      {
+        "slot": "auto-current-o3",
+        "top_level_passed": 21,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 0,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d",
+        "effective_environment_sha256_without_override": "95a2a7130645155e67ad661cca672499af16d07dfb21f11c9f5825c81d085919",
+        "not_asserted_count": 0,
+        "raw": {
+          "result": {
+            "bytes": 1264,
+            "sha256": "41d0261cb6b13211b374ed126c7032ce1fe55ae03822394249243d6b628aab80"
+          },
+          "stdout": {
+            "bytes": 27204,
+            "sha256": "273d8b47d90a18be96b426f9844b35f6f2c4302079c04270bfddbdd7a57269a9"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "original_terminal": {
+            "bytes": 165,
+            "sha256": "b1ae9deb91430e84eb54990477ac557d27aecbda68f349e0ea896c0d801d5752"
+          }
+        }
+      },
+      {
+        "slot": "auto-current-os",
+        "top_level_passed": 21,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 0,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": "dac1fbfdc4d99b2c6e6c7ca2b5ef7dfe53a3c0a31b1c39ddfde8e7063531710e",
+        "effective_environment_sha256_without_override": "c3edd530e621b2574f0430cb5ae3d8b3ec1eeb679460c116b53acfca15b5bc5b",
+        "not_asserted_count": 0,
+        "raw": {
+          "result": {
+            "bytes": 1264,
+            "sha256": "0ea648be0c880d49273b283244bdecf7f4ca03b4cf996c150ac020a806c27e3f"
+          },
+          "stdout": {
+            "bytes": 27205,
+            "sha256": "aa006236bae4a6659fb4c56e8b358ce814c4c462fd7c361d34fd795c2230e046"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "original_terminal": {
+            "bytes": 164,
+            "sha256": "5581446794393ccfbe5ff19cacd100c9a0750ac1a5b6ef7b4a9c543f73bf5278"
+          }
+        }
+      },
+      {
+        "slot": "battery-current-o3",
+        "top_level_passed": 47,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 2,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d",
+        "effective_environment_sha256_without_override": "cd44b80407909691d7869c0d94dc3a2d51ba554e0ef22cd8e4e7b6faff21d569",
+        "not_asserted_count": 0,
+        "raw": {
+          "result": {
+            "bytes": 1344,
+            "sha256": "80883c2da1b84bd9683fb3763e17c01a4580810747fd5a643b2a09dc47589380"
+          },
+          "stdout": {
+            "bytes": 137269,
+            "sha256": "b996ab48e33a764e75197a08388b9089e73197fe8b68137df9dd781eddad98c8"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "original_terminal": {
+            "bytes": 168,
+            "sha256": "37552313bdc1ff57de2467a3243a848ca0abd1f9f5996fb90d027b7e7a250155"
+          }
+        }
+      },
+      {
+        "slot": "battery-current-os",
+        "top_level_passed": 47,
+        "failed": 0,
+        "ignored": 0,
+        "filtered_out": 2,
+        "driver_native_exit": 0,
+        "outer_tool_exit": 0,
+        "pre_post_artifact_identity": true,
+        "selected_guard_sha256": "dac1fbfdc4d99b2c6e6c7ca2b5ef7dfe53a3c0a31b1c39ddfde8e7063531710e",
+        "effective_environment_sha256_without_override": "18b418f6fc0cc69f1b2a83c8aa4db02ba633b47955bd9fc79a5af04e32fb0fa5",
+        "not_asserted_count": 0,
+        "raw": {
+          "result": {
+            "bytes": 1344,
+            "sha256": "8dc04bc30d8b2734e66f047bcaf3e6517f454ddbaf6a7d88609b14695762dd52"
+          },
+          "stdout": {
+            "bytes": 137215,
+            "sha256": "e82f7bcb34204eb9392a9d850fc3314ec69f908ea1c9d0d5c6bcc2e74ea946f1"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "original_terminal": {
+            "bytes": 167,
+            "sha256": "aba7767c4a9002a581890ea622b7eadbd8944cfe47dcb887e03eeb76adb8affb"
+          }
+        }
+      }
+    ],
+    "top_level_test_function_executions_passed": 600,
+    "failures": 0,
+    "source_files_post_rehashed": 943,
+    "executable_artifacts_post_rehashed": 14,
+    "conditional_assertions": {
+      "same_five_notices_in_both_guard_calls": true,
+      "ids": [
+        "G103",
+        "G87",
+        "G95",
+        "G97",
+        "G98"
+      ],
+      "coverage": "G103/G95 desktop tests were not opted in; G87 stdin and G97/G98 console paths were preempted by the outer guard. These assertions did not pass or fail; they were not exercised."
+    },
+    "filtered_battery_functions": [
+      "b75_sequential_runs_do_not_slow_down",
+      "b76_to_b78_efficiency"
+    ],
+    "limits": [
+      "300 library tests are newly built opt=s code, not archived guard main PE. The embedded child 1/299-filtered result is within the300.",
+      "guard() selects the two archived main PEs; role()/testkit() retain newly built opt=s binaries common to both suites. Passing entire drivers does not mean every assertion invoked selected archived PE.",
+      "Guard drivers report five identical conditional NOT ASSERTED notices each; those assertions remain uncovered, not converted to passes.",
+      "Different opaque effective environment hashes exclude only selected override. Exact changed environment keys are not captured and cannot be attributed to a specific cause. These suite durations are not controlled performance comparisons.",
+      "Two exact battery timing functions, including groupedB76-B78, were intentionally filtered for readiness and remain required in later benchmark.",
+      "The 600 passed top-level function executions are not 600 distinct assertions or final correctness/performance qualification. No product source/default/protection change or optimization promotion follows."
+    ],
+    "raw_actual_sha256": "3775ac5004ffac6d7026a0552a9037520b2b3ff74bf8618e45432ad90c69a9f8",
+    "independent_actual_reviews_sha256": [
+      "c9e4975d52d6b432250eaa1d0a553773dfb6f9142e3a9d415a9e8d0115cb8a67",
+      "6c935b8f489e63aa93a1a8988166955e9437fb54fce371a1dbfa47c94258aab7"
+    ]
+  },
+  "failed_speed_attempt": {
+    "source_sha256": "13e8827ff76e901d6ebf51fe23163e0d17667d4262382a6e62d0f882d6abe6f4",
+    "outer_tool_exit": 1,
+    "qualification_completed": 0,
+    "measured_slots": 0,
+    "measured_blocks": 0,
+    "reason": {
+      "indices": {
+        "root": [
+          0,
+          4
+        ],
+        "backup": [
+          4,
+          8
+        ]
+      },
+      "kind": "guardian and interpreter path tokens passed with forward slashes while strict plan expected backslashes",
+      "all_other_tokens_equal": true,
+      "deadline_arguments_55_and_60_match": true,
+      "controller_path_already_normalized": true
+    },
+    "raw_actual_sha256": "52e64e4ebe5d6f64cd3f61e32979f9f3c34b07ad5857a110177ce7e2f84899f7",
+    "capture_sha256": "1fea4a73e5c45853da357a6c62f861840326e0f8526cff2cbe9181faaf44622c",
+    "original_tool_sha256": "4b9c70ad0380c4b203337b44afc4393c256ca0a901695e3f2c8337fcd44b3082",
+    "independent_actual_review_sha256": "709f4a412a5e591fdd46839cb2411f149f614b3de023478620186b7ec0d0fa80",
+    "preserved": true,
+    "replayed": false,
+    "meaning": "Launcher exact-argument validation failed before requesting any benchmark arm; no product or performance result."
+  },
+  "primary_qualifying_performance_measurements": 0,
+  "speed_requirement": "UNMET",
+  "public_package": "Exact raw originals remain private; this summary is not the complete academic reproducibility package."
+}
