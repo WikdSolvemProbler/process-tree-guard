@@ -1,0 +1,417 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "Completed descriptive suspended-image creation control; no product behavior or speed acceptance",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "purpose": "Check parent CreateProcessW bracket associations across exact archived profiled current/reference images and balanced private locations before primary thread resume.",
+  "evidence_sha256": {
+    "source_manifest": "a54e0064646b3f57651343d8fe422abeb2f21d1158ebb6f80738b4fb6c64c6b3",
+    "probe": "fcc58f615ada6d7cfb2c1698188fc726c7e92eb0cfc036c23ab1952e1e399c0f",
+    "plan": "30fe68c979723f461e63aeed6c994aed14c1c9136270b76d5e62c9a0918142e1",
+    "launcher": "1240f8f5921fa7b3d262453ae7447be510ed07639794f83b9ff2d2fd0af5d346",
+    "prospective_invocation": "8ec4b69d3c2ef85f50982191fd3ff1f8de12444694213bebd0cca4891d9236d9",
+    "current_profiled_image": "396dbc37f9bffe80af57991b05ce802d2c82de7e2c3401b3a841f9b5f0025da7",
+    "reference_profiled_image": "8d19a77dd4e12c903eb79a36427249a7d49c53503ed5dfbbb8c7ff61730a7e5e",
+    "raw_receipt": "1284a5448350c272ee6b2e31c8a8d1a31cf5fbd709632cbb1154f24c3aff853e",
+    "root_actual": "166af02c73097799f2e0e67a42eab75465a28ac1c650680275c559bb702f6352",
+    "independent_actual": [
+      "dc5e17f7f886ba38ee3a0ca014d5af55e2c1481f8f0f6637c1dcb09d1d471fb4",
+      "00aa5894e43c062051234f62fd44dafb8a12c82f0605c79344d1f718a295eedd"
+    ],
+    "native_postpins": "87991fbf78367f4930b5aa377bada75a40f220b271eb805cbc4c93a84cd5e4e9"
+  },
+  "protocol": {
+    "planned_blocks": 8,
+    "completed_blocks": 8,
+    "planned_creations": 32,
+    "completed_creations": 32,
+    "cells": {
+      "c0": "current/site0/lane0",
+      "r0": "reference/site0/lane1",
+      "c1": "current/site1/lane1",
+      "r1": "reference/site1/lane0"
+    },
+    "schedule": "Four Williams sequences repeated twice; each cell occurs twice at each position.",
+    "blocks": [
+      {
+        "block": 0,
+        "order": [
+          "c0",
+          "r0",
+          "r1",
+          "c1"
+        ]
+      },
+      {
+        "block": 1,
+        "order": [
+          "r0",
+          "c1",
+          "c0",
+          "r1"
+        ]
+      },
+      {
+        "block": 2,
+        "order": [
+          "c1",
+          "r1",
+          "r0",
+          "c0"
+        ]
+      },
+      {
+        "block": 3,
+        "order": [
+          "r1",
+          "c0",
+          "c1",
+          "r0"
+        ]
+      },
+      {
+        "block": 4,
+        "order": [
+          "c0",
+          "r0",
+          "r1",
+          "c1"
+        ]
+      },
+      {
+        "block": 5,
+        "order": [
+          "r0",
+          "c1",
+          "c0",
+          "r1"
+        ]
+      },
+      {
+        "block": 6,
+        "order": [
+          "c1",
+          "r1",
+          "r0",
+          "c0"
+        ]
+      },
+      {
+        "block": 7,
+        "order": [
+          "r1",
+          "c0",
+          "c1",
+          "r0"
+        ]
+      }
+    ],
+    "private_copies": 4,
+    "copy_identity": "Four distinct native file identities, exclusive exact-byte copies; same basename and equal 136-character full paths.",
+    "archived_images_prior_profile_executions_each": 30,
+    "primary_thread_resumes": 0,
+    "payload_launches": 0,
+    "per_slot_seconds": 3,
+    "controller_admission_seconds": 52,
+    "guardian_seconds": 55,
+    "backup_and_outer_whole_tree_deadline_seconds": 60,
+    "automatic_retries": 0,
+    "warmup_or_outlier_exclusions": 0,
+    "within_block_environment_utf16_hashes_equal": true,
+    "within_block_serialized_command_lengths_equal": true
+  },
+  "validation": {
+    "original_tool_exit": 0,
+    "source_postpins": 12,
+    "native_copy_id_checks": 4,
+    "raw_slot_rows_equal": 32,
+    "qualified_slot_rows_equal": 32,
+    "retained_original_identity_matches": 32,
+    "suspended_live_members": 32,
+    "explicit_trusted_controller_job_terminations": 32,
+    "original_processes_terminal_expected_control_exit": 32,
+    "jobs_active0_before_handle_close": 32,
+    "each_four_owned_handles_closed_once": true,
+    "watchdogs_joined_without_firing": 32,
+    "empty_io_and_absent_payload_markers": 32,
+    "inventory": {
+      "files": 222,
+      "bytes": 2754669,
+      "sha256": "2d674e79ffe79f1fa2288f17078f66ebcfe431f25b99df3c1a07681290be6891"
+    }
+  },
+  "metrics": {
+    "time_unit": "nanoseconds",
+    "endpoint": "Parent QueryPerformanceCounter immediately before CreateProcessW to immediately after its native return and LastError capture; primary thread remains suspended. This includes native/parent work and scheduling, not exclusive child CPU or loader cost.",
+    "direction": "Image contrast current minus reference; site contrast site1 minus site0. Balanced image contrast per block is (c0+c1-r0-r1)/2.",
+    "cell_descriptives": {
+      "c0": {
+        "n": 8,
+        "median_ns": 9487200,
+        "mean_ns": 21371962.5,
+        "min_ns": 8956700,
+        "max_ns": 102654200,
+        "positive": 8,
+        "negative": 0,
+        "zero": 0
+      },
+      "r0": {
+        "n": 8,
+        "median_ns": 9190850,
+        "mean_ns": 17943337.5,
+        "min_ns": 8470300,
+        "max_ns": 79802200,
+        "positive": 8,
+        "negative": 0,
+        "zero": 0
+      },
+      "c1": {
+        "n": 8,
+        "median_ns": 9772950,
+        "mean_ns": 29317712.5,
+        "min_ns": 8953900,
+        "max_ns": 165853600,
+        "positive": 8,
+        "negative": 0,
+        "zero": 0
+      },
+      "r1": {
+        "n": 8,
+        "median_ns": 9409550,
+        "mean_ns": 16229237.5,
+        "min_ns": 8136600,
+        "max_ns": 62579500,
+        "positive": 8,
+        "negative": 0,
+        "zero": 0
+      }
+    },
+    "all_blocks": [
+      {
+        "block": 0,
+        "order": [
+          "c0",
+          "r0",
+          "r1",
+          "c1"
+        ],
+        "cell_ns": {
+          "c0": 102654200,
+          "r0": 79802200,
+          "r1": 62579500,
+          "c1": 165853600
+        },
+        "image_current_minus_reference_site0_ns": 22852000,
+        "image_current_minus_reference_site1_ns": 103274100,
+        "image_balanced_contrast_ns": 63063050,
+        "site1_minus_site0_current_ns": 63199400,
+        "site1_minus_site0_reference_ns": -17222700
+      },
+      {
+        "block": 1,
+        "order": [
+          "r0",
+          "c1",
+          "c0",
+          "r1"
+        ],
+        "cell_ns": {
+          "r0": 10193800,
+          "c1": 9676500,
+          "c0": 9757200,
+          "r1": 10423500
+        },
+        "image_current_minus_reference_site0_ns": -436600,
+        "image_current_minus_reference_site1_ns": -747000,
+        "image_balanced_contrast_ns": -591800,
+        "site1_minus_site0_current_ns": -80700,
+        "site1_minus_site0_reference_ns": 229700
+      },
+      {
+        "block": 2,
+        "order": [
+          "c1",
+          "r1",
+          "r0",
+          "c0"
+        ],
+        "cell_ns": {
+          "c1": 10351800,
+          "r1": 8136600,
+          "r0": 9108700,
+          "c0": 9451700
+        },
+        "image_current_minus_reference_site0_ns": 343000,
+        "image_current_minus_reference_site1_ns": 2215200,
+        "image_balanced_contrast_ns": 1279100,
+        "site1_minus_site0_current_ns": 900100,
+        "site1_minus_site0_reference_ns": -972100
+      },
+      {
+        "block": 3,
+        "order": [
+          "r1",
+          "c0",
+          "c1",
+          "r0"
+        ],
+        "cell_ns": {
+          "r1": 8548000,
+          "c0": 8956700,
+          "c1": 9045700,
+          "r0": 8509800
+        },
+        "image_current_minus_reference_site0_ns": 446900,
+        "image_current_minus_reference_site1_ns": 497700,
+        "image_balanced_contrast_ns": 472300,
+        "site1_minus_site0_current_ns": 89000,
+        "site1_minus_site0_reference_ns": 38200
+      },
+      {
+        "block": 4,
+        "order": [
+          "c0",
+          "r0",
+          "r1",
+          "c1"
+        ],
+        "cell_ns": {
+          "c0": 9315400,
+          "r0": 8470300,
+          "r1": 8512700,
+          "c1": 8953900
+        },
+        "image_current_minus_reference_site0_ns": 845100,
+        "image_current_minus_reference_site1_ns": 441200,
+        "image_balanced_contrast_ns": 643150,
+        "site1_minus_site0_current_ns": -361500,
+        "site1_minus_site0_reference_ns": 42400
+      },
+      {
+        "block": 5,
+        "order": [
+          "r0",
+          "c1",
+          "c0",
+          "r1"
+        ],
+        "cell_ns": {
+          "r0": 8834700,
+          "c1": 9869400,
+          "c0": 12016200,
+          "r1": 12814500
+        },
+        "image_current_minus_reference_site0_ns": 3181500,
+        "image_current_minus_reference_site1_ns": -2945100,
+        "image_balanced_contrast_ns": 118200,
+        "site1_minus_site0_current_ns": -2146800,
+        "site1_minus_site0_reference_ns": 3979800
+      },
+      {
+        "block": 6,
+        "order": [
+          "c1",
+          "r1",
+          "r0",
+          "c0"
+        ],
+        "cell_ns": {
+          "c1": 11211600,
+          "r1": 10055700,
+          "r0": 9354200,
+          "c0": 9522700
+        },
+        "image_current_minus_reference_site0_ns": 168500,
+        "image_current_minus_reference_site1_ns": 1155900,
+        "image_balanced_contrast_ns": 662200,
+        "site1_minus_site0_current_ns": 1688900,
+        "site1_minus_site0_reference_ns": 701500
+      },
+      {
+        "block": 7,
+        "order": [
+          "r1",
+          "c0",
+          "c1",
+          "r0"
+        ],
+        "cell_ns": {
+          "r1": 8763400,
+          "c0": 9301600,
+          "c1": 9579200,
+          "r0": 9273000
+        },
+        "image_current_minus_reference_site0_ns": 28600,
+        "image_current_minus_reference_site1_ns": 815800,
+        "image_balanced_contrast_ns": 422200,
+        "site1_minus_site0_current_ns": 277600,
+        "site1_minus_site0_reference_ns": -509600
+      }
+    ],
+    "aggregate": {
+      "image_current_minus_reference_site0_ns": {
+        "n": 8,
+        "median_ns": 394950,
+        "mean_ns": 3428625,
+        "min_ns": -436600,
+        "max_ns": 22852000,
+        "positive": 7,
+        "negative": 1,
+        "zero": 0
+      },
+      "image_current_minus_reference_site1_ns": {
+        "n": 8,
+        "median_ns": 656750,
+        "mean_ns": 13088475,
+        "min_ns": -2945100,
+        "max_ns": 103274100,
+        "positive": 6,
+        "negative": 2,
+        "zero": 0
+      },
+      "image_balanced_contrast_ns": {
+        "n": 8,
+        "median_ns": 557725,
+        "mean_ns": 8258550,
+        "min_ns": -591800,
+        "max_ns": 63063050,
+        "positive": 7,
+        "negative": 1,
+        "zero": 0
+      },
+      "site1_minus_site0_current_ns": {
+        "n": 8,
+        "median_ns": 183300,
+        "mean_ns": 7945750,
+        "min_ns": -2146800,
+        "max_ns": 63199400,
+        "positive": 5,
+        "negative": 3,
+        "zero": 0
+      },
+      "site1_minus_site0_reference_ns": {
+        "n": 8,
+        "median_ns": 40300,
+        "mean_ns": -1714100,
+        "min_ns": -17222700,
+        "max_ns": 3979800,
+        "positive": 5,
+        "negative": 3,
+        "zero": 0
+      }
+    }
+  },
+  "limits": [
+    "Site main contrasts and image main contrasts are descriptive under copied image, private path and file-ID conditions.",
+    "Lane assignment is exactly confounded with image-by-site interaction; no separately identified interaction or intrinsic image effect.",
+    "Copy identities, path/security filtering, shared filesystem/cache state, and scheduling can affect CreateProcessW; no loader, AV, or kernel cause claim.",
+    "The created primary guard thread is never resumed and no payload is launched; this does not exercise product security behavior or qualify product speed.",
+    "The trusted controller explicitly terminates suspended subjects. Product deadline, owner monitoring, cleanup and console behavior are not exercised.",
+    "These are instrumented profiled images, whose bytes/imports/layout differ from stock binaries; no profiled guard stamp executes before primary resume.",
+    "All first-block values are included, including 102.6542 ms current/site0 and 165.8536 ms current/site1. First use of copied paths is not a proven cold-cache condition.",
+    "Do not subtract this epoch from an earlier full-run parent bracket or treat smaller descriptive deltas as a product speed improvement.",
+    "No primary speed acceptance, parity, ranking, intrinsic image effect or unique path/loader/security-filter cause is established."
+  ],
+  "canonical_guard_rust_changed": false,
+  "primary_qualifying_performance_measurements": 0
+}
