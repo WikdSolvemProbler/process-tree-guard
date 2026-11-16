@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "private diagnostic build qualification; no runtime performance result",
+  "current_product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "canonical_main_observed": "b7a736da62ea45ab86a3bb70a684a8c16fb478c7",
+  "purpose": "Qualify matched stock and instrumented builds before a phase-localization diagnostic for issue #7.",
+  "source_and_build": {
+    "stock_current_manifest_sha256": "3a170f2e6467ff95db6747d221aa3dc30bd65174148aeef6c600b803d32d0631",
+    "stock_reference_manifest_sha256": "98062eb4d9dbd28f54b43bca12efd9edf907b306f77f6b164e2e169e3e7ad675",
+    "instrumentation_source_manifest_sha256": "b2debd032b7e89c72cc37de8b216bda6e9e00e48ae6c64767bed3d2a708ca7ed",
+    "independent_source_review_sha256": "dbd1470da36569409e3c56b81c0da1e1bbed879daafa85715fe4e725db70ff5b",
+    "stock_current_files": 943,
+    "stock_reference_files": 14,
+    "instrumented_current_files": 944,
+    "instrumented_reference_files": 15,
+    "overlay_files": {
+      "current": 5,
+      "reference": 3
+    },
+    "common_source_and_target_paths": true,
+    "paths_differ_from_historical_builds": true,
+    "source_hashes_verified_before_and_after_all_builds": true,
+    "sequential_fresh_targets": true,
+    "complete_source_target_logs_archived_before_next_arm": true
+  },
+  "recipe": {
+    "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)",
+    "target": "x86_64-pc-windows-msvc",
+    "msvc": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "cargo": [
+      "build",
+      "--offline",
+      "--locked",
+      "--release",
+      "--target",
+      "x86_64-pc-windows-msvc",
+      "--verbose"
+    ],
+    "current_additional_flags": [
+      "--all-features",
+      "--bin",
+      "process-tree-guard"
+    ],
+    "reference_additional_flags": [
+      "--bin",
+      "process-guard"
+    ],
+    "opt_level": 3,
+    "lto": true,
+    "codegen_units": 1,
+    "panic": "abort",
+    "strip": true,
+    "incremental": false,
+    "jobs": 2,
+    "rustflags": "-D warnings",
+    "tool_hashes_unchanged_before_and_after": true,
+    "whole_process_tree_deadline_seconds_per_build": 600,
+    "archive_deadline_seconds_per_arm": 300
+  },
+  "builds": [
+    {
+      "arm": "stock-current",
+      "exit_code": 0,
+      "native_build_exit": 0,
+      "source_files": 943,
+      "target_files": 46,
+      "log_files": 2,
+      "artifact_bytes": 820736,
+      "artifact_sha256": "45a112ea4ef2ad8a2ba4e267e3d878c39f3561c9d806359f995c862d3a6dc184",
+      "source_matches": true
+    },
+    {
+      "arm": "stock-reference",
+      "exit_code": 0,
+      "native_build_exit": 0,
+      "source_files": 14,
+      "target_files": 19,
+      "log_files": 2,
+      "artifact_bytes": 371712,
+      "artifact_sha256": "7223fee6761d7456447e7d7460ffccff0d16f91d6c19474b220cb19de8a82a94",
+      "source_matches": true
+    },
+    {
+      "arm": "profile-current",
+      "exit_code": 0,
+      "native_build_exit": 0,
+      "source_files": 944,
+      "target_files": 46,
+      "log_files": 2,
+      "artifact_bytes": 829440,
+      "artifact_sha256": "396dbc37f9bffe80af57991b05ce802d2c82de7e2c3401b3a841f9b5f0025da7",
+      "source_matches": true
+    },
+    {
+      "arm": "profile-reference",
+      "exit_code": 0,
+      "native_build_exit": 0,
+      "source_files": 15,
+      "target_files": 19,
+      "log_files": 2,
+      "artifact_bytes": 379904,
+      "artifact_sha256": "8d19a77dd4e12c903eb79a36427249a7d49c53503ed5dfbbb8c7ff61730a7e5e",
+      "source_matches": true
+    }
+  ],
+  "historical_stock_comparison": {
+    "whole_pe_hashes_identical": false,
+    "each_stock_image_has_28_differing_bytes": true,
+    "differences": [
+      "COFF timestamp: three bytes",
+      "Three debug directory timestamps: three bytes each",
+      "CodeView RSDS GUID: sixteen bytes"
+    ],
+    "code_and_non_debug_section_bytes_match": true,
+    "section_layout_and_ordered_imports_match": true,
+    "resource_content_matches": true,
+    "current_historical_sha256": "e8af56a25af34e6d7e1acf706fd819bbe56c84259da0a07760e9e9f532a59d2c",
+    "reference_historical_sha256": "7edd4765bf53089799c898be6a65f179ec177de838960460bf5f2bbe1af33533",
+    "read_only_report_sha256": "88769c093da500d83b5afa53912b0734c8c6329ecc7404e51f170dfe2cca4f13"
+  },
+  "instrumentation_effects": {
+    "added_imports_each": [
+      "KERNEL32.dll!QueryProcessCycleTime"
+    ],
+    "other_import_symbol_multiset_changes": false,
+    "new_dlls": false,
+    "import_order_and_code_layout_can_change": true,
+    "current_size_increase_bytes": 8704,
+    "reference_size_increase_bytes": 8192,
+    "current_versioninfo_payload_unchanged": true,
+    "reference_resources_absent_in_both": true,
+    "output_uses_existing_bounded_diagnostics_writer": true
+  },
+  "qualification": {
+    "rust_compile_errors": 0,
+    "original_compiler_commands": 4,
+    "automatic_retries": 0,
+    "runtime_profile_trials": 0,
+    "primary_qualifying_competitive_measurements": 0,
+    "canonical_product_source_changed": false,
+    "cargo_manifest_warnings": "Existing deprecated binary edition declarations remain; these are Cargo manifest warnings, distinct from rustc -D warnings.",
+    "limitations": [
+      "This qualifies compilation and artifact identity, not runtime behavior or performance.",
+      "Stock PE whole-file hashes differ from historical images; timestamp and debug identity differences are retained.",
+      "The profiler changes code, imports, layout and diagnostics work. Stock-to-profile subtraction cannot establish a product speedup or exclusive cause.",
+      "The original untraced slowdown remains unresolved. No parity, equivalence, ranking or speed acceptance is established.",
+      "Raw machine and transport evidence stays private. This summary is not the complete public reproducibility package."
+    ],
+    "canonical_product_security_contract_changed": false,
+    "instrumented_binary_security_behavior_assessed": false
+  }
+}
