@@ -1,0 +1,355 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "FIXED_DESCRIPTIVE_WINDOWS_SOURCE_BY_OPT_LEVEL_SENSITIVITY",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "question": "Does the broad opt=3 to opt=s compiler intervention improve the current guard protected normal-run latency, and how does the repaired archived reference respond in the same run?",
+  "builds": {
+    "current_o3": {
+      "role": "c3",
+      "bytes": 820736,
+      "sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d"
+    },
+    "reference_o3": {
+      "role": "r3",
+      "bytes": 371712,
+      "sha256": "cbfd2c164ed3fc228a1ccfaba09eef8825efb5857bb0a32ab4f78c9817c9de78"
+    },
+    "current_os": {
+      "role": "cs",
+      "bytes": 645120,
+      "sha256": "dac1fbfdc4d99b2c6e6c7ca2b5ef7dfe53a3c0a31b1c39ddfde8e7063531710e"
+    },
+    "reference_os": {
+      "role": "rs",
+      "bytes": 302592,
+      "sha256": "c24e8c61606a79ba420d9d9e16cf61be9aa0661d4199dbefd238abd47897db03"
+    },
+    "settings": "Exact matched fresh builds described by windows-opt-level-builds-20261116-summary.json; within each source only CARGO_PROFILE_RELEASE_OPT_LEVEL changed. Current all-features and reference intrinsic source/feature differences remain."
+  },
+  "method": {
+    "qualification_slots": 4,
+    "qualification_order": [
+      "c3",
+      "r3",
+      "rs",
+      "cs"
+    ],
+    "qualification_excluded_from_contrasts": true,
+    "measured_blocks": 8,
+    "measured_slots": 32,
+    "attempts_in_corrected_namespace": 1,
+    "retries": 0,
+    "previous_failed_attempt": "The prior consumed pre-SUT launcher attempt is preserved in windows-opt-level-readiness-20261116-summary.json and was not replayed or scored.",
+    "schedule": "Four Williams rows repeated twice: c3 r3 rs cs / r3 cs c3 rs / cs rs r3 c3 / rs c3 cs r3",
+    "balance": "Each arm twice per position; each directed within-block predecessor once per four-row cycle. Cross-block carryover remains.",
+    "workload": "Same pinned fixture mark FILE 0.05, protected by --timeout2; payload sleep is included in elapsed.",
+    "endpoint": "Parent CreateProcessW entry through original retained guard native wait; observer/marker acquisition overlaps payload startup and execution.",
+    "bounds": {
+      "product_seconds": 2,
+      "slot_seconds": 3,
+      "root_seconds": 55,
+      "backup_seconds": 60,
+      "root_cleanup_reserve_seconds": 11
+    },
+    "shared_sut_child_environment_sha256": "4ed0004447f9a9aec79fd387a74b24d7fe894976263e0eb78127a6671c40256a",
+    "trace_profile_keys_absent_before_guardian": true,
+    "prior_exposures": "The exact archived current-o3/current-os images were exercised by the just-completed full guard/auto/battery suites; the new repaired-reference images were not exercised by those suites. Exact SUT invocation counts were not logged. All images were read and hashed before launch. Four equal within-call qualifications are excluded and disclosed; they do not establish equal prior cache/history. No cold or intrinsic-causal comparison is claimed."
+  },
+  "runtime_observations": {
+    "original_outer_tool_exit": 0,
+    "all_36_qualified_custody_observations": true,
+    "first_payload_sample": "The first retained original-payload zero-time poll after the guard native completion returned0 in every slot. This proves terminal at that observed sample; it does not identify the exact termination instant.",
+    "guard_and_payload_native_exit_zero": 36,
+    "empty_original_job_before_trusted_cleanup": 36,
+    "empty_stdio": 36,
+    "watchdog_or_trusted_cleanup_assistance_used": false,
+    "held_identity_count": 37,
+    "source_pins_post_rehashed": 31,
+    "raw_capture_files": 256,
+    "raw_capture_bytes": 703789,
+    "source_integer_identity_parsing": "Lossless FILETIME and file-ID comparisons; original decimal bytes unchanged."
+  },
+  "qualification_elapsed_ns": [
+    {
+      "phase": "qualification",
+      "block": 0,
+      "position": 0,
+      "arm": "c3",
+      "elapsed_ns": 164881200
+    },
+    {
+      "phase": "qualification",
+      "block": 0,
+      "position": 1,
+      "arm": "r3",
+      "elapsed_ns": 151880300
+    },
+    {
+      "phase": "qualification",
+      "block": 0,
+      "position": 2,
+      "arm": "rs",
+      "elapsed_ns": 155643200
+    },
+    {
+      "phase": "qualification",
+      "block": 0,
+      "position": 3,
+      "arm": "cs",
+      "elapsed_ns": 117941500
+    }
+  ],
+  "measured_blocks": [
+    {
+      "index": 0,
+      "order": [
+        "c3",
+        "r3",
+        "rs",
+        "cs"
+      ],
+      "elapsed_ns": {
+        "c3": 163877500,
+        "r3": 102120400,
+        "rs": 102534600,
+        "cs": 99079500
+      },
+      "current_minus_reference_o3_ns": 61757100,
+      "current_minus_reference_os_ns": -3455100,
+      "current_os_minus_o3_ns": -64798000,
+      "reference_os_minus_o3_ns": 414200,
+      "difference_in_differences_ns": -65212200
+    },
+    {
+      "index": 1,
+      "order": [
+        "r3",
+        "cs",
+        "c3",
+        "rs"
+      ],
+      "elapsed_ns": {
+        "r3": 98624200,
+        "cs": 103778900,
+        "c3": 102386600,
+        "rs": 100808200
+      },
+      "current_minus_reference_o3_ns": 3762400,
+      "current_minus_reference_os_ns": 2970700,
+      "current_os_minus_o3_ns": 1392300,
+      "reference_os_minus_o3_ns": 2184000,
+      "difference_in_differences_ns": -791700
+    },
+    {
+      "index": 2,
+      "order": [
+        "cs",
+        "rs",
+        "r3",
+        "c3"
+      ],
+      "elapsed_ns": {
+        "cs": 99016700,
+        "rs": 97577200,
+        "r3": 102721300,
+        "c3": 107255300
+      },
+      "current_minus_reference_o3_ns": 4534000,
+      "current_minus_reference_os_ns": 1439500,
+      "current_os_minus_o3_ns": -8238600,
+      "reference_os_minus_o3_ns": -5144100,
+      "difference_in_differences_ns": -3094500
+    },
+    {
+      "index": 3,
+      "order": [
+        "rs",
+        "c3",
+        "cs",
+        "r3"
+      ],
+      "elapsed_ns": {
+        "rs": 100481800,
+        "c3": 99509100,
+        "cs": 102138100,
+        "r3": 99704900
+      },
+      "current_minus_reference_o3_ns": -195800,
+      "current_minus_reference_os_ns": 1656300,
+      "current_os_minus_o3_ns": 2629000,
+      "reference_os_minus_o3_ns": 776900,
+      "difference_in_differences_ns": 1852100
+    },
+    {
+      "index": 4,
+      "order": [
+        "c3",
+        "r3",
+        "rs",
+        "cs"
+      ],
+      "elapsed_ns": {
+        "c3": 102480600,
+        "r3": 99339200,
+        "rs": 140254300,
+        "cs": 103036300
+      },
+      "current_minus_reference_o3_ns": 3141400,
+      "current_minus_reference_os_ns": -37218000,
+      "current_os_minus_o3_ns": 555700,
+      "reference_os_minus_o3_ns": 40915100,
+      "difference_in_differences_ns": -40359400
+    },
+    {
+      "index": 5,
+      "order": [
+        "r3",
+        "cs",
+        "c3",
+        "rs"
+      ],
+      "elapsed_ns": {
+        "r3": 105959500,
+        "cs": 105984400,
+        "c3": 104101900,
+        "rs": 101917400
+      },
+      "current_minus_reference_o3_ns": -1857600,
+      "current_minus_reference_os_ns": 4067000,
+      "current_os_minus_o3_ns": 1882500,
+      "reference_os_minus_o3_ns": -4042100,
+      "difference_in_differences_ns": 5924600
+    },
+    {
+      "index": 6,
+      "order": [
+        "cs",
+        "rs",
+        "r3",
+        "c3"
+      ],
+      "elapsed_ns": {
+        "cs": 110162900,
+        "rs": 153774000,
+        "r3": 101929600,
+        "c3": 103635200
+      },
+      "current_minus_reference_o3_ns": 1705600,
+      "current_minus_reference_os_ns": -43611100,
+      "current_os_minus_o3_ns": 6527700,
+      "reference_os_minus_o3_ns": 51844400,
+      "difference_in_differences_ns": -45316700
+    },
+    {
+      "index": 7,
+      "order": [
+        "rs",
+        "c3",
+        "cs",
+        "r3"
+      ],
+      "elapsed_ns": {
+        "rs": 101028900,
+        "c3": 104793900,
+        "cs": 161095900,
+        "r3": 106984600
+      },
+      "current_minus_reference_o3_ns": -2190700,
+      "current_minus_reference_os_ns": 60067000,
+      "current_os_minus_o3_ns": 56302000,
+      "reference_os_minus_o3_ns": -5955700,
+      "difference_in_differences_ns": 62257700
+    }
+  ],
+  "predeclared_block_contrasts": {
+    "current_minus_reference_o3_ns": {
+      "n": 8,
+      "median_ns": 2423500,
+      "mean_ns": 8832050,
+      "positive": 5,
+      "negative": 3,
+      "zero": 0,
+      "min_ns": -2190700,
+      "max_ns": 61757100
+    },
+    "current_minus_reference_os_ns": {
+      "n": 8,
+      "median_ns": 1547900,
+      "mean_ns": -1760462.5,
+      "positive": 5,
+      "negative": 3,
+      "zero": 0,
+      "min_ns": -43611100,
+      "max_ns": 60067000
+    },
+    "current_os_minus_o3_ns": {
+      "n": 8,
+      "median_ns": 1637400,
+      "mean_ns": -468425,
+      "positive": 6,
+      "negative": 2,
+      "zero": 0,
+      "min_ns": -64798000,
+      "max_ns": 56302000
+    },
+    "reference_os_minus_o3_ns": {
+      "n": 8,
+      "median_ns": 595550,
+      "mean_ns": 10124087.5,
+      "positive": 5,
+      "negative": 3,
+      "zero": 0,
+      "min_ns": -5955700,
+      "max_ns": 51844400
+    },
+    "difference_in_differences_ns": {
+      "n": 8,
+      "median_ns": -1943100,
+      "mean_ns": -10592512.5,
+      "positive": 3,
+      "negative": 5,
+      "zero": 0,
+      "min_ns": -65212200,
+      "max_ns": 62257700
+    }
+  },
+  "decision": {
+    "default_release_opt_level": "3 unchanged",
+    "candidate_opt_s_promoted": false,
+    "reason": "The current opt=s minus opt3 paired block median is +1637400ns and positive6/8; its mean is -468425ns and marginal arm medians point the other way. This sample does not establish a dependable improvement and does not justify promotion.",
+    "current_default_minus_reference_o3": "Paired block median+2423500ns, positive5/8; this diagnostic does not pass the speed requirement.",
+    "speed_requirement": "UNMET",
+    "primary_qualifying_performance_measurements": 0
+  },
+  "evidence_sha256": {
+    "source": "ab0790bc171238232f123b42c17a9e6ff5682a0ff0d067c1e924b2d1f4489733",
+    "freeze": "f05fc54e5a6c204f579b6070d8745298f69d232690af51bbd499f2e3dc547f38",
+    "native_gate": "60fe124b2e3a8e63da83ecde90e1ac43caec4f1114d20b309990eab9ea11dcbd",
+    "native_actual_launcher_vectors": "da0fa9fedd4e9bc208e724e52ec06e797c033f51225f53a7e27038ba20a501f3",
+    "receipt": "33caf58670ba7173fcfa1ab8db6382109c4f49d1e2d37bb06c782658bf72af0a",
+    "root_actual": "0e44e0d91898fd57b449c3f42223e9a94378fc75480a14df0df999a005bf7853",
+    "full_capture_inventory": "e83f910bd8f232e21ce34ff843137ca66b4df5dc5cb21ceb5ab28b287c04e412",
+    "independent_actual_reviews": [
+      "571c943a968a0e6ba4682a3f8bb86ce4680aff3fc6874af16040f2ec0b79db58",
+      "fd37de00e8be6391da8125b6b790a04a136c7f52b75dcf0f402c00863423d361"
+    ]
+  },
+  "limits": [
+    "Four fixed qualification slots c3,r3,rs,cs precede measurement; all four must pass original protected custody. They are excluded from eight measured Williams blocks. Any failure stops; preserve raw partials and do not restart or replace slots.",
+    "Eight fixed four-arm Williams blocks repeat four rows twice, 32 measured slots. Each arm appears twice in each position and each directed predecessor occurs once per four-block cycle within blocks; cross-block carryover remains.",
+    "The same pinned testkit executes mark FILE 0.05. Original guard and payload PID/creation image/Job/first terminal/empty I/O/deadline/cleanup oracles remain required, using published native share READ|WRITE|DELETE marker reader and no trace environment.",
+    "Elapsed includes parent CreateProcessW through original retained guard native wait and overlaps marker acquisition and 50ms payload. Separate phase intervals are observer-influenced and not exclusive component costs.",
+    "Predeclare per-block current-reference at opt3 and opts, within-source opts-opt3, and descriptive difference-in-differences. Medians/order strata are descriptive, not isolated compiler, image-size, loader, CPU, security, product-default or primary speed acceptance.",
+    "Four archived PE paths and file identities differ; path/cache/AV/scheduler and source feature/resource graph can affect outcomes. Reference is not generally eligible (prior G28 failure).",
+    "2s product timeout, 3s slot bound, retained original 55s root/60s backup with 11s reserve; no watchdog/trusted assistance qualifies. Root outer finite Job remains required.",
+    "No prior exposures are labeled cold or deleted; current/repaired-reference historical observations stay separate.",
+    "Prior namespace001 failed strict root guard argv before any qualification or product call; preserved and excluded, not a warmup or measured slot.",
+    "All eight blocks and all large observations are retained. No trimming, significance-based equivalence, favorable retry, pooled historical epochs or aggregate win-rate claim.",
+    "Means, medians and marginal arm medians can point in different directions; the within-block contrasts are the predeclared summaries. Eight blocks are descriptive, not an academic primary performance qualification.",
+    "The compiler intervention affects broad code generation, inlining and layout. This does not isolate image size, loader work, CPU cost or a source-level slowdown cause.",
+    "The archived reference passed this narrow protected normal workload; its prior broader G28 qualification failure remains unresolved and it is not generally eligible as a correctness baseline.",
+    "Current-image readiness was600 top-level existing test function executions with five guard conditional assertions not exercised and two timing functions filtered per battery. This does not certify all protections under opt=s.",
+    "Exact machine/transport/identity raw originals remain private; this numeric summary and hashes are not the complete public academic reproducibility package."
+  ]
+}
