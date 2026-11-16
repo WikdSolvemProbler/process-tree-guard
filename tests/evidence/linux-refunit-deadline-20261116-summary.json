@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "summary_only": true,
+  "case_id": "linux-separate-service-original-deadline-descendant-1",
+  "status": "pass",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "environment": {
+    "os": "Linux",
+    "architecture": "aarch64",
+    "systemd": "255.4-1ubuntu8.18"
+  },
+  "product_images": {
+    "root_sha256": "3368ec504fd0959bb6a26a4c17cc74bbd34e5576baaa582cc83ca4b71719d93d",
+    "client_sha256": "193eaaf6be88c8878d549e750ed722ab55fcae31a78c7081d73e4c3bca3e5f24"
+  },
+  "workload": {
+    "original_deadline_seconds": 10,
+    "payload_processes_observed_live": 2,
+    "descendant_detached_session": true,
+    "ordinary_caller": true
+  },
+  "observed": {
+    "client_exit": 124,
+    "client_stderr": "PROCESS_TIMEOUT: original invocation deadline expired\n",
+    "client_began_to_ended_ns": "10010024046",
+    "original_owner_live_at_first_client_terminal_sample": true,
+    "both_original_payload_pidfds_terminal_at_first_client_sample": true,
+    "same_service_invocation_recorded_exit124": true,
+    "original_parent_domain_empty": true,
+    "two_original_subdomains_retired": true,
+    "same_socket_one_accepted_connection_and_zero_current_connections": true,
+    "manager_job_snapshots_empty": true,
+    "prestop_before_assistance": true,
+    "ordinary_and_root_observer_exit": 0,
+    "fallback_timer_fired": false,
+    "normal_cleanup_exit": 0,
+    "exact_owned_paths_removed": 7,
+    "cleanup_errors": [],
+    "retained_product_assets": []
+  },
+  "failed_preworkload_attempts_in_this_fixture_series": [
+    {
+      "attempt": "004",
+      "ssh_exit": 125,
+      "sut_calls": 0,
+      "error": "Observer wrapper assumed the first stdout frame was READY.",
+      "normal_cleanup_succeeded": true,
+      "all_available_evidence_preserved": true,
+      "limitation": "The already-read observer stdout prefix was not retained on that failure path."
+    }
+  ],
+  "receipts": {
+    "raw_bundle_sha256": "975c6e8f5d307fcff933336c5d0fabd906b6caf31450d91109a46a59b499a089",
+    "root_audit_sha256": "27e00d07eed7fd7266977f5018392cddbe4f7dcb70606ea404c9dc8848487bc9",
+    "independent_raw_audit_sha256": "4627e0dc856d92ecd6722c627914afc0f53026711eb729cc062898b61ecfc49b",
+    "independent_custody_audit_sha256": "0135cce817601dc486e525743272a4ca845c4c30573bdd75f86c81193988d0e4",
+    "preserved_files": 27,
+    "preserved_bytes": 1906529,
+    "nested_raw_records_rehashed": 36,
+    "source_product_tool_postpins": 24
+  },
+  "limits": [
+    "One fixed separate-service deadline case; not full Linux qualification.",
+    "Product internal native and manager joins remain source inferred; internal product result frames were not exported.",
+    "The next fixture must independently check prior test-scope retirement and absence of product assets.",
+    "Owner-loss, broader lifecycle and escape cases, transparent context and kernel-floor qualification remain open.",
+    "The duration is descriptive; there are zero primary qualifying competitive measurements.",
+    "Linux default dispatch remains disabled.",
+    "Exact original evidence contains private environment records and remains local; this summary and its hashes do not replace publicly accessible raw evidence."
+  ]
+}

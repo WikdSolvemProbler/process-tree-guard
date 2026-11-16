@@ -473,3 +473,11 @@ Native settlement, original-service/domain, retained-manager and reference-relea
 A preliminary local audit used an incomplete derived witness hash. That record was retained; both independent reviewers recomputed the published hash from the complete original witness. The raw observations and test outcome were unchanged.
 
 Receipt SHA-256: `9e99a440853e7a3f3d6525ff74cc73462a0114b23a871a6a1bae919726adf267`; raw collection: `5e9e877eaf5ba7c3ca2c618b4d826e5ceb19398ea2652247bdab9a7d1ceb7bd1`; canonical pre-stop witness: `0db225d82ad0148493e45d90c489801ea81a7f9e01efeff09d8253b2bb603267`. Exact machine and SSH records remain local under the publication privacy policy; these hashes and this summary do not replace publicly accessible raw evidence.
+
+## Linux original-deadline descendant case
+
+The repaired root and client from `d9537ba` passed one separate-service deadline case on Linux ARM64 with systemd 255. The payload created a detached descendant. With the original 10-second deadline, the client returned 124 and the exact timeout notice after 10.010024046 seconds. Both original payload pidfds were terminal at the first client-completion sample while the original owner remained live.
+
+The same service incarnation recorded exit 124. The original parent domain was empty, its two observed subdomains were retired, and the same socket recorded one accepted connection and zero current connections. The persisted PRESTOP witness preceded assistance. Normal cleanup removed the six installed product assets and the owned policy directory; no fallback timer fired. Independent reviews verified all 27 preserved files and 36 nested raw records. The preceding attempt stopped in the observer wrapper before any guard invocation; its failure and cleanup evidence remain preserved.
+
+The [structured summary and receipt hashes](linux-refunit-deadline-20261116-summary.json) state the exact scope and evidence limits. This is one deadline case, not full Linux qualification or a speed result. Internal product joins remain source inferred. Owner-loss and the wider lifecycle/escape battery remain open, and Linux default dispatch remains disabled. Exact originals remain local under the publication privacy policy; this summary does not replace publicly accessible raw evidence.
