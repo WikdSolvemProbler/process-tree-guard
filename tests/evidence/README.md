@@ -497,3 +497,11 @@ A fixed 20-pair diagnostic compared a fresh archived repaired reference with the
 The paired factor-minus-reference median was -0.69205 ms overall, but the median reversed from -1.8039 ms with the factor first to +1.5073 ms with the reference first. This order-sensitive result does not establish a stable import penalty, zero effect, parity or the cause of the canonical guard slowdown. It does not justify a product loading or randomness change.
 
 The [structured summary, all 20 numeric pairs and receipt hashes](windows-import-factor-20261116-summary.json) disclose the excluded two-slot preflight, build/layout confounds and evidence limits. The canonical guard was not compared here; the historical reference retains its broader qualification failures. There remain zero primary qualifying competitive measurements. Exact machine records stay private; the extracts and hashes do not replace publicly accessible raw evidence.
+
+## Windows startup localization
+
+Offline reanalysis of the existing 20 current-versus-repaired-reference pairs preserves the observed slowdown: a paired median of +3.73415 ms, positive in both launch orders. The largest median component is the interval from resuming the guard to the observer opening the payload handle (+3.10085 ms). That interval includes guard/payload startup, marker publication, scheduling and polling; it does not identify exclusive product CPU or loader cost. Component medians must not be added to explain the total median.
+
+One separately reviewed traced correctness pair then completed both arms with valid V1 records and the original process/Job/cleanup oracles. The first tracing plan and failed empty-stderr attempt remain preserved. Early loader/CLI/Job setup remains outside V1, and similarly named stage lines occur at different source callsites across the arms. This single pair does not cancel the untraced residual or establish speed acceptance.
+
+The [numeric extracts, trace feasibility results and audit hashes](windows-startup-localization-20261116-summary.json) give the scope and limits. No product source, protection or default changed. Primary qualifying competitive measurements remain zero; exact private originals are not replaced by this summary.

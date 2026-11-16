@@ -1,0 +1,444 @@
+{
+  "schema_version": 1,
+  "summary_only": true,
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "primary_qualifying_performance_measurements": 0,
+  "speed_acceptance_proven": false,
+  "images": {
+    "current_sha256": "e8af56a25af34e6d7e1acf706fd819bbe56c84259da0a07760e9e9f532a59d2c",
+    "repaired_historical_reference_sha256": "7edd4765bf53089799c898be6a65f179ec177de838960460bf5f2bbe1af33533"
+  },
+  "untraced_original_sample": {
+    "pairs": 20,
+    "slots": 40,
+    "workload": "Protected manual --timeout 2 with fixed marker payload and 50 ms hold",
+    "raw_receipt_sha256": "cee2493b51f5abcb8c533b6ccd7a30ea2361418594a5944ed63d59755da335ee",
+    "root_audit_sha256": "7e39f49958e4c08399ddd1064e4b2f09babafe708e90044621996a18b61737a5",
+    "offline_component_audit_sha256": "b36f0ec163fda7af7dfd909faf95d46463930bdadbfd3f406c331089399fa317",
+    "paired_current_minus_reference_ns": {
+      "total": {
+        "n": 20,
+        "paired_median_ns": 3734150,
+        "paired_mean_ns": 2201795,
+        "current_longer": 14,
+        "current_shorter": 6
+      },
+      "start_to_create": {
+        "n": 20,
+        "paired_median_ns": 1273350,
+        "paired_mean_ns": -443675,
+        "current_longer": 14,
+        "current_shorter": 6
+      },
+      "resume_to_handle_open": {
+        "n": 20,
+        "paired_median_ns": 3100850,
+        "paired_mean_ns": 2954055,
+        "current_longer": 15,
+        "current_shorter": 5
+      },
+      "handle_open_to_verified": {
+        "n": 20,
+        "paired_median_ns": 20450,
+        "paired_mean_ns": -79470,
+        "current_longer": 11,
+        "current_shorter": 9
+      },
+      "verified_to_native_wait": {
+        "n": 20,
+        "paired_median_ns": 2150,
+        "paired_mean_ns": 190,
+        "current_longer": 14,
+        "current_shorter": 6
+      },
+      "resume_to_native_wait": {
+        "n": 20,
+        "paired_median_ns": 3103550,
+        "paired_mean_ns": 2874775,
+        "current_longer": 15,
+        "current_shorter": 5
+      },
+      "native_wait_to_end": {
+        "n": 20,
+        "paired_median_ns": 349100,
+        "paired_mean_ns": -218545,
+        "current_longer": 12,
+        "current_shorter": 8
+      }
+    },
+    "order_strata_ns": {
+      "current_first": {
+        "total": {
+          "n": 10,
+          "paired_median_ns": 4914950,
+          "paired_mean_ns": 2446830,
+          "current_longer": 7,
+          "current_shorter": 3
+        },
+        "start_to_create": {
+          "n": 10,
+          "paired_median_ns": 202700,
+          "paired_mean_ns": 778240,
+          "current_longer": 6,
+          "current_shorter": 4
+        },
+        "resume_to_handle_open": {
+          "n": 10,
+          "paired_median_ns": 3891700,
+          "paired_mean_ns": 1384750,
+          "current_longer": 6,
+          "current_shorter": 4
+        },
+        "handle_open_to_verified": {
+          "n": 10,
+          "paired_median_ns": 3700,
+          "paired_mean_ns": -18610,
+          "current_longer": 5,
+          "current_shorter": 5
+        },
+        "verified_to_native_wait": {
+          "n": 10,
+          "paired_median_ns": 4200,
+          "paired_mean_ns": 1940,
+          "current_longer": 7,
+          "current_shorter": 3
+        },
+        "resume_to_native_wait": {
+          "n": 10,
+          "paired_median_ns": 3750350,
+          "paired_mean_ns": 1368080,
+          "current_longer": 6,
+          "current_shorter": 4
+        },
+        "native_wait_to_end": {
+          "n": 10,
+          "paired_median_ns": 1162400,
+          "paired_mean_ns": 315580,
+          "current_longer": 6,
+          "current_shorter": 4
+        }
+      },
+      "reference_first": {
+        "total": {
+          "n": 10,
+          "paired_median_ns": 2618400,
+          "paired_mean_ns": 1956760,
+          "current_longer": 7,
+          "current_shorter": 3
+        },
+        "start_to_create": {
+          "n": 10,
+          "paired_median_ns": 2067600,
+          "paired_mean_ns": -1665590,
+          "current_longer": 8,
+          "current_shorter": 2
+        },
+        "resume_to_handle_open": {
+          "n": 10,
+          "paired_median_ns": 3100850,
+          "paired_mean_ns": 4523360,
+          "current_longer": 9,
+          "current_shorter": 1
+        },
+        "handle_open_to_verified": {
+          "n": 10,
+          "paired_median_ns": 20450,
+          "paired_mean_ns": -140330,
+          "current_longer": 6,
+          "current_shorter": 4
+        },
+        "verified_to_native_wait": {
+          "n": 10,
+          "paired_median_ns": 2150,
+          "paired_mean_ns": -1560,
+          "current_longer": 7,
+          "current_shorter": 3
+        },
+        "resume_to_native_wait": {
+          "n": 10,
+          "paired_median_ns": 3103550,
+          "paired_mean_ns": 4381470,
+          "current_longer": 9,
+          "current_shorter": 1
+        },
+        "native_wait_to_end": {
+          "n": 10,
+          "paired_median_ns": 349100,
+          "paired_mean_ns": -752670,
+          "current_longer": 6,
+          "current_shorter": 4
+        }
+      }
+    },
+    "paired_numeric_extract_ns": [
+      {
+        "index": 0,
+        "first": "current",
+        "total": 5953500,
+        "start_to_create": 148500,
+        "resume_to_handle_open": 7079000,
+        "handle_open_to_verified": 74700,
+        "verified_to_native_wait": 26200,
+        "resume_to_native_wait": 7179900,
+        "native_wait_to_end": -1206900
+      },
+      {
+        "index": 1,
+        "first": "reference",
+        "total": -3941900,
+        "start_to_create": 1080100,
+        "resume_to_handle_open": 2198600,
+        "handle_open_to_verified": 28700,
+        "verified_to_native_wait": 5400,
+        "resume_to_native_wait": 2232700,
+        "native_wait_to_end": -7258400
+      },
+      {
+        "index": 2,
+        "first": "current",
+        "total": -3996800,
+        "start_to_create": 1466600,
+        "resume_to_handle_open": -8520700,
+        "handle_open_to_verified": 53400,
+        "verified_to_native_wait": 11300,
+        "resume_to_native_wait": -8456000,
+        "native_wait_to_end": 2981300
+      },
+      {
+        "index": 3,
+        "first": "reference",
+        "total": 2398900,
+        "start_to_create": 485800,
+        "resume_to_handle_open": 3342800,
+        "handle_open_to_verified": -47400,
+        "verified_to_native_wait": 9300,
+        "resume_to_native_wait": 3304700,
+        "native_wait_to_end": -1246600
+      },
+      {
+        "index": 4,
+        "first": "current",
+        "total": 4630400,
+        "start_to_create": -1333400,
+        "resume_to_handle_open": 15016600,
+        "handle_open_to_verified": 35500,
+        "verified_to_native_wait": 8100,
+        "resume_to_native_wait": 15060200,
+        "native_wait_to_end": -9097500
+      },
+      {
+        "index": 5,
+        "first": "reference",
+        "total": 42998000,
+        "start_to_create": 1749500,
+        "resume_to_handle_open": 37330100,
+        "handle_open_to_verified": 59900,
+        "verified_to_native_wait": -17000,
+        "resume_to_native_wait": 37373000,
+        "native_wait_to_end": 3880700
+      },
+      {
+        "index": 6,
+        "first": "current",
+        "total": 6473800,
+        "start_to_create": -1151500,
+        "resume_to_handle_open": 2158500,
+        "handle_open_to_verified": -191500,
+        "verified_to_native_wait": -8600,
+        "resume_to_native_wait": 1958400,
+        "native_wait_to_end": 5670900
+      },
+      {
+        "index": 7,
+        "first": "reference",
+        "total": 15585300,
+        "start_to_create": 8292800,
+        "resume_to_handle_open": 6590800,
+        "handle_open_to_verified": -9300,
+        "verified_to_native_wait": 2100,
+        "resume_to_native_wait": 6583600,
+        "native_wait_to_end": 674800
+      },
+      {
+        "index": 8,
+        "first": "current",
+        "total": 1123200,
+        "start_to_create": 256900,
+        "resume_to_handle_open": 5697000,
+        "handle_open_to_verified": 36900,
+        "verified_to_native_wait": 16400,
+        "resume_to_native_wait": 5750300,
+        "native_wait_to_end": -4897600
+      },
+      {
+        "index": 9,
+        "first": "reference",
+        "total": 5749400,
+        "start_to_create": 2385700,
+        "resume_to_handle_open": 2675300,
+        "handle_open_to_verified": 71200,
+        "verified_to_native_wait": 5500,
+        "resume_to_native_wait": 2752000,
+        "native_wait_to_end": 607400
+      },
+      {
+        "index": 10,
+        "first": "current",
+        "total": 49801700,
+        "start_to_create": 3102700,
+        "resume_to_handle_open": 43065200,
+        "handle_open_to_verified": -128800,
+        "verified_to_native_wait": -30800,
+        "resume_to_native_wait": 42905600,
+        "native_wait_to_end": 3768600
+      },
+      {
+        "index": 11,
+        "first": "reference",
+        "total": -35555100,
+        "start_to_create": 5419300,
+        "resume_to_handle_open": -37949800,
+        "handle_open_to_verified": -1505200,
+        "verified_to_native_wait": -21200,
+        "resume_to_native_wait": -39476200,
+        "native_wait_to_end": -1522000
+      },
+      {
+        "index": 12,
+        "first": "current",
+        "total": -747300,
+        "start_to_create": 2465700,
+        "resume_to_handle_open": -1950000,
+        "handle_open_to_verified": -140800,
+        "verified_to_native_wait": -11900,
+        "resume_to_native_wait": -2102700,
+        "native_wait_to_end": -1118100
+      },
+      {
+        "index": 13,
+        "first": "reference",
+        "total": 928200,
+        "start_to_create": -2297000,
+        "resume_to_handle_open": 2858900,
+        "handle_open_to_verified": 38000,
+        "verified_to_native_wait": 5500,
+        "resume_to_native_wait": 2902400,
+        "native_wait_to_end": 339100
+      },
+      {
+        "index": 14,
+        "first": "current",
+        "total": 5199500,
+        "start_to_create": 4815300,
+        "resume_to_handle_open": -1594200,
+        "handle_open_to_verified": -28100,
+        "verified_to_native_wait": 300,
+        "resume_to_native_wait": -1622000,
+        "native_wait_to_end": 2031200
+      },
+      {
+        "index": 15,
+        "first": "reference",
+        "total": 2837900,
+        "start_to_create": 2611600,
+        "resume_to_handle_open": 4009400,
+        "handle_open_to_verified": 12200,
+        "verified_to_native_wait": 2200,
+        "resume_to_native_wait": 4023800,
+        "native_wait_to_end": -3783300
+      },
+      {
+        "index": 16,
+        "first": "current",
+        "total": -49458500,
+        "start_to_create": -1639900,
+        "resume_to_handle_open": -52728800,
+        "handle_open_to_verified": 186100,
+        "verified_to_native_wait": 7500,
+        "resume_to_native_wait": -52535200,
+        "native_wait_to_end": 4730300
+      },
+      {
+        "index": 17,
+        "first": "reference",
+        "total": 5869200,
+        "start_to_create": 3647200,
+        "resume_to_handle_open": 1791700,
+        "handle_open_to_verified": 41700,
+        "verified_to_native_wait": 2100,
+        "resume_to_native_wait": 1835500,
+        "native_wait_to_end": 359100
+      },
+      {
+        "index": 18,
+        "first": "current",
+        "total": 5488800,
+        "start_to_create": -348500,
+        "resume_to_handle_open": 5624900,
+        "handle_open_to_verified": -83500,
+        "verified_to_native_wait": 900,
+        "resume_to_native_wait": 5542300,
+        "native_wait_to_end": 293600
+      },
+      {
+        "index": 19,
+        "first": "reference",
+        "total": -17302300,
+        "start_to_create": -40030900,
+        "resume_to_handle_open": 22385800,
+        "handle_open_to_verified": -93100,
+        "verified_to_native_wait": -9500,
+        "resume_to_native_wait": 22283200,
+        "native_wait_to_end": 422500
+      }
+    ],
+    "interpretation": "The existing untraced sample retains a positive paired current-minus-reference median in both orders. The largest median component is before the observer opens the payload handle. Component medians are separate and must not be added to explain the total median."
+  },
+  "traced_feasibility": {
+    "pairs": 1,
+    "slots": 2,
+    "order": "current then reference",
+    "all_original_normal_case_custody_oracles_passed": true,
+    "valid_complete_v1_records": 2,
+    "source_pins_rehashed": 38,
+    "before_held_and_reopened_bindings_rehashed": 132,
+    "raw_receipt_sha256": "dabcadac45bca6c49afdd34e17ffaa98a87ec66c617a6a995cdfa13646463ed3",
+    "root_audit_sha256": "8f476830be598c14fb88b0d59291b1ec1506b7cc1d39495c11c3ce5fd4733284",
+    "independent_raw_audit_sha256": "31938b59bc575e436df695cb38801a77df7db7df31e90071d798f0e47d6eed29",
+    "independent_inventory_audit_sha256": "a0a9746fafbc2256b6642612c5e18dcb26d8cc91dbd3d62c4596473a875f37ae",
+    "records": [
+      {
+        "arm": "current",
+        "outer_elapsed_ns": 96142000,
+        "qpc_frequency": 10000000,
+        "assignment_bracket_ns": "1100",
+        "post_assignment_to_final_native_wait_ns": "6355600",
+        "final_native_wait_to_selected_outcome_ns": "58979900"
+      },
+      {
+        "arm": "repaired_reference",
+        "outer_elapsed_ns": 101064200,
+        "qpc_frequency": 10000000,
+        "assignment_bracket_ns": "1000",
+        "post_assignment_to_final_native_wait_ns": "6546800",
+        "final_native_wait_to_selected_outcome_ns": "60267600"
+      }
+    ],
+    "trace_environment": "Legacy trace and nonce keys are injected at SUT launch and inherited by its fixed payload. The pinned testkit marker branch does not read these keys; the environment still differs from the untraced workload.",
+    "interpretation": "One traced correctness pair establishes usable source-mapped records. Its direction does not cancel the untraced residual or establish a ranking."
+  },
+  "preserved_attempts": [
+    "The first tracing plan was rejected without runtime because it inaccurately claimed no payload inheritance.",
+    "The first actual traced attempt stopped in an empty-stderr classifier before completing a pair. It remains failed. A private trace-aware classifier, retaining every other original predicate and validating complete raw V1 first, corrected the harness.",
+    "Two Root validator mistakes were preserved: a reviewer-hash transcription error before authority creation and a held-snapshot schema assumption during post-run audit. Neither caused a repeated SUT call."
+  ],
+  "limits": [
+    "The post-resume/pre-handle-open interval includes SUT launch, payload startup and marker publication, scheduling and observer polling. It is not exclusive product CPU or loader time.",
+    "Source stage labels are not aligned phase endpoints: child-started is after ResumeThread in current and after CreateProcessW in reference; child-finished is before cleanup in current and after teardown in reference.",
+    "V1 starts after early loader, CLI and Job setup. Final native wait to selected outcome includes blocking wait; it is not post-wait cleanup.",
+    "Tracing adds QPC/stage work. Do not subtract traced and untraced measurements to estimate overhead.",
+    "No slowdown cause or product repair is established. No guarantee, default or product source was changed.",
+    "The historical repaired reference remains generally ineligible because of its preserved broader correctness failures.",
+    "Exact machine and transport records remain private. Numeric extracts, summaries and hashes do not replace publicly accessible raw evidence."
+  ]
+}
