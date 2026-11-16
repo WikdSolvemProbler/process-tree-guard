@@ -130,7 +130,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   outcome.service=Some(service);outcome.events=Some(fs::File::from(events));outcome.hello=Some(hello.clone());
   validate_pidfd(outcome.service.as_ref().expect("owned service"),hello.pid as c_int,&mut NativeReceipt::default()).map_err(|e|format!("service capability: {e:?}"))?;
   let name=CString::new(hello.unit.clone()).map_err(|_|"unit name NUL")?;
-  outcome.unit=Some(manager::UnitReference::acquire(&name,hello.invocation,hello.pid,hello.group.clone(),end)?);
+  outcome.unit=Some(manager::UnitReference::acquire(&name,hello.invocation,hello.pid,hello.group.clone(),original,outcome.service.as_ref().expect("held original service"),end)?);
   let events=outcome.events.as_ref().expect("owned events");let duplicate=error(os_result(unsafe{fcntl(events.as_raw_fd(),1030,3 as c_int)} as isize))? as RawFd;
   let duplicate=unsafe{OwnedFd::from_raw_fd(duplicate)};
   outcome.completion=Some(supervisor::native_activation::client_events(&duplicate,&hello.group)?);drop(duplicate);

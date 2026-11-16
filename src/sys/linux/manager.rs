@@ -76,6 +76,121 @@ impl Message{
  fn bytes16(&self)->Probe<[u8;16]>{let mut data=ptr::null();let mut size=0;let count=call(unsafe{sd_bus_message_read_array(self.0.as_ptr(),b'y' as c_char,&mut data,&mut size)},"read invocation bytes")?;if count!=1||size!=16||data.is_null(){return Err("invalid systemd invocation ID".into());}let mut result=[0;16];result.copy_from_slice(unsafe{std::slice::from_raw_parts(data.cast(),16)});if result==[0;16]{return Err("zero systemd invocation ID".into());}Ok(result)}
 }
 impl Drop for Message{fn drop(&mut self){unsafe{sd_bus_message_unref(self.0.as_ptr());}}}
+
+// RefUnit may spend only the ORIGINAL execution budget. Other manager calls
+// retain bound()'s 500ms limit; no retry or cleanup-grace lease is created here.
+#[repr(C)]struct SdSlot{_opaque:[u8;0]}
+#[repr(C)]#[derive(Default)]struct RefTimespec{seconds:i64,nanoseconds:i64}
+#[repr(C)]struct RefItimer{interval:RefTimespec,value:RefTimespec}
+type RefCallback=unsafe extern "C" fn(*mut SdMessage,*mut c_void,*mut SdBusError)->c_int;
+unsafe extern "C"{
+ fn sd_bus_message_new_method_call(bus:*mut SdBus,message:*mut *mut SdMessage,destination:*const c_char,path:*const c_char,interface:*const c_char,member:*const c_char)->c_int;
+ fn sd_bus_message_append(message:*mut SdMessage,types:*const c_char,...)->c_int;
+ fn sd_bus_call_async(bus:*mut SdBus,slot:*mut *mut SdSlot,message:*mut SdMessage,callback:Option<RefCallback>,userdata:*mut c_void,usec:u64)->c_int;
+ fn sd_bus_process(bus:*mut SdBus,message:*mut *mut SdMessage)->c_int;
+ fn sd_bus_get_events(bus:*mut SdBus)->c_int;
+ fn sd_bus_get_timeout(bus:*mut SdBus,usec:*mut u64)->c_int;
+ fn sd_bus_slot_unref(slot:*mut SdSlot)->*mut SdSlot;
+ fn sd_bus_message_ref(message:*mut SdMessage)->*mut SdMessage;
+ fn sd_bus_message_get_type(message:*mut SdMessage,kind:*mut u8)->c_int;
+ fn sd_bus_message_get_sender(message:*mut SdMessage)->*const c_char;
+ fn sd_bus_message_get_signature(message:*mut SdMessage,complete:c_int)->*const c_char;
+ fn sd_bus_message_get_error(message:*mut SdMessage)->*const SdBusError;
+ fn sd_bus_message_get_errno(message:*mut SdMessage)->c_int;
+ #[link_name="clock_gettime"]fn ref_clock_gettime(clock:c_int,value:*mut RefTimespec)->c_int;
+ #[link_name="timerfd_create"]fn ref_timerfd_create(clock:c_int,flags:c_int)->c_int;
+ #[link_name="timerfd_settime"]fn ref_timerfd_settime(fd:c_int,flags:c_int,value:*const RefItimer,old:*mut RefItimer)->c_int;
+}
+struct RefSlot(NonNull<SdSlot>);
+impl Drop for RefSlot{fn drop(&mut self){unsafe{sd_bus_slot_unref(self.0.as_ptr());}}}
+struct RefReplyState{message:*mut SdMessage,called:bool,fault:bool}
+// Raw-owned stable userdata: no Rust reference to the state spans C dispatch.
+struct RefReplyOwner(NonNull<RefReplyState>);
+impl RefReplyOwner{
+ fn new()->Self{let raw=Box::into_raw(Box::new(RefReplyState{message:ptr::null_mut(),called:false,fault:false}));Self(unsafe{NonNull::new_unchecked(raw)})}
+ fn userdata(&self)->*mut c_void{self.0.as_ptr().cast()}
+ fn ready(&self)->bool{unsafe{(*self.0.as_ptr()).called||(*self.0.as_ptr()).fault}}
+ fn take(&mut self)->Probe<Message>{unsafe{
+  let state=self.0.as_ptr();let pointer=(*state).message;(*state).message=ptr::null_mut();
+  let owned=NonNull::new(pointer).map(Message); // adopt before all returned errors
+  if (*state).fault||!(*state).called{drop(owned);return Err("RefUnit callback state is unverified".into());}
+  owned.ok_or_else(||"RefUnit callback contained no message".into())
+ }}
+}
+impl Drop for RefReplyOwner{fn drop(&mut self){unsafe{
+ let state=Box::from_raw(self.0.as_ptr());if !state.message.is_null(){sd_bus_message_unref(state.message);}
+}}}
+unsafe extern "C" fn ref_reply_callback(message:*mut SdMessage,userdata:*mut c_void,_ret_error:*mut SdBusError)->c_int{
+ if userdata.is_null(){return -22;}
+ let state=userdata.cast::<RefReplyState>();
+ unsafe{
+  if (*state).called||message.is_null(){(*state).fault=true;return 1;}
+  // The callback's ret_error is OUTPUT, not the received message's error.
+  (*state).message=sd_bus_message_ref(message);(*state).called=true;
+  if (*state).message.is_null(){(*state).fault=true;}
+ }
+ 1
+}
+fn ref_decision(owner:c_short,timer:c_short,service:c_short,now:u64,until:u64,reply:bool)->Probe<bool>{
+ if owner & !(POLLIN|0x10)!=0{return Err("RefUnit original-owner poll flags unverified".into());}
+ if owner!=0{return Err("original invocation owner lost during RefUnit acquisition".into());}
+ if timer & !POLLIN!=0{return Err("RefUnit original-deadline timer flags unverified".into());}
+ if timer!=0||now>=until{return Err("RefUnit original execution deadline expired".into());}
+ if service & !(POLLIN|0x10)!=0{return Err("RefUnit original-service poll flags unverified".into());}
+ if service!=0{return Err("original service ended during RefUnit acquisition".into());}
+ Ok(reply)
+}
+struct RefWatch<'a>{original:&'a OriginalInvocation,service:&'a OwnedFd,timer:OwnedFd,until:u64}
+impl<'a> RefWatch<'a>{
+ fn new(original:&'a OriginalInvocation,service:&'a OwnedFd)->Probe<Self>{
+  original.revalidate().map_err(|e|format!("RefUnit original context: {e:?}"))?;
+  let until=original.metadata().deadline_ns;
+  if until==0||supervisor::boottime_ns()?>=until{return Err("RefUnit original execution deadline expired before submission".into());}
+  let raw=unsafe{ref_timerfd_create(7,SOCK_CLOEXEC|SOCK_NONBLOCK)};
+  if raw<0{return Err(format!("RefUnit original timer create: {}",io::Error::last_os_error()));}
+  let timer=unsafe{OwnedFd::from_raw_fd(raw)};
+  let seconds=i64::try_from(until/1_000_000_000).map_err(|_|"RefUnit timer seconds overflow")?;
+  let value=RefItimer{interval:RefTimespec::default(),value:RefTimespec{seconds,nanoseconds:(until%1_000_000_000) as i64}};
+  if unsafe{ref_timerfd_settime(timer.as_raw_fd(),1,&value,ptr::null_mut())}<0{return Err(format!("RefUnit original timer arm: {}",io::Error::last_os_error()));}
+  let result=Self{original,service,timer,until};result.checkpoint(false)?;Ok(result)
+ }
+ fn sample(&self,bus:Option<(RawFd,c_short)>,milliseconds:c_int,reply:bool)->Probe<bool>{
+  let owners=self.original.pidfds();if !(2..=invocation::MAX_WATCHERS).contains(&owners.len()){return Err("RefUnit original watcher count differs".into());}
+  let mut watched=[PollFd{fd:-1,events:POLLIN,revents:0};invocation::MAX_WATCHERS+3];
+  for (entry,fd) in watched.iter_mut().zip(owners){entry.fd=fd.as_raw_fd();}
+  let timer_index=owners.len();let service_index=timer_index+1;let bus_index=service_index+1;
+  watched[timer_index].fd=self.timer.as_raw_fd();watched[service_index].fd=self.service.as_raw_fd();
+  let count=if let Some((fd,events))=bus{watched[bus_index]=PollFd{fd,events,revents:0};bus_index+1}else{bus_index};
+  for i in 0..count{if watched[i].fd<0||watched[..i].iter().any(|old|old.fd==watched[i].fd){return Err("RefUnit watched descriptors overlap or are invalid".into());}}
+  let observed=unsafe{poll(watched.as_mut_ptr(),count,milliseconds)};
+  if observed<0{return Err(format!("RefUnit watched poll: {}",io::Error::last_os_error()));}
+  let populated=watched[..count].iter().filter(|entry|entry.revents!=0).count();
+  let owner=watched[..timer_index].iter().fold(0,|bits,entry|bits|entry.revents);
+  let timer=watched[timer_index].revents;let service=watched[service_index].revents;let bus_flags=if bus.is_some(){watched[bus_index].revents}else{0};
+  let facts=|error:&str|format!("{error}; poll_count={observed} populated={populated} owner_flags={owner:#x} timer_flags={timer:#x} service_flags={service:#x} bus_flags={bus_flags:#x}");
+  if observed as usize!=populated{return Err(facts("RefUnit native poll count differs"));}
+  // Preserve an observed owner loss even if a later clock read could fail.
+  let sampled=if owner!=0{0}else{supervisor::boottime_ns().map_err(|error|facts(&error))?};
+  let decision=ref_decision(owner,timer,service,sampled,self.until,reply).map_err(|error|facts(&error))?;
+  if let Some((_,events))=bus{if bus_flags & !events!=0{return Err(facts("RefUnit bus readiness/disconnect flags unverified"));}}
+  Ok(decision)
+ }
+ fn checkpoint(&self,reply:bool)->Probe<bool>{self.sample(None,0,reply)}
+ fn wait(&self,bus:RawFd,events:c_short,milliseconds:c_int)->Probe<()>{self.sample(Some((bus,events)),milliseconds,false)?;self.checkpoint(false).map(|_|())}
+}
+fn ref_poll_timeout(bus_until:u64,original_until:u64)->Probe<c_int>{
+ let now=supervisor::boottime_ns()?;let original_left=original_until.checked_sub(now).filter(|n|*n>0).ok_or("RefUnit original execution deadline expired")?;
+ let mut milliseconds=original_left.div_ceil(1_000_000);
+ if bus_until!=u64::MAX{
+  let mut mono=RefTimespec::default();if unsafe{ref_clock_gettime(1,&mut mono)}<0{return Err(format!("RefUnit monotonic clock: {}",io::Error::last_os_error()));}
+  let seconds=u64::try_from(mono.seconds).map_err(|_|"RefUnit negative monotonic seconds")?;let nanos=u64::try_from(mono.nanoseconds).map_err(|_|"RefUnit negative monotonic fraction")?;
+  if nanos>=1_000_000_000{return Err("RefUnit monotonic fraction invalid".into());}
+  let micros=seconds.checked_mul(1_000_000).and_then(|v|v.checked_add(nanos/1000)).ok_or("RefUnit monotonic overflow")?;
+  milliseconds=milliseconds.min(bus_until.saturating_sub(micros).div_ceil(1000));
+ }
+ Ok(milliseconds.min(c_int::MAX as u64) as c_int)
+}
+
 // libsystemd owns its connection FD; it is never transferred to a client.
 pub(super) struct Bus{raw:NonNull<SdBus>,private:bool,public_destination:CString,manager_identity:Option<OwnedFd>,endpoint:Option<supervisor::native_activation::PublicBusEndpoint>}
 impl Bus{
@@ -118,6 +233,46 @@ impl Bus{
  fn number<T:Default>(&self,path:&CStr,interface:&CStr,name:&CStr,signature:&CStr,kind:u8,until:u64)->Probe<T>{self.property(path,interface,name,signature,until)?.basic(kind)}
  fn unit_for_pid(&self,pid:u32,until:u64)->Probe<CString>{self.bound(until)?;let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),c"GetUnitByPID".as_ptr(),ptr::null_mut(),&mut reply,c"u".as_ptr(),pid)};CString::new(owned_reply(status,reply,"unit for actual PID")?.text(b'o')?).map_err(|_|"unit object NUL".into())}
  fn unit_for_name(&self,name:&CStr,until:u64)->Probe<CString>{self.bound(until)?;let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),c"GetUnit".as_ptr(),ptr::null_mut(),&mut reply,c"s".as_ptr(),name.as_ptr())};CString::new(owned_reply(status,reply,"get referenced unit")?.text(b'o')?).map_err(|_|"unit object NUL".into())}
+ fn acquire_reference(&self,name:&CStr,original:&OriginalInvocation,service:&OwnedFd)->Probe<()>{
+  let watch=RefWatch::new(original,service)?;
+  if let Some(endpoint)=&self.endpoint{endpoint.revalidate()?;}
+  let authenticated_fd=call(unsafe{sd_bus_get_fd(self.raw.as_ptr())},"RefUnit authenticated bus FD")?;
+  let mut raw_message=ptr::null_mut();let status=unsafe{sd_bus_message_new_method_call(self.raw.as_ptr(),&mut raw_message,self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),c"RefUnit".as_ptr())};
+  let outgoing=NonNull::new(raw_message).map(Message);call(status,"create RefUnit message")?;let outgoing=outgoing.ok_or("RefUnit outgoing message missing")?;
+  call(unsafe{sd_bus_message_append(outgoing.0.as_ptr(),c"s".as_ptr(),name.as_ptr())},"append RefUnit unit")?;
+  let mut state=RefReplyOwner::new();watch.checkpoint(false)?;
+  let left=watch.until.checked_sub(supervisor::boottime_ns()?).filter(|n|*n>0).ok_or("RefUnit original execution deadline expired before send")?;
+  let mut raw_slot=ptr::null_mut();let submitted=unsafe{sd_bus_call_async(self.raw.as_ptr(),&mut raw_slot,outgoing.0.as_ptr(),Some(ref_reply_callback),state.userdata(),left.div_ceil(1000))};
+  // Declare the owned slot AFTER state: every returned-error/unwind drops it first.
+  let mut slot=NonNull::new(raw_slot).map(RefSlot);call(submitted,"submit single RefUnit request")?;if slot.is_none(){return Err("RefUnit callback slot missing".into());}
+  loop{
+   let current_fd=call(unsafe{sd_bus_get_fd(self.raw.as_ptr())},"checkpoint RefUnit authenticated bus FD")?;if current_fd!=authenticated_fd{return Err("RefUnit authenticated bus descriptor changed".into());}
+   if watch.checkpoint(state.ready())?{
+    original.revalidate().map_err(|e|format!("RefUnit completed original context: {e:?}"))?;watch.checkpoint(true)?;
+    drop(slot.take()); // detach before reading/dropping the callback state or Bus
+    let reply=state.take()?;let mut kind=0u8;call(unsafe{sd_bus_message_get_type(reply.0.as_ptr(),&mut kind)},"RefUnit reply type")?;
+    if kind==3{
+     let error=unsafe{sd_bus_message_get_error(reply.0.as_ptr())};let Some(error)=(unsafe{error.as_ref()})else{return Err("RefUnit callback method-error omitted its error".into());};
+     let code=unsafe{sd_bus_message_get_errno(reply.0.as_ptr())};
+     return Err(format!("{}: callback method-error (wire/local origin not inferred), mapped errno {code}",reference_operation(c"RefUnit",name,error)));
+    }
+    if kind!=2{return Err("RefUnit callback is not a method return".into());}
+    let sender=unsafe{sd_bus_message_get_sender(reply.0.as_ptr())};if sender.is_null()||unsafe{CStr::from_ptr(sender)}!=self.public_destination.as_c_str(){return Err("RefUnit success sender differs from authenticated PID1".into());}
+    let signature=unsafe{sd_bus_message_get_signature(reply.0.as_ptr(),1)};if signature.is_null()||unsafe{signature.read()}!=0{return Err("RefUnit success result is not empty".into());}
+    if let Some(endpoint)=&self.endpoint{endpoint.revalidate()?;}
+    original.revalidate().map_err(|e|format!("RefUnit final original context: {e:?}"))?;
+    let current_fd=call(unsafe{sd_bus_get_fd(self.raw.as_ptr())},"final RefUnit authenticated bus FD")?;if current_fd!=authenticated_fd{return Err("RefUnit authenticated bus descriptor changed".into());}
+    watch.checkpoint(true)?;return Ok(());
+   }
+   let progress=call(unsafe{sd_bus_process(self.raw.as_ptr(),ptr::null_mut())},"process pending RefUnit")?;
+   if progress>0||state.ready(){continue;}
+   let fd=call(unsafe{sd_bus_get_fd(self.raw.as_ptr())},"pending RefUnit bus FD")?;if fd!=authenticated_fd{return Err("RefUnit authenticated bus descriptor changed".into());}
+   let events=call(unsafe{sd_bus_get_events(self.raw.as_ptr())},"pending RefUnit bus events")?;
+   if events & !(1|4)!=0{return Err("RefUnit bus event mask unsupported".into());}
+   let mut bus_until=0u64;call(unsafe{sd_bus_get_timeout(self.raw.as_ptr(),&mut bus_until)},"pending RefUnit bus timeout")?;
+   watch.wait(fd,events as c_short,ref_poll_timeout(bus_until,watch.until)?)?;
+  }
+ }
  fn ref_operation(&self,name:&CStr,member:&CStr,until:u64)->Probe<()>{self.bound(until)?;let mut error=BusError::new();let mut reply=ptr::null_mut();let status=unsafe{sd_bus_call_method(self.raw.as_ptr(),self.destination(),ROOT.as_ptr(),MANAGER.as_ptr(),member.as_ptr(),&mut error.0,&mut reply,c"s".as_ptr(),name.as_ptr())};let owned=NonNull::new(reply).map(Message);let operation=reference_operation(member,name,&error.0);if status<0{drop(owned);return Err(format!("{operation}: libsystemd error {status}"));}drop(owned.ok_or_else(||format!("{operation}: missing systemd reply"))?);Ok(())}
  fn invocation(&self,path:&CStr,until:u64)->Probe<[u8;16]>{self.property(path,UNIT,c"InvocationID",c"ay",until)?.bytes16()}
  fn exec(&self,path:&CStr,until:u64)->Probe<(u32,i32,i32)>{let reply=self.property(path,SERVICE,c"ExecStart",c"a(sasbttttuii)",until)?;if reply.enter(b'a',c"(sasbttttuii)")?!=1||reply.enter(b'r',c"sasbttttuii")?!=1{return Err("missing exact ExecStart".into());}if reply.text(b's')?!=HELPER{return Err("unit ExecStart path differs".into());}if reply.enter(b'a',c"s")?!=1{return Err("missing ExecStart argv".into());}let a=reply.text(b's')?;let b=reply.text(b's')?;let mut extra:*const c_char=ptr::null();if a!=HELPER||b!="--service"||call(unsafe{sd_bus_message_read_basic(reply.0.as_ptr(),b's' as c_char,(&mut extra as *mut *const c_char).cast())},"ExecStart tail")?!=0{return Err("unit ExecStart argv differs".into());}reply.leave()?;let ignore:i32=reply.basic(b'b')?;for _ in 0..4{let _:u64=reply.basic(b't')?;}let pid=reply.basic(b'u')?;let code=reply.basic(b'i')?;let status=reply.basic(b'i')?;reply.leave()?;if ignore!=0||reply.enter(b'r',c"sasbttttuii")?!=0{return Err("unit has extra/ignored ExecStart".into());}reply.leave()?;Ok((pid,code,status))}
@@ -189,7 +344,7 @@ if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u3
 pub(super) enum FinalStatus{Verified,NeedsRetirement}
 pub(super) struct UnitReference{bus:Bus,path:CString,name:CString,invocation:[u8;16],pid:u32,group:String,referenced:bool}
 impl UnitReference{
- pub(super) fn acquire(name:&CStr,invocation:[u8;16],pid:u32,group:String,until:u64)->Probe<Self>{let bus=Bus::public(until)?;bus.ref_operation(name,c"RefUnit",until)?;let path=bus.unit_for_name(name,until)?;let result=Self{bus,path,name:name.to_owned(),invocation,pid,group,referenced:true};result.live(until)?;Ok(result)}
+ pub(super) fn acquire(name:&CStr,invocation:[u8;16],pid:u32,group:String,original:&OriginalInvocation,service:&OwnedFd,until:u64)->Probe<Self>{let bus=Bus::public(until)?;bus.acquire_reference(name,original,service)?;let path=bus.unit_for_name(name,until)?;let result=Self{bus,path,name:name.to_owned(),invocation,pid,group,referenced:true};result.live(until)?;Ok(result)}
  pub(super) fn live(&self,until:u64)->Probe<()>{if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u32>(&self.path,SERVICE,c"MainPID",c"u",b'u',until)?!=self.pid||self.bus.text(&self.path,SERVICE,c"ControlGroup",until)?!=self.group{return Err("root unit reference identity differs".into());}let (pid,_,_)=self.bus.exec(&self.path,until)?;if pid!=self.pid{return Err("root ExecStart identity differs".into());}notify_policy(&self.bus,&self.path,until)?;let(active,sub)=self.bus.state(&self.path,until)?;if !phase_allows(UnitPhase::Running,&active,&sub){return Err("referenced root service is not running".into());}Ok(())}
  pub(super) fn terminal_code(&self,until:u64)->Probe<i32>{
   if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u32>(&self.path,SERVICE,c"ExecMainPID",c"u",b'u',until)?!=self.pid||self.bus.number::<i32>(&self.path,SERVICE,c"ExecMainCode",c"i",b'i',until)?!=1{return Err("unframed terminal incarnation/status is unverified".into());}
@@ -219,4 +374,30 @@ impl UnitReference{
  assert_eq!(MAX_RUNTIME_USEC,((crate::deadline::MAX_SECONDS as u64)+30)*1_000_000);
  for(phase,active,sub,expected)in [(UnitPhase::Starting,"activating","start",true),(UnitPhase::Running,"active","running",true),(UnitPhase::Starting,"active","running",false),(UnitPhase::Running,"activating","start",false),(UnitPhase::Running,"active","exited",false),(UnitPhase::Running,"failed","failed",false),(UnitPhase::Starting,"deactivating","stop-sigkill",false),(UnitPhase::Running,"active","reload",false)]{assert_eq!(phase_allows(phase,active,sub),expected);}
  eprintln!("notify_phase_regression exact_starting_running_ceiling_verified");
+ // Real original owner pidfds plus a private absolute BOOTTIME timer; no
+ // service, fork, signal, global setting or authorization request is used here.
+ {
+  let original=OriginalInvocation::capture(OwnerMode::Manual,2.0).unwrap();
+  let service=pidfd_for(std::process::id() as c_int).unwrap(); // live surrogate, not root-service qualification
+  let watch=RefWatch::new(&original,&service).unwrap();
+  assert!(watch.checkpoint(true).unwrap(),"live original context accepts a completed-reply fact");
+  let mut timer=PollFd{fd:watch.timer.as_raw_fd(),events:POLLIN,revents:0};
+  assert_eq!(unsafe{poll(&mut timer,1,3000)},1,"real original-deadline timer must wake within finite unit bound");
+  assert_eq!(timer.revents,POLLIN,"real timer readiness, not a fabricated wait result");
+  let refused=watch.checkpoint(true).expect_err("expired original deadline must veto a completed RefUnit reply");
+  assert!(refused.contains("original execution deadline expired"));
+ }
+ // Pure classification boundaries; these do not simulate an actual owner death.
+ assert!(ref_decision(POLLIN,POLLIN,POLLIN,2,1,true).unwrap_err().contains("owner lost"));
+ assert!(ref_decision(0,POLLIN,POLLIN,2,1,true).unwrap_err().contains("deadline expired"));
+ assert!(ref_decision(0,0,POLLIN,0,1,true).unwrap_err().contains("service ended"));
+ assert!(ref_decision(0x20,0,0,0,1,true).unwrap_err().contains("unverified"));
+ assert!(ref_decision(0,0x10,0,0,1,true).unwrap_err().contains("unverified"));
+ assert!(ref_decision(0,0,0x20,0,1,true).unwrap_err().contains("unverified"));
+ assert_eq!(ref_decision(0,0,0,0,1,false).unwrap(),false);
+ let mut invalid=RefReplyOwner::new();
+ assert_eq!(unsafe{ref_reply_callback(ptr::null_mut(),invalid.userdata(),ptr::null_mut())},1);
+ assert!(invalid.ready());assert!(invalid.take().is_err(),"null callback cannot create successful authority");
+ eprintln!("refunit_original_deadline_native_checkpoint_verified");
+
 }
