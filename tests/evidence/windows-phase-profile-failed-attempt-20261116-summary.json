@@ -70,8 +70,47 @@
       "The now-present marker was not bound to a retained original payload handle. Reading it after cleanup cannot establish the missing live custody evidence.",
       "This attempt is preserved as a failure. It is not a warmup, complete sample, speed/parity result or evidence of equivalence.",
       "Any fresh diagnostic must disclose the failed attempt and changed per-image exposure counts. No access denial will be silently retried or swallowed.",
-      "The next source-only change adds bounded operation/errno/WinError/traceback recording and still fails closed. A successful later call would not by itself explain this failure.",
+      "A subsequent source-only change adds bounded operation/errno/WinError/traceback recording and still fails closed. A successful later call would not by itself explain this failure.",
       "Raw machine and transport originals remain private; the public reproducibility package is still incomplete."
+    ]
+  },
+  "followup_access_recording_qualification": {
+    "classification": "A fresh one-pair diagnostic; preserved failed20 result remains unchanged.",
+    "source_sha256": "f082218e33e2df4f74a0838501b6b3bbf5f9659f7634acac7517a904fcbe4627",
+    "observer_sha256": "a4cfadb06c957b91c22d6ee13402cb082f347d900d0747a7a3a36199c915fe46",
+    "observer_change": "Derived original observer records bounded operation, exception type, errno, WinError and traceback, then re-raises. No access retry, swallowed error, new normal-path native call or first-poll/cleanup change.",
+    "observer_byte_exact": false,
+    "offline_injected_error_cases": 11,
+    "offline_scope": "stat/open/read/close failures with WinError5/32 plus formatting, bounding and record-storage failures; original exception identity preserved; zero native bindings or SUTs in these checks.",
+    "source_review_sha256": "bb59af52480ab9c99f6a817f53b40d6c8b59afb944cfeedf8f0f4c2dab8b3cfe",
+    "root_actual_audit_sha256": "4a072301a7e766843cde7bd83a056c044192837a6f3d8fc57b69710bef227cc9",
+    "raw_receipt_sha256": "e7d48d0f953891bbf4ec4f046e77da68d07e1368baf5779bbe4c78e4971d25c7",
+    "runtime": {
+      "planned_pairs": 1,
+      "completed_pairs": 1,
+      "completed_slots": 2,
+      "original_tool_exit_code": 0,
+      "errors": 0,
+      "access_fault_recurred": false,
+      "source_roles_rehashed": 45,
+      "held_distinct_roles": 51,
+      "held_identity_records_rehashed": 153,
+      "original_raw_io_identity_clock_and_job_oracles_pass": true,
+      "guard_and_payload_naturally_terminal_zero": true,
+      "assisted_cleanup": false,
+      "profiled_image_exposures_after_pair": {
+        "current": 3,
+        "reference": 2
+      }
+    },
+    "prior_permission_error_cause_resolved": false,
+    "canonical_product_source_changed": false,
+    "product_speed_acceptance_proven": false,
+    "primary_qualifying_competitive_measurements": 0,
+    "limits": [
+      "Normal-path success does not identify or fix the earlier access failure. The derived logger only improves evidence if another error occurs.",
+      "The original failed20 sample remains incomplete, published and excluded from successful measurements. There is no automatic full20 replay authority.",
+      "These profiled executables and observer bookkeeping perturb timing; this pair establishes fault-capture integration on its normal path, not comparative product performance."
     ]
   }
 }
