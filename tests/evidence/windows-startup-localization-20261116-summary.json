@@ -440,7 +440,8 @@
     "No slowdown cause or product repair is established. No guarantee, default or product source was changed.",
     "The historical repaired reference remains generally ineligible because of its preserved broader correctness failures.",
     "Exact machine and transport records remain private. Numeric extracts, summaries and hashes do not replace publicly accessible raw evidence.",
-    "The 20-pair traced sample is order sensitive and does not erase the separately preserved 20-pair untraced residual. Its larger sample is still diagnostic, with no adaptive extension or favorable retry."
+    "The 20-pair traced sample is order sensitive and does not erase the separately preserved 20-pair untraced residual. Its larger sample is still diagnostic, with no adaptive extension or favorable retry.",
+    "The post-endpoint CPU study uses a new AABB schedule and observation epoch. Its +0.48865ms paired elapsed median is not parity and cannot erase the separately preserved +3.73415ms original untraced residual. No samples were removed."
   ],
   "traced_fixed_sample": {
     "pairs": 20,
@@ -964,6 +965,988 @@
     "independent_audits_sha256": [
       "c579cb333b72e2c815b8b81e49cc4d489ec3f6cf3ea5b8e99b45b2c6f2269e78",
       "2f657d1eee460585c74fce7659771de66928cb1e15a37d9fa0d353987e3010a5"
+    ]
+  },
+  "post_endpoint_cpu_method": {
+    "subject": "Original selected guard process only, summed across its own threads; excludes the payload.",
+    "probe_order": "Byte-exact original payload observer and first raw retained-payload poll complete after the elapsed endpoint; then GetProcessTimes and QueryProcessCycleTime use the original retained CreateProcess handle before cleanup.",
+    "one_pair_feasibility": {
+      "pairs": 1,
+      "slots": 2,
+      "custody_passed": true,
+      "both_counter_apis_succeeded": true,
+      "raw_receipt_sha256": "f2e3cc2805911f57b7bc579de31f86ca18905c0a3ce328d1b7f6587908d508cc",
+      "root_audit_sha256": "8ef019b7455ef7d1f5b3014028f334681076e5cdf37fc66458136f2dbd4debf1",
+      "root_history_clarifier_sha256": "426059241d5bfc5cbae880c573579aa3ce1efcab82b755d7e8728908b753afeb",
+      "independent_raw_audit_sha256": "42ffb8eea1523969ad70f15d4bef404fe9908ce7cd8c5e7bc6674789ebe93f3c"
+    },
+    "limits": "Whole-guard CPU-work correlate only. CPU time units do not establish measurement precision; raw cycles cannot be converted to elapsed time or attributed to a phase. CPU-query failure remains inconclusive, separate from the original custody verdict. The post-endpoint probe may affect later-slot context.",
+    "primary_api_sources": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes",
+      "https://learn.microsoft.com/en-us/windows/win32/api/realtimeapiset/nf-realtimeapiset-queryprocesscycletime",
+      "https://learn.microsoft.com/en-us/windows/win32/procthread/process-handles-and-identifiers"
+    ]
+  },
+  "untraced_post_endpoint_cpu_sample": {
+    "pairs": 20,
+    "slots": 40,
+    "valid_cpu_samples": 40,
+    "all_original_normal_case_custody_oracles_passed": true,
+    "order": "AABB repeated five times; A=current then reference, B=reference then current",
+    "prior_cpu_feasibility_slots_disclosed_and_excluded": 2,
+    "raw_receipt_sha256": "9363838dc37ce786e1a523bcda5f51ca916d4690a54e4cc64bd755ed25c92553",
+    "root_audit_sha256": "64fde632fe66da01c2f2cf2b434c6e0ec992d717c377851efe20f372341b1a64",
+    "independent_raw_audit_sha256": "c11530455cf1baad61d36f2c9ccc2aa1040d563464f386b921cda9a7ed5d4ab9",
+    "independent_metrics_audit_sha256": "18898e0d47c1a4c17fa63aaac430af9cff2bc82aaee05a4303f789e0eaf12d92",
+    "independent_inventory_audit_sha256": "dbfa2a65a1155dfd9645ac4a03bb600ef5e32e90fb521851eda339024a41c886",
+    "descriptive_audit_sha256": "03b4adcc4799c314584340b338f59a83f6f8dfca5fc5a641811cf4bbccba639e",
+    "source_pins": 59,
+    "held_before_held_after_reopened_bindings": 195,
+    "cutoff_inventory_files": 301,
+    "cutoff_inventory_bytes": 1018437,
+    "arms": {
+      "current": {
+        "n": 20,
+        "elapsed_ns": {
+          "n": 20,
+          "median": 95698650,
+          "mean": 107625135,
+          "min": 93445600,
+          "max": 159480000,
+          "positive": 20,
+          "negative": 0,
+          "zero": 0
+        },
+        "raw_cycles": {
+          "n": 20,
+          "median": 31469833.5,
+          "mean": 52246947.2,
+          "min": 28833611,
+          "max": 125040229,
+          "positive": 20,
+          "negative": 0,
+          "zero": 0
+        },
+        "total_cpu_100ns": {
+          "n": 20,
+          "median": 156250,
+          "mean": 265625,
+          "min": 0,
+          "max": 937500,
+          "positive": 14,
+          "negative": 0,
+          "zero": 6
+        },
+        "zero_cpu_duration_slots": 6,
+        "observed_cpu_duration_bins_100ns": [
+          0,
+          156250,
+          312500,
+          468750,
+          625000,
+          781250,
+          937500
+        ]
+      },
+      "reference": {
+        "n": 20,
+        "elapsed_ns": {
+          "n": 20,
+          "median": 96744200,
+          "mean": 106846475,
+          "min": 92754700,
+          "max": 176991600,
+          "positive": 20,
+          "negative": 0,
+          "zero": 0
+        },
+        "raw_cycles": {
+          "n": 20,
+          "median": 29957763,
+          "mean": 42686527.1,
+          "min": 27706076,
+          "max": 113209730,
+          "positive": 20,
+          "negative": 0,
+          "zero": 0
+        },
+        "total_cpu_100ns": {
+          "n": 20,
+          "median": 156250,
+          "mean": 179687.5,
+          "min": 0,
+          "max": 625000,
+          "positive": 14,
+          "negative": 0,
+          "zero": 6
+        },
+        "zero_cpu_duration_slots": 6,
+        "observed_cpu_duration_bins_100ns": [
+          0,
+          156250,
+          312500,
+          468750,
+          625000
+        ]
+      }
+    },
+    "paired_current_minus_reference": {
+      "elapsed_ns": {
+        "n": 20,
+        "median": 488650,
+        "mean": 778660,
+        "min": -45344900,
+        "max": 64284000,
+        "positive": 10,
+        "negative": 10,
+        "zero": 0
+      },
+      "guard_kernel_100ns": {
+        "n": 20,
+        "median": 0,
+        "mean": 23437.5,
+        "min": -312500,
+        "max": 468750,
+        "positive": 7,
+        "negative": 8,
+        "zero": 5
+      },
+      "guard_user_100ns": {
+        "n": 20,
+        "median": 0,
+        "mean": 62500,
+        "min": -312500,
+        "max": 468750,
+        "positive": 8,
+        "negative": 4,
+        "zero": 8
+      },
+      "guard_total_cpu_100ns": {
+        "n": 20,
+        "median": 0,
+        "mean": 85937.5,
+        "min": -468750,
+        "max": 781250,
+        "positive": 9,
+        "negative": 6,
+        "zero": 5
+      },
+      "guard_raw_cycles": {
+        "n": 20,
+        "median": 874345.5,
+        "mean": 9560420.1,
+        "min": -83752761,
+        "max": 95618992,
+        "positive": 14,
+        "negative": 6,
+        "zero": 0
+      },
+      "resume_to_payload_open_ns": {
+        "n": 20,
+        "median": 645850,
+        "mean": 4278465,
+        "min": -44274600,
+        "max": 53588800,
+        "positive": 12,
+        "negative": 8,
+        "zero": 0
+      },
+      "post_endpoint_probe_duration_ns": {
+        "n": 20,
+        "median": -2050,
+        "mean": 220,
+        "min": -146000,
+        "max": 148500,
+        "positive": 9,
+        "negative": 11,
+        "zero": 0
+      }
+    },
+    "order_strata": {
+      "current_first": {
+        "elapsed_ns": {
+          "n": 10,
+          "median": 488650,
+          "mean": -7954460,
+          "min": -45344900,
+          "max": 43783400,
+          "positive": 5,
+          "negative": 5,
+          "zero": 0
+        },
+        "guard_kernel_100ns": {
+          "n": 10,
+          "median": -78125,
+          "mean": 15625,
+          "min": -156250,
+          "max": 468750,
+          "positive": 3,
+          "negative": 5,
+          "zero": 2
+        },
+        "guard_user_100ns": {
+          "n": 10,
+          "median": 0,
+          "mean": -15625,
+          "min": -312500,
+          "max": 156250,
+          "positive": 3,
+          "negative": 3,
+          "zero": 4
+        },
+        "guard_total_cpu_100ns": {
+          "n": 10,
+          "median": 0,
+          "mean": 0,
+          "min": -468750,
+          "max": 468750,
+          "positive": 4,
+          "negative": 4,
+          "zero": 2
+        },
+        "guard_raw_cycles": {
+          "n": 10,
+          "median": 874345.5,
+          "mean": 580297.4,
+          "min": -83752761,
+          "max": 81666340,
+          "positive": 7,
+          "negative": 3,
+          "zero": 0
+        },
+        "resume_to_payload_open_ns": {
+          "n": 10,
+          "median": 882950,
+          "mean": -694450,
+          "min": -44274600,
+          "max": 42287400,
+          "positive": 6,
+          "negative": 4,
+          "zero": 0
+        },
+        "post_endpoint_probe_duration_ns": {
+          "n": 10,
+          "median": -2550,
+          "mean": 8380,
+          "min": -39900,
+          "max": 148500,
+          "positive": 4,
+          "negative": 6,
+          "zero": 0
+        }
+      },
+      "reference_first": {
+        "elapsed_ns": {
+          "n": 10,
+          "median": 11750,
+          "mean": 9511780,
+          "min": -42868200,
+          "max": 64284000,
+          "positive": 5,
+          "negative": 5,
+          "zero": 0
+        },
+        "guard_kernel_100ns": {
+          "n": 10,
+          "median": 0,
+          "mean": 31250,
+          "min": -312500,
+          "max": 312500,
+          "positive": 4,
+          "negative": 3,
+          "zero": 3
+        },
+        "guard_user_100ns": {
+          "n": 10,
+          "median": 78125,
+          "mean": 140625,
+          "min": -156250,
+          "max": 468750,
+          "positive": 5,
+          "negative": 1,
+          "zero": 4
+        },
+        "guard_total_cpu_100ns": {
+          "n": 10,
+          "median": 78125,
+          "mean": 171875,
+          "min": -312500,
+          "max": 781250,
+          "positive": 5,
+          "negative": 2,
+          "zero": 3
+        },
+        "guard_raw_cycles": {
+          "n": 10,
+          "median": 1030630.5,
+          "mean": 18540542.8,
+          "min": -81271142,
+          "max": 95618992,
+          "positive": 7,
+          "negative": 3,
+          "zero": 0
+        },
+        "resume_to_payload_open_ns": {
+          "n": 10,
+          "median": 437200,
+          "mean": 9251380,
+          "min": -41157200,
+          "max": 53588800,
+          "positive": 6,
+          "negative": 4,
+          "zero": 0
+        },
+        "post_endpoint_probe_duration_ns": {
+          "n": 10,
+          "median": 1000,
+          "mean": -7940,
+          "min": -146000,
+          "max": 58300,
+          "positive": 5,
+          "negative": 5,
+          "zero": 0
+        }
+      }
+    },
+    "prior_selected_image_context_cells": {
+      "current_first_outside_capture": 1,
+      "reference_second_switch": 10,
+      "current_first_switch": 5,
+      "reference_first_repeat": 5,
+      "current_second_switch": 10,
+      "reference_first_switch": 5,
+      "current_first_repeat": 4
+    },
+    "all_paired_numeric_extracts": [
+      {
+        "index": 0,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 95698100,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 30493896,
+          "resume_to_payload_open_ns": 35733200,
+          "post_endpoint_probe_duration_ns": 304800
+        },
+        "reference": {
+          "elapsed_ns": 94402100,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 29835408,
+          "resume_to_payload_open_ns": 34986600,
+          "post_endpoint_probe_duration_ns": 156300
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 1296000,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 658488,
+          "resume_to_payload_open_ns": 746600,
+          "post_endpoint_probe_duration_ns": 148500
+        }
+      },
+      {
+        "index": 1,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 95564200,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 29456969,
+          "resume_to_payload_open_ns": 34703400,
+          "post_endpoint_probe_duration_ns": 151600
+        },
+        "reference": {
+          "elapsed_ns": 138172300,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 312500,
+          "guard_total_cpu_100ns": 468750,
+          "guard_raw_cycles": 113209730,
+          "resume_to_payload_open_ns": 78978000,
+          "post_endpoint_probe_duration_ns": 146300
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -42608100,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": -312500,
+          "guard_total_cpu_100ns": -468750,
+          "guard_raw_cycles": -83752761,
+          "resume_to_payload_open_ns": -44274600,
+          "post_endpoint_probe_duration_ns": 5300
+        }
+      },
+      {
+        "index": 2,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 93445600,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 312500,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 28945991,
+          "resume_to_payload_open_ns": 34618700,
+          "post_endpoint_probe_duration_ns": 161300
+        },
+        "reference": {
+          "elapsed_ns": 94725900,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 29235019,
+          "resume_to_payload_open_ns": 34073600,
+          "post_endpoint_probe_duration_ns": 141900
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -1280300,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": 312500,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": -289028,
+          "resume_to_payload_open_ns": 545100,
+          "post_endpoint_probe_duration_ns": 19400
+        }
+      },
+      {
+        "index": 3,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 95699200,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 29430023,
+          "resume_to_payload_open_ns": 34282900,
+          "post_endpoint_probe_duration_ns": 146000
+        },
+        "reference": {
+          "elapsed_ns": 93524700,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 28777136,
+          "resume_to_payload_open_ns": 33953600,
+          "post_endpoint_probe_duration_ns": 148900
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 2174500,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 652887,
+          "resume_to_payload_open_ns": 329300,
+          "post_endpoint_probe_duration_ns": -2900
+        }
+      },
+      {
+        "index": 4,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 96978000,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 32200075,
+          "resume_to_payload_open_ns": 37624800,
+          "post_endpoint_probe_duration_ns": 149500
+        },
+        "reference": {
+          "elapsed_ns": 97090400,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 29826033,
+          "resume_to_payload_open_ns": 36605500,
+          "post_endpoint_probe_duration_ns": 153400
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -112400,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": -156250,
+          "guard_raw_cycles": 2374042,
+          "resume_to_payload_open_ns": 1019300,
+          "post_endpoint_probe_duration_ns": -3900
+        }
+      },
+      {
+        "index": 5,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 93844400,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 28833611,
+          "resume_to_payload_open_ns": 34523800,
+          "post_endpoint_probe_duration_ns": 142300
+        },
+        "reference": {
+          "elapsed_ns": 92754700,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 27965953,
+          "resume_to_payload_open_ns": 35805000,
+          "post_endpoint_probe_duration_ns": 158500
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 1089700,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 867658,
+          "resume_to_payload_open_ns": -1281200,
+          "post_endpoint_probe_duration_ns": -16200
+        }
+      },
+      {
+        "index": 6,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 95695900,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 30153572,
+          "resume_to_payload_open_ns": 34267100,
+          "post_endpoint_probe_duration_ns": 148200
+        },
+        "reference": {
+          "elapsed_ns": 97662200,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 29765953,
+          "resume_to_payload_open_ns": 37302300,
+          "post_endpoint_probe_duration_ns": 142600
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -1966300,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 387619,
+          "resume_to_payload_open_ns": -3035200,
+          "post_endpoint_probe_duration_ns": 5600
+        }
+      },
+      {
+        "index": 7,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 93821700,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 30962347,
+          "resume_to_payload_open_ns": 35948600,
+          "post_endpoint_probe_duration_ns": 148400
+        },
+        "reference": {
+          "elapsed_ns": 136689900,
+          "guard_kernel_100ns": 468750,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 625000,
+          "guard_raw_cycles": 112233489,
+          "resume_to_payload_open_ns": 77105800,
+          "post_endpoint_probe_duration_ns": 160300
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -42868200,
+          "guard_kernel_100ns": -312500,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": -312500,
+          "guard_raw_cycles": -81271142,
+          "resume_to_payload_open_ns": -41157200,
+          "post_endpoint_probe_duration_ns": -11900
+        }
+      },
+      {
+        "index": 8,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 97093800,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 32766139,
+          "resume_to_payload_open_ns": 39741600,
+          "post_endpoint_probe_duration_ns": 141800
+        },
+        "reference": {
+          "elapsed_ns": 95668300,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 31885106,
+          "resume_to_payload_open_ns": 35340100,
+          "post_endpoint_probe_duration_ns": 162900
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 1425500,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": -156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 881033,
+          "resume_to_payload_open_ns": 4401500,
+          "post_endpoint_probe_duration_ns": -21100
+        }
+      },
+      {
+        "index": 9,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 94057200,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 31796882,
+          "resume_to_payload_open_ns": 35823200,
+          "post_endpoint_probe_duration_ns": 149500
+        },
+        "reference": {
+          "elapsed_ns": 108015200,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 34474314,
+          "resume_to_payload_open_ns": 50481600,
+          "post_endpoint_probe_duration_ns": 141500
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -13958000,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": -156250,
+          "guard_total_cpu_100ns": -312500,
+          "guard_raw_cycles": -2677432,
+          "resume_to_payload_open_ns": -14658400,
+          "post_endpoint_probe_duration_ns": 8000
+        }
+      },
+      {
+        "index": 10,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 135230600,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 468750,
+          "guard_raw_cycles": 113578580,
+          "resume_to_payload_open_ns": 77124600,
+          "post_endpoint_probe_duration_ns": 160800
+        },
+        "reference": {
+          "elapsed_ns": 93991500,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 27706076,
+          "resume_to_payload_open_ns": 31979900,
+          "post_endpoint_probe_duration_ns": 145800
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 41239100,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 312500,
+          "guard_raw_cycles": 85872504,
+          "resume_to_payload_open_ns": 45144700,
+          "post_endpoint_probe_duration_ns": 15000
+        }
+      },
+      {
+        "index": 11,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 93652100,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 31488492,
+          "resume_to_payload_open_ns": 35641000,
+          "post_endpoint_probe_duration_ns": 143600
+        },
+        "reference": {
+          "elapsed_ns": 96731600,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 30080118,
+          "resume_to_payload_open_ns": 39497600,
+          "post_endpoint_probe_duration_ns": 289600
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -3079500,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 1408374,
+          "resume_to_payload_open_ns": -3856600,
+          "post_endpoint_probe_duration_ns": -146000
+        }
+      },
+      {
+        "index": 12,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 100470500,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 29727623,
+          "resume_to_payload_open_ns": 39203200,
+          "post_endpoint_probe_duration_ns": 144900
+        },
+        "reference": {
+          "elapsed_ns": 93725900,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 28194099,
+          "resume_to_payload_open_ns": 35252400,
+          "post_endpoint_probe_duration_ns": 151400
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 6744600,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 1533524,
+          "resume_to_payload_open_ns": 3950800,
+          "post_endpoint_probe_duration_ns": -6500
+        }
+      },
+      {
+        "index": 13,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 138422900,
+          "guard_kernel_100ns": 468750,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 625000,
+          "guard_raw_cycles": 113704340,
+          "resume_to_payload_open_ns": 76254500,
+          "post_endpoint_probe_duration_ns": 149000
+        },
+        "reference": {
+          "elapsed_ns": 94639500,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 32038000,
+          "resume_to_payload_open_ns": 33967100,
+          "post_endpoint_probe_duration_ns": 150200
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 43783400,
+          "guard_kernel_100ns": 468750,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 468750,
+          "guard_raw_cycles": 81666340,
+          "resume_to_payload_open_ns": 42287400,
+          "post_endpoint_probe_duration_ns": -1200
+        }
+      },
+      {
+        "index": 14,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 159480000,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 625000,
+          "guard_total_cpu_100ns": 937500,
+          "guard_raw_cycles": 125040229,
+          "resume_to_payload_open_ns": 88131100,
+          "post_endpoint_probe_duration_ns": 149500
+        },
+        "reference": {
+          "elapsed_ns": 95196000,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 29421237,
+          "resume_to_payload_open_ns": 34542300,
+          "post_endpoint_probe_duration_ns": 163900
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 64284000,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 468750,
+          "guard_total_cpu_100ns": 781250,
+          "guard_raw_cycles": 95618992,
+          "resume_to_payload_open_ns": 53588800,
+          "post_endpoint_probe_duration_ns": -14400
+        }
+      },
+      {
+        "index": 15,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 138075000,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 468750,
+          "guard_total_cpu_100ns": 781250,
+          "guard_raw_cycles": 114649241,
+          "resume_to_payload_open_ns": 78412600,
+          "post_endpoint_probe_duration_ns": 155900
+        },
+        "reference": {
+          "elapsed_ns": 96756800,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 32416633,
+          "resume_to_payload_open_ns": 32294700,
+          "post_endpoint_probe_duration_ns": 163300
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 41318200,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 468750,
+          "guard_total_cpu_100ns": 781250,
+          "guard_raw_cycles": 82232608,
+          "resume_to_payload_open_ns": 46117900,
+          "post_endpoint_probe_duration_ns": -7400
+        }
+      },
+      {
+        "index": 16,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 93860000,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 31451175,
+          "resume_to_payload_open_ns": 34845000,
+          "post_endpoint_probe_duration_ns": 178800
+        },
+        "reference": {
+          "elapsed_ns": 139204900,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 31962545,
+          "resume_to_payload_open_ns": 36017000,
+          "post_endpoint_probe_duration_ns": 168000
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -45344900,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": -156250,
+          "guard_raw_cycles": -511370,
+          "resume_to_payload_open_ns": -1172000,
+          "post_endpoint_probe_duration_ns": 10800
+        }
+      },
+      {
+        "index": 17,
+        "first": "current",
+        "current": {
+          "elapsed_ns": 145131200,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 468750,
+          "guard_raw_cycles": 117366797,
+          "resume_to_payload_open_ns": 80535400,
+          "post_endpoint_probe_duration_ns": 151800
+        },
+        "reference": {
+          "elapsed_ns": 176991600,
+          "guard_kernel_100ns": 312500,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 468750,
+          "guard_raw_cycles": 112603345,
+          "resume_to_payload_open_ns": 78499300,
+          "post_endpoint_probe_duration_ns": 191700
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -31860400,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 4763452,
+          "resume_to_payload_open_ns": 2036100,
+          "post_endpoint_probe_duration_ns": -39900
+        }
+      },
+      {
+        "index": 18,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 94802000,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 30450378,
+          "resume_to_payload_open_ns": 34945300,
+          "post_endpoint_probe_duration_ns": 208500
+        },
+        "reference": {
+          "elapsed_ns": 100809500,
+          "guard_kernel_100ns": 156250,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 32980108,
+          "resume_to_payload_open_ns": 41024400,
+          "post_endpoint_probe_duration_ns": 150200
+        },
+        "current_minus_reference": {
+          "elapsed_ns": -6007500,
+          "guard_kernel_100ns": -156250,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": -2529730,
+          "resume_to_payload_open_ns": -6079100,
+          "post_endpoint_probe_duration_ns": 58300
+        }
+      },
+      {
+        "index": 19,
+        "first": "reference",
+        "current": {
+          "elapsed_ns": 101480300,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 0,
+          "guard_total_cpu_100ns": 0,
+          "guard_raw_cycles": 32442584,
+          "resume_to_payload_open_ns": 40930900,
+          "post_endpoint_probe_duration_ns": 158600
+        },
+        "reference": {
+          "elapsed_ns": 100176500,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": 156250,
+          "guard_total_cpu_100ns": 156250,
+          "guard_raw_cycles": 29120240,
+          "resume_to_payload_open_ns": 40014800,
+          "post_endpoint_probe_duration_ns": 153700
+        },
+        "current_minus_reference": {
+          "elapsed_ns": 1303800,
+          "guard_kernel_100ns": 0,
+          "guard_user_100ns": -156250,
+          "guard_total_cpu_100ns": -156250,
+          "guard_raw_cycles": 3322344,
+          "resume_to_payload_open_ns": 916100,
+          "post_endpoint_probe_duration_ns": 4900
+        }
+      }
+    ],
+    "interpretation": "Whole-guard counters are available after the original endpoint. The fixed-schedule elapsed and raw-cycle differences are descriptive; neither cause nor speed acceptance/equivalence is established. Prior untraced residual and other epochs remain separate.",
+    "limits": [
+      "CPU kernel/user quantities have100ns units but observed coarse quantization; a zero reported total is not zero CPU work.",
+      "Raw cycle totals are per original guard process across its threads, excluding its payload; do not convert cycles to elapsed time or localize them to a source phase.",
+      "Counter probe follows elapsed end and original first payload poll; it may affect subsequent slot context.",
+      "AABB mixes first-slot repeat/switch contexts but second always switches. It does not establish intrinsic/cold-warm or cache/AV/scheduler attribution.",
+      "All20 pairs remain included, including extreme elapsed/cycle values. No adaptive extension or favorable retry.",
+      "No product source/default/security guarantee changed, historical reference broader qualification failures remain, primary qualifying competitive measurements remainzero."
     ]
   }
 }
