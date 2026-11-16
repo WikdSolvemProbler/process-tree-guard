@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "summary_only": true,
+  "experiment": "Windows static ProcessPrng import factor",
+  "canonical_guard_compared": false,
+  "primary_qualifying_performance_measurements": 0,
+  "method": {
+    "pairs": 20,
+    "slots": 40,
+    "order": "Fixed alternating order, ten pairs per order",
+    "payload": "Protected manual invocation, two-second product deadline, finite marker payload with 50 ms hold",
+    "build": "Matched x64 release Rust/MSVC toolchain, common source and target paths, offline locked dependencies",
+    "factor": "Archived repaired reference plus never-called retained ProcessPrng import anchor; original guard source prefix unchanged",
+    "excluded_preflight_warmup_slots": 2
+  },
+  "images": {
+    "unmodified_repaired_reference": {
+      "bytes": 371712,
+      "sha256": "bea51b7b472c498a6215455c242bb0b507ed2f8cc9c0b9c09fa74efc0316cc1a",
+      "import_dlls": 10,
+      "import_symbols": 127
+    },
+    "private_import_factor": {
+      "bytes": 371712,
+      "sha256": "10bb2ff791a574e8ab4cc65fd74a1e79481bf3e3615a68baf18256dda88a41f2",
+      "import_dlls": 11,
+      "import_symbols": 128
+    },
+    "sole_added_import": "bcryptprimitives.dll:ProcessPrng",
+    "all_other_import_multisets_identical": true
+  },
+  "oracles": {
+    "pairs": 20,
+    "slots": 40,
+    "slot_failures": [],
+    "all_original_guard_payload_native0": true,
+    "all_first_held_payload_poll_terminal0": true,
+    "all_empty_io_job_active0_no_assist": true,
+    "all_seven_boundary_partitions": true
+  },
+  "results_ns": {
+    "factor_median": 99372550,
+    "reference_median": 100450500,
+    "paired_factor_minus_reference_median": -692050,
+    "paired_factor_minus_reference_mean": -2670365,
+    "order_strata": {
+      "factor_first": {
+        "n": 10,
+        "paired_median": -1803900,
+        "paired_mean": -17236470
+      },
+      "reference_first": {
+        "n": 10,
+        "paired_median": 1507300,
+        "paired_mean": 11895740
+      }
+    }
+  },
+  "pairs_ns": [
+    {
+      "index": 0,
+      "first": "factor",
+      "factor": 101732000,
+      "reference": 145868700,
+      "delta": -44136700
+    },
+    {
+      "index": 1,
+      "first": "reference",
+      "factor": 96457100,
+      "reference": 100699800,
+      "delta": -4242700
+    },
+    {
+      "index": 2,
+      "first": "factor",
+      "factor": 95935800,
+      "reference": 95673700,
+      "delta": 262100
+    },
+    {
+      "index": 3,
+      "first": "reference",
+      "factor": 136155700,
+      "reference": 104346500,
+      "delta": 31809200
+    },
+    {
+      "index": 4,
+      "first": "factor",
+      "factor": 97102900,
+      "reference": 96441000,
+      "delta": 661900
+    },
+    {
+      "index": 5,
+      "first": "reference",
+      "factor": 143045300,
+      "reference": 98203000,
+      "delta": 44842300
+    },
+    {
+      "index": 6,
+      "first": "factor",
+      "factor": 97360400,
+      "reference": 137880700,
+      "delta": -40520300
+    },
+    {
+      "index": 7,
+      "first": "reference",
+      "factor": 139269700,
+      "reference": 92581800,
+      "delta": 46687900
+    },
+    {
+      "index": 8,
+      "first": "factor",
+      "factor": 140764800,
+      "reference": 180441400,
+      "delta": -39676600
+    },
+    {
+      "index": 9,
+      "first": "reference",
+      "factor": 99604400,
+      "reference": 95737300,
+      "delta": 3867100
+    },
+    {
+      "index": 10,
+      "first": "factor",
+      "factor": 94740400,
+      "reference": 95436900,
+      "delta": -696500
+    },
+    {
+      "index": 11,
+      "first": "reference",
+      "factor": 96811400,
+      "reference": 98195200,
+      "delta": -1383800
+    },
+    {
+      "index": 12,
+      "first": "factor",
+      "factor": 98275100,
+      "reference": 98577100,
+      "delta": -302000
+    },
+    {
+      "index": 13,
+      "first": "reference",
+      "factor": 100067400,
+      "reference": 102815600,
+      "delta": -2748200
+    },
+    {
+      "index": 14,
+      "first": "factor",
+      "factor": 102431300,
+      "reference": 102075800,
+      "delta": 355500
+    },
+    {
+      "index": 15,
+      "first": "reference",
+      "factor": 103903400,
+      "reference": 100201200,
+      "delta": 3702200
+    },
+    {
+      "index": 16,
+      "first": "factor",
+      "factor": 99109100,
+      "reference": 102020400,
+      "delta": -2911300
+    },
+    {
+      "index": 17,
+      "first": "reference",
+      "factor": 98694300,
+      "reference": 99381900,
+      "delta": -687600
+    },
+    {
+      "index": 18,
+      "first": "factor",
+      "factor": 99140700,
+      "reference": 144541500,
+      "delta": -45400800
+    },
+    {
+      "index": 19,
+      "first": "reference",
+      "factor": 100684900,
+      "reference": 103573900,
+      "delta": -2889000
+    }
+  ],
+  "interpretation": "No stable added-import penalty in this diagnostic: the direction reverses between order strata. This does not establish zero effect, parity, a startup cause or a reason to change product loading/randomness.",
+  "receipts": {
+    "raw_sha256": "deb7e2b5e27dfac717d4fb8d2058270bbf33084fce9417b5f7c4f21ea94d45af",
+    "root_audit_sha256": "24fe87b468ffbe614453fa1dd09b1b14c94ba642eb545e46d6f23c7ac4ebe37f",
+    "independent_raw_audit_sha256": "852df1e88c19a9f8b2d2151d28756a5a28bda1f60ec18b5ef4b72ebbb438bfb3",
+    "pe_factor_gate_sha256": "417180809ae60d37d150f3e5826e021d82248a6386075a3501e84821936e5e6a"
+  },
+  "limits": [
+    "This compares two private diagnostic variants of the same archived repaired reference, not the current canonical guard or outside competitors.",
+    "PE bytes/layout and build-script graph differ; same file size does not establish code/layout equality or isolate a pure loader cost.",
+    "The repaired historical reference remains ineligible for general qualification because of its preserved broader correctness findings.",
+    "Timings are descriptive observations on the available host, with order effects; they are not qualifying performance or causal measurements.",
+    "Exact machine records remain private under the publication policy. These numeric extracts, summaries and hashes do not replace independently accessible raw evidence."
+  ]
+}

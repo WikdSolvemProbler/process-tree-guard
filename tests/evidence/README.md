@@ -489,3 +489,11 @@ The same repaired `d9537ba` binaries passed two further separate-service descend
 In each case both original payload pidfds were terminal at the first client-completion sample, the original service/domain observations and PRESTOP witness passed, and exact-owned teardown removed the six product assets and owned policy directory without fallback timer assistance. The owner-loss preflight independently checked the prior deadline test scope was inactive with its cgroup absent; the natural-exit preflight did the same for the owner-loss scope.
 
 The [structured results, receipt hashes and limits](linux-refunit-ownerloss-natural124-20261116-summary.json) distinguish these cases from full Linux qualification. The wider credential, policy, arming-fault, escape, transparent-context and platform-floor gates remain open, as do packaging and performance. Linux default dispatch remains disabled. Exact originals remain local; the public summaries do not replace independently accessible raw evidence.
+
+## Windows static-import diagnostic
+
+A fixed 20-pair diagnostic compared a fresh archived repaired reference with the same reference plus a retained, never-called `bcryptprimitives.dll:ProcessPrng` import. The two matched builds had identical other import multisets. All 40 protected marker slots passed the original native-exit, retained-payload, empty-I/O, empty-Job and unassisted-cleanup checks.
+
+The paired factor-minus-reference median was -0.69205 ms overall, but the median reversed from -1.8039 ms with the factor first to +1.5073 ms with the reference first. This order-sensitive result does not establish a stable import penalty, zero effect, parity or the cause of the canonical guard slowdown. It does not justify a product loading or randomness change.
+
+The [structured summary, all 20 numeric pairs and receipt hashes](windows-import-factor-20261116-summary.json) disclose the excluded two-slot preflight, build/layout confounds and evidence limits. The canonical guard was not compared here; the historical reference retains its broader qualification failures. There remain zero primary qualifying competitive measurements. Exact machine records stay private; the extracts and hashes do not replace publicly accessible raw evidence.
