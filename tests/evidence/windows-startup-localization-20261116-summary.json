@@ -439,6 +439,494 @@
     "Tracing adds QPC/stage work. Do not subtract traced and untraced measurements to estimate overhead.",
     "No slowdown cause or product repair is established. No guarantee, default or product source was changed.",
     "The historical repaired reference remains generally ineligible because of its preserved broader correctness failures.",
-    "Exact machine and transport records remain private. Numeric extracts, summaries and hashes do not replace publicly accessible raw evidence."
-  ]
+    "Exact machine and transport records remain private. Numeric extracts, summaries and hashes do not replace publicly accessible raw evidence.",
+    "The 20-pair traced sample is order sensitive and does not erase the separately preserved 20-pair untraced residual. Its larger sample is still diagnostic, with no adaptive extension or favorable retry."
+  ],
+  "traced_fixed_sample": {
+    "pairs": 20,
+    "slots": 40,
+    "order": "Precommitted alternating order; ten pairs per order",
+    "all_original_normal_case_custody_and_complete_v1_oracles_passed": true,
+    "source_pins_rehashed": 48,
+    "before_held_after_and_reopened_bindings_rehashed": 162,
+    "raw_receipt_sha256": "bfd4ed65913c74dae07a962c7ce18b20eb626db506d2d6a5571e8a3768717ff4",
+    "root_actual_sha256": "0079ace68facbd4381bfde92e39ed91ded1830d1b36314ccae97dbe71760f58d",
+    "independent_raw_audit_sha256": "c8744695fe02665821ecd36f92456191ce642d5d28ccfaa6349044c3b38e2a5b",
+    "independent_full_inventory_audit_sha256": "55badd492364a1b4329ebea64358ba10585d969a972eb3d25c2dcfd92429a91d",
+    "descriptive_audit_sha256": "1af3b6588609770fc3e9e8dc0013d7e7fdea974db0598201247c7b2f7ed2db42",
+    "prior_exposure_excluded": {
+      "failed002_current_slots": 1,
+      "passed003_current_slots": 1,
+      "passed003_reference_slots": 1
+    },
+    "paired_current_minus_reference_ns": {
+      "outer_total": {
+        "n": 20,
+        "paired_median_ns": 1071250,
+        "paired_mean_ns": 1515100,
+        "current_longer": 12,
+        "current_shorter": 8,
+        "min_ns": -49996900,
+        "max_ns": 53152600
+      },
+      "start_to_create": {
+        "n": 20,
+        "paired_median_ns": 318150,
+        "paired_mean_ns": 295755,
+        "current_longer": 14,
+        "current_shorter": 6,
+        "min_ns": -50732100,
+        "max_ns": 50329600
+      },
+      "resume_to_payload_handle_open": {
+        "n": 20,
+        "paired_median_ns": -271300,
+        "paired_mean_ns": -172445,
+        "current_longer": 9,
+        "current_shorter": 11,
+        "min_ns": -8356100,
+        "max_ns": 9053000
+      },
+      "inferred_resume_to_sut_assignment": {
+        "n": 20,
+        "paired_median_ns": -323550,
+        "paired_mean_ns": -2493395,
+        "current_longer": 10,
+        "current_shorter": 10,
+        "min_ns": -53427500,
+        "max_ns": 6841200
+      },
+      "sut_assignment_after_to_selected_wait": {
+        "n": 20,
+        "paired_median_ns": 231900,
+        "paired_mean_ns": 2659580,
+        "current_longer": 14,
+        "current_shorter": 6,
+        "min_ns": -1570400,
+        "max_ns": 48632400
+      },
+      "sut_selected_wait_to_outcome": {
+        "n": 20,
+        "paired_median_ns": 124800,
+        "paired_mean_ns": 411910,
+        "current_longer": 12,
+        "current_shorter": 8,
+        "min_ns": -3979300,
+        "max_ns": 4129800
+      },
+      "outer_wait_to_measurement_end": {
+        "n": 20,
+        "paired_median_ns": 898150,
+        "paired_mean_ns": 1352140,
+        "current_longer": 15,
+        "current_shorter": 5,
+        "min_ns": -2705700,
+        "max_ns": 6401400
+      },
+      "inferred_sut_outcome_to_outer_end": {
+        "n": 20,
+        "paired_median_ns": 493850,
+        "paired_mean_ns": 640225,
+        "current_longer": 16,
+        "current_shorter": 4,
+        "min_ns": -689000,
+        "max_ns": 2571300
+      }
+    },
+    "order_strata_ns": {
+      "current_first": {
+        "outer_total": {
+          "n": 10,
+          "paired_median_ns": -1948750,
+          "paired_mean_ns": -9166900,
+          "current_longer": 4,
+          "current_shorter": 6,
+          "min_ns": -49996900,
+          "max_ns": 11025800
+        },
+        "start_to_create": {
+          "n": 10,
+          "paired_median_ns": 212300,
+          "paired_mean_ns": -9917020,
+          "current_longer": 6,
+          "current_shorter": 4,
+          "min_ns": -50732100,
+          "max_ns": 2580600
+        },
+        "resume_to_payload_handle_open": {
+          "n": 10,
+          "paired_median_ns": -386650,
+          "paired_mean_ns": -562130,
+          "current_longer": 4,
+          "current_shorter": 6,
+          "min_ns": -8356100,
+          "max_ns": 9053000
+        },
+        "inferred_resume_to_sut_assignment": {
+          "n": 10,
+          "paired_median_ns": -1240250,
+          "paired_mean_ns": -289630,
+          "current_longer": 4,
+          "current_shorter": 6,
+          "min_ns": -6360100,
+          "max_ns": 6841200
+        },
+        "sut_assignment_after_to_selected_wait": {
+          "n": 10,
+          "paired_median_ns": 268050,
+          "paired_mean_ns": 350760,
+          "current_longer": 8,
+          "current_shorter": 2,
+          "min_ns": -1032900,
+          "max_ns": 2244600
+        },
+        "sut_selected_wait_to_outcome": {
+          "n": 10,
+          "paired_median_ns": -27850,
+          "paired_mean_ns": 64850,
+          "current_longer": 5,
+          "current_shorter": 5,
+          "min_ns": -3979300,
+          "max_ns": 4129800
+        },
+        "outer_wait_to_measurement_end": {
+          "n": 10,
+          "paired_median_ns": 1045950,
+          "paired_mean_ns": 1262390,
+          "current_longer": 7,
+          "current_shorter": 3,
+          "min_ns": -2705700,
+          "max_ns": 6401400
+        },
+        "inferred_sut_outcome_to_outer_end": {
+          "n": 10,
+          "paired_median_ns": 442550,
+          "paired_mean_ns": 624770,
+          "current_longer": 7,
+          "current_shorter": 3,
+          "min_ns": -689000,
+          "max_ns": 2571300
+        }
+      },
+      "reference_first": {
+        "outer_total": {
+          "n": 10,
+          "paired_median_ns": 4874550,
+          "paired_mean_ns": 12197100,
+          "current_longer": 8,
+          "current_shorter": 2,
+          "min_ns": -1324500,
+          "max_ns": 53152600
+        },
+        "start_to_create": {
+          "n": 10,
+          "paired_median_ns": 934850,
+          "paired_mean_ns": 10508530,
+          "current_longer": 8,
+          "current_shorter": 2,
+          "min_ns": -3251800,
+          "max_ns": 50329600
+        },
+        "resume_to_payload_handle_open": {
+          "n": 10,
+          "paired_median_ns": 215250,
+          "paired_mean_ns": 217240,
+          "current_longer": 5,
+          "current_shorter": 5,
+          "min_ns": -6456200,
+          "max_ns": 5282900
+        },
+        "inferred_resume_to_sut_assignment": {
+          "n": 10,
+          "paired_median_ns": 884950,
+          "paired_mean_ns": -4697160,
+          "current_longer": 6,
+          "current_shorter": 4,
+          "min_ns": -53427500,
+          "max_ns": 3269000
+        },
+        "sut_assignment_after_to_selected_wait": {
+          "n": 10,
+          "paired_median_ns": 229650,
+          "paired_mean_ns": 4968400,
+          "current_longer": 6,
+          "current_shorter": 4,
+          "min_ns": -1570400,
+          "max_ns": 48632400
+        },
+        "sut_selected_wait_to_outcome": {
+          "n": 10,
+          "paired_median_ns": 124800,
+          "paired_mean_ns": 758970,
+          "current_longer": 7,
+          "current_shorter": 3,
+          "min_ns": -794600,
+          "max_ns": 3213900
+        },
+        "outer_wait_to_measurement_end": {
+          "n": 10,
+          "paired_median_ns": 814150,
+          "paired_mean_ns": 1441890,
+          "current_longer": 8,
+          "current_shorter": 2,
+          "min_ns": -731600,
+          "max_ns": 4960300
+        },
+        "inferred_sut_outcome_to_outer_end": {
+          "n": 10,
+          "paired_median_ns": 548000,
+          "paired_mean_ns": 655680,
+          "current_longer": 9,
+          "current_shorter": 1,
+          "min_ns": -167100,
+          "max_ns": 1869300
+        }
+      }
+    },
+    "paired_numeric_extract_ns": [
+      {
+        "index": 0,
+        "first": "current",
+        "outer_total": 8159100,
+        "start_to_create": 343200,
+        "resume_to_payload_handle_open": 7029900,
+        "inferred_resume_to_sut_assignment": 745400,
+        "sut_assignment_after_to_selected_wait": 360100,
+        "sut_selected_wait_to_outcome": 4129800,
+        "outer_wait_to_measurement_end": 654900,
+        "inferred_sut_outcome_to_outer_end": 2571300
+      },
+      {
+        "index": 1,
+        "first": "reference",
+        "outer_total": 53152600,
+        "start_to_create": 50329600,
+        "resume_to_payload_handle_open": -781100,
+        "inferred_resume_to_sut_assignment": 3061400,
+        "sut_assignment_after_to_selected_wait": -226500,
+        "sut_selected_wait_to_outcome": 137100,
+        "outer_wait_to_measurement_end": 3612000,
+        "inferred_sut_outcome_to_outer_end": -167100
+      },
+      {
+        "index": 2,
+        "first": "current",
+        "outer_total": -49996900,
+        "start_to_create": -50732100,
+        "resume_to_payload_handle_open": -1558900,
+        "inferred_resume_to_sut_assignment": -1604800,
+        "sut_assignment_after_to_selected_wait": 905300,
+        "sut_selected_wait_to_outcome": 996700,
+        "outer_wait_to_measurement_end": 2319600,
+        "inferred_sut_outcome_to_outer_end": 451800
+      },
+      {
+        "index": 3,
+        "first": "reference",
+        "outer_total": 44926500,
+        "start_to_create": 46905600,
+        "resume_to_payload_handle_open": -1367300,
+        "inferred_resume_to_sut_assignment": -53427500,
+        "sut_assignment_after_to_selected_wait": 48632400,
+        "sut_selected_wait_to_outcome": 2041100,
+        "outer_wait_to_measurement_end": -731600,
+        "inferred_sut_outcome_to_outer_end": 772400
+      },
+      {
+        "index": 4,
+        "first": "current",
+        "outer_total": 1586700,
+        "start_to_create": 291000,
+        "resume_to_payload_handle_open": 126600,
+        "inferred_resume_to_sut_assignment": -1733400,
+        "sut_assignment_after_to_selected_wait": 28900,
+        "sut_selected_wait_to_outcome": 1181100,
+        "outer_wait_to_measurement_end": 1243100,
+        "inferred_sut_outcome_to_outer_end": 1817800
+      },
+      {
+        "index": 5,
+        "first": "reference",
+        "outer_total": 2767800,
+        "start_to_create": -462600,
+        "resume_to_payload_handle_open": 770500,
+        "inferred_resume_to_sut_assignment": 2180200,
+        "sut_assignment_after_to_selected_wait": 327400,
+        "sut_selected_wait_to_outcome": 343300,
+        "outer_wait_to_measurement_end": 2346600,
+        "inferred_sut_outcome_to_outer_end": 373900
+      },
+      {
+        "index": 6,
+        "first": "current",
+        "outer_total": -4697600,
+        "start_to_create": -1500,
+        "resume_to_payload_handle_open": -8356100,
+        "inferred_resume_to_sut_assignment": -875700,
+        "sut_assignment_after_to_selected_wait": -273000,
+        "sut_selected_wait_to_outcome": -3979300,
+        "outer_wait_to_measurement_end": 3546800,
+        "inferred_sut_outcome_to_outer_end": 433300
+      },
+      {
+        "index": 7,
+        "first": "reference",
+        "outer_total": 399300,
+        "start_to_create": -3251800,
+        "resume_to_payload_handle_open": 2900500,
+        "inferred_resume_to_sut_assignment": 3269000,
+        "sut_assignment_after_to_selected_wait": 592100,
+        "sut_selected_wait_to_outcome": -269100,
+        "outer_wait_to_measurement_end": 658100,
+        "inferred_sut_outcome_to_outer_end": 44300
+      },
+      {
+        "index": 8,
+        "first": "current",
+        "outer_total": 1012800,
+        "start_to_create": 543200,
+        "resume_to_payload_handle_open": -570700,
+        "inferred_resume_to_sut_assignment": 228600,
+        "sut_assignment_after_to_selected_wait": 92900,
+        "sut_selected_wait_to_outcome": 395900,
+        "outer_wait_to_measurement_end": 953200,
+        "inferred_sut_outcome_to_outer_end": -260200
+      },
+      {
+        "index": 9,
+        "first": "reference",
+        "outer_total": -843800,
+        "start_to_create": 293100,
+        "resume_to_payload_handle_open": -980700,
+        "inferred_resume_to_sut_assignment": -1325200,
+        "sut_assignment_after_to_selected_wait": -236200,
+        "sut_selected_wait_to_outcome": -202200,
+        "outer_wait_to_measurement_end": -173000,
+        "inferred_sut_outcome_to_outer_end": 625900
+      },
+      {
+        "index": 10,
+        "first": "current",
+        "outer_total": -8279500,
+        "start_to_create": -2829300,
+        "resume_to_payload_handle_open": -5342200,
+        "inferred_resume_to_sut_assignment": -6360100,
+        "sut_assignment_after_to_selected_wait": 445600,
+        "sut_selected_wait_to_outcome": -451600,
+        "outer_wait_to_measurement_end": -228900,
+        "inferred_sut_outcome_to_outer_end": 915300
+      },
+      {
+        "index": 11,
+        "first": "reference",
+        "outer_total": 6981300,
+        "start_to_create": 5414000,
+        "resume_to_payload_handle_open": 902400,
+        "inferred_resume_to_sut_assignment": 620600,
+        "sut_assignment_after_to_selected_wait": 171500,
+        "sut_selected_wait_to_outcome": -794600,
+        "outer_wait_to_measurement_end": 843100,
+        "inferred_sut_outcome_to_outer_end": 1559500
+      },
+      {
+        "index": 12,
+        "first": "current",
+        "outer_total": -2120300,
+        "start_to_create": 848800,
+        "resume_to_payload_handle_open": -202600,
+        "inferred_resume_to_sut_assignment": -2241200,
+        "sut_assignment_after_to_selected_wait": 560100,
+        "sut_selected_wait_to_outcome": -619300,
+        "outer_wait_to_measurement_end": -2705700,
+        "inferred_sut_outcome_to_outer_end": -689000
+      },
+      {
+        "index": 13,
+        "first": "reference",
+        "outer_total": 7753400,
+        "start_to_create": 819500,
+        "resume_to_payload_handle_open": 5282900,
+        "inferred_resume_to_sut_assignment": 1232200,
+        "sut_assignment_after_to_selected_wait": 2199100,
+        "sut_selected_wait_to_outcome": 2967200,
+        "outer_wait_to_measurement_end": 1671200,
+        "inferred_sut_outcome_to_outer_end": 560100
+      },
+      {
+        "index": 14,
+        "first": "current",
+        "outer_total": -46581900,
+        "start_to_create": -50347700,
+        "resume_to_payload_handle_open": 2419900,
+        "inferred_resume_to_sut_assignment": 4276700,
+        "sut_assignment_after_to_selected_wait": 176000,
+        "sut_selected_wait_to_outcome": -1665700,
+        "outer_wait_to_measurement_end": 1138700,
+        "inferred_sut_outcome_to_outer_end": 985400
+      },
+      {
+        "index": 15,
+        "first": "reference",
+        "outer_total": 1129700,
+        "start_to_create": 1050200,
+        "resume_to_payload_handle_open": -340000,
+        "inferred_resume_to_sut_assignment": -2113800,
+        "sut_assignment_after_to_selected_wait": 287800,
+        "sut_selected_wait_to_outcome": 40500,
+        "outer_wait_to_measurement_end": 447000,
+        "inferred_sut_outcome_to_outer_end": 1869300
+      },
+      {
+        "index": 16,
+        "first": "current",
+        "outer_total": -1777200,
+        "start_to_create": 133600,
+        "resume_to_payload_handle_open": -8220200,
+        "inferred_resume_to_sut_assignment": -2173000,
+        "sut_assignment_after_to_selected_wait": -1032900,
+        "sut_selected_wait_to_outcome": 1668500,
+        "outer_wait_to_measurement_end": 6401400,
+        "inferred_sut_outcome_to_outer_end": -343000
+      },
+      {
+        "index": 17,
+        "first": "reference",
+        "outer_total": -1324500,
+        "start_to_create": 140400,
+        "resume_to_payload_handle_open": -6456200,
+        "inferred_resume_to_sut_assignment": -1617800,
+        "sut_assignment_after_to_selected_wait": -493200,
+        "sut_selected_wait_to_outcome": 112500,
+        "outer_wait_to_measurement_end": 4960300,
+        "inferred_sut_outcome_to_outer_end": 535900
+      },
+      {
+        "index": 18,
+        "first": "current",
+        "outer_total": 11025800,
+        "start_to_create": 2580600,
+        "resume_to_payload_handle_open": 9053000,
+        "inferred_resume_to_sut_assignment": 6841200,
+        "sut_assignment_after_to_selected_wait": 2244600,
+        "sut_selected_wait_to_outcome": -1007600,
+        "outer_wait_to_measurement_end": -699200,
+        "inferred_sut_outcome_to_outer_end": 365000
+      },
+      {
+        "index": 19,
+        "first": "reference",
+        "outer_total": 7028700,
+        "start_to_create": 3847300,
+        "resume_to_payload_handle_open": 2241400,
+        "inferred_resume_to_sut_assignment": 1149300,
+        "sut_assignment_after_to_selected_wait": -1570400,
+        "sut_selected_wait_to_outcome": 3213900,
+        "outer_wait_to_measurement_end": 785200,
+        "inferred_sut_outcome_to_outer_end": 382600
+      }
+    ],
+    "interpretation": "Traced overall difference is order-sensitive. The positive untraced pre-handle-open component does not recur consistently under trace; this does not erase the prior untraced residual or establish a cause, zero effect, equivalence or ranking.",
+    "clock_join_limits": "Fields labelled inferred join CPython perf_counter_ns to source V1 QPC using CPython3.12 implementation and the Windows same-system QPC contract. The installed Python exact source-build provenance and simultaneous calibration remain unproven; no offset is fitted. These joins are source-grounded inference, not primary evidence.",
+    "next": "A product repair needs a low-perturbation method that can reproduce and localize the untraced excess; this sample supports no speculative optimization."
+  }
 }
