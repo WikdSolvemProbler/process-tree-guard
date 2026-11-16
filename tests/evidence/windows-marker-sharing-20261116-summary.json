@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "Incomplete phase sample and controlled Windows marker-reader compatibility diagnosis; no product speed acceptance",
+  "partial_sample": {
+    "planned_pairs": 20,
+    "schedule": "AABB repeated five times",
+    "completed_pairs": 7,
+    "completed_slots": 14,
+    "attempted_guard_slots": 15,
+    "original_tool_exit_code": 1,
+    "failed_slot": {
+      "pair": 7,
+      "position": 0,
+      "arm": "reference",
+      "operation": "marker.open",
+      "exception": "PermissionError",
+      "errno": 13,
+      "winerror": null,
+      "traceback": "pathlib.open delegates to io.open",
+      "payload_handle_acquired": false,
+      "normal_guard_endpoint_available": false,
+      "assisted_job_cleanup_active_before": 3,
+      "assisted_job_cleanup_active_after": 0
+    },
+    "passing_slot_oracles_verified": 14,
+    "source_roles_rehashed": 52,
+    "held_distinct_roles": 58,
+    "held_identity_records": 174,
+    "raw_receipt_sha256": "f7fb311663ed3418d9a3627d5ee89af6eaf4069c73a0c8891d9b058451934be5",
+    "root_partial_audit_sha256": "e5bc336e785e44c3462ce03a3e9eb39086a66f37f3eda2ee9bca71bd74e32cff",
+    "independent_partial_audit_sha256": "6bd16ad3c43944338f8b269917174b6aff8a31261aaa2142f719b1808a7ea70e",
+    "author_partial_audit_sha256": "b74e965cf5d9c2b63a91f9217df8e80ac7ab0e117dcbf91546907e484dd0ed19",
+    "private_inventory": {
+      "files": 132,
+      "bytes": 648115,
+      "sha256": "5b51562cc77aa01510da492f90cd5d3ba8a76ae472f6707470647a98734069b9"
+    },
+    "profiled_image_exposures_after_attempt": {
+      "current": 10,
+      "reference": 10
+    },
+    "full20_qualification": false,
+    "automatic_retries": 0
+  },
+  "controlled_crt_capture": {
+    "cases": 3,
+    "sut_runs": 0,
+    "source_sha256": "17b8ca337bcb48eb305c27612e3278aff4a7c6c9e801bd0d618c2a57762089d9",
+    "result_sha256": "8f5c7ada157dc38d5f18f48d40d1e7166b0188c9fac4f85f6be82a6dddcbfad6",
+    "python_version": "3.12.10",
+    "native_exclusive_sharing_denial_each": 32,
+    "python_errno_each": 13,
+    "python_winerror_each": null,
+    "immediate_cleared_system_crt_doserrno_each": 32,
+    "get_doserrno_return_each": 0,
+    "same_thread_and_handles_closed": true,
+    "historical_error_recovered": false
+  },
+  "controlled_delete_sharing": {
+    "cases": 3,
+    "sut_runs": 0,
+    "source_sha256": "4d861ef7e301ea667f4ef4a4f83f41182c1081cf3a9011b22346cfa45155c4dd",
+    "result_sha256": "7e2ff1cc1300faa61e997ea22d95f5f6b82022a64759302ecc1a24ac2e2867a3",
+    "independent_actual_audit_sha256": "e90786a06d73d0f049927f85d4d0d45859c5f1544f02c28995cca3e9a4f34140",
+    "author_actual_audit_sha256": "5029a2f996b3a7c8f86af5dec6ad049453636f3f5c8cb972c7c3790b3a5f35a3",
+    "private_file_data": "12345 (synthetic control bytes, not a process identity)",
+    "holder_desired_access": "DELETE (0x10000)",
+    "holder_share_mask": 7,
+    "python_read_open_while_holder_live": {
+      "failed_each": true,
+      "errno": 13,
+      "winerror": null,
+      "doserrno": 32
+    },
+    "native_read_open_while_holder_live": {
+      "succeeded_each": true,
+      "desired_access": "GENERIC_READ (0x80000000)",
+      "share_mask": 7,
+      "creation_disposition": "OPEN_EXISTING",
+      "maximum_read_bytes": 11,
+      "returned_bytes_each": 5,
+      "exact_control_bytes_each": true
+    },
+    "both_handles_closed_each": true,
+    "python_read_after_holder_close_exact_each": true,
+    "rename_or_delete_performed": false,
+    "local_compatibility_difference_proven": true
+  },
+  "sources": {
+    "windows_share_contract": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew",
+    "native_read_contract": "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile",
+    "crt_error_capture": "https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/get-doserrno",
+    "python_reference_version": "https://github.com/python/cpython/blob/v3.12.10/Modules/_io/fileio.c"
+  },
+  "qualification": {
+    "canonical_product_source_changed": false,
+    "primary_qualifying_competitive_measurements": 0,
+    "original_marker_denial_cause_proven": false,
+    "limitations": [
+      "Both incomplete fixed20 attempts remain preserved; no complete phase sample or speed/parity result exists.",
+      "The controlled files demonstrate a real local compatibility difference while a DELETE-access handle is live. They do not show that such a handle existed during either earlier marker failure or identify its owner.",
+      "Immediate system-UCRT error capture worked in the controlled process/thread; source-identical provenance for every installed runtime component is not established.",
+      "A native reader with explicit READ|WRITE|DELETE sharing permits concurrent rename/delete while its read handle remains open. It grants no new desired access to the reader; all PID, image, original process handle, Job, deadline and cleanup checks must remain.",
+      "Any native-reader repair must pass focused success/error/close-ownership checks and independent review before a new SUT sample. No access retry or swallowed denial is justified here.",
+      "Raw machine and transport evidence stays private. Public raw reproducibility packaging and the comprehensive competitive battery remain incomplete."
+    ]
+  },
+  "native_reader_repair": {
+    "status": "COMPONENT_VALIDATED_NEW_FIXED20_SAMPLE_PENDING",
+    "module": "tests/campaign/windows_payload_observer.py",
+    "module_sha256": "d4982594d8789e3027156d1a0bff458568177e414c606f09b7101c8bb5de219f",
+    "regression_test": "tests/tests/test_windows_payload_observer.py",
+    "regression_test_sha256": "2690c5ce3cb1761eaaedda6acbe380df7d9619fdab016343ccdbb16d787076f4",
+    "implementation": "Prebound typed CreateFileW GENERIC_READ/share7/OPEN_EXISTING, one synchronous ReadFile of at most11 bytes, and exactly-once CloseHandle in finally. Immediate native WinError on failure, local primary-error precedence over secondary close failure, Windows nonzero BOOL success. No access retry or swallowed error.",
+    "original_pid_job_image_deadline_first_poll_and_cleanup_checks_retained": true,
+    "observer_reader_and_timing_work_changed": true,
+    "private_component_controls": {
+      "real_delete_holder_cases": 3,
+      "injected_fault_cases": 6,
+      "nonzero_bool_success_cases": 1,
+      "sut_runs": 0,
+      "passed": true,
+      "independent_actual_review_sha256": "39448c7efa16c5dd43a688f8ac67bbd2c05e6422a7bb88a18b59fe36db72aeff",
+      "author_actual_review_sha256": "d4f96b4bb2ef54bf65336e786f79396ee55942b2482737e0782f8c6446ea8aed"
+    },
+    "canonical_regression": {
+      "unittest_methods": 2,
+      "real_delete_holder_subcases": 3,
+      "fake_error_and_bool_subcases": 4,
+      "passed": true,
+      "python_version": "3.12.10",
+      "whole_tree_deadline_seconds": 30,
+      "sut_runs": 0,
+      "original_tool_receipt_sha256": "1d014a23795a184473d5a16f646eddbb69c14a4cbbfb81290f8ff099e5c96684"
+    },
+    "python_311_portability": "Test uses Windows lstat file attributes instead of Python3.12-only Path.is_junction; not executed under Python3.11 in this run.",
+    "compatibility_property_validated": true,
+    "previous_marker_failure_causes_identified": false,
+    "guard_speed_acceptance_established": false
+  }
+}
