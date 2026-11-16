@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "REPOSITORY_SECURITY_CONFIGURATION_AND_ALERT_SNAPSHOT",
+  "repository": "WikdSolvemProbler/process-tree-guard",
+  "main_at_inspection": "30101148bdac02f27458b2dc34644e93abd14fdf",
+  "sources": {
+    "repository_settings": "https://api.github.com/repos/WikdSolvemProbler/process-tree-guard",
+    "code_scanning_alerts": "https://api.github.com/repos/WikdSolvemProbler/process-tree-guard/code-scanning/alerts?state=open&per_page=100",
+    "dependency_alerts": "https://api.github.com/repos/WikdSolvemProbler/process-tree-guard/dependabot/alerts?state=open&per_page=100",
+    "secret_alerts": "https://api.github.com/repos/WikdSolvemProbler/process-tree-guard/secret-scanning/alerts?state=open&per_page=100"
+  },
+  "observations": {
+    "code_scanning_open_alerts": 0,
+    "dependabot_open_alerts": 0,
+    "initial_secret_alert_query": "HTTP404: secret scanning disabled; not a clean scan",
+    "secret_scanning": {
+      "before": "disabled",
+      "after": "enabled",
+      "fresh_readback_verified": true
+    },
+    "secret_scanning_push_protection": {
+      "before": "disabled",
+      "after": "enabled",
+      "fresh_readback_verified": true
+    },
+    "secret_open_alerts_after_enable": 0,
+    "dependabot_security_updates": "enabled, unchanged",
+    "non_provider_patterns": "disabled, unchanged",
+    "validity_checks": "disabled, unchanged"
+  },
+  "change": {
+    "method": "PATCH repository security_and_analysis with secret_scanning and secret_scanning_push_protection enabled",
+    "product_source_changed": false,
+    "guard_defaults_changed": false,
+    "alerts_dismissed": 0,
+    "scan_completion_verified": false
+  },
+  "evidence": {
+    "private_manifest_sha256": "24a85eb45e64c71fc4a0d8772b0a22d6524bddf1eb93ef60d47554801e2d4ebd",
+    "original_terminal_receipts": [
+      {
+        "file": "dependabotInspectionTool.json",
+        "bytes": 128,
+        "sha256": "7667194ae21e2abc7da5be46f162e53b9d65f2afd584f5655da0c996337b3967"
+      },
+      {
+        "file": "repoEnableSecretProtectionTool.json",
+        "bytes": 421,
+        "sha256": "2524ec98e24f6891878294878cc6e983769a9caa0f8fb07142db378d9b1e6b08"
+      },
+      {
+        "file": "repoSecuritySettingsBeforeTool.json",
+        "bytes": 564,
+        "sha256": "af2f50a917ca3427ff80c9037a8b700ef0fd527bdcb69fed54afaccaae64075b"
+      },
+      {
+        "file": "repoSecuritySettingsReadbackTool.json",
+        "bytes": 425,
+        "sha256": "7cee6a8a95c2d6263d35c1d7a7f6403bddaf4b773505bed15e159f0c27acff35"
+      },
+      {
+        "file": "secretScanningInspectionTool.json",
+        "bytes": 414,
+        "sha256": "33b17e30af53ac5e2c62e60a70faa56069fd12334fe1aad9339c04b0bc786ba4"
+      },
+      {
+        "file": "securityAlertsInspectionTool.json",
+        "bytes": 137,
+        "sha256": "50dd60807190a9fe58fd5b50d5ab6a7838505cb6724200a813557181d5bc6e04"
+      }
+    ],
+    "payload_sha256": "47e711b85b4caf57dba06cb7eff027dc81dbe3566fa870ae7949fa0b5745bc1a"
+  },
+  "limits": [
+    "Alert counts are an API snapshot, not a proof that the product or repository has no vulnerabilities.",
+    "Newly enabled historical secret scan completion was not verified; an empty current alert list is not a completed scan.",
+    "This does not expand the recognized patterns to all possible secrets; non-provider and validity-check settings remain disabled.",
+    "No secret values were printed or published; exact command and tool records remain private."
+  ]
+}
