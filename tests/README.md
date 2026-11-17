@@ -246,10 +246,13 @@ A refuted case's item is not adopted.
 The FAIL stands recorded in `results\battery\`.
 The run continues to the test families after a battery FAIL.
 `run.ps1` names the battery stage in its aggregate failure.
-The aggregate failure is reported after every stage has run.
-A battery **execution failure** aborts loudly before the families.
-An execution failure is a case BLOCKED-ERROR, a crash, or no `battery.json` written.
-The battery then produced no decisions to continue on.
+The aggregate failure is reported after every independent stage has been attempted.
+A battery **execution failure** remains a failed stage.
+An execution failure is a case BLOCKED-ERROR, a crash, or no report file written.
+The independent test families still run after that failure.
+The original battery exit and report-file presence are recorded separately.
+A missing or non-file `battery.json` cannot support a recorded FAIL decision.
+The final aggregate remains nonzero and names every failed stage.
 The distinction stands on the exit-code contract of `battery.py`.
 Exit 0 means executed, with no FAIL and no BLOCKED-ERROR.
 Exit 2 means BLOCKED-ERROR, an execution failure.

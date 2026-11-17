@@ -47,13 +47,11 @@
 #   results\battery\, and the run CONTINUES to the test families.
 #   The battery stage is named in the aggregate failure reported
 #   after every stage has run.
-# - A battery execution failure still aborts loudly, before the
-#   test families: battery.py exit code 2 (a case BLOCKED-ERROR:
-#   a driver missing, a driver error, evidence withheld), any
-#   other unexpected battery exit code (for example a crash), or
-#   no battery.json written into results\battery\ at all. The
-#   battery did not produce decisions, so there is nothing to
-#   continue on the strength of.
+# - A battery execution failure is recorded, but does not suppress
+#   the independent test families: battery.py exit code 2 (a case
+#   BLOCKED-ERROR), an unexpected exit code, or no battery.json are
+#   each named as failed evidence. The battery's decisions are not
+#   completed in that case. The final aggregate remains nonzero.
 # - Test-family failures are recorded and named in the same
 #   aggregate at the end; they never rewrite the earlier stages.
 #
@@ -181,8 +179,9 @@ if ($campaignStatus -ne $CampaignStatusComplete) {
     Write-Host "campaign outcome: INCOMPLETE (campaign_status '$campaignStatus'); recorded as a failed stage; continuing to the battery and the test families"
 }
 
-# Stage 2: the battery. A FAIL decision is recorded and the run
-# continues; an execution failure aborts loudly, right here.
+# Stage 2: the battery. Record its native exit and report presence
+# separately. Every failure is named, and the independent test
+# families still run after a completed campaign attempt.
 $batteryDir = Join-Path $results "battery"
 python (Join-Path $here "battery\battery.py") --json `
     --tree $treeResolved `
@@ -190,22 +189,29 @@ python (Join-Path $here "battery\battery.py") --json `
     Tee-Object (Join-Path $results "battery-report.json")
 $batteryExit = $LASTEXITCODE
 Add-Content -Path $stageRecord -Value "battery exit: $batteryExit"
-if (-not (Test-Path (Join-Path $batteryDir "battery.json"))) {
-    throw "battery execution failed: no battery.json was written into results\battery; the battery did not run and the run stops here"
+$batteryReportPresent = Test-Path -LiteralPath (Join-Path $batteryDir "battery.json") -PathType Leaf
+Add-Content -Path $stageRecord -Value "battery report present: $batteryReportPresent"
+if (-not $batteryReportPresent) {
+    $failedStages += "battery (execution failure: no battery.json was written into results\battery)"
+    Write-Host "battery execution failure: no battery.json was written; continuing to the independent test families"
 }
 if ($batteryExit -eq $BatteryExecutionExit) {
-    throw "battery execution failed with $batteryExit (BLOCKED-ERROR: a case could not be executed); the run stops here"
-}
-if ($batteryExit -ne 0 -and $batteryExit -ne $BatteryFailDecisionExit) {
-    throw "battery execution failed with $batteryExit; the run stops here"
-}
-if ($batteryExit -eq $BatteryFailDecisionExit) {
-    $failedStages += "battery (FAIL decision, recorded in results\battery)"
-    Write-Host "battery decision: FAIL, recorded in results\battery; continuing to the test families"
+    $failedStages += "battery (execution failure: exit $batteryExit, BLOCKED-ERROR)"
+    Write-Host "battery execution failure: exit $batteryExit (BLOCKED-ERROR); continuing to the independent test families"
+} elseif ($batteryExit -eq $BatteryFailDecisionExit) {
+    if ($batteryReportPresent) {
+        $failedStages += "battery (FAIL decision, recorded in results\battery)"
+        Write-Host "battery decision: FAIL, recorded in results\battery; continuing to the independent test families"
+    } else {
+        Write-Host "battery exit $batteryExit had no report; continuing to the independent test families"
+    }
+} elseif ($batteryExit -ne 0) {
+    $failedStages += "battery (execution failure: unexpected exit $batteryExit)"
+    Write-Host "battery execution failure: unexpected exit $batteryExit; continuing to the independent test families"
 }
 
-# Stage 3: every test family. This stage runs whenever the campaign
-# measured and the battery produced decisions, FAIL included.
+# Stage 3: every test family. This stage runs after the campaign
+# measured, even when the battery could not produce decisions.
 # The test runner writes its progress to stderr by design, and
 # this stage merges that stream into the recorded output. Under
 # the Stop preference set at the top of this script, a native
@@ -226,7 +232,7 @@ if ($testsExit -ne 0) {
 }
 
 if ($failedStages.Count -gt 0) {
-    throw "run finished every stage; stages that did not pass: $($failedStages -join '; ')"
+    throw "run attempted every independent stage; stages that did not pass: $($failedStages -join '; ')"
 }
 
 Write-Host "results in $results"

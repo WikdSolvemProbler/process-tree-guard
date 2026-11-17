@@ -3524,9 +3524,9 @@ class BatteryExitContractTests(unittest.TestCase):
 class RunScriptTests(unittest.TestCase):
     """run.ps1's stage handling, checked mechanically here (its
     execution is Windows-theory): a battery FAIL decision is
-    recorded and the run continues to the test families, a battery
-    execution failure aborts loudly before them, and a campaign
-    failure still aborts the whole run at once."""
+    recorded and the run continues to the test families; a battery
+    execution failure is named while those independent families still
+    run. A campaign infrastructure failure still aborts at once."""
 
     def run_script(self):
         with open(os.path.join(HERE, "..", "run.ps1"),
@@ -3546,19 +3546,28 @@ class RunScriptTests(unittest.TestCase):
         # The old unconditional throw on any battery exit is gone.
         self.assertNotIn('throw "battery failed', text)
 
-    def test_battery_execution_failure_aborts_before_the_families(self):
+    def test_battery_execution_failure_is_named_after_independent_families(self):
         text = self.run_script()
         battery_at = text.index("# Stage 2")
         tests_at = text.index("# Stage 3")
         self.assertLess(battery_at, tests_at)
-        # A missing report is an execution failure, checked between
-        # the battery stage and the test families.
+        # A missing report and a BLOCKED-ERROR native exit are distinct
+        # failures, recorded before the independent test stage runs.
         missing_at = text.index("no battery.json was written")
         self.assertLess(battery_at, missing_at)
         self.assertLess(missing_at, tests_at)
         blocked_at = text.index(
-            "battery execution failed with $batteryExit (BLOCKED-ERROR")
+            '$failedStages += "battery (execution failure: exit '
+            '$batteryExit, BLOCKED-ERROR)"')
         self.assertLess(blocked_at, tests_at)
+        self.assertIn("battery report present: $batteryReportPresent", text)
+        self.assertIn('battery exit: $batteryExit', text)
+        self.assertIn("unexpected exit $batteryExit", text)
+        self.assertIn("if ($batteryReportPresent) {", text)
+        self.assertNotIn('throw "battery execution failed', text)
+        aggregate_at = text.index("stages that did not pass")
+        self.assertLess(tests_at, aggregate_at)
+        self.assertIn("run attempted every independent stage", text)
         self.assertIn("stage-exit-codes.txt", text)
 
     def test_battery_fail_decision_continues_and_is_named_at_the_end(self):
@@ -3568,7 +3577,7 @@ class RunScriptTests(unittest.TestCase):
         tests_at = text.index("run_tests.py")
         # Recording the decision does not throw: the families run.
         self.assertLess(decision_at, tests_at)
-        self.assertIn("continuing to the test families", text)
+        self.assertIn("continuing to the independent test families", text)
         self.assertIn("results\\tests.txt", text)
         # The aggregate naming every failed stage comes last.
         aggregate_at = text.index("stages that did not pass")
