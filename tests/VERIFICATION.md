@@ -479,22 +479,20 @@ was run under finite deadlines. Raw outputs are in `evidence/`.
    `evidence/battery-linux.json` holds the record. The audits are
    function-scoped: each names its file, function and line —
    `Sleep(10)` at `src/engine/wait.rs`, function
-   `wait_until_empty`, line 487. The `vars_os()` call is at
+   `wait_until_empty`, line 617. The `vars_os()` call is at
    `src/engine/environment.rs`, function `environment_block`,
    line 72. The audit enumerates the four pseudo-handle fetch
    sites in `harden_self` (lines 212, 219), `watched_owner_handles`
-   (line 481), and `cli_exit` (line 335), with their consumers,
-   including `deny_acl` line 213, `parent_process_id_on` line 489,
-   and `TerminateProcess` line 335.
+   (line 506), and `cli_exit` (line 277), with their consumers,
+   including `deny_acl` line 213, `parent_process_id_on` line 514,
+   and `TerminateProcess` line 277.
    `Console::finish` at `src/cli_process.rs` line 173; and
    `CreateIoCompletionPort` inside `Extension::start` at
-   `src/extend/server.rs` line 124. (Coordinates re-recorded in
-   the round-21 landing from a fresh battery run against the
-   current tree, each verified against the tree source text at
-   that line; the recorded evidence is now held to a fresh run
-   by the recorded battery-evidence freshness control in this
-   item's family, so a tree move that shifts the audited lines
-   fails the suite until the record is regenerated.)
+   `src/extend/server.rs` line 140. (Coordinates refreshed from the current source on 2026-11-16,
+   using the driver-blocked Linux audit context on Windows.
+   This replay checks source locations only; all five native
+   behavior verdicts remain BLOCKED-WINDOWS. The record is held
+   to a fresh source audit by its existing freshness control.)
    Mutation controls against a scratch copy of the tree run
    as suite tests: deleting the
    counted owner fetch while the other `GetCurrentProcess()`
