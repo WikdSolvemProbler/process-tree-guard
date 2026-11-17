@@ -630,8 +630,8 @@ This suite claims the remainder at no tier above manual/Windows-theory.
 
 ## The suite's counted-once total
 
-647 tests counted once, each by `run_tests.py`.
-The split is (593 execute on any platform; 54 drive the guard).
+651 tests counted once in the current source collection, as reported by `run_tests.py --count-only`.
+The current collection has 593 portable tests, 54 guard-driving tests, and 4 Windows-only helper tests.
 The 54 execute on Windows against the built package.
 Elsewhere they skip.
 The negative controls prove the skip reason is the missing binary.
@@ -640,8 +640,8 @@ That test reads the counted-once totals in three documents.
 The documents are `README.md`, `VERIFICATION.md`, and `FAILURE-TREE.md`.
 The canonical phrasing is "N tests counted once".
 The test fails on any disagreement with `run_tests.py --count-only`.
-The census set also includes the recorded evidence summary `evidence/test-run.txt`.
-The same discipline holds that summary's recorded total to the runner's count.
+The census set also includes the historical execution summary `evidence/test-run.txt`.
+The unchanged receipt preserved in e16 reports 647 tests (593 passed, 54 skipped), consistent with the imported e16 source count. The original run's exact source and environment are not independently re-attested; this receipt is not evidence that the current 651-test collection executed.
 The counted-ops census tests also stand among them.
 Those tests recount the plain, hook, and run-core totals.
 The recount reads the vendored enumeration in `campaign/census.json`.
@@ -655,7 +655,8 @@ That size is the size of the corpus.
 The size is reported separately from the test count.
 Every case is compared, guard against an independent parsed-form reference.
 The comparison count is in 1,453 comparisons per Windows run.
-The guard's own in-tree Rust tests (461 counted once) belong to the tree.
+The guard's own in-tree Rust tests (483 counted once) belong to the tree.
+That is a current source recount, not a new execution receipt.
 This suite does not recount those tests.
 `FAILURE-TREE.md` states which failure branches have families.
 `FAILURE-TREE.md` also states which branches remain unimplemented.

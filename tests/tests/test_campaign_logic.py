@@ -2492,37 +2492,47 @@ class CensusConsistencyTests(unittest.TestCase):
                              f"{name}: stated {stated}, runner {expected}")
 
     def test_recorded_test_run_evidence_matches_the_runner_count(self):
-        # Round-21 adjudication P1: the census discipline held
-        # the three documents to the runner's count and stopped
-        # one artifact short — evidence/test-run.txt, the
-        # recorded summary VERIFICATION item 1 cites for the
-        # headline total, recorded a 344-test run while the
-        # documents stated 390 and drifted two landings behind
-        # them. The evidence file is part of the census set now:
-        # its recorded counted-once total (and its "Ran N tests"
-        # line, the runner's own format) is held to
-        # run_tests.py --count-only, the runner's own count, so
-        # a landing that moves the total must refresh it.
+        """Hold an imported 647-run receipt to an e16 source-count snapshot.
+
+        e16ea4aaef9b55155486912f1ad30a58be5d69cd has tree
+        9866626bf69d37956afc3e0156572f9b653d4616. Its six
+        test_*.py files were independently exported as raw Git blobs
+        and statically recounted as 69 + 487 + 31 + 36 + 10 + 14.
+        The old collector's count-only path uses unittest discovery.
+        This static consistency check does not re-attest the original
+        run's exact source or execution environment, nor claim the
+        current source collection ran.
+        """
+        import hashlib
         import re
-        done = subprocess.run(
-            [sys.executable,
-             os.path.join(HERE, "..", "run_tests.py"), "--count-only"],
-            capture_output=True, text=True, timeout=120)
-        self.assertEqual(done.returncode, 0, done.stderr)
-        expected = int(done.stdout.strip())
+        historical_by_file = {
+            "test_battery_cases.py": 69,
+            "test_campaign_logic.py": 487,
+            "test_coverage_families.py": 31,
+            "test_guard_families.py": 36,
+            "test_output_observation.py": 10,
+            "test_scanner_differential.py": 14,
+        }
+        historical_total = sum(historical_by_file.values())
+        self.assertEqual(historical_total, 647)
         with open(os.path.join(HERE, "..", "evidence", "test-run.txt"),
-                  encoding="utf-8") as handle:
-            recorded = handle.read()
-        match = re.search(r"counted-once total: (\d+) tests", recorded)
-        self.assertIsNotNone(
-            match, "evidence/test-run.txt records no counted-once total")
-        self.assertEqual(int(match.group(1)), expected,
-                         "evidence/test-run.txt is stale against "
-                         "the runner's counted-once total")
-        match = re.search(r"Ran (\d+) tests", recorded)
-        self.assertIsNotNone(
-            match, "evidence/test-run.txt records no test run")
-        self.assertEqual(int(match.group(1)), expected)
+                  "rb") as handle:
+            raw = handle.read()
+        # Git's LF blob and the public checkout's CRLF copy differ only
+        # in line endings; this digest pins the historical content.
+        self.assertEqual(
+            hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest(),
+            "3a19b70ea299016f2b8bc9d34dd06b631c8af1f5b67a222557e4cd333afdc598")
+        recorded = raw.decode("utf-8")
+        for pattern in (r"counted-once total: (\d+) tests",
+                        r"Ran (\d+) tests"):
+            match = re.search(pattern, recorded)
+            self.assertIsNotNone(match)
+            self.assertEqual(int(match.group(1)), historical_total)
+        self.assertIn("OK (skipped=54)", recorded)
+        self.assertIn(
+            "647 tests (647 run, 54 skipped, 0 failures, 0 errors)",
+            recorded)
 
     def derived_skipped_count(self):
         """The execute/skip split this machine's run produces,
@@ -2553,15 +2563,11 @@ class CensusConsistencyTests(unittest.TestCase):
         return total
 
     def test_recorded_split_matches_the_derived_split(self):
-        # Round-22 adjudication P7: round 21 held the counted-once
-        # total in evidence/test-run.txt and stopped at the split
-        # printed beside it — the same file's skipped fields and
-        # the documents' run/skipped split could all be wrong at
-        # a constant total. The split is held now: the gated
-        # count re-derives from the test sources (above), the
-        # evidence file's run / skipped / failures / errors are
-        # held to it and to the runner's total, and the split
-        # each document states in prose is held the same way.
+        # Hold the imported 647-run receipt split to its e16 source-count
+        # snapshot. Separately derive today's portable,
+        # guard-driving, and Windows-only helper counts from the current
+        # source collection. A current count is not an execution receipt.
+        import ast
         import re
         # This derivation is this machine's: a built guard
         # package would un-skip the gated families and the
@@ -2579,18 +2585,31 @@ class CensusConsistencyTests(unittest.TestCase):
             capture_output=True, text=True, timeout=120)
         self.assertEqual(done.returncode, 0, done.stderr)
         total = int(done.stdout.strip())
-        skipped = self.derived_skipped_count()
-        self.assertGreater(skipped, 0)
-        executed = total - skipped
+        guard_skipped = self.derived_skipped_count()
+        self.assertGreater(guard_skipped, 0)
+        windows_only = 0
+        for name in ("test_windows_payload_observer.py",
+                     "test_windows_slot_job.py"):
+            with open(os.path.join(HERE, name), encoding="utf-8") as fh:
+                module = ast.parse(fh.read())
+            for node in module.body:
+                if isinstance(node, ast.ClassDef) and any(
+                    "skipUnless(sys.platform == 'win32'" in ast.unparse(d)
+                    for d in node.decorator_list
+                ):
+                    windows_only += sum(
+                        isinstance(item, ast.FunctionDef)
+                        and item.name.startswith("test_")
+                        for item in node.body)
+        executed = total - guard_skipped - windows_only
         with open(os.path.join(HERE, "..", "evidence", "test-run.txt"),
                   encoding="utf-8") as handle:
             recorded = handle.read()
         match = re.search(r"OK \(skipped=(\d+)\)", recorded)
         self.assertIsNotNone(
             match, "evidence/test-run.txt records no skipped count")
-        self.assertEqual(int(match.group(1)), skipped,
-                         "evidence/test-run.txt skipped field is "
-                         "stale against the derived gated count")
+        self.assertEqual(int(match.group(1)), 54,
+                         "historical e16 skipped field differs")
         match = re.search(
             r"counted-once total: (\d+) tests \((\d+) run, "
             r"(\d+) skipped, (\d+) failures, (\d+) errors\)", recorded)
@@ -2598,18 +2617,18 @@ class CensusConsistencyTests(unittest.TestCase):
             match, "evidence/test-run.txt records no split line")
         self.assertEqual(
             [int(group) for group in match.groups()],
-            [total, total, skipped, 0, 0],
-            "evidence/test-run.txt split is stale against the "
-            "runner's total and the derived gated count")
+            [647, 647, 54, 0, 0],
+            "historical e16 receipt split differs")
         with open(os.path.join(HERE, "..", "README.md"),
                   encoding="utf-8") as handle:
             readme = handle.read()
         match = re.search(
-            r"\((\d+) execute\s+on any platform; (\d+) drive the guard",
+            r"(\d+) portable tests, (\d+) guard-driving tests, "
+            r"and (\d+) Windows-only helper tests",
             readme)
         self.assertIsNotNone(match, "README states no execute/skip split")
-        self.assertEqual([int(match.group(1)), int(match.group(2))],
-                         [executed, skipped],
+        self.assertEqual([int(group) for group in match.groups()],
+                         [executed, guard_skipped, windows_only],
                          "README's split is stale")
         with open(os.path.join(HERE, "..", "VERIFICATION.md"),
                   encoding="utf-8") as handle:
@@ -2621,8 +2640,8 @@ class CensusConsistencyTests(unittest.TestCase):
             match, "VERIFICATION item 1 states no split")
         self.assertEqual(
             [int(group) for group in match.groups()],
-            [executed, skipped, 0, 0],
-            "VERIFICATION item 1's split is stale")
+            [593, 54, 0, 0],
+            "VERIFICATION item 1's historical e16 split differs")
         # Round-25 adjudication P6: VERIFICATION's theory
         # section restates the same split figure ("The 53
         # guard-driving tests") outside item 1's phrasing, in
@@ -2633,7 +2652,7 @@ class CensusConsistencyTests(unittest.TestCase):
         self.assertIsNotNone(
             match, "VERIFICATION's theory section states no "
                    "guard-driving count")
-        self.assertEqual(int(match.group(1)), skipped,
+        self.assertEqual(int(match.group(1)), guard_skipped,
                          "VERIFICATION theory section's "
                          "guard-driving count is stale")
 
@@ -10399,6 +10418,9 @@ class Round26LandingTests(unittest.TestCase):
             "test_scanner_differential.py"))
         battery = counts["test_battery_cases.py"]
         total = sum(counts.values())
+        windows_helpers = sum(counts[name] for name in (
+            "test_windows_payload_observer.py",
+            "test_windows_slot_job.py"))
         with open(os.path.join(HERE, "..", "VERIFICATION.md"),
                   encoding="utf-8") as handle:
             verification = re.sub(r"\s+", " ", handle.read())
@@ -10416,7 +10438,19 @@ class Round26LandingTests(unittest.TestCase):
             match, "VERIFICATION states no landed split")
         self.assertEqual(
             [int(group) for group in match.groups()],
-            [campaign, guard_facing, guard_facing + battery, total])
+            [487, 91, 160, 647])
+        # The landing is historical; the four later Windows-only helper
+        # tests belong to the current collection, not that landing.
+        match = re.search(
+            r"Current source collection adds four Windows-only helper "
+            r"tests to the historical 647: (\d+) campaign-logic / "
+            r"(\d+) guard-facing / (\d+) battery / (\d+) "
+            r"Windows-only helper tests, of (\d+) counted once",
+            verification)
+        self.assertIsNotNone(match)
+        self.assertEqual(
+            [int(group) for group in match.groups()],
+            [campaign, guard_facing, battery, windows_helpers, total])
         # Round-32 F3 (rebuilding round-31 F3): the BY-SUBJECT
         # statement beside the by-file one, held the same way —
         # recomputed from the test sources PER TEST under the
@@ -10636,8 +10670,19 @@ class Round26LandingTests(unittest.TestCase):
             match, "VERIFICATION states no by-subject split")
         self.assertEqual(
             [int(group) for group in match.groups()],
+            [312, 335, 647, 91, 69, 152])
+        match = re.search(
+            r"Its by-subject split is (\d+) guard-facing / "
+            r"(\d+) harness, of (\d+) counted once "
+            r"\((\d+) guard files \+ (\d+) battery \+ "
+            r"(\d+) per-test-classified tests inside "
+            r"test_campaign_logic\.py \+ (\d+) Windows-only helpers\)",
+            verification)
+        self.assertIsNotNone(match)
+        self.assertEqual(
+            [int(group) for group in match.groups()],
             [guard_by_subject, harness_by_subject, total,
-             guard_facing, battery, programme])
+             guard_facing, battery, programme, windows_helpers])
 
     # ----------------------------------------------------- F7 / F8
     def test_failure_tree_names_the_bat_family_and_console_case(self):
