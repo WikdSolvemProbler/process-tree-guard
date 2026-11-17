@@ -1,0 +1,399 @@
+{
+  "schema": 1,
+  "date_utc": "2026-11-17",
+  "status": "SELECTED_CORRECTNESS_PASSED_SPEED_UNRESOLVED_NOT_ADOPTED",
+  "question": "Does deferring the unused stdin console-mode query improve the current manual guard without changing its guarantees?",
+  "candidate": {
+    "source_sha256": "c1c4f235e69ba7495aa35808a5879c59f9d057122dc191ff9d116cb3fd458f69",
+    "base_stdio_sha256": "8c6e69cfbc22b914483ba2136fa0fd8fb69b950235db57d96919c9d1b4513843",
+    "change": "Store the original standard handle separately from its console verdict. Merely forwarding stdin does not query its mode; actual stdin readers query it on the retained handle. Output/error modes remain pinned before child launch. Unknown-selector and returning-library behavior is preserved.",
+    "production_adopted": false,
+    "canonical_production_rust_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "source_availability": "Prototype bytes and exact raw records remain private; this summary is not an executable public reproduction package."
+  },
+  "build": {
+    "method": "Fresh baseline and candidate default-main builds at the same source and target paths, archived before reuse. One production Rust code file changed; no active feature cfg flags in selected compilations.",
+    "rust": "1.98.1",
+    "llvm": "22.1.8",
+    "msvc": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": {
+      "opt_level": 3,
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "symbols",
+      "features": "default",
+      "offline": true,
+      "locked": true
+    }
+  },
+  "correctness": {
+    "library_top_level_functions_passed": 300,
+    "library_failures": 0,
+    "nested_child": {
+      "functions_passed": 1,
+      "filtered": 299,
+      "counting": "Within an existing outer test; not an additional independent top-level function."
+    },
+    "selected_existing_functions": {
+      "baseline_main": 7,
+      "candidate_main": 7,
+      "candidate_role_family": 1,
+      "total_calls": 15,
+      "each_exactly_one_actual_function": true,
+      "outer_and_driver_native_exits": 0,
+      "not_asserted_lines": 0
+    },
+    "source_files_rehashed": 943,
+    "artifacts_rehashed": 11,
+    "limits": [
+      "All 15 opaque child-environment digests differ; these are correctness checks, not matched timing evidence.",
+      "Role-family B125 uses freshly compiled candidate helpers; it does not select the archived baseline main.",
+      "Real-console stdin and the full suite/battery were not qualified by these selected calls."
+    ]
+  },
+  "timing": {
+    "attempts": 1,
+    "retries": 0,
+    "qualification_count": 4,
+    "qualification_excluded": true,
+    "qualification_order": [
+      "A",
+      "B",
+      "D",
+      "C"
+    ],
+    "measured_blocks": 32,
+    "measured_slots": 128,
+    "failed_or_partial_slots": 0,
+    "arms": {
+      "A": {
+        "meaning": "Current baseline at first file site",
+        "bytes": 820736,
+        "sha256": "b363ac8ec01943a1658411732b0d913066e5e91d59d05b8b1bb44c3a4383299a"
+      },
+      "B": {
+        "meaning": "Private stdin-query candidate",
+        "bytes": 818176,
+        "sha256": "b1c473c095fe384438432e7963b592121df00165077af395a0ff06567011c7cf"
+      },
+      "C": {
+        "meaning": "Exact Windows-repaired historical reference; broader G28 failure remains",
+        "bytes": 371712,
+        "sha256": "65b5f879941d69ad8a98fd33d59ae9a4648380b276dad1c6e5f00ac18caedd52"
+      },
+      "D": {
+        "meaning": "Byte-identical copy of baseline A at a second file site; not an independent build",
+        "bytes": 820736,
+        "sha256": "b363ac8ec01943a1658411732b0d913066e5e91d59d05b8b1bb44c3a4383299a"
+      }
+    },
+    "schedule": {
+      "rows": [
+        [
+          "A",
+          "B",
+          "D",
+          "C"
+        ],
+        [
+          "B",
+          "C",
+          "A",
+          "D"
+        ],
+        [
+          "C",
+          "D",
+          "B",
+          "A"
+        ],
+        [
+          "D",
+          "A",
+          "C",
+          "B"
+        ]
+      ],
+      "repetitions": 8,
+      "each_arm_per_position": 8
+    },
+    "dataset": {
+      "unit": "nanoseconds",
+      "columns": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "block_elapsed": [
+        [
+          112995400,
+          108769300,
+          110275200,
+          117656400
+        ],
+        [
+          98044000,
+          105857600,
+          152903700,
+          101929700
+        ],
+        [
+          98807000,
+          99283800,
+          103209000,
+          157606500
+        ],
+        [
+          111242200,
+          158063100,
+          149828400,
+          154227700
+        ],
+        [
+          217935600,
+          103349700,
+          104346400,
+          102038000
+        ],
+        [
+          102570800,
+          100806300,
+          101506200,
+          101999300
+        ],
+        [
+          107616700,
+          104037100,
+          103740100,
+          99268900
+        ],
+        [
+          111068900,
+          101006300,
+          98492900,
+          101130900
+        ],
+        [
+          103182100,
+          101343900,
+          105897300,
+          101720100
+        ],
+        [
+          157845900,
+          101554500,
+          102231400,
+          103997600
+        ],
+        [
+          103103900,
+          121347800,
+          99712400,
+          99920500
+        ],
+        [
+          104966700,
+          107896600,
+          100579100,
+          100288700
+        ],
+        [
+          101317400,
+          106349400,
+          101028800,
+          102281800
+        ],
+        [
+          114514000,
+          158793400,
+          103691500,
+          98446700
+        ],
+        [
+          101411000,
+          100852100,
+          99203200,
+          105767200
+        ],
+        [
+          106013900,
+          102373000,
+          162021600,
+          101495100
+        ],
+        [
+          117165700,
+          109736400,
+          108634200,
+          102380600
+        ],
+        [
+          105732900,
+          158937100,
+          101186300,
+          101131400
+        ],
+        [
+          154019500,
+          102013100,
+          156291500,
+          107191200
+        ],
+        [
+          159762400,
+          153986600,
+          154124400,
+          102950000
+        ],
+        [
+          215873500,
+          102021600,
+          103326900,
+          104268600
+        ],
+        [
+          107562100,
+          99989300,
+          102974400,
+          102254100
+        ],
+        [
+          110775100,
+          101215800,
+          99578500,
+          99771300
+        ],
+        [
+          97458700,
+          102685400,
+          100640700,
+          100125100
+        ],
+        [
+          103938400,
+          101989000,
+          100196300,
+          98857300
+        ],
+        [
+          161261000,
+          101300800,
+          111971100,
+          101055600
+        ],
+        [
+          106711000,
+          111794300,
+          101418000,
+          101544700
+        ],
+        [
+          106996800,
+          109604600,
+          112105400,
+          104431900
+        ],
+        [
+          108479400,
+          164473500,
+          118310700,
+          104825900
+        ],
+        [
+          100312200,
+          108289600,
+          109050500,
+          101564100
+        ],
+        [
+          106230600,
+          99071300,
+          164207200,
+          102263100
+        ],
+        [
+          106285000,
+          102303700,
+          100918400,
+          110000100
+        ]
+      ]
+    },
+    "contrasts": {
+      "candidate_minus_baseline_ns": {
+        "paired_block_median_ms": "-1.8938",
+        "mean_ms": "-6.56574375",
+        "positive": 13,
+        "negative": 19,
+        "zero": 0,
+        "lhs_before_rhs_median_ms": "-1.1617",
+        "lhs_after_rhs_median_ms": "-2.79515"
+      },
+      "candidate_minus_baseline_second_site_ns": {
+        "paired_block_median_ms": "2.0024",
+        "mean_ms": "6.772059375",
+        "positive": 20,
+        "negative": 12,
+        "zero": 0,
+        "lhs_before_rhs_median_ms": "2.2217",
+        "lhs_after_rhs_median_ms": "2.0024"
+      },
+      "candidate_minus_repaired_reference_ns": {
+        "paired_block_median_ms": "0.0796",
+        "mean_ms": "-1.015803125",
+        "positive": 16,
+        "negative": 16,
+        "zero": 0,
+        "lhs_before_rhs_median_ms": "-0.7304",
+        "lhs_after_rhs_median_ms": "1.5113"
+      },
+      "baseline_second_site_minus_first_site_ns": {
+        "paired_block_median_ms": "-4.56015",
+        "mean_ms": "-13.337803125",
+        "positive": 9,
+        "negative": 23,
+        "zero": 0,
+        "lhs_before_rhs_median_ms": "-4.24315",
+        "lhs_after_rhs_median_ms": "-4.8413"
+      }
+    },
+    "context": "Same sanitized child environment, observer, workload, neutral working directory, flags and endpoint across all 132 slots. Four fresh PE copies have the same basename and equal-length paths; A/D bytes match but original file identities differ.",
+    "prior_exposure": "Both source images had earlier existing-test exposure, and the historical reference had earlier captures. Archived PE/PDB originals also received read-only static inspection. Routine source/image hash checks are disclosed; no cold-cache or equal cache/reputation-state claim.",
+    "workload": "Same pinned external testkit publishes its fresh marker and holds for 50 ms.",
+    "deadlines_seconds": {
+      "outer": 60,
+      "backup": 60,
+      "root": 55,
+      "reserve": 11,
+      "slot": 3,
+      "product": 2
+    },
+    "validated": "All 132 original guard/payload identity, exact marker, empty-stream, finite-deadline, terminal first-poll, Job0, natural-exit and unassisted-cleanup checks passed. Both independent audits matched all raw rows and 32 block contrasts.",
+    "primary_speed_acceptance": "NOT_EVALUATED",
+    "interpretation": "The candidate is faster than A but slower than byte-identical baseline D in this fixed sample. The A/D association is larger than the candidate contrast. This does not identify the cause of that association or establish a source speed improvement, equivalence, or adoption."
+  },
+  "limits": [
+    "All 32 blocks and extreme values retained. No adaptive retry, filtering, significance-to-equivalence inference, primary ranking or production freeze.",
+    "Four contrast medians are not additive; do not adjust the candidate result by subtracting the baseline-site median.",
+    "A/D measures this particular pair of file sites and schedule contexts, not universal host noise. Source, PE layout, path/file identity, cache, AV and scheduling are not separately identified.",
+    "The first payload poll follows the elapsed endpoint; terminal at that sample is not proof of physical teardown before the endpoint.",
+    "The historical reference remains broadly ineligible after G28; protected normal-workload qualification does not rehabilitate it.",
+    "The broader speed requirement, Case N fixture correction, comprehensive benchmark and public reproduction package remain open."
+  ],
+  "custody_sha256": {
+    "source": "347b961faba7981d32d0f166ef89abfc1e912a0b4cea719e3a1987d75933188c",
+    "freeze": "7ee49dc34823cefa400c341bc47c37a1eb928b2c7a433a5e24c3c062440a8072",
+    "authorization": "b44c5ba682359b35d0b00040198f86d8acb8746ff8a08b254786712956171f8a",
+    "raw_receipt": "8072ae28fb684b3369f8224526f7b317423a7b3ef2422d10a45ab9b9703b72e1",
+    "original_tool": "fcd0a08bae676a465a14a2be123be24003fb6b7004298d9cad72a122883aabdc",
+    "integer_analysis": "da65cea18caa1e14c0dcd63cac4c6467cb446e7da708cf6b37dac001f11d7406",
+    "correctness_receipt": "24ac2502638e1aa7a9901a923280f8ebe7129303f7f02da084c6a09d52d348d0",
+    "actual_review_1": "28e91074d2a4cc3ac9be80800a9e9e7e135a82a21ed196a3ad5d3e65bd7e7182",
+    "actual_review_2": "061d36f7a244ad34bd37821f4fb0f1a5b196c245f741f200ace7c9c4024fe999"
+  },
+  "independent_review": "Both Sol reviewers approved the exact implementation source and independently audited the selected correctness and completed timing evidence with zero unresolved objections in their stated scope. This agreement does not establish speed acceptance."
+}
