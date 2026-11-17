@@ -255,6 +255,10 @@ def _noninherit(obs):
                 "control's outcome, the spawn mechanism); a bare "
                 "port_inherited claim cannot evidence the "
                 "condition — BLOCKED-ERROR, never evidenced")
+    if ni["port_inherit_flag"] is True:
+        return ("refuted",
+                "the port's inherit flag was confirmed set at spawn, "
+                "refuting the required non-inheritable port setup")
     if ni["inheritance_enabled"] is not True:
         return ("error",
                 "the checking child was not spawned with handle "
@@ -267,6 +271,11 @@ def _noninherit(obs):
                 "deliberately inheritable control handle as "
                 "inherited, so the trial cannot see inheritance "
                 "at all — BLOCKED-ERROR, never evidenced")
+    if ni["port_inherit_flag"] is not False:
+        return ("error",
+                "the port's inherit flag was not confirmed clear "
+                "at spawn, so its non-inheritance cannot be "
+                "evidenced — BLOCKED-ERROR")
     return ("evidenced" if not ni["port_inherited"] else "refuted",
             "the checking child was spawned with handle "
             "inheritance enabled and the port handle offered "

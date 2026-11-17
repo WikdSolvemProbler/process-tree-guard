@@ -52,17 +52,14 @@ packet. Nothing decided is a constant of this program:
   driver must refute that run (the negative control that proves
   the test can see packet influence).
 
-Non-inheritance spawns the checking child WITH handle
-inheritance enabled and the port handle explicitly offered
-through the inheritance path (a STARTUPINFOEX handle list,
-mirroring the forged trial's inheritance handling), while the
-port handle itself is created non-inheritable and its inherit
-flag is cleared and read back before the spawn — so the trial
-passes only if the handle truly does not cross. The record
-states the creation attributes used. A positive control proves
-the machinery can see inheritance: a deliberately inheritable
-event handle, offered through the same spawn, must be reported
-inherited by the same child check.
+Non-inheritance spawns the checking child with ordinary handle
+inheritance enabled (close_fds=False), without an explicit
+STARTUPINFOEX handle list. A non-inheritable handle cannot be
+placed in that list: Windows rejects process creation. The
+port's inherit flag is cleared and read back before spawn. A
+positive control sends a deliberately inheritable event through
+the same ordinary inheritance path. This tests the port's
+non-inheritance without claiming the invalid explicit-list path.
 """
 
 import ctypes
@@ -417,22 +414,14 @@ class SecurityAttributes(ctypes.Structure):
 
 
 def _spawn_handle_checker(handle_value):
-    """Spawn the checking child with handle inheritance enabled
-    and the given handle explicitly offered through a
-    STARTUPINFOEX handle list — the inheritance path a guarded
-    child is created through. Returns the child's report:
-    "usable" when the handle names a usable handle in the
-    child."""
-    startupinfo = subprocess.STARTUPINFO()
-    try:
-        startupinfo.lpAttributeList = {
-            "handle_list": [int(handle_value)]}
-    except (AttributeError, TypeError):
-        pass
+    """Use the same ordinary inheritable-handle path for both controls.
+    Explicit HANDLE_LIST rejects a non-inheritable port with WinError 87,
+    so this trial must not present the port in that list. The child says
+    "usable" only if the inherited numeric handle names a live object."""
     proc = subprocess.run(
         [sys.executable, os.path.abspath(__file__), "--child",
          str(handle_value)], capture_output=True, text=True,
-        timeout=120, close_fds=False, startupinfo=startupinfo)
+        timeout=120, close_fds=False)
     return proc.stdout.strip()
 
 
@@ -441,12 +430,20 @@ def non_inheritance_trial():
     # The port is created non-inheritable; make that state
     # explicit and read it back before the spawn, so the record
     # states the creation attributes the trial used.
-    kernel32.SetHandleInformation(ctypes.c_void_p(port),
-                                  HANDLE_FLAG_INHERIT, 0)
+    ctypes.set_last_error(0)
+    changed = kernel32.SetHandleInformation(ctypes.c_void_p(port),
+                                               HANDLE_FLAG_INHERIT, 0)
+    if not changed:
+        raise OSError(ctypes.get_last_error(), "port inherit-flag clear failed")
     flags = ctypes.c_uint32()
+    ctypes.set_last_error(0)
     read = kernel32.GetHandleInformation(
         ctypes.c_void_p(port), ctypes.byref(flags))
-    inherit_flag = bool(read) and bool(flags.value & HANDLE_FLAG_INHERIT)
+    if not read:
+        raise OSError(ctypes.get_last_error(), "port inherit-flag readback failed")
+    inherit_flag = bool(flags.value & HANDLE_FLAG_INHERIT)
+    if inherit_flag:
+        raise ValueError("port remained inheritable after flag clear")
     # Positive control: a deliberately inheritable event handle,
     # offered through the very same spawn, must be reported
     # inherited — otherwise the trial cannot see inheritance.
@@ -463,12 +460,12 @@ def non_inheritance_trial():
             "inheritance_enabled": True,
             "port_inherit_flag": inherit_flag,
             "control_inheritable_detected": bool(control_detected),
-            "spawn_mechanism": "handle inheritance enabled "
-                               "(close_fds=False), port handle "
-                               "offered through a STARTUPINFOEX "
-                               "handle list; port created "
+            "spawn_mechanism": "ordinary handle inheritance "
+                               "enabled (close_fds=False), no "
+                               "explicit HANDLE_LIST; port created "
                                "non-inheritable, inherit flag "
-                               "cleared and read back"}
+                               "cleared and read back; inheritable "
+                               "event control uses the same path"}
 
 
 def verdict_from_query(packet, job):

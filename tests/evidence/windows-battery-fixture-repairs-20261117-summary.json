@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "date_utc": "2026-11-17",
+  "scope": "Repair benchmark candidate fixtures; no production optimization adopted.",
+  "repairs": {
+    "m": "Use the fully qualified Windows Handle type when substituting the fourth pseudo-handle candidate; the previous unqualified type did not compile in diagnostics.",
+    "o_probe": "Test ordinary handle inheritance using the same launch path for an inheritable event control and a non-inheritable completion port. Do not put a non-inheritable handle in an explicit HANDLE_LIST. Fail closed if clearing/reading the port's inherit flag fails or it remains set.",
+    "o_decider": "Evidence requires port_inherit_flag exactly false. A known true flag refutes the condition independently of the positive control; missing or nonboolean readback remains an error."
+  },
+  "validation": {
+    "python_family": {
+      "tests": 69,
+      "failures": 0,
+      "skips": 0,
+      "elapsed_seconds": 12.907
+    },
+    "m_fourth_candidate": {
+      "operation": "cargo check --offline --locked --release --target x86_64-pc-windows-msvc --all-targets",
+      "source": "Isolated copy of all966 frozen tracked inputs, with only the fourth candidate substitution applied.",
+      "toolchain": "Rust/Cargo1.98.1 MSVC",
+      "native_exit": 0,
+      "cargo_reported_seconds": 8.73,
+      "limits": "Compilation only. No linked-image behavior, full four-site rerun, speed result, or production adoption is established."
+    },
+    "o_native": {
+      "native_exit": 1,
+      "interpretation": "Complete observations, legitimate candidate-refutation verdict; no WinError87 probe crash.",
+      "evidenced": [
+        "packet composition",
+        "never-dies budget",
+        "non-inheritance with positive control",
+        "forged-packet independence"
+      ],
+      "refuted": [
+        "zero-packet delivery for already-empty association",
+        "fallback invariance",
+        "port disassociation/close effects"
+      ],
+      "noninheritance": {
+        "port_inherit_flag": false,
+        "port_inherited": false,
+        "control_inheritable_detected": true
+      },
+      "limits": "The IOCP optimization remains rejected. These results do not demonstrate a defect in the shipped polling cleanup."
+    }
+  },
+  "preserved_attempts": [
+    {
+      "kind": "output redirection failed before Python started",
+      "qualified": false
+    },
+    {
+      "kind": "Earlier 69-test run completed while a probe source file was edited",
+      "qualified": false,
+      "reason": "Source-identity ambiguity; retained and not used to qualify the final patch."
+    },
+    {
+      "kind": "Intermediate family run",
+      "tests": 69,
+      "failures": 1,
+      "elapsed_seconds": 26.046,
+      "reason": "Existing inheritable-port negative control exposed that a known true flag was being reported as blocked rather than refuted. Corrected without changing that control's expected failure."
+    }
+  ],
+  "original_aggregate": "Original M compile failure and O WinError87 failure remain recorded. No prior result was rescored or overwritten.",
+  "product_changed": false,
+  "remaining": "Case N fixture repair, full future battery, performance diagnosis/acceptance and the public academic reproduction package remain outstanding.",
+  "evidence": "Exact raw records remain private under the publication policy; this summary does not replace independently accessible raw evidence.",
+  "source_sha256": {
+    "tests/battery/drivers/case_m.py": "133aa3b140f6987ee4d12e3fb70d970bb6ce9d2d673be6b1992bd6645dc324b4",
+    "tests/battery/drivers/case_o.py": "0a5eaf0c263dfb734ff247d6644a9288af812fc9de27b731ce0998b5c1e7a055",
+    "tests/battery/drivers/probe_win_o.py": "399090bdd7792c6162c8e4028d6ef7c118e3dace45e06d1d7a0c506c23d67c93",
+    "tests/tests/test_battery_cases.py": "bcf995bbd759bc5d0b871252f0a4fd6e4188c2af937b671c2c37c84e442cd8e4"
+  }
+}

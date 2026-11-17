@@ -53,7 +53,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import driver_common as dc  # noqa: E402
 import battery as battery_mod  # noqa: E402
 
-CONSTANTS = {"GetCurrentProcess()": "(usize::MAX as Handle)",
+CONSTANTS = {"GetCurrentProcess()": "(usize::MAX as crate::sys::windows::Handle)",
              "GetCurrentThread()": "((usize::MAX - 1) as Handle)"}
 
 # The driver's deadline budget: per site, one build and one test

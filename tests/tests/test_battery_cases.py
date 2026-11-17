@@ -765,6 +765,21 @@ class Round4ProbeTests(unittest.TestCase):
         self.assertEqual(verdict, "BLOCKED-ERROR")
         cond = conds["non-inheritance"]
         self.assertEqual(cond["status"], "error")
+        driver = load_driver_module("o")
+        status, detail = driver._noninherit({"non_inheritance": {
+            "port_inherited": False, "inheritance_enabled": True,
+            "port_inherit_flag": True,
+            "control_inheritable_detected": True,
+            "spawn_mechanism": "ordinary handle inheritance"}})
+        self.assertEqual(status, "refuted")
+        self.assertIn("confirmed set", detail)
+        status, detail = driver._noninherit({"non_inheritance": {
+            "port_inherited": False, "inheritance_enabled": True,
+            "port_inherit_flag": True,
+            "control_inheritable_detected": False,
+            "spawn_mechanism": "ordinary handle inheritance"}})
+        self.assertEqual(status, "refuted")
+        self.assertIn("confirmed set", detail)
 
     # ---- (o) P9: confirmed teardown count, independent
     # fallback observations
