@@ -1,0 +1,457 @@
+{
+  "schema": 1,
+  "date_utc": "2026-11-17",
+  "scope": "Completed exploratory Windows source-checkpoint diagnostic; no production change or primary speed acceptance.",
+  "source_provenance": {
+    "A": "Preserved exact Windows-repaired reference. The historical source object is not reachable in this repository; the selected bytes were checked against its preserved 14-file manifest. The broken pre-repair original was not selected.",
+    "B": "Earliest reachable repository root, already integrated. No complete intervening commit ladder is available from A to B.",
+    "C": "Later reachable checkpoint.",
+    "D": "Current production Rust source; later canonical commits repair reporting and fixtures.",
+    "archive_relation": "Tracked snapshots matched Git blobs exactly or after CRLF-to-LF conversion only; zero other mismatches."
+  },
+  "build": {
+    "arms": [
+      {
+        "arm": "A",
+        "source_commit": "9c6f0df93cee92dcaca0e89ebc3f09134eeab53d",
+        "source_files": 14,
+        "executable_bytes": 371712,
+        "executable_sha256": "65b5f879941d69ad8a98fd33d59ae9a4648380b276dad1c6e5f00ac18caedd52",
+        "build_exit": 0
+      },
+      {
+        "arm": "B",
+        "source_commit": "e16ea4aaef9b55155486912f1ad30a58be5d69cd",
+        "source_files": 865,
+        "executable_bytes": 808960,
+        "executable_sha256": "324d731777334af288408ad00f702289f9d749696e204a42bf76d57902d4dc0c",
+        "build_exit": 0
+      },
+      {
+        "arm": "C",
+        "source_commit": "0ef16a40fe0b5f4cff5c01bde3a907390c7cc756",
+        "source_files": 941,
+        "executable_bytes": 825344,
+        "executable_sha256": "3e0c7f0088933cd2c42cee5b0e2f8b3f34e98bf82d56a574c3507c8e03fdf039",
+        "build_exit": 0
+      },
+      {
+        "arm": "D",
+        "source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+        "source_files": 943,
+        "executable_bytes": 820736,
+        "executable_sha256": "1489291363f5fa93e893f70e909cc52a126d08d2bef34bb827c2efaff613514a",
+        "build_exit": 0
+      }
+    ],
+    "toolchain": {
+      "rust": "1.98.1",
+      "cargo": "1.98.1",
+      "llvm": "22.1.8",
+      "msvc": "14.51.36231",
+      "windows_sdk": "10.0.28000.0",
+      "target": "x86_64-pc-windows-msvc"
+    },
+    "settings": {
+      "opt_level": 3,
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "symbols",
+      "incremental": false,
+      "jobs": 2,
+      "offline": true,
+      "locked": true,
+      "features": "Default only; no active feature cfg flags on selected compilations."
+    },
+    "method": "Sequential fresh builds at the same source and target paths. Whole source, target, compiler logs and original terminal records archived before reuse. Existing manifest warnings retained.",
+    "static_duplicate": {
+      "build_exit": 0,
+      "runtime_calls": 0,
+      "selected_as_timing_arm": false,
+      "sha256": "01bb8c3dfaaaef920beaa4d509a2223cafdd958a57c7eb34645a6ffca009853f",
+      "changed_bytes": 24,
+      "permitted_differences": [
+        "COFF timestamp",
+        "Debug-directory timestamps",
+        "CodeView RSDS GUID"
+      ],
+      "every_other_file_byte_identical": true,
+      "limit": "Static build reproducibility only; this is not a timing or host-noise control."
+    }
+  },
+  "runtime": {
+    "attempts": 1,
+    "retries": 0,
+    "native_exit": 0,
+    "qualification": 4,
+    "qualification_excluded_from_measurements": true,
+    "measured_slots": 32,
+    "measured_blocks": 8,
+    "failed_or_partial_slots": 0,
+    "payload": "Same pinned external testkit: mark with fresh unique marker and 50 ms hold.",
+    "testkit_sha256": "bdac8b60e109bafdfb2c6507010605ece5e849845153d9c61bb9714af67f6ef0",
+    "deadline_seconds": {
+      "outer": 60,
+      "backup": 60,
+      "root": 55,
+      "sut": 2,
+      "slot": 3
+    },
+    "creation_flags": "0x08080404",
+    "job_flags": "0x2208",
+    "context": "Common sanitized child environment, working directory, argv form, creation flags, observer and endpoint; tracing keys absent. Selected executable copies use the same basename and equal-length paths but distinct identities/cache histories.",
+    "qualification_order": [
+      "A",
+      "B",
+      "D",
+      "C"
+    ],
+    "blocks": [
+      {
+        "index": 0,
+        "order": [
+          "A",
+          "B",
+          "D",
+          "C"
+        ],
+        "elapsed_ns": {
+          "A": 110044800,
+          "B": 118484400,
+          "D": 112657800,
+          "C": 109788300
+        }
+      },
+      {
+        "index": 1,
+        "order": [
+          "B",
+          "C",
+          "A",
+          "D"
+        ],
+        "elapsed_ns": {
+          "B": 115782000,
+          "C": 123544100,
+          "A": 114640800,
+          "D": 108910100
+        }
+      },
+      {
+        "index": 2,
+        "order": [
+          "C",
+          "D",
+          "B",
+          "A"
+        ],
+        "elapsed_ns": {
+          "C": 115027700,
+          "D": 114585400,
+          "B": 171673400,
+          "A": 110082800
+        }
+      },
+      {
+        "index": 3,
+        "order": [
+          "D",
+          "A",
+          "C",
+          "B"
+        ],
+        "elapsed_ns": {
+          "D": 114944900,
+          "A": 109482500,
+          "C": 115689900,
+          "B": 111975300
+        }
+      },
+      {
+        "index": 4,
+        "order": [
+          "A",
+          "B",
+          "D",
+          "C"
+        ],
+        "elapsed_ns": {
+          "A": 105585800,
+          "B": 101473700,
+          "D": 107718300,
+          "C": 100384800
+        }
+      },
+      {
+        "index": 5,
+        "order": [
+          "B",
+          "C",
+          "A",
+          "D"
+        ],
+        "elapsed_ns": {
+          "B": 104362200,
+          "C": 103981000,
+          "A": 101640400,
+          "D": 106179300
+        }
+      },
+      {
+        "index": 6,
+        "order": [
+          "C",
+          "D",
+          "B",
+          "A"
+        ],
+        "elapsed_ns": {
+          "C": 100340100,
+          "D": 104161200,
+          "B": 103010100,
+          "A": 100993600
+        }
+      },
+      {
+        "index": 7,
+        "order": [
+          "D",
+          "A",
+          "C",
+          "B"
+        ],
+        "elapsed_ns": {
+          "D": 99704100,
+          "A": 101866000,
+          "C": 107237400,
+          "B": 126512800
+        }
+      }
+    ],
+    "validated": "All 36 slots retained original guard and payload identity, exact marker, empty streams, terminal first payload poll, natural exit0, Job active0, finite deadlines and unassisted cleanup.",
+    "measurement_limit": "The first payload poll is after the elapsed endpoint; it does not prove physical teardown before that endpoint."
+  },
+  "contrasts": {
+    "B_minus_A": {
+      "paired_block_median_ms": "2.6073",
+      "positive_slower_blocks": 7,
+      "negative_faster_blocks": 1,
+      "exact_zero_blocks": 0,
+      "samples_ns": [
+        8439600,
+        1141200,
+        61590600,
+        2492800,
+        -4112100,
+        2721800,
+        2016500,
+        24646800
+      ],
+      "order_strata": {
+        "lhs_before_rhs": {
+          "samples_ns": [
+            1141200,
+            61590600,
+            2721800,
+            2016500
+          ],
+          "median_ns_numerator": 2369150,
+          "median_ns_denominator": 1,
+          "median_ms": "2.36915",
+          "positive": 4,
+          "negative": 0,
+          "exact_zero": 0,
+          "min_ns": 1141200,
+          "max_ns": 61590600
+        },
+        "lhs_after_rhs": {
+          "samples_ns": [
+            8439600,
+            2492800,
+            -4112100,
+            24646800
+          ],
+          "median_ns_numerator": 5466200,
+          "median_ns_denominator": 1,
+          "median_ms": "5.4662",
+          "positive": 3,
+          "negative": 1,
+          "exact_zero": 0,
+          "min_ns": -4112100,
+          "max_ns": 24646800
+        }
+      }
+    },
+    "C_minus_B": {
+      "paired_block_median_ms": "-1.87945",
+      "positive_slower_blocks": 2,
+      "negative_faster_blocks": 6,
+      "exact_zero_blocks": 0,
+      "samples_ns": [
+        -8696100,
+        7762100,
+        -56645700,
+        3714600,
+        -1088900,
+        -381200,
+        -2670000,
+        -19275400
+      ],
+      "order_strata": {
+        "lhs_before_rhs": {
+          "samples_ns": [
+            -56645700,
+            3714600,
+            -2670000,
+            -19275400
+          ],
+          "median_ns_numerator": -10972700,
+          "median_ns_denominator": 1,
+          "median_ms": "-10.9727",
+          "positive": 1,
+          "negative": 3,
+          "exact_zero": 0,
+          "min_ns": -56645700,
+          "max_ns": 3714600
+        },
+        "lhs_after_rhs": {
+          "samples_ns": [
+            -8696100,
+            7762100,
+            -1088900,
+            -381200
+          ],
+          "median_ns_numerator": -735050,
+          "median_ns_denominator": 1,
+          "median_ms": "-0.73505",
+          "positive": 1,
+          "negative": 3,
+          "exact_zero": 0,
+          "min_ns": -8696100,
+          "max_ns": 7762100
+        }
+      }
+    },
+    "D_minus_C": {
+      "paired_block_median_ms": "0.878",
+      "positive_slower_blocks": 4,
+      "negative_faster_blocks": 4,
+      "exact_zero_blocks": 0,
+      "samples_ns": [
+        2869500,
+        -14634000,
+        -442300,
+        -745000,
+        7333500,
+        2198300,
+        3821100,
+        -7533300
+      ],
+      "order_strata": {
+        "lhs_before_rhs": {
+          "samples_ns": [
+            2869500,
+            -745000,
+            7333500,
+            -7533300
+          ],
+          "median_ns_numerator": 1062250,
+          "median_ns_denominator": 1,
+          "median_ms": "1.06225",
+          "positive": 2,
+          "negative": 2,
+          "exact_zero": 0,
+          "min_ns": -7533300,
+          "max_ns": 7333500
+        },
+        "lhs_after_rhs": {
+          "samples_ns": [
+            -14634000,
+            -442300,
+            2198300,
+            3821100
+          ],
+          "median_ns_numerator": 878000,
+          "median_ns_denominator": 1,
+          "median_ms": "0.878",
+          "positive": 2,
+          "negative": 2,
+          "exact_zero": 0,
+          "min_ns": -14634000,
+          "max_ns": 3821100
+        }
+      }
+    },
+    "D_minus_A": {
+      "paired_block_median_ms": "2.8903",
+      "positive_slower_blocks": 6,
+      "negative_faster_blocks": 2,
+      "exact_zero_blocks": 0,
+      "samples_ns": [
+        2613000,
+        -5730700,
+        4502600,
+        5462400,
+        2132500,
+        4538900,
+        3167600,
+        -2161900
+      ],
+      "order_strata": {
+        "lhs_before_rhs": {
+          "samples_ns": [
+            4502600,
+            5462400,
+            3167600,
+            -2161900
+          ],
+          "median_ns_numerator": 3835100,
+          "median_ns_denominator": 1,
+          "median_ms": "3.8351",
+          "positive": 3,
+          "negative": 1,
+          "exact_zero": 0,
+          "min_ns": -2161900,
+          "max_ns": 5462400
+        },
+        "lhs_after_rhs": {
+          "samples_ns": [
+            2613000,
+            -5730700,
+            2132500,
+            4538900
+          ],
+          "median_ns_numerator": 2372750,
+          "median_ns_denominator": 1,
+          "median_ms": "2.37275",
+          "positive": 3,
+          "negative": 1,
+          "exact_zero": 0,
+          "min_ns": -5730700,
+          "max_ns": 4538900
+        }
+      }
+    }
+  },
+  "interpretation": "A positive paired difference is already present at the earliest integrated checkpoint in this sample. Subsequent transitions are nonmonotonic. This narrows a broad source/build transition; it does not identify an individual responsible operation or cause.",
+  "limits": [
+    "All eight blocks and large values retained. No outlier deletion, adaptive retry, significance-to-equivalence inference or primary ranking.",
+    "Source changes alter the linked image. Loader, scheduling, observer, path/cache and source execution effects remain combined; none is isolated by this sample.",
+    "Medians are not additive. Do not sum transition medians or substitute marginal-median differences for paired contrasts.",
+    "The historical reference has a known broader G28 failure and is not eligible as the best active guard. This normal-workload qualification does not repair or rehabilitate it.",
+    "This diagnostic changes no production source, guarantee, default, full-campaign score or benchmark gate. Matching or beating the required speed target remains unproven.",
+    "Exact originals remain private under the publication policy. Numeric extracts and hashes do not replace a publicly accessible reproduction package."
+  ],
+  "custody_sha256": {
+    "frozen_source": "7bd0327cc9042dfba3280dd90dfc2ff39a6e2551acaf35159ac72fd86c9e4bf2",
+    "raw_receipt": "4746da883c0dfc71062565104092719e8ae8aefde80e4ac86b4c1a67c548ce58",
+    "original_tool_terminal": "2eeefd935f26c6772e8faee6c1ce8e93ab6e25fb83ee4be8e9cebaf7d1b26c12",
+    "raw_inventory": "c19ab969ffef1506e714bae4ab79f80419a834053cbec33f8f9bcd99d1acc2c4",
+    "static_duplicate_result": "1e9011b2d58e7c7d3df391d0aa115d7dc475adcac7a2cadba98d36301bcabab8",
+    "exact_integer_analysis": "8a480f6f277de0a7a6182e902a19303eedccdbead1b078276fecaaab489798bd",
+    "independent_review_1": "f8200df43a97d52899414bf1a987b82ce9058be391d6884da590430f74417fee",
+    "independent_review_2": "19c39b2b191785a0f86e0f5c1cc95864b1b7fa4bf678d5506b7732ce480f38e5"
+  },
+  "independent_review": "Both Sol reviewers independently checked the identical fixed capture and reported zero unresolved custody or arithmetic objections; their agreement is limited to this diagnostic."
+}
