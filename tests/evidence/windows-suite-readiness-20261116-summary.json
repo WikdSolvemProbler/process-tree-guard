@@ -110,10 +110,99 @@
   "limits": [
     "The original full651 attempt remains failed; the separate69-test pass does not rescore it.",
     "This suite combines source audits, harness tests and native guard checks; counts do not mean651 distinct native containment scenarios.",
-    "A fresh complete run after the coordinate correction is pending.",
+    "A fresh complete Windows run after the correction passed647 tests with4 declared skips; all651 per-test outcomes are retained.",
     "Mixed build profiles are disclosed correctness inputs, not uniform-profile or competitive speed evidence.",
     "No product speed improvement, historical-reference parity, Linux/macOS backend qualification, or comprehensive competitive benchmark completion is claimed.",
-    "Raw byte captures remain preserved privately; published hashes support integrity checks without exposing host identity."
+    "Raw byte captures remain preserved privately; published hashes support integrity checks without exposing host identity.",
+    "The13 native Linux census checks are existing no-guard suite/accounting checks. They do not qualify Linux product protection or execute the full651 suite on Linux.",
+    "The separate Linux pass does not remove or relabel the four recorded Windows skips.",
+    "The Linux observer scope had a180-second finite bound; its own retirement was not independently queried in the same call.",
+    "The comprehensive1940-slot competitive campaign, speed acceptance and remaining platform work are still open."
   ],
-  "preserved_postprocessing_issue": "The first family-output parser rejected CRLF using an LF-only OK predicate; corrected parsing consumed the same raw capture without rerunning any test."
+  "preserved_postprocessing_issue": "The first family-output parser rejected CRLF using an LF-only OK predicate; corrected parsing consumed the same raw capture without rerunning any test.",
+  "updated": "2026-11-17",
+  "full_suite_successor_attempt": {
+    "id": "windows-full651-004",
+    "status": "PASS_WITH_FOUR_DECLARED_SKIPS",
+    "source_commit": "46cdad5f8c17dab7cf9376ca4267475b656ff1eb",
+    "native_exit": 0,
+    "whole_tree_deadline_seconds": 3600,
+    "elapsed_seconds": 666.671,
+    "discovered": 651,
+    "executed": 651,
+    "passed": 647,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 4,
+    "unique_complete_id_set": true,
+    "skips": [
+      {
+        "id": "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+        "reason": "the real cases run their Windows drivers there"
+      },
+      {
+        "id": "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+        "reason": "guard binaries are built here; the recorded split is the no-guard Linux run's and the gated families execute on this machine"
+      },
+      {
+        "id": "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+        "reason": "Windows presents the shape as written"
+      },
+      {
+        "id": "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing",
+        "reason": "binaries present; absence control not applicable"
+      }
+    ],
+    "copied_tracked_files_posthash_match": 966,
+    "all_five_staged_image_hashes_and_resolved_paths_match": true,
+    "expected_generated_private_marker_files": 4,
+    "certificate_emitter_called": false,
+    "raw_result_sha256": "cbf855642553ee7d45eb0004d1ef8a52147da9843687b193d7e07d9be14c450c",
+    "raw_discovery_sha256": "68da6a566ce57b44bb56adf83968cd459a18d96e2790d4b48a027236118f8ccb",
+    "raw_stdout_sha256": "d2feaf0573f59aa301932385a66bc01b0175e3ff170aeafd90a4bd7b174e4604",
+    "raw_stderr_sha256": "0c825ec1d261224f01cbaadc33540d7f572d7157fbf09a48666e6487b2061c05",
+    "input_freeze_sha256": "8709dadf9a9724e4962e70357a30909bca548a34a8757838102999796d141c72"
+  },
+  "separate_native_linux_census_validation": {
+    "id": "linux-no-guard-census13-001",
+    "status": "PASS",
+    "source_commit": "46cdad5f8c17dab7cf9376ca4267475b656ff1eb",
+    "ssh_native_exit": 0,
+    "whole_tree_deadline_seconds": 220,
+    "controller_elapsed_seconds": 64.469,
+    "guest_elapsed_seconds": 61.316478961,
+    "discovered": 651,
+    "selected_existing_tests": 13,
+    "executed": 13,
+    "passed": 13,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "selected_ids": [
+      "test_campaign_logic.CensusConsistencyTests.test_counted_ops_census_recomputes_from_the_vendored_enumeration",
+      "test_campaign_logic.CensusConsistencyTests.test_documented_counted_once_totals_match_the_runner",
+      "test_campaign_logic.CensusConsistencyTests.test_documents_printing_the_census_state_the_recomputed_totals",
+      "test_campaign_logic.CensusConsistencyTests.test_documents_scanner_and_campaign_figures_match_their_sources",
+      "test_campaign_logic.CensusConsistencyTests.test_failure_tree_citations_resolve_to_suite_tests",
+      "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+      "test_campaign_logic.CensusConsistencyTests.test_recorded_test_run_evidence_matches_the_runner_count",
+      "test_campaign_logic.CensusConsistencyTests.test_vendored_census_matches_the_guard_tree_measurement",
+      "test_campaign_logic.CensusConsistencyTests.test_verification_floor_citations_carry_the_quiet_qualification",
+      "test_campaign_logic.CensusConsistencyTests.test_verification_item3_figures_match_the_preserved_reduced_package",
+      "test_campaign_logic.CensusConsistencyTests.test_verification_item6_pricing_figures_match_the_preserved_reduced_package",
+      "test_campaign_logic.CensusConsistencyTests.test_verification_section4_prose_coordinates_match_the_fresh_battery_record",
+      "test_campaign_logic.CensusConsistencyTests.test_verification_section4_prose_subjects_and_duration_match_the_fresh_record"
+    ],
+    "all_five_guard_roles_absent": true,
+    "product_executed": false,
+    "certificate_emitter_called": false,
+    "previous_observer_scope_and_cgroup_retired": true,
+    "new_observer_retirement_independently_observed": false,
+    "source_pins_posthash_match": 20,
+    "freeze_pins_posthash_match": 9,
+    "raw_result_sha256": "a7738081740dd20dc01e99691324a5b8790d71b971a39d51089c573b97e08c7b",
+    "raw_stdout_sha256": "40b528d7c136762af632b4313ac55bf9766522963cdffa039b0a92761cc67060",
+    "raw_stderr_sha256": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+    "raw_unittest_sha256": "b8bf1aa3e80751dbf89638211434fcaf53944f608c9490bec678f4833ae65141"
+  }
 }
