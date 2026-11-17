@@ -32,13 +32,13 @@ Per-arm medians by context (for inspection only):
     kill: guard: no successful slots; processkit: no successful slots; nuewframe: no successful slots; sysprims: no successful slots
 
 Freeze gate (SPEC freeze rule: win or tie on each of the five gate dimensions, per context):
-  [NO_WINDOW] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
-  [NO_WINDOW] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
+  [NO_WINDOW] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
+  [NO_WINDOW] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
   [NO_WINDOW] kill-path correctness: UNEVALUATED — no guard kill slots ran in this context
   [NO_WINDOW] exit-code correctness: UNEVALUATED — no guard slots ran in this context
   [NO_WINDOW] output correctness: UNEVALUATED — no guard fast slots ran in this context
-  [DETACHED] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
-  [DETACHED] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
+  [DETACHED] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
+  [DETACHED] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
   [DETACHED] kill-path correctness: UNEVALUATED — no guard kill slots ran in this context
   [DETACHED] exit-code correctness: UNEVALUATED — no guard slots ran in this context
   [DETACHED] output correctness: UNEVALUATED — no guard fast slots ran in this context
@@ -131,13 +131,13 @@ Standing losses:
   - missing 4 slot(s): warmup sysprims/scale/DETACHED reps 0, 1, 2, 3
   - missing 4 slot(s): warmup sysprims/scale/NO_WINDOW reps 0, 1, 2, 3
   - exit mismatch in guard/malformed/NO_WINDOW rep 0: exit code 1 != expected 125 for guard/malformed
-  - freeze gate [NO_WINDOW] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
-  - freeze gate [NO_WINDOW] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
+  - freeze gate [NO_WINDOW] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
+  - freeze gate [NO_WINDOW] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
   - freeze gate [NO_WINDOW] kill-path correctness: UNEVALUATED — no guard kill slots ran in this context
   - freeze gate [NO_WINDOW] exit-code correctness: UNEVALUATED — no guard slots ran in this context
   - freeze gate [NO_WINDOW] output correctness: UNEVALUATED — no guard fast slots ran in this context
-  - freeze gate [DETACHED] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
-  - freeze gate [DETACHED] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context
+  - freeze gate [DETACHED] fast-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
+  - freeze gate [DETACHED] kill-path latency: UNEVALUATED — a median needed for the comparison is missing in this context: guard, nuewframe, processkit, sysprims
   - freeze gate [DETACHED] kill-path correctness: UNEVALUATED — no guard kill slots ran in this context
   - freeze gate [DETACHED] exit-code correctness: UNEVALUATED — no guard slots ran in this context
   - freeze gate [DETACHED] output correctness: UNEVALUATED — no guard fast slots ran in this context
