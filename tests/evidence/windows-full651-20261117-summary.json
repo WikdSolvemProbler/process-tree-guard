@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "date": "2026-11-17",
+  "classification": "COMPLETE_651_TEST_WINDOWS_CORRECTNESS_CONTINUATION",
+  "test_source_commit": "f92dc5a0e7a869b47622a6d2ca05fb8a7934905f",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "product_source_or_defaults_changed": false,
+  "method": {
+    "suite": "All 651 unique IDs from the existing run_tests.load_suite discovery; no filtering and no certificate overwrite.",
+    "source_files_in_fresh_copy": 970,
+    "source_bytes": 19920092,
+    "selected_binary_images": 6,
+    "binary_provenance": "Hash-verified archived artifacts from the successful earlier build; all 131 selected project source/build files match this source copy byte-for-byte. This bridge does not claim that every selected file was compiled or that every external dependency was covered. No fresh compilation is claimed.",
+    "cargo_profile": "default release",
+    "cargo_features": [
+      "testkit"
+    ],
+    "outer_whole_tree_deadline_seconds": 3600,
+    "isolated_fresh_source_binary_scratch_and_raw_directories": true,
+    "selected_project_source_build_bridge_files": 131
+  },
+  "observed": {
+    "original_outer_native_exit": 0,
+    "tests_run": 651,
+    "passed": 647,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 4,
+    "unexpected_successes": 0,
+    "complete_discovered_id_set": true,
+    "unittest_reported_elapsed_seconds": 940.425,
+    "all_source_and_binary_postpins_unchanged": true,
+    "freeze_pins_unchanged": 12
+  },
+  "skipped_tests": [
+    {
+      "test": "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+      "reason": "the real cases run their Windows drivers there"
+    },
+    {
+      "test": "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+      "reason": "guard binaries are built here; the recorded split is the no-guard Linux run's and the gated families execute on this machine"
+    },
+    {
+      "test": "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+      "reason": "Windows presents the shape as written"
+    },
+    {
+      "test": "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing",
+      "reason": "binaries present; absence control not applicable"
+    }
+  ],
+  "qualification_limits": [
+    "Correctness evidence for this full discovered Python suite and the six identified testkit-feature release images; not a no-feature build qualification or timing comparison.",
+    "The previous 651-test attempt remains FAILED at 635 pass, 12 fail and four skip. Its report-text failures were repaired in f92dc5a; this new attempt does not rescore it.",
+    "The earlier 1,940-slot benchmark remains INCOMPLETE with its original standing losses; its Python stage was not started. This full-suite continuation does not change its outcome.",
+    "No speed parity, competitor ranking, full battery acceptance, Linux or macOS qualification follows.",
+    "Exact local paths, process identities and transport originals remain private. Public summaries and hashes do not replace independently accessible raw evidence."
+  ],
+  "evidence_sha256": {
+    "source_manifest": "fabf1e4812889fdf541a1ee8359eaedbbef4c74e626e3cf3310b9fa1571b8b88",
+    "binary_manifest": "3b138acdd69e69c2384697dc443bf7ec71896f8348c0cc3f5649e235b35fa207",
+    "frozen_input_pins": "b047c7e2004e3a373b86cd40d54ec5ce7927808f183152448997952388b46da1",
+    "root_original_terminal": "3d0b985d6a879ccca7e3e0189633a50709425cd88f66ee04fc20071c6e82f7da",
+    "result": "b28bacbdabfaf4ee1d29d83e4106ca8692d83b704d967ac9594cdd22a91fc896",
+    "discovery": "dbd9354ab519182baf3c5c5deec945fe74f38dc1daeafba0a1a9cc59c4ac61f2",
+    "stdout": "30c4b3c7c4172043b15d24193ac8067e85dbea4f1bf8d2072a8e865c56561084",
+    "stderr": "659823b7ce026f7134a2c3b6f918fee53d25ea0d562287414e9bfaea071c78d1",
+    "post_run_audit": "fa0de913dbcb70566b18d598b265eed0bfcb4f08ab966eea0058188e0b571e22",
+    "post_run_original_terminal": "6881069d894130da07ce03c05c05173abc238da64c5ee52b3994b48c8f9e2076"
+  },
+  "benchmark_issue_status": "OPEN",
+  "primary_qualifying_competitive_performance_measurements": 0
+}

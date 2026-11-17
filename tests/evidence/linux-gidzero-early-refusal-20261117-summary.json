@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "date": "2026-11-17",
+  "classification": "ONE_LINUX_MODE2_PRIMARY_GID_ZERO_EARLY_CLIENT_REFUSAL",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "product_source_or_defaults_changed": false,
+  "platform": {
+    "os": "Linux",
+    "architecture": "aarch64",
+    "literal_suid_dumpable": 2
+  },
+  "method": {
+    "attempts": 1,
+    "retries": 0,
+    "case": "Original non-root client with primary GID zero; expect the client PeerCredentials refusal before request-packet transmission.",
+    "credential_limit": "The fixture enforces the requested preexec credentials; no independent raw preexec credential frame is exported.",
+    "temporary_product_assets": 6,
+    "source_roles_verified_before_and_after": 29,
+    "freeze_pins_verified_before_and_after": 13,
+    "embedded_package_members": 7,
+    "whole_tree_deadlines_seconds": {
+      "windows_job": 330,
+      "windows_subprocess": 315,
+      "mac_gtimeout": 300,
+      "guest_timeout": 290,
+      "outer_scope": 280,
+      "nested_case_command": 110,
+      "nested_case_scope": 105,
+      "root_subprocess": 95,
+      "product_original": 10,
+      "ordinary_observer": 20,
+      "cleanup_timer_after": 65,
+      "cleanup_oneshot_start": 40,
+      "post_outer_retirement": 3
+    }
+  },
+  "observed": {
+    "original_outer_tool_exit": 0,
+    "transport_exit": 0,
+    "local_timeout": false,
+    "outer_scope_exit": 0,
+    "client_exit": 125,
+    "client_stdout_bytes": 0,
+    "client_stderr_bytes": 36,
+    "client_stderr": "process-tree-guard: PeerCredentials\n",
+    "client_stderr_sha256": "2ad254598512de1a2245379b91dba6c7ade410ae96f31d93998cd1587f590b5a",
+    "retained_original_client_pidfd_terminal": true,
+    "completed_cases": 1,
+    "prior_observer_scope_and_cgroup_retired_before_staging": true,
+    "six_protected_assets_absent_before_staging": true,
+    "owned_cleanup_succeeded": true,
+    "fallback_timer_armed_before_product": true,
+    "fallback_timer_fired": false,
+    "fallback_timer_cancelled_after_cleanup": true,
+    "nested_case_scope_and_cgroup_retired": true,
+    "outer_scope_and_cgroup_retired": true,
+    "transport_stderr": {
+      "bytes": 72,
+      "classification": "Pseudo-terminal allocation notice, retained separately from the empty client stdout and exact client stderr."
+    },
+    "matching_service_during_cleanup": "A matching service unit was observed loaded/failed/failed during cleanup after pre-case unit absence; later cleanup readback reported inactive/dead."
+  },
+  "source_mapped_conclusion": "The client checks PeerCredentials after socket connection and before sending the request packet. Its exact diagnostic is consistent with rejecting primary GID zero. A matching failed service unit was observed during cleanup; this capture does not bind its original manager incarnation or establish its request handling.",
+  "qualification_limits": [
+    "One negative credential case only; not the full credential, race, escape, arbitrary-context or Linux platform qualification matrix.",
+    "Sentinel absence is a narrow observation; no universal no-spawn, service-nonactivation, manager-incarnation or original product-domain emptiness claim follows.",
+    "The earlier two-case batch remains FAILED; its incorrect later-root-refusal oracle is not rescored.",
+    "No product source, defaults or kernel settings changed. The six temporary Linux deployment assets, including an authorization rule, were removed during exact-owned cleanup. No shared runtime was reset.",
+    "No performance ranking or primary competitive timing qualification follows.",
+    "Exact transport, account, path and process-identity originals remain private. Public summaries and hashes do not replace independently accessible raw evidence."
+  ],
+  "linux_default_dispatch": "DISABLED",
+  "issue_qualification": "Linux backend issue remains OPEN",
+  "evidence_sha256": {
+    "source": "0574ea22807aa1c34b2fee7b4d2c8e3782cdd5c00b0b521371fb906ae279a616",
+    "freeze": "e1feaf44b474a529882b7c84ec0ae6627405a623d97e829c8ac33d0fb616f9b4",
+    "invocation": "6fd229931ddcd66afd37fb591002a6abe3ffedb3df41f2adc535bbec9d1a755d",
+    "root_actual": "2c9cb1e53f4d696a7b20770923ded704416bf5ff0c76f5ba9e168a6973faaadc",
+    "raw_result": "c4c1ebec7418794a07ed49e006a8d8a833b787216b89a74b04a0535f94631503",
+    "raw_guest_bundle": "dc80346cf41995c81fbb635f0abd94c4dd6aff5d162dac300173d5a456c72e60",
+    "raw_ssh_stdout": "0a09fbf3bae8905f12022948e0f175d764fbd7e1e2d70bcbcef627eb8f284654",
+    "raw_ssh_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+    "root_post_input_and_capture_pins": "8c6f5b87af986aa8298f59e46995853a0817e98bca4e5cd0997ba85a6a9b0488"
+  }
+}
