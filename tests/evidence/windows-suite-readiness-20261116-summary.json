@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "date": "2026-11-16",
+  "classification": "WINDOWS_CORRECTNESS_READINESS_NOT_COMPETITIVE_PERFORMANCE",
+  "source_base_commit": "5bca5a94f0201ebbf4bdef50d7ab4f2c12cd4904",
+  "compiled_product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "full_suite_attempt": {
+    "id": "windows-full651-003",
+    "status": "FAILED_PRESERVED",
+    "native_exit": 1,
+    "whole_tree_deadline_seconds": 3600,
+    "elapsed_seconds": 1224.531,
+    "discovered": 651,
+    "executed": 651,
+    "passed": 646,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 4,
+    "unique_complete_id_set": true,
+    "failure": {
+      "id": "test_battery_cases.FunctionScopedAuditTests.test_case_m_audit_enumerates_handle_consumers",
+      "cause": "Source-audit test asserted two outdated Rust source-line coordinates. No product execution defect established by this failure."
+    },
+    "skips": [
+      {
+        "id": "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+        "reason": "the real cases run their Windows drivers there"
+      },
+      {
+        "id": "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+        "reason": "guard binaries are built here; the recorded split is the no-guard Linux run's and the gated families execute on this machine"
+      },
+      {
+        "id": "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+        "reason": "Windows presents the shape as written"
+      },
+      {
+        "id": "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing",
+        "reason": "binaries present; absence control not applicable"
+      }
+    ],
+    "raw_result_sha256": "7816973b0bb4e285123dfd354d75fbf8fb00edcc82d11fc67a56aa0983f356e7",
+    "raw_stdout_sha256": "a8f3d09630ee2a35096fa194b35fa1fc96d12dc7a994c287b735226cdab4440c",
+    "raw_stderr_sha256": "c71d8ad75c7ac0fc4ba03b3a5b6f4b33daefa4e055f2488fba781b388ded147f",
+    "all_965_tracked_source_files_and_five_images_posthash_match": true
+  },
+  "repair": {
+    "file": "tests/tests/test_battery_cases.py",
+    "before_sha256": "9718ac2fb3f8faf515f1272000fbaae4745d235420fa882c45d38ab86ebff7f8",
+    "after_sha256": "2cc3275916b3eefac97ceae0c3f30500ee3f245bf8e74cf68167fc1269f42071",
+    "only_changes": [
+      {
+        "asserted_call": "parent_process_id_on",
+        "old_line": 489,
+        "current_line": 514
+      },
+      {
+        "asserted_call": "TerminateProcess",
+        "old_line": 335,
+        "current_line": 277
+      }
+    ],
+    "consumer_names_and_assertion_count_preserved": true,
+    "product_changes": false,
+    "independent_sol_source_reviewers": 2,
+    "unresolved_source_objections": 0
+  },
+  "separate_existing_family_validation": {
+    "id": "battery-coordinate-repair-family-001",
+    "status": "PASS",
+    "native_exit": 0,
+    "whole_tree_deadline_seconds": 300,
+    "executed": 69,
+    "passed": 69,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 12.652,
+    "raw_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw_stderr_sha256": "82208119c193ea9be9cb2ec71b62e952ee85ec4021c6871fa11efaa01e1c650d",
+    "source_copies_and_canonical_posthash_match": true
+  },
+  "build_disclosure": {
+    "main": "default release opt-level=3",
+    "deadline_gate_contain_testkit": "all-features release opt-level=s",
+    "mixed_profiles": true,
+    "images": [
+      {
+        "role": "full",
+        "sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d"
+      },
+      {
+        "role": "deadline",
+        "sha256": "f2e24e66e0bcc55d13785c5e87c00b1906de5dba9b379d7ef38d0773f7723ead"
+      },
+      {
+        "role": "gate",
+        "sha256": "5f0855598a63e8d6a00207365ad0fae113edb08d6693160a31ac1f0b2ea94e8d"
+      },
+      {
+        "role": "contain",
+        "sha256": "477f7e6bf421af9f731de2851d10b0f1607f508be69d7ae242c75df723935cd8"
+      },
+      {
+        "role": "testkit",
+        "sha256": "cb6c2097a2ab46c7521c8faae37d2e2084cc988431a3701f9fad0c162e87ebbf"
+      }
+    ]
+  },
+  "limits": [
+    "The original full651 attempt remains failed; the separate69-test pass does not rescore it.",
+    "This suite combines source audits, harness tests and native guard checks; counts do not mean651 distinct native containment scenarios.",
+    "A fresh complete run after the coordinate correction is pending.",
+    "Mixed build profiles are disclosed correctness inputs, not uniform-profile or competitive speed evidence.",
+    "No product speed improvement, historical-reference parity, Linux/macOS backend qualification, or comprehensive competitive benchmark completion is claimed.",
+    "Raw byte captures remain preserved privately; published hashes support integrity checks without exposing host identity."
+  ],
+  "preserved_postprocessing_issue": "The first family-output parser rejected CRLF using an LF-only OK predicate; corrected parsing consumed the same raw capture without rerunning any test."
+}
