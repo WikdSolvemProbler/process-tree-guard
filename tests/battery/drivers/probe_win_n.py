@@ -1,64 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Peter Shiller
-"""Windows probe for battery case (n). Runs on win32 only; on any
-other platform it prints nothing and exits 3.
+"""Windows probe for battery case (n); other platforms exit 3.
 
-The charged matrix — standard handles (console / pipe / file /
-closed) x every role program x runs with and without post-finish
-output pending — plus the API-level verdict cells the finish
-cycle is about. Nothing in the record is a label restated:
+The charged console / pipe / file / closed matrix remains the adoption
+contract. This fixture can run the pipe and file shapes, but DEVNULL cannot
+stand in for a console or a closed standard handle. Those cells are recorded
+as blocked before launching a role or API child, so the native matrix remains
+BLOCKED-ERROR. The 0.4-second delay is not a finish acknowledgement.
 
-- Pending output is produced, or not, per cell. In a pending
-  cell the producer writes a distinctive pending pattern (a
-  repeated 16-byte block) to the output handles after the
-  finish point and no reader consumes it; in a non-pending cell
-  it writes none. Every role cell records held_output_bytes AND
-  held_pattern_bytes, the pending-pattern bytes actually
-  measured for that cell: counted in the drained stream for
-  pipe and file handles, counted in the producer's own write
-  record for console and closed handles (a console holds its
-  output unread; a closed handle's stream cannot be drained).
-  The driver refutes a cell whose two counts disagree — a held
-  count assigned from the pending label has no measured pattern
-  behind it.
-- Role cells run the built role programs themselves (the full,
-  deadline, gate and contain programs from the build folder)
-  with the role process's standard handles arranged in the
-  cell's configuration, and record verdict-shaped evidence:
-  the exit code, the role's full decision output bytes (its
-  stdout stream, drained), and the consulted verdict values.
-  For the run roles the consulted verdicts are the standard
-  handles' console verdicts the workload child measures at its
-  start on the very handles the role arranged for it; for the
-  gate they are the decision parsed out of the gate's own
-  decision output.
-- The gate role is invoked with a named vendor (pretooluse)
-  and a payload whose watched command is a guarded envelope —
-  the full program's path with its timeout/shell/command-b64
-  form — whose verdict can vary (allow for the well-formed
-  envelope), not a constant deny. Its pending output is
-  produced by a separate producer process that shares the
-  gate's stderr handle and writes the pending pattern after
-  the gate's finish point.
-- The contain role runs inside a real enclosing extendable
-  run: the full program is started with --extendable and its
-  child is a launcher that runs the contain program on the
-  workload and records the contain program's own exit code.
-  A contain cell whose enclosing run cannot start it is
-  recorded blocked_error, never as a refusal-shaped pairing.
-- API cells run a sacrificial child that records the console
-  verdict (GetConsoleMode succeeds) of each standard handle
-  eagerly, performs the cycle Console::finish performs —
-  FreeConsole, then AttachConsole back to its parent's
-  console — and records the verdicts again, lazily.
-- For any unequal API cell the parent re-runs the child in
-  pinned mode for exactly the handles with pending post-finish
-  output (output and error in a pending cell) and records the
-  eager verdicts, the lazy verdicts RE-MEASURED after the
-  cycle in that pinned run, and the pinned set. The driver
-  computes the fallback's effective verdicts from those raw
-  fields; this probe never computes or copies an "effective"
-  verdict itself.
+Pipe shapes use an explicitly requested 64 KiB anonymous-pipe buffer and
+require a 64 KiB receiving quota readback. A separate native regression
+requires the unchanged 8,192-byte producer to exit before its parent drains.
+Neither check establishes the real Console::finish timing or completes the
+charged matrix. The driver keeps role output, measured pattern bytes, and
+API verdict records for shapes it actually executes.
 """
 
 import base64
@@ -68,11 +23,37 @@ import os
 import subprocess
 import sys
 import tempfile
+from ctypes import wintypes
 
 if sys.platform != "win32":
     sys.exit(3)
 
+import msvcrt  # noqa: E402 - Windows-only module after the platform gate
+
 kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+# Explicit pointer-width HANDLE signatures: ctypes' default c_int truncates
+# GetStdHandle results on 64-bit Windows.
+kernel32.GetStdHandle.argtypes = (wintypes.DWORD,)
+kernel32.GetStdHandle.restype = wintypes.HANDLE
+kernel32.GetConsoleMode.argtypes = (wintypes.HANDLE,
+                                    ctypes.POINTER(wintypes.DWORD))
+kernel32.GetConsoleMode.restype = wintypes.BOOL
+kernel32.FreeConsole.argtypes = ()
+kernel32.FreeConsole.restype = wintypes.BOOL
+kernel32.AttachConsole.argtypes = (wintypes.DWORD,)
+kernel32.AttachConsole.restype = wintypes.BOOL
+kernel32.CreatePipe.argtypes = (ctypes.POINTER(wintypes.HANDLE),
+                                ctypes.POINTER(wintypes.HANDLE),
+                                ctypes.c_void_p, wintypes.DWORD)
+kernel32.CreatePipe.restype = wintypes.BOOL
+kernel32.GetNamedPipeInfo.argtypes = (wintypes.HANDLE,
+                                      ctypes.POINTER(wintypes.DWORD),
+                                      ctypes.POINTER(wintypes.DWORD),
+                                      ctypes.POINTER(wintypes.DWORD),
+                                      ctypes.POINTER(wintypes.DWORD))
+kernel32.GetNamedPipeInfo.restype = wintypes.BOOL
+kernel32.CloseHandle.argtypes = (wintypes.HANDLE,)
+kernel32.CloseHandle.restype = wintypes.BOOL
 STD_INPUT_HANDLE = -10
 STD_OUTPUT_HANDLE = -11
 STD_ERROR_HANDLE = -12
@@ -85,6 +66,64 @@ ROLE_EXES = {"full": "process-tree-guard.exe",
              "deadline": "process-tree-guard-deadline.exe",
              "gate": "process-tree-guard-gate.exe",
              "contain": "process-tree-guard-contain.exe"}
+
+
+PIPE_REQUESTED_BYTES = 65536
+MIN_PIPE_QUOTA_BYTES = PIPE_REQUESTED_BYTES
+UNSUPPORTED_SHAPES = {
+    "console": "DEVNULL is not a console standard handle",
+    "closed": "DEVNULL is open, not a closed standard handle",
+}
+
+
+def buffered_pipe():
+    """Return non-inheritable binary CRT fds and the measured read quota.
+
+    Native handles belong to open_osfhandle after a successful conversion;
+    never CloseHandle them as well. A failed CreatePipe has indeterminate
+    output values, so there is nothing to close on that path.
+    """
+    read_handle = wintypes.HANDLE()
+    write_handle = wintypes.HANDLE()
+    if not kernel32.CreatePipe(ctypes.byref(read_handle),
+                               ctypes.byref(write_handle), None,
+                               PIPE_REQUESTED_BYTES):
+        raise ctypes.WinError(ctypes.get_last_error())
+    read_native, write_native = read_handle.value, write_handle.value
+    read_fd = write_fd = None
+    try:
+        flags = wintypes.DWORD()
+        outgoing = wintypes.DWORD()
+        incoming = wintypes.DWORD()
+        if not kernel32.GetNamedPipeInfo(read_native,
+                                         ctypes.byref(flags),
+                                         ctypes.byref(outgoing),
+                                         ctypes.byref(incoming), None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        # A zero reported buffer means allocated as needed, not proof that
+        # this 8,192-byte workload can finish before its parent drains.
+        if incoming.value < MIN_PIPE_QUOTA_BYTES:
+            raise RuntimeError("pipe incoming quota is below the required "
+                               f"headroom: {incoming.value} < "
+                               f"{MIN_PIPE_QUOTA_BYTES}")
+        read_fd = msvcrt.open_osfhandle(
+            read_native, os.O_RDONLY | os.O_BINARY | os.O_NOINHERIT)
+        read_native = None
+        write_fd = msvcrt.open_osfhandle(
+            write_native, os.O_WRONLY | os.O_BINARY | os.O_NOINHERIT)
+        write_native = None
+        result = (read_fd, write_fd, incoming.value)
+        read_fd = write_fd = None
+        return result
+    finally:
+        if read_fd is not None:
+            os.close(read_fd)
+        if write_fd is not None:
+            os.close(write_fd)
+        if read_native is not None:
+            kernel32.CloseHandle(read_native)
+        if write_native is not None:
+            kernel32.CloseHandle(write_native)
 
 
 def verdicts():
@@ -103,9 +142,8 @@ def finish_cycle():
 
 
 def produce_pending():
-    """Write post-finish output nobody reads (API cells);
-    returns the number of bytes produced (a write to a closed
-    handle produces nothing and is not counted)."""
+    """Write the API child's pattern before its simulated console cycle;
+    return the number of bytes actually written."""
     produced = 0
     for fd in (1, 2):
         try:
@@ -150,14 +188,14 @@ def child_api_main(result_path, pending, pinned):
 def workload_main(marker_path, pending):
     """The workload the run roles execute. It first measures the
     console verdicts of the standard handles it was given, then
-    — in a pending cell — writes the pending pattern to its
-    error handle after the finish point; its marker records the
-    verdicts and the pattern bytes it actually wrote."""
+    — in a pending cell — writes the pending pattern after a delay.
+    The delay does not establish that the real guard finished;
+    its marker records verdicts and bytes actually written."""
     measured = verdicts()
     produced = 0
     if pending:
         import time
-        time.sleep(0.4)  # after the guard's finish point
+        time.sleep(0.4)  # simulated delay, not a finish ACK
         produced = write_pattern(2)
     with open(marker_path, "w", encoding="utf-8") as handle:
         json.dump({"produced_bytes": produced,
@@ -167,9 +205,8 @@ def workload_main(marker_path, pending):
 
 def producer_main(marker_path):
     """The pending producer for gate cells: shares the gate's
-    error handle (inherited at spawn), writes the pending
-    pattern after the gate's finish point, and records the
-    pattern bytes it actually wrote."""
+    error handle (inherited at spawn), writes the pattern after
+    a delay, and records bytes written; no real finish ACK exists."""
     import time
     time.sleep(0.4)
     produced = write_pattern(2)
@@ -194,28 +231,12 @@ def contain_launcher_main(result_path, contain_exe, marker_path,
 
 
 class Arrangement:
-    """A child's standard handles in one configuration, with the
-    drains that measure what was left in them.
+    """One role's standard handles and any readable pending output.
 
-    drain_stdout() / drain_stderr() return the bytes left in
-    that stream, or None where the stream cannot be drained
-    (console: the stream is DEVNULL-backed, see below, so the
-    bytes were discarded; closed: they were discarded) — for
-    those configurations the producer's own write record is
-    the measurement.
-
-    The console configuration never inherits this probe's own
-    handles: a role program writing on an inherited stdout
-    would write straight onto the probe's observations channel
-    (the gate's JSON decision line is the certain case), and
-    the single JSON print at the end of main() must be the only
-    thing on the probe's stdout. Console cells therefore route
-    every standard handle to DEVNULL; the recorded decision
-    evidence for such a cell is its exit code (and, for the
-    gate, the decision verdict the exit code decides, exactly
-    as the gate branch's undrainable-stream fallback already
-    works), plus the marker/producer records the workloads
-    leave in files, which no arrangement touches."""
+    Pipe and file shapes retain drainable stdout/stderr. A DEVNULL handle
+    cannot establish either the console or closed shape; those charged
+    cells are recorded as blocked before any role or API child launches.
+    """
 
     def __init__(self, handles_kind):
         self.kind = handles_kind
@@ -223,9 +244,16 @@ class Arrangement:
         self._out_r = self._err_r = None
         self._out_path = self._err_path = None
         self._files = []
+        self.pipe_incoming_quota = None
         if handles_kind == "pipe":
-            self._out_r, out_w = os.pipe()
-            self._err_r, err_w = os.pipe()
+            self._out_r, out_w, out_quota = buffered_pipe()
+            try:
+                self._err_r, err_w, err_quota = buffered_pipe()
+            except BaseException:
+                os.close(self._out_r)
+                os.close(out_w)
+                raise
+            self.pipe_incoming_quota = (out_quota, err_quota)
             self.kwargs = {"stdin": subprocess.PIPE,
                            "stdout": out_w, "stderr": err_w}
             self._write_ends = (out_w, err_w)
@@ -237,19 +265,9 @@ class Arrangement:
             self._files = [out_f, err_f]
             self.kwargs = {"stdin": subprocess.PIPE,
                            "stdout": out_f, "stderr": err_f}
-        elif handles_kind == "closed":
-            self.kwargs = {"stdin": subprocess.DEVNULL,
-                           "stdout": subprocess.DEVNULL,
-                           "stderr": subprocess.DEVNULL}
-        elif handles_kind == "console":
-            # Never inherit the probe's stdout (see the class
-            # docstring): console cells are DEVNULL-backed, so
-            # no role program can write on the observations
-            # channel; the exit code is the recorded decision
-            # evidence for the cell.
-            self.kwargs = {"stdin": subprocess.DEVNULL,
-                           "stdout": subprocess.DEVNULL,
-                           "stderr": subprocess.DEVNULL}
+        else:
+            raise ValueError("unsupported standard-handle shape: "
+                             f"{handles_kind}")
 
     @staticmethod
     def _temp_path():
@@ -271,11 +289,18 @@ class Arrangement:
     @staticmethod
     def _drain(fd):
         data = b""
-        while True:
-            chunk = os.read(fd, 65536)
-            if not chunk:
-                break
-            data += chunk
+        try:
+            while True:
+                chunk = os.read(fd, 65536)
+                if not chunk:
+                    break
+                data += chunk
+        except BaseException:
+            try:
+                os.close(fd)
+            except OSError:
+                pass  # keep the read failure primary
+            raise
         os.close(fd)
         return data
 
@@ -307,17 +332,7 @@ class Arrangement:
             self._files.append(handle)
             return {"stderr": handle, "stdout": subprocess.DEVNULL,
                     "stdin": subprocess.DEVNULL}
-        if self.kind == "closed":
-            return {"stderr": subprocess.DEVNULL,
-                    "stdout": subprocess.DEVNULL,
-                    "stdin": subprocess.DEVNULL}
-        # console: the producer shares the role's error handle,
-        # which is DEVNULL-backed under this arrangement (see
-        # the class docstring) — never the probe's own handles,
-        # so its stdout can never be the probe's stdout either.
-        return {"stderr": subprocess.DEVNULL,
-                "stdout": subprocess.DEVNULL,
-                "stdin": subprocess.DEVNULL}
+        raise ValueError("unsupported producer handle shape")
 
 
 def read_json(path):
@@ -347,6 +362,10 @@ def spawn_role_cell(build_dir, role, handles_kind, pending):
     if not os.path.isfile(exe):
         return {"exit_code": None, "role_present": False,
                 "held_output_bytes": 0}
+    if handles_kind in UNSUPPORTED_SHAPES:
+        return {"exit_code": None, "role_present": True,
+                "held_output_bytes": 0,
+                "blocked_error": UNSUPPORTED_SHAPES[handles_kind]}
     arrangement = Arrangement(handles_kind)
     marker = temp_json_path()
     workload = [sys.executable, os.path.abspath(__file__),
@@ -362,13 +381,6 @@ def spawn_role_cell(build_dir, role, handles_kind, pending):
         payload = json.dumps(
             {"tool_name": "Bash",
              "tool_input": {"command": command}}).encode()
-        # For a console arrangement the arrangement's stdout
-        # is DEVNULL (never the probe's own stdout), so the
-        # gate's decision line cannot corrupt the observations
-        # channel; communicate() then yields no output bytes
-        # and the exit code recorded below is the cell's
-        # decision evidence, as the fallback further down
-        # already handles.
         proc = subprocess.Popen([exe, "pretooluse"],
                                 stdin=subprocess.PIPE,
                                 stdout=arrangement.kwargs.get("stdout"),
@@ -378,17 +390,13 @@ def spawn_role_cell(build_dir, role, handles_kind, pending):
                 [sys.executable, os.path.abspath(__file__),
                  "--pending-producer", producer_marker],
                 **arrangement.producer_kwargs())
-        out, _ = proc.communicate(input=payload)
+        proc.communicate(input=payload)
         exit_code = proc.returncode
         if producer is not None:
             producer.wait()
         arrangement.close_write_ends()
-        decision_bytes = out if arrangement.kind == "console" \
-            else arrangement.drain_stdout()
-        if decision_bytes is None:
-            decision_bytes = out or b""
-        stderr_bytes = arrangement.drain_stderr() \
-            if arrangement.kind != "console" else None
+        decision_bytes = arrangement.drain_stdout()
+        stderr_bytes = arrangement.drain_stderr()
         produced_record = read_json(producer_marker) or {}
         produced = int(produced_record.get("produced_bytes", 0))
         held, pattern, how = held_for(arrangement, stderr_bytes,
@@ -397,10 +405,8 @@ def spawn_role_cell(build_dir, role, handles_kind, pending):
                                               errors="replace")
         # The gate's decision shapes: allow is exit 0 with {}
         # (or an allow permission) on stdout; deny is exit 2
-        # with a deny permission. Where the stream itself was
-        # drained it decides; on a console arrangement, where
-        # the stream cannot be drained, the exit code — the
-        # other half of the same shape — decides.
+        # with a deny permission. Only drainable pipe/file shapes
+        # reach this branch.
         if '"deny"' in decision_text or exit_code == 2:
             decision_verdict = "deny"
         elif decision_text.strip() == "{}" \
@@ -456,15 +462,14 @@ def spawn_role_cell(build_dir, role, handles_kind, pending):
 
 
 def spawn_api_cell(handles_kind, pending, pinned=False):
+    if handles_kind in UNSUPPORTED_SHAPES:
+        return {"blocked_error": UNSUPPORTED_SHAPES[handles_kind],
+                "held_output_bytes": 0, "eager": None,
+                "lazy": None, "pinned_handles": []}
     result = temp_json_path()
     arrangement = Arrangement(handles_kind)
     kwargs = dict(arrangement.kwargs)
     kwargs.pop("stdin", None)
-    # Console cells keep the arrangement's DEVNULL backing
-    # here too (no special-case inheritance): the API child's
-    # pending output is post-finish output on its own handles,
-    # and on an inherited stdout it would land on the probe's
-    # observations channel just as a role program's would.
     args = [sys.executable, os.path.abspath(__file__), "--child-api",
             result, "1" if pending else "0",
             "1" if pinned else "0"]
@@ -487,7 +492,58 @@ def spawn_api_cell(handles_kind, pending, pinned=False):
             "pinned_handles": record["pinned_handles"]}
 
 
+def pipe_producer_main():
+    """Write the unchanged 8,192-byte pattern to inherited stderr."""
+    block = PATTERN_BLOCK * PATTERN_REPS
+    written = 0
+    while written < len(block):
+        count = os.write(2, block[written:])
+        if count <= 0:
+            return 2
+        written += count
+    return 0
+
+
+def pipe_regression_main():
+    """Prove the producer exits before its parent drains one fresh pipe."""
+    read_fd, write_fd, incoming = buffered_pipe()
+    proc = None
+    try:
+        proc = subprocess.Popen(
+            [sys.executable, os.path.abspath(__file__), "--pipe-producer"],
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=write_fd)
+        os.close(write_fd)
+        write_fd = None
+        # Ordering is deliberate: the full write must finish without any
+        # parent read before this wait returns.
+        native_exit = proc.wait(timeout=10)
+        drain_fd = read_fd
+        read_fd = None
+        data = Arrangement._drain(drain_fd)
+        passed = (native_exit == 0 and
+                  data == PATTERN_BLOCK * PATTERN_REPS)
+        print(json.dumps({"passed": passed,
+                          "producer_exited_before_parent_drain": True,
+                          "native_exit": native_exit,
+                          "incoming_quota_bytes": incoming,
+                          "pattern_bytes": len(data)}))
+        return 0 if passed else 2
+    finally:
+        if proc is not None and proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=5)
+        if write_fd is not None:
+            os.close(write_fd)
+        if read_fd is not None:
+            os.close(read_fd)
+
+
 def main():
+    if len(sys.argv) == 2 and sys.argv[1] == "--pipe-producer":
+        return pipe_producer_main()
+    if len(sys.argv) == 2 and sys.argv[1] == "--pipe-regression":
+        return pipe_regression_main()
     if len(sys.argv) > 4 and sys.argv[1] == "--child-api":
         return child_api_main(sys.argv[2], sys.argv[3] == "1",
                               sys.argv[4] == "1")
@@ -522,7 +578,9 @@ def main():
                           "held_output_bytes":
                               got["held_output_bytes"],
                           "eager": got["eager"],
-                          "lazy": got["lazy"]})
+                          "lazy": got["lazy"],
+                          **({"blocked_error": got["blocked_error"]}
+                             if "blocked_error" in got else {})})
             if got["eager"] != got["lazy"]:
                 unequal.append((handles, pending))
     fallback_cells = []

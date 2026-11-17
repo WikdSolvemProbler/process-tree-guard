@@ -3,16 +3,18 @@
 """Driver for battery case (n): lazy console verdicts, gated on
 before/after verdict equality across the Console::finish cycle.
 
-Windows tier: probe_win_n.py runs the charged matrix — standard
+Windows tier: probe_win_n.py is charged with the matrix — standard
 handles (console / pipe / file / closed) x every role program x
 runs with and without post-finish output pending — plus the
 API-level verdict cells (the three standard handles' console
 verdicts recorded eagerly, the FreeConsole/AttachConsole cycle
 Console::finish performs, the verdicts recorded lazily after).
-Pending output is real: in a pending cell the workload leaves
-output unread on its handles at the finish point, and the probe
-records the held byte count it measures; in a non-pending cell
-it leaves none. Role cells record verdict-shaped evidence, not
+The current fixture has no verified finish acknowledgement, and its
+DEVNULL-backed console/closed arrangements are blocked before launch.
+It therefore cannot establish the full native matrix or a PASS. In
+executed pipe/file cells the producer writes a measured pattern after
+a delay; that delay does not prove the guard has finished. Role cells
+record verdict-shaped evidence, not
 exit codes alone: each cell carries the role's full decision
 output bytes and the consulted verdict values (for the gate,
 the decision its named-vendor payload produced — a guarded
@@ -92,13 +94,12 @@ def decide(obs):
                        "in the build folder; its cells ran "
                        "nothing — BLOCKED-ERROR, never evidenced")}
     role_cells = [c for c in cells if c["kind"] == "role"]
-    if any(c.get("blocked_error") for c in role_cells):
+    if any(c.get("blocked_error") for c in cells):
         return {COND: ("error",
-                       "a role program could not run in its "
-                       "cell's shape (for example the contain "
-                       "role outside an enclosing extendable "
-                       "run); its cells are BLOCKED-ERROR, never "
-                       "paired as equality")}
+                       "a charged role or API cell could not run in its "
+                       "actual standard-handle shape; DEVNULL cannot "
+                       "evidence console or closed handles — "
+                       "BLOCKED-ERROR, never paired as equality")}
     if any(any(field not in c for field in ROLE_FIELDS)
            for c in role_cells):
         return {COND: ("error",

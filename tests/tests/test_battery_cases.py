@@ -10,6 +10,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -20,6 +21,7 @@ sys.path.insert(0, os.path.join(HERE, "..", "campaign"))
 
 import battery as battery_mod  # noqa: E402
 import env_fixtures  # noqa: E402
+from drivers import case_n  # noqa: E402
 
 TREE = os.path.normpath(os.path.join(HERE, "..", ".."))
 # Source-audit tests replay the driver-blocked tier on every host. Native
@@ -134,6 +136,25 @@ class CaseNTests(unittest.TestCase):
         cond = conditions("n")["verdict equality across the finish cycle"]
         self.assertIn("pin", cond["detail"])
         self.assertIn("pending", cond["detail"])
+        blocked = case_n.decide({"cells": [{
+            "kind": "api", "handles": "console", "pending_output": False,
+            "held_output_bytes": 0, "blocked_error": "DEVNULL is not console",
+        }]})[case_n.COND]
+        self.assertEqual(blocked[0], "error")
+        self.assertIn("BLOCKED-ERROR", blocked[1])
+        if sys.platform == "win32":
+            probe = os.path.join(TREE, "tests", "battery", "drivers",
+                                 "probe_win_n.py")
+            proc = subprocess.run([sys.executable, probe,
+                                   "--pipe-regression"],
+                                  capture_output=True, timeout=25)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            record = json.loads(proc.stdout)
+            self.assertTrue(record["producer_exited_before_parent_drain"])
+            self.assertTrue(record["passed"])
+            self.assertEqual(record["native_exit"], 0)
+            self.assertGreaterEqual(record["incoming_quota_bytes"], 65536)
+            self.assertEqual(record["pattern_bytes"], 8192)
 
 
 class CaseOTests(unittest.TestCase):
