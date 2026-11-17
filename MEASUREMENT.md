@@ -172,24 +172,24 @@ count below except as noted in section 4). Named native calls:
 | Spawn (`run_job_core`) | `CreateProcessW` 1 | 1 |
 | Pre-resume check (`engine::poll_before_resume` and the deadline read in `fixed_pre_resume_with`, `src/engine/wait.rs`) | `WaitForMultipleObjects` 1, `GetTickCount64` 1 | 2 |
 | Resume (`run_job_core`) | `ResumeThread` 1 | 1 |
-| Wait, first plain pass, the child exits in it (`engine::wait_with_deadline_observed`) | `GetTickCount64` 1, `WaitForMultipleObjects` 1 | 2 |
+| Wait, first plain pass, the child exits in it (`engine::wait_with_deadline_observed`) | `GetSystemTimeAsFileTime` 1, `GetTickCount64` 1, `CreateWaitableTimerExW` 1, `SetWaitableTimer` 1, `WaitForMultipleObjects` 1, `CloseHandle` 1 (the timer) | 6 |
 | Exit code (`run_job_core`) | `GetExitCodeProcess` 1 | 1 |
 | Teardown, the job already empty (`engine::terminate_and_wait` → `active_processes`) | `QueryInformationJobObject` 1 | 1 |
 | Console finish, fixed part (`cli_process::Console::finish`) | `GetSystemWindowsDirectoryW` 1; for an attached console `FlushConsoleInputBuffer` 1, `GetConsoleProcessList` 1, `FreeConsole` 1 | 4 |
 | Console finish, first walk level (`cli_process::Console::finish` → `boundary`, on the first owner; the walk examines at least this one level on every run that reaches the finish, and the ordinary route's first owner is a boundary, so it breaks there) | `QueryFullProcessImageNameW` 1 | 1 |
 | Process exit (`diagnostics::cli_exit`) | `GetCurrentProcess` 1, `TerminateProcess` 1 (the guard itself) | 2 |
-| **Total, fixed core** | | **45** |
+| **Total, fixed core** | | **49** |
 
-The subtotal from job setup to process exit is 36; the total above is
+The subtotal from job setup to process exit is 40; the total above is
 the entry-to-exit count, on the same boundary §2.1 uses for the hook
 route (which counts its entry hardening and its process exit). A
 contain-role run, whose entry makes no automatic-name check, totals
-44 on this boundary for its run core — but a contain run cannot start
+48 on this boundary for its run core — but a contain run cannot start
 at all without its mandatory enclosing-run request, which the core
 above does not include: before the job is set up it pays the client
 exchange of §2.3 (13 named calls when the request is granted on the
 first attempt), plus the one-time `CreateEventW` of its thread's
-first exchange, for an entry-to-exit total of 58 on an ordinary
+first exchange, for an entry-to-exit total of 62 on an ordinary
 successful contain run. A plain run started inside an extendable run
 pays the same request the same way; the ordinary route counted above
 is a top-level run, which pays none of it (its channel probe finds no
@@ -235,14 +235,18 @@ and no per-call total above moves for them.
 
 Dependences on this path:
 
-- Wait passes. The tally holds the pass the child exits in. Each further
-  plain pass costs `GetTickCount64` 1 and `WaitForMultipleObjects` 1.
-  After three plain passes the wait arms a suspend-inclusive timer: one
-  `CreateWaitableTimerExW` (and its `CloseHandle` when the wait ends),
-  and each timer pass costs `GetSystemTimeAsFileTime` 1, `GetTickCount64`
-  1, `SetWaitableTimer` 1 and `WaitForMultipleObjects` 1
-  (`wait_with_deadline_observed`). A plain pass waits at most 250 ms of
-  the time left; a run whose child exits at once never creates the timer.
+- Wait passes. The tally includes the first blocking pass, with a positive
+  remaining deadline, and the timer close when that wait ends. Every such
+  pass uses the suspend-inclusive timer, including the first. Its creation
+  costs `CreateWaitableTimerExW` 1 on the ordinary high-resolution route
+  (one additional call if creation must fall back to the ordinary timer),
+  and the timer is closed once with `CloseHandle`. Each pass costs
+  `GetSystemTimeAsFileTime` 1, `GetTickCount64` 1, `SetWaitableTimer` 1
+  and `WaitForMultipleObjects` 1. The first three fixed passes are capped
+  at 250 ms each; later fixed passes are capped at 10,000 ms, always also
+  bounded by time remaining. An already-expired deadline instead takes
+  the final zero-time child/owner poll without creating or arming a timer.
+  These are named-call counts, not a latency or CPU-cost measurement.
 - Teardown with the job not empty. When `active_processes` does not
   report zero, `terminate_and_wait` adds: one `QueryInformationJobObject`
   for the member list (repeated only while the list outgrows the scratch
@@ -373,16 +377,18 @@ one wait per pass (`engine::wait_extendable` → `wait_until` →
 `wait_with_deadline_observed`, with the extension's wake event in the
 wait set):
 
-- One plain pass costs `GetTickCount64` 1 (in `remaining`, under the
-  state lock) and `WaitForMultipleObjects` 1: 2 named calls.
+- Each blocking pass with positive time remaining costs
+  `GetSystemTimeAsFileTime` 1, `GetTickCount64` 1 (in `remaining`, under
+  the state lock), `SetWaitableTimer` 1 and `WaitForMultipleObjects` 1:
+  4 named calls, including the first pass.
 - A pass that carries the wake event waits in slices of at most
   1,000 ms (`wait_slice_wake`, the `BACKSTOP_WAKE_MS` of `src/extend.rs`),
   so an idle run makes about one pass per second, and a grant or a job
   exit ends the pass at once through the wake event instead.
-- From the fourth pass the timer is armed, as on the plain path: one
-  `CreateWaitableTimerExW` for the wait (closed when it ends), and 4
-  named calls per pass (`GetTickCount64`, `GetSystemTimeAsFileTime`,
-  `SetWaitableTimer`, `WaitForMultipleObjects`).
+- The first blocking pass creates its timer with `CreateWaitableTimerExW`
+  1 on the ordinary high-resolution route (one more call on fallback).
+  The wait closes it once with `CloseHandle`. These two one-time calls
+  are additional to the four calls per pass above.
 - `remaining` with `H` holds standing adds, per pass, the job's process
   list query (`QueryInformationJobObject` 1, into a thread-held buffer
   that is reused and grows only to the largest list its thread has seen)

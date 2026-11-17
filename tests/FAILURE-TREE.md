@@ -18,7 +18,7 @@ this suite's counted-once total is its own Python tests: 647 tests counted once,
 
 ## Contents
 
-- [1. Fast path (plain run; census: 45 named calls)](#1-fast-path-plain-run-census-45-named-calls)
+- [1. Fast path (plain run; census: 49 named calls)](#1-fast-path-plain-run-census-49-named-calls)
 - [2. Kill path (deadline and teardown)](#2-kill-path-deadline-and-teardown)
 - [3. Hook surfaces (gate and full role; vendors: pretooluse, cursor,](#3-hook-surfaces-gate-and-full-role-vendors-pretooluse-cursor)
 - [4. CLI and error contract](#4-cli-and-error-contract)
@@ -29,7 +29,7 @@ this suite's counted-once total is its own Python tests: 647 tests counted once,
 
 [↑ Back to Contents](#contents)
 
-## 1. Fast path (plain run; census: 45 named calls)
+## 1. Fast path (plain run; census: 49 named calls)
 
 The 45 is the vendored enumeration of MEASUREMENT §2's named
 calls in `campaign/census.json`, enforced by the counted-ops

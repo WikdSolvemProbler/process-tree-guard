@@ -322,7 +322,7 @@ Every stage's exit code stands recorded in `results\stage-exit-codes.txt`.
   The 5% bound holds that spread with headroom.
   The bound stands in place of the earlier 10%.
   Each distance is decomposed against the counted-ops census.
-  The census states plain path 45 named calls, hook path 18.
+  The census states plain path 49 named calls, hook path 18.
   That census is the vendored enumeration of MEASUREMENT §2's named calls.
   The enumeration stands in `campaign/census.json`.
   The counted-ops census tests in `tests/test_campaign_logic.py` enforce the census.

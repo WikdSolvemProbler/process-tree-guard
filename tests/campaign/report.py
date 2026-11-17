@@ -302,14 +302,14 @@ from runner import fast_workload_argv
 
 # Census anchors: the vendored enumeration of MEASUREMENT.md
 # section 2's named calls in campaign/census.json (this package) —
-# plain run path 45 named calls entry-to-exit, hook verdict path
-# 18, and the run-core subtotal (job setup to process exit) 36 —
+# plain run path 49 named calls entry-to-exit, hook verdict path
+# 18, and the run-core subtotal (job setup to process exit) 40 —
 # recomputed from that enumeration and enforced by the
 # counted-ops census tests in tests/test_campaign_logic.py
 # (CensusConsistencyTests), which also re-derive the enumeration
 # from the guard tree's MEASUREMENT.md section 2 when the tree is
 # present beside the suite.
-CENSUS = {"plain_total": 45, "hook_total": 18, "subtotal_run_core": 36}
+CENSUS = {"plain_total": 49, "hook_total": 18, "subtotal_run_core": 40}
 
 STALE_PAIRING_PROVENANCE = (
     "The pairing \"66.5 ms vs 50.9 ms\" (N=5) cites a 66.5 ms anchor that "
