@@ -1004,5 +1004,348 @@
     "The AABB order balances within-pair position, but second positions always switch image; context effects remain unidentifiable.",
     "No profiled-minus-untraced subtraction, product speed acceptance, canonical parity, causal attribution, ranking or optimization warrant."
   ],
-  "primary_qualifying_performance_measurements": 0
+  "primary_qualifying_performance_measurements": 0,
+  "postrun_pre_s0_split": {
+    "date": "2026-11-17",
+    "classification": "OFFLINE_SAME_COUNTER_PRE_S0_LOCALIZATION_NO_NEW_RUNTIME_SAMPLE",
+    "input_rows": 40,
+    "paired_comparisons": 20,
+    "excluded_rows": 0,
+    "new_guard_launches": 0,
+    "observed_qpc_frequency_hz": 10000000,
+    "definitions": {
+      "parent_return_to_s0": "Direct parent CreateProcessW return to the guard phase_profile::begin stamp, including parent resume, guard startup, pre-s0 profile work and scheduling.",
+      "s0_to_s2": "Guard first existing profile stamp to its stamp before payload CreateProcessW; the arms have different checked-admission callsite semantics.",
+      "additivity": "Every individual row and paired difference partitions exactly. Component medians are not additive."
+    },
+    "all_pairs_and_order_strata": {
+      "all": {
+        "parent_after_to_s0_current_minus_ref_ns": {
+          "n": 20,
+          "median": 2386150,
+          "mean_numerator": -77820900,
+          "mean_denominator": 20,
+          "positive": 13,
+          "negative": 7,
+          "zero": 0,
+          "min": -111656500,
+          "max": 49639700
+        },
+        "s0_to_s2_current_minus_ref_ns": {
+          "n": 20,
+          "median": 13950,
+          "mean_numerator": 293200,
+          "mean_denominator": 20,
+          "positive": 13,
+          "negative": 7,
+          "zero": 0,
+          "min": -91500,
+          "max": 108700
+        },
+        "parent_after_to_s2_current_minus_ref_ns": {
+          "n": 20,
+          "median": 2372750,
+          "mean_numerator": -77527700,
+          "mean_denominator": 20,
+          "positive": 13,
+          "negative": 7,
+          "zero": 0,
+          "min": -111639700,
+          "max": 49617800
+        },
+        "s0_to_s2_cycles_current_minus_ref": {
+          "n": 20,
+          "median": 21657.5,
+          "mean_numerator": 457882,
+          "mean_denominator": 20,
+          "positive": 14,
+          "negative": 6,
+          "zero": 0,
+          "min": -210578,
+          "max": 178840
+        }
+      },
+      "current_first": {
+        "parent_after_to_s0_current_minus_ref_ns": {
+          "n": 10,
+          "median": 3790850,
+          "mean_numerator": -45872900,
+          "mean_denominator": 10,
+          "positive": 7,
+          "negative": 3,
+          "zero": 0,
+          "min": -111656500,
+          "max": 49639700
+        },
+        "s0_to_s2_current_minus_ref_ns": {
+          "n": 10,
+          "median": 13950,
+          "mean_numerator": 236400,
+          "mean_denominator": 10,
+          "positive": 7,
+          "negative": 3,
+          "zero": 0,
+          "min": -21900,
+          "max": 108700
+        },
+        "parent_after_to_s2_current_minus_ref_ns": {
+          "n": 10,
+          "median": 3799050,
+          "mean_numerator": -45636500,
+          "mean_denominator": 10,
+          "positive": 7,
+          "negative": 3,
+          "zero": 0,
+          "min": -111639700,
+          "max": 49617800
+        },
+        "s0_to_s2_cycles_current_minus_ref": {
+          "n": 10,
+          "median": 28343.5,
+          "mean_numerator": 381233,
+          "mean_denominator": 10,
+          "positive": 8,
+          "negative": 2,
+          "zero": 0,
+          "min": -43713,
+          "max": 178840
+        }
+      },
+      "reference_first": {
+        "parent_after_to_s0_current_minus_ref_ns": {
+          "n": 10,
+          "median": 1991350,
+          "mean_numerator": -31948000,
+          "mean_denominator": 10,
+          "positive": 6,
+          "negative": 4,
+          "zero": 0,
+          "min": -57933600,
+          "max": 46262200
+        },
+        "s0_to_s2_current_minus_ref_ns": {
+          "n": 10,
+          "median": 12700,
+          "mean_numerator": 56800,
+          "mean_denominator": 10,
+          "positive": 6,
+          "negative": 4,
+          "zero": 0,
+          "min": -91500,
+          "max": 93300
+        },
+        "parent_after_to_s2_current_minus_ref_ns": {
+          "n": 10,
+          "median": 1988100,
+          "mean_numerator": -31891200,
+          "mean_denominator": 10,
+          "positive": 6,
+          "negative": 4,
+          "zero": 0,
+          "min": -57966100,
+          "max": 46205500
+        },
+        "s0_to_s2_cycles_current_minus_ref": {
+          "n": 10,
+          "median": 14273,
+          "mean_numerator": 76649,
+          "mean_denominator": 10,
+          "positive": 6,
+          "negative": 4,
+          "zero": 0,
+          "min": -210578,
+          "max": 159880
+        }
+      }
+    },
+    "paired_numeric_differences": [
+      {
+        "pair": 0,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 6079400,
+        "s0_to_s2_current_minus_ref_ns": 75900,
+        "parent_after_to_s2_current_minus_ref_ns": 6155300,
+        "s0_to_s2_cycles_current_minus_ref": 110978
+      },
+      {
+        "pair": 1,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 1224300,
+        "s0_to_s2_current_minus_ref_ns": -2300,
+        "parent_after_to_s2_current_minus_ref_ns": 1222000,
+        "s0_to_s2_cycles_current_minus_ref": -21357
+      },
+      {
+        "pair": 2,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": -38926800,
+        "s0_to_s2_current_minus_ref_ns": 32800,
+        "parent_after_to_s2_current_minus_ref_ns": -38894000,
+        "s0_to_s2_cycles_current_minus_ref": 53294
+      },
+      {
+        "pair": 3,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": 2514300,
+        "s0_to_s2_current_minus_ref_ns": -25700,
+        "parent_after_to_s2_current_minus_ref_ns": 2488600,
+        "s0_to_s2_cycles_current_minus_ref": -30539
+      },
+      {
+        "pair": 4,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 6193400,
+        "s0_to_s2_current_minus_ref_ns": 26800,
+        "parent_after_to_s2_current_minus_ref_ns": 6220200,
+        "s0_to_s2_cycles_current_minus_ref": 53293
+      },
+      {
+        "pair": 5,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 5323700,
+        "s0_to_s2_current_minus_ref_ns": 17500,
+        "parent_after_to_s2_current_minus_ref_ns": 5341200,
+        "s0_to_s2_cycles_current_minus_ref": 11177
+      },
+      {
+        "pair": 6,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": 5119200,
+        "s0_to_s2_current_minus_ref_ns": -91500,
+        "parent_after_to_s2_current_minus_ref_ns": 5027700,
+        "s0_to_s2_cycles_current_minus_ref": -210578
+      },
+      {
+        "pair": 7,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": 46262200,
+        "s0_to_s2_current_minus_ref_ns": -56700,
+        "parent_after_to_s2_current_minus_ref_ns": 46205500,
+        "s0_to_s2_cycles_current_minus_ref": -82636
+      },
+      {
+        "pair": 8,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 2258000,
+        "s0_to_s2_current_minus_ref_ns": -1100,
+        "parent_after_to_s2_current_minus_ref_ns": 2256900,
+        "s0_to_s2_cycles_current_minus_ref": 29940
+      },
+      {
+        "pair": 9,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 5536500,
+        "s0_to_s2_current_minus_ref_ns": 108700,
+        "parent_after_to_s2_current_minus_ref_ns": 5645200,
+        "s0_to_s2_cycles_current_minus_ref": 178840
+      },
+      {
+        "pair": 10,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": -57933600,
+        "s0_to_s2_current_minus_ref_ns": -32500,
+        "parent_after_to_s2_current_minus_ref_ns": -57966100,
+        "s0_to_s2_cycles_current_minus_ref": -3593
+      },
+      {
+        "pair": 11,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": 4679500,
+        "s0_to_s2_current_minus_ref_ns": 60900,
+        "parent_after_to_s2_current_minus_ref_ns": 4740400,
+        "s0_to_s2_cycles_current_minus_ref": 66466
+      },
+      {
+        "pair": 12,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": 49639700,
+        "s0_to_s2_current_minus_ref_ns": -21900,
+        "parent_after_to_s2_current_minus_ref_ns": 49617800,
+        "s0_to_s2_cycles_current_minus_ref": -43713
+      },
+      {
+        "pair": 13,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": -8663200,
+        "s0_to_s2_current_minus_ref_ns": 11100,
+        "parent_after_to_s2_current_minus_ref_ns": -8652100,
+        "s0_to_s2_cycles_current_minus_ref": 30939
+      },
+      {
+        "pair": 14,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": 5827100,
+        "s0_to_s2_current_minus_ref_ns": 93300,
+        "parent_after_to_s2_current_minus_ref_ns": 5920400,
+        "s0_to_s2_cycles_current_minus_ref": 159880
+      },
+      {
+        "pair": 15,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": 1468400,
+        "s0_to_s2_current_minus_ref_ns": 19200,
+        "parent_after_to_s2_current_minus_ref_ns": 1487600,
+        "s0_to_s2_cycles_current_minus_ref": 11978
+      },
+      {
+        "pair": 16,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": -1808200,
+        "s0_to_s2_current_minus_ref_ns": 4900,
+        "parent_after_to_s2_current_minus_ref_ns": -1803300,
+        "s0_to_s2_cycles_current_minus_ref": 26747
+      },
+      {
+        "pair": 17,
+        "current_first": true,
+        "parent_after_to_s0_current_minus_ref_ns": -111656500,
+        "s0_to_s2_current_minus_ref_ns": 16800,
+        "parent_after_to_s2_current_minus_ref_ns": -111639700,
+        "s0_to_s2_cycles_current_minus_ref": 4389
+      },
+      {
+        "pair": 18,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": -434100,
+        "s0_to_s2_current_minus_ref_ns": 6200,
+        "parent_after_to_s2_current_minus_ref_ns": -427900,
+        "s0_to_s2_cycles_current_minus_ref": 16568
+      },
+      {
+        "pair": 19,
+        "current_first": false,
+        "parent_after_to_s0_current_minus_ref_ns": -524200,
+        "s0_to_s2_current_minus_ref_ns": 50800,
+        "parent_after_to_s2_current_minus_ref_ns": -473400,
+        "s0_to_s2_cycles_current_minus_ref": 95809
+      }
+    ],
+    "source_mapped_callsite_limits": [
+      "Current profiled diagnostics.rs:247-249 calls checked cli_process::enter(kind) before phase_profile::begin; enter calls harden_self at cli_process.rs:127-129.",
+      "Reference profiled main.rs:5007-5014 invokes best-effort harden_self before phase_profile::begin; its checked later run admission remains distinct.",
+      "Each s0 is the QPC/cycle stamp within phase_profile::begin after nonce/identity/frequency work; s2 is before payload CreateProcessW.",
+      "Parent CreateProcessW return→s0 uses direct parent and guard QPC readings at the same recorded 10 MHz frequency; it includes parent ResumeThread timing, child startup, pre-s0 work and scheduling. It is a descriptive cross-process same-counter interval, not an exclusive cost."
+    ],
+    "interpretation": "Paired current-minus-reference medians are +2.38615 ms for parent return to s0, +0.01395 ms for s0 to s2, and +2.37275 ms for parent return to s2. These component medians do not add. The earlier-bracket mean is -3.891045 ms with all extreme differences retained, so the median and mean have opposite signs. This is a localization lead, not a stable exclusive-cost estimate or identification of loader, hardening, profiling-work or scheduling cause. No source optimization or speed acceptance follows.",
+    "limits": [
+      "This profiled-image native-observer epoch does not establish untraced speed, primary acceptance or a source optimization.",
+      "s0 follows different checked/best-effort hardening semantics; s0→s2 contrast is not equivalence of instructions or guarantee coverage.",
+      "The small s0→s2 median does not prove any particular pre-s0 loader, hardening, AV or scheduler cause.",
+      "All 20 paired rows retained; component medians are not additive and no raw Python wall-clock axis is joined.",
+      "Earlier failed PermissionError attempts remain failed and are not rescored."
+    ],
+    "evidence_sha256": {
+      "original_raw_receipt": "e1c54a9e8c97ef8b393b2a0342a0c6eaef6b4151b30315fa2f1c337562066171",
+      "profile_contract": "df0115440a4193f54277a2aa9f54a9628c1ac005f907e005f8b94d804bc01823",
+      "offline_40_row_split": "5f84adc7662f314f820124a9b9fe1decd6f8ec4a174c2ff7a062fa7266247893",
+      "independent_root_arithmetic_audit": "7f9df02dfcda435dc654362fff5c311bcd8c5fc99229b35a60c9d4f620c50373",
+      "source_files": {
+        "current_profile_diagnostics": "2ad0b13de1fd5ee75e069815b745cb3c31ab71e62cda52ecd8243ede40148534",
+        "current_profile_phase": "77bfc41b4647c10e2a8f31b25aba2c05b4f842b82241cfe2c7289b49beef38ff",
+        "reference_profile_main": "84d105ad16ae97a26cd642a6c17c137670295b16c06fd91cf17737b6293f5aed",
+        "reference_profile_phase": "465c966ad7edb7c406564868eea50a966f21469fb8bc76d70c6aeaf39968c33c"
+      }
+    },
+    "primary_qualifying_performance_measurements": 0
+  }
 }
