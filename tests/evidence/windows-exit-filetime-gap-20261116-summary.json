@@ -1,0 +1,130 @@
+{
+  "schema": "windows-exit-filetime-gap-diagnostic-summary-v1",
+  "date": "2026-11-16",
+  "classification": "COMPLETED_DESCRIPTIVE_DIAGNOSTIC_NOT_COMPETITIVE_ACCEPTANCE",
+  "product": {
+    "source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "changed_in_this_diagnostic": false,
+    "build": "default opt-level=3; same archived controlled-build image",
+    "bytes": 820736,
+    "sha256": "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d"
+  },
+  "reference": {
+    "role": "Archived Windows-repaired historical comparison fixture only",
+    "build": "default opt-level=3; same archived controlled-build image",
+    "bytes": 371712,
+    "sha256": "cbfd2c164ed3fc228a1ccfaba09eef8825efb5857bb0a32ab4f78c9817c9de78",
+    "general_correctness_qualified": false,
+    "reason": "Previously failed G28 descendant-cleanup qualification; this normal-exit diagnostic neither repairs nor overrides that failure. Historical speed target unchanged."
+  },
+  "method": {
+    "workload": "Manual --timeout 2 -- shared native fixture mark FILE 0.05",
+    "pair_count": 8,
+    "slot_count": 16,
+    "order": [
+      "C,R",
+      "C,R",
+      "R,C",
+      "R,C",
+      "C,R",
+      "C,R",
+      "R,C",
+      "R,C"
+    ],
+    "warmups_discarded": 0,
+    "adaptive_extension": false,
+    "retry_for_favorable_result": false,
+    "elapsed": "Original controller perf_counter_ns start before CreateProcessW to original guard HANDLE native wait endpoint; includes observer/controller work, payload lifecycle and host scheduling. Not isolated startup or SUT CPU.",
+    "exit_gap": "Signed guard exit FILETIME minus payload exit FILETIME; GetProcessTimes called once on each retained original HANDLE only after original measured endpoint and original first payload poll, then qualified after all original normal-custody checks.",
+    "timestamp_handling": "Full 64-bit FILETIME values joined exactly and stored privately as decimal strings. Public report contains signed differences only.",
+    "comparability": "Same archived default-opt3 images, shared native payload, fixed command form, child environment digest and protected controller within this one call. Source/image paths, file identities, feature sets, prior exposure and scheduler/cache/AV effects remain potential differences."
+  },
+  "native_result": {
+    "original_outer_terminal": 0,
+    "outer_wall_seconds": 4.9269455,
+    "completed_pairs": 8,
+    "measured_slots": 16,
+    "qualified_exit_gap_slots": 16,
+    "errors": [],
+    "all_original_guard_and_payload_first_polls_terminal": true,
+    "all_exit_codes": 0,
+    "streams": "stdin/stdout/stderr empty in every slot",
+    "all_precleanup_job_active_counts": 0,
+    "watchdog_or_cleanup_assistance": false
+  },
+  "paired_current_minus_reference": {
+    "outer_elapsed_ms": {
+      "values": [
+        -18.8349,
+        24.4168,
+        31.9843,
+        12.2366,
+        -75.8275,
+        -2.9571,
+        -8.4586,
+        58.8555
+      ],
+      "median_ms": 4.63975,
+      "mean_ms": 2.6768875,
+      "positive": 4,
+      "negative": 4
+    },
+    "utc_exit_gap_ms": {
+      "values": [
+        0.4312,
+        0.1842,
+        0.3839,
+        2.8911,
+        5.6335,
+        0.2071,
+        -1.1532,
+        2.3174
+      ],
+      "median_ms": 0.40755,
+      "mean_ms": 1.3619,
+      "positive": 7,
+      "negative": 1
+    }
+  },
+  "preserved_attempts": [
+    {
+      "attempt": "001",
+      "result": "Python syntax gate failed before authorization or any SUT launch; no qualified data."
+    },
+    {
+      "attempt": "002",
+      "result": "One current SUT ran; original normal custody and raw API sample completed, but harness phase qualification order was wrong. Original failure, raw data and zero-qualified-slot status preserved; not rescored as successful."
+    },
+    {
+      "attempt": "003",
+      "result": "Fresh fixed packet; offline counterfactual replay plus API, phase and normal-custody negative controls passed before native launch; all16 actual slots completed."
+    }
+  ],
+  "source_inspection": {
+    "current_and_reference": "Both skip a second original-child wait after a previously observed natural exit and return immediately when Job accounting is zero. Both have a conditional Sleep(10) while waiting for nonempty Job cleanup.",
+    "branch_limit": "Raw controller Job accounting does not identify the immediate internal SUT Job branch, and these data do not prove an avoidable source wait.",
+    "current_plain_path": "No extension shutdown thread joins; empty optional diagnostics starts no writer. Console finish contains native calls and retains its existing behavior."
+  },
+  "evidence": {
+    "source_sha256": "388c1cb08e8de32c63914205c47d146130e0651d11ae7cf7ce1009efffa2d17c",
+    "freeze_sha256": "b7470963b35064e1ae8b4bdd742fce9069a3885c1afb003e630e05c41dff10cb",
+    "raw_receipt_sha256": "5c501ac18a8922b557571f32c860c6c3b21517c8690bc388edd981e3f7e5964e",
+    "root_audit_sha256": "0e68c927ac7cf968551288f92430a398cd1924f415d26cb464ae0a009d607e26",
+    "independent_audit_sha256": "78f719d231ab09e85152ea5511ddebf52d873b494a5ac49a1199493792ab3407",
+    "source_inspection_sha256": "581fc72b24937e3f7f7659f050c768211ad090e5e77cbe0860f0c1f0e359038a",
+    "postverified_source_roles": 39,
+    "unchanged_original_reopened_file_identities": 45,
+    "capture_files": 116,
+    "capture_bytes": 398347,
+    "raw_location": "Retained privately with exact source, launch, vectors, original terminal and lossless handle identities; raw host identifiers are not published.",
+    "second_independent_audit_sha256": "a5eabf67cd118ec694d33b5daeb03cef0fda84a5c271cdc6cab75364df5bc823"
+  },
+  "limits": [
+    "100ns is a FILETIME unit, not a guaranteed measurement resolution or accuracy. UTC clock adjustments and scheduling may affect signed gaps.",
+    "No UTC FILETIME/QPC subtraction, CPU-cost claim, physical cleanup-latency claim or source-cause attribution is justified.",
+    "All eight pairs and extremes are retained. Marginal-median subtraction does not replace paired arithmetic; noisy or statistically insignificant differences do not establish equivalence.",
+    "This diagnostic is a separate epoch from prior opt-level and trace captures. Do not pool it or substitute it for the agreed comprehensive campaign.",
+    "No compiler/source/default/guarantee change is promoted, no speed parity or superiority is established, and no reference G28 eligibility is restored.",
+    "Windows speed acceptance, broader platform coverage, the complete1940-slot campaign and academic reproducibility package remain open."
+  ]
+}
