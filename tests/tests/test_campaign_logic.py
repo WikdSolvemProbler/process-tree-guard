@@ -749,6 +749,45 @@ class PerContextTests(unittest.TestCase):
         self.assertIn("[DETACHED]", text)
         self.assertNotIn("100.000", text)  # the pooled median of 50/150
 
+        # An unavailable rival must not hide an observed loss to a
+        # different rival. Exercise both latency paths and contexts;
+        # keep the comparison strict even below display precision.
+        for path in ("fast", "kill"):
+            for context in plan_mod.CONTEXTS:
+                with self.subTest(path=path, context=context):
+                    partial = [measured("guard", 65.0000000001, path=path,
+                                        context=context),
+                               measured("nuewframe", 65.0, path=path,
+                                        context=context)]
+                    dimension = f"{path}-path latency"
+                    loss = gate_entry(partial, dimension, context)
+                    self.assertEqual(loss["outcome"], "FAIL")
+                    self.assertIn("nuewframe 65.0 ms", loss["detail"])
+                    self.assertIn("65.0000000001", loss["detail"])
+                    self.assertIn("missing median", loss["detail"])
+                    self.assertIn("sysprims", loss["detail"])
+                    self.assertEqual(gate_entry(
+                        partial, dimension,
+                        next(c for c in plan_mod.CONTEXTS if c != context)
+                    )["outcome"], "UNEVALUATED")
+                    partial[0]["elapsed_ms"] = 65.0
+                    self.assertEqual(gate_entry(
+                        partial, dimension, context)["outcome"], "UNEVALUATED")
+                    partial.extend(measured(arm, 65.0, path=path, context=context)
+                                   for arm in ("processkit", "sysprims"))
+                    self.assertEqual(gate_entry(
+                        partial, dimension, context)["outcome"], "PASS")
+                    partial[0]["elapsed_ms"] = 65.0000000001
+                    partial[-1]["elapsed_ms"] = None
+                    loss = gate_entry(partial, dimension, context)
+                    self.assertEqual(loss["outcome"], "FAIL")
+                    self.assertIn("nuewframe 65.0 ms", loss["detail"])
+                    self.assertIn("sysprims", loss["detail"])
+                    self.assertIn("carry no elapsed_ms", loss["detail"])
+                    partial[0]["elapsed_ms"] = 65.0
+                    self.assertEqual(gate_entry(
+                        partial, dimension, context)["outcome"], "UNEVALUATED")
+
     def test_absent_context_produces_no_number(self):
         recs = [r for r in complete_records()
                 if r["context"] == "NO_WINDOW"]

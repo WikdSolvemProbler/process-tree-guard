@@ -4916,6 +4916,25 @@ def _loser_phrases(losers):
         for arm, survived, total in losers)
 
 
+def _latency_comparison(guard, rivals):
+    """A known loss remains a loss when another comparison is missing."""
+    missing = (["guard"] if guard is None else []) + [
+        arm for arm, median in sorted(rivals.items()) if median is None]
+    slower = [f"{arm} {median!r} ms"
+              for arm, median in sorted(rivals.items())
+              if guard is not None and median is not None and guard > median]
+    missing_note = ("; missing median(s) in this context: " + ", ".join(missing)
+                    if missing else "")
+    if slower:
+        return "FAIL", (f"guard median {guard!r} ms is slower than "
+                        + ", ".join(slower) + missing_note)
+    if missing:
+        return "UNEVALUATED", ("a median needed for the comparison is "
+                               "missing in this context: " + ", ".join(missing))
+    return "PASS", (f"guard median {guard!r} ms wins or "
+                    "ties every competitor median")
+
+
 def freeze_gate(records, expected_output=None, config=None):
     """Per-dimension, per-context freeze-gate outcomes. Each entry:
     {dimension, context, outcome, detail} with outcome PASS, FAIL or
@@ -4973,6 +4992,32 @@ def freeze_gate(records, expected_output=None, config=None):
                 and item["record"].get("kind") == "measured"
                 and item["field"] in fields})
 
+        def independent_latency_loss(path, guard, rivals):
+            fields = {"elapsed_ms", "argv", "arm_pid", "exit_code", "outcome"}
+            if path == "fast":
+                fields.update({"output_stdout_match", "output_stderr_match",
+                               "output_stdout_sha256", "output_stderr_sha256",
+                               "output_stdout_len", "output_stderr_len"})
+            unobserved_output = {
+                row["arm"] for row in planned_records
+                if path == "fast" and row.get("path") == path
+                and row.get("context") == context
+                and row.get("kind") == "measured" and row.get("outcome") == "ok"
+                and any(_expected_pair(expected_output, row, stream) is not None
+                        and row.get(f"output_{stream}_match") is not True
+                        for stream in ("stdout", "stderr"))
+            }
+            if (guard is None or _plan_is_unverified(config)
+                    or "guard" in unobserved_output or inc("guard", path, fields)):
+                return None
+            valid_rivals = {
+                arm: (median if arm not in unobserved_output
+                      and not inc(arm, path, fields) else None)
+                for arm, median in rivals.items()
+            }
+            outcome, detail = _latency_comparison(guard, valid_rivals)
+            return detail if outcome == "FAIL" else None
+
         guard = _median(records, "guard", "fast", context)
         rivals = {arm: _median(records, arm, "fast", context)
                   for arm in PRODUCT_ARMS if arm != "guard"}
@@ -4989,74 +5034,36 @@ def freeze_gate(records, expected_output=None, config=None):
                           "the fast-path median cannot be certified "
                           "from them"})
         elif inc("sysprims", "fast", {"fast_workload_argv"}):
-            timing_fields = {
-                "elapsed_ms", "argv", "arm_pid", "exit_code", "outcome",
-                "output_stdout_match", "output_stderr_match",
-                "output_stdout_sha256", "output_stderr_sha256",
-                "output_stdout_len", "output_stderr_len",
-            }
-            # An absent verdict does not contradict the record shape,
-            # but it cannot certify a sample with configured output.
-            unobserved_output = {
-                row["arm"] for row in planned_records
-                if row.get("path") == "fast" and row.get("context") == context
-                and row.get("kind") == "measured" and row.get("outcome") == "ok"
-                and _is_plausible_elapsed(row.get("elapsed_ms"))
-                and any(_expected_pair(expected_output, row, stream) is not None
-                        and row.get(f"output_{stream}_match") is not True
-                        for stream in ("stdout", "stderr"))
-            }
-            independent_losses = []
-            if (guard is not None and not _plan_is_unverified(config)
-                    and "guard" not in unobserved_output
-                    and not inc("guard", "fast", timing_fields)):
-                independent_losses = [
-                    f"{arm} {med:.3f} ms" for arm, med in sorted(rivals.items())
-                    if arm != "sysprims" and med is not None and guard > med
-                    and arm not in unobserved_output
-                    and not inc(arm, "fast", timing_fields)]
+            independent_loss = independent_latency_loss(
+                "fast", guard, {arm: median for arm, median in rivals.items()
+                                if arm != "sysprims"})
             profile_note = ("measured SysPrims fast argv cannot be verified "
                             "against the anchored fast_workload profile")
             entries.append({
                 "dimension": "fast-path latency", "context": context,
-                "outcome": "FAIL" if independent_losses else "UNEVALUATED",
-                "detail": (f"guard median {guard:.3f} ms is slower than "
-                           + ", ".join(independent_losses) + "; " + profile_note
-                           if independent_losses else profile_note)})
+                "outcome": "FAIL" if independent_loss else "UNEVALUATED",
+                "detail": (independent_loss + "; " + profile_note
+                           if independent_loss else profile_note)})
         elif rival_fast_timing:
+            independent_loss = independent_latency_loss("fast", guard, rivals)
             entries.append({
                 "dimension": "fast-path latency", "context": context,
-                "outcome": "UNEVALUATED",
-                "detail": "ok measured fast record(s) of "
+                "outcome": "FAIL" if independent_loss else "UNEVALUATED",
+                "detail": (independent_loss + "; " if independent_loss else "")
+                          + "ok measured fast record(s) of "
                           f"{', '.join(rival_fast_timing)} in this "
                           "context carry no elapsed_ms (named as "
                           "record-inconsistency standing losses); "
                           "the fast-path comparison cannot be "
                           "certified from them"})
-        elif guard is None or any(v is None for v in rivals.values()):
+        else:
+            outcome, detail = _latency_comparison(guard, rivals)
             entries.append({
                 "dimension": "fast-path latency", "context": context,
-                "outcome": "UNEVALUATED",
-                "detail": "a median needed for the comparison is "
-                          "missing in this context"})
-        else:
-            slower = [f"{arm} {med:.3f} ms" for arm, med in
-                      sorted(rivals.items()) if guard > med]
-            if slower:
-                entries.append({
-                    "dimension": "fast-path latency", "context": context,
-                    "outcome": "FAIL",
-                    "detail": f"guard median {guard:.3f} ms is "
-                              f"slower than " + ", ".join(slower)})
-            else:
-                entries.append({
-                    "dimension": "fast-path latency", "context": context,
-                    "outcome": "PASS",
-                    "detail": f"guard median {guard:.3f} ms wins or "
-                              "ties every competitor median"})
+                "outcome": outcome, "detail": detail})
         # Kill-path latency: a descendant-loser rival is excluded —
-        # it has no kill latency to lose to. Every other rival with
-        # a missing median leaves the dimension UNEVALUATED.
+        # it has no kill latency to lose to. A missing median cannot
+        # certify a pass or erase an independently observed loss.
         guard = _median(records, "guard", "kill", context)
         rivals = {}
         excluded = []
@@ -5086,38 +5093,22 @@ def freeze_gate(records, expected_output=None, config=None):
                           "the kill-path median cannot be certified "
                           "from them" + excluded_note})
         elif rival_kill_timing:
+            independent_loss = independent_latency_loss("kill", guard, rivals)
             entries.append({
                 "dimension": "kill-path latency", "context": context,
-                "outcome": "UNEVALUATED",
-                "detail": "ok measured kill record(s) of "
+                "outcome": "FAIL" if independent_loss else "UNEVALUATED",
+                "detail": (independent_loss + "; " if independent_loss else "")
+                          + "ok measured kill record(s) of "
                           f"{', '.join(rival_kill_timing)} in this "
                           "context carry no elapsed_ms (named as "
                           "record-inconsistency standing losses); "
                           "the kill-path comparison cannot be "
                           "certified from them" + excluded_note})
-        elif guard is None or any(v is None for v in rivals.values()):
+        else:
+            outcome, detail = _latency_comparison(guard, rivals)
             entries.append({
                 "dimension": "kill-path latency", "context": context,
-                "outcome": "UNEVALUATED",
-                "detail": "a median needed for the comparison is "
-                          "missing in this context" + excluded_note})
-        else:
-            slower = [f"{arm} {med:.3f} ms" for arm, med in
-                      sorted(rivals.items()) if guard > med]
-            if slower:
-                entries.append({
-                    "dimension": "kill-path latency", "context": context,
-                    "outcome": "FAIL",
-                    "detail": f"guard median {guard:.3f} ms is "
-                              f"slower than " + ", ".join(slower)
-                              + excluded_note})
-            else:
-                entries.append({
-                    "dimension": "kill-path latency", "context": context,
-                    "outcome": "PASS",
-                    "detail": f"guard median {guard:.3f} ms wins or "
-                              "ties every competitor median"
-                              + excluded_note})
+                "outcome": outcome, "detail": detail + excluded_note})
         # Kill-path correctness: comparative, for every product arm.
         guard_state, _guard_kills, guard_survived = _kill_state(
             records, "guard", context)

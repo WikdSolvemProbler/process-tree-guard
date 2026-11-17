@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "date_utc": "2026-11-17",
+  "scope": "Completed Windows campaign and latency-report correction; acceptance remains unmet.",
+  "product": {
+    "source_revision": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "aggregate_source_revision": "45edf9bd9a44f9259ad4783ba67fb4c97925afca",
+    "guard_sha256": "57d73cc12e49ee634f2308e676614aa379cfde6efb11f0c681ce3b7218b33833",
+    "product_changed_by_this_repair": false
+  },
+  "original_aggregate": {
+    "native_exit": 1,
+    "timed_out": false,
+    "elapsed_seconds": 6831.266,
+    "campaign": {
+      "slots_collected": 1940,
+      "slots_planned": 1940,
+      "controls": 36,
+      "warmups": 224,
+      "measured": 1680,
+      "status": "incomplete",
+      "original_standing_loss_entries": 42,
+      "original_freeze_gate_fail_entries": 0,
+      "observations_sha256": "62550c29af920fd7a4626916165388aadb7c6fb1da952a0c2e164fc7f7857f79",
+      "package_consistency_defects": [],
+      "package_consistency_is_not_acceptance": true
+    },
+    "battery": [
+      {
+        "case": "a",
+        "verdict": "FAIL",
+        "interpretation": "Rejected proposed Job-signaled-wait optimization; not a demonstrated defect in the shipped polling implementation."
+      },
+      {
+        "case": "l",
+        "verdict": "PASS",
+        "interpretation": "Environment-builder differential candidate only; no production adoption."
+      },
+      {
+        "case": "m",
+        "verdict": "FAIL",
+        "interpretation": "Fourth candidate substitution failed to compile due to an unqualified Handle type; its tests did not run."
+      },
+      {
+        "case": "n",
+        "verdict": "BLOCKED-ERROR",
+        "interpretation": "Probe reached its 1800-second deadline without emitting observations."
+      },
+      {
+        "case": "o",
+        "verdict": "BLOCKED-ERROR",
+        "interpretation": "Probe attempted an invalid non-inheritable HANDLE_LIST entry; Windows refused process creation with error87."
+      }
+    ],
+    "python_suite": "NOT_STARTED: existing aggregate aborts on battery execution error."
+  },
+  "classification_repair": {
+    "problem": "One missing competitor median masked a strict measured loss to another valid competitor. A timing-inconsistent rival could cause the same masking.",
+    "behavior": "Fast and kill latency now retain independently verified losses and name unavailable comparisons. Missing comparisons never certify PASS. Comparisons use strict full-precision greater-than, not statistical insignificance or rounded display equality.",
+    "original_artifacts_preserved": true,
+    "replay_is_new_measurement": false,
+    "corrected_fast_NO_WINDOW": {
+      "guard_median_ms": 93.74325,
+      "nuewframe_median_ms": 86.7151,
+      "outcome": "FAIL",
+      "missing_rival": "sysprims"
+    },
+    "corrected_fast_DETACHED": {
+      "outcome": "UNEVALUATED",
+      "missing_rival": "sysprims"
+    },
+    "kill_latency_both_contexts": "PASS in the recorded report; Nuewframe excluded because every kill slot classified descendant-survived."
+  },
+  "additional_limits": {
+    "floor_control_disagreement_percent": {
+      "NO_WINDOW": 9.7,
+      "DETACHED": 17.61
+    },
+    "floor_agreement_limit_percent": 5,
+    "resource_comparison": "Observed-failing:31 cell/counter pairs,78 ranks; all reported failing counters are arm-only CPU time. CPU observations fell on 15.625ms steps; no causal conclusion follows.",
+    "harness_intervention": "24 guard malformed NO_WINDOW rows required the harness Job drain. Their original outcome remains ok; this does not prove unassisted retirement for those rows.",
+    "remaining": "No overall winner, speed parity, complete lifecycle guarantee, Linux/macOS backend qualification, or completed public academic reproduction package is established."
+  },
+  "sysprims_output_diagnostic": {
+    "scope": "Two new fixed output controls; no timing or historical rescore.",
+    "default": {
+      "native_exit": 0,
+      "stdout_bytes": 18,
+      "stderr_bytes": 389,
+      "outcome": "output-mismatch",
+      "observed": "INFO lines include the timeout-command log."
+    },
+    "warn": {
+      "option": "--log-level=warn",
+      "native_exit": 0,
+      "stdout_bytes": 18,
+      "stderr_bytes": 13,
+      "outcome": "ok"
+    },
+    "both": {
+      "same_child_environment": true,
+      "RUST_LOG_absent": true,
+      "job_active_before": 0,
+      "job_active_after": 0,
+      "assisted_termination": false
+    },
+    "preserved_failure": "First no-SUT inspect refused inherited RUST_LOG. A separately recorded child-only normalization removed that key; the second no-SUT inspect and two-slot execution passed."
+  },
+  "validation": {
+    "selected_existing_report_family_tests": {
+      "run": 28,
+      "failures": 0,
+      "skips": 0,
+      "elapsed_seconds": 16.111
+    },
+    "original_source_control": {
+      "run": 1,
+      "failed_subtests": 4,
+      "native_exit": 1,
+      "expected_failure": "The four path/context subtests retain UNEVALUATED instead of the required FAIL. Later assertions in each failed subtest were not reached."
+    },
+    "report_sha256": "e859135c7d816a149f3f4316ef1b075ec80ea75e485ac967cdba76d2694ec62f",
+    "test_module_sha256": "91f97b3ccb16081fb7c4e0596ef0543da97ca2330a8f1c1f4ac8420905d3331f"
+  },
+  "evidence_custody": {
+    "raw": "Exact original captures remain private under the repository publication policy. This summary does not replace accessible raw evidence.",
+    "preservation": "All original failed/interrupted attempts and the original completed run/report remain unchanged."
+  }
+}
