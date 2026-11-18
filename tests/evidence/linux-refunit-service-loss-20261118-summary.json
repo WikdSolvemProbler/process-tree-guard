@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "classification": "PASS_ONE_LINUX_HELD_ORIGINAL_SERVICE_LOSS_SETTLED_CASE",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "product_source_or_defaults_changed": false,
+  "method": {
+    "qualified_product_cases": 1,
+    "original_remote_calls": 1,
+    "retries": 0,
+    "product_deadline_seconds": 60,
+    "ordinary_observer_seconds": 20,
+    "windows_whole_tree_deadline_seconds": 135,
+    "original_identity_method": "Held service, client and descendant pidfds, process start times, one-use nonce and READY/ACK hashes, and original domain identities.",
+    "trigger": "After the ordinary observer published READY for the adopted grandchild and live parent, the fixture sent SIGKILL9 through the retained original service pidfd. It did not send the payload GO marker."
+  },
+  "observed": {
+    "outer_tool_exit": 0,
+    "ssh_exit": 0,
+    "enclosing_scope_exit": 0,
+    "local_timeout": false,
+    "original_case_pass": true,
+    "ordinary_ready_after_orphan_ack": true,
+    "ready_bound_original_service_client_parent_grandchild_identities_and_ack_hash": true,
+    "original_service_parent_grandchild_and_client_live_immediately_before_signal": true,
+    "signal_sent_only_via_held_original_service_pidfd": 9,
+    "signal_before_fixed_cutoff": true,
+    "first_original_client_completion_exit": 125,
+    "client_stderr_bytes": 54,
+    "client_stderr": "process-tree-guard: root packet framing/flags refused",
+    "client_timeout_notice_absent": true,
+    "first_original_service_parent_intermediate_grandchild_pidfds_terminal": true,
+    "original_domain_empty_at_first_client_completion_sample": true,
+    "original_manager_result": "signal",
+    "original_manager_exit_signal": 9,
+    "prestop_case_pass_before_fixture_assistance": true,
+    "six_product_asset_paths_absent_at_preflight": true,
+    "normal_exact_owned_cleanup_succeeded": true,
+    "six_product_assets_including_authorization_rule_plus_owned_policy_directory_removed": true,
+    "fixture_commands_native_zero": 11,
+    "inner_cleanup_commands_native_zero": 7,
+    "fallback_timer_armed_before_product": true,
+    "fallback_timer_cancelled_after_cleanup": true,
+    "fallback_timer_fired": false,
+    "same_enclosing_scope_inactive_dead_and_cgroup_absent": true,
+    "source_role_postpins_unchanged": 33,
+    "freeze_file_postpins_unchanged": 16,
+    "transport_stderr": "Pseudo-terminal will not be allocated because stdin is not a terminal."
+  },
+  "prior_preparation": {
+    "service_loss_predecessor_001": "Frozen but superseded and never executed because its ACK-to-signal handoff had a READY race.",
+    "failed_local_validator": "An early local carrier validator refused the final-LF representation before any SSH or product call. Its failed receipt remains preserved; corrected local validation passed without changing the frozen executable inputs.",
+    "earlier_doublefork_readiness_failures": "The three earlier double-fork preparation attempts remain failed and are not rescored by this distinct case."
+  },
+  "qualification_limits": [
+    "The first client, task pidfd and domain readings are sequential samples, not one atomic kernel snapshot; the evidence does not prove exact kernel exit order.",
+    "Only the intermediate has a joined native wait status in the inherited double-fork witness. Terminal service, parent and grandchild pidfds are observations, not exported waitpid or reaper results.",
+    "systemd KillMode=control-group may contribute to descendant termination; this case does not prove exclusive product reaping.",
+    "The original client returned 125; at the first completion check, sequential held-pidfd and domain samples found the original tasks terminal and domain empty before fixture assistance. This does not establish exact kernel exit order; a 125 paired with unsettled original tasks or domain at that check would be nonpassing.",
+    "Cleanup removed six exact-owned product assets, including the authorization rule, plus the owned policy directory, and cancelled the timer. Fixture staging, ledger, proof and output evidence remain private and retained.",
+    "One service-loss case does not qualify the full Linux backend, other race or escape cases, macOS, performance parity or competitive acceptance. Linux default dispatch remains disabled and backend issue2 remains open.",
+    "The exact transport, host, account, absolute paths, process identities and raw timing records stay private; public hashes and summaries are not a complete public reproduction package."
+  ],
+  "evidence_sha256": {
+    "source": "7a4c535919879ca9c1e761bc9d4d7725a3b3ec671e5dcbec34455ad52b88560c",
+    "plan": "e49f51a89bca73acf5ba4cc8866e6a3ee05be272175f524fa5bc34a0a8e4f7f5",
+    "freeze": "b43cacd1e309efc7c790af7f95e26c3607c531f4c75af1c1abd8547307ab7783",
+    "invocation": "abc64d695cf211541deab481e17f1ffe1b2474aff23a3a3c6abf46c879b58982",
+    "authorization": "2c89922520292b4211ca6c0f3d1d81e68d8cca93a768b842f2a2791606aa35ec",
+    "result": "7e54fcfce41321e6fd80ee9d4380ecc0f37d9db1f11349ea3e7378991c2dd700",
+    "guest_bundle": "02f5d493ac79f6c87fda7476606e173aed9e1c7532924da65a37d8b3016016a4",
+    "ssh_stdout": "b0f73cc36e4dc91a0dc5867f9144983c5b8282e4c3ea9d2bde721689de90c3f7",
+    "ssh_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+    "original_tool_terminal": "a3a00b04abdcd3eccff57d2b374f78afc3e689a0b375b67dda2b5b1c41319c5e",
+    "independent_actual_reviews": [
+      "60dd402f99834eb84ff2d25163cc43174980882d2d146279db8f4c20148d0107",
+      "8a3e5587406864857b8b264f5fce2de1466537f12c62684002f2979de5f38ece"
+    ],
+    "root_offline_postrun_audit": "4e6b5643872d8990f9023e5df7d11c93619673c2e36393ef4e2685f35ee4706b"
+  },
+  "primary_qualifying_competitive_performance_measurements": 0
+}
