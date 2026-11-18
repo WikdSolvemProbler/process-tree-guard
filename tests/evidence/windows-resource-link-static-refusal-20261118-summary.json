@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "date_local": "2026-11-18",
+  "status": "STATIC_ADMISSION_REFUSED_NO_TIMING_NOT_ADOPTED",
+  "question": "Does linking the selected Windows main VS_VERSIONINFO resource produce an otherwise unchanged private image suitable for a scoped startup comparison?",
+  "source": {
+    "product_rust_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "files_per_arm": 943,
+    "compiled_source_bridge_files": 93,
+    "only_changed_file": "build.rs",
+    "factor": "The private variant still generated all five identical version resources but omitted the selected main resource linker directive; the four other linker directives remained.",
+    "canonical_product_changed": false
+  },
+  "build": {
+    "method": "Sequential private default-feature release builds at the same source and target paths, each archived and fully rehashed before path reuse.",
+    "rust": "1.98.1",
+    "msvc": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "profile": "opt3, LTO, codegen units 1, panic abort, stripped symbols, offline locked, warnings as errors",
+    "present": {
+      "native_build_exit": 0,
+      "archive_files": {
+        "source": 943,
+        "target": 46,
+        "logs": 2
+      },
+      "image_bytes": 820736,
+      "image_sha256": "eff55c0c7713f80302d22f7f22d7ca78e723636826bac316d9c914e560919828"
+    },
+    "absent": {
+      "native_build_exit": 0,
+      "archive_files": {
+        "source": 943,
+        "target": 46,
+        "logs": 2
+      },
+      "image_bytes": 819712,
+      "image_sha256": "edfa148c68ccbdd65c7995b53cd209e5511c46b80305b822abed3624954c002e"
+    }
+  },
+  "static_admission": {
+    "strict_gate_native_exit": 1,
+    "first_refusal": "Nonresource import-directory RVA differed.",
+    "import_directory_rva": {
+      "present": 804036,
+      "absent": 803996
+    },
+    "selected_image_size_difference_bytes": 1024,
+    "section_byte_differences": {
+      "text": 4,
+      "rdata": 18104,
+      "pdata": 1034,
+      "data": 0,
+      "reloc": 0
+    },
+    "resource_directory_present_only_in_linked_image": true,
+    "all_five_generated_resource_files_identical": true,
+    "main_link_directive_removed_only_in_private_variant": true,
+    "selected_sut_calls": 0,
+    "timing_pairs_executed": 0,
+    "eligible_for_timing": false,
+    "production_adopted": false
+  },
+  "existing_feature_static_bound": {
+    "scope": "Separate archived current-source opt3 builds using default versus all-features build contexts; their recipes were not otherwise identical.",
+    "image_sha256": [
+      "83e47c0394b94925916e6e2c84b52599c621bb7ac1ca4318c74924ba8bfc1e4d",
+      "1489291363f5fa93e893f70e909cc52a126d08d2bef34bb827c2efaff613514a"
+    ],
+    "bytes_each": 820736,
+    "differing_bytes": 28,
+    "all_differences_coff_or_debug_timestamp_and_rsds_guid": true,
+    "nonmetadata_bytes_identical": true,
+    "reason_no_fresh_feature_build": "The existing static comparison bounded this build difference; it did not establish isolated feature causality or timing equivalence."
+  },
+  "receipts_sha256": {
+    "present_archive": "b254f61e47c9b1a13e142e3f1a8b4a1a64ee0bcd351131d4d8ee6f8d8ecdabb2",
+    "absent_archive": "e072fa48a45f3b76dab9eff4c835e644a0866addcb3f55b3d17e47eaf312f003",
+    "strict_gate_original_tool": "4ca3b9755926a010aa46c7e86b2ed0cf9f65c10c98b2377adf1d7e27b8d5c41c",
+    "independent_static_refusal": "021159e236163aaf90731a5f56a148f3d4e728febe865a0cd384b3bba305e980",
+    "feature_static_bound": "b5fed1df9dfd205ff174c7f4aded4770de5de197abbb278fc9e9a48b6bbe5a10"
+  },
+  "limits": [
+    "The private resource-free image lacks required product version metadata and is ineligible for adoption.",
+    "Different nonresource PE bytes fail the preregistered comparability gate; no performance result or resource-link startup effect was measured.",
+    "The changed bytes do not identify whether compiler code generation, linker layout, address dependencies or another build effect produced them.",
+    "No product runtime test or comprehensive benchmark was run for this factor. Exact build and PE custody remains private."
+  ]
+}
