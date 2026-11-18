@@ -17,7 +17,9 @@
     "observer_draft_sha256": "18bbbc98455f44a35693175b6336dedcc92ae50698fdbc7cac07b133d7029f3c",
     "inventory_sha256": "144696113d741d226a57af25c1ec721877909253d86153ea68e74d57ac009052",
     "component_controller_sha256": "911da6f5ebc2a24529dfde3e7f15d0d435e64b8a7933d608763f301d81ed907b",
-    "phase_controller_sha256": "b88614e72cb5ea1ced60a01ac2fa0a792c0668b6b1fa79a347017c533971e272"
+    "phase_controller_sha256": "b88614e72cb5ea1ced60a01ac2fa0a792c0668b6b1fa79a347017c533971e272",
+    "operation_profile_controller_sha256": "d68384988db79db82e39678d50b2cdbeee4e4e052bf8e2b2a9707a5df22a7ff7",
+    "operation_profile_pure_controls_sha256": "000c896e162011af6507af8a50b76595752cea01d931ed78d82064423d3f6b30"
   },
   "pure_checks": [
     {
@@ -41,6 +43,14 @@
       "failures": 0,
       "accepted_ns": 50000000,
       "rejected_ns": 50000001,
+      "native_subjects": 0
+    },
+    {
+      "scope": "Original versus instrumented inventory call order, native error preservation, file-failure cleanup, invalid clock and exact PRE reader/callback",
+      "test_methods": 6,
+      "file_failure_subcases": 2,
+      "passed": 6,
+      "failures": 0,
       "native_subjects": 0
     }
   ],
@@ -137,6 +147,11 @@
     {
       "status": "UNEXECUTED_PHASE_DRAFT_CORRECTED",
       "cause": "The initial extracted callback omitted its validator and rejection bindings. The successor passed both exact-boundary controls before the single phase trial."
+    },
+    {
+      "status": "UNEXECUTED_PROFILE_PROPOSAL_AND_REVIEW_ERRATUM_PRESERVED",
+      "note": "The initial projection bracket was already correct. A contrary review finding was corrected before execution. The successor added a separate native-provider bracket and additional error/clock controls.",
+      "erratum_sha256": "fd06d9808100e461b77796ea71cbb2268d7effe8fa2ea1710aa490ae93fd7b3c"
     }
   ],
   "evidence_sha256": {
@@ -154,7 +169,15 @@
     "phase_original_tool": "1716c86f190350f74f565ca268a8af65191ada034c779c344c392d2bbeb20c68",
     "phase_author_audit": "e176195f69be4e905a850e88b8f8c82735c661af3b49a8c569e1c3b9e8bff6d2",
     "phase_critic_audit": "20a5639a63875fb03a85424adad7971a445add00b146e80602ab80f56cbc969e",
-    "phase_root_audit": "e353697d4939245b6a0c862be2172ce85130a06195cb5bc791e07f2573585589"
+    "phase_root_audit": "e353697d4939245b6a0c862be2172ce85130a06195cb5bc791e07f2573585589",
+    "operation_profile_pure_tool": "2fc3c854fcecae64099bfc9723766e036812742a8b165583df83f7fcdc478e61",
+    "operation_profile_original_tool": "c5a83bc9ed8fd875cb78ca55befa3ac7b9086a28aadf2b6b012557be6874a69b",
+    "operation_profile_raw_inventory": "6bb02e99ffdfb98de3cf192c9890f46b563bf79beb7981f81374c14fd0423c2b",
+    "operation_profile_raw_telemetry": "fd7fc1a5e726ec241b8abb676d32a6786484d18388cf3a73c6b62ffd4d6c22c0",
+    "operation_profile_raw_terminal": "e0dfbfcc05fce4ae1c3846f27392b0262f1ce99480977fe370567c6271cdec6a",
+    "operation_profile_author_audit": "2a910af72be5d21ffcc13d1bcee88e5bd8338dd1f44edb1612ded697510a6b88",
+    "operation_profile_critic_audit": "ba0a6e733dc32ca51d77a3b7717b0f1dbebcc64bae70faa28aa228c60cfc9ee3",
+    "operation_profile_root_audit": "35188680b3b023f361d70c1c3579da7b05ae1c472a56ff95fa2629295faa0a62"
   },
   "qualification_limits": [
     "The integrated observer remains unqualified; no during membership, post phase or campaign slot was reached.",
@@ -162,6 +185,133 @@
     "Returned status and UTF-16 prefixes are replayed; no independent whole-host population equality, separate C return, discarded-tail replay or loaded-byte immutability is claimed.",
     "Repeated held identity and liveness checks rely on the pinned executed source; after-values are not independently serialized.",
     "Exact raw custody records remain private and contain machine data. This public summary and hashes are not a standalone reproducible academic benchmark package.",
-    "Existing speed losses and the comprehensive benchmark remain open. The next diagnostic will localize existing per-process work without weakening gates or adding a favorable retry."
-  ]
+    "Operation profiling localized substantial file-verification wall time in its own sample. Existing speed losses and comprehensive qualification remain open; no earlier failure is rescored."
+  ],
+  "operation_profile": {
+    "status": "FAILED_ORIGINAL_50MS_GATE_VALID_LOCALIZATION_RECORD",
+    "original_exit": 1,
+    "measured_pre_samples": 1,
+    "retries": 0,
+    "fixture_invocations": 0,
+    "phase_job_created": false,
+    "job_warmup": false,
+    "benchmark_slots": 0,
+    "source_roles": 35,
+    "native_rows": 473,
+    "relevant_rows": 11,
+    "all_classifications_allowed": true,
+    "interval_count": 223,
+    "invalid_clock_reads": 0,
+    "module_cleanup_errors": 0,
+    "quarantine_owners": 0,
+    "original_statements_ast_equal_after_removing_only_timers": true,
+    "census_ns": 59052500,
+    "acceptance_limit_ns": 50000000,
+    "top_level_intervals_ns": 58126800,
+    "outside_intervals_ns": 925700,
+    "nested_operation_groups": {
+      "native_snapshot_provider": {
+        "count": 1,
+        "inclusive_ns": 33272500,
+        "exclusive_ns": 33272500
+      },
+      "snapshot_projection": {
+        "count": 1,
+        "inclusive_ns": 207700,
+        "exclusive_ns": 207700
+      },
+      "liveness": {
+        "count": 11,
+        "inclusive_ns": 31400,
+        "exclusive_ns": 31400
+      },
+      "process_open": {
+        "count": 10,
+        "inclusive_ns": 85000,
+        "exclusive_ns": 85000
+      },
+      "identity_P0": {
+        "count": 10,
+        "inclusive_ns": 945600,
+        "exclusive_ns": 80400
+      },
+      "identity_image_buffer": {
+        "count": 20,
+        "inclusive_ns": 145500,
+        "exclusive_ns": 145500
+      },
+      "identity_image_query": {
+        "count": 20,
+        "inclusive_ns": 1359300,
+        "exclusive_ns": 1359300
+      },
+      "identity_times_buffer": {
+        "count": 20,
+        "inclusive_ns": 51600,
+        "exclusive_ns": 51600
+      },
+      "identity_times_query": {
+        "count": 20,
+        "inclusive_ns": 68600,
+        "exclusive_ns": 68600
+      },
+      "identity_conversion": {
+        "count": 20,
+        "inclusive_ns": 113400,
+        "exclusive_ns": 113400
+      },
+      "image_digest_or_exemption": {
+        "count": 10,
+        "inclusive_ns": 22379100,
+        "exclusive_ns": 6638700
+      },
+      "file_path_metadata_before": {
+        "count": 10,
+        "inclusive_ns": 6012700,
+        "exclusive_ns": 6012700
+      },
+      "file_held_metadata_before": {
+        "count": 10,
+        "inclusive_ns": 655400,
+        "exclusive_ns": 655400
+      },
+      "file_content_digest": {
+        "count": 10,
+        "inclusive_ns": 3659900,
+        "exclusive_ns": 3659900
+      },
+      "file_held_metadata_after": {
+        "count": 10,
+        "inclusive_ns": 719200,
+        "exclusive_ns": 719200
+      },
+      "file_path_metadata_after": {
+        "count": 10,
+        "inclusive_ns": 4693200,
+        "exclusive_ns": 4693200
+      },
+      "identity_P1": {
+        "count": 10,
+        "inclusive_ns": 1167900,
+        "exclusive_ns": 294700
+      },
+      "classification": {
+        "count": 10,
+        "inclusive_ns": 19300,
+        "exclusive_ns": 19300
+      },
+      "process_close": {
+        "count": 10,
+        "inclusive_ns": 18300,
+        "exclusive_ns": 18300
+      }
+    },
+    "accounting_note": "Inclusive intervals overlap children. Exclusive intervals sum to the top-level total. All profiling overhead remains in elapsed time.",
+    "first_sample_available_memory_mib": 3605.4140625,
+    "required_memory_floor_mib": 4096,
+    "ac_line": 1,
+    "battery_saver": 0,
+    "complete_host_window_scored": false,
+    "interpretation": "Fresh instrumented PRE-only localization. Cross-sample timing subtraction, historical attribution, CPU/syscall causality and comparative speed claims are not established."
+  }
 }
