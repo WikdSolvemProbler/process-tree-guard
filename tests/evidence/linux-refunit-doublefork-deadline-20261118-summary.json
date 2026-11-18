@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "status": "PASS_ONE_ORIGINAL_ADOPTED_DOUBLE_FORK_DEADLINE_CASE",
+  "product_revision": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "case_scope": "One fixed Linux root-service and socket case with a detached, adopted grandchild and its original ten-second invocation deadline. The Linux feature remains disabled by default.",
+  "actual": {
+    "guarded_remote_calls": 1,
+    "retries": 0,
+    "windows_outer_job_seconds": 135,
+    "original_product_deadline_seconds": 10,
+    "readiness_window_seconds": 5,
+    "ordinary_observer_seconds": 20,
+    "route_and_guest_carrier_exit": 0,
+    "root_observer_exit": 0,
+    "ordinary_observer_exit": 0,
+    "original_product_client_exit": 124,
+    "outer_scope_retired": true,
+    "validated_source_roles": 106,
+    "validated_freeze_rows": 109,
+    "local_preparation_controls_passed": 7,
+    "protected_join_controls_passed": 6
+  },
+  "deadline_observations": {
+    "readiness_ns_after_original_begin": 237378044,
+    "root_first_client_terminal_sample_ns_after_original_begin": 10020957532,
+    "protected_first_receipt_completed_ns_after_original_begin": 10023507705,
+    "ordinary_completion_capture_end_ns_after_original_begin": 10028063252,
+    "prestop_authenticated_ns_after_original_begin": 10156588793,
+    "timeout_notice_bytes": 54,
+    "timeout_notice_ending": "LF",
+    "combined_expected_stdout_markers_bytes": 168,
+    "detached_grandchild_adoption_verified_before_deadline": true,
+    "go_created": false,
+    "fixture_signal_sent": false,
+    "protected_root_first_receipt_ordinary_raw_echo_and_semantic_join_verified": true,
+    "first_sample_original_parent_intermediate_grandchild_terminal_and_detached": true,
+    "first_sample_original_service_terminal_and_detached": true,
+    "first_sample_original_domain_empty_or_retired": true,
+    "successful_root_prestop_before_fixture_assistance": true
+  },
+  "retained_manager_checks": {
+    "same_original_unit_incarnation": true,
+    "terminal_state": "failed",
+    "terminal_result": "exit-code",
+    "exec_main_status": 124,
+    "no_queued_product_jobs_before_or_after": true,
+    "same_original_socket_incarnation": true,
+    "accepted_connection_delta": 1,
+    "remaining_connections": 0
+  },
+  "owned_cleanup": {
+    "verified_exact_product_assets_removed": 6,
+    "owned_policy_directory_removed": true,
+    "retained_targets": 0,
+    "outer_scope_retired": true,
+    "fallback_delay_seconds": 65,
+    "blocking_stop_completed_ns_after_conservative_arm_lower": 11138802029,
+    "margin_to_earliest_possible_scheduled_expiry_ns": 53861197971,
+    "same_guest_monotonic_clock_and_time_namespace_verified": true,
+    "scheduled_timer_expiry_excluded": true,
+    "both_timer_markers_absent": true
+  },
+  "preserved_failures": [
+    {
+      "attempt": "005",
+      "scope": "original remote case",
+      "status": "FAIL_CONSUMED",
+      "reason": "The root closure compared tuple-origin poll data to its JSON-decoded copy as Python objects even though the protected bytes matched."
+    },
+    {
+      "attempt": "006",
+      "scope": "local preparation",
+      "status": "FAIL_CONSUMED",
+      "reason": "Literal carrier quoting was corrupted during source preparation. The namespace quote check refused before the remote case started."
+    }
+  ],
+  "evidence_sha256": {
+    "frozen_source": "1046ab035c11952edfb1410c066683c191eddd8dcbbdd14c249487a6bc7976fe",
+    "frozen_manifest": "2632a841b598620b3c9b0fe4930935d02da3e5659cd85c11580dd07eae0ec840",
+    "local_preparation": "f00a7b75848bf4e4874251602b2045738cf7529aa831455aa04326533dfc1b95",
+    "original_result": "95dcb801954cf2eb861966e5a435a95d6ab337d628650ff3c4c1c7c5d114b2c9",
+    "original_private_guest_bundle": "e52c77e23d508dcc4df4fd0884c2aeca62101b571334976e45ddcbdd07f06edf",
+    "independent_actual_review": "d32cc1ecc52d71907068cc7cf523b72caab05a91003526956e9ca838a14fb0b0",
+    "protected_first_completion_receipt": "ea6fe58cf3aac5124598a1f65b674c73979781a57fa63c8d5a2d463a7c3e5bf8",
+    "protected_before_assistance_receipt": "43ace0124c465238582e9531597842e826da12b652385ef4d6f19c77936f1808"
+  },
+  "limits": [
+    "The protected first completion and manager observations cover this one original run. Internal protocol fields unavailable to the observer remain source-inferred.",
+    "General Linux escape coverage and competitive performance remain open. The raw machine evidence is private and the complete public academic reproduction package remains open.",
+    "Observed task, service and domain states were sampled sequentially. Kernel exit ordering and exclusive reaper attribution remain unproved; systemd may contribute to retirement."
+  ]
+}
