@@ -23,7 +23,13 @@ The Linux client and service built from `7b2e6d5` with Rust 1.88 passed one mode
 
 The fixture removed all six temporary deployment assets and the owned policy directory, canceled the unused fallback timer, and confirmed scope retirement. An earlier attempt refused the already named slice before the client launched. That failed attempt also passed cleanup and remains preserved. Two independent reviews verified the recorded outcome and scope. The raw machine and transport records are private. Full Linux lifecycle and performance qualification remain open.
 
-A separate ARM64 run exercised `--separate-service-context auto --timeout 10 -- /usr/bin/true` with the same release binaries. The client returned 0 with empty standard output and error. The fixture again observed the held client terminal while its direct caller was live, verified the same empty slice before and after the invocation, and passed removal of all six assets and the owned policy directory, unused timer cancellation, and scope retirement. This covers one successful auto-mode invocation. Ancestor-loss coverage and full Linux qualification remain open.
+A separate ARM64 run exercised `--separate-service-context auto --timeout 10 -- /usr/bin/true` with the same release binaries. The client returned 0 with empty standard output and error. The fixture again observed the held client terminal while its direct caller was live, verified the same empty slice before and after the invocation, and passed removal of all six assets and the owned policy directory, unused timer cancellation, and scope retirement. This covers one successful auto-mode invocation. Full Linux qualification remains open.
+
+## Auto-mode ancestor loss on ARM64
+
+One mode 2 run used `--separate-service-context auto --timeout 60` with a single timed payload. The fixture ended only an ancestor it created. The client's original direct parent remained live and still parented the client at termination. The client returned 125 and emitted the original-owner-loss diagnostic. Retained handles showed the original service and payload terminal. The fixture verified the original protected cgroup hierarchy empty or retired before assistance.
+
+The fixture removed all six temporary deployment assets and the owned policy directory, canceled the unused fallback timer, and confirmed scope retirement. Two independent reviews verified the recorded case. The raw machine and transport records are private. Broader ancestor-loss and Linux lifecycle coverage remain open.
 
 ## Last qualified predecessor smoke
 
