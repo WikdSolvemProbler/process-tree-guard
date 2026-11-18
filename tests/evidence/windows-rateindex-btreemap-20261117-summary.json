@@ -1,0 +1,1609 @@
+{
+  "schema": 1,
+  "date_local": "2026-11-17",
+  "status": "SELECTED_CORRECTNESS_PASSED_NO_CONSISTENT_SPEED_WIN_NOT_ADOPTED",
+  "question": "Does replacing the bounded extension rate index HashMap with BTreeMap remove the stock image static ProcessPrng import and yield a measurable manual-guard speed improvement?",
+  "source": {
+    "canonical_product_rust_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "prototype_manifest_sha256": "50a207e21db15a23f4e63a751c9bf87692511082744b8e971e412734c572bd36",
+    "source_files_per_arm": 943,
+    "only_changed_product_path": "src/extend/state/rate.rs",
+    "change": "Replace the bounded extension rate index HashMap with BTreeMap; the rate Vec, 1,024-key cap and separate token generator remain as before.",
+    "production_adopted": false,
+    "availability": "The private source copies and exact executable/raw records are not a public reproduction package."
+  },
+  "build": {
+    "method": "Sequential stock and candidate builds at the same private source and target paths, archived and fully rehashed before reuse.",
+    "rust": "1.98.1",
+    "msvc": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": {
+      "features": "default",
+      "opt_level": 3,
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "symbols",
+      "offline": true,
+      "locked": true,
+      "warnings_as_errors": true
+    },
+    "stock_image_sha256": "749c7ef28dd1d877c9341148b82cd56a84e58ce972ee854f963a94827812a776",
+    "candidate_image_sha256": "3d41fdd677b9c6aa8d73fb9f198abb1ca6e924bc8065db4f894130d92f5945c8",
+    "stock_image_bytes": 820736,
+    "candidate_image_bytes": 825344,
+    "static_imports": {
+      "stock_process_prng": true,
+      "stock_bcryptprimitives_dll": true,
+      "candidate_process_prng": false,
+      "candidate_bcryptprimitives_dll": false,
+      "removed_dll": "bcryptprimitives.dll",
+      "claim_limit": "Static import observation only; it does not establish a startup speed mechanism."
+    },
+    "static_result_sha256": "73756f00de79a7be2003f64108822d161937f93cdc9dfe043fdecaa6121622ba"
+  },
+  "correctness": {
+    "unfiltered_candidate_library_top_level_passed": 300,
+    "failed": 0,
+    "ignored": 0,
+    "focused_existing_functions": {
+      "guard_passed": 37,
+      "auto_passed": 1,
+      "battery_passed": 9,
+      "total_passed": 47,
+      "failed": 0,
+      "ignored": 0,
+      "not_asserted_lines": 0
+    },
+    "source_files_post_rehashed": 943,
+    "artifact_roles_post_rehashed": 10,
+    "limits": "Selected correctness only; no full product or platform qualification."
+  },
+  "timing": {
+    "method": "One preregistered 16-pair fresh-path diagnostic with two qualifications and four measurements per pair. Candidate site L/R, measured ABBA/BAAB order and file-copy LR/RL order were balanced in eight cells with two replicates each. All 32 copies had distinct file identities, the same basename and equal path lengths.",
+    "source_sha256": "bfeef23d4fd2366d148d98113186720427c3d888ec0a686f9911352694a5a532",
+    "freeze_sha256": "74cea265e529206812051046d8a65f35c915cae1ef9391dd44ac00f4dbdb95b1",
+    "design_sha256": "a0d90ed81dda6d38958a3cdca249208b4f0287419c766f66ba45c574e406a4ff",
+    "copy_manifest_sha256": "86c7695fada44d7452c077beb1600c395af08471a600b73d6a1689241f2477bc",
+    "raw_receipt_sha256": "57f51e4fcd772416359a70403111d1da1dd737a64b82f6ae5ccd5a796a84738a",
+    "offline_analysis_sha256": "06c8298a8994db9ed5b117a33678a4edeedeb5df2b945baa97dd3311625d00d1",
+    "pairs_completed": 16,
+    "qualification_slots_passed_excluded_from_contrast": 32,
+    "measured_slots": 64,
+    "total_slots_passed": 96,
+    "retries": 0,
+    "outliers_removed": 0,
+    "workload": "Protected manual mark 0.05 seconds; natural exit zero, exact empty streams.",
+    "configured_product_timeout_seconds": 2,
+    "configured_slot_deadline_seconds": 3,
+    "guardian_deadline_seconds": 55,
+    "backup_deadline_seconds": 60,
+    "reserve_seconds": 11,
+    "endpoint": "CreateProcessW through retained original guard native wait; marker/acquisition observation and the 50ms payload overlap. The product timeout was enforced but did not expire.",
+    "all_original_first_payload_polls_terminal_unassisted": true,
+    "all_slot_jobs_active_zero_before_and_after_cleanup": true,
+    "all_96_normalized_elapsed_rows": [
+      {
+        "pair_id": "p00",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 150323100
+      },
+      {
+        "pair_id": "p00",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 181101800
+      },
+      {
+        "pair_id": "p00",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 100545400
+      },
+      {
+        "pair_id": "p00",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 116469100
+      },
+      {
+        "pair_id": "p00",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 124238700
+      },
+      {
+        "pair_id": "p00",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 108243900
+      },
+      {
+        "pair_id": "p01",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 166447700
+      },
+      {
+        "pair_id": "p01",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 163265400
+      },
+      {
+        "pair_id": "p01",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 103781500
+      },
+      {
+        "pair_id": "p01",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 103651300
+      },
+      {
+        "pair_id": "p01",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 103350800
+      },
+      {
+        "pair_id": "p01",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 108597200
+      },
+      {
+        "pair_id": "p02",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 141302900
+      },
+      {
+        "pair_id": "p02",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 168231700
+      },
+      {
+        "pair_id": "p02",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 103082900
+      },
+      {
+        "pair_id": "p02",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 104637200
+      },
+      {
+        "pair_id": "p02",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 115609400
+      },
+      {
+        "pair_id": "p02",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 103072800
+      },
+      {
+        "pair_id": "p03",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 163087800
+      },
+      {
+        "pair_id": "p03",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 146271400
+      },
+      {
+        "pair_id": "p03",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 116138400
+      },
+      {
+        "pair_id": "p03",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 110695000
+      },
+      {
+        "pair_id": "p03",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 108390800
+      },
+      {
+        "pair_id": "p03",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 101560500
+      },
+      {
+        "pair_id": "p04",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 167154600
+      },
+      {
+        "pair_id": "p04",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 140045100
+      },
+      {
+        "pair_id": "p04",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 103179000
+      },
+      {
+        "pair_id": "p04",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 103245600
+      },
+      {
+        "pair_id": "p04",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 173802900
+      },
+      {
+        "pair_id": "p04",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 112455900
+      },
+      {
+        "pair_id": "p05",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 142813200
+      },
+      {
+        "pair_id": "p05",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 168693300
+      },
+      {
+        "pair_id": "p05",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 108089200
+      },
+      {
+        "pair_id": "p05",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 115300300
+      },
+      {
+        "pair_id": "p05",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 105349200
+      },
+      {
+        "pair_id": "p05",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 127111200
+      },
+      {
+        "pair_id": "p06",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 318771700
+      },
+      {
+        "pair_id": "p06",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 161842900
+      },
+      {
+        "pair_id": "p06",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 126808400
+      },
+      {
+        "pair_id": "p06",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 136827000
+      },
+      {
+        "pair_id": "p06",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 124309200
+      },
+      {
+        "pair_id": "p06",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 120590700
+      },
+      {
+        "pair_id": "p07",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 198319900
+      },
+      {
+        "pair_id": "p07",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 224970400
+      },
+      {
+        "pair_id": "p07",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 123620400
+      },
+      {
+        "pair_id": "p07",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 121627900
+      },
+      {
+        "pair_id": "p07",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 126138100
+      },
+      {
+        "pair_id": "p07",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 128224400
+      },
+      {
+        "pair_id": "p08",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 176205000
+      },
+      {
+        "pair_id": "p08",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 213407600
+      },
+      {
+        "pair_id": "p08",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 131099100
+      },
+      {
+        "pair_id": "p08",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 161384900
+      },
+      {
+        "pair_id": "p08",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 126433700
+      },
+      {
+        "pair_id": "p08",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 130306000
+      },
+      {
+        "pair_id": "p09",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 188809900
+      },
+      {
+        "pair_id": "p09",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 200609500
+      },
+      {
+        "pair_id": "p09",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 128894400
+      },
+      {
+        "pair_id": "p09",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 128113500
+      },
+      {
+        "pair_id": "p09",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 132210700
+      },
+      {
+        "pair_id": "p09",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 118315000
+      },
+      {
+        "pair_id": "p10",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 177950100
+      },
+      {
+        "pair_id": "p10",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 151212900
+      },
+      {
+        "pair_id": "p10",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 122457700
+      },
+      {
+        "pair_id": "p10",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 112491700
+      },
+      {
+        "pair_id": "p10",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 116726000
+      },
+      {
+        "pair_id": "p10",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 116231500
+      },
+      {
+        "pair_id": "p11",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 162906000
+      },
+      {
+        "pair_id": "p11",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 180532900
+      },
+      {
+        "pair_id": "p11",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 118269700
+      },
+      {
+        "pair_id": "p11",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 112485600
+      },
+      {
+        "pair_id": "p11",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 118472400
+      },
+      {
+        "pair_id": "p11",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 115973900
+      },
+      {
+        "pair_id": "p12",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 184187600
+      },
+      {
+        "pair_id": "p12",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 211782000
+      },
+      {
+        "pair_id": "p12",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 124353900
+      },
+      {
+        "pair_id": "p12",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 194834800
+      },
+      {
+        "pair_id": "p12",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 138380500
+      },
+      {
+        "pair_id": "p12",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 143874400
+      },
+      {
+        "pair_id": "p13",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 233911900
+      },
+      {
+        "pair_id": "p13",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 205447700
+      },
+      {
+        "pair_id": "p13",
+        "phase": "measured",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 128248000
+      },
+      {
+        "pair_id": "p13",
+        "phase": "measured",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 120408000
+      },
+      {
+        "pair_id": "p13",
+        "phase": "measured",
+        "position": 2,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 124521300
+      },
+      {
+        "pair_id": "p13",
+        "phase": "measured",
+        "position": 3,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 121812600
+      },
+      {
+        "pair_id": "p14",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 163344200
+      },
+      {
+        "pair_id": "p14",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 204331100
+      },
+      {
+        "pair_id": "p14",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 124000700
+      },
+      {
+        "pair_id": "p14",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 121455500
+      },
+      {
+        "pair_id": "p14",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "L",
+        "elapsed_ns": 121871000
+      },
+      {
+        "pair_id": "p14",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "R",
+        "elapsed_ns": 138400700
+      },
+      {
+        "pair_id": "p15",
+        "phase": "qualification",
+        "position": 0,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 201531700
+      },
+      {
+        "pair_id": "p15",
+        "phase": "qualification",
+        "position": 1,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 165079100
+      },
+      {
+        "pair_id": "p15",
+        "phase": "measured",
+        "position": 0,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 124982100
+      },
+      {
+        "pair_id": "p15",
+        "phase": "measured",
+        "position": 1,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 139381500
+      },
+      {
+        "pair_id": "p15",
+        "phase": "measured",
+        "position": 2,
+        "arm": "B",
+        "site": "R",
+        "elapsed_ns": 117944100
+      },
+      {
+        "pair_id": "p15",
+        "phase": "measured",
+        "position": 3,
+        "arm": "A",
+        "site": "L",
+        "elapsed_ns": 201187100
+      }
+    ],
+    "all_16_candidate_minus_stock_pair_contrasts": [
+      {
+        "pair_id": "p00",
+        "cell_id": "BR-BAAB-copyRL-r0",
+        "candidate_site": "R",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "LR",
+        "numerator_ns": -31918500,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p01",
+        "cell_id": "BL-ABBA-copyRL-r0",
+        "candidate_site": "L",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "LR",
+        "numerator_ns": -5376600,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p02",
+        "cell_id": "BR-ABBA-copyRL-r0",
+        "candidate_site": "R",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "LR",
+        "numerator_ns": 14090900,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p03",
+        "cell_id": "BL-ABBA-copyLR-r0",
+        "candidate_site": "L",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "LR",
+        "numerator_ns": 1386900,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p04",
+        "cell_id": "BR-ABBA-copyLR-r1",
+        "candidate_site": "R",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "RL",
+        "numerator_ns": 61413600,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p05",
+        "cell_id": "BL-BAAB-copyLR-r1",
+        "candidate_site": "L",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "RL",
+        "numerator_ns": 14550900,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p06",
+        "cell_id": "BR-BAAB-copyLR-r1",
+        "candidate_site": "R",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "RL",
+        "numerator_ns": -13737100,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p07",
+        "cell_id": "BL-BAAB-copyRL-r0",
+        "candidate_site": "L",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "LR",
+        "numerator_ns": 4078800,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p08",
+        "cell_id": "BR-BAAB-copyLR-r0",
+        "candidate_site": "R",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "LR",
+        "numerator_ns": -26413500,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p09",
+        "cell_id": "BL-ABBA-copyRL-r1",
+        "candidate_site": "L",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "RL",
+        "numerator_ns": 13114800,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p10",
+        "cell_id": "BL-BAAB-copyLR-r0",
+        "candidate_site": "L",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "LR",
+        "numerator_ns": 9471500,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p11",
+        "cell_id": "BL-BAAB-copyRL-r1",
+        "candidate_site": "L",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "RL",
+        "numerator_ns": 3285600,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p12",
+        "cell_id": "BR-ABBA-copyLR-r0",
+        "candidate_site": "R",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "LR",
+        "numerator_ns": 64987000,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p13",
+        "cell_id": "BR-BAAB-copyRL-r1",
+        "candidate_site": "R",
+        "measured_arm_order": "BAAB",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "RL",
+        "numerator_ns": 5131300,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p14",
+        "cell_id": "BL-ABBA-copyLR-r1",
+        "candidate_site": "L",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "LR",
+        "qualification_site_order": "RL",
+        "numerator_ns": -19074900,
+        "denominator": 2
+      },
+      {
+        "pair_id": "p15",
+        "cell_id": "BR-ABBA-copyRL-r1",
+        "candidate_site": "R",
+        "measured_arm_order": "ABBA",
+        "copy_creation_order": "RL",
+        "qualification_site_order": "RL",
+        "numerator_ns": -68843600,
+        "denominator": 2
+      }
+    ],
+    "exact_summary": {
+      "n": 16,
+      "median_ns": {
+        "numerator": 1841100,
+        "denominator": 1
+      },
+      "mean_ns": {
+        "numerator": 6536775,
+        "denominator": 8
+      },
+      "negative": 6,
+      "positive": 10,
+      "zero": 0,
+      "minimum_ns": {
+        "numerator": -34421800,
+        "denominator": 1
+      },
+      "maximum_ns": {
+        "numerator": 32493500,
+        "denominator": 1
+      }
+    },
+    "exact_strata": {
+      "cell_id": {
+        "BL-ABBA-copyLR-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 693450,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 693450,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 693450,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 693450,
+            "denominator": 1
+          }
+        },
+        "BL-ABBA-copyLR-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": -9537450,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -9537450,
+            "denominator": 1
+          },
+          "negative": 1,
+          "positive": 0,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -9537450,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": -9537450,
+            "denominator": 1
+          }
+        },
+        "BL-ABBA-copyRL-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": -2688300,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -2688300,
+            "denominator": 1
+          },
+          "negative": 1,
+          "positive": 0,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -2688300,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": -2688300,
+            "denominator": 1
+          }
+        },
+        "BL-ABBA-copyRL-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 6557400,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 6557400,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 6557400,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 6557400,
+            "denominator": 1
+          }
+        },
+        "BL-BAAB-copyLR-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 4735750,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 4735750,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 4735750,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 4735750,
+            "denominator": 1
+          }
+        },
+        "BL-BAAB-copyLR-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 7275450,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 7275450,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 7275450,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 7275450,
+            "denominator": 1
+          }
+        },
+        "BL-BAAB-copyRL-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 2039400,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 2039400,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 2039400,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 2039400,
+            "denominator": 1
+          }
+        },
+        "BL-BAAB-copyRL-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 1642800,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 1642800,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 1642800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 1642800,
+            "denominator": 1
+          }
+        },
+        "BR-ABBA-copyLR-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          }
+        },
+        "BR-ABBA-copyLR-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 30706800,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 30706800,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 30706800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 30706800,
+            "denominator": 1
+          }
+        },
+        "BR-ABBA-copyRL-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 7045450,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 7045450,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 7045450,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 7045450,
+            "denominator": 1
+          }
+        },
+        "BR-ABBA-copyRL-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "negative": 1,
+          "positive": 0,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          }
+        },
+        "BR-BAAB-copyLR-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": -13206750,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -13206750,
+            "denominator": 1
+          },
+          "negative": 1,
+          "positive": 0,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -13206750,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": -13206750,
+            "denominator": 1
+          }
+        },
+        "BR-BAAB-copyLR-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": -6868550,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -6868550,
+            "denominator": 1
+          },
+          "negative": 1,
+          "positive": 0,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -6868550,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": -6868550,
+            "denominator": 1
+          }
+        },
+        "BR-BAAB-copyRL-r0": {
+          "n": 1,
+          "median_ns": {
+            "numerator": -15959250,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -15959250,
+            "denominator": 1
+          },
+          "negative": 1,
+          "positive": 0,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -15959250,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": -15959250,
+            "denominator": 1
+          }
+        },
+        "BR-BAAB-copyRL-r1": {
+          "n": 1,
+          "median_ns": {
+            "numerator": 2565650,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 2565650,
+            "denominator": 1
+          },
+          "negative": 0,
+          "positive": 1,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": 2565650,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 2565650,
+            "denominator": 1
+          }
+        }
+      },
+      "candidate_site": {
+        "L": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 1841100,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 2679625,
+            "denominator": 2
+          },
+          "negative": 2,
+          "positive": 6,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -9537450,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 7275450,
+            "denominator": 1
+          }
+        },
+        "R": {
+          "n": 8,
+          "median_ns": {
+            "numerator": -2151450,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 1177525,
+            "denominator": 4
+          },
+          "negative": 4,
+          "positive": 4,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          }
+        }
+      },
+      "measured_arm_order": {
+        "ABBA": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 3625425,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 15424525,
+            "denominator": 4
+          },
+          "negative": 3,
+          "positive": 5,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          }
+        },
+        "BAAB": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 1841100,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -4443875,
+            "denominator": 2
+          },
+          "negative": 3,
+          "positive": 5,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -15959250,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 7275450,
+            "denominator": 1
+          }
+        }
+      },
+      "copy_creation_order": {
+        "LR": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 2714600,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 5786525,
+            "denominator": 1
+          },
+          "negative": 3,
+          "positive": 5,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -13206750,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          }
+        },
+        "RL": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 1841100,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -16609325,
+            "denominator": 4
+          },
+          "negative": 3,
+          "positive": 5,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 7045450,
+            "denominator": 1
+          }
+        }
+      },
+      "qualification_site_order": {
+        "LR": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 1366425,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": 7576625,
+            "denominator": 4
+          },
+          "negative": 3,
+          "positive": 5,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -15959250,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 32493500,
+            "denominator": 1
+          }
+        },
+        "RL": {
+          "n": 8,
+          "median_ns": {
+            "numerator": 2104225,
+            "denominator": 1
+          },
+          "mean_ns": {
+            "numerator": -519925,
+            "denominator": 2
+          },
+          "negative": 3,
+          "positive": 5,
+          "zero": 0,
+          "minimum_ns": {
+            "numerator": -34421800,
+            "denominator": 1
+          },
+          "maximum_ns": {
+            "numerator": 30706800,
+            "denominator": 1
+          }
+        }
+      }
+    },
+    "interpretation": "The candidate was slower in 10 pairs and faster in six. The paired median was +1.8411 ms and mean +0.817096875 ms; extremes were −34.4218 and +32.4935 ms. This sample does not show a consistent speed win."
+  },
+  "failed_preparation_records": [
+    {
+      "stage": "extra native identity gate",
+      "original_exit": 1,
+      "reason": "An additional assertion incorrectly equated Node and Python Windows volume identifiers; the 96 leaf and three parent argv subchecks had passed. A corrected same-domain held identity gate later passed before authorization; the failed call remains failed.",
+      "tool_sha256": "8106a8183fb0a630197cfd8431cdf1f817c861b06d9f1d692a2ecc296acaf088",
+      "sut_calls": 0
+    },
+    {
+      "stage": "first offline analysis",
+      "original_exit": 1,
+      "reason": "The script treated the held-after record as flat rather than nested held and reopened snapshots. The corrected offline analysis used the unchanged original capture; the first analysis remains failed.",
+      "tool_sha256": "f26e0441207aae9391723aeae0487d972cb530c5e6e2de06d7f8092a1e5410b2",
+      "additional_sut_calls": 0
+    }
+  ],
+  "custody": {
+    "independent_actual_review_sha256": "78ff060652fb4be61f2df8ff5a0940d1b79fc66c57bd7e8d9e16e29add9c17c3",
+    "independent_peer_actual_review_sha256": "686f48056ed5354636b0250dd7fa7f0eb14a397dcb7375e9dec7208327721c71",
+    "raw_records": "Exact PID, FILETIME, handles, stream bytes, Jobs, authority and original tool responses remain in the private packet."
+  },
+  "limits": [
+    "This is a built-image contrast. Different image size/imports/layout and unobserved loader, cache, antivirus, scheduler and filesystem effects may contribute. It does not isolate BTreeMap runtime cost.",
+    "No primary competitive speed acceptance, cold-cache equivalence, production adoption or full correctness claim.",
+    "All 96 individual elapsed values and 16 signed pair contrasts are retained with both signs and every factor stratum; no discarded tails, retries or adaptive extension.",
+    "The comprehensive public reproduction package remains incomplete."
+  ]
+}
