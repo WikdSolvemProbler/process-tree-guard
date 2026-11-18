@@ -92,7 +92,7 @@ def decode_records(records, raw, returned):
             require(length and present and not pointer % 2 and offset + 48 <= pointer < limit
                     and maximum <= limit - pointer, "class-252 selected name storage")
             used_end = pointer + maximum
-        require(0 <= limit - used_end < 8 and not any(name[length:]), "class-252 extent/transport tail")
+        require(0 <= limit - used_end < 8 and not name[length:].lstrip(b"\0"), "class-252 extent/transport tail")
         text = name[:length].decode("utf-16le", "surrogatepass")
         require(not any(ch in text for ch in ("\0", "/", "\\", ":")), "class-252 name is not a basename")
         seen.add(pid)
