@@ -1,0 +1,52 @@
+{
+  "schema": "process-tree-guard-linux-protected-policy-mode-refusal-summary-v1",
+  "date": "2026-11-18",
+  "status": "PASS_ONE_PROTECTED_POLICY_MODE_REFUSAL",
+  "scope": "One fixed Linux service-context case on unchanged product binaries. The test changed only the owned delegation policy mode from 0644 to 0664 among the six product inputs, keeping the granting bytes and scoped authorization rule unchanged.",
+  "input_readback": {
+    "stage": "Before socket activation",
+    "file": "Root-owned regular file with mode 0664, one link, and three protected parent directories.",
+    "policy_bytes": 50,
+    "content_matched_frozen_grant": true
+  },
+  "observations": {
+    "case_attempts": 1,
+    "retries": 0,
+    "case_runner_exit": 0,
+    "client_exit": 125,
+    "client_stdout_bytes": 0,
+    "client_stderr_bytes": 82,
+    "client_stderr_lf_terminated": true,
+    "client_notice": "process-tree-guard: root bootstrap: authority is not a protected root-owned inode",
+    "payload_sentinel_absent": true,
+    "service_manager_sample": "Failed with exit status 125 after client completion.",
+    "socket_before_cleanup": "Listening with zero connections."
+  },
+  "cleanup": {
+    "exact_product_assets_removed": 6,
+    "owned_policy_directory_removed": true,
+    "normal_cleanup_passed": true,
+    "cleanup_timer_canceled_after_cleanup_and_before_earliest_65_second_trigger": true,
+    "outer_test_scope_retired": true
+  },
+  "evidence_limits": "The source places the refusal before readiness, private listener creation and payload provisioning. The absent payload sentinel is a separate runtime observation. The manager and socket checks were sequential and establish no held original service or cgroup identity, kernel no-spawn, RefUnit authorization denial, broader lifecycle qualification, or performance result.",
+  "provenance": {
+    "earlier_source_proposal": "Preserved unrun after review found incomplete pins for the policy call site and protected-mode predicate.",
+    "source_roles": 53,
+    "freeze_roles": 56,
+    "local_controls_passed": 3,
+    "raw_evidence_retained_privately": true,
+    "sha256": {
+      "source": "4cbb57cd10f7873d1e23ebbf85ad83695e2d958b41a67f1265d896be585a924e",
+      "freeze": "166776df21c6c5784018e0fef89151b277513ab3a8b7547ade55bca8f44372c7",
+      "local_control_result": "5056088b28cf384802844a72d1305d6e93f7980ea5ef2cf160b7e83c2ccc21ff",
+      "run_result": "fcad2d67d5bbe3a81bba13640187550ce299b8962e54f56f2cd46cd6613b9445",
+      "guest_bundle": "a4338c5922ee150225dbe8b3115bdd7decf55c2b498f9fd759c303af4a4d268f"
+    }
+  },
+  "product_executable_sha256": {
+    "root": "3368ec504fd0959bb6a26a4c17cc74bbd34e5576baaa582cc83ca4b71719d93d",
+    "client": "193eaaf6be88c8878d549e750ed722ab55fcae31a78c7081d73e4c3bca3e5f24"
+  },
+  "qualification_status": "Linux default dispatch remains disabled. Broader qualification and the complete public academic reproduction package remain open."
+}
