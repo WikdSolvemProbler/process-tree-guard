@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "status": "PASS_ONE_STANDALONE_CAPABILITY_CALL_NOT_AN_OBSERVER_QUALIFICATION",
+  "purpose": "Check documented SystemBasicProcessInformation capability and bounded record decoding as a candidate repair for the benchmark observer.",
+  "production": {
+    "rust_revision": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "source_defaults_and_guarantees_changed": false,
+    "provider_adopted": false
+  },
+  "portable_sources": {
+    "basic_process_probe.c": "d013c9c144aae656f730f3081b34075c489ec9abc5486065bf59266cce268a06",
+    "test_basic_process_parser.c": "01ed4c021e16b849d8f0d61050b2d64ba43129240075c3a46b0dd2260ad4ad68"
+  },
+  "build": {
+    "compiler": "MSVC19.51.36260 AMD64",
+    "sdk": "10.0.28000.0",
+    "language": "C11",
+    "flags": [
+      "/W4",
+      "/WX",
+      "/O2",
+      "/MT",
+      "/INCREMENTAL:NO",
+      "/DYNAMICBASE",
+      "/NXCOMPAT",
+      "/Brepro"
+    ],
+    "selected_source_tool_roles": 48,
+    "pre_post_pins_match": true,
+    "diagnostic_warnings": 0,
+    "probe_bytes": 153600,
+    "probe_sha256": "b1f51234e1a4e0647a08a1c50b9605be6c5ed45e509ee13ac98546edf08cf406",
+    "compile_process_tree_seconds": 60
+  },
+  "parser": {
+    "positive_cases": 1,
+    "negative_cases": 21,
+    "original_exit": 0,
+    "stderr_bytes": 0,
+    "nt_query_calls": 0,
+    "process_tree_seconds": 15
+  },
+  "native": {
+    "original_exit": 0,
+    "attempts": 1,
+    "retries": 0,
+    "query_calls": 1,
+    "information_class": 252,
+    "ntstatus": 0,
+    "capacity_bytes": 4194304,
+    "returned_bytes": 34232,
+    "decoded_rows": 438,
+    "unique_pids": 438,
+    "empty_pid_zero_rows": 1,
+    "nonempty_basename_rows": 437,
+    "final_chain_extent_bytes": 34232,
+    "query_plus_immediate_upper_qpc_ns": 1260300,
+    "timing_includes_parser_or_output": false,
+    "stdout_bytes": 0,
+    "stderr_bytes": 0,
+    "process_tree_seconds": 15,
+    "product_or_fixture_invocations": 0,
+    "benchmark_slots": 0
+  },
+  "preserved_preparation": {
+    "status": "DRAFT001_UNEXECUTED_STRICT_BOUNDS_REJECTION",
+    "reason": "The initial parser accepted a non-null zero-length PID-zero name pointer at an owning record or buffer end. Successor002 tightens both strict bounds and adds two distinct negative cases. All predecessor source and unexecuted build files remain preserved."
+  },
+  "evidence_sha256": {
+    "source_seal": "ee41a53cd6b9d60ec2c509016e60995ff113856994291bbdb3056340fd3168ed",
+    "build_original_tool": "a70524b3dafbc5f2d3be76d697c10670a932a097d9cdf00b90ef6e9a06b911d8",
+    "parser_original_tool": "67ccb29bc2d351baf18edd6ce26232e1c02402277865cef9ecbfa82b5758b5af",
+    "native_original_tool": "d07db8b3913639c2e00b92612acdcbe8ddb2eeb1b1b428043abb6f2de385066a",
+    "native_raw": "b392b38455587f538383a06c4981c9cf329322f68ff969945ef3bd5ea67b4d1c",
+    "author_actual_audit": "ed971788a3dfb7ee95ef809fce12e61a87134b561c05dcdc7e36fcd195fe41a6",
+    "critic_actual_audit": "aeb4e9ce06ebf605ba485de7215382748f2a68d2952517cc4411517d6947012c",
+    "root_lossless_audit": "9909ce42aa953daf5e9011680c43e4afd33a0f158ad7a387c7027276f2b59c9d"
+  },
+  "primary_docs": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntquerysysteminformation"
+  ],
+  "limits": [
+    "Single capability and record-decoding observation only. Microsoft compares this API with SystemProcessInformation, not with Toolhelp. No controlled Toolhelp comparison or speedup is established.",
+    "The current observer decoder rejects empty PID-zero names. No adapter has been qualified and no native provider is adopted.",
+    "No held-process identity, Job membership, owner/deadline cleanup, full observer phase or competitive product performance is established by this standalone program.",
+    "QPC encloses the query and immediately following precise UTC upper stamp. It excludes decoding and output; no atomic whole-host snapshot or UTC/QPC clock equivalence is claimed.",
+    "The ABI is limited to documented class252 on supported Windows11 builds and the asserted AMD64 layout. Fixed buffer/capacity or unknown layout errors refuse without fallback or retry.",
+    "Loaded ntdll path was checked and selected disk/build inputs pinned; complete loaded-byte immutability and full transitive compiler-input closure are not established.",
+    "Raw machine records stay private. The portable component sources support independent capability reproduction; this summary and hashes are not the comprehensive public academic benchmark package."
+  ]
+}

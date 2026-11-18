@@ -632,3 +632,18 @@ The private candidate retains the original per-row checks, fixed snapshot order 
 The subsequent original phase **failed**: two PRE censuses took **47.3899 ms** and **66.4043 ms**. The second exceeded the unchanged limit; no fixture, phase Job, complete resource window or benchmark slot was reached. All worker sets joined and module cleanup was clean. Native-bridge and post-bridge wall time both increased; no exclusive cause is established. Both memory points were below the unchanged 4096 MiB floor, without a completed admission window. [Counts, timing partitions, receipt hashes and limits](windows-native-observer-requalification-20261118-summary.json).
 
 The failed phase remains preserved and will not be retried as the same attempt. The reader remains unqualified and private; production Rust, defaults and protection guarantees are unchanged. Competitive speed acceptance and the complete public benchmark package remain open.
+
+### Basic-process API capability — 2026-11-18
+
+One fixed standalone class-252 query returned **438 complete records**. Its query plus immediately following precise timestamp took **1.2603 ms**; decoding and output are outside that bracket. The positive parser case and all **21 malformed-buffer cases passed**. The earlier unexecuted strict-bounds draft remains preserved. [Observation, source identities and limits](windows-basic-process-feasibility-20261118-summary.json).
+
+The [portable probe](../diagnostics/windows-basic-process/basic_process_probe.c) and [parser controls](../diagnostics/windows-basic-process/test_basic_process_parser.c) are committed as component reproduction tools. They do not run or repair the guard. The current observer decoder rejects the API's empty PID-zero name, so integration still needs a separately reviewed adapter and complete qualification. No Toolhelp speed comparison, observer admission or product improvement follows. Production Rust and defaults remain unchanged.
+
+For independent reproduction, use a fresh directory containing those two files and an AMD64 Visual Studio Native Tools prompt. The recorded build used MSVC 19.51.36260 and SDK 10.0.28000.0; the sources assert the class and ABI. Choose an available guard executable for each finite whole-tree deadline, as illustrated below. The probe creates its output exclusively; use a fresh output filename and keep machine records private. These commands reproduce the component contracts, not historical timings or the full benchmark.
+
+```text
+process-tree-guard --timeout 60 -- cl /nologo /std:c11 /W4 /WX /O2 /MT basic_process_probe.c /Fe:basic_process_probe.exe /link /INCREMENTAL:NO /DYNAMICBASE /NXCOMPAT /Brepro kernel32.lib
+process-tree-guard --timeout 60 -- cl /nologo /std:c11 /W4 /WX /O2 /MT test_basic_process_parser.c /Fe:test_basic_process_parser.exe /link /INCREMENTAL:NO /DYNAMICBASE /NXCOMPAT /Brepro kernel32.lib
+process-tree-guard --timeout 15 -- test_basic_process_parser.exe
+process-tree-guard --timeout 15 -- basic_process_probe.exe local-capability.jsonl
+```
