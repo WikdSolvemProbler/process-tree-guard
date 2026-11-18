@@ -23,6 +23,8 @@ The Linux client and service built from `7b2e6d5` with Rust 1.88 passed one mode
 
 The fixture removed all six temporary deployment assets and the owned policy directory, canceled the unused fallback timer, and confirmed scope retirement. An earlier attempt refused the already named slice before the client launched. That failed attempt also passed cleanup and remains preserved. Two independent reviews verified the recorded outcome and scope. The raw machine and transport records are private. Full Linux lifecycle and performance qualification remain open.
 
+A separate ARM64 run exercised `--separate-service-context auto --timeout 10 -- /usr/bin/true` with the same release binaries. The client returned 0 with empty standard output and error. The fixture again observed the held client terminal while its direct caller was live, verified the same empty slice before and after the invocation, and passed removal of all six assets and the owned policy directory, unused timer cancellation, and scope retirement. This covers one successful auto-mode invocation. Ancestor-loss coverage and full Linux qualification remain open.
+
 ## Last qualified predecessor smoke
 
 One genuine acknowledged separate-service normal-exit case passed on Linux 6.8 ARM64 under mode 2. The client returned 0 without a timeout in 6.09 seconds with empty standard output and error. A persisted unassisted pre-stop witness proved the original guard family empty while the original fixture was still live, before teardown. Exact owned temporary rule removal and the independently bounded host process-tree stop and join completed without errors. This establishes one fixed basic entry and native-join contract; Linux default dispatch remains disabled.
