@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "result": "PASS_MACOS_EXPLICIT_LINUX_FEATURE_REFUSAL",
+  "source_commit": "dc3771b94934fb670e681e7c555adf17e9d6e653",
+  "source_archive": {
+    "sha256": "4c62419530b6a86462526384c40f63d192f09d833aacf6e376afaa73e926971c",
+    "bytes": 2375680,
+    "members": 148
+  },
+  "test": {
+    "native_host_target": "aarch64-apple-darwin",
+    "rustc": "1.99.0",
+    "cargo": "1.99.0",
+    "arguments": "check --locked --offline --lib --message-format=json --target aarch64-apple-darwin --features linux-separate-service",
+    "cargo_exit": 101,
+    "build_finished_success": false,
+    "host_build_script_artifacts": 1,
+    "product_artifacts": 0,
+    "diagnostic": "linux-separate-service requires a native x86_64/aarch64 GNU Linux build (HOST == TARGET)",
+    "scratch_removed": true,
+    "independent_group_member_count": 0
+  },
+  "preserved_failures": [
+    {
+      "attempt": 1,
+      "result": "Validation failed after Cargo reached the intended build-script refusal because the checker expected unindented output. The retirement check passed."
+    },
+    {
+      "attempt": 2,
+      "result": "The command timed out before verifying the source archive or starting Cargo. The retirement check passed."
+    }
+  ],
+  "private_evidence_sha256": {
+    "ROOT-ARCHIVE-AUDIT.json": "7e349590126fa8dc8d7c6a9113be7cd9382ee0ba8c02d725c43726b10975204e",
+    "run-native.py": "a885c70364ff8216bfa93ef44a9676fec40b17818a56febdacc5a1d96b348350",
+    "native-feature-refusal.sh": "b0b2f123f70f30665bab78cd3a40c35fc9441107f79c67885f036648f39c93ef",
+    "verify-retirement.sh": "67698f7b5c64d18ce6225189a3dfd13899a82924dd5f7f6cf5c5cfab01584ed4",
+    "ROOT-TERMINALS.json": "cb1d9d70cd89d7d6634ff949e73c0d84d3fc470426e75156674257e28dd98448",
+    "ROOT-COMPILE-RESULT.json": "5e9de78bf10019ab6c7840b98136e9470e2008047c32a202766736c64b69cf94",
+    "ROOT-RETIRE-RESULT.json": "2f08c8f37fca320f376dfc93a017abcd9d24b59e415cd4762d2f2cd4d6b32398"
+  },
+  "scope": "The explicit Linux feature is refused on this native macOS target. macOS backend qualification, administrator validation, and the full public benchmark remain open."
+}
