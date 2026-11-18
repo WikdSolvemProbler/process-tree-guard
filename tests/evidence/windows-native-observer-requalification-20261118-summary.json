@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-11-18",
-  "status": "COMPONENT_PASS_INTEGRATED_PHASE_FAILED",
+  "status": "COMPONENT_PASS_FOUR_LANE_SINGLE_PRE_PASS_FULL_PHASE_FAILED",
   "purpose": "Qualify an unchanged native snapshot decoder against the current Windows dependency identity, then test its integration with the original observer.",
   "production": {
     "rust_revision": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
@@ -177,7 +177,21 @@
     "operation_profile_raw_terminal": "e0dfbfcc05fce4ae1c3846f27392b0262f1ce99480977fe370567c6271cdec6a",
     "operation_profile_author_audit": "2a910af72be5d21ffcc13d1bcee88e5bd8338dd1f44edb1612ded697510a6b88",
     "operation_profile_critic_audit": "ba0a6e733dc32ca51d77a3b7717b0f1dbebcc64bae70faa28aa228c60cfc9ee3",
-    "operation_profile_root_audit": "35188680b3b023f361d70c1c3579da7b05ae1c472a56ff95fa2629295faa0a62"
+    "operation_profile_root_audit": "35188680b3b023f361d70c1c3579da7b05ae1c472a56ff95fa2629295faa0a62",
+    "four_lane_pure_tool": "b961d496743910591c7311c983d65e439a6f3eddaaf7f9c494cb305caccedb9b",
+    "four_lane_pre_original_tool": "8735868b5bb2ff6ca2893221bead447b1fb6796e55c2505e8528c1375e06a925",
+    "four_lane_pre_raw_inventory": "53d409fab03ff885214e22a2e35ab8615e5a318dc320f44ab7f0be704ade250a",
+    "four_lane_pre_raw_telemetry": "04d893d2667aa991075ec55b7d97330af6085880ee5f7d73301ecadaf8a5e536",
+    "four_lane_pre_raw_terminal": "7081d6c1ccee62b3865bcc6de6a2b00f932fa5f73f22001aa5e24c03cb42618a",
+    "four_lane_pre_author_audit": "126a68b4e04c69d0ca04ca3375593a3313710a77064f1849d19e02018078ba26",
+    "four_lane_pre_critic_audit": "37e0c3ff0f34db160dfabd2a7bf5a51e1899bce23cdb0ef39cb552eb16f3cf82",
+    "four_lane_phase_pure_tool": "045e48e1291a2d0c57f113153e84da9a24c097da4afca0e0d0ff15cd20eff5b1",
+    "four_lane_phase_original_tool": "97af738861b2559cdee624ee05794afc598f01386074bb55df7532b61457e4a8",
+    "four_lane_phase_raw_inventory": "5a671d4c7c34b57a6b7e38007c1094ee4610eb324f26ad0a64e58882f6d7cdf0",
+    "four_lane_phase_raw_telemetry": "3e8e2b736b2bab2e2e1db5f31c511fb930f233e981b81dba974f30c0b40b40e1",
+    "four_lane_phase_raw_terminal": "7dd98aaff905dbb87a789a8fb936ac685694b38b7fef9c60fca046d224d222f8",
+    "four_lane_phase_author_audit": "7e2642914557e4613d7867977c00546f4af4de812bfe06ad8ba8362dd6aa80d8",
+    "four_lane_phase_critic_audit": "b05225911805862bee0da6b08b67bbf3cb7e3e0195607b3bffe82e6008e39498"
   },
   "qualification_limits": [
     "The integrated observer remains unqualified; no during membership, post phase or campaign slot was reached.",
@@ -313,5 +327,132 @@
     "battery_saver": 0,
     "complete_host_window_scored": false,
     "interpretation": "Fresh instrumented PRE-only localization. Cross-sample timing subtraction, historical attribution, CPU/syscall causality and comparative speed claims are not established."
+  },
+  "four_lane_candidate": {
+    "status": "PRIVATE_CANDIDATE_NOT_ADOPTED_PHASE_UNQUALIFIED",
+    "method": "At most four non-daemon in-process workers with fixed contiguous native-snapshot-index lanes; retain each original per-row identity, Job, file and liveness check and deterministic output order. Dispatch, all joins, merge and shutdown precede the unchanged finished endpoint.",
+    "reader_sha256": "cd118486c0ab57267da728da8b4d826073738a62e8f775b13b1def80ac2233e6",
+    "pre_controller_sha256": "fb8a3fe841bfe61922b78ca9cf6b31ce8a21d96a8895eee605ea7739deb8fc79",
+    "phase_controller_sha256": "5f854e044835ebff9dad0980e22874cc98fe72f369c830553c5e9e006b2205bf",
+    "controls": {
+      "reader_methods_passed": 10,
+      "phase_methods_passed": 3,
+      "failures": 0,
+      "native_process_and_file_apis": "fake",
+      "real_bounded_threads": true,
+      "scope": "Deterministic operation/order, same-thread error and Job handling, startup/submit/shutdown failure custody, 50ms boundary and exact phase callback binding. These controls are not native phase observations."
+    },
+    "single_pre": {
+      "status": "PASS_ONE_CENSUS_ONLY",
+      "original_exit": 0,
+      "source_roles": 51,
+      "census_ns": 39399300,
+      "acceptance_limit_ns": 50000000,
+      "native_rows": 452,
+      "selected_rows": 11,
+      "lane_sizes": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "cleanup_proved": true,
+      "pending_returned_futures": 0,
+      "active_or_starting_workers": 0,
+      "module_cleanup_errors": 0,
+      "quarantine_count": 0,
+      "available_memory_mib": 4068.1328125,
+      "required_memory_floor_mib": 4096,
+      "complete_host_window": false,
+      "phase_qualified": false,
+      "fixture_invocations": 0,
+      "benchmark_slots": 0
+    },
+    "full_phase": {
+      "status": "REFUSED_SECOND_PRE_CENSUS",
+      "original_exit": 1,
+      "attempts": 1,
+      "retries": 0,
+      "source_roles": 89,
+      "samples": 2,
+      "complete_windows": 0,
+      "phase_job_created": false,
+      "fixture_invocations": 0,
+      "benchmark_slots": 0,
+      "inner_seconds": 225,
+      "outer_seconds": 240,
+      "original_gates_changed": false,
+      "sample_census_ns": [
+        47389900,
+        66404300
+      ],
+      "native_rows": [
+        456,
+        452
+      ],
+      "selected_rows": [
+        12,
+        12
+      ],
+      "background_rows": [
+        11,
+        11
+      ],
+      "lane_sizes": [
+        [
+          3,
+          3,
+          3,
+          2
+        ],
+        [
+          3,
+          3,
+          3,
+          2
+        ]
+      ],
+      "all_worker_sets_joined": true,
+      "pending_returned_futures": 0,
+      "active_or_starting_workers": 0,
+      "module_cleanup_errors": 0,
+      "quarantine_count": 0,
+      "available_memory_mib": [
+        3923.90234375,
+        3925.6640625
+      ],
+      "required_memory_floor_mib": 4096,
+      "ac_line": [
+        1,
+        1
+      ],
+      "battery_saver": [
+        0,
+        0
+      ],
+      "timing_partitions_ns": {
+        "sample_to_bridge_begin": [
+          380000,
+          2354500
+        ],
+        "bridge": [
+          30281800,
+          36164700
+        ],
+        "bridge_end_to_finished": [
+          16728100,
+          27885100
+        ]
+      },
+      "interpretation": "The second census exceeded the unchanged 50ms cutoff. Both native-bridge and post-bridge wall time increased. No exclusive cause or stable budget compliance is established. Both single memory readings were below the floor, but no complete resource window was scored."
+    },
+    "limits": [
+      "The 50ms limit is an admission cutoff, not an interrupt deadline for native APIs; unchanged enclosing whole-tree deadlines bound stalled work.",
+      "One accepted PRE does not establish improvement: epochs, native populations and provider durations differ. No cross-run speedup calculation is made.",
+      "The subsequent original phase failed and remains failed; no during Job membership or complete pre/during/post qualification occurred.",
+      "Production Rust, defaults and protection guarantees are unchanged. No product optimization or new observer default is adopted.",
+      "Cross-row observation timing changes under parallel execution; this does not add an atomic whole-host snapshot guarantee.",
+      "Original and rejected preparations, failed attempts and all raw outputs remain preserved privately; hashes are not a standalone reproduction package."
+    ]
   }
 }
