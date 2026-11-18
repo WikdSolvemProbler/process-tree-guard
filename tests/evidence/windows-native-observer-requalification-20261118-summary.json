@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "status": "COMPONENT_PASS_INTEGRATED_PHASE_FAILED",
+  "purpose": "Qualify an unchanged native snapshot decoder against the current Windows dependency identity, then test its integration with the original observer.",
+  "production": {
+    "rust_revision": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "rust_and_checked_build_inputs_changed": false,
+    "defaults_changed": false,
+    "guard_guarantees_changed": false,
+    "performance_optimization_adopted": false
+  },
+  "sources": {
+    "native_c_sha256": "c691273b1c43b1188f9098238bdac635c4054eb63900cd9519f9691b97f39e1e",
+    "native_dll_sha256": "1c51fef8ed53fa7bafe8ac542145c6a32499006e79491a9a2cbaca3ae910d281",
+    "byte_decoder_sha256": "ac685aefa881d0c4b059bc63c543d39cc71f2efca991200e1f98307314203ef7",
+    "observer_draft_sha256": "18bbbc98455f44a35693175b6336dedcc92ae50698fdbc7cac07b133d7029f3c",
+    "inventory_sha256": "144696113d741d226a57af25c1ec721877909253d86153ea68e74d57ac009052",
+    "component_controller_sha256": "911da6f5ebc2a24529dfde3e7f15d0d435e64b8a7933d608763f301d81ed907b",
+    "phase_controller_sha256": "b88614e72cb5ea1ced60a01ac2fa0a792c0668b6b1fa79a347017c533971e272"
+  },
+  "pure_checks": [
+    {
+      "scope": "Corrected observer ownership and evidence-failure paths",
+      "tests": 11,
+      "passed": 11,
+      "failures": 0,
+      "native_subjects": 0
+    },
+    {
+      "scope": "Exact component ownership and terminal-failure helper delta",
+      "controls": 6,
+      "passed": 6,
+      "failures": 0,
+      "native_subjects": 0
+    },
+    {
+      "scope": "Extracted original callback scope and timing boundary",
+      "tests": 2,
+      "passed": 2,
+      "failures": 0,
+      "accepted_ns": 50000000,
+      "rejected_ns": 50000001,
+      "native_subjects": 0
+    }
+  ],
+  "inherited_decoder_prerequisites": {
+    "saved_python_tests": 11,
+    "saved_paired_cases": 8,
+    "saved_adversarial_cases": 16,
+    "rerun_in_current_native_invocation": false,
+    "availability": "Previously qualified saved controls were rehashed and checked; these are not additional current-OS native observations."
+  },
+  "component": {
+    "status": "PASS_ONE_FIXED_COMPONENT_CALL",
+    "native_exit": 0,
+    "source_tool_roles_checked_before_and_after": 65,
+    "native_snapshots": 1,
+    "retries": 0,
+    "decoded_rows": 479,
+    "unique_pids": true,
+    "held_observer_and_guard_snapshot_anchors_validated": true,
+    "handles_before": 133,
+    "handles_after": 133,
+    "module_cleanup_errors": 0,
+    "quarantine_owners": 0,
+    "inner_process_tree_deadline_seconds": 15,
+    "outer_process_tree_deadline_seconds": 30,
+    "benchmark_slots": 0,
+    "timing_ns": {
+      "snapshot_wrapper": 29300100,
+      "before_native_call": 287900,
+      "python_native_call_envelope": 22492300,
+      "after_native_call": 6519900,
+      "c_qpc_entry_to_end": 22469400
+    },
+    "timing_note": "The C QPC span is contained within the Python native-call envelope. These are one-call wall-clock observations, not comparative speed evidence."
+  },
+  "integrated_phase": {
+    "status": "FAILED_FIRST_PRELAUNCH_CENSUS",
+    "original_exit": 1,
+    "source_input_roles_checked_before_and_after": 63,
+    "phase_attempts": 1,
+    "retries": 0,
+    "samples": 1,
+    "complete_windows": 0,
+    "phase_job_created": false,
+    "fixture_launches": 0,
+    "benchmark_slots": 0,
+    "fixture_planned_seconds": 61,
+    "inner_process_tree_deadline_seconds": 225,
+    "outer_process_tree_deadline_seconds": 240,
+    "original_during_rule_seconds": 6600,
+    "native_snapshot_rows": 486,
+    "relevant_rows": 13,
+    "classifications": {
+      "unclassified_background": 12,
+      "pinned_enclosing_guard": 1
+    },
+    "all_classifications_allowed": true,
+    "one_native_snapshot": true,
+    "module_cleanup_errors": 0,
+    "quarantine_owners": 0,
+    "timing_ns": {
+      "census": 57151900,
+      "acceptance_limit": 50000000,
+      "sample_to_bridge_begin": 583600,
+      "bridge": 29660100,
+      "snapshot_wrapper": 29541500,
+      "python_native_call_envelope": 23862000,
+      "c_qpc_entry_to_end": 23838800,
+      "post_bridge_to_inventory_finished": 26908200,
+      "inventory_finished_to_callback_return": 544300
+    },
+    "first_sample": {
+      "available_memory_mib": 2097.96875,
+      "required_memory_floor_mib": 4096,
+      "ac_line": 1,
+      "battery_saver": 0,
+      "complete_host_admission_window": false
+    },
+    "interpretation": "The unchanged census gate caused the first refusal. The single memory sample was also below the original floor, but no complete memory/CPU/power window was reached. The post-bridge interval combines original projection, process queries, file verification, checks and scheduling; no exclusive API or CPU cause is established."
+  },
+  "preserved_preparations": [
+    {
+      "status": "FAILED_PURE_PREDECESSOR",
+      "tests": 8,
+      "passed": 5,
+      "errors": 3,
+      "cause": "An earlier mock clock lacked sleep. The corrected observer draft subsequently passed 11 controls; the original failure remains preserved.",
+      "receipt_sha256": "2b7d6dfa375db01151d789d8c29d77d32dbe321257875e2328063f3f079d1b56"
+    },
+    {
+      "status": "UNEXECUTED_SOURCE_PROPOSAL_CORRECTED",
+      "cause": "The initial current-OS proposal pinned an unused shell executable. The actual guarded shell was identified and bound before the native call."
+    },
+    {
+      "status": "UNEXECUTED_PHASE_DRAFT_CORRECTED",
+      "cause": "The initial extracted callback omitted its validator and rejection bindings. The successor passed both exact-boundary controls before the single phase trial."
+    }
+  ],
+  "evidence_sha256": {
+    "observer_pure_tool": "a62190d866b11e12d3029f100b3099f3cad07cf2580cb9dd4d6f3c0ae55579d9",
+    "component_pure_tool": "7bd3de7330d18089889584670945fb391a7b1796e5e0d5bb39b35931ba07344a",
+    "callback_pure_tool": "ed6422a73055853233e899dc7682b2fac239c4bd35c437f9e82b3c7ac2d50bc9",
+    "component_raw": "a85fc35b8bae70de5e64875b5f520fb3034db6e042dcaa7f3d213037de0b1ecf",
+    "component_original_tool": "51bd5aba2fc14b3c84936a0d55c6a102c6868b2c42782910091bf5036ef52813",
+    "component_author_audit": "2ae77ef36c137e3f5fc0d5742a1739d30479f8817ace22c772c1516fadd59473",
+    "component_critic_audit": "4e960e265e09b4dae36356c7e02a3b58fc44b74d133b1f38ec258c79abe97c7a",
+    "component_clock_clarification": "978102056f0ad0a3838f9b34aee4d7ed77ff37a3f15030ce90ffdfe02c6c6b84",
+    "component_root_audit": "cd1b60ffb015346ba01cd2c54d623ba07f68ba3de793459c4f307ecf36625d38",
+    "phase_raw_inventory": "432dcdc7b49d4243b0b73112c29244e5a9257b4b3d4ec08f8ad1b4d97b46d7c8",
+    "phase_raw_telemetry": "b22f7198af7f532a174db856f504f4820560dda4be8e7f84292f691ee0a7c703",
+    "phase_original_tool": "1716c86f190350f74f565ca268a8af65191ada034c779c344c392d2bbeb20c68",
+    "phase_author_audit": "e176195f69be4e905a850e88b8f8c82735c661af3b49a8c569e1c3b9e8bff6d2",
+    "phase_critic_audit": "20a5639a63875fb03a85424adad7971a445add00b146e80602ab80f56cbc969e",
+    "phase_root_audit": "e353697d4939245b6a0c862be2172ce85130a06195cb5bc791e07f2573585589"
+  },
+  "qualification_limits": [
+    "The integrated observer remains unqualified; no during membership, post phase or campaign slot was reached.",
+    "No winning, matching, speedup, equivalence, deadline-correctness or comprehensive guard claim follows.",
+    "Returned status and UTF-16 prefixes are replayed; no independent whole-host population equality, separate C return, discarded-tail replay or loaded-byte immutability is claimed.",
+    "Repeated held identity and liveness checks rely on the pinned executed source; after-values are not independently serialized.",
+    "Exact raw custody records remain private and contain machine data. This public summary and hashes are not a standalone reproducible academic benchmark package.",
+    "Existing speed losses and the comprehensive benchmark remain open. The next diagnostic will localize existing per-process work without weakening gates or adding a favorable retry."
+  ]
+}
