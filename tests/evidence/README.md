@@ -647,3 +647,11 @@ process-tree-guard --timeout 60 -- cl /nologo /std:c11 /W4 /WX /O2 /MT test_basi
 process-tree-guard --timeout 15 -- test_basic_process_parser.exe
 process-tree-guard --timeout 15 -- basic_process_probe.exe local-capability.jsonl
 ```
+
+### Class-252 DLL: held cohort passed; original phase refused — 2026-11-18
+
+The exact [native provider](../diagnostics/windows-basic-process/class252_provider.c) and [Python adapter](../diagnostics/windows-basic-process/class252_adapter.py) are experimental component tools. Their profile deliberately requires AMD64 and running build 26300. Nine fake-API controls passed, including interrupted setup/observation and a throwing release; unproved release retains its owner after one attempt. The native component held the guard and two fixed peers continuously, matched their identity/name/parent/creation fences across both providers, and released both modules cleanly. Each comparison returned 437 raw rows, including its explicit PID-zero representation. This proves only that held cohort, not whole-host or speed parity.
+
+The subsequent original full phase **refused its first PRE census at 52.089 ms**, above the unchanged 50 ms cutoff. Its bridge took 14.7872 ms; 36.4992 ms followed the bridge. The adapter's 9.8866 ms after native return includes wire copying, raw evidence, validation and scheduling; it has no narrower clocks. Native query/timestamp and C decoding/copying occupied 0.5093 ms inside the native-call envelope. These nested spans cannot be added or compared across epochs as a speedup. All four worker lanes joined and the module released cleanly. No fixture, phase Job, complete resource window or benchmark slot was reached. [Counts, boundaries, source/receipt hashes and limits](windows-class252-provider-20261118-summary.json).
+
+The raw point also had 3977.9492 MiB available and battery power; resource windows were not completed or separately scored. Every original gate remains. The failed attempt and rejected source/review preparations remain preserved. Production guard source and defaults are unchanged; the new provider is unqualified for adoption and competitive speed acceptance remains open. The standalone build instructions above describe the earlier executable, not this DLL.

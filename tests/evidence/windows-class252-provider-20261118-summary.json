@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "status": "HELD_COHORT_COMPONENT_PASSED_ORIGINAL_PHASE_REFUSED",
+  "production": {
+    "rust_revision": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+    "source_defaults_and_guarantees_changed": false,
+    "provider_adopted": false
+  },
+  "portable_component_sources": {
+    "class252_provider.c": "ccc08ff4aee0cd2b0e98e67a4ff595bd411fb7765cb699ea36e7337c3cf9f3f2",
+    "class252_adapter.py": "44684e5d3e75a05b570650f77d048302271189f858493ff1555bcc7cd15a56c9"
+  },
+  "profile": {
+    "architecture": "AMD64",
+    "running_build_required": 26300,
+    "information_class": 252,
+    "fixed_buffer_bytes": 4194304,
+    "row_capacity": 4096,
+    "scope": "Experimental benchmark observer provider, not a production backend or generally qualified Windows API wrapper."
+  },
+  "build": {
+    "original_exit": 0,
+    "selected_source_tool_roles": 79,
+    "pre_post_match": true,
+    "compiler": "MSVC19.51.36260",
+    "sdk": "10.0.28000.0",
+    "warnings": 0,
+    "dll_bytes": 108544,
+    "dll_sha256": "4cbc89acecfc3f2cf2662ee8bfc417b8f6034053918c9639e4c996e628784b89",
+    "static_imports": [
+      "kernel32.dll"
+    ],
+    "dynamic_dependency": "System32 ntdll.dll",
+    "scope": "Exact loaded paths and on-disk digests checked separately; no loaded-byte identity or full transitive build closure claim."
+  },
+  "pure": {
+    "provider_methods_passed": 9,
+    "native_provider_calls": 0,
+    "scope": "Exact adapter, constructor, close, interruption evidence and original selector/owner context exercised using fake APIs. Native work was never retried.",
+    "phase_receipt_predicate": {
+      "positive": 1,
+      "negative": 12,
+      "exact_plus_one_filetime_tick_refused": true,
+      "native_calls": 0
+    },
+    "prior_phase_callback_controls": 3,
+    "prior_callback_controls_rerun": false
+  },
+  "held_component": {
+    "original_exit": 0,
+    "source_roles": 84,
+    "pre_post_match": true,
+    "fixed_held_processes": 3,
+    "comparison_order": [
+      "Toolhelp",
+      "class252"
+    ],
+    "calls_per_comparison_provider": 1,
+    "raw_rows": [
+      437,
+      437
+    ],
+    "class252_returned_bytes": 34152,
+    "matched": [
+      "PID",
+      "parent PID",
+      "casefolded image basename",
+      "continuously held identity before/after",
+      "exact positive creation no later than both provider uppers"
+    ],
+    "pid_zero_names": {
+      "toolhelp": "[System Process]",
+      "class252": ""
+    },
+    "module_cleanup_errors": 0,
+    "quarantine_count": 0,
+    "fixtures": 0,
+    "phases": 0,
+    "benchmark_slots": 0,
+    "scope": "The held cohort matched; separate non-atomic snapshots do not establish whole-host parity, matching global order or comparative timing. Preselection is source-bound and was not separately serialized."
+  },
+  "original_phase": {
+    "status": "REFUSED_FIRST_PRE_CENSUS",
+    "original_exit": 1,
+    "attempts": 1,
+    "retries": 0,
+    "source_roles": 113,
+    "pre_post_match": true,
+    "pre_samples": 1,
+    "complete_windows": 0,
+    "fixtures": 0,
+    "phase_jobs": 0,
+    "benchmark_slots": 0,
+    "native_rows": 442,
+    "class252_returned_bytes": 34528,
+    "selected_rows": 9,
+    "background_rows": 8,
+    "held_guard_rows": 1,
+    "all_classifications_allowed": true,
+    "lanes": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "workers_joined": true,
+    "pending_or_active_workers": 0,
+    "module_cleanup_errors": 0,
+    "quarantine_count": 0,
+    "original_census_limit_ns": 50000000,
+    "census_ns": 52089000,
+    "wall_time_partitions_ns": {
+      "sample_to_bridge_begin": 802600,
+      "bridge": 14787200,
+      "bridge_to_finished": 36499200,
+      "adapter": 13646300,
+      "adapter_before_native_call": 3049000,
+      "python_native_call_envelope": 710700,
+      "adapter_after_native_return": 9886600,
+      "c_native_query_plus_precise_upper": 425700,
+      "c_decode_plus_row_copy": 83600
+    },
+    "timing_limits": "Nested spans overlap. Source regions include all work and scheduling within their endpoints; no exclusive CPU, allocation, syscall or serialization cause is established. No cross-epoch subtraction or speedup claim.",
+    "raw_resource_point": {
+      "available_memory_mib": 3977.94921875,
+      "required_floor_mib": 4096,
+      "ac_line": 0,
+      "saver": 0,
+      "complete_admission_window": false
+    },
+    "refusal": "The census cutoff refused first. Below-floor memory and battery power are raw observations, not separately scored completed resource windows.",
+    "inner_seconds": 225,
+    "outer_seconds": 240,
+    "all_original_gates_unchanged": true
+  },
+  "preserved_preparation": [
+    {
+      "status": "UNEXECUTED_PROVIDER001_SOURCE_REJECTED",
+      "reason": "Setup/close could lose unproved module custody when unload raised, and native interruption could lose partial evidence. Successor002 preserves primary and secondary failures, single release attempt and quarantine owner; nine controls passed."
+    },
+    {
+      "status": "UNEXECUTED_PHASE_REVIEW_PACKET001_REJECTED",
+      "reason": "A review-role key collided with an inherited key, producing112 roles while the carrier expected113. Root caught it before authority or native launch. Successor uses unique keys; original source proposal unchanged."
+    }
+  ],
+  "evidence_sha256": {
+    "provider_pure_tool": "ba94f84b724e2a2f10d548f7578cb4bcb0918f2ebfaa49f5f8862a8503a3a53f",
+    "provider_build_tool": "cb185f16c9bad01be3c0c3fbf5805da70d86a1598dd5bde8762e402bbebe619b",
+    "component_original_tool": "29c65c1e386c91232a32de2ab37d9dde8a8198bd6461484c09e801f43c98f1f5",
+    "component_raw_terminal": "c86ed493bc4f7f4080ced5d4a031b309f8991160dbd827ce8270c26fbe837995",
+    "component_author_audit": "03ede7436b8d0aa4ab605bea9d53e93af44ae6dda7838bad7990b2fca1cd1d96",
+    "component_critic_audit": "46233b1cac1d9925bc6a220a757cb93530a87d5a4face19826f55263682c7069",
+    "phase_offline_tool": "defb22d83774a9071eb833ae68e82c6bf25aa5765b161baf17b3c0e8b6885baf",
+    "phase_offline_result": "1d9ff516bc40df81c85df7f3e96d4a0ed30d100f3aab1498a8b542d89ae4fdf1",
+    "phase_original_tool": "5e8049346381f638959b7e79744fd0b7800328d539b58df9a34273d5bbe0b502",
+    "phase_raw_inventory": "9fc5e8f481d97ea4daf487ecdb48756d4d41b683ced981971b691701e0ba963f",
+    "phase_raw_telemetry": "31862f312f23b11f97502a19e652401be880fee290a2903252829be76e780fe6",
+    "phase_author_audit": "bdfc84e2c69baae22c86d06bab8af7db9d4dcb3ec13739d5a6814a03559fe7c9",
+    "phase_critic_audit": "d3469abb14852d326123919ffd81ea4f12ef63111c2433cedc9c1d8e5cf11a10"
+  },
+  "limits": [
+    "No completed original observer phase, during Job membership or competitive benchmark follows. The failed phase remains failed.",
+    "Prototype source is published for independent inspection and component work; it is not enabled in the guard or benchmark defaults.",
+    "Matching a fixed held cohort is identity agreement, not performance equivalence. Existing competitive losses and speed acceptance remain unresolved.",
+    "Raw machine evidence remains private. These source tools, hashes and scoped observations do not constitute the complete reproducible academic benchmark package."
+  ]
+}
