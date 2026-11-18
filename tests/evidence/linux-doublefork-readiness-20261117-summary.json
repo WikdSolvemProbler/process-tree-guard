@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "date": "2026-11-17",
+  "classification": "THREE_FAILED_LINUX_DOUBLEFORK_READINESS_ATTEMPTS_NO_QUALIFIED_PRODUCT_CASE",
+  "product_source_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+  "product_source_or_defaults_changed": false,
+  "purpose": "Prepare a detached P-to-I-to-G natural-exit124 descendant case with original process identities, domain/manager settlement, cleanup and scope retirement. These attempts did not qualify that case.",
+  "method": {
+    "retries_per_packet": 0,
+    "windows_whole_tree_deadline_seconds": 135,
+    "transport_subprocess_seconds": 130,
+    "remote_carrier_seconds": 125,
+    "guest_seconds": 115,
+    "user_scope_seconds": 105,
+    "root_fixture_seconds": 95,
+    "prearmed_cleanup_timer_seconds": 65,
+    "ordinary_observer_seconds": 20,
+    "readiness_attempt_ssh_calls": 3,
+    "additional_empty_stage_cleanup_calls": 1,
+    "separate_frozen_packet_after_each_repair": true,
+    "requested_product_deadline_seconds": 60
+  },
+  "attempts": [
+    {
+      "attempt": "001",
+      "outcome": "FAILED",
+      "outer_tool_exit": 1,
+      "ssh_exit": 125,
+      "outer_scope_exit": 1,
+      "local_timeout": false,
+      "same_scope_retirement_observed": true,
+      "product_case_qualified": false,
+      "evidence_sha256": {
+        "source": "a87fbaef9cc462bf726525976c5f2d43d834b23dc88678e2720c2c42a7cd4aba",
+        "result": "4964a0e13ba0ca0e8bb16e781ab4ebb9f19509f080927c39996a6b71ea7d5026",
+        "ssh_stdout": "765c397143eb12c7f24911c926be816f3803c4cf7e44e7af16dd7c54621a51fc",
+        "ssh_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+        "original_tool": "ebf75d2416cb4341744ae1b47210d873916337312bbce58dde187dbcdb623573",
+        "independent_failed_audit": "c7f9ac04373832643d91ee058aace03f4e7909104f99c5ab36cb27c4f85efbe7"
+      },
+      "failure": "Coordinator loader did not bind FIXTURE_SOURCE required by the fixture. The ordinary staging directory was created, then the fixture failed before writing its stage inputs or invoking the privileged root stage.",
+      "aftermath": "A separate bounded ordinary call verified and removed that empty owned directory. This does not qualify the product case."
+    },
+    {
+      "attempt": "002",
+      "outcome": "FAILED",
+      "outer_tool_exit": 1,
+      "ssh_exit": 125,
+      "outer_scope_exit": 125,
+      "local_timeout": false,
+      "same_scope_retirement_observed": true,
+      "product_case_qualified": false,
+      "evidence_sha256": {
+        "source": "c6d6a9aba3e12bca064f5aac68749870b38aa3425794152071955feb6236bd7d",
+        "result": "7b655538f663e607d0b92c68efa52ad899f124210e467c490d64d3d05d2f36a2",
+        "ssh_stdout": "7de23126684246a8baec5cad2a66e4a73adfd8528a7671fe8b4b955d3c95297f",
+        "ssh_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+        "original_tool": "39e8e6f7862beb4238bf9cfb717ae286c20a815560ffa1763ba8a81def57c06a",
+        "independent_failed_audit": "27dda3e4fc36cf1bd79810351fc1cd85b64a873319fe54c4d180d14ecf5e95a8",
+        "guest_bundle": "fef2293747f5c36025371034df0f65b919aa850665fd768eea8e74230eed7630"
+      },
+      "failure": "The root observer rejected publication of its exact 17,817-byte ordinary helper at the inherited 16,384-byte publication limit, before READY.",
+      "setup_and_teardown": {
+        "six_product_assets_installed": true,
+        "socket_started": true,
+        "normal_cleanup_succeeded": true,
+        "fallback_timer_armed": true,
+        "fallback_timer_cancelled": true,
+        "fallback_timer_fired": false,
+        "fixture_commands_native_zero": 11,
+        "exact_owned_cleanup_commands_native_zero": 4
+      }
+    },
+    {
+      "attempt": "003",
+      "outcome": "FAILED",
+      "outer_tool_exit": 1,
+      "ssh_exit": 125,
+      "outer_scope_exit": 1,
+      "local_timeout": false,
+      "same_scope_retirement_observed": true,
+      "product_case_qualified": false,
+      "evidence_sha256": {
+        "source": "d7ddfb8dbd0f6e3f4c1f9738a514852f0178a17f11b3ddd55843d1841455a264",
+        "result": "5f6014624d776d59fe67e5894a9e45bfb9dc4ac3bb3e299c99502089263ec79e",
+        "ssh_stdout": "ff233bb91df82f2cd4d2fc4c3c6530d1213f65cb9d1d0ef71b3147faf9dc3b2f",
+        "ssh_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+        "original_tool": "83f84267c068a782a5883b8370b3f482e3cd75662e96448afd40eccae085d81f",
+        "independent_failed_audit": "1a29cc7eec61ff0df1c9b8ba461e348028b0c75dfa6546e98b894af339924930"
+      },
+      "failure": "An old stage name survived namespace substitution and collided with nonempty inputs preserved from002. FileExistsError occurred before the privileged root stage; no fixture bundle was emitted.",
+      "aftermath": "Older nonempty staging inputs were retained. A new explicit owned-namespace closure is required before any successor execution."
+    }
+  ],
+  "prospective_fixture_repairs": [
+    "Bind actual fixture source and preserve trailing input in the nested loader; checked with a harmless local source/tail semantic control.",
+    "Keep default 16,384-byte publication limits; allow 32,768 only for the already hash-verified 17,817-byte helper source; checked at exact boundaries without publication I/O.",
+    "Preserve already-received actor buffers on errors, retain both secondary capture errors, and drain the two actor pipes concurrently within the original 32+8-second collection budget. Local semantic controls passed; the remote lifecycle remains unqualified.",
+    "Audit every active test-owned stage, root directory, proof/output path, cleanup unit, nonce and scope as one namespace. These three captures contain no successor runtime result."
+  ],
+  "qualification_limits": [
+    "All three attempts remain failed; local controls, cleanup and scope retirement do not rescore them.",
+    "No guard/P-I-G lifecycle correctness counterexample or passing case follows from these preparation failures.",
+    "No exclusive product-reaper attribution, general escape/race/platform qualification or performance result follows.",
+    "Linux default dispatch remains disabled and backend issue2 remains open.",
+    "Exact transport/account/path/process-identity originals and machine-specific fixture inputs remain private; public summaries and hashes do not replace independently accessible raw evidence."
+  ],
+  "qualified_product_cases_from_these_attempts": 0,
+  "primary_qualifying_competitive_measurements": 0
+}
