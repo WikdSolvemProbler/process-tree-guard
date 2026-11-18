@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "status": "PASS_ARM64_GNU_LINUX_RUST_1_88_SELECTED_TARGETS_AND_CLIENT_TESTS",
+  "source_commit": "dc3771b94934fb670e681e7c555adf17e9d6e653",
+  "source_archive_sha256": "c7746c46ecbf966e2b122a98d2be4fbd31e512d63f0d8d2fee6608667674ca47",
+  "host_target": "aarch64-unknown-linux-gnu",
+  "rustc": "1.88.0",
+  "cargo": "1.88.0",
+  "release_manifest": {
+    "date": "2025-06-26",
+    "sha256": "431b7c5c0b9a511d8e31d29b378bbc74124e8521f14beb92d3a5a5f7e7e55449",
+    "signing_key_fingerprint": "108F66205EAEB0AAA8DD5E1C85AB96E6FA1BE5FE"
+  },
+  "projected_toolchain_files": 117,
+  "tracked_source_files": 134,
+  "preserved_artifacts": 161,
+  "commands": [
+    "cargo build --locked --offline --release --target aarch64-unknown-linux-gnu --features linux-separate-service --bin process-tree-guard-root --bin process-tree-guard-client --message-format=json-render-diagnostics",
+    "cargo test --locked --offline --release --target aarch64-unknown-linux-gnu --features linux-separate-service --bin process-tree-guard-client --message-format=json-render-diagnostics -- --nocapture --test-threads=1"
+  ],
+  "release_executable_sha256": {
+    "process-tree-guard-client": "856924bcc1726e99d57b7c44c59828aebb782a6f1834b9d5e36c68c901078556",
+    "process-tree-guard-root": "fa0d8a93753c92bd491e02a012af9feac0ccbed552180b4ae063ede5a3d71891"
+  },
+  "test_executable_sha256": "0b88780d73d434ae092badc2250af3aaf43ff3c126cde6308dde0398a618a2a3",
+  "result": {
+    "build_exit": 0,
+    "test_exit": 0,
+    "passed": 12,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 0,
+    "owned_scratch_removed": true,
+    "original_scope_retired": true
+  },
+  "preservation": {
+    "result_sha256": "afee83c32fcf4bd26977ea3859d27f902784feb5aefba8ceb5e1f0e27ca69ff5",
+    "bundle_sha256": "ff523655bb7455966ebe6de88e0a4e0c1d29e616e0d7a62fb350218da412df9c",
+    "raw_records_private": true,
+    "preparation_failures_preserved": "An initial local compiler download timed out. A separate signature-verifier invocation rejected an absolute keyring path. Both failures were preserved; the final component archives matched the verified release manifest."
+  },
+  "scope": "One native ARM64 GNU Linux build at the declared Rust floor and the existing client unit tests. x86-64, broader Linux lifecycle and performance qualification, and the public academic benchmark package remain open."
+}
