@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "date": "2026-11-18",
+  "classification": "FAILED_FIXED_WINDOWS_HARNESS_CONTROL",
+  "proposed_public_filename": "windows-slotjob-conhost-custody-20261118-summary.json",
+  "purpose": "Examine the existing Windows SlotJob’s accounting and retained-handle evidence at its pre-assistance drain point. The control launched the pinned native cmd.exe /c exit 0 and exercised no current or historical guard product.",
+  "original_control": {
+    "invocations": 1,
+    "whole_tree_deadline_seconds": 40,
+    "wrapper_exit_code": 1,
+    "wrapper_output_empty": true,
+    "retries": 0,
+    "guard_product_invocations": 0,
+    "planned_contexts": [
+      "NO_WINDOW",
+      "DETACHED"
+    ],
+    "executed_contexts": [
+      "NO_WINDOW"
+    ],
+    "qualified_cells": 0,
+    "completed_child_invocations": 1,
+    "stdout_bytes": 0,
+    "stderr_bytes": 0,
+    "cleanup_proved": false,
+    "detached": {
+      "status": "NOT_RUN",
+      "reason": "The previous cell did not prove cleanup under the frozen rule."
+    }
+  },
+  "no_window": {
+    "command": {
+      "retained_handle_wait": "WAIT_OBJECT_0",
+      "exit_code": 0,
+      "post_exit_image_query_succeeded": false,
+      "post_exit_image_query_win32_error": 31,
+      "independent_image_verification_passed": false
+    },
+    "pre_assistance": {
+      "job_active_count": 1,
+      "listed_members": 1,
+      "distinct_member_image_basename": "conhost.exe",
+      "member_identity_and_creation_verified": true,
+      "member_job_membership_verified": true,
+      "retained_member_wait": "WAIT_TIMEOUT",
+      "wait_status": 258,
+      "exit_code_query_succeeded": true,
+      "exit_code_readback": 0
+    },
+    "after_assistance": {
+      "native_terminate_job_request_succeeded": true,
+      "job_active_count": 0,
+      "immediate_retained_member_wait": "WAIT_TIMEOUT",
+      "wait_status": 258,
+      "exit_code_query_succeeded": true,
+      "exit_code_readback": 0,
+      "held_handles_closed_successfully": true
+    },
+    "qualification": "Both the command image query and the required terminal signal on the listed member failed to establish the frozen evidence. Aggregate Job zero and a successful termination request established no held-handle terminal signal at the sampled instant."
+  },
+  "later_read_only_observation": {
+    "status": "RECORDED_PROCESS_IDENTIFIER_ABSENT_AT_LATER_OPEN",
+    "same_recorded_identity_and_expected_creation_bound_in_source": true,
+    "access_rights": [
+      "PROCESS_QUERY_LIMITED_INFORMATION",
+      "SYNCHRONIZE"
+    ],
+    "open_succeeded": false,
+    "win32_error": 87,
+    "tool_exit_code": 0,
+    "command_subjects_launched": 0,
+    "termination_requests": 0,
+    "original_control_retried": false,
+    "original_result_rescored": false,
+    "scope": "The original process identifier was absent at this later open attempt. No process handle was acquired. This supplies no observation of when or how the earlier listed member retired."
+  },
+  "limits": [
+    "The fresh control identifies a console host member for this NO_WINDOW launch. It leaves the members in the historical 24 assisted rows unidentified.",
+    "The observed wait state cannot establish active execution of code. This fixed control supplies no evidence of a persistent leak, no attribution of retirement to assistance, and no guard correctness, performance or cleanup result.",
+    "DETACHED remains unevaluated. The original campaign verdict, the 69-case battery-family result and the 651-test suite result are unchanged.",
+    "The original receipt and read-only observation remain in private custody. Digest values identify the exact source and evidence bytes."
+  ],
+  "sha256": {
+    "freeze": "970730175aa05b88ad6422186d3c2c050706c049b4c36f73b5285a2794207142",
+    "invocation": "9d4ff217daea73aae667bd27e2e615ea5616e13e97666637c10e88417517c9a5",
+    "control_source": "55fd62e13aa2eb81fedddff593c60e3474450d1ec9ed099f54ac019b0eb77324",
+    "slot_plan": "ba573503133e523b014c13c2c98e3633833acf5a8d9eb6d0164e5f4ae32ea474",
+    "source_author_review": "845d9d3f2f259ee213223523cc78aa2866be236afab7732a78cb1d53a82e4424",
+    "independent_source_review": "900b17b3adf31523ef6bf4d4cb5f793cf2b8f1892bb0b1a6f2b7252fc9ea146e",
+    "compile_only_terminal": "7b375ac400001b5c3813a932b38294c86e29f7806b7e4a298e0d577fa64aff62",
+    "execution_authorization": "56bf14b7c3eeca52702dcb52749a700a4efeeb3a4acab6310a85a466b3e1fb11",
+    "original_raw_receipt": "9c96950cd8b6be7ec25a588ea9b6b51158aa17d03e295a6cd88188335a52d5c5",
+    "original_terminal": "c0cec0184895e49bfb0151197abd3a6b3e9cc0f946efa798997541bed2bdb9fc",
+    "actual_source_author_review": "c736e2a7edf1058e9075c51aebe37f6d600aa9f4b51c05a050c34aa6876b78cc",
+    "actual_independent_review": "773bc140dbce3062d7ad494a5c266f91847f0f1c837c73629424047e6e0e6172",
+    "later_read_only_source": "4b233b08d86ac17001c5d9dc99344174ca39e995551ab6a7dc152eb8f05fae16",
+    "later_read_only_result": "6668975bbd088863b8d0bde4b060d3f9a7b2a6a85f332262b2810a120fd68bc8",
+    "later_read_only_terminal": "374068cace85c91fd3f51f2a7a99ef84ef85419547dd4756d097be7cf9b5c1da"
+  }
+}
