@@ -179,7 +179,7 @@ pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
 
  }
  if arguments.get(index).is_some_and(|v|v=="--"){index+=1;}
- let Some(seconds)=seconds else{let mut result=ClientOutcome::empty();result.error=Some("usage: --separate-service-context [auto] --timeout SECONDS -- PROGRAM ARGS".into());return result;};
+ let Some(seconds)=seconds.filter(|_| index < arguments.len()) else{let mut result=ClientOutcome::empty();result.error=Some("usage: --separate-service-context [auto] --timeout SECONDS -- PROGRAM ARGS".into());return result;};
  match OriginalInvocation::capture(mode,seconds){Ok(original)=>run_captured(original.acknowledge_separate_service(SeparateService::Acknowledged),&arguments[index..],true),Err(error)=>capture_failure(error)}
 }
 

@@ -62,8 +62,10 @@ cargo build --release --features linux-separate-service --bin process-tree-guard
 Cargo packages the C/headers and deployment units; the build script compiles six
 C objects into the native archive. The default Linux guard selector remains
 unsupported. Native AArch64 GNU build, 12 component tests, source package and
-extracted-source build checks passed with Rust 1.99; native minimum-Rust,
-x86-64 Linux and privileged entry/lifecycle qualification remain pending.
+extracted-source build checks passed with Rust 1.99. A separate native ARM64 GNU
+Linux run with Rust 1.88 built both release binaries and passed the 12 existing
+client tests. [Rust 1.88 evidence](../../../../tests/evidence/linux-rust-1-88-arm64-20261118-summary.json).
+Native x86-64 and full privileged lifecycle qualification remain pending.
 
 No installer, daemon, sudoers rule or permanent listener is created here. Native
 entry/bootstrap/unit and full lifecycle qualification remains pending. Temporary

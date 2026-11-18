@@ -75,7 +75,7 @@ Or in one line. Warning: some antivirus tools flag a downloaded script piped str
 irm https://raw.githubusercontent.com/WikdSolvemProbler/process-tree-guard/main/install.ps1 | iex
 ```
 
-With Rust installed, `cargo install process-tree-guard` builds and installs the programs, `ptg` included, from [crates.io](https://crates.io/crates/process-tree-guard).
+On Windows, with Rust installed, `cargo install process-tree-guard` builds and installs the programs, `ptg` included, from [crates.io](https://crates.io/crates/process-tree-guard).
 
 To install by hand instead, download the x86-64 or Arm64 Windows release from the releases page of this repository. Check each program against the Secure Hash Algorithm 256 (SHA-256) list in `SHA256SUMS`:
 
@@ -341,7 +341,7 @@ cargo build --locked --release --features linux-separate-service --bin process-t
 cargo test --locked --release --features linux-separate-service --bin process-tree-guard-client
 ```
 
-This build path requires existing `cc` and `ar` tools and `HOST == TARGET`; it does not support cross-compilation or non-GNU targets. Select these two binaries rather than a bare feature-enabled build, which also selects the Windows programs. The executables do not install protected service files, configure an account or policy, or enable a socket. [Linux deployment requirements](src/sys/linux/README.md) still apply. On ARM64 GNU Linux with Rust 1.99, the selected-bin build, the same 12 existing component tests, source packaging and a fresh rebuild from the extracted package passed. The default no-feature library check produced the exact unsupported-backend refusal without native outputs. Rust 1.88 and x86-64 remain unverified. These results do not qualify a live Linux lifecycle or performance, or enable the default Linux backend or a transparent Linux library execution API.
+This build path requires existing `cc` and `ar` tools and `HOST == TARGET`; it does not support cross-compilation or non-GNU targets. Select these two binaries rather than a bare feature-enabled build, which also selects the Windows programs. The executables do not install protected service files, configure an account or policy, or enable a socket. [Linux deployment requirements](src/sys/linux/README.md) still apply. On ARM64 GNU Linux with Rust 1.99, the selected-bin build, the same 12 existing component tests, source packaging and a fresh rebuild from the extracted package passed. The default no-feature library check produced the exact unsupported-backend refusal without native outputs. On ARM64 GNU Linux, Rust 1.88 also built both selected release binaries and passed all 12 existing client tests. [Rust 1.88 evidence](tests/evidence/linux-rust-1-88-arm64-20261118-summary.json). Native x86-64 remains unverified. These results do not qualify a live Linux lifecycle or performance, or enable the default Linux backend or a transparent Linux library execution API.
 
 ## Results
 
