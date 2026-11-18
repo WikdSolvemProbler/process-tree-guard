@@ -2,7 +2,7 @@
 
 The current Rust-only repair retains a typed original-deadline cause through preparation, native classification and the authenticated private PTGOUTC2 result. The ordinary client records that cause only after all existing service, domain, manager and reference-release joins. Natural payload exits 124 and 125 do not acquire it. The dedicated CLI then attempts one fixed `PROCESS_TIMEOUT` notice under its unchanged timer; the library writes nothing. A capture-time expiry has a distinct no-launch cause.
 
-Exact c2f64084 passed 11 ordinary native build/link steps and the same 12 existing tests (0 failed or ignored). The executed controls cover typed classification and natural payload exits 124/125, strict PTGOUTC2 decoding, post-join marker eligibility and capture-time no-launch refusal. These are pure controls alongside the existing read-only descriptor checks; they do not execute a privileged C2 root/client lifecycle or emit a CLI timeout marker. All 91 artifacts totaling 31,655,543 bytes were preserved and verified. Cleanup then verified the 83 build and 8 unit-test artifacts, removed both exact owned scratch roots and confirmed both original scopes absent; local artifacts remain preserved. G18 and genuine runtime markers remain unqualified; the historical smoke below belongs to the exact db383 predecessor. No default, native C, Windows, timer, policy or containment change is made.
+Exact c2f64084 passed 11 ordinary native build/link steps and the same 12 existing tests (0 failed or ignored). The executed controls cover typed classification and natural payload exits 124/125, strict PTGOUTC2 decoding, post-join marker eligibility and capture-time no-launch refusal. These are pure controls alongside the existing read-only descriptor checks; they do not execute a privileged C2 root/client lifecycle or emit a CLI timeout marker. All 91 artifacts totaling 31,655,543 bytes were preserved and verified. Cleanup then verified the 83 build and 8 unit-test artifacts, removed both exact owned scratch roots and confirmed both original scopes absent; local artifacts remain preserved. That component-test run left full G18 coverage open. The historical normal-exit smoke below used the exact db383 predecessor. No default, native C, Windows, timer, policy or containment change is made.
 
 ## Opt-in Cargo packaging
 
@@ -30,6 +30,12 @@ A separate ARM64 run exercised `--separate-service-context auto --timeout 10 -- 
 One mode 2 run used `--separate-service-context auto --timeout 60` with a single timed payload. The fixture ended only an ancestor it created. The client's original direct parent remained live and still parented the client at termination. The client returned 125 and emitted the original-owner-loss diagnostic. Retained handles showed the original service and payload terminal. The fixture verified the original protected cgroup hierarchy empty or retired before assistance.
 
 The fixture removed all six temporary deployment assets and the owned policy directory, canceled the unused fallback timer, and confirmed scope retirement. Two independent reviews verified the recorded case. The raw machine and transport records are private. Broader ancestor-loss and Linux lifecycle coverage remain open.
+
+## Auto-mode deadline expiry on ARM64
+
+One mode 2 run used `--separate-service-context auto --timeout 10` with two benign payload processes in the same session. The client returned 124 with `PROCESS_TIMEOUT: original invocation deadline expired` after the configured deadline. Both observers sampled the original payload processes terminal while the caller remained live. The original service was terminal and the protected cgroup hierarchy was empty or retired before fixture assistance.
+
+The fixture removed all six temporary deployment assets and the owned policy directory, canceled the unused fallback timer, and verified scope retirement. Two independent reviews verified the recorded case. Broader Linux lifecycle and performance qualification remain open.
 
 ## Last qualified predecessor smoke
 
