@@ -1,0 +1,88 @@
+{
+  "schema": "ptg-windows-current-native-full-suite-1",
+  "date": "2026-11-19",
+  "tested_commit": "0470a171397da692aefaf656942ff8762457bdc0",
+  "method": {
+    "architecture": "x86_64",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "release",
+    "build_features": [
+      "testkit"
+    ],
+    "rust": "1.98.1",
+    "msvc": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "isolated_guard_deadline_seconds": 3600,
+    "suite_entry": "tests/run_tests.py load_suite",
+    "tracked_archive_files": 1001,
+    "archive_sha256": "a51d389cf61cf69051a3c9185ca027735974bc74b74ce4a65dbc19432b518f54",
+    "archive_byte_identical_git_blobs": 65,
+    "archive_newline_only_differences": 936,
+    "archive_other_differences": 0
+  },
+  "results": {
+    "discovered": 651,
+    "pass": 647,
+    "skip": 4,
+    "fail": 0,
+    "error": 0,
+    "native_exit": 0,
+    "duration_seconds": 680.029,
+    "partial_stdout_timeout_check": "pass",
+    "test_ids_matched": true,
+    "tracked_source_files_unchanged": true,
+    "byte_verified_images_before_and_after": 6
+  },
+  "skips": [
+    "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+    "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+    "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+    "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing"
+  ],
+  "images": [
+    {
+      "name": "ptg.exe",
+      "bytes": 818688,
+      "sha256": "18db4ca631b993191ec09728b6e1e8eea4485637ad968abf31f72b5d55122567"
+    },
+    {
+      "name": "process-tree-guard-contain.exe",
+      "bytes": 373760,
+      "sha256": "d5d5298af9b478bab1b99e7bf470fa9f197a4390d602d69b07f63ea314ead6f8"
+    },
+    {
+      "name": "process-tree-guard-deadline.exe",
+      "bytes": 716288,
+      "sha256": "516310e405aace4130a966e7d48fb63952e5fbe9fb76fc5194a57359ee03e3ec"
+    },
+    {
+      "name": "process-tree-guard.exe",
+      "bytes": 818688,
+      "sha256": "f84f6657f55901c2359ee1d4498c2e828a4635c522f51177b14078ceb1608cc8"
+    },
+    {
+      "name": "process-tree-guard-gate.exe",
+      "bytes": 328704,
+      "sha256": "3778fc20ba5e206f9a34826854aae41946f2d076a412d7a86bc3a00a48a01aca"
+    },
+    {
+      "name": "testkit.exe",
+      "bytes": 629248,
+      "sha256": "1f60dc5b73de4e17dfc9385b06ec23a878950593ffb870b33381811ad0534e92"
+    }
+  ],
+  "evidence_sha256": {
+    "frozen_inputs": "446a2e6410ea2d5e853774e5a94020ce234e9e07bde2d5e86087ef71da44a969",
+    "outer_job_invocation": "df57714ddbbe57129cb517355dbcaae2da98deb8006455d67b2080587e0fc019",
+    "terminal_audit": "9785438d92bad8ae9b51e30a31847a75856500d7cd4e4058b8a4d55763587882",
+    "per_test_results": "6f4ebf5277bbd233f1853a47c34cf0651efec26f1106f68195fe382de4ea3786",
+    "discovery": "fb85e7bea03ebf38cf689bff828caadb2fe99760b81eb1ee8c10a67378309c9c",
+    "stdout": "867abafcad5a045029e2cb110bc038ee395972917765ed5e0c1c2e5188a1b67a",
+    "stderr": "afc19ec9ede9cd4ba1b4fb4a13d1807177a90fcee4e1e92f4b6e5fc839540ba6"
+  },
+  "notes": [
+    "The first file-set audit flagged four generated markers from the Windows payload-observer fixture. The subsequent audit verified the exact expected marker set and the unchanged tracked source. The files contain synthetic fixture text.",
+    "The previously observed empty stdout failure remains unexplained. The repaired assertions passed here under the original test setup.",
+    "This is correctness evidence for the Windows release testkit build. Rust integration, interactive prompt branches and competitive performance have separate qualification requirements. Raw logs and machine identifiers remain private."
+  ]
+}
