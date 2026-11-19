@@ -1,0 +1,57 @@
+{
+  "schema": "ptg-linux-arm64-live-library-refunit-refusal-1",
+  "date": "2026-11-19",
+  "source_commit": "ad521fcfc06c35caef99bf8012ccdaf15e723586",
+  "method": {
+    "architecture": "aarch64",
+    "rust_version": "1.88.0",
+    "build": "The source archive supplied the production root service and native library code. A private adapter replaced only the client binary entry point and kept the returned library outcome live until the observer released it.",
+    "entry_point": "run_library_delegated",
+    "owner_mode": "manual",
+    "separate_service_context_acknowledged": true,
+    "fixture_refunit_authorization_rule_installed": false,
+    "client_deadline_seconds": 60,
+    "observation_limit_seconds": 8,
+    "maximum_fixture_scope_seconds": 105
+  },
+  "result": {
+    "native_client_unit_tests_passed": 12,
+    "library_exit": 125,
+    "typed_refunit_authorization_denial": true,
+    "authenticated_service_hello_received": true,
+    "payload_result_received": false,
+    "payload_marker_observed": false,
+    "timeout_reported": false,
+    "manager_matched_hello_invocation_and_exec_main_pid": true,
+    "service_state": "failed",
+    "service_exit": 125,
+    "main_pid": 0,
+    "control_pid": 0,
+    "runtime_directory_absent": true,
+    "service_cgroup_absent": true,
+    "caller_and_parent_pidfds_live_at_observation": true,
+    "observation_elapsed_ms": 43.714,
+    "observation_before_caller_release": true,
+    "observation_before_fixture_cleanup": true,
+    "adapter_exit_after_release": 0,
+    "fixture_cleanup_succeeded": true,
+    "fallback_cancelled_before_trigger": true,
+    "enclosing_scope_retired": true
+  },
+  "evidence_sha256": {
+    "source_archive": "c58fa2ed72e4686426d4cd66415d3b2448e80c1d7e05bac291afa2e346bcfb68",
+    "adapter_source": "914b7953f30853ccf589ffee3461e8b4764feb16af9aa5aa8469f9cd67264a26",
+    "root_executable": "59a3f815fd6494d901e49ae66bcc48a8cc4d042f09b06899c558762b174226f6",
+    "adapter_executable": "45e877d718b2f7fb6997960f21abd10910cb61080efbf26fc9bccf9ed2eb3f16",
+    "observer_source": "6830b1859ed05ccc81c9c4e441d57e4b64146e495b3d865b216dca271cb8c2fa",
+    "sealed_input": "ccc0633723b0c052e038a49958eb27e207f57982149457a09dfda88430f6c1ec",
+    "terminal_result": "6b52084768043022e2446c5c20ec25e939514f32dd69fc9a8ace8aaef2ff3e2b",
+    "guest_receipt": "0ec4c52b811175c032a13e015a19f8bbbb3f9fe699c39a01eb2931c7b14ebc98"
+  },
+  "limits": [
+    "One fixed ARM64 delegated-library authorization-refusal case. The time is a bound on when the observer confirmed retirement in this run.",
+    "The root service and systemd may both contribute to cleanup. This case leaves exclusive cleanup causality open.",
+    "The private adapter, observer, and raw machine and transport receipts are retained outside the published repository tree.",
+    "Broader Linux qualification, default dispatch, and comparative performance remain open."
+  ]
+}
