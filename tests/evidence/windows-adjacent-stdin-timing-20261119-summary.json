@@ -1,0 +1,83 @@
+{
+  "schema": "ptg-windows-adjacent-stdin-build-comparison-v1",
+  "date_local": "2026-11-19",
+  "status": "DESCRIPTIVE_ONLY_PROTECTION_CHECKS_PASSED",
+  "build": {
+    "before_commit": "14976e43fc9097b471aacf0482dee9d48d288da4",
+    "after_commit": "a923fe5aaf463f21a71d2cbd853e64f626291016",
+    "before_image_sha256": "15dba94e48f3557fea1f207fce070215d034b5ed784d971a14d5daa15dd4f69e",
+    "after_image_sha256": "272370ee6c1670926e973cf7597349662100d2db174689db4f8cafd5af997f20",
+    "target": "x86_64-pc-windows-msvc",
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "msvc_linker": "14.51.36260.0",
+    "windows_sdk": "10.0.28000.0",
+    "cargo_command": "cargo build --offline --locked --release --bin process-tree-guard --target x86_64-pc-windows-msvc -vv",
+    "separately_verified_git_files_per_build": 992,
+    "checked_lock_sha256": "6c008ac49bdf2e3744c74f70164956a2d0883d230a96a9ca67667a702f7497e2"
+  },
+  "method": {
+    "fixed_pairs": 6,
+    "completed_slots": 12,
+    "after_first_pairs": 3,
+    "before_first_pairs": 3,
+    "independent_reviewers": 2,
+    "unresolved_method_objections": 0,
+    "physical_cores": 2,
+    "logical_processors": 4,
+    "exclusive_affinity_verified": false,
+    "workload": "Manual guard with inherited regular-file stdin, 50 ms marker payload and two-second guard timeout.",
+    "endpoint": "Before CreateProcessW until the retained original guard's native wait returned.",
+    "passed_protection_slots": 12,
+    "assisted_cleanup_slots": 0,
+    "load_filtered_or_replaced_slots": 0,
+    "coarse_whole_host_cpu_pct_range": [
+      23.2224,
+      55.9758
+    ]
+  },
+  "results": {
+    "after_faster_pairs": 2,
+    "after_slower_pairs": 4,
+    "exact_ties": 0,
+    "after_over_before_elapsed_geomean": 1.2882878768548325,
+    "after_first_elapsed_geomean": 1.7517488516610633,
+    "before_first_elapsed_geomean": 0.9474449788149517,
+    "primary_speed_acceptance": "NOT_EVALUATED",
+    "qualified_competitive_pairs": 0
+  },
+  "pairs": [
+    {"pair":1,"order":"before-first","after_elapsed_ns":301045600,"before_elapsed_ns":552245500,"after_minus_before_suspended_creation_ns":-229320600,"after_minus_before_resumed_lifecycle_ns":-21852600},
+    {"pair":2,"order":"before-first","after_elapsed_ns":127612000,"before_elapsed_ns":177375800,"after_minus_before_suspended_creation_ns":-4876500,"after_minus_before_resumed_lifecycle_ns":-44884700},
+    {"pair":3,"order":"after-first","after_elapsed_ns":107749000,"before_elapsed_ns":105792000,"after_minus_before_suspended_creation_ns":920900,"after_minus_before_resumed_lifecycle_ns":1038100},
+    {"pair":4,"order":"after-first","after_elapsed_ns":358893200,"before_elapsed_ns":150437000,"after_minus_before_suspended_creation_ns":20380100,"after_minus_before_resumed_lifecycle_ns":188085300},
+    {"pair":5,"order":"before-first","after_elapsed_ns":519266700,"before_elapsed_ns":239456000,"after_minus_before_suspended_creation_ns":-63696200,"after_minus_before_resumed_lifecycle_ns":343537000},
+    {"pair":6,"order":"after-first","after_elapsed_ns":341865800,"before_elapsed_ns":154529400,"after_minus_before_suspended_creation_ns":57301100,"after_minus_before_resumed_lifecycle_ns":130049700}
+  ],
+  "post_hoc": {
+    "difference_sums_ns": {
+      "all": 376596600,
+      "from_resumed_thread": 595972800,
+      "other": -85000,
+      "through_suspended_creation": -219291200
+    },
+    "resumed_lifecycle_after_over_before_geomean": 1.4625077220369966,
+    "retained_guard_only_cycle_ratio_geomean": 0.9704032181059712,
+    "ratios_above_one": 3,
+    "ratios_below_one": 3
+  },
+  "evidence_sha256": {
+    "source_manifest": "9cedd3bbe50ec485c48936362286deafb6d9ce7147850d2af0e443907d2750c3",
+    "plan": "c2fff5732ce9e336be64a9c8a023f3f80789d4074ad37e03bdefdfadb2ed3b5b",
+    "build_method": "6bf35f11b834e1f799d98e36bbab638f259a205314547a46b1c0eb1b478b3c38",
+    "raw_receipt": "0302d273da43ebe8e676f457ce8f4fec7ff501a997b0ca921463ecb567e2a1b9",
+    "result": "85199ad9145adf53d1418022a2f8c5b0f6fa293d4ab14dacd965e05e557f40f3",
+    "coarse_resource": "e932f8bd0d501677f31214c7446f97b23eb05ed075923e0e00a19e2cfd4453f5"
+  },
+  "limits": [
+    "The two local builds use the same toolchain, release settings, source-directory location and output-directory location. They launch from separate, equal-length image paths on the same volume.",
+    "The observed elapsed difference reversed direction with run order. The cumulative difference was concentrated in the interval from entry to ResumeThread through the retained guard wait.",
+    "After-resume timing includes the payload, observation and scheduling. Root-only cycles exclude descendants and are not elapsed time. The study does not identify the elapsed cost of the stdin query.",
+    "The coarse CPU samples include test activity. Per-launch contention, exclusive processor use, and equivalence remain unverified.",
+    "Two preparatory failures occurred before either build began. All preparations, raw receipts and machine-specific details are retained privately."
+  ]
+}

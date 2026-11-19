@@ -669,3 +669,7 @@ One fixed service-context case verified that the guard refused a root-owned dele
 ## macOS explicit Linux feature refusal — 2026-11-18
 
 On native ARM64 macOS, Cargo returned 101 when asked to build the Linux separate-service feature. The build script emitted the expected GNU Linux target diagnostic, Cargo reported an unsuccessful build, and the only compiler artifact was the host build script. The separate retirement check confirmed scratch removal and an empty compiler process group. Two earlier attempts remain failed and are described in the [scoped result](macos-explicit-linux-feature-refusal-20261118-summary.json). macOS backend qualification and the deferred administrator tests remain open.
+
+## Windows adjacent stdin-probe timing - 2026-11-19
+
+Two matching local MSVC release builds completed six balanced pairs with configured affinity. All 12 launches passed the protection checks. The `a923fe5` build was faster in two pairs and slower in four against its parent `14976e4`. Its elapsed geometric mean was 28.83% higher, and the direction reversed by run order. The elapsed-time breakdown places the cumulative difference in the interval from resuming the guard thread through waiting for it to exit. That interval includes the payload, observation and shared-host scheduling. The formal speed requirement remains open under issue #7. [All six timings, build identities and limits](windows-adjacent-stdin-timing-20261119-summary.json)
