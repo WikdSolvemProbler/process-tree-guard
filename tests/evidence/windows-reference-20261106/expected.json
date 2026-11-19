@@ -1,0 +1,713 @@
+{
+  "numerical_results": {
+    "endpoints": [
+      {
+        "endpoint": "raw_q50",
+        "estimate_ns": 4700,
+        "half_estimate_ns": [
+          1566200,
+          -183100
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -2250500,
+            1545200
+          ],
+          "L4": [
+            -2174200,
+            1387700
+          ],
+          "L8": [
+            -1911500,
+            1387700
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 1183800,
+          "bare/wake/main": -674300,
+          "main/bare/wake": -317500,
+          "main/wake/bare": 1867500,
+          "wake/bare/main": -1582200,
+          "wake/main/bare": -3059300
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "raw_q90",
+        "estimate_ns": 7907900,
+        "half_estimate_ns": [
+          9882100,
+          7463700
+        ],
+        "interval_classification": {
+          "L2": "slower",
+          "L4": "slower",
+          "L8": "slower"
+        },
+        "intervals_ns": {
+          "L2": [
+            1764700,
+            16885400
+          ],
+          "L4": [
+            2603200,
+            17008200
+          ],
+          "L8": [
+            2403100,
+            16259500
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 1782100,
+          "bare/wake/main": 6952000,
+          "main/bare/wake": 10406400,
+          "main/wake/bare": 9402000,
+          "wake/bare/main": 4617100,
+          "wake/main/bare": 8820600
+        },
+        "reasons": [],
+        "verdict": "slower",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "overhead_q50",
+        "estimate_ns": 662900,
+        "half_estimate_ns": [
+          2268200,
+          472000
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -1412000,
+            2320900
+          ],
+          "L4": [
+            -1412000,
+            2476900
+          ],
+          "L8": [
+            -1584200,
+            2844000
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 1721300,
+          "bare/wake/main": 687800,
+          "main/bare/wake": 2107400,
+          "main/wake/bare": 684400,
+          "wake/bare/main": 1131500,
+          "wake/main/bare": -511600
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "overhead_q90",
+        "estimate_ns": 5357500,
+        "half_estimate_ns": [
+          6327600,
+          1970700
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -2033800,
+            12972300
+          ],
+          "L4": [
+            -1666900,
+            12869800
+          ],
+          "L8": [
+            -715800,
+            13355500
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 3132600,
+          "bare/wake/main": 5783000,
+          "main/bare/wake": 4293100,
+          "main/wake/bare": 9922300,
+          "wake/bare/main": 3734100,
+          "wake/main/bare": 4438100
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "raw_q50",
+        "estimate_ns": 1435900,
+        "half_estimate_ns": [
+          556400,
+          2194200
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -441500,
+            3464200
+          ],
+          "L4": [
+            -387000,
+            3574200
+          ],
+          "L8": [
+            -489200,
+            3547100
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": -719500,
+          "bare/wake/main": 3237300,
+          "main/bare/wake": 869200,
+          "main/wake/bare": -991800,
+          "wake/bare/main": 3336400,
+          "wake/main/bare": 3918100
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "raw_q90",
+        "estimate_ns": 376600,
+        "half_estimate_ns": [
+          140000,
+          87800
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -9135200,
+            9365300
+          ],
+          "L4": [
+            -8839200,
+            9365300
+          ],
+          "L8": [
+            -9211800,
+            6928300
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 4157400,
+          "bare/wake/main": 390600,
+          "main/bare/wake": 5914300,
+          "main/wake/bare": -5786200,
+          "wake/bare/main": 6383300,
+          "wake/main/bare": -2217300
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "overhead_q50",
+        "estimate_ns": 1510600,
+        "half_estimate_ns": [
+          271400,
+          2056900
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "slower",
+          "L8": "slower"
+        },
+        "intervals_ns": {
+          "L2": [
+            -148900,
+            3700500
+          ],
+          "L4": [
+            93400,
+            3950300
+          ],
+          "L8": [
+            250800,
+            4005300
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 1136800,
+          "bare/wake/main": 1271000,
+          "main/bare/wake": 692300,
+          "main/wake/bare": -388500,
+          "wake/bare/main": 3326000,
+          "wake/main/bare": 3385300
+        },
+        "reasons": [
+          "block_length_classification_differs",
+          "opposite_half_or_permutation_sign"
+        ],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "overhead_q90",
+        "estimate_ns": 2227300,
+        "half_estimate_ns": [
+          1634300,
+          1963000
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -2899300,
+            13351900
+          ],
+          "L4": [
+            -2730700,
+            13034800
+          ],
+          "L8": [
+            -2463400,
+            9000700
+          ]
+        },
+        "mode": "manual",
+        "permutation_estimate_ns": {
+          "bare/main/wake": -127200,
+          "bare/wake/main": 2242100,
+          "main/bare/wake": -1141600,
+          "main/wake/bare": 1275100,
+          "wake/bare/main": 9509400,
+          "wake/main/bare": 627700
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "raw_q50",
+        "estimate_ns": 82600,
+        "half_estimate_ns": [
+          725400,
+          836300
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -3076200,
+            2225500
+          ],
+          "L4": [
+            -3225500,
+            2186700
+          ],
+          "L8": [
+            -2263800,
+            1614700
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 323800,
+          "bare/wake/main": 1187600,
+          "main/bare/wake": 2470900,
+          "main/wake/bare": -466500,
+          "wake/bare/main": -585800,
+          "wake/main/bare": -1570700
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "raw_q90",
+        "estimate_ns": -379900,
+        "half_estimate_ns": [
+          841200,
+          1792100
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -10041700,
+            6772600
+          ],
+          "L4": [
+            -7750300,
+            6916800
+          ],
+          "L8": [
+            -7429500,
+            6467700
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 1085400,
+          "bare/wake/main": 3549100,
+          "main/bare/wake": 15920100,
+          "main/wake/bare": 3707000,
+          "wake/bare/main": -638600,
+          "wake/main/bare": -9414300
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "overhead_q50",
+        "estimate_ns": 357700,
+        "half_estimate_ns": [
+          1349400,
+          634000
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -2304700,
+            2235900
+          ],
+          "L4": [
+            -2516400,
+            2201800
+          ],
+          "L8": [
+            -1842500,
+            1801800
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 585000,
+          "bare/wake/main": 2268000,
+          "main/bare/wake": 1778800,
+          "main/wake/bare": 2036000,
+          "wake/bare/main": -1313500,
+          "wake/main/bare": -265900
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "overhead_q90",
+        "estimate_ns": 86700,
+        "half_estimate_ns": [
+          432100,
+          1194600
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -6525400,
+            12422300
+          ],
+          "L4": [
+            -5730500,
+            13003200
+          ],
+          "L8": [
+            -4556500,
+            13207100
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 4269000,
+          "bare/wake/main": 2497200,
+          "main/bare/wake": 2909100,
+          "main/wake/bare": 755000,
+          "wake/bare/main": -1523900,
+          "wake/main/bare": -10189900
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "startup"
+      },
+      {
+        "endpoint": "raw_q50",
+        "estimate_ns": 2117900,
+        "half_estimate_ns": [
+          2388900,
+          1050200
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -1033500,
+            4505400
+          ],
+          "L4": [
+            -791300,
+            4572400
+          ],
+          "L8": [
+            -600800,
+            4462200
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 2929900,
+          "bare/wake/main": -307100,
+          "main/bare/wake": 5648100,
+          "main/wake/bare": 1923300,
+          "wake/bare/main": 1432700,
+          "wake/main/bare": 48700
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "raw_q90",
+        "estimate_ns": 5225100,
+        "half_estimate_ns": [
+          -1179100,
+          6249600
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -2275700,
+            17125000
+          ],
+          "L4": [
+            -3732000,
+            17760600
+          ],
+          "L8": [
+            -2930300,
+            17759600
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 1047600,
+          "bare/wake/main": -12021600,
+          "main/bare/wake": 2075300,
+          "main/wake/bare": -8812400,
+          "wake/bare/main": 15939400,
+          "wake/main/bare": 9320400
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "overhead_q50",
+        "estimate_ns": 1861400,
+        "half_estimate_ns": [
+          2298000,
+          2575800
+        ],
+        "interval_classification": {
+          "L2": "unresolved",
+          "L4": "unresolved",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            -1145800,
+            3973900
+          ],
+          "L4": [
+            -1244600,
+            4123700
+          ],
+          "L8": [
+            -1376700,
+            3987000
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 2351200,
+          "bare/wake/main": 2279200,
+          "main/bare/wake": 3100600,
+          "main/wake/bare": 1672100,
+          "wake/bare/main": 1090000,
+          "wake/main/bare": 1412400
+        },
+        "reasons": [],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      },
+      {
+        "endpoint": "overhead_q90",
+        "estimate_ns": 4530000,
+        "half_estimate_ns": [
+          1874000,
+          7544600
+        ],
+        "interval_classification": {
+          "L2": "slower",
+          "L4": "slower",
+          "L8": "unresolved"
+        },
+        "intervals_ns": {
+          "L2": [
+            432200,
+            13748100
+          ],
+          "L4": [
+            132700,
+            15302200
+          ],
+          "L8": [
+            -183000,
+            15690400
+          ]
+        },
+        "mode": "auto",
+        "permutation_estimate_ns": {
+          "bare/main/wake": 5192300,
+          "bare/wake/main": -1261500,
+          "main/bare/wake": 7032900,
+          "main/wake/bare": -4845400,
+          "wake/bare/main": 13757600,
+          "wake/main/bare": -60500
+        },
+        "reasons": [
+          "block_length_classification_differs",
+          "opposite_half_or_permutation_sign"
+        ],
+        "verdict": "unresolved",
+        "workload": "wait50"
+      }
+    ],
+    "paired_differences_descriptive_only": [
+      {
+        "mode": "manual",
+        "q50_ns": 1609000,
+        "q90_ns": 12814800,
+        "workload": "startup"
+      },
+      {
+        "mode": "manual",
+        "q50_ns": 947000,
+        "q90_ns": 14244900,
+        "workload": "wait50"
+      },
+      {
+        "mode": "auto",
+        "q50_ns": 550900,
+        "q90_ns": 10488000,
+        "workload": "startup"
+      },
+      {
+        "mode": "auto",
+        "q50_ns": 1580800,
+        "q90_ns": 12978000,
+        "workload": "wait50"
+      }
+    ]
+  },
+  "protocol": {
+    "archived_host_flags": {
+      "interrupted": false,
+      "major_instrumentation_drift": false,
+      "suspend_resume": false
+    },
+    "bootstrap": {
+      "assumption": "nominal conditional inference assuming stationary weak dependence across 40 chronological macroblocks",
+      "interval": "Bonferroni basic, nearest rank",
+      "primary_length": 4,
+      "prng": "CPython Random.getrandbits; SHA256 domain and length seed",
+      "replicates": 100000,
+      "sensitivity_lengths": [
+        2,
+        8
+      ],
+      "tail": "1/640"
+    },
+    "phase_counts": {
+      "control": 15,
+      "measured": 2880,
+      "warmup": 72
+    },
+    "schedule_seed_hex": "da150ba892a1b098d42cce518d3bfa4b55b1e242fabacd184ab6fc3013f66c81",
+    "schedule_sha256": "4731f889ee1aa0a355eec5802679307e5307eedb44d9e7a1fdaefec358f1016c",
+    "schedule_source_sha256": "2f80bcc0ca933f216b0477545bb1b81d71ef4783b9e904d9728616e89bc169ba"
+  },
+  "schema": 1,
+  "slots_sha256": "77499661139d555225bce9737c4a76772c420e768fc7864f4f557085abbc7a6b",
+  "source": {
+    "archived_admission_sha256": "9dbb2bbc3c250a14c97f46c6bd48ce603c0377673ccd50e1c0b557fc678771e7",
+    "archived_analysis_code_sha256": "4a1707fb42ccfa84151bbd2cb6f01d5cacda2eb7240d8c082711bb1d681cba53",
+    "archived_analysis_result_sha256": "5f8186357f43872f82bbce7a7c9f2b7c97f23a1d322b3f8c829ddf946012931e",
+    "archived_capture_sha256": "d92ccdb12c51eadc703674d1f1758f09d71624f12b5cedd5b4968ee5667d0258",
+    "archived_protocol_sha256": "c980b1ebd3407baee2852d3f6e9fc4db2d883887a5690547b9efca4e311d2118",
+    "earlier_attempt": {
+      "completed": false,
+      "rows": 0,
+      "terminal_sha256": "6f5b5cfb8f6368052c42d7ef02f941b6930d57a9272b45f2e5bfd407e9008de6"
+    },
+    "executable_sha256": {
+      "bare": "81678345d3b1bb31bbeaee1872580764386274d64f98129b538c80b20ed058d0",
+      "main": "f7f6e1fca2533e651ece4b44f6a484e6903612252d3aa466870314b920dc2e02",
+      "wake": "50f73d903f03ab580d4dbe1335a055febcd2aef4a79d04c5a5a179d358324770"
+    },
+    "original_archive_sha256": "56d7e8282ce249dc5bfc3ab984ea03e97d99b463bb85e96db1684a7992f47038",
+    "source_commit": {
+      "main": "8bf828a467e03d9f5f249a9da76b5845df53d057",
+      "wake_repaired": "9c6f0df93cee92dcaca0e89ebc3f09134eeab53d"
+    }
+  }
+}
