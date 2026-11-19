@@ -124,7 +124,14 @@ pub(super) fn wait(fd:RawFd,events:c_short,until:u64,
   ];
   let timeout=left.div_ceil(1_000_000).min(100) as c_int;
   let count=unsafe{poll(watched.as_mut_ptr(),1+usize::from(admission.is_some()),timeout)};
-  if count<0 {return Err(format!("native channel poll: {}",io::Error::last_os_error()));}
+  if count < 0 {
+   let error = io::Error::last_os_error();
+   // Recheck the held owners and the original absolute deadline before polling again.
+   if error.kind() == io::ErrorKind::Interrupted {
+    continue;
+   }
+   return Err(format!("native channel poll: {error}"));
+  }
   // Refuse even when the listener or private request is ready in the same poll.
   if watched[1].revents!=0 {return Err("activation channel unavailable before private admission".into());}
   if count==0 {continue;}

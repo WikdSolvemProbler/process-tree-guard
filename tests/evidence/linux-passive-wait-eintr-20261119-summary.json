@@ -1,0 +1,50 @@
+{
+  "schema": "ptg-linux-passive-wait-eintr-1",
+  "date": "2026-11-19",
+  "production": {
+    "parent_commit": "de0de387aa4a500fec53acf4ab104601041d7742",
+    "entry_rs_sha256": "3ae42483cab8fe83c93a1d32b2159338ed0bbbd0ed7cef29c709c4fbfc0840fa",
+    "change": "Retry only an interrupted native poll through the existing passive wait loop. The next iteration repeats owner checks when applicable and recomputes the remaining time from the existing CLOCK_BOOTTIME deadline."
+  },
+  "method": {
+    "architecture": "aarch64",
+    "rust": "1.88.0",
+    "environment": "Bounded ordinary-user Linux VM",
+    "probe": "A private serial test used an anonymous socket pair, a test-local caught signal and a counter attached to the actual native EINTR branch. The expiry sender continued through the late-readiness point. The test restored its signal disposition and mask after both senders had joined.",
+    "test_overlay": "The native fixture added the test-only Rust counter and control plus a C signal helper in its isolated source package."
+  },
+  "results": {
+    "native_build_exit": 0,
+    "existing_tests_passed": 12,
+    "existing_tests_failed": 0,
+    "readiness": {
+      "native_eintr_observed": 7,
+      "byte_read_within_original_deadline": true
+    },
+    "expiry": {
+      "native_eintr_observed": 27,
+      "original_deadline_ns_from_start": 450000000,
+      "observed_exit_after_cutoff_ns": 1899913,
+      "late_readiness_after_cutoff_ns": 104951377,
+      "returned_before_late_readiness": true,
+      "readiness_after_expiry_refused": true
+    },
+    "invalid_descriptor_flags_refused": true,
+    "original_signal_state_restored": true,
+    "fixture_scope_retired": true,
+    "scratch_cleanup_passed": true
+  },
+  "preserved_preparation": {
+    "attempted_build_or_test": false,
+    "reason": "The fixture manifest was rejected before native compilation because its list of archived unit-test assertions had changed.",
+    "terminal_result_sha256": "18df2c3246485ebcdd5570167eb66c1c8ffbccdb1e585a958eb8feafdfa82cc2"
+  },
+  "exact_evidence_sha256": {
+    "bound_native_input": "571ec75605ba13a5bc1711e079a2647a87233ddfa08284ff64e78c1876b29d64",
+    "instrumented_entry": "16abf5bbfc7f942dc2ed0e61bc1ad9e34a65784a105030da2d1e5889485e4389",
+    "private_entry_timer_with_test_shim": "a2ef55b3b53825641b6aba980eb0f03a4823bce914fb07a3ef7cb72428d7913f",
+    "native_terminal": "2ab6e16b7746ea319c792d473dc31064de06a1716f7481f2cdb50293ed86afd1",
+    "native_bundle": "3572403c49cb730424dda7082364deae6188afd2ea79d67944851ed132539afd"
+  },
+  "scope": "One ordinary-user native passive-wait regression. The observation times come from the original probe cutoff. Whole-service lifecycle, Linux backend qualification, and comparative performance have separate acceptance criteria."
+}
