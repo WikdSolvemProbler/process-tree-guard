@@ -21,9 +21,17 @@ On ARM64 GNU Linux with Rust 1.99, the selected-bin build, the same 12 existing 
 
 The opt-in release binaries from `f6dee0e` ran in an offline Ubuntu 24.04 x86-64 guest with kernel `6.8.0-147-generic`, cgroup v2, and `fs.suid_dumpable=2`. The acknowledged separate-service client returned 0 with empty stdout and stderr for `/usr/bin/true`. A second invocation ran a workload that printed a start marker and then slept. The client returned 124 with the original-invocation deadline message after the configured ten-second deadline. [Exact x86-64 build and CI tests](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/44441275583/job/135282419854)
 
-Before the fixture stopped the socket, systemd reported a terminal service exit of 124 and zero main and control PIDs. The fixture found no matching active service or populated cgroup in the inspected service slice. The fixture stopped the socket, verified it was inactive, and removed its temporary deployment files. The guest powered off cleanly. These observations cover the two fixed cases in mode 2. Mode 0 credential checks, the Linux kernel floor, and performance are still open. [Linux backend issue](https://github.com/WikdSolvemProbler/process-tree-guard/issues/2)
+Before the fixture stopped the socket, systemd reported a terminal service exit of 124 and zero main and control PIDs. The fixture found no matching active service or populated cgroup in the inspected service slice. The fixture stopped the socket, verified it was inactive, and removed its temporary deployment files. The guest powered off cleanly. These observations cover the two fixed cases in mode 2. The Linux kernel floor and performance are still open. [Linux backend issue](https://github.com/WikdSolvemProbler/process-tree-guard/issues/2)
 
 The first run remains a failed fixture run. Its checker required zero failed units, and the systemd journal recorded the timed-out service as failed with exit 124. The passing run required the exact terminal status and checked for live services and populated cgroups before fixture cleanup. Both raw records are retained privately.
+
+## Mode 0 credentials and CORE limits on x86-64
+
+One independent run of the same binaries used an offline Ubuntu 24.04 x86-64 guest with kernel `6.8.0-147-generic` and `fs.suid_dumpable=0`. The ordinary caller had soft and hard `RLIMIT_CORE` set to zero. While the payload waited on a checked release pipe, the observer read the live service and payload limits independently. Both had soft limit zero and an unlimited hard limit, and the payload reported the same limits.
+
+The payload's real, effective, saved, and filesystem IDs and both group memberships matched the configured ordinary account. Its `NoNewPrivs` value was 1, and its effective, permitted, inheritable, and ambient capabilities were zero. The dumpability value of 1 was measured after exec. The observer held pidfds for both original tasks across the readings and verified the same live systemd invocation.
+
+After release, the client returned 0 with empty remaining stdout and stderr. Both held pidfds indicated termination before fixture cleanup. The fixture retired its temporary activation setup, restored the initial guest dumpability mode, and the guest powered off cleanly. This result covers one mode-0 credential and CORE case on Linux 6.8. The Linux 5.14 kernel floor and broader backend qualification remain open. [Linux backend issue](https://github.com/WikdSolvemProbler/process-tree-guard/issues/2)
 
 ## Normal exit on ARM64
 
