@@ -1,0 +1,59 @@
+{
+  "schema": "ptg-macos-selected-portable-1",
+  "date": "2026-11-19",
+  "source_commit": "0d75f3bcdcca378ab92cda3e6186fcf120b2c1ab",
+  "platform": {
+    "os": "macOS",
+    "architecture": "ARM64",
+    "python": [
+      3,
+      12,
+      15
+    ],
+    "privilege": "ordinary user"
+  },
+  "method": {
+    "archive_sha256": "17ca482fdba6363471ec0288405b56453d79695708642247078fd99f40518b7a",
+    "archive_members": 1060,
+    "selectors": [
+      "test_campaign_logic.PlanTests",
+      "test_campaign_logic.TemplateTests",
+      "test_campaign_logic.ConfigPathTests",
+      "test_campaign_logic.CompetitorLossKindTests",
+      "test_campaign_logic.PricingProvenanceTests",
+      "test_campaign_logic.RecordedOutcomeTests",
+      "test_campaign_logic.CompletenessAccountingTests",
+      "test_battery_cases.BatteryShapeTests",
+      "test_battery_cases.RecordedBatteryEvidenceTests",
+      "test_campaign_logic.MalformedPackageTests",
+      "test_campaign_logic.RecordConsistencyTests",
+      "test_campaign_logic.PricingUncertaintyTests",
+      "test_campaign_logic.FloorAndReportTests",
+      "test_campaign_logic.ProfileDimensionTests",
+      "test_campaign_logic.FreezeGateKillTests",
+      "test_guard_families.PartialOutputConstructionTests",
+      "test_guard_families.OutputPassthroughAssertionTests",
+      "test_output_observation.OutputGateTests"
+    ],
+    "selected_suite": "Existing offline unittest classes. No new test cases or production edits.",
+    "audit": "Matched every successful method in the native journal to the declarations in the Git archive. Verified both transport hashes against the local result and the result against the archive, source and native receipt.",
+    "runtime": "Fixed native timeout. The test process audit hook rejected subprocess, process signal, fork, exec and socket events from its enumerated Python audit hooks."
+  },
+  "results": {
+    "selected": 136,
+    "passed": 136,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "additional_selected_vs_previous_mac_run": 28,
+    "blocked_audit_events": 0,
+    "scratch_removed": true
+  },
+  "private_receipt_sha256": {
+    "result": "e1ad8ed92a877822b7172fbe3015020147b60ab5c0087776d0d5392ff37177f3",
+    "stdout": "79de4bd44f9786bc4cf0adfbe6b34326b34e6a31c535877c281deaa870dd24e5",
+    "stderr": "01aaa3aa206ae9ba856ef1314ad94d419c557a4ee0cd0cdc3df1e91614544ad9",
+    "audit": "4f44b518db8d1f972324fc03d6851b6700e01595929e7549ccfa6dab3496a107"
+  },
+  "scope": "Portable benchmark planning, offline report evaluation and recorded evidence checks. No backend executable, administrator validation or performance trials ran."
+}

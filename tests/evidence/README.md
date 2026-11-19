@@ -703,3 +703,7 @@ The client now closes its invocation-owned systemd connection before returning t
 ## Linux passive wait signal recovery - 2026-11-19
 
 The passive socket wait retries `EINTR` through its existing loop and recomputes the remaining time from the original absolute deadline. On ARM64 Linux, the native readiness control observed seven interruptions and still received the expected byte. The expiry control observed 27 interruptions and returned the deadline error before the late byte became ready. The invalid-descriptor check still refused the native flags. All 12 existing client tests passed in the instrumented native test build, and the test scope retired. The earlier manifest refusal remains recorded separately. [Native evidence and exact inputs](linux-passive-wait-eintr-20261119-summary.json) | [Linux signal documentation](https://man7.org/linux/man-pages/man7/signal.7.html)
+
+## macOS portable benchmark checks - 2026-11-19
+
+The selected ordinary-user ARM64 macOS run passed all 136 existing offline tests with zero failures, errors or skips. This adds 28 tests over the earlier macOS selection, including plan construction, pricing provenance, recorded run outcomes and campaign completeness accounting. The native journal matched all 136 test methods in the archived source, and the runner reported scratch removal. This qualifies the selected harness checks. macOS backend and administrator qualification remain open. [Selections, source commit and receipts](macos-selected-portable-20261119-summary.json)
