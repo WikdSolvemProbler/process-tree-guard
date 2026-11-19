@@ -1,0 +1,47 @@
+{
+  "schema": "ptg-linux-x64-refunit-refusal-1",
+  "date": "2026-11-19",
+  "binary_source_commit": "0f374a60927ab0f7a971bd5044bfddfb81846c7e",
+  "checked_revision": "681c1748e9ec520278d0cbd0f43d30f8d92e63b9",
+  "provenance": "The Linux source tree, two Linux entry points, shared deadline module, and Cargo build inputs matched between these revisions.",
+  "method": {
+    "architecture": "x86_64",
+    "kernel": "6.8.0-147-generic",
+    "dumpable_mode": 2,
+    "network_enabled": false,
+    "client_mode": "explicit separate-service context",
+    "setup": "The fixture supplied the scoped UID delegation and withheld its test RefUnit authorization rule.",
+    "outer_deadline_seconds": 280,
+    "guest_driver_deadline_seconds": 105,
+    "client_deadline_seconds": 12
+  },
+  "result": {
+    "ordinary_client_exit": 125,
+    "typed_refunit_authorization_denial": true,
+    "payload_stdout_marker": false,
+    "same_named_unit_status": "failed",
+    "same_named_unit_main_exit": 125,
+    "main_pid_after": 0,
+    "control_pid_after": 0,
+    "unit_runtime_directory_absent": true,
+    "matching_cgroup_absent_or_unpopulated": true,
+    "matching_live_units_after": 0,
+    "verified_before_fixture_stopped_socket": true,
+    "fixture_cleanup_success": true,
+    "guest_powered_off": true,
+    "qemu_exit": 0
+  },
+  "evidence_sha256": {
+    "guest_fixture": "c2710fb934ff0d45c0ea795b3279f70f99f09890661b06a3cde7af2793b81788",
+    "host_runner": "ab2d2dd3d1d28b85fa657aa4423aa08b11f97d70f5668a7733d537cec7f21007",
+    "execution_intent": "e1b9e72327a20bbc7c070262f1a6e8189e91eac158b5942378966273b95825a9",
+    "terminal_result": "2c3987c41f61b0227ab6507e1854bcc35c6074ca203202ca20cc60206b736004",
+    "serial": "c78c0cd6529235c644ad2ef710a3585e4d4cde196d1b1c0f2e79c23f9c345ee2"
+  },
+  "limits": [
+    "One fixed CLI permission-refusal case. The caller exited, so cleanup with a live library caller remains unverified.",
+    "The systemd observations establish service retirement before fixture assistance. Exclusive cleanup causality remains unverified.",
+    "The guest fixture's typed-denial check is recorded by its completion marker. The detailed client and service logs remain in the private guest disk.",
+    "Linux backend qualification, default dispatch and comparative performance remain open."
+  ]
+}

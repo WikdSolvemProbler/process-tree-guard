@@ -677,3 +677,7 @@ Two matching local MSVC release builds completed six balanced pairs with configu
 ## Full Windows correctness rerun after the PowerShell fixture repair - 2026-11-19
 
 The Windows suite at `ec5f52b` completed all 651 discovered tests with **647 passes, four skips, zero failures and zero errors**. The six release images were built at `cf111ad` and verified before and after the rerun. The prior full run remains failed at 646 passes, four skips and one failure. The revised fixture kept the same PowerShell path and now requires a post-flush witness and the complete stdout line. The cause of the earlier empty capture remains unresolved. [Counts, skips, build identities and evidence hashes](windows-full651-20261119-summary.json)
+
+## Linux x86-64 RefUnit denial before payload admission - 2026-11-19
+
+In an offline x86-64 VM, the acknowledged separate-service client was denied `RefUnit` authorization. It returned 125 and emitted no payload marker. Before the fixture stopped the socket, the identified service had exited 125 with zero main and control PIDs. Its runtime directory was absent, and the matching cgroup was absent or empty. The fixture cleaned up and the guest powered off. This covers one CLI refusal. Cleanup while a library caller remains live, exclusive cleanup causality, and broader Linux qualification remain open. [Bounded case and evidence hashes](linux-x64-refunit-refusal-20261119-summary.json)
