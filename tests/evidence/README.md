@@ -673,3 +673,7 @@ On native ARM64 macOS, Cargo returned 101 when asked to build the Linux separate
 ## Windows adjacent stdin-probe timing - 2026-11-19
 
 Two matching local MSVC release builds completed six balanced pairs with configured affinity. All 12 launches passed the protection checks. The `a923fe5` build was faster in two pairs and slower in four against its parent `14976e4`. Its elapsed geometric mean was 28.83% higher, and the direction reversed by run order. The elapsed-time breakdown places the cumulative difference in the interval from resuming the guard thread through waiting for it to exit. That interval includes the payload, observation and shared-host scheduling. The formal speed requirement remains open under issue #7. [All six timings, build identities and limits](windows-adjacent-stdin-timing-20261119-summary.json)
+
+## Full Windows correctness rerun after the PowerShell fixture repair - 2026-11-19
+
+The Windows suite at `ec5f52b` completed all 651 discovered tests with **647 passes, four skips, zero failures and zero errors**. The six release images were built at `cf111ad` and verified before and after the rerun. The prior full run remains failed at 646 passes, four skips and one failure. The revised fixture kept the same PowerShell path and now requires a post-flush witness and the complete stdout line. The cause of the earlier empty capture remains unresolved. [Counts, skips, build identities and evidence hashes](windows-full651-20261119-summary.json)

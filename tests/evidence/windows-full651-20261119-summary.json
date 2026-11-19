@@ -1,0 +1,83 @@
+{
+  "schema": "ptg-full-windows-correctness-1",
+  "date": "2026-11-19",
+  "test_commit": "ec5f52bc9d352fb8ed3085778e34648cbb3674cb",
+  "binary_source_commit": "cf111ad1b7c401604f281f84bba2c2fc7753fe78",
+  "method": {
+    "test_entry": "tests/run_tests.py",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "release",
+    "build_features": [
+      "testkit"
+    ],
+    "suite_deadline_seconds": 3600,
+    "verified_archive_files": 993,
+    "unchanged_nongenerated_tracked_files": 345,
+    "byte_verified_images_before_and_after": 6,
+    "exact_discovery_ids_verified": true
+  },
+  "outcome": {
+    "native_runner_exit": 0,
+    "discovered": 651,
+    "executed": 651,
+    "passes": 647,
+    "skips": 4,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 1013.982
+  },
+  "skips": [
+    {
+      "reason": "the real cases run their Windows drivers there",
+      "test": "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero"
+    },
+    {
+      "reason": "guard binaries are built here; the recorded split is the no-guard Linux run's and the gated families execute on this machine",
+      "test": "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split"
+    },
+    {
+      "reason": "Windows presents the shape as written",
+      "test": "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here"
+    },
+    {
+      "reason": "binaries present; absence control not applicable",
+      "test": "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing"
+    }
+  ],
+  "previous_attempt": {
+    "test_commit": "cf111ad1b7c401604f281f84bba2c2fc7753fe78",
+    "passes": 646,
+    "skips": 4,
+    "failures": 1,
+    "errors": 0,
+    "native_runner_exit": 1,
+    "failed_test": "test_guard_families.F2KillPathTests.test_partial_output_survives_the_kill",
+    "observation": "Exit 124 with empty stdout. The original fixture could not establish that PowerShell had reached its write and flush.",
+    "follow_up": "Four separate diagnostic invocations passed at 1, 5, 5 and 1 seconds with captured output and a post-flush witness. The original failure's cause remains unresolved."
+  },
+  "repair": {
+    "fixture_blob": "cb69fdbbf1c7a58a1afe49a32e043db0d2e8a2ed",
+    "reviewers": 2,
+    "unresolved_objections": 0,
+    "targeted_checks_passed": 6,
+    "behavior": "The fixture requires a complete stdout line and an exact post-flush witness, exit 124, timeout notice and elapsed bounds. PowerShell gets five seconds to launch and write."
+  },
+  "images": [
+    {"name":"process-tree-guard.exe","bytes":818688,"sha256":"2b87b3471a30091c21e148926693b6a38b2121c17ffbab2394a41194d21bfac1"},
+    {"name":"process-tree-guard-deadline.exe","bytes":716288,"sha256":"92c5b16d09506a43d5de40123c64bf1102b65751d140d1ea8b514f2c042eb8cd"},
+    {"name":"process-tree-guard-contain.exe","bytes":374272,"sha256":"a2896f358a4260d2581f73e5ecbe4c0fc7b3b081e2ff94c596de054b99ff59d7"},
+    {"name":"process-tree-guard-gate.exe","bytes":328704,"sha256":"a1b87b10923c934447a1e57dd0d68f38b6bb96311b113885c397dc01f8554f07"},
+    {"name":"testkit.exe","bytes":629248,"sha256":"3d553165004c977e241df0914717530616c74937552fca7963cb3babcec4243c"},
+    {"name":"ptg.exe","bytes":818688,"sha256":"1364c0a9ab8a4b067821662d04e1c2037dde02fa2e700a4903fb73bd0f18be6e"}
+  ],
+  "evidence_sha256": {
+    "source_archive": "48960a62f8631c5883e7622b5a9bbba7dbba0f26a5053f5449a80b4f7b339d12",
+    "verification_audit": "066ecafdef830906bdde644e3e5ed71b5dc433f242f7967d38e6e56f3b30a49b",
+    "runner_stdout": "d19063c6fd0d4017a62165def78f5417094a163f586904e5228f4768634b2e73",
+    "runner_stderr": "490ec3da7f6b33ac510569d7cbc8490911dc3e0567349cd89e837f6b020f3f1c",
+    "certificate_index": "e8ce9eed164d2f0bb0a1bb96f65da28496c7579cd23108dca991fee1996e45e0",
+    "original_failure_stderr": "a34db3d4a2b0809d6682eb29fd20a774ca79efdcaa3214e23b0f78e7eb15b16f",
+    "diagnostic_results": "5a61db5bcfe24ad4862a21efb5e792f36c618d9391a41f1bdedd421aa0549e8a"
+  },
+  "scope": "Windows correctness for this release testkit-feature build. Formal speed acceptance and Linux and macOS qualification remain open. Raw records remain private."
+}
