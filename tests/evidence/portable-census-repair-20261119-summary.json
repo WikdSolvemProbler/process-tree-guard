@@ -1,0 +1,84 @@
+{
+  "schema": "ptg-portable-test-rerun-1",
+  "date": "2026-11-19",
+  "repair": {
+    "commit": "15126686d4d47c90b5ee807d328b90988f90888c",
+    "predecessor": "b9f0bf33320167f2ce6171d849ebc4578a848968",
+    "changed_files": [
+      "tests/FAILURE-TREE.md",
+      "tests/README.md"
+    ],
+    "count_kind": "Static in-tree Rust test census",
+    "previous_count": 483,
+    "verified_count": 484,
+    "affected_tests": [
+      "test_campaign_logic.CensusConsistencyTests.test_documents_printing_the_census_state_the_recomputed_totals",
+      "test_campaign_logic.Round25NeighbourTests.test_documents_next_ring_copies_recount"
+    ]
+  },
+  "linux": {
+    "architecture": "aarch64",
+    "python": "3.12.3",
+    "method": "Unmodified Python suite in a bounded ordinary-user systemd scope. Each test's start and result record matched its emitted certificate.",
+    "before": {
+      "commit": "b9f0bf33320167f2ce6171d849ebc4578a848968",
+      "archive_sha256": "6a401f49312b175acd895852313b5032240c85941754e19cf8fef7163fb3b254",
+      "discovered": 651,
+      "pass": 591,
+      "skip": 58,
+      "fail": 2,
+      "error": 0,
+      "native_exit": 1,
+      "scope_retired": true,
+      "scratch_removed": true,
+      "certificate_archive_sha256": "333ffe58bb45337153915b1fc957a05f42a8ae77c39668bff4377c6527250572",
+      "audit_sha256": "afe3856c2e6f0215c9d46e553986561cfc851d0b0671ef7b3784bf877f637335"
+    },
+    "after": {
+      "commit": "15126686d4d47c90b5ee807d328b90988f90888c",
+      "archive_sha256": "9fba941b42eb60f806ef4eb31d95c6e2d950a6420b6f4397f816924d11a97a12",
+      "discovered": 651,
+      "pass": 593,
+      "skip": 58,
+      "fail": 0,
+      "error": 0,
+      "native_exit": 0,
+      "scope_retired": true,
+      "scratch_removed": true,
+      "certificate_archive_sha256": "3eec82c77a3f4563b1fa247ac92d839c55bcf5ee6970affce39dc12d245b4af4",
+      "audit_sha256": "1c37ec0b2e342d7202d676f79b6d06a4543e2863b04520772f8beb10ea64430c"
+    },
+    "skip_breakdown": {
+      "windows_guard_build_required": 54,
+      "windows_handle_tests": 4
+    }
+  },
+  "macos": {
+    "architecture": "arm64",
+    "python": "3.12.15",
+    "commit": "b9f0bf33320167f2ce6171d849ebc4578a848968",
+    "archive_sha256": "6a401f49312b175acd895852313b5032240c85941754e19cf8fef7163fb3b254",
+    "method": "Nine selected existing classes in a bounded ordinary-user native run. The Python audit hook refused process and socket creation. The verbose journal independently matched 108 unique passing test names.",
+    "discovered": 108,
+    "pass": 108,
+    "skip": 0,
+    "fail": 0,
+    "error": 0,
+    "native_exit": 0,
+    "blocked_audit_events": 0,
+    "scratch_removed": true,
+    "selectors": [
+      "test_campaign_logic.MalformedPackageTests",
+      "test_campaign_logic.RecordConsistencyTests",
+      "test_campaign_logic.PricingUncertaintyTests",
+      "test_campaign_logic.FloorAndReportTests",
+      "test_campaign_logic.ProfileDimensionTests",
+      "test_campaign_logic.FreezeGateKillTests",
+      "test_guard_families.PartialOutputConstructionTests",
+      "test_guard_families.OutputPassthroughAssertionTests",
+      "test_output_observation.OutputGateTests"
+    ],
+    "audit_sha256": "c1922522c45222ff9e683d848b2a59393953a3633d64a0ebfa0373b64d29a860"
+  },
+  "scope": "Portable suite and selected macOS test logic. The Mac and repaired Linux source archives differed in the two documentation files listed above. Raw transport and machine data remain private. Backend qualification and performance acceptance remain open."
+}

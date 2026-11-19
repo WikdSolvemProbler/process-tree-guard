@@ -685,3 +685,9 @@ In an offline x86-64 VM, the acknowledged separate-service client was denied `Re
 ## Linux ARM64 RefUnit denial with a live library caller - 2026-11-19
 
 The acknowledged separate-service library call returned `125` after the VM refused `RefUnit` authorization. While the adapter still held the return value, both the original caller and its parent were alive. The service's HELLO matched systemd's invocation and main-process identities. The service had exited `125` with no active main or control process, and its runtime directory and cgroup were absent. The observer confirmed those facts 43.714 ms after opening the start gate, before releasing the caller or starting fixture cleanup. The adapter later exited normally. The fixture retired its scope and cancelled its unused fallback timer. This qualifies one delegated-library refusal case. [Scoped evidence and hashes](linux-arm64-live-library-refunit-20261119-summary.json)
+
+## Portable suite census repair and native reruns - 2026-11-19
+
+The first ARM64 Linux run collected 651 Python tests. It recorded 591 passes, 58 skips and two failures. Both failures traced to the same stale Rust source count, which appeared in three places. The documentation now reports 484 instead of 483. The ARM64 Linux rerun at `1512668` recorded **593 passes, 58 Windows-only skips, zero failures and zero errors**. Both formerly failing checks passed. The original failed run and the rerun retain separate journals and certificates.
+
+On macOS ARM64, all 108 selected existing Python tests passed at `b9f0bf3`. The selection covered report checks, recorded benchmark calculations and output assertions. The two tested archives differed only in the census documentation. Both environments removed their test scratch directories, and the Linux test scopes retired. [Results, selections and evidence hashes](portable-census-repair-20261119-summary.json)
