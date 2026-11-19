@@ -137,7 +137,12 @@ pub(super) fn wait(fd:RawFd,events:c_short,until:u64,
   if count==0 {continue;}
   let ready=watched[0].revents;
   if count!=1||ready&!(events|0x10)!=0 {return Err("native channel poll flags refused".into());}
-  if ready&events!=0 {return Ok(());}
+  if ready & events != 0 {
+   if supervisor::boottime_ns()? >= until {
+    return Err("native channel deadline expired".into());
+   }
+   return Ok(());
+  }
   return Err("native channel closed before expected event".into());
  }
 }

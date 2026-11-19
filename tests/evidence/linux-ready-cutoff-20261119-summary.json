@@ -1,0 +1,47 @@
+{
+  "schema": "ptg-linux-readiness-cutoff-1",
+  "date": "2026-11-19",
+  "parent_commit": "067ae673a4cd5aace126470f5c5a6309b8ba440a",
+  "production_entry_sha256": "62e89e9e575c9646285aabaf150f81cbe13658085dd887e4cab56072b6b630f6",
+  "method": {
+    "platform": "ARM64 GNU Linux",
+    "rust": "1.88.0",
+    "comparison": "Old wait function from the parent source, copied into the test build, and the patched function. Each had the same test-only hook after a real poll reported readable data on its own nonblocking socket pair.",
+    "clock": "CLOCK_BOOTTIME",
+    "fresh_deadline_per_case_ns": 250000000,
+    "delayed_consumer": "The hook confirmed readiness before the cutoff, then paused the consumer through the cutoff in both delayed cases.",
+    "intact_data": "The expected byte remained readable after each wait decision."
+  },
+  "results": {
+    "original_early": "accepted",
+    "patched_early": "accepted",
+    "original_delayed": "accepted",
+    "patched_delayed": "native channel deadline expired",
+    "timestamps_relative_to_cutoff_ns": {
+      "original_early_before": 249997959,
+      "patched_early_before": 249999292,
+      "original_late_after": 21711037,
+      "patched_late_after": 21119742
+    },
+    "existing_client_tests": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "stages": [
+      0,
+      0
+    ],
+    "scratch_removed": true,
+    "scope_retired": true
+  },
+  "evidence_sha256": {
+    "native_input": "fa5b607adf2d80ea261fe607866d342ad77202c6504e2c59e078f7c44333d508",
+    "manifest": "35d18073b95e3272f911247ebb6aef7e5320c6937bf1b61a5a4325a6d73be1db",
+    "instrumented_entry": "bae4073994748706eda61950634695159adea2f07033ce0f1b7e0ec22b480323",
+    "terminal": "1d475c1e7b9f61d00ba2f7477e85db592f6bc1cf00453aebee8b23712d639d55",
+    "bundle": "b00ab501601538b2807050ce2fcf3fdeae60d3315c8e6361a528d52497d1199c",
+    "audit": "edf26e90e9a3dde872e419f4b101fc9bcce2837d78a63f79a9b950d8a9a0714f"
+  },
+  "scope": "The patched function refuses readiness when the clock sample at the decision is at or past the original cutoff. Data may have become readable before then. The observed delays were induced by the test. This component run supplies no bound on the following syscall or whole-service qualification."
+}

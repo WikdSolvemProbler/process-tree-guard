@@ -707,3 +707,7 @@ The passive socket wait retries `EINTR` through its existing loop and recomputes
 ## macOS portable benchmark checks - 2026-11-19
 
 The selected ordinary-user ARM64 macOS run passed all 136 existing offline tests with zero failures, errors or skips. This adds 28 tests over the earlier macOS selection, including plan construction, pricing provenance, recorded run outcomes and campaign completeness accounting. The native journal matched all 136 test methods in the archived source, and the runner reported scratch removal. This qualifies the selected harness checks. macOS backend and administrator qualification remain open. [Selections, source commit and receipts](macos-selected-portable-20261119-summary.json)
+
+## Linux socket readiness at the deadline - 2026-11-19
+
+A bounded ARM64 comparison used real ready poll events on owned socket pairs and a test-only pause before the readiness decision. Both variants accepted early readiness. With the pause extending past the original deadline, the old branch still accepted readiness and the patched branch reported deadline expiry. The byte stayed readable in every case. All 12 existing client tests passed. This qualifies the passive wait's decision at its clock sample. Linux backend qualification remains open. [Method, results and evidence pins](linux-ready-cutoff-20261119-summary.json)
