@@ -19,6 +19,8 @@ The [benchmark specification](../../SPEC_Benchmark.md) records the evaluation co
 
 The public reduced report has a short, offline reproduction procedure with its verification limits. [Replay the public report](../evidence/reduced-run/README.md#replay-the-public-report)
 
+The November 17 Windows capture is available as a numerical replay with every recorded slot. [Replay the Windows measurements](../evidence/windows-campaign-20261117/README.md)
+
 ## Windows capture, 6 November 2026
 
 The campaign recorded all 1,940 planned slots in 56 minutes 53 seconds. The seeded order, 1,680 measured rows, and 1,940 successful slot Job drain receipts verified. The harness reported an incomplete certification with 44 standing losses. The startup comparison was unevaluated under its full eligibility rules, and resource and scaling gates failed. Manual usability remained unevaluated. Host CPU before launch was 22.7–27.8%, so this capture does not establish a quiet-host speed record.

@@ -1,0 +1,341 @@
+{
+  "analysis_commit": "e4e14fa9c5ea97e3afb06855c9395e470bf013cb",
+  "analysis_sha256": {
+    "tests/campaign/arms.py": "ed9b9721c25ecf375c329fbb57bb34eaaeeddc468c66958aa4726de6b02e959f",
+    "tests/campaign/plan.py": "9909e762cb3ffc731930f5f4d2679d163098d16a5360094e83d90e9206087255",
+    "tests/campaign/report.py": "92e8f5c1776db8ba1a975bc425ac1f8b130b93ac15e50e5965d7eb93c923e245",
+    "tests/campaign/runner.py": "263cd7a4d9c5ecf11e8abb3eaebff2c7624f53e67656106d3b11ff38470fbe4d",
+    "tests/campaign/windows_payload_observer.py": "d4982594d8789e3027156d1a0bff458568177e414c606f09b7101c8bb5de219f",
+    "tests/campaign/windows_slot_job.py": "94f31bffbb6faae728907e88bd7796857309e0ee795f46866a20e9527ddf98e0",
+    "tests/envcase.py": "367761bb63953ce693f9bda1e1a59616e1dd65986b5ac318f1894636dbe4391a"
+  },
+  "historical_recorded_status": {
+    "campaign_status": "incomplete",
+    "freeze_gate_failures": 0,
+    "standing_losses": 42
+  },
+  "private_original_sha256": {
+    "claim-ledger.json": "67e1d551b8cdd48eb8a1e90791eb566bfe1dbe54b599c8917b4cfdc4ac6b3490",
+    "configuration": "d94850b7bff763719a384f686e1469a47ec12daf00ae5140ff30e0e695c043b4",
+    "observations.jsonl": "62550c29af920fd7a4626916165388aadb7c6fb1da952a0c2e164fc7f7857f79",
+    "report.txt": "243695cf7a4fb3635480ab32a22b8bca6462f677a49e9f0aa1acc9e2093cdb0d",
+    "run.json": "6ed4efcce628f37e5160529b72fa2471c3fbcc4d79af1f32bead3c4e8faaf9f8"
+  },
+  "results": {
+    "floors": [
+      {
+        "agreed": false,
+        "context": "NO_WINDOW",
+        "direct_median_ms": 38.4554,
+        "relative_disagreement": 0.09704308460304825,
+        "spawn_median_ms": 42.5883
+      },
+      {
+        "agreed": false,
+        "context": "DETACHED",
+        "direct_median_ms": 27.5259,
+        "relative_disagreement": 0.17611776544999436,
+        "spawn_median_ms": 22.6781
+      }
+    ],
+    "latency": [
+      {
+        "arithmetic_outcome": "FAIL",
+        "context": "NO_WINDOW",
+        "median_ms": {
+          "guard": 93.74325,
+          "nuewframe": 86.7151,
+          "processkit": 121.35149999999999,
+          "sysprims": null
+        },
+        "path": "fast",
+        "recorded_kill_outcome_exclusions": []
+      },
+      {
+        "arithmetic_outcome": "PASS",
+        "context": "NO_WINDOW",
+        "median_ms": {
+          "guard": 2146.4762499999997,
+          "nuewframe": null,
+          "processkit": 2218.2460499999997,
+          "sysprims": 2170.6678
+        },
+        "path": "kill",
+        "recorded_kill_outcome_exclusions": [
+          "nuewframe"
+        ]
+      },
+      {
+        "arithmetic_outcome": "UNEVALUATED",
+        "context": "DETACHED",
+        "median_ms": {
+          "guard": 95.2911,
+          "nuewframe": 279.9394,
+          "processkit": 308.5855,
+          "sysprims": null
+        },
+        "path": "fast",
+        "recorded_kill_outcome_exclusions": []
+      },
+      {
+        "arithmetic_outcome": "PASS",
+        "context": "DETACHED",
+        "median_ms": {
+          "guard": 2129.1099,
+          "nuewframe": null,
+          "processkit": 2227.6708,
+          "sysprims": 2172.8089
+        },
+        "path": "kill",
+        "recorded_kill_outcome_exclusions": [
+          "nuewframe"
+        ]
+      }
+    ],
+    "recorded_fast_stream_flags": [
+      {
+        "arm": "guard",
+        "context": "NO_WINDOW",
+        "measured_fast_slots": 90,
+        "stderr_matches": 90,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "processkit",
+        "context": "NO_WINDOW",
+        "measured_fast_slots": 90,
+        "stderr_matches": 90,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "nuewframe",
+        "context": "NO_WINDOW",
+        "measured_fast_slots": 90,
+        "stderr_matches": 90,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "sysprims",
+        "context": "NO_WINDOW",
+        "measured_fast_slots": 90,
+        "stderr_matches": 0,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "guard",
+        "context": "DETACHED",
+        "measured_fast_slots": 90,
+        "stderr_matches": 90,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "processkit",
+        "context": "DETACHED",
+        "measured_fast_slots": 90,
+        "stderr_matches": 90,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "nuewframe",
+        "context": "DETACHED",
+        "measured_fast_slots": 90,
+        "stderr_matches": 90,
+        "stdout_matches": 90
+      },
+      {
+        "arm": "sysprims",
+        "context": "DETACHED",
+        "measured_fast_slots": 90,
+        "stderr_matches": 0,
+        "stdout_matches": 90
+      }
+    ],
+    "recorded_outcomes": {
+      "descendant-survived": 230,
+      "infra-failure": 2,
+      "ok": 1510,
+      "output-mismatch": 198
+    },
+    "recorded_slot_jobs": {
+      "empty_at_final_observation": 1940,
+      "harness_termination_flag": 443
+    },
+    "recorded_survivor_flags": [
+      {
+        "arm": "guard",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 0,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "guard",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 0,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "processkit",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 0,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "processkit",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 0,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "nuewframe",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 90,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "nuewframe",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 12,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "sysprims",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 0,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "sysprims",
+        "context": "NO_WINDOW",
+        "flagged_survivor": 0,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "guard",
+        "context": "DETACHED",
+        "flagged_survivor": 0,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "guard",
+        "context": "DETACHED",
+        "flagged_survivor": 0,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "processkit",
+        "context": "DETACHED",
+        "flagged_survivor": 0,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "processkit",
+        "context": "DETACHED",
+        "flagged_survivor": 0,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "nuewframe",
+        "context": "DETACHED",
+        "flagged_survivor": 90,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "nuewframe",
+        "context": "DETACHED",
+        "flagged_survivor": 12,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      },
+      {
+        "arm": "sysprims",
+        "context": "DETACHED",
+        "flagged_survivor": 0,
+        "path": "kill",
+        "slots": 90,
+        "unobserved": 0
+      },
+      {
+        "arm": "sysprims",
+        "context": "DETACHED",
+        "flagged_survivor": 0,
+        "path": "scale",
+        "slots": 12,
+        "unobserved": 0
+      }
+    ],
+    "resource_arithmetic": {
+      "compared_units": 144,
+      "failing_ranks": 78,
+      "failing_ranks_by_unit": {
+        "nuewframe on cpu_ms in fast/DETACHED variant None": 9,
+        "nuewframe on cpu_ms in fast/NO_WINDOW variant None": 2,
+        "nuewframe on cpu_ms in kill/DETACHED variant None": 3,
+        "nuewframe on cpu_ms in kill/NO_WINDOW variant None": 19,
+        "nuewframe on cpu_ms in malformed/DETACHED variant 'empty-command'": 2,
+        "nuewframe on cpu_ms in malformed/DETACHED variant 'malformed-timeout'": 1,
+        "nuewframe on cpu_ms in malformed/DETACHED variant 'non-unicode-argument'": 1,
+        "nuewframe on cpu_ms in malformed/DETACHED variant 'nonexistent-program'": 3,
+        "nuewframe on cpu_ms in malformed/NO_WINDOW variant 'empty-command'": 2,
+        "nuewframe on cpu_ms in malformed/NO_WINDOW variant 'malformed-timeout'": 2,
+        "nuewframe on cpu_ms in malformed/NO_WINDOW variant 'nonexistent-program'": 2,
+        "nuewframe on cpu_ms in malformed/NO_WINDOW variant 'over-long-argument'": 1,
+        "nuewframe on cpu_ms in scale/DETACHED variant 'wide-72'": 1,
+        "nuewframe on cpu_ms in scale/NO_WINDOW variant 'deep-40'": 2,
+        "nuewframe on cpu_ms in scale/NO_WINDOW variant 'wide-72'": 3,
+        "processkit on cpu_ms in malformed/NO_WINDOW variant 'empty-command'": 2,
+        "processkit on cpu_ms in malformed/NO_WINDOW variant 'malformed-timeout'": 2,
+        "sysprims on cpu_ms in fast/DETACHED variant None": 1,
+        "sysprims on cpu_ms in fast/NO_WINDOW variant None": 4,
+        "sysprims on cpu_ms in kill/NO_WINDOW variant None": 2,
+        "sysprims on cpu_ms in malformed/DETACHED variant 'empty-command'": 1,
+        "sysprims on cpu_ms in malformed/DETACHED variant 'malformed-timeout'": 1,
+        "sysprims on cpu_ms in malformed/DETACHED variant 'non-unicode-argument'": 1,
+        "sysprims on cpu_ms in malformed/DETACHED variant 'over-long-argument'": 2,
+        "sysprims on cpu_ms in malformed/NO_WINDOW variant 'empty-command'": 2,
+        "sysprims on cpu_ms in malformed/NO_WINDOW variant 'malformed-timeout'": 1,
+        "sysprims on cpu_ms in malformed/NO_WINDOW variant 'nonexistent-program'": 1,
+        "sysprims on cpu_ms in scale/DETACHED variant 'deep-4'": 1,
+        "sysprims on cpu_ms in scale/DETACHED variant 'wide-72'": 2,
+        "sysprims on cpu_ms in scale/NO_WINDOW variant 'wide-72'": 1,
+        "sysprims on cpu_ms in scale/NO_WINDOW variant 'wide-8'": 1
+      },
+      "loss_units": 31,
+      "unavailable_units": 0
+    },
+    "slot_counts": {
+      "control": 36,
+      "measured": 1680,
+      "warmup": 224
+    }
+  },
+  "schema": "ptg-historical-numerical-replay-1",
+  "seed": 20261029,
+  "slots_sha256": "23f48ee09c6773dc8a11337d11ebf5fa0fc746e7fb6518e5bfe0c96f689f0c0c"
+}
