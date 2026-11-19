@@ -65,7 +65,7 @@ unsupported. Native AArch64 GNU build, 12 component tests, source package and
 extracted-source build checks passed with Rust 1.99. A separate native ARM64 GNU
 Linux run with Rust 1.88 built both release binaries and passed the 12 existing
 client tests. [Rust 1.88 evidence](../../../../tests/evidence/linux-rust-1-88-arm64-20261118-summary.json).
-Native x86-64 and full privileged lifecycle qualification remain pending.
+Native GNU Linux x86-64 CI built both release binaries and passed all 12 existing client tests with Rust 1.88. [Native x86-64 CI](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/44432517131/job/135253169938). Full privileged lifecycle qualification remains pending.
 
 No installer, daemon, sudoers rule or permanent listener is created here. Native
 entry/bootstrap/unit and full lifecycle qualification remains pending. Temporary
