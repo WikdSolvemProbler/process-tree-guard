@@ -33,6 +33,12 @@ The payload's real, effective, saved, and filesystem IDs and both group membersh
 
 After release, the client returned 0 with empty remaining stdout and stderr. Both held pidfds indicated termination before fixture cleanup. The fixture retired its temporary activation setup, restored the initial guest dumpability mode, and the guest powered off cleanly. This result covers one mode-0 credential and CORE case on Linux 6.8. The Linux 5.14 kernel floor and broader backend qualification remain open. [Linux backend issue](https://github.com/WikdSolvemProbler/process-tree-guard/issues/2)
 
+## Linux 5.14 x86-64 boot and guard observations
+
+Two offline x86-64 attempts booted AlmaLinux's `5.14.0-741.22.1.el9_9.x86_64` kernel and its matching modules with Ubuntu 24.04 userspace. The live service manager exposed `DelegateSubgroup`, and the guest reported `fs.suid_dumpable=2`. Both attempts verified normal exit 0 and observed the service inactive. [AlmaLinux kernel build](https://errata.almalinux.org/9/ALSA-2026-99135.html)
+
+In the second attempt, records recovered from the preserved guest disk showed the timed payload started, the client emitted the joined original-invocation deadline diagnostic, and systemd recorded the service exiting 124. The fixture returned 1 before emitting its expiry completion marker, so the full 5.14 fixture is still incomplete. The guest powered off and its disk and logs were retained. [Linux backend issue](https://github.com/WikdSolvemProbler/process-tree-guard/issues/2)
+
 ## Normal exit on ARM64
 
 The Linux client and service built from `7b2e6d5` with Rust 1.88 passed one mode 2 invocation of `--separate-service-context --timeout 10 -- /usr/bin/true`. The client returned 0 with empty standard output and error. The fixture observed the retained client terminal before reaping it, while the original caller was live. The same protected systemd slice was empty before launch and at the later observation before fixture cleanup. The product service was absent at the later observation.

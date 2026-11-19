@@ -17,10 +17,10 @@ This page is the platform support page of process-tree-guard and the public home
 | Backend | Tier | State |
 |---|---|---|
 | Windows | Proven backend | One declaration module stands at `src/sys/windows.rs`. The crate refuses a build with no proven backend. |
-| Linux | Theory | No backend exists. A named place stands at `src/sys/linux/`. |
+| Linux x86-64 and ARM64, GNU | Opt-in execution | The acknowledged separate-service client and service have live test results. [Linux deployment and evidence](../src/sys/linux/README.md) |
 | macOS | Theory | No backend exists. A named place stands at `src/sys/macos/`. |
 
-The harness logic of the test suite has Linux proof. That proof does not raise the Linux backend tier. The tiers do not bleed into each other.
+Linux test-harness checks cover the harness. The linked native runtime results identify the separate-service cases verified on each Linux configuration.
 
 [↑ Back to Contents](#contents)
 
@@ -49,13 +49,13 @@ The guard therefore refuses a build for a target with no proven backend. The ref
 this build has no proven backend for its target; the proven backend at this version is Windows
 ```
 
-A build for a Linux target or a macOS target stops with that compile error. The proven backend at this version is Windows.
+Default Linux builds and macOS builds stop with that compile error. Linux users can explicitly build the separate-service components listed above.
 
 [↑ Back to Contents](#contents)
 
 ## Named places and revival conditions
 
-A named place is a folder with one `README.md` and no code. The Linux place stands at [src/sys/linux/README.md](../src/sys/linux/README.md). The macOS place stands at [src/sys/macos/README.md](../src/sys/macos/README.md). No module declaration names those folders. No code in those folders compiles.
+The macOS backend folder contains its [design and feasibility notes](../src/sys/macos/README.md).
 
 A future backend revives a place in one of two ways. Name a mechanism set on that system. That set must give placement at creation. That set must give an end of the whole tree on close. That set must give no breakaway. Or argue a changed promise for that backend as a product decision. Silence on both points is a refusal.
 
@@ -63,6 +63,6 @@ A future backend revives a place in one of two ways. Name a mechanism set on tha
 
 ## What a tier means
 
-Proven means the claim has execution evidence on that platform. Type-and-borrow means the code checks as types and borrows, with no execution. Theory means an argument stands and no check stands. A page that states a platform fact states its tier in the same sentence or in the same table row. A platform claim with no tier is a defect in this set.
+Proven means the claim has execution evidence on that platform. Opt-in execution covers the cases listed for explicitly selected components. Type-and-borrow means the code checks as types and borrows, with no execution. Theory means an argument stands and no check stands. A page that states a platform fact states its tier in the same sentence or in the same table row. A platform claim with no tier is a defect in this set.
 
 [↑ Back to Contents](#contents)
