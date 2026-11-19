@@ -1,6 +1,13 @@
 {
   "schema": "ptg-portable-test-rerun-1",
   "date": "2026-11-19",
+  "archive_verification": {
+    "method": "Compared both exported test archives with their committed Git blobs and tracked file modes. The archive hashes identify the exact transferred bytes.",
+    "tracked_files_per_archive": 1000,
+    "byte_identical_files_per_archive": 65,
+    "newline_only_differences_per_archive": 935,
+    "other_blob_differences": 0
+  },
   "repair": {
     "commit": "15126686d4d47c90b5ee807d328b90988f90888c",
     "predecessor": "b9f0bf33320167f2ce6171d849ebc4578a848968",
