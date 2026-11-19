@@ -56,13 +56,21 @@ fn command_absolute(command:&[OsString])->std::result::Result<Vec<Vec<u8>>,Strin
 }
 fn environment()->Vec<Vec<u8>>{std::env::vars_os().map(|(key,value)|{let mut bytes=key.into_vec();bytes.push(b'=');bytes.extend(value.into_vec());bytes}).collect()}
 fn service_gone(fd:&OwnedFd)->std::result::Result<bool,String>{let mut entry=PollFd{fd:fd.as_raw_fd(),events:POLLIN,revents:0};let count=error(os_result(unsafe{poll(&mut entry,1,0)} as isize))?;if count==0&&entry.revents==0{return Ok(false);}if count==1&&entry.revents&(POLLIN|0x10)!=0&&entry.revents&!(POLLIN|0x10)==0{return Ok(true);}Err("service pidfd poll unverified".into())}
+fn settlement_poll(service: RawFd, terminal: bool, left_ns: u64) -> (PollFd, c_int) {
+    // A terminal pidfd stays ready. Let poll wait for the next cgroup observation.
+    let fd = if terminal { -1 } else { service };
+    let timeout = left_ns.div_ceil(1_000_000).min(10) as c_int;
+    (PollFd { fd, events: POLLIN, revents: 0 }, timeout)
+}
 fn join_service(outcome:&mut ClientOutcome,reported:Option<i32>,until:u64,facts:&mut JoinFacts)->std::result::Result<(),String>{
  let hello=outcome.hello.as_ref().ok_or("missing service hello for join")?.clone();
  loop{
   before(until)?;let service=outcome.service.as_ref().ok_or("missing exact service capability")?;
-  if service_gone(service)?{facts.service_terminal=true;before(until)?;if !outcome.completion.as_mut().ok_or("missing exact completion authority")?.population_after_terminal(service,hello.pid)?{facts.domain_empty=true;break;}}
+  let terminal = service_gone(service)?;
+  if terminal{facts.service_terminal=true;before(until)?;if !outcome.completion.as_mut().ok_or("missing exact completion authority")?.population_after_terminal(service,hello.pid)?{facts.domain_empty=true;break;}}
   before(until)?;let left=until.checked_sub(supervisor::boottime_ns()?).filter(|n|*n>0).ok_or("join poll deadline expired")?;
-  let mut watched=PollFd{fd:service.as_raw_fd(),events:POLLIN,revents:0};let result=unsafe{poll(&mut watched,1,left.div_ceil(1_000_000).min(10) as c_int)};
+  let (mut watched, timeout) = settlement_poll(service.as_raw_fd(), terminal, left);
+  let result = unsafe { poll(&mut watched, 1, timeout) };
   if result<0{return Err(format!("root settlement poll: {}",io::Error::last_os_error()));}
  }
  before(until)?;let code=match reported{Some(code)=>code,None=>outcome.unit.as_ref().ok_or("missing retained unit reference")?.terminal_code(until)?};facts.manager_status=Some(code);
@@ -152,7 +160,20 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   if !settled||!root_error.is_empty(){return Err(if root_error.is_empty(){"root native settlement is unverified".into()}else{root_error});}
   outcome.completed=true;outcome.timeout=joined_timeout(timeout,settled,root_error.is_empty(),facts);Ok(code)
  })();
- match result{Ok(code)=>outcome.code=code,Err(primary)=>{outcome.code=125;outcome.timeout=None;outcome.error=Some(primary);if outcome.presentation_attempted{cancel_and_join(&mut outcome);}}}
+ match result {
+  Ok(code) => outcome.code = code,
+  Err(primary) => {
+   outcome.code = 125;
+   outcome.timeout = None;
+   outcome.error = Some(primary);
+   if outcome.presentation_attempted {
+    cancel_and_join(&mut outcome);
+   } else {
+    // No payload request was presented. Close the dedicated RefUnit connection.
+    drop(outcome.unit.take());
+   }
+  }
+ }
  outcome
 }
 /// Transparent caller confinement/resource inheritance is not implemented.
@@ -187,6 +208,10 @@ pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
 pub(crate) fn exit(result:ClientOutcome)->!{entry::cli_exit(result.exit_code(),result.error(),result.exit_timer.as_deref(),result.timeout_cause())}
 
 #[cfg(test)]pub(super) fn timeout_cause_regression(){
+ let (active, long_wait) = settlement_poll(17, false, 40_000_000);
+ let (terminal, short_wait) = settlement_poll(17, true, 250_000);
+ assert_eq!((active.fd, active.events, long_wait), (17, POLLIN, 10));
+ assert_eq!((terminal.fd, terminal.events, short_wait), (-1, POLLIN, 1));
  let facts=JoinFacts{service_terminal:true,domain_empty:true,manager_status:Some(124),manager_verified:true,unit_unreferenced:true};
  assert_eq!(joined_timeout(Some(TimeoutCause::Terminal),true,true,facts),Some(ClientTimeout::Joined(TimeoutCause::Terminal)));
  assert_eq!(joined_timeout(None,true,true,facts),None);
