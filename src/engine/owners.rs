@@ -493,7 +493,7 @@ where
     Ok(Some(owners))
 }
 
-pub(super) fn watched_owner_handles(watch_ancestors: bool, kept: &[Handle], cleanup: &mut HandleList, seed: Option<&ParentFacts>, levels: &mut Option<SmallList<ConsoleOwner, 16>>, windows: &mut Option<String>) -> Result<HandleList, GuardError> {
+pub(super) fn watched_owner_handles(watch_ancestors: bool, kept: &[Handle], cleanup: &mut HandleList, seed: Option<&ParentFacts>, levels: &mut Option<SmallList<ConsoleOwner, 16>>, windows: &mut Option<String>) -> Result<(HandleList, Option<u64>), GuardError> {
     // The pseudo-handle behind this run's own creation-time read is
     // kept in `process` and handed to the parent query below (and,
     // on the watched route, to the direct chain's parent query):
@@ -523,14 +523,14 @@ pub(super) fn watched_owner_handles(watch_ancestors: bool, kept: &[Handle], clea
                 handle
             }
         };
-        if !matches!(started_at(handle), Some(started) if started <= ours) {
-            return Err(GuardError("the parent cannot be verified and watched".into()));
-        }
+        let started = started_at(handle).filter(|&started| started <= ours)
+            .ok_or_else(|| GuardError("the parent cannot be verified and watched".into()))?;
         // No image or whole-system process snapshot is needed for one parent.
-        return Ok(HandleList::from_slice(&[handle]));
+        // Keep the verified time with its retained handle for console cleanup.
+        return Ok((HandleList::from_slice(&[handle]), Some(started)));
     }
 
-    if let Some(owners) = direct_owner_chain(ours, kept, cleanup, seed, levels, windows, process)? { return Ok(owners); }
+    if let Some(owners) = direct_owner_chain(ours, kept, cleanup, seed, levels, windows, process)? { return Ok((owners, None)); }
     // The fallback must describe its own verified chain, not a partial direct walk.
     if let Some(levels) = levels.as_mut() { *levels = SmallList::new(); }
     let map = owner_parent_map()?;
@@ -545,7 +545,7 @@ pub(super) fn watched_owner_handles(watch_ancestors: bool, kept: &[Handle], clea
     collect_owner_handles_with_levels(&map, me, ours, windows.as_deref().unwrap_or(""), |id| {
         let retained = if Some(id) == first { seed.map(|seed| seed.handle).or_else(|| kept.first().copied()) } else { None };
         observed_owner(id, retained, cleanup)
-    }, levels)
+    }, levels).map(|owners| (owners, None))
 }
 
 /// Live ancestors of this process, nearest first, each with the file name

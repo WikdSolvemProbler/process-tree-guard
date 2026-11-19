@@ -170,7 +170,7 @@ impl Console {
 
     /// Best effort, after Job cleanup only, and only for a real CLI invocation.
     /// User type-ahead is deliberately discarded with child-injected input.
-    pub(crate) fn finish(&self, first_owner: Option<Handle>, levels: Option<&[crate::engine::ConsoleOwner]>, windows: Option<&str>) {
+    pub(crate) fn finish(&self, first_owner: Option<(Handle, Option<u64>)>, levels: Option<&[crate::engine::ConsoleOwner]>, windows: Option<&str>) {
         if !active() { return; }
         unsafe {
             // The Windows folder string of the whole call: the run's
@@ -217,10 +217,10 @@ impl Console {
                 });
                 return;
             }
-            let Some(first) = first_owner else { return };
+            let Some((first, mut current_started)) = first_owner else { return };
             let mut current = first;
             let mut owned = false;
-            let mut current_started = None;
+            // A parent-only run already checked the retained first owner.
             // The finite ancestry-flush bound: 64 levels. Every newly opened
             // parent must predate its retained child; no PID-only replacement.
             for _ in 0..crate::engine::MAX_CONSOLE_LEVELS {
@@ -440,6 +440,12 @@ mod tests {
         assert_eq!(*reads.borrow(), [11, 12, 13, 14]);
         assert_eq!(cached, Some(10), "a rejected parent never becomes the cached child");
         assert!(!advance_creation_time(&mut None, 11usize as Handle, 12usize as Handle, |_| None));
+
+        reads.borrow_mut().clear();
+        let mut verified_first_owner = Some(30);
+        assert!(advance_creation_time(&mut verified_first_owner, 11usize as Handle, 12usize as Handle, &mut read));
+        assert_eq!(*reads.borrow(), [12], "the retained first owner's verified time is reused");
+        assert_eq!(verified_first_owner, Some(20));
     }
 
     use super::*;

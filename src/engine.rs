@@ -511,8 +511,8 @@ fn run_job_core<D: Decisions>(
             // Owners: the parent, or in automatic mode every live ancestor, so a
             // host that kills only the outer launcher of a shell still ends the tree.
             // A run with an exception already holds its parent (nearest first), opened for the prompt.
-            let owners = watched_owner_handles(watch_ancestors, &kept, &mut handles, parent, &mut console_owners, &mut console_windows)?;
-            first_owner = owners.first().copied();
+            let (owners, parent_started) = watched_owner_handles(watch_ancestors, &kept, &mut handles, parent, &mut console_owners, &mut console_windows)?;
+            first_owner = owners.first().map(|&handle| (handle, parent_started));
             trace("job ready, owners opened");
             // For the unit tests of the engine only: a look at the run just before its command starts.
             #[cfg(test)]
