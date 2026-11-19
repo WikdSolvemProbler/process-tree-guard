@@ -80,6 +80,7 @@ struct Options {
     shell: Option<String>,
     command_b64: Option<String>,
     command: Vec<String>,
+    command_separator: bool,
     extendable: bool,
     max_extension: Option<String>,
     extension_log: Option<String>,
@@ -91,14 +92,17 @@ struct Options {
 /// when `extension_options` is true (the full command and the deadline role).
 fn parse(mut args: Vec<String>, extension_options: bool) -> Result<Options, GuardError> {
     let mut options = Options {
-        help: false, timeout: None, shell: None, command_b64: None, command: Vec::new(),
+        help: false, timeout: None, shell: None, command_b64: None, command: Vec::new(), command_separator: false,
         extendable: false, max_extension: None, extension_log: None, authenticate: None,
     };
     let mut i = 0;
     while i < args.len() {
         let arg = &args[i];
-        if !arg.starts_with('-') || arg == "--" {
-            args.drain(..i);
+        let starts_with_dash = arg.starts_with('-');
+        if !starts_with_dash || arg == "--" {
+            // Move the command tail once, whether it has a separator or not.
+            options.command_separator = starts_with_dash;
+            args.drain(..i + usize::from(options.command_separator));
             options.command = args;
             break;
         }
@@ -252,7 +256,7 @@ struct Launch {
 
 /// Check the options and work out the command: the errors in the order they are reported (the
 /// timeout and the cap, then the command), with no prompt and no system call.
-fn plan(mut options: Options) -> Result<Launch, GuardError> {
+fn plan(options: Options) -> Result<Launch, GuardError> {
     let timeout = options.timeout.as_deref().ok_or_else(|| GuardError("the following arguments are required: --timeout".into()))?;
     let seconds = duration(timeout)?;
     let mut extendable = extension_settings(&options, seconds)?;
@@ -261,7 +265,7 @@ fn plan(mut options: Options) -> Result<Launch, GuardError> {
     let needs_shown = extendable.as_ref().is_some_and(|settings| settings.exception.is_some());
     let mut shown = None;
     let child: Vec<String> = if let Some(shell) = options.shell {
-        let encoded = match (&options.command_b64, options.command.is_empty()) {
+        let encoded = match (&options.command_b64, options.command.is_empty() && !options.command_separator) {
             (Some(b64), true) => b64,
             _ => return Err(GuardError("--shell requires --command-b64 and no additional arguments".into())),
         };
@@ -275,11 +279,9 @@ fn plan(mut options: Options) -> Result<Launch, GuardError> {
         if options.command_b64.is_some() {
             return Err(GuardError("--command-b64 requires --shell".into()));
         }
-        let after_dashes = options.command.first().map(String::as_str) == Some("--");
-        if after_dashes { options.command.remove(0); }
         let child = options.command;
         if child.is_empty() {
-            return Err(GuardError(if after_dashes { "a command is required after --" } else { "a command is required" }.into()));
+            return Err(GuardError(if options.command_separator { "a command is required after --" } else { "a command is required" }.into()));
         }
         if needs_shown { shown = Some(list2cmdline(&child)); }
         child
@@ -374,13 +376,34 @@ mod tests {
         assert!(parse(vec!["--timeout".into()], true).is_err());
         let ok = parse(vec!["--timeout=5".into(), "--".into(), "x".into()], true).ok().unwrap();
         assert_eq!(ok.timeout.as_deref(), Some("5"));
-        assert_eq!(ok.command, vec!["--".to_string(), "x".to_string()]);
+        assert!(ok.command_separator);
+        assert_eq!(ok.command, words("x"));
         assert!(parse(vec!["--help".into()], true).ok().unwrap().help);
         assert!(parse(vec!["-h".into(), "--bogus".into()], true).ok().unwrap().help);
     }
 
     fn words(line: &str) -> Vec<String> {
         line.split_whitespace().map(String::from).collect()
+    }
+
+    #[test]
+    fn command_separator_preserves_child_arguments_and_errors() {
+        let launch = |line: &str| plan(parse(words(line), true).ok().unwrap());
+        for line in ["--timeout 5 -- tool -- --help", "--timeout 5 tool -- --help"] {
+            assert_eq!(launch(line).ok().unwrap().child, words("tool -- --help"));
+        }
+        assert_eq!(launch("--timeout 5 -- --").ok().unwrap().child, words("--"));
+
+        for (line, expected) in [
+            ("--timeout 5", "a command is required"),
+            ("--timeout 5 --", "a command is required after --"),
+            ("--timeout 5 --shell cmd --command-b64 eA== --",
+             "--shell requires --command-b64 and no additional arguments"),
+            ("--timeout bad --shell cmd --command-b64 eA== --", "timeout must be a number"),
+        ] {
+            let error = launch(line).err().expect("invalid launch was accepted");
+            assert_eq!(error.message(), expected);
+        }
     }
 
     #[test]
