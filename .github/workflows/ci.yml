@@ -12,6 +12,7 @@
 #         hosted runner, then the library and shared process behavior tests run natively
 #         on Arm64, then an artifact that holds the programs.
 # minimum-rust: the same check with the toolchain named by rust-version in Cargo.toml.
+#               Also builds the opt-in Linux programs and runs the client tests natively.
 #
 # The full integration suite needs Git Bash paths and an interactive desktop session.
 # Run it with `cargo test --release` on a Windows machine that has
@@ -122,6 +123,21 @@ jobs:
               sys.exit(f"Unexpected backend refusal: Cargo {sys.argv[1]}, finished={finished}, errors={failures}")
           print("Verified the intentional unsupported-backend error.")
           PY
+
+      - name: Build the opt-in Linux programs, release
+        timeout-minutes: 4
+        run: |
+          test "$(uname -m)" = x86_64
+          timeout --signal=KILL 180s cargo build --release --locked --offline \
+            --target x86_64-unknown-linux-gnu --features linux-separate-service \
+            --bin process-tree-guard-root --bin process-tree-guard-client
+
+      - name: Test the opt-in Linux client, release
+        timeout-minutes: 4
+        run: |
+          timeout --signal=KILL 180s cargo test --release --locked --offline \
+            --target x86_64-unknown-linux-gnu --features linux-separate-service \
+            --bin process-tree-guard-client
 
   build:
     name: build (x86_64-pc-windows-msvc)
