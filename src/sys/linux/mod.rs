@@ -680,7 +680,12 @@ mod tests {
         refusal("file_instead_of_owner_pidfd",&frame,&wrong_owner,Refusal::NotPidfd);
         let mut wrong_ancestor=rights.clone();wrong_ancestor[1]=rights[0];
         refusal("self_instead_of_parent_pidfd",&frame,&wrong_ancestor,Refusal::Invocation(invocation::InvocationError::Kernel("WrongPidfd".into())));
-        let mut expired=original.metadata().clone();expired.captured_ns=1;expired.deadline_ns=60_250_000_001;
+        // Use a deadline already sampled on the boot clock, even on a fresh runner.
+        let mut expired = original.metadata().clone();
+        expired.seconds = 1e-9;
+        expired.deadline_ns = original.metadata().captured_ns;
+        let duration_ns = invocation::requested_ns(expired.seconds).unwrap();
+        expired.captured_ns = expired.deadline_ns.checked_sub(duration_ns).unwrap();
         let expired=request::encode(&expired,&[b"/never-executed"],&[]).unwrap();
         refusal("original_deadline_expired",&expired,&rights,Refusal::Invocation(invocation::InvocationError::Expired));
         assert_eq!(invocation::InvocationError::Expired.exit_code(),124);
