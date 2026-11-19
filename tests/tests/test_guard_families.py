@@ -32,37 +32,26 @@ needs_guard = unittest.skipUnless(
 # ------------------------------------------------------- F2 partial output
 
 PARTIAL_OUTPUT_LINE = "line-before-kill"
-PARTIAL_OUTPUT_TIMEOUT_S = 1
+# Allow PowerShell startup before observing the write and flush.
+PARTIAL_OUTPUT_TIMEOUT_S = 5
 PARTIAL_OUTPUT_SLEEP_S = 30
+PARTIAL_OUTPUT_WITNESS = "flushed"
 
 
-def partial_output_command():
-    """The shell command for F2's partial-output fixture: write a
-    line, flush it, then sleep far past the guard's deadline, so
-    the only way the run ends is the guard's kill at the deadline
-    and the line in the captured output is genuinely pre-kill
-    output. The command text is plain PowerShell."""
-    return ("[System.Console]::WriteLine('line-before-kill'); "
-            "[System.Console]::Out.Flush(); "
-            f"Start-Sleep -Seconds {PARTIAL_OUTPUT_SLEEP_S}")
-
-
-def partial_output_shell_args():
-    """The guard invocation for the partial-output fixture, in the
-    guard's own shell form (the shape F1's
-    `test_shell_form_runs_the_decoded_command` uses: `--timeout`,
-    `--shell powershell`, `--command-b64`). Construction runs
-    anywhere; only the verdict needs the guard.
-
-    The payload is the Base64 of the command's UTF-8 bytes — the
-    encoding the guard's `--command-b64` decode requires (UTF-8,
-    nonempty, no NUL; see the tree's `decode_command`) and the
-    encoding every other shell-form use in this suite uses
-    (F1, F3/F8, the scanner corpus's `ZWNobyBPSw==`). A UTF-16LE
-    spelling would decode to NUL-bearing bytes the guard refuses
-    with 125, so it is used nowhere in this suite."""
-    command = partial_output_command()
-    encoded = base64.b64encode(command.encode("utf-8")).decode()
+def partial_output_shell_args(witness):
+    """Build a bounded shell test with a witness written after the stdout flush."""
+    witness_b64 = base64.b64encode(os.fspath(witness).encode("utf-8")).decode("ascii")
+    command = (
+        "$ErrorActionPreference = 'Stop'; "
+        "$witness = [System.Text.Encoding]::UTF8.GetString("
+        f"[System.Convert]::FromBase64String('{witness_b64}')); "
+        f"[System.Console]::WriteLine('{PARTIAL_OUTPUT_LINE}'); "
+        "[System.Console]::Out.Flush(); "
+        "[System.IO.File]::WriteAllBytes($witness, "
+        f"[System.Text.Encoding]::ASCII.GetBytes('{PARTIAL_OUTPUT_WITNESS}')); "
+        f"Start-Sleep -Seconds {PARTIAL_OUTPUT_SLEEP_S}"
+    )
+    encoded = base64.b64encode(command.encode("utf-8")).decode("ascii")
     return {
         "command": command,
         "encoded": encoded,
@@ -80,39 +69,35 @@ class PartialOutputConstructionTests(unittest.TestCase):
     construction is checked in `CapConstructionTests`."""
 
     def test_partial_output_payload_construction(self):
-        fixture = partial_output_shell_args()
-        # The payload round-trips as UTF-8 with no NUL, exactly
-        # what the guard's --command-b64 decode accepts.
+        witness = os.path.join("fixture's directory\u2019", "flush.bin")
+        fixture = partial_output_shell_args(witness)
         decoded = base64.b64decode(
             fixture["encoded"], validate=True).decode("utf-8")
         self.assertEqual(decoded, fixture["command"])
         self.assertNotIn("\x00", decoded)
-        # The argument construction is the shell form, at a 1 s
-        # deadline, carrying exactly that payload.
+        path_b64 = decoded.split("::FromBase64String('", 1)[1].split("'", 1)[0]
+        self.assertEqual(base64.b64decode(path_b64, validate=True).decode("utf-8"), witness)
         self.assertEqual(
             fixture["args"],
-            ["--timeout", "1", "--shell", "powershell",
+            ["--timeout", "5", "--shell", "powershell",
              "--command-b64", fixture["encoded"]])
-        self.assertEqual(fixture["timeout_s"], 1)
+        self.assertEqual(fixture["timeout_s"], 5)
 
     def test_partial_output_fixture_writes_flushes_then_outlives(self):
-        fixture = partial_output_shell_args()
+        fixture = partial_output_shell_args("flush.bin")
         command = fixture["command"]
+        self.assertTrue(command.startswith("$ErrorActionPreference = 'Stop'; "))
         line_at = command.index(PARTIAL_OUTPUT_LINE)
-        flush_at = command.index("Flush")
+        flush_at = command.index("::Out.Flush()")
+        witness_at = command.index("::WriteAllBytes")
         sleep_at = command.index("Start-Sleep")
-        # Write, then flush, then sleep — in that order.
         self.assertLess(line_at, flush_at)
-        self.assertLess(flush_at, sleep_at)
+        self.assertLess(flush_at, witness_at)
+        self.assertLess(witness_at, sleep_at)
+        self.assertIn(f"GetBytes('{PARTIAL_OUTPUT_WITNESS}')", command)
         self.assertIn(f"-Seconds {PARTIAL_OUTPUT_SLEEP_S}", command)
-        # The fixture outlives its deadline by a wide margin, so
-        # a return can only be the guard's kill, never the
-        # child's own exit: sleep 30 s against a 1 s deadline,
-        # well under the driver's 60 s deadline only because
-        # the guard kills it.
         self.assertGreater(fixture["sleep_s"], fixture["timeout_s"])
-        self.assertEqual(fixture["line"],
-                         PARTIAL_OUTPUT_LINE.encode("utf-8"))
+        self.assertEqual(fixture["line"], PARTIAL_OUTPUT_LINE.encode("utf-8"))
 
 
 # ------------------------------------------------- F1 exact output
@@ -353,19 +338,21 @@ class F2KillPathTests(unittest.TestCase):
                              "grandchild survived the tree kill")
 
     def test_partial_output_survives_the_kill(self):
-        fixture = partial_output_shell_args()
-        start = time.perf_counter()
-        exit_code, out, _, _ = drv.guard(fixture["args"])
-        elapsed = time.perf_counter() - start
-        # All three: the kill happened (124, not the child's own
-        # exit), the pre-kill line survived in the captured
-        # stdout, and the elapsed time is a kill at the deadline
-        # — at least the timeout, well under the driver's 60 s
-        # deadline and well under the fixture's 30 s sleep.
-        self.assertEqual(exit_code, 124)
-        self.assertIn(fixture["line"], out)
-        self.assertGreaterEqual(elapsed, fixture["timeout_s"])
-        self.assertLess(elapsed, 15.0)
+        with tempfile.TemporaryDirectory(prefix="ptg-output-'-\u2019-") as tmp:
+            witness = os.path.join(tmp, "flush.bin")
+            fixture = partial_output_shell_args(witness)
+            start = time.perf_counter()
+            exit_code, out, err, _ = drv.guard(fixture["args"])
+            elapsed = time.perf_counter() - start
+            self.assertEqual(exit_code, 124)
+            self.assertIn(b"PROCESS_TIMEOUT", err)
+            self.assertTrue(os.path.isfile(witness),
+                            "PowerShell did not confirm the stdout flush before the deadline")
+            with open(witness, "rb") as proof:
+                self.assertEqual(proof.read(), PARTIAL_OUTPUT_WITNESS.encode("ascii"))
+            self.assertIn(fixture["line"], out.splitlines())
+            self.assertGreaterEqual(elapsed, fixture["timeout_s"])
+            self.assertLess(elapsed, 15.0)
 
 
 @needs_guard
