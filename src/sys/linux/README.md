@@ -37,6 +37,12 @@ One mode 2 run used `--separate-service-context auto --timeout 10` with two beni
 
 The fixture removed all six temporary deployment assets and the owned policy directory, canceled the unused fallback timer, and verified scope retirement. Two independent reviews verified the recorded case. Broader Linux lifecycle and performance qualification remain open.
 
+## Overlapping auto-mode invocations on ARM64
+
+Two mode 2 invocations from the same live caller overlapped on one activation socket in distinct service units and cgroups. The 10-second invocation returned 124 with the timeout notice. Its retained client, service, and payload were terminal while the other invocation's retained client, service, and payload remained live. The second invocation returned 0 under its own 18-second deadline.
+
+The fixture verified both original domains empty or retired before assistance. It removed all six temporary assets and the owned policy directory, canceled the unused timer, and verified scope retirement. A first attempt stopped in the test driver's receipt handling. Its cleanup passed, and its original record remains preserved. Two independent reviews verified the successful case. Broader concurrent lifecycle and performance qualification remain open.
+
 ## Last qualified predecessor smoke
 
 One genuine acknowledged separate-service normal-exit case passed on Linux 6.8 ARM64 under mode 2. The client returned 0 without a timeout in 6.09 seconds with empty standard output and error. A persisted unassisted pre-stop witness proved the original guard family empty while the original fixture was still live, before teardown. Exact owned temporary rule removal and the independently bounded host process-tree stop and join completed without errors. This establishes one fixed basic entry and native-join contract; Linux default dispatch remains disabled.
@@ -129,7 +135,7 @@ A one-shot admission fixture used kernel credentials on a private Unix socket an
 
 A follow-up fixture admitted an independently launched ordinary user through a bounded one-shot root rendezvous. The accepted socket credentials and per-packet kernel credentials matched the transferred pidfd. Seven malformed or mismatched requests left no payload leaf or exec marker. The valid fixture forwarded exit 127. Caller exit before release prevented exec, and caller exit after exec drained the payload cgroup. The independent sibling survived. [External admission proof and raw receipts — raw archive withdrawn](../../../tests/evidence/README.md#withdrawn-private-evidence)
 
-Both admission fixtures ran on Linux ARM64 6.8. The product backend still needs an installation and activation policy, general command authorization, qualification on the supported kernel floor, and concurrent lifecycle coverage.
+Both admission fixtures ran on Linux ARM64 6.8. The product backend still needs an installation and activation policy, general command authorization, qualification on the supported kernel floor, and broader concurrent lifecycle coverage.
 
 A shared deadline-validation prototype passed focused checks on Windows x64, Linux ARM64, and native macOS ARM64. The recovered census classified its new module as pure after the current baseline pins were reconciled. The matched Windows release changed its mapped code section, and the historical generator still emits an obsolete explanation for `environment.rs`. The prototype remains outside production pending speed qualification and a refreshed design gate. [Source, native receipts, and raw censuses — raw archive withdrawn](../../../tests/evidence/README.md#withdrawn-private-evidence)
 
