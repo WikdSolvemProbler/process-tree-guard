@@ -639,6 +639,18 @@ mod tests {
         let mut received_err=fs::File::from(received_err);received_err.write_all(b"err").unwrap();
         let received_cwd=fs::File::from(received_cwd);let held=received_cwd.metadata().unwrap();
         assert_eq!((held.dev(),held.ino()),(meta.dev(),meta.ino()));
+        {
+            let (activation, peer) = socket_pair().unwrap();
+            let (request, writer) = socket_pair().unwrap();
+            send_packet(writer.as_raw_fd(), b"x", &[]).unwrap();
+            let until = (supervisor::boottime_ns().unwrap() + 5_000_000_000)
+                .min(received_owners.metadata().deadline_ns);
+            let admission = Some((&received_owners, &activation));
+            entry::wait(request.as_raw_fd(), POLLIN, until, admission).unwrap();
+            drop(peer);
+            assert_eq!(entry::wait(request.as_raw_fd(), POLLIN, until, admission).unwrap_err(),
+                "activation channel unavailable before private admission");
+        }
         drop((received_owners,received_in,received_out,received_err,received_cwd,plan));
         assert_eq!(count_fds(),before,"accepted original-owner/IO request leaked descriptors");
         assert_eq!(fs::read(root.join("output")).unwrap(),b"out");

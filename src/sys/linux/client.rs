@@ -169,7 +169,10 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
    if outcome.presentation_attempted {
     cancel_and_join(&mut outcome);
    } else {
-    // No payload request was presented. Close the dedicated RefUnit connection.
+    // Signal bootstrap abandonment while the library caller can stay alive.
+    // No payload request was presented. Release both channels and our unit reference.
+    drop(outcome.activation.take());
+    drop(outcome.private.take());
     drop(outcome.unit.take());
    }
   }

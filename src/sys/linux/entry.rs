@@ -9,6 +9,7 @@ use std::os::unix::fs::{MetadataExt,PermissionsExt};
 pub(super) const GRACE:u64=5_000_000_000;
 const BOOTSTRAP:u64=15_000_000_000;
 const POLLOUT:c_short=4;
+const POLLRDHUP:c_short=0x2000;
 #[repr(C)]#[derive(Clone,Copy,Debug)]
 struct TimerObservation{schema:u32,stage:u32,result:c_int,call_errno:c_int,created:c_int,armed:c_int,
  create_result:c_int,create_errno:c_int,set_result:c_int,set_errno:c_int,get_result:c_int,get_errno:c_int,
@@ -111,11 +112,26 @@ impl PendingNotify{
 #[repr(C)]struct UnixAddress{family:u16,path:[u8;108]}
 fn address(path:&str)->Probe<(UnixAddress,u32)>{if !path.starts_with('/')||path.len()>=108||path.as_bytes().contains(&0){return Err("invalid bounded Unix address".into());}let mut value=UnixAddress{family:AF_UNIX as u16,path:[0;108]};value.path[..path.len()].copy_from_slice(path.as_bytes());Ok((value,(2+path.len()+1) as u32))}
 fn own_fd(value:c_int)->Probe<OwnedFd>{let fd=os_result(value as isize).map_err(|e|format!("{e:?}"))? as RawFd;Ok(unsafe{OwnedFd::from_raw_fd(fd)})}
-pub(super) fn wait(fd:RawFd,events:c_short,until:u64,owners:Option<&invocation::VerifiedInvocation>)->Probe<()>{
- loop{if let Some(owners)=owners{owners.check_live().map_err(|e|format!("{e:?}"))?;}let now=supervisor::boottime_ns()?;let left=until.checked_sub(now).filter(|v|*v>0).ok_or("native channel deadline expired")?;
-  let mut entry=PollFd{fd,events,revents:0};let timeout=left.div_ceil(1_000_000).min(100) as c_int;let count=unsafe{poll(&mut entry,1,timeout)};
-  if count<0{return Err(format!("native channel poll: {}",io::Error::last_os_error()));}
-  if count==0{continue;}if count!=1||entry.revents&!(events|0x10)!=0{return Err("native channel poll flags refused".into());}if entry.revents&events!=0{return Ok(());}return Err("native channel closed before expected event".into());
+pub(super) fn wait(fd:RawFd,events:c_short,until:u64,
+ admission:Option<(&invocation::VerifiedInvocation,&OwnedFd)>)->Probe<()>{
+ loop {
+  if let Some((owners,_))=admission {owners.check_live().map_err(|e|format!("{e:?}"))?;}
+  let now=supervisor::boottime_ns()?;
+  let left=until.checked_sub(now).filter(|v|*v>0).ok_or("native channel deadline expired")?;
+  let mut watched=[
+   PollFd{fd,events,revents:0},
+   PollFd{fd:admission.map_or(-1,|(_,activation)|activation.as_raw_fd()),events:POLLRDHUP,revents:0},
+  ];
+  let timeout=left.div_ceil(1_000_000).min(100) as c_int;
+  let count=unsafe{poll(watched.as_mut_ptr(),1+usize::from(admission.is_some()),timeout)};
+  if count<0 {return Err(format!("native channel poll: {}",io::Error::last_os_error()));}
+  // Refuse even when the listener or private request is ready in the same poll.
+  if watched[1].revents!=0 {return Err("activation channel unavailable before private admission".into());}
+  if count==0 {continue;}
+  let ready=watched[0].revents;
+  if count!=1||ready&!(events|0x10)!=0 {return Err("native channel poll flags refused".into());}
+  if ready&events!=0 {return Ok(());}
+  return Err("native channel closed before expected event".into());
  }
 }
 fn connect_retry_ms(until:u64,now:u64)->c_int {
@@ -203,7 +219,7 @@ impl PrivateListener{
  fn revalidate_parent(&self)->Probe<()>{self.parent_authority.revalidate()}
  fn require_exact(&self)->Probe<()>{self.revalidate_parent()?;let metadata=fs::symlink_metadata(&self.path).map_err(|e|e.to_string())?;
   if !self.bound||metadata.uid()!=0||metadata.mode()&0o170000!=0o140000||Some((metadata.dev(),metadata.ino()))!=self.identity{return Err("private socket identity changed; quarantined".into());}Ok(())}
- fn accept(&self,until:u64,original:&invocation::VerifiedInvocation)->Probe<OwnedFd>{self.require_exact()?;wait(self.fd.as_raw_fd(),POLLIN,until,Some(original))?;own_fd(unsafe{accept4(self.fd.as_raw_fd(),ptr::null_mut(),ptr::null_mut(),SOCK_NONBLOCK|SOCK_CLOEXEC)})}
+ fn accept(&self,until:u64,original:&invocation::VerifiedInvocation,activation:&OwnedFd)->Probe<OwnedFd>{self.require_exact()?;wait(self.fd.as_raw_fd(),POLLIN,until,Some((original,activation)))?;own_fd(unsafe{accept4(self.fd.as_raw_fd(),ptr::null_mut(),ptr::null_mut(),SOCK_NONBLOCK|SOCK_CLOEXEC)})}
  fn unlink_exact(&self)->Probe<()>{if self.path_removed.get()||!self.bound{return Ok(());}self.require_exact()?;fs::remove_file(&self.path).map_err(|e|e.to_string())?;self.path_removed.set(true);Ok(())}
  fn cleanup_error(&self,primary:&str)->String{match self.unlink_exact(){Ok(())=>primary.to_owned(),Err(error)=>format!("{primary}; exact private socket cleanup: {error}; original owner retained for PID1 runtime cleanup")}}
 }
@@ -214,7 +230,7 @@ pub(super) enum CancellationState{Clear,Peer,Fault}
 impl CancellationObservation{
  pub(super) fn state(self)->CancellationState{
   if self.returned==0&&self.errno==0&&self.revents==0{return CancellationState::Clear;}
-  if self.returned==1&&self.errno==0&&self.revents!=0&&self.revents&!(POLLIN|0x2000|0x10)==0{return CancellationState::Peer;}
+  if self.returned==1&&self.errno==0&&self.revents!=0&&self.revents&!(POLLIN|POLLRDHUP|0x10)==0{return CancellationState::Peer;}
   CancellationState::Fault
  }
 }
@@ -234,7 +250,7 @@ impl AuthenticatedCancellation{
  pub(super) fn peer(&self)->Credentials{self.peer}
  pub(super) fn shutdown_read(&self)->(c_int,c_int){let result=unsafe{shutdown(self.fd(),0)};let errno=if result<0{io::Error::last_os_error().raw_os_error().unwrap_or(0)}else{0};(result,errno)}
  pub(super) fn sample(&self)->CancellationObservation{
-  let mut event=PollFd{fd:self.fd(),events:POLLIN|0x2000,revents:0};let returned=unsafe{poll(&mut event,1,0)};let errno=if returned<0{io::Error::last_os_error().raw_os_error().unwrap_or(0)}else{0};CancellationObservation{returned,errno,revents:event.revents}
+  let mut event=PollFd{fd:self.fd(),events:POLLIN|POLLRDHUP,revents:0};let returned=unsafe{poll(&mut event,1,0)};let errno=if returned<0{io::Error::last_os_error().raw_os_error().unwrap_or(0)}else{0};CancellationObservation{returned,errno,revents:event.revents}
  }
 }
 
@@ -375,11 +391,11 @@ pub(crate) fn root_service_main()->!{
  let hello=Hello{pid:std::process::id(),invocation,cutoff:cleanup.until,unit:unit.to_string_lossy().into_owned(),group,socket:listener.path.clone(),early:0};
  let bytes=match hello.encode(){Ok(bytes)=>bytes,Err(error)=>{let error=listener.cleanup_error(&error);refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}};
  if let Err(error)=send(activation.as_raw_fd(),&bytes,&[service_pidfd.as_raw_fd(),events.as_raw_fd()],until){let error=listener.cleanup_error(&error);refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}
- let private=match listener.accept(until.min(first.invocation.metadata().deadline_ns),&first.invocation){Ok(fd)=>fd,Err(error)=>{let _primary=error;let cleanup_result=listener.unlink_exact();let _quarantine=listener;let error=match cleanup_result{Ok(())=>_primary,Err(cleanup_error)=>format!("{_primary}; exact socket cleanup: {cleanup_error}")};refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}};
+ let private=match listener.accept(until.min(first.invocation.metadata().deadline_ns),&first.invocation,&activation){Ok(fd)=>fd,Err(error)=>{let _primary=error;let cleanup_result=listener.unlink_exact();let _quarantine=listener;let error=match cleanup_result{Ok(())=>_primary,Err(cleanup_error)=>format!("{_primary}; exact socket cleanup: {cleanup_error}")};refuse_activation(activation.as_raw_fd(),&error,&bootstrap,Some(&cleanup))}};
  let result=(||->Probe<()>{
   first.invocation.check_live().map_err(|e|format!("{e:?}"))?;
   let peer=kernel_peer_credentials(private.as_raw_fd()).map_err(|e|format!("{e:?}"))?;if peer!=first.peer{return Err("private socket caller differs from original held requester".into());}
-  wait(private.as_raw_fd(),POLLIN,until.min(first.invocation.metadata().deadline_ns),Some(&first.invocation))?;
+  wait(private.as_raw_fd(),POLLIN,until.min(first.invocation.metadata().deadline_ns),Some((&first.invocation,&activation)))?;
   let mut again=NativeReceipt::default();let second=receive_observed(private.as_raw_fd(),&mut again).map_err(|e|format!("private admission: {e:?}"))?;
   if second.peer!=first.peer||second.invocation.metadata()!=first.invocation.metadata()||second.plan.arguments()!=first.plan.arguments()||second.plan.environment()!=first.plan.environment(){return Err("private request differs from captured bootstrap request".into());}
   first.invocation.check_live().map_err(|e|format!("{e:?}"))?;first.invocation.check_time().map_err(|e|format!("{e:?}"))?;
