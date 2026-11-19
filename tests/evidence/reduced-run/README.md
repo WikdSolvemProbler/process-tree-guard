@@ -38,3 +38,23 @@ The 18 pricing fingerprint placeholders were normalized after a private e16 sour
 The report was rendered again from the unchanged manifest, 40 observations and 18 pricing records using the reporting correction in `f5c10f76`. After newline normalization, exactly eight content lines now name the arms whose latency medians are missing. The refreshed text uses LF line endings. Their UNEVALUATED verdicts, all numerical values, the incomplete status, 82 standing losses and zero freeze-gate FAIL entries are unchanged. No probe or workload was rerun to generate this report.
 
 The [previous report at 946d404](https://github.com/WikdSolvemProbler/process-tree-guard/blob/946d404845a1c47c0b454e7896058f64a9ff1801/tests/evidence/reduced-run/report.txt) remains preserved in Git. The separately preserved Windows checkout used CRLF and has SHA-256 `b9e6ed475d8f8a7dbe9cbcc137030be096d8486f61af3a80dbf4fbb14a3eac4f`; normalizing only its line endings to LF yields SHA-256 `a95664b15928116d9c032be5beb06cdad6bd8641db7ef165a88de94b23789dcb`. The refreshed LF report has SHA-256 `fa14b15ad266134e1d4c6f7e055a11a28f11063d67c6b8f9e9b0a026f165740e`. The package still lacks its original configuration anchor and retains all five declared unverifiable checks; this refresh supplies no new provenance or competitive result.
+
+## Replay the public report
+
+Use commit `dd5abc5` and Python 3.12. From the repository root, give each command a 30-second whole-process deadline. Use `python3` if that is how Python is installed. The checkout supplies the campaign modules and the shared `tests/envcase.py` helper. [Recorded checkout](https://github.com/WikdSolvemProbler/process-tree-guard/tree/dd5abc575f114181ddfa460521c3c25af826b417)
+
+```sh
+python -B -X utf8 tests/campaign/harness.py report --out tests/evidence/reduced-run
+```
+
+The command reads the saved inputs and writes the reduced report to stdout. To compare stdout with the saved report, normalize CRLF to LF in both copies and remove the single final LF the command adds to stdout. The replay uses 40 observations and 18 pricing records and reproduces the incomplete status, 82 standing losses, and zero freeze-gate failures. A zero process exit confirms that the report rendered. [Saved report](report.txt)
+
+Inspect the package checks separately.
+
+```sh
+python -I -B -X utf8 -c "import sys; sys.path.insert(0, 'tests/campaign'); import harness; print(*harness.check_run_package('tests/evidence/reduced-run'), sep=chr(10))"
+```
+
+Expect five findings marked unverifiable. The missing configuration prevents checking the recorded command templates, competitor identity, expected-output pairing, profile decisions, and malformed argument length budget. The recorded configuration digest is in the manifest. [Run manifest](run.json)
+
+Three bounded replays at `dd5abc5` matched the same saved report on Windows x64, macOS ARM64, and a Linux ARM64 VM. Each checked all 19 exported inputs, returned the five named findings, and removed its scratch directory. These were offline replays. The full Windows campaign archives are indexed by hash and held privately. [Archive availability](../README.md#withdrawn-private-evidence)
