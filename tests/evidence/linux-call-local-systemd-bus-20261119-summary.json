@@ -1,0 +1,52 @@
+{
+  "schema": "ptg-linux-call-local-systemd-bus-1",
+  "date": "2026-11-19",
+  "source": {
+    "parent": "19e05eb3c8a2980a80e8f9116fd2eba5f7dce7aa",
+    "client_sha256": "760123561e5b7719e8386c45dbd162bbc4410c9c12ddb5cc7439711e784195fd",
+    "manager_sha256": "a0724d26f210ca09036db7a1a1e9d354b48be715b877870de90277ed79799f6f"
+  },
+  "method": {
+    "architecture": "aarch64",
+    "rust": "1.88.0",
+    "client_entry": "The private client entry called the production run_library_delegated function and held its returned outcome until the observer released it.",
+    "mode": "manual acknowledged separate-service context",
+    "test_payload": "A fixed start marker, four-second sleep and finish marker.",
+    "invocation_deadline_seconds": 60,
+    "observation_deadline_seconds": 10
+  },
+  "result": {
+    "native_build_passed": true,
+    "native_client_tests_passed": 12,
+    "native_client_tests_failed": 0,
+    "library_exit": 0,
+    "library_receipt_complete": true,
+    "payload_start_and_finish_observed": true,
+    "broker_bound_unique_name_to_caller_pid_and_uid": true,
+    "live_observation_after_call_gate_ms": 55.833,
+    "root_hello_matched_live_service_identity": true,
+    "exact_name_absent_on_same_broker_before_release": true,
+    "runtime_directory_absent": true,
+    "service_cgroup_absent": true,
+    "caller_and_parent_pidfds_live_before_release": true,
+    "closure_observation_after_call_gate_seconds": 4.09224,
+    "adapter_exit_after_release": 0,
+    "fixture_cleanup_succeeded": true,
+    "fallback_timer_cancelled_before_trigger": true,
+    "enclosing_scope_retired": true
+  },
+  "evidence_sha256": {
+    "native_build_input": "7117b10ce11ae2da17c46346f8af0daee65c399e3496936486bcb7908cca7c33",
+    "native_build_result": "1cda51e6747a23bf010ab3990e19b45a27ae29ce0c46c5800d7517103e5e50ea",
+    "adapter_executable": "a50f0edc001e201cb207a5d15f34e0d9547f77308899acaa3654fd1f6448673e",
+    "root_executable": "53a06d2d9a9b755dfc0638e30879de4915e826f9c9fa5c9295caf7141d82528e",
+    "run_source": "cc258d12b07073596f76f6f1fb61fc917440eac7c0f464b209ac46befb1a63bb",
+    "terminal_result": "a219c6187ac71dd6cdb0b982da6b56dd0e8e0e85686f59eda1de166a0d477b96",
+    "guest_receipt": "d86a947197a328940a6337c087ea54b9e2a1f10286773356e562094789995050"
+  },
+  "limits": [
+    "The native observation covers one normal return. The call-local ownership and bounded failed-join release path were reviewed in source.",
+    "The broker absence is recorded by the observer before any fixture cleanup. The separate check does not identify an exclusive cleanup cause or prove systemd collected its manager object.",
+    "Broader Linux qualification, default dispatch and competitive performance remain open. Exact process, broker and machine identities are kept private."
+  ]
+}

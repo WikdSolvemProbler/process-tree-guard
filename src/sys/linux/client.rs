@@ -19,11 +19,11 @@ fn before(until:u64)->std::result::Result<(),String>{if supervisor::boottime_ns(
 pub(crate) struct ClientOutcome{
  code:i32,error:Option<String>,timeout:Option<ClientTimeout>,original:Option<OriginalInvocation>,
  activation:Option<OwnedFd>,private:Option<OwnedFd>,service:Option<OwnedFd>,events:Option<fs::File>,
- unit:Option<manager::UnitReference>,completion:Option<supervisor::native_activation::ClientCompletion>,private_runtime:Option<supervisor::native_activation::PrivateRuntimeDirectory>,protected:Vec<OwnedFd>,hello:Option<entry::Hello>,
+ completion:Option<supervisor::native_activation::ClientCompletion>,private_runtime:Option<supervisor::native_activation::PrivateRuntimeDirectory>,protected:Vec<OwnedFd>,hello:Option<entry::Hello>,
  raw_hello:Vec<u8>,raw_result:Vec<u8>,result_read:entry::PacketAttempt,cancellation_join:Option<CancellationJoin>,join_facts:JoinFacts,result:Option<entry::DecodedOutcome>,exit_timer:Option<std::rc::Rc<entry::ExitTimer>>,presentation_attempted:bool,completed:bool,
 }
 impl ClientOutcome{
- fn empty()->Self{Self{code:125,error:None,timeout:None,original:None,activation:None,private:None,service:None,events:None,unit:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result_read:entry::PacketAttempt::default(),cancellation_join:None,join_facts:JoinFacts::default(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
+ fn empty()->Self{Self{code:125,error:None,timeout:None,original:None,activation:None,private:None,service:None,events:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result_read:entry::PacketAttempt::default(),cancellation_join:None,join_facts:JoinFacts::default(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
  pub(crate) fn exit_code(&self)->i32{self.code}
  pub(crate) fn error(&self)->Option<&str>{self.error.as_deref()}
  pub(crate) fn timeout_cause(&self)->Option<ClientTimeout>{self.timeout}
@@ -62,7 +62,7 @@ fn settlement_poll(service: RawFd, terminal: bool, left_ns: u64) -> (PollFd, c_i
     let timeout = left_ns.div_ceil(1_000_000).min(10) as c_int;
     (PollFd { fd, events: POLLIN, revents: 0 }, timeout)
 }
-fn join_service(outcome:&mut ClientOutcome,reported:Option<i32>,until:u64,facts:&mut JoinFacts)->std::result::Result<(),String>{
+fn join_service(outcome:&mut ClientOutcome,unit:&mut manager::UnitReference,reported:Option<i32>,until:u64,facts:&mut JoinFacts)->std::result::Result<(),String>{
  let hello=outcome.hello.as_ref().ok_or("missing service hello for join")?.clone();
  loop{
   before(until)?;let service=outcome.service.as_ref().ok_or("missing exact service capability")?;
@@ -73,16 +73,16 @@ fn join_service(outcome:&mut ClientOutcome,reported:Option<i32>,until:u64,facts:
   let result = unsafe { poll(&mut watched, 1, timeout) };
   if result<0{return Err(format!("root settlement poll: {}",io::Error::last_os_error()));}
  }
- before(until)?;let code=match reported{Some(code)=>code,None=>outcome.unit.as_ref().ok_or("missing retained unit reference")?.terminal_code(until)?};facts.manager_status=Some(code);
- let status=outcome.unit.as_ref().ok_or("missing retained unit reference")?.final_status(code,outcome.completion.as_ref().ok_or("missing completion")?.retired(),until)?;
+ before(until)?;let code=match reported{Some(code)=>code,None=>unit.terminal_code(until)?};facts.manager_status=Some(code);
+ let status=unit.final_status(code,outcome.completion.as_ref().ok_or("missing completion")?.retired(),until)?;
  if matches!(status,manager::FinalStatus::NeedsRetirement){
   before(until)?;if outcome.completion.as_mut().ok_or("missing completion")?.population_after_terminal(outcome.service.as_ref().ok_or("missing service")?,hello.pid)?{return Err("terminal unit is still populated".into());}
   let proof=outcome.completion.as_ref().expect("checked completion").retired().ok_or("manager pruned path without exact original retirement proof")?;
-  before(until)?;if !matches!(outcome.unit.as_ref().expect("checked unit").final_status(code,Some(proof),until)?,manager::FinalStatus::Verified){return Err("terminal retirement join remained unverified".into());}
+  before(until)?;if !matches!(unit.final_status(code,Some(proof),until)?,manager::FinalStatus::Verified){return Err("terminal retirement join remained unverified".into());}
  }
- facts.manager_verified=true;before(until)?;outcome.unit.as_mut().expect("checked unit").release(until)?;facts.unit_unreferenced=true;before(until)
+ facts.manager_verified=true;before(until)?;unit.release(until)?;facts.unit_unreferenced=true;before(until)
 }
-fn cancel_and_join(outcome:&mut ClientOutcome){
+fn cancel_and_join(outcome:&mut ClientOutcome,unit:&mut manager::UnitReference){
  let mut receipt=CancellationJoin::new();receipt.native_settled=outcome.completed;if outcome.completed{receipt.facts=outcome.join_facts;}
  let cap=(||->std::result::Result<u64,String>{let original=outcome.original.as_ref().ok_or("missing original join lease")?;let observed_end=original.metadata().deadline_ns.checked_add(entry::GRACE+OBSERVE_GRACE).ok_or("original observation cutoff overflow")?;Ok(supervisor::boottime_ns()?.checked_add(5_000_000_000).ok_or("short cancellation join overflow")?.min(observed_end))})();
  if let Ok(until)=&cap{receipt.until_ns=Some(*until);}
@@ -101,7 +101,7 @@ fn cancel_and_join(outcome:&mut ClientOutcome){
     entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,hello.cutoff,outcome.original.as_ref().ok_or("missing original deadline")?.metadata().deadline_ns)
    })();match read{Ok(frame)=>outcome.result=Some(frame),Err(error)=>receipt.read_error=Some(error)}
   }
-  let expected=outcome.result.as_ref().map(|frame|frame.code);join_service(outcome,expected,until,&mut receipt.facts)?;
+  let expected=outcome.result.as_ref().map(|frame|frame.code);join_service(outcome,unit,expected,until,&mut receipt.facts)?;
   receipt.native_settled=outcome.result.as_ref().is_some_and(|frame|frame.settled);outcome.completed=receipt.native_settled;
   if !receipt.native_settled{return Err("native settlement frame missing or unconfirmed; separate empty-domain facts retained".into());}Ok(())
  })();if let Err(error)=result{receipt.join_error=Some(error);}outcome.cancellation_join=Some(receipt);
@@ -110,6 +110,8 @@ fn cancel_and_join(outcome:&mut ClientOutcome){
 
 fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)->ClientOutcome{
  let mut outcome=ClientOutcome::empty();outcome.original=Some(original);
+ // Keep the dedicated manager connection through the final bounded join only.
+ let mut unit=None;
  let result=(||->std::result::Result<i32,String>{
   let absolute=outcome.original.as_ref().expect("captured original").metadata().deadline_ns;
   if standalone{let until=absolute.checked_add(entry::GRACE+OBSERVE_GRACE).ok_or("CLI exit deadline overflow")?;match entry::cli_timer(until){Ok(owner)=>outcome.exit_timer=Some(owner),Err((owner,error))=>{outcome.exit_timer=Some(owner);return Err(error);}}}
@@ -138,7 +140,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   outcome.service=Some(service);outcome.events=Some(fs::File::from(events));outcome.hello=Some(hello.clone());
   validate_pidfd(outcome.service.as_ref().expect("owned service"),hello.pid as c_int,&mut NativeReceipt::default()).map_err(|e|format!("service capability: {e:?}"))?;
   let name=CString::new(hello.unit.clone()).map_err(|_|"unit name NUL")?;
-  outcome.unit=Some(manager::UnitReference::acquire(&name,hello.invocation,hello.pid,hello.group.clone(),original,outcome.service.as_ref().expect("held original service"),end)?);
+  unit=Some(manager::UnitReference::acquire(&name,hello.invocation,hello.pid,hello.group.clone(),original,outcome.service.as_ref().expect("held original service"),end)?);
   let events=outcome.events.as_ref().expect("owned events");let duplicate=error(os_result(unsafe{fcntl(events.as_raw_fd(),1030,3 as c_int)} as isize))? as RawFd;
   let duplicate=unsafe{OwnedFd::from_raw_fd(duplicate)};
   outcome.completion=Some(supervisor::native_activation::client_events(&duplicate,&hello.group)?);drop(duplicate);
@@ -155,7 +157,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   if !packet.rights.is_empty()||packet.sender!=peer{return Err("root result sender/capabilities differ".into());}
   outcome.result=Some(entry::DecodedOutcome::decode(&outcome.raw_result,hello.invocation,end,absolute)?);
   let decoded=outcome.result.as_ref().expect("owned root result");let code=decoded.code;let settled=decoded.settled;let root_error=decoded.error.clone();let timeout=decoded.timeout;
-  let mut facts=JoinFacts::default();let joined=join_service(&mut outcome,Some(code),observation_end,&mut facts);outcome.join_facts=facts;joined?;
+  let mut facts=JoinFacts::default();let joined=join_service(&mut outcome,unit.as_mut().expect("acquired unit reference"),Some(code),observation_end,&mut facts);outcome.join_facts=facts;joined?;
   outcome.completed=settled;
   if !settled||!root_error.is_empty(){return Err(if root_error.is_empty(){"root native settlement is unverified".into()}else{root_error});}
   outcome.completed=true;outcome.timeout=joined_timeout(timeout,settled,root_error.is_empty(),facts);Ok(code)
@@ -167,16 +169,17 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
    outcome.timeout = None;
    outcome.error = Some(primary);
    if outcome.presentation_attempted {
-    cancel_and_join(&mut outcome);
+    cancel_and_join(&mut outcome,unit.as_mut().expect("presented with unit reference"));
    } else {
     // Signal bootstrap abandonment while the library caller can stay alive.
-    // No payload request was presented. Release both channels and our unit reference.
+    // No payload request was presented. Release both channels before disconnecting the manager.
     drop(outcome.activation.take());
     drop(outcome.private.take());
-    drop(outcome.unit.take());
    }
   }
  }
+ // Disconnect even if the bounded UnrefUnit or settlement attempt failed.
+ drop(unit);
  outcome
 }
 /// Transparent caller confinement/resource inheritance is not implemented.

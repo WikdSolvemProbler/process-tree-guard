@@ -50,6 +50,7 @@ unsafe extern "C" {
  fn sd_bus_start(bus:*mut SdBus)->c_int;
  fn sd_bus_get_fd(bus:*mut SdBus)->c_int;
  fn sd_bus_set_method_call_timeout(bus:*mut SdBus,usec:u64)->c_int;
+ fn sd_bus_close(bus:*mut SdBus);
  fn sd_bus_unref(bus:*mut SdBus)->*mut SdBus;
  fn sd_bus_message_unref(message:*mut SdMessage)->*mut SdMessage;
  fn sd_bus_error_free(error:*mut SdBusError);
@@ -277,7 +278,15 @@ impl Bus{
  fn invocation(&self,path:&CStr,until:u64)->Probe<[u8;16]>{self.property(path,UNIT,c"InvocationID",c"ay",until)?.bytes16()}
  fn exec(&self,path:&CStr,until:u64)->Probe<(u32,i32,i32)>{let reply=self.property(path,SERVICE,c"ExecStart",c"a(sasbttttuii)",until)?;if reply.enter(b'a',c"(sasbttttuii)")?!=1||reply.enter(b'r',c"sasbttttuii")?!=1{return Err("missing exact ExecStart".into());}if reply.text(b's')?!=HELPER{return Err("unit ExecStart path differs".into());}if reply.enter(b'a',c"s")?!=1{return Err("missing ExecStart argv".into());}let a=reply.text(b's')?;let b=reply.text(b's')?;let mut extra:*const c_char=ptr::null();if a!=HELPER||b!="--service"||call(unsafe{sd_bus_message_read_basic(reply.0.as_ptr(),b's' as c_char,(&mut extra as *mut *const c_char).cast())},"ExecStart tail")?!=0{return Err("unit ExecStart argv differs".into());}reply.leave()?;let ignore:i32=reply.basic(b'b')?;for _ in 0..4{let _:u64=reply.basic(b't')?;}let pid=reply.basic(b'u')?;let code=reply.basic(b'i')?;let status=reply.basic(b'i')?;reply.leave()?;if ignore!=0||reply.enter(b'r',c"sasbttttuii")?!=0{return Err("unit has extra/ignored ExecStart".into());}reply.leave()?;Ok((pid,code,status))}
 }
-impl Drop for Bus{fn drop(&mut self){unsafe{sd_bus_unref(self.raw.as_ptr());}}}
+impl Drop for Bus {
+ fn drop(&mut self) {
+  // Close explicitly to release queued messages and disconnect without flushing.
+  unsafe {
+   sd_bus_close(self.raw.as_ptr());
+   sd_bus_unref(self.raw.as_ptr());
+  }
+ }
+}
 
 const MAX_RUNTIME_USEC:u64=86_430_000_000;
 #[derive(Clone,Copy,PartialEq,Eq)]enum UnitPhase{Starting,Running}
