@@ -126,7 +126,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   // Resolve/validate all context before activation, under the original cutoff.
   request::encode(original.metadata(),&args,&env).map_err(|e|format!("{e:?}"))?;
   original.revalidate().map_err(|e|format!("{e:?}"))?;
-  outcome.activation=Some(entry::connect_root(manager::ACTIVATE,original.metadata().deadline_ns)?);
+  outcome.activation=Some(entry::connect_root(manager::ACTIVATE,original,None)?);
   let activation=outcome.activation.as_ref().expect("activation owned");
   error(send_request(activation,original,&args,&env,io.stdio.each_ref().map(|fd|fd.as_fd()),io.cwd.as_fd()))?;
   let packet=entry::packet(activation.as_raw_fd(),end,8192)?;outcome.raw_hello=packet.bytes.clone();
@@ -145,7 +145,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   original.revalidate().map_err(|e|format!("{e:?}"))?;
   outcome.private_runtime=Some(supervisor::native_activation::PrivateRuntimeDirectory::capture(&hello.unit)?);
   if hello.socket!=outcome.private_runtime.as_ref().expect("held private directory").path()?||!hello.unit.starts_with("process-tree-guard@")||!hello.unit.ends_with(".service")||hello.unit.len()>255{return Err("root hello unit/private path binding differs".into());}
-  outcome.private=Some(entry::connect_root(&hello.socket,original.metadata().deadline_ns)?);
+  outcome.private=Some(entry::connect_root(&hello.socket,original,outcome.private_runtime.as_ref())?);
   let private=outcome.private.as_ref().expect("private connection owned");let peer=kernel_peer_credentials(private.as_raw_fd()).map_err(|e|format!("{e:?}"))?;
   if peer!=(Credentials{pid:hello.pid as c_int,uid:0,gid:0}){return Err("private root peer differs from held service".into());}
   validate_pidfd(outcome.service.as_ref().expect("held service"),hello.pid as c_int,&mut NativeReceipt::default()).map_err(|e|format!("{e:?}"))?;

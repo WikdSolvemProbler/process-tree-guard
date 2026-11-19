@@ -118,12 +118,49 @@ pub(super) fn wait(fd:RawFd,events:c_short,until:u64,owners:Option<&invocation::
   if count==0{continue;}if count!=1||entry.revents&!(events|0x10)!=0{return Err("native channel poll flags refused".into());}if entry.revents&events!=0{return Ok(());}return Err("native channel closed before expected event".into());
  }
 }
-pub(super) fn connect_root(path:&str,until:u64)->Probe<OwnedFd>{
- let fd=own_fd(unsafe{socket(AF_UNIX,SOCK_SEQPACKET|SOCK_NONBLOCK|SOCK_CLOEXEC,0)})?;
- os_result(unsafe{setsockopt(fd.as_raw_fd(),SOL_SOCKET,SO_PASSCRED,&1,size_of::<c_int>() as u32)} as isize).map_err(|e|format!("{e:?}"))?;
- let (value,length)=address(path)?;let result=unsafe{connect(fd.as_raw_fd(),(&value as *const UnixAddress).cast(),length)};
- if result<0{let error=io::Error::last_os_error().raw_os_error();if !matches!(error,Some(115)|Some(11)){return Err(format!("root socket connect error {error:?}"));}wait(fd.as_raw_fd(),POLLOUT,until,None)?;if socket_option(fd.as_raw_fd(),4).map_err(|e|format!("{e:?}"))?!=0{return Err("root socket completion error".into());}}
- validate_connection(fd.as_raw_fd(),false).map_err(|e|format!("{e:?}"))?;let peer=kernel_peer_credentials(fd.as_raw_fd()).map_err(|e|format!("{e:?}"))?;if peer.uid!=0||peer.gid!=0{return Err("root endpoint is not root".into());}Ok(fd)
+fn connect_retry_ms(until:u64,now:u64)->c_int {
+ until.saturating_sub(now).div_ceil(1_000_000).min(10) as c_int
+}
+pub(super) fn connect_root(path:&str,original:&OriginalInvocation,
+ private_runtime:Option<&supervisor::native_activation::PrivateRuntimeDirectory>)->Probe<OwnedFd>{
+ const EAGAIN:c_int=11;
+ const EINPROGRESS:c_int=115;
+
+ let until=original.metadata().deadline_ns;
+ let (value,length)=address(path)?;
+ loop {
+  let fd=own_fd(unsafe{socket(AF_UNIX,SOCK_SEQPACKET|SOCK_NONBLOCK|SOCK_CLOEXEC,0)})?;
+  os_result(unsafe{setsockopt(fd.as_raw_fd(),SOL_SOCKET,SO_PASSCRED,&1,size_of::<c_int>() as u32)} as isize).map_err(|e|format!("{e:?}"))?;
+  let result=unsafe{connect(fd.as_raw_fd(),(&value as *const UnixAddress).cast(),length)};
+  if result<0 {
+   match io::Error::last_os_error().raw_os_error() {
+    Some(EAGAIN) => {
+     // A full AF_UNIX listen queue leaves this socket unconnected.
+     drop(fd);
+     let now=supervisor::boottime_ns()?;
+     let delay=connect_retry_ms(until,now);
+     if delay==0 {return Err("root socket connect deadline expired".into());}
+     if unsafe{poll(ptr::null_mut(),0,delay)}!=0 {
+      return Err(format!("root socket retry wait: {}",io::Error::last_os_error()));
+     }
+     if let Some(runtime)=private_runtime {runtime.revalidate()?;}
+     original.revalidate().map_err(|e|format!("{e:?}"))?;
+     continue;
+    }
+    Some(EINPROGRESS) => {
+     wait(fd.as_raw_fd(),POLLOUT,until,None)?;
+     if socket_option(fd.as_raw_fd(),4).map_err(|e|format!("{e:?}"))?!=0 {
+      return Err("root socket completion error".into());
+     }
+    }
+    error => return Err(format!("root socket connect error {error:?}")),
+   }
+  }
+  validate_connection(fd.as_raw_fd(),false).map_err(|e|format!("{e:?}"))?;
+  let peer=kernel_peer_credentials(fd.as_raw_fd()).map_err(|e|format!("{e:?}"))?;
+  if peer.uid!=0||peer.gid!=0 {return Err("root endpoint is not root".into());}
+  return Ok(fd);
+ }
 }
 pub(super) fn send(fd:RawFd,bytes:&[u8],rights:&[RawFd],until:u64)->Probe<()>{loop{match send_packet(fd,bytes,rights){Ok(())=>return Ok(()),Err(Refusal::Os(Some(11)))=>wait(fd,POLLOUT,until,None)?,Err(e)=>return Err(format!("root channel send: {e:?}"))}}}
 pub(super) struct Packet{pub(super) bytes:Vec<u8>,pub(super) rights:Vec<OwnedFd>,pub(super) sender:Credentials}
@@ -366,6 +403,10 @@ pub(crate) fn root_service_main()->!{
 }
 
 #[cfg(test)]pub(super) fn original_deadline_readback_regression(){
+ assert_eq!(connect_retry_ms(5_000_000,5_000_001),0);
+ assert_eq!(connect_retry_ms(5_000_000,5_000_000),0);
+ assert_eq!(connect_retry_ms(5_000_001,5_000_000),1);
+ assert_eq!(connect_retry_ms(15_000_001,5_000_000),10);
  let until=1000;let mut raw=TimerObservation{schema:1,stage:4,result:0,call_errno:0,created:1,armed:1,get_result:0,get_errno:0,deadline_ns:until,remaining_ns:100,interval_ns:0,before_ns:899,observed_ns:901,..TimerObservation::default()};
  assert!(timer_readback(&raw,until));assert!(!timer_readback(&raw,until+1));
  raw.interval_ns=1;assert!(!timer_readback(&raw,until));raw.interval_ns=0;raw.remaining_ns=0;assert!(!timer_readback(&raw,until));raw.remaining_ns=100;raw.before_ns=902;assert!(!timer_readback(&raw,until));raw.before_ns=899;raw.get_errno=5;assert!(!timer_readback(&raw,until));
