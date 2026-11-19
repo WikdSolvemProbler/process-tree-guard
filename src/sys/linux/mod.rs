@@ -550,6 +550,10 @@ pub(crate) fn send_request(
 
 #[cfg(test)]
 mod tests {
+    // Descriptor census assertions read the process-wide table.
+    // Take this lock in tests that open descriptors while those checks run.
+    static FD_CENSUS_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
     #[test]
     fn watchdog_fault125_is_not_hidden_by_later_cancellation(){super::supervisor::native_activation::watchdog_fault_regression();}
 
@@ -584,6 +588,7 @@ mod tests {
     // global setting. All fixture files remain for enclosing raw preservation.
     #[test]
     fn native_seqpacket_admission_and_refusals() {
+        let _fd_guard = FD_CENSUS_LOCK.lock().unwrap();
         let uid=unsafe{getuid()};let gid=unsafe{getgid()};
         assert_ne!(uid,0,"ordinary user required");assert_ne!(gid,0,"ordinary group required");
         assert_eq!(unsafe{geteuid()},uid);assert_eq!(unsafe{getegid()},gid);
@@ -715,6 +720,7 @@ mod tests {
     }
     #[test]
     fn separate_context_ack_precedes_client_capture_and_activation(){
+        let _fd_guard = FD_CENSUS_LOCK.lock().unwrap();
         super::manager::notify_handoff_regression();super::entry::original_deadline_readback_regression();super::client::timeout_cause_regression();
         let transparent=run_library(&[],f64::NAN,OwnerMode::Manual);assert_eq!(transparent.exit_code(),125);
         assert!(transparent.error().unwrap().contains("transparent Linux execution context"));assert!(!transparent.complete());assert!(!transparent.may_have_active_service());assert_eq!(transparent.wire_evidence(),(&[][..],&[][..]));
