@@ -2301,11 +2301,13 @@
         let consent = WaitsOnAnOperation { operation: operation.clone(), timeout: Duration::from_millis(100) };
         COOL_DOWNS.with(|count| count.set(0));
         let error = run_desktop(&desktop("x"), &consent, &StubPrompt::new(vec![]), &any_verifier(), &Owners::empty(), &log).expect_err("no answer");
-        log.finish(1_000);
         assert_eq!(operation.cancels(), 1, "the request is cancelled exactly once");
         assert!(error.message().contains("no answer within 300 seconds, the request was cancelled"), "{}", error);
-        assert!(lines_of(&kept).len() == 1 && lines_of(&kept)[0].contains("method=\"hello\"") && lines_of(&kept)[0].contains("attempt=1 "), "{:?}", lines_of(&kept));
         assert_eq!(COOL_DOWNS.with(|count| count.replace(0)), 0, "the process ends at once");
+        log.wait_for_captured_lines(1, 5_000);
+        log.finish(1_000);
+        let lines = lines_of(&kept);
+        assert!(lines.len() == 1 && lines[0].contains("method=\"hello\"") && lines[0].contains("attempt=1 "), "{lines:?}");
         // The starter exits while the request is open: it is cancelled long before the time, and the run is refused for that.
         let starter = event(false);
         let handle = starter as usize;
@@ -2319,10 +2321,13 @@
         let consent = WaitsOnAnOperation { operation: operation.clone(), timeout: Duration::from_secs(60) };
         let started = Instant::now();
         let error = run_desktop(&desktop("x"), &consent, &StubPrompt::new(vec![]), &any_verifier(), &Owners::of(vec![starter]), &log).expect_err("the starter is gone");
-        log.finish(1_000);
-        assert!(started.elapsed() < Duration::from_secs(5) && operation.cancels() == 1 && error.message().contains("nobody is waiting for it"), "{:?} {} {}", started.elapsed(), operation.cancels(), error);
-        assert!(lines_of(&kept).len() == 1 && lines_of(&kept)[0].contains("attempt=1 "), "{:?}", lines_of(&kept));
+        let elapsed = started.elapsed();
+        assert!(elapsed < Duration::from_secs(5) && operation.cancels() == 1 && error.message().contains("nobody is waiting for it"), "{:?} {} {}", elapsed, operation.cancels(), error);
         assert_eq!(COOL_DOWNS.with(|count| count.replace(0)), 0);
+        log.wait_for_captured_lines(1, 5_000);
+        log.finish(1_000);
+        let lines = lines_of(&kept);
+        assert!(lines.len() == 1 && lines[0].contains("attempt=1 "), "{lines:?}");
     }
 
     // ---- an operation of the Windows Runtime made here, read through the slots of its interfaces

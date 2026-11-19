@@ -436,6 +436,15 @@ impl Log {
         Log { sinks: vec![sink], file_sink: None, blocked: Arc::new(AtomicBool::new(false)), only }
     }
 
+    /// Check the private capture queue and wait separately for its writer.
+    #[cfg(test)]
+    pub(crate) fn wait_for_captured_lines(&self, expected: usize, wait_ms: u64) {
+        assert_eq!(self.sinks.len(), 1, "expected one test capture sink");
+        let sink = &self.sinks[0];
+        assert_eq!(sink.queued.load(Ordering::SeqCst), expected, "unexpected number of audit lines queued");
+        assert!(sink.wait_written(expected, wait_ms), "audit capture did not write {expected} lines within {wait_ms} ms");
+    }
+
     /// A log whose audit file's sink has a closed queue (its thread could not
     /// be started or hardened), for the tests of other modules: the file sink
     /// is first in `sinks` and the copy that keeps its lines in `lines` is
