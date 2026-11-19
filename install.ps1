@@ -45,7 +45,7 @@ $arch = $env:PROCESSOR_ARCHITEW6432
 if (-not $arch) { $arch = $env:PROCESSOR_ARCHITECTURE }
 switch ($arch) {
     "AMD64" { Write-Host "Machine: Windows x86-64; the programs run natively." }
-    "ARM64" { Write-Host "Machine: Windows on Arm64."; $onArm64 = $true }
+    "ARM64" { Write-Host "Machine: Windows on Arm64." }
     default { throw "Unsupported processor architecture: $arch." }
 }
 
@@ -58,7 +58,7 @@ if ($env:PTG_VERSION) {
 }
 $version = $release.tag_name.TrimStart("v")
 $zipName = "process-tree-guard-$version-$target.zip"
-if ($onArm64) {
+if ($arch -eq "ARM64") {
     $nativeName = "process-tree-guard-$version-$native.zip"
     if ($release.assets | Where-Object { $_.name -eq $nativeName }) {
         $zipName = $nativeName
