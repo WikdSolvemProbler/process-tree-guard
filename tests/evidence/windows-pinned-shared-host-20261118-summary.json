@@ -1,0 +1,176 @@
+{
+  "archive_images": {
+    "candidate": "e8af56a25af34e6d7e1acf706fd819bbe56c84259da0a07760e9e9f532a59d2c",
+    "windows_repaired_reference": "7edd4765bf53089799c898be6a65f179ec177de838960460bf5f2bbe1af33533",
+    "workload_fixture": "bdac8b60e109bafdfb2c6507010605ece5e849845153d9c61bb9714af67f6ef0"
+  },
+  "date_local": "2026-11-18",
+  "elapsed_summary": {
+    "ab_geometric_mean": 0.9404766251709391,
+    "ba_geometric_mean": 1.3322033267983278,
+    "candidate_faster": 2,
+    "candidate_over_reference_geometric_mean": 1.1193328766853894,
+    "candidate_slower": 4,
+    "exact_ties": 0
+  },
+  "evidence_sha256": {
+    "first_failed_study": "4b9c98afbcd08bade84d7996193154c0cde57bf19f35b5824afa7d5d5c60e21e",
+    "fresh_coarse_resource": "76b1f9d57b7d8fe3b9dd8ac266edfe765afeffdbd5b065255bbcdbf43490e126",
+    "fresh_raw_receipt": "373e6e53f3a94138d826fd9792a2edff8f3c98eb89dacae776787ad8b22e8727",
+    "fresh_result": "10e8433fcefcf4806b822cbb0c72b753236166d7e2aed6ec15ba14452a6cc31d",
+    "fresh_source_plan": "97b5dd593996dd436f58df900013d968e4ba436859d92b78cb9d24d34ac6f93e",
+    "native_marker_observer": "ba9645debc4782edf265de2d3a8406235f9a67e4846726115cd3b0216f524253",
+    "raw_counter_rehearsal": "eb4edf66005402e8a7d911b9c9a0db246d5ecfc037741bf7d5ef15aa537b53fd"
+  },
+  "limits": [
+    "The archived candidate took longer overall in these six pairs. The AB and BA summaries point in opposite directions.",
+    "The configured affinity mask and held readbacks establish sampled configuration. Continuous CPU residence and exclusive cores were unverified.",
+    "The long CPU samples include test activity. They cannot bound contention in any individual timed launch.",
+    "The resource box, scheduling, cache state and changed observer cannot be assigned causal effects from this one sample. The study carries no p-value or equivalence claim.",
+    "The frozen whole-host campaign and its previous results stand. Primary acceptance was unevaluated and zero competitive pairs qualified.",
+    "Exact raw inputs and machine-specific records are retained privately. This numerical extract does not replace independent access to full raw evidence."
+  ],
+  "method": {
+    "affinity_mask_hex": "0x33",
+    "arm_start_lateness_ns": [
+      2755100,
+      5271000
+    ],
+    "independent_reviews": 2,
+    "load_filtered_slots": 0,
+    "logical_processors": 4,
+    "marker_native_statuses_observed": [
+      0,
+      2
+    ],
+    "marker_observer": "The revised native marker-open and bounded retries are inside the measured interval.",
+    "pairs_completed": 6,
+    "physical_cores": 2,
+    "randomized_fixed_pairs_planned": 6,
+    "replacement_slots": 0,
+    "seed": "0x834251512adfb6cc5c75f8bddd9f918d2f15ff2b2b1cc6fd3066845685845077",
+    "slots_completed": 12,
+    "target_slot_spacing_ns": 3450000000,
+    "three_ab_and_three_ba": true
+  },
+  "observed_resource_context": [
+    {
+      "fixed_processors_mean_pct": 13.82855,
+      "maximum_selected_logical_processor_pct": 19.2628,
+      "minimum_qpc_interval_ns": 5030342900,
+      "whole_host_pct": 22.1352
+    },
+    {
+      "fixed_processors_mean_pct": 11.152925,
+      "maximum_selected_logical_processor_pct": 17.4602,
+      "minimum_qpc_interval_ns": 5016128800,
+      "whole_host_pct": 17.5381
+    },
+    {
+      "fixed_processors_mean_pct": 14.323525,
+      "maximum_selected_logical_processor_pct": 27.5886,
+      "minimum_qpc_interval_ns": 5005815300,
+      "whole_host_pct": 18.4981
+    },
+    {
+      "fixed_processors_mean_pct": 11.000275,
+      "maximum_selected_logical_processor_pct": 19.5729,
+      "minimum_qpc_interval_ns": 5011803500,
+      "whole_host_pct": 17.2155
+    },
+    {
+      "fixed_processors_mean_pct": 14.561125,
+      "maximum_selected_logical_processor_pct": 19.6236,
+      "minimum_qpc_interval_ns": 5015284600,
+      "whole_host_pct": 19.2147
+    },
+    {
+      "fixed_processors_mean_pct": 13.94485,
+      "maximum_selected_logical_processor_pct": 22.7451,
+      "minimum_qpc_interval_ns": 5015428000,
+      "whole_host_pct": 19.591
+    },
+    {
+      "fixed_processors_mean_pct": 19.5613,
+      "maximum_selected_logical_processor_pct": 26.1802,
+      "minimum_qpc_interval_ns": 5015819600,
+      "whole_host_pct": 27.4455
+    },
+    {
+      "fixed_processors_mean_pct": 30.542675,
+      "maximum_selected_logical_processor_pct": 44.144,
+      "minimum_qpc_interval_ns": 4308639300,
+      "whole_host_pct": 31.5854
+    }
+  ],
+  "pairs": [
+    {
+      "candidate_elapsed_ns": 189742500,
+      "candidate_over_reference": 1.0676395371409761,
+      "order": "AB",
+      "pair": 1,
+      "reference_elapsed_ns": 177721500
+    },
+    {
+      "candidate_elapsed_ns": 241696100,
+      "candidate_over_reference": 2.0598473285045027,
+      "order": "BA",
+      "pair": 2,
+      "reference_elapsed_ns": 117336900
+    },
+    {
+      "candidate_elapsed_ns": 111106800,
+      "candidate_over_reference": 0.8948297149042446,
+      "order": "BA",
+      "pair": 3,
+      "reference_elapsed_ns": 124165300
+    },
+    {
+      "candidate_elapsed_ns": 141743100,
+      "candidate_over_reference": 1.2827325388300004,
+      "order": "BA",
+      "pair": 4,
+      "reference_elapsed_ns": 110500900
+    },
+    {
+      "candidate_elapsed_ns": 176015100,
+      "candidate_over_reference": 1.5342670058035643,
+      "order": "AB",
+      "pair": 5,
+      "reference_elapsed_ns": 114722600
+    },
+    {
+      "candidate_elapsed_ns": 113612000,
+      "candidate_over_reference": 0.5078300826254187,
+      "order": "AB",
+      "pair": 6,
+      "reference_elapsed_ns": 223720500
+    }
+  ],
+  "previous_failures_preserved": {
+    "bench_only_repair_control": "The prior Python read returned errno 13 with a benign exclusive writer. The revised native reader returned error 32 and read the same bytes after the writer closed. The completed study observed only codes 2 and 0.",
+    "first_pilot": "The prior study attempted 12 slots and completed 11 slots and five pairs. Its last slot failed before the elapsed endpoint during PID marker observation. Native error cause remains unknown.",
+    "short_window_counter": "The no-image 50 ms rehearsal produced physically impossible CPU-time readings. Short-window load admission was refused."
+  },
+  "recorded_protection_checks": {
+    "first_payload_poll_lag_ns": [
+      29400,
+      43600
+    ],
+    "held_guard_and_payload_masks_matched": 12,
+    "job_empty_before_and_after_cleanup": 12,
+    "normal_zero_exits_with_exact_empty_streams": 12,
+    "unassisted_first_payload_polls_terminal": 12,
+    "watchdog_or_assisted_cleanup_slots": 0
+  },
+  "repository_head_at_execution": "0f374a60927ab0f7a971bd5044bfddfb81846c7e",
+  "schema": "ptg-windows-pinned-shared-host-descriptive-1",
+  "status": "DESCRIPTIVE_ONLY_ALL_SLOTS_PASSED_RECORDED_ORACLES",
+  "workload": {
+    "endpoint": "Just before CreateProcessW through retained original guard native wait return",
+    "mode": "manual",
+    "payload_pause_s": 0.05,
+    "product_deadline_s": 2,
+    "slot_watchdog_s": 3
+  }
+}
