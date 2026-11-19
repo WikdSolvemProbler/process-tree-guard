@@ -2265,8 +2265,8 @@ class CensusConsistencyTests(unittest.TestCase):
     suite's own documents, in the canonical phrasing
     "N tests counted once", agrees with run_tests.py
     --count-only's number. The counted-ops anchor: the census the
-    report decomposes against (plain path 49 named calls, hook
-    path 18, run-core subtotal 40) recomputes from the vendored
+    report decomposes against (plain path 48 named calls, hook
+    path 18, run-core subtotal 39) recomputes from the vendored
     enumeration of MEASUREMENT.md section 2's named calls in
     campaign/census.json, that enumeration matches the guard
     tree's section 2 when the tree is present beside the suite,

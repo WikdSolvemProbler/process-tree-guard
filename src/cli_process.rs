@@ -481,6 +481,7 @@ mod tests {
 
     #[test]
     fn cell_cache_replacement_and_take_drop_owned_values_normally() {
+        stdio::stdin_mode_cache_regression();
         use std::sync::{Arc, atomic::{AtomicUsize, Ordering}};
         struct Probe(Arc<AtomicUsize>);
         impl Drop for Probe { fn drop(&mut self) { self.0.fetch_add(1, Ordering::SeqCst); } }

@@ -152,7 +152,7 @@
         "count": 2
       },
       {
-        "step": "Standard handles (the handle loop in `run_job_core`; on a process-owning invocation the three handles are read back from their per-handle slots — each slot's one probe is paid at its first read here, and no `GetStdHandle` is paid a second time for any of them. The current-process pseudo-handle only the returning-library branch duplicates with is fetched on that branch's first duplication and kept for its later ones, so this route pays no fetch for it)",
+        "step": "Standard handles (the handle loop in `run_job_core`. A process-owning invocation captures each raw handle once. It reads the console mode of standard output and standard error before cleanup. Passing stdin through needs only its handle. Only returning library calls duplicate the handles.)",
         "calls": [
           {
             "name": "GetStdHandle",
@@ -160,14 +160,14 @@
           },
           {
             "name": "GetConsoleMode",
-            "count": 3
+            "count": 2
           },
           {
             "name": "SetHandleInformation",
             "count": 3
           }
         ],
-        "count": 9
+        "count": 8
       },
       {
         "step": "Owner, the parent only (`engine::watched_owner_handles` and `engine::parent_process_id_on` in `src/engine/owners.rs`; the one pseudo-handle fetch serves both the creation-time read of this process and the parent query through it)",
@@ -358,13 +358,13 @@
         "count": 2
       }
     ],
-    "total": 49
+    "total": 48
   },
   "subtotal_run_core": {
     "definition": "The subtotal from job setup to process exit, as the prose after the plain-path table in section 2.2 states it: the plain path's steps from Job setup through Process exit, excluding Entry hardening and the Automatic-name check.",
     "steps": [
       "Job setup (`engine::run_job_core`)",
-      "Standard handles (the handle loop in `run_job_core`; on a process-owning invocation the three handles are read back from their per-handle slots — each slot's one probe is paid at its first read here, and no `GetStdHandle` is paid a second time for any of them. The current-process pseudo-handle only the returning-library branch duplicates with is fetched on that branch's first duplication and kept for its later ones, so this route pays no fetch for it)",
+      "Standard handles (the handle loop in `run_job_core`. A process-owning invocation captures each raw handle once. It reads the console mode of standard output and standard error before cleanup. Passing stdin through needs only its handle. Only returning library calls duplicate the handles.)",
       "Owner, the parent only (`engine::watched_owner_handles` and `engine::parent_process_id_on` in `src/engine/owners.rs`; the one pseudo-handle fetch serves both the creation-time read of this process and the parent query through it)",
       "Console probe (`cli_process::Console::probe`)",
       "Creation attributes (`engine::JobAttributeList::new`, stack storage)",
@@ -379,6 +379,6 @@
       "Console finish, first walk level (`cli_process::Console::finish` → `boundary`, on the first owner; the walk examines at least this one level on every run that reaches the finish, and the ordinary route's first owner is a boundary, so it breaks there)",
       "Process exit (`diagnostics::cli_exit`)"
     ],
-    "total": 40
+    "total": 39
   }
 }

@@ -164,7 +164,7 @@ count below except as noted in section 4). Named native calls:
 | Entry hardening (`diagnostics::cli_exit` → `cli_process::enter` → `harden_self` → `deny_acl`, for the process object and the thread object; the same row §2.1 counts for the hook route) | `GetCurrentProcess` 1, `GetCurrentThread` 1, `GetSecurityInfo` 2, `LocalFree` 2, `SetSecurityInfo` 2 | 8 |
 | Automatic-name check (`lib::entry_full` / `lib::entry_deadline` → `auto_by_name`, the stack form; the contain and gate entries make no such check) | `GetModuleFileNameW` 1 | 1 |
 | Job setup (`engine::run_job_core`) | `CreateJobObjectW` 1, `SetInformationJobObject` 1 | 2 |
-| Standard handles (the handle loop in `run_job_core`; on a process-owning invocation the three handles are read back from their per-handle slots — each slot's one probe is paid at its first read here, and no `GetStdHandle` is paid a second time for any of them. The current-process pseudo-handle only the returning-library branch duplicates with is fetched on that branch's first duplication and kept for its later ones, so this route pays no fetch for it) | `GetStdHandle` 3, `GetConsoleMode` 3 (the one probe of each handle's slot, paid at this first read), `SetHandleInformation` 3 (one per distinct handle) | 9 |
+| Standard handles (the handle loop in `run_job_core`. A process-owning invocation captures each raw handle once. It reads the console mode of standard output and standard error before cleanup. Passing stdin through needs only its handle. Only returning library calls duplicate the handles.) | `GetStdHandle` 3, `GetConsoleMode` 2 (standard output and standard error), `SetHandleInformation` 3 (one per distinct handle) | 8 |
 | Owner, the parent only (`engine::watched_owner_handles` and `engine::parent_process_id_on` in `src/engine/owners.rs`; the one pseudo-handle fetch serves both the creation-time read of this process and the parent query through it) | `GetCurrentProcess` 1, `GetProcessTimes` 2, `NtQueryInformationProcess` 1, `OpenProcess` 1 | 5 |
 | Console probe (`cli_process::Console::probe`) | `CreateFileW` 1 (the `CONIN$` device opens; 2 when `CONIN$` fails — whether `CONOUT$` then opens, so the probe succeeds with input missing, or neither console device opens) | 1 |
 | Creation attributes (`engine::JobAttributeList::new`, stack storage) | `InitializeProcThreadAttributeList` 1, `UpdateProcThreadAttribute` 2 (the job list and the handle list) | 3 |
@@ -178,18 +178,18 @@ count below except as noted in section 4). Named native calls:
 | Console finish, fixed part (`cli_process::Console::finish`) | `GetSystemWindowsDirectoryW` 1; for an attached console `FlushConsoleInputBuffer` 1, `GetConsoleProcessList` 1, `FreeConsole` 1 | 4 |
 | Console finish, first walk level (`cli_process::Console::finish` → `boundary`, on the first owner; the walk examines at least this one level on every run that reaches the finish, and the ordinary route's first owner is a boundary, so it breaks there) | `QueryFullProcessImageNameW` 1 | 1 |
 | Process exit (`diagnostics::cli_exit`) | `GetCurrentProcess` 1, `TerminateProcess` 1 (the guard itself) | 2 |
-| **Total, fixed core** | | **49** |
+| **Total, fixed core** | | **48** |
 
-The subtotal from job setup to process exit is 40; the total above is
+The subtotal from job setup to process exit is 39. The total above is
 the entry-to-exit count, on the same boundary §2.1 uses for the hook
 route (which counts its entry hardening and its process exit). A
 contain-role run, whose entry makes no automatic-name check, totals
-48 on this boundary for its run core — but a contain run cannot start
+47 on this boundary for its run core — but a contain run cannot start
 at all without its mandatory enclosing-run request, which the core
 above does not include: before the job is set up it pays the client
 exchange of §2.3 (13 named calls when the request is granted on the
 first attempt), plus the one-time `CreateEventW` of its thread's
-first exchange, for an entry-to-exit total of 62 on an ordinary
+first exchange, for an entry-to-exit total of 61 on an ordinary
 successful contain run. A plain run started inside an extendable run
 pays the same request the same way; the ordinary route counted above
 is a top-level run, which pays none of it (its channel probe finds no

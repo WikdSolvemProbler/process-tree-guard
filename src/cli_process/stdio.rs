@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright 2026 Peter Shiller
 
-//! The standard handles of a process-owning invocation: each probed once, kept, and written as lines.
+//! Standard handles and console-mode probes for process-owning and returning calls.
 
 use super::*;
 
@@ -17,40 +17,50 @@ use crate::sys::windows::{
     STD_OUTPUT_HANDLE, WriteConsoleW, WriteFile, wide,
 
 };
-/// One standard handle and whether it is a console, probed once for a
-/// process-owning CLI invocation and kept for its lifetime: its handles
-/// do not change under it. Each of the three handles is probed on its
-/// own, the first time that handle is actually needed: a call that
-/// reads standard input and writes its decision on standard output
-/// never pays to probe standard error, and a call that only reports an
-/// argument error on standard error probes nothing else. The handle
-/// itself is kept beside its verdict: a caller that needs both (every
-/// line writer, the standard-input choice, the run's handle loop)
-/// reads it back here instead of fetching the same handle again. A
-/// missing or invalid handle is not a console, exactly as the live
-/// probe reports it.
 #[derive(Clone, Copy)]
 struct ProbedHandle {
     handle: Handle,
     console: bool,
 }
 
-// The handles are process handles: values the kernel, not this process,
-// owns, written once by the probe that fills the slot and only read
-// afterwards, so sharing the filled value between threads is sound in
-// the same way reading a handle on any thread already is.
+struct CachedInput {
+    handle: Handle,
+    console: std::sync::OnceLock<bool>,
+}
+
+// These borrowed handles belong to the process. Keeping and sharing the raw
+// values does not transfer ownership, and the console verdict is initialized
+// at most once for each cached handle.
 unsafe impl Send for ProbedHandle {}
 unsafe impl Sync for ProbedHandle {}
+unsafe impl Send for CachedInput {}
+unsafe impl Sync for CachedInput {}
 
-/// The probed handle and verdict of one standard stream of a
-/// process-owning CLI invocation, from its own slot: the first need of
-/// that stream pays its one `GetStdHandle` and `GetConsoleMode`, and
-/// every later need reads the slot back.
+impl CachedInput {
+    fn probed(&self, is_console: impl FnOnce(Handle) -> bool) -> ProbedHandle {
+        ProbedHandle {
+            handle: self.handle,
+            console: *self.console.get_or_init(|| is_console(self.handle)),
+        }
+    }
+}
+
+static STANDARD_INPUT: std::sync::OnceLock<CachedInput> = std::sync::OnceLock::new();
+static STANDARD_OUTPUTS: [std::sync::OnceLock<ProbedHandle>; 2] =
+    [std::sync::OnceLock::new(), std::sync::OnceLock::new()];
+
+fn stdin_handle() -> &'static CachedInput {
+    STANDARD_INPUT.get_or_init(|| CachedInput {
+        handle: unsafe { GetStdHandle(STD_INPUT_HANDLE) },
+        console: std::sync::OnceLock::new(),
+    })
+}
+
 fn probed_handle(which: u32) -> ProbedHandle {
     let slot = match which {
-        STD_INPUT_HANDLE => &STANDARD_HANDLES[0],
-        STD_OUTPUT_HANDLE => &STANDARD_HANDLES[1],
-        STD_ERROR_HANDLE => &STANDARD_HANDLES[2],
+        STD_INPUT_HANDLE => return stdin_handle().probed(has_console_mode),
+        STD_OUTPUT_HANDLE => &STANDARD_OUTPUTS[0],
+        STD_ERROR_HANDLE => &STANDARD_OUTPUTS[1],
         _ => return ProbedHandle { handle: std::ptr::null_mut(), console: false },
     };
     *slot.get_or_init(|| {
@@ -59,14 +69,12 @@ fn probed_handle(which: u32) -> ProbedHandle {
     })
 }
 
-/// The standard handle `which` as the cached probe read it, on a
-/// process-owning CLI invocation (exactly when `active` holds): the
-/// probe's `GetStdHandle` is the one fetch of the invocation, and every
-/// later need of the same handle reads it back. A returning call, whose
-/// handles are its host's and may change under it, gets None and fetches
-/// live, exactly as it did before.
+/// A process-owning CLI captures each handle once. Launching a child needs
+/// only the raw input handle. Output verdicts are captured before console
+/// cleanup can change the active console. Returning callers fetch live.
 pub(crate) fn cached_std_handle(which: u32) -> Option<Handle> {
-    if active() { Some(probed_handle(which).handle) } else { None }
+    if !active() { return None; }
+    Some(if which == STD_INPUT_HANDLE { stdin_handle().handle } else { probed_handle(which).handle })
 }
 
 /// The standard stream `which` as this invocation resolved it at entry,
@@ -77,10 +85,8 @@ pub(crate) fn std_line_target(which: u32) -> (Handle, bool) {
     line_target(which)
 }
 
-/// One standard stream's handle and console verdict together: on a
-/// process-owning CLI invocation both come from the probe `enter` cached
-/// (no second `GetStdHandle`, no second `GetConsoleMode`); on any other
-/// call both are probed live on the handle just fetched, as before.
+/// Resolve a handle and its console verdict. A process-owning CLI uses its
+/// cached handle. Returning callers probe the freshly fetched handle.
 fn line_target(which: u32) -> (Handle, bool) {
     if active() {
         let probed = probed_handle(which);
@@ -90,22 +96,34 @@ fn line_target(which: u32) -> (Handle, bool) {
     }
 }
 
-static STANDARD_HANDLES: [std::sync::OnceLock<ProbedHandle>; 3] =
-    [std::sync::OnceLock::new(), std::sync::OnceLock::new(), std::sync::OnceLock::new()];
-
-/// The live probe of one standard handle, with the handle the probe
-/// fetched kept beside the verdict: a missing or invalid handle is not a
-/// console, and a valid one is a console exactly when the console mode
-/// can be read from it.
 fn probe_console_handle(which: u32) -> (Handle, bool) {
-    unsafe {
-        let handle = GetStdHandle(which);
-        if handle.is_null() || handle == INVALID_HANDLE {
-            return (handle, false);
-        }
-        let mut mode = 0u32;
-        (handle, GetConsoleMode(handle, &mut mode) != 0)
+    let handle = unsafe { GetStdHandle(which) };
+    (handle, has_console_mode(handle))
+}
+
+fn has_console_mode(handle: Handle) -> bool {
+    if handle.is_null() || handle == INVALID_HANDLE {
+        return false;
     }
+    let mut mode = 0u32;
+    unsafe { GetConsoleMode(handle, &mut mode) != 0 }
+}
+
+#[cfg(test)]
+pub(super) fn stdin_mode_cache_regression() {
+    let handle = 17usize as Handle;
+    let input = CachedInput { handle, console: std::sync::OnceLock::new() };
+    assert_eq!(input.handle, handle);
+    assert!(input.console.get().is_none());
+    let first = input.probed(|observed| {
+        assert_eq!(observed, handle);
+        false
+    });
+    let again = input.probed(|_| panic!("cached input must not probe again"));
+    assert_eq!(first.handle, again.handle);
+    assert!(!first.console && !again.console);
+    assert!(!has_console_mode(std::ptr::null_mut()));
+    assert!(!has_console_mode(INVALID_HANDLE));
 }
 
 /// Standard input for the hook vendors, served on its raw handle when it

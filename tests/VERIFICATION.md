@@ -819,8 +819,8 @@ was run under finite deadlines. Raw outputs are in `evidence/`.
    by the order checker, and a fixture with every slot present
    still renders INCOMPLETE for the evaluation profile (below).
    Counted-ops census: the census figures every report's
-   floor-based decomposition prints (plain path 49 named
-   calls, hook path 18, run-core subtotal 40) are the vendored
+   floor-based decomposition prints (plain path 48 named
+   calls, hook path 18, run-core subtotal 39) are the vendored
    enumeration of MEASUREMENT §2's named calls in
    `campaign/census.json` — the plain path's and the hook
    path's named calls in §2's own groupings, in §2's order,
