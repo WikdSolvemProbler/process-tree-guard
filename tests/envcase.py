@@ -47,3 +47,54 @@ def set_env_var(env, name, value):
         del env[key]
     env[name] = value
     return env
+
+# Error policy belongs to these test-owned Python processes, not the product.
+_WINDOWS_QUIET_ERROR_BITS = 0x8003
+_windows_error_mode = None
+
+
+def suppress_windows_error_dialogs():
+    """Preserve existing error-mode bits and suppress OS error UI before spawn.
+
+    Children inherit this process mode. The outer launcher must establish it
+    before this Python process loads too. No alignment-fault handling is added;
+    errors, exit statuses and captured stderr remain available to the harness.
+    """
+    global _windows_error_mode
+    import os
+    if os.name != "nt":
+        return None
+    if _windows_error_mode is not None:
+        return _windows_error_mode
+    import ctypes
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    get_mode = kernel32.GetErrorMode
+    get_mode.argtypes = []
+    get_mode.restype = ctypes.c_uint32
+    set_mode = kernel32.SetErrorMode
+    set_mode.argtypes = [ctypes.c_uint32]
+    set_mode.restype = ctypes.c_uint32
+    expected = get_mode() | _WINDOWS_QUIET_ERROR_BITS
+    set_mode(expected)
+    observed = get_mode()
+    if observed & expected != expected:
+        raise RuntimeError("Windows harness error-mode readback failed: "
+                           f"expected bits {expected:#x}, observed {observed:#x}")
+    _windows_error_mode = observed
+    return observed
+
+
+def hidden_helper_kwargs():
+    """Hide an incidental helper's initial window without changing its flags.
+
+    Do not apply this helper to a measured arm or an explicit console test.
+    """
+    suppress_windows_error_dialogs()
+    import os
+    if os.name != "nt":
+        return {}
+    import subprocess
+    startup = subprocess.STARTUPINFO()
+    startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    startup.wShowWindow = subprocess.SW_HIDE
+    return {"startupinfo": startup}

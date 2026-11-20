@@ -31,9 +31,12 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 TESTS = os.path.join(HERE, "tests")
 CERTIFICATES = os.path.join(HERE, "certificates")
+sys.path.insert(0, HERE)
 sys.path.insert(0, TESTS)
 sys.path.insert(0, os.path.join(HERE, "campaign"))
 sys.path.insert(0, os.path.join(HERE, "battery"))
+
+from envcase import suppress_windows_error_dialogs  # noqa: E402
 
 # The benchmark test families: the families whose subject is the
 # campaign and its competitor arms. Certificates for tests in these
@@ -223,6 +226,7 @@ def resolve_tree_sha(argv):
 
 
 def main(argv=None):
+    suppress_windows_error_dialogs()
     tree_sha, rest = resolve_tree_sha(
         sys.argv[1:] if argv is None else argv)
     suite = load_suite()

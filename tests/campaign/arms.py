@@ -23,8 +23,12 @@ import hashlib
 import os
 import re
 import subprocess
+import sys
 import types
 from collections.abc import Mapping
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from envcase import hidden_helper_kwargs  # noqa: E402
 
 PLACEHOLDERS = ("{timeout_s}", "{timeout_ms}", "{child}", "{child_args}")
 
@@ -1498,7 +1502,7 @@ def probe_version(executable, version_args=("--version",)):
         done = subprocess.run(
             [executable] + tokens,
             capture_output=True, text=True, errors="replace",
-            timeout=VERSION_PROBE_DEADLINE_S)
+            timeout=VERSION_PROBE_DEADLINE_S, **hidden_helper_kwargs())
     except (OSError, subprocess.TimeoutExpired):
         return None
     text = (done.stdout or "") + "\n" + (done.stderr or "")

@@ -34,7 +34,7 @@ import sys
 SUITE_ROOT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.path.insert(0, SUITE_ROOT)
 
-from envcase import set_env_var  # noqa: E402
+from envcase import set_env_var, suppress_windows_error_dialogs  # noqa: E402
 ROLES = {
     "full": "process-tree-guard",
     "deadline": "process-tree-guard-deadline",
@@ -92,6 +92,7 @@ def guard_present():
 
 def run(argv, stdin=b"", deadline=RUN_DEADLINE_S, env_extra=None):
     """Run argv under a finite deadline; return (exit, stdout, stderr, seconds)."""
+    suppress_windows_error_dialogs()
     import time
     env = None
     if env_extra:

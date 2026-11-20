@@ -13,6 +13,7 @@ use std::ffi::c_void;
 use std::fmt::Display;
 use std::io::{Read, Write};
 use std::os::windows::io::AsRawHandle;
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -31,12 +32,26 @@ extern "system" {
     fn CreateJobObjectW(attributes: *mut c_void, name: *const u16) -> *mut c_void;
     fn AssignProcessToJobObject(job: *mut c_void, process: *mut c_void) -> i32;
     fn GetCurrentProcess() -> *mut c_void;
+    fn GetErrorMode() -> u32;
+    fn SetErrorMode(mode: u32) -> u32;
 }
 
 const SYNCHRONIZE: u32 = 0x0010_0000;
 const PROCESS_QUERY_LIMITED_INFORMATION: u32 = 0x1000;
 const WAIT_OBJECT_0: u32 = 0;
 const WAIT_TIMEOUT: u32 = 0x102;
+
+/// Keep unattended test failures in exit statuses and captured output, rather
+/// than blocking the desktop with critical-error or Windows crash dialogs.
+/// Children inherit this mode, including during their loader initialization.
+fn suppress_test_error_dialogs() {
+    static DONE: OnceLock<()> = OnceLock::new();
+    DONE.get_or_init(|| unsafe {
+        let mode = GetErrorMode() | 0x8003;
+        SetErrorMode(mode);
+        assert_eq!(GetErrorMode() & mode, mode, "could not disable test error dialogs");
+    });
+}
 
 // ---------------------------------------------------------------- locations
 
@@ -90,6 +105,7 @@ pub const NAMES: [&str; 3] = ["process-tree-guard", "process-guard", "ptg"];
 /// not reach the checks they are for. The new job kills nothing, so the job that cargo made still holds. Done once, before the
 /// first program of the guard is named; if the system does not take a nested job the tests go on and say so.
 fn leave_the_job_of_the_runner() {
+    suppress_test_error_dialogs();
     static DONE: OnceLock<()> = OnceLock::new();
     DONE.get_or_init(|| unsafe {
         let job = CreateJobObjectW(std::ptr::null_mut(), std::ptr::null());
@@ -323,6 +339,7 @@ pub fn exec(command: Command) -> Out {
 
 /// Run a command to completion with captured output and a hard time limit.
 pub fn exec_with(mut command: Command, opts: Opts) -> Out {
+    suppress_test_error_dialogs();
     refuse_prompt_in(&command);
     let Opts { input, limit_secs, keep_stdout } = opts;
     command
@@ -355,6 +372,7 @@ pub fn exec_with(mut command: Command, opts: Opts) -> Out {
 
 /// Run a command whose standard streams the caller has already set.
 pub fn run_status(mut command: Command, limit_secs: u64) -> u32 {
+    suppress_test_error_dialogs();
     refuse_prompt_in(&command);
     let mut child = command.spawn().unwrap_or_else(|e| panic!("cannot start {:?}: {}", command.get_program(), e));
     match wait_limited(&mut child, limit_secs) {
@@ -506,7 +524,7 @@ pub const NO_CONSOLE_REASON: &str = "standard input is not an interactive consol
 pub fn guard_above_the_tests() -> Option<String> {
     static ABOVE: OnceLock<Option<String>> = OnceLock::new();
     ABOVE.get_or_init(|| {
-        let output = Command::new(testkit()).arg("ancestors").stdin(Stdio::null()).output().expect("run the helper that lists the processes above");
+        let output = Command::new(testkit()).arg("ancestors").creation_flags(0x0800_0000).stdin(Stdio::null()).output().expect("run the helper that lists the processes above");
         String::from_utf8_lossy(&output.stdout).lines().map(str::trim).map(str::to_ascii_lowercase)
             .find(|name| {
                 GUARD_PROGRAMS.contains(&name.as_str()) || name.rsplit_once('.').map_or(name.as_str(), |(stem, _)| stem).ends_with("-auto")
@@ -519,7 +537,7 @@ pub fn guard_above_the_tests() -> Option<String> {
 pub fn own_account() -> String {
     static ACCOUNT: OnceLock<String> = OnceLock::new();
     ACCOUNT.get_or_init(|| {
-        let output = Command::new(testkit()).arg("account-name").stdin(Stdio::null()).output().expect("run the helper that names the account");
+        let output = Command::new(testkit()).arg("account-name").creation_flags(0x0800_0000).stdin(Stdio::null()).output().expect("run the helper that names the account");
         assert!(output.status.success(), "the helper could not read the name of the account");
         String::from_utf8_lossy(&output.stdout).trim().to_string()
     }).clone()
@@ -658,6 +676,7 @@ pub fn log_field(line: &str, name: &str) -> Option<String> {
 
 /// Start the guard (or anything else) with all standard streams null.
 pub fn spawn_quiet(program: &str, args: &[&str]) -> Child {
+    suppress_test_error_dialogs();
     refuse_prompt(args);
     Command::new(program)
         .args(args)

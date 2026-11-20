@@ -1,0 +1,144 @@
+{
+  "schema": "ptg-windows-unattended-test-ui-1",
+  "date": "2026-11-19",
+  "parent_commit": "a95f32b8dea5de48e82de5a00c9c78653230586b",
+  "scope": "Test harness and fixtures only. No production guard code, protection, defaults or console behavior changed. This is not a performance comparison.",
+  "changes": [
+    "Set and verify the inherited process-local Windows error mode, preserving existing bits and adding 0x8003 before child loading. No alignment-fault flag or global setting is added.",
+    "Request hidden initial windows for incidental Python helpers and hide fixed native bulk-tree helpers.",
+    "Run B36 CREATE_NEW_CONSOLE and B40 plain cmd start on a checked private window station. Their creation actions, captured streams, marker checks and cleanup assertions remain; UI, parent and outer-console contexts change for these nonperformance fixtures.",
+    "Retain the original hidden-station approval fixture initial 10-second wait. Failed waits allow a bounded 5-second retirement wait, stay failures and leave whole-tree cleanup to the enclosing deadline. Failed native exit-status queries are failures."
+  ],
+  "validation": {
+    "source_overlay_files": 15,
+    "other_baseline_files_verified_unchanged": 1001,
+    "unrelated_working_changes_excluded": true,
+    "independent_source_reviewers": 2,
+    "unresolved_source_review_objections": 0,
+    "release_build": {
+      "native_exit": 0,
+      "rust": "1.98.1",
+      "msvc": "14.51.36231",
+      "sdk": "10.0.28000.0",
+      "warnings_as_errors": true
+    },
+    "python_regressions": {
+      "passed": 98,
+      "failed": 0,
+      "duration_seconds": 54.944,
+      "scope": "Existing environment, competitor identity, build/run script and battery families in the isolated popup-only snapshot"
+    },
+    "native_library": {
+      "passed": 301,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "native_escape_function": {
+      "passed": 1,
+      "failed": 0,
+      "filtered": 48,
+      "subchecks": [
+        "B36",
+        "B37",
+        "B38",
+        "B39",
+        "B40",
+        "B41"
+      ],
+      "each_marker_count": 1,
+      "each_alive_count": 0
+    },
+    "bounded_smoke": {
+      "native_exit": 0,
+      "inherited_parent_and_child_error_mode": 32771,
+      "intentional_child_exit": 7,
+      "stderr_preserved": true,
+      "preserves_prior_bits_and_caches": true,
+      "failed_mode_readback_refuses": true,
+      "hidden_initial_window_requested": true,
+      "creation_flags_changed": false,
+      "deliberate_crashes": 0,
+      "scope": "Canonical Python helper bytes match the isolated overlay; eight changed Python files parse"
+    },
+    "desktop_observation": "No test error windows were present in the pre/post inventories. These snapshots and the SW_HIDE request do not establish continuous visibility monitoring or suppression of arbitrary application dialogs.",
+    "source_pins_and_native_artifact_pins_unchanged": true,
+    "test_methods_added": 0
+  },
+  "source_sha256": [
+    {
+      "path": "tests/envcase.py",
+      "sha256": "bd21bfe35c1ea34bc1a5c1c594fa7e9f4c0d7e9c83d620ee609d316d229f4de1"
+    },
+    {
+      "path": "tests/campaign/harness.py",
+      "sha256": "a6f190131e597ae5b9ca911346ac19ea002771a0d10581eaadcd29d3ae1244b5"
+    },
+    {
+      "path": "tests/campaign/arms.py",
+      "sha256": "e7c463e1a5ba52dea911d62f54b9566d1fa73f28399c2694dbcda8c5f0ed1b07"
+    },
+    {
+      "path": "tests/campaign/runner.py",
+      "sha256": "5ca795b44bc8f92efc2c2f24d416899bb16fece969843b6cab8ee5cf30e16425"
+    },
+    {
+      "path": "tests/battery/battery.py",
+      "sha256": "1b1e4ee585416d65fb35c6076f60796751036fdc7ceaec48d60699784145de30"
+    },
+    {
+      "path": "tests/battery/drivers/driver_common.py",
+      "sha256": "fbf271cc986b779bd87a0e49adc0b5268ac72f7899b62927a737ae1db4de19f8"
+    },
+    {
+      "path": "tests/run_tests.py",
+      "sha256": "19ee96e49e11123ee7336bb8434bc914c6f277eca4b62b6b19ae7260170d50aa"
+    },
+    {
+      "path": "tests/tests/guard_driver.py",
+      "sha256": "fa4063b2758446d8e786d6e8636ef7540b5386013fbc8c7d8e1176abd7b0e301"
+    },
+    {
+      "path": "tests/common/mod.rs",
+      "sha256": "f4df5e45363c0df13c50a9e2ea1571fc1ca0fa7f61c5efbf8ba860dcfc6e38aa"
+    },
+    {
+      "path": "tests/support/testkit.rs",
+      "sha256": "28eb4180385e7236455e8e182b9210bd756f6940a636c34401404a6ec84ad2f7"
+    },
+    {
+      "path": "src/engine/tests.rs",
+      "sha256": "722b9fc09f19d7251050a0b4e73be8b4d1c46d785982c6b591aa2b4cf083e6c9"
+    },
+    {
+      "path": "tests/battery.rs",
+      "sha256": "cff3f34b0f35865604e161e348c5ead356385170b5127ee082fc396577c9e700"
+    },
+    {
+      "path": "tests/support/windows-error-mode.ps1",
+      "sha256": "d38c33b4759b2ea2174db4e55557cea377c4fe8c8866ecf85e2245a5802f2be4"
+    },
+    {
+      "path": "tests/build.ps1",
+      "sha256": "900c83055499adc26ecf5d2ea5bb2d9ec394fadf2eac3ac55d64fab84ca2cad0"
+    },
+    {
+      "path": "tests/run.ps1",
+      "sha256": "9e45c36199701741dd55cf8f7b0073df5956ebd18952fb1704fa4fd1c3803a32"
+    }
+  ],
+  "evidence_sha256": {
+    "source_overlay": "1a4d6fc112625b78179422cabd70077a39312be76195be281e8a0717803b8c02",
+    "smoke_script": "9df07e9906cedd52efc8ab9515481b6aaf8b094032d2171c30728e84bc87ceca",
+    "smoke_stdout": "a0b4bf7943a537f1ba5a53bdbe0c9b48977fe87ee4b3a0735bfa103942a855d2",
+    "native_build_recipe": "c821977c0d4e801d5323a08d82d31cf13fe94d95686bf8911a28768f803f362d",
+    "native_build_log": "85f6d3727f968d57c8006ffe618368f4d9d441c6a0fc140a6e09d7a587684070",
+    "python_log": "abda8cf11599a4baa270e78851c0b25a26a92460594e612e760799f6cd99bef5",
+    "native_checks_script": "2532f1b65408d992b93cdee23443a17b8c7a94a1e8174a5cc0577b33d2daf455",
+    "native_artifacts": "2c3177d1357b77b6094be3632f68768014ccf617d2334a3b1042666daf39a532",
+    "library_stdout": "7973b03a2ed179df63e3d852e25a12b45a1596ade573007878dde6a53800ab34",
+    "library_stderr": "51651904d58310e58c4e2454fd212ea771f3e42742b93d3a24be81a572b56feb",
+    "escape_stdout": "cf478bc52b65d170ca9fc2c7e0f7f021bebe36402341eca11ce5ee3d4c036f2b",
+    "escape_stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

@@ -72,6 +72,8 @@ EXIT_EXECUTION_FAILURE = 2
 EXIT_FAIL_DECISION = 3
 
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.dirname(HERE))
+from envcase import hidden_helper_kwargs, suppress_windows_error_dialogs  # noqa: E402
 import env_fixtures  # noqa: E402
 
 
@@ -274,7 +276,7 @@ class Case:
             if mode == "windows" else 600
         try:
             proc = subprocess.run(argv, capture_output=True, text=True,
-                                  timeout=timeout)
+                                  timeout=timeout, **hidden_helper_kwargs())
         except subprocess.TimeoutExpired:
             return "error", f"driver exceeded its {timeout} s deadline"
         try:
@@ -851,6 +853,7 @@ CASES = [case_a(), case_l(), case_m(), case_n(), case_o()]
 
 
 def main(argv=None):
+    suppress_windows_error_dialogs()
     parser = argparse.ArgumentParser(description="theory-item battery")
     parser.add_argument("--tree", default=DEFAULT_TREE)
     parser.add_argument("--json", action="store_true")

@@ -45,6 +45,7 @@ param(
     [string]$Competitors = ""
 )
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "support\windows-error-mode.ps1")
 
 # --- competitor staging source -------------------------------------------
 # With no -Competitors folder named, the staging source defaults to

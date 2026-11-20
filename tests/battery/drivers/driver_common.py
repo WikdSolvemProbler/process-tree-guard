@@ -32,6 +32,8 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 BATTERY_DIR = os.path.dirname(HERE)
 SUITE_DIR = os.path.dirname(BATTERY_DIR)
+sys.path.insert(0, SUITE_DIR)
+from envcase import hidden_helper_kwargs, suppress_windows_error_dialogs  # noqa: E402
 DEFAULT_TREE = os.path.normpath(os.path.join(SUITE_DIR, ".."))
 DEFAULT_BUILD = os.path.join(SUITE_DIR, "build")
 
@@ -44,7 +46,8 @@ def run_command(argv, timeout_s=COMMAND_TIMEOUT_S, cwd=None, env=None):
     record."""
     try:
         proc = subprocess.run(argv, capture_output=True, text=True,
-                              timeout=timeout_s, cwd=cwd, env=env)
+                              timeout=timeout_s, cwd=cwd, env=env,
+                              **hidden_helper_kwargs())
         return {"command": argv, "exit_code": proc.returncode,
                 "stdout": proc.stdout, "stderr": proc.stderr}
     except subprocess.TimeoutExpired as exc:
@@ -73,6 +76,7 @@ def run_probe(script, extra_args, timeout_s=COMMAND_TIMEOUT_S):
 
 
 def main(case_ident, decide, collect_windows, collect_stub):
+    suppress_windows_error_dialogs()
     parser = argparse.ArgumentParser(
         description=f"battery case ({case_ident}) driver")
     parser.add_argument("--mode", choices=("windows", "stub"),

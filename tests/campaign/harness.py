@@ -156,6 +156,9 @@ import sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from envcase import suppress_windows_error_dialogs  # noqa: E402
 
 from arms import fingerprint, probe_version, check_competitor_identities, expected_exit, materialized_list, has_sysprims_fast_workload  # noqa: E402
 from plan import DEFAULT_SEED, build_plan, check_plan, slot_key  # noqa: E402
@@ -3372,6 +3375,7 @@ def cmd_report(args):
 
 
 def main(argv=None):
+    suppress_windows_error_dialogs()
     parser = argparse.ArgumentParser(description="process-tree-guard campaign harness")
     sub = parser.add_subparsers(dest="command", required=True)
     run = sub.add_parser("run")

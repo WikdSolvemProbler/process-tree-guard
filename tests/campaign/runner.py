@@ -154,6 +154,9 @@ import sys
 import tempfile
 import time
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from envcase import hidden_helper_kwargs, suppress_windows_error_dialogs  # noqa: E402
+
 from arms import arm_executable, expected_exit, expand_template, \
     expand_template_text, \
     materialized_candidate_pending, \
@@ -562,7 +565,7 @@ def descendants_alive(config, descendant_pids):
     command = command + [str(pid) for pid in descendant_pids]
     try:
         done = subprocess.run(command, timeout=PROBE_DEADLINE_S,
-                              capture_output=True)
+                              capture_output=True, **hidden_helper_kwargs())
     except (OSError, subprocess.TimeoutExpired):
         return None
     if done.returncode == 0:
@@ -574,6 +577,7 @@ def descendants_alive(config, descendant_pids):
 
 def run_slot(slot, config):
     """Execute one slot and settle its isolation before returning."""
+    suppress_windows_error_dialogs()
     job = None
     event_dir = None
     event_root = config.get("_processkit_event_dir")

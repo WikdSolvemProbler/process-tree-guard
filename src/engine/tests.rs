@@ -2,6 +2,7 @@
 // Copyright 2026 Peter Shiller
 
     use super::*;
+    use std::os::windows::process::CommandExt;
 
 
     use crate::sys::windows::{
@@ -799,6 +800,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         use std::os::windows::io::AsRawHandle;
         // A process that is started here has a system folder path, which the system writes with capitals.
         let mut child = std::process::Command::new("cmd").args(["/d", "/c", "ping -n 6 127.0.0.1 >nul"])
+            .creation_flags(0x0800_0000)
             .stdin(std::process::Stdio::null()).stdout(std::process::Stdio::null()).spawn().expect("start a process");
         let path = image_path_of_handle(child.as_raw_handle() as Handle);
         let by_identifier = image_path_of_id(child.id());
@@ -850,6 +852,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         let system = format!("{}\\System32\\cmd.exe", windows);
         std::fs::copy(&system, &copy).expect("copy a program");
         let mut child = std::process::Command::new(&copy).args(["/d", "/c", "ping -n 6 127.0.0.1 >nul"])
+            .creation_flags(0x0800_0000)
             .stdin(std::process::Stdio::null()).stdout(std::process::Stdio::null()).spawn().expect("start the copy");
         let image = image_path_of_id(child.id());
         let ends = ends_the_walk("explorer.exe", &image, &windows);
@@ -1102,7 +1105,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             let job = CreateJobObjectW(std::ptr::null_mut(), std::ptr::null());
             assert!(!job.is_null());
             // The command holds the run for 30 seconds and ends on its own after two, a second after the run's own deadline of one.
-            let mut child = std::process::Command::new("ping.exe").args(["-n", "3", "127.0.0.1"]).stdin(quiet()).stdout(quiet()).stderr(quiet()).spawn().expect("start ping.exe");
+            let mut child = std::process::Command::new("ping.exe").args(["-n", "3", "127.0.0.1"]).creation_flags(0x0800_0000).stdin(quiet()).stdout(quiet()).stderr(quiet()).spawn().expect("start ping.exe");
             assert_ne!(AssignProcessToJobObject(job, child.as_raw_handle() as Handle), 0, "put the command in the job");
             let extension = Extension::start(job, &Settings { max_seconds: 60.0, log_path: None, exception: None }, 1.0, None).expect("start the extension");
             extension.hold_for_test(child.id(), 30.0);
@@ -1110,7 +1113,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             // The hold ended with the command, so the deadline is back at the one that passed long ago, and the exit is still reported.
             assert_eq!(wait_extendable(&extension, &[child.as_raw_handle() as Handle]), 0, "the command's exit wins over the deadline");
             // A command that is still running when the deadline has passed is the deadline.
-            let mut running = std::process::Command::new("ping.exe").args(["-n", "60", "127.0.0.1"]).stdin(quiet()).stdout(quiet()).stderr(quiet()).spawn().expect("start ping.exe");
+            let mut running = std::process::Command::new("ping.exe").args(["-n", "60", "127.0.0.1"]).creation_flags(0x0800_0000).stdin(quiet()).stdout(quiet()).stderr(quiet()).spawn().expect("start ping.exe");
             assert_ne!(AssignProcessToJobObject(job, running.as_raw_handle() as Handle), 0, "put the command in the job");
             assert_eq!(wait_extendable(&extension, &[running.as_raw_handle() as Handle]), WAIT_TIMEOUT);
             running.kill().expect("end the command");

@@ -77,6 +77,7 @@ param(
     [string]$Tree = (Join-Path $PSScriptRoot "..")
 )
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "support\windows-error-mode.ps1")
 
 # --- prerequisites -------------------------------------------------------
 # Preflight, before stage 1: Python 3 on PATH is required, or the

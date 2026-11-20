@@ -52,6 +52,8 @@ extern "system" {
     fn Process32FirstW(snapshot: *mut c_void, entry: *mut ProcessEntry) -> i32;
     fn Process32NextW(snapshot: *mut c_void, entry: *mut ProcessEntry) -> i32;
     fn GetCurrentProcessId() -> u32;
+    fn GetErrorMode() -> u32;
+    fn SetErrorMode(mode: u32) -> u32;
     fn GetStdHandle(which: u32) -> *mut c_void;
     fn CloseHandle(handle: *mut c_void) -> i32;
     fn GetNamedPipeInfo(pipe: *mut c_void, flags: *mut u32, out_buffer: *mut u32, in_buffer: *mut u32, max_instances: *mut u32) -> i32;
@@ -228,10 +230,12 @@ fn start(program: &OsStr, args: &[&str], flags: u32, quiet: bool) -> Child {
     command.spawn().unwrap_or_else(|error| fail_spawn(&error))
 }
 
-/// Start another copy of this executable with null standard streams.
+/// Start another copy with null streams. Bulk tree fixtures do not need a
+/// console; explicit console and library-client fixtures keep their context.
 fn start_self(args: &[&str]) -> Child {
     let me = std::env::current_exe().unwrap_or_else(|error| fail_spawn(&error));
-    start(me.as_os_str(), args, 0, true)
+    let flags = if matches!(args.first().copied(), Some("sleep" | "deep" | "mark-dir")) { 0x0800_0000 } else { 0 };
+    start(me.as_os_str(), args, flags, true)
 }
 
 /// The result of a request to the enclosing extendable run, as one line of text.
@@ -348,6 +352,14 @@ fn command_line(args: &[&str]) -> String {
 }
 
 fn run_on_hidden_station(guard: &str, cap: &str, timeout: &str, child: &[String]) -> i32 {
+    let mut args: Vec<&str> = vec![guard, "--extendable", "--max-extension", cap, "--timeout", timeout, "--"];
+    args.extend(child.iter().map(String::as_str));
+    run_hidden_command(&args, 10_000)
+}
+
+/// Run fixed test argv on a noninteractive station. This is a UI context for
+/// containment fixtures, not a performance sample or an interactive-console test.
+fn run_hidden_command(args: &[&str], wait_limit_ms: u32) -> i32 {
     const GENERIC_ALL: u32 = 0x1000_0000;
     const UOI_FLAGS: i32 = 1;
     const UOI_NAME: i32 = 2;
@@ -355,9 +367,6 @@ fn run_on_hidden_station(guard: &str, cap: &str, timeout: &str, child: &[String]
     const DETACHED_PROCESS: u32 = 0x8;
     const STARTF_USESTDHANDLES: u32 = 0x100;
     const HANDLE_FLAG_INHERIT: u32 = 1;
-    // The refusal is immediate. A guard that is still there after this is not refusing, and may have put a prompt on
-    // the screen: the wait is short so that, if it ever does, the prompt is gone within seconds.
-    const WAIT_LIMIT_MS: u32 = 10_000;
     unsafe {
         // A station with no name of its own: the system names it, and a named one is refused to a process that is not a service.
         let station = CreateWindowStationW(std::ptr::null(), 0, GENERIC_ALL, std::ptr::null_mut());
@@ -384,9 +393,7 @@ fn run_on_hidden_station(guard: &str, cap: &str, timeout: &str, child: &[String]
         }
         let station_name = String::from_utf16_lossy(&station_name[..station_name.iter().position(|unit| *unit == 0).unwrap_or(0)]);
         let mut desktop_name = wide(&format!("{}\\hidden", station_name));
-        let mut args: Vec<&str> = vec![guard, "--extendable", "--max-extension", cap, "--timeout", timeout, "--"];
-        args.extend(child.iter().map(String::as_str));
-        let mut line = wide(&command_line(&args));
+        let mut line = wide(&command_line(args));
         let mut startup: StartupInfo = std::mem::zeroed();
         startup.cb = std::mem::size_of::<StartupInfo>() as u32;
         startup.desktop = desktop_name.as_mut_ptr();
@@ -410,14 +417,21 @@ fn run_on_hidden_station(guard: &str, cap: &str, timeout: &str, child: &[String]
             return NO_HIDDEN_STATION_EXIT;
         }
         CloseHandle(info.thread);
-        if WaitForSingleObject(info.process, WAIT_LIMIT_MS) != 0 {
-            TerminateProcess(info.process, 1);
-            eprintln!("testkit: the guard did not end within {} milliseconds", WAIT_LIMIT_MS);
+        if WaitForSingleObject(info.process, wait_limit_ms) != 0 {
+            let terminated = TerminateProcess(info.process, 1);
+            let retired = WaitForSingleObject(info.process, 5_000);
+            CloseHandle(info.process);
+            eprintln!("testkit: the guard did not end within {} milliseconds (terminate {}, wait {}); the enclosing deadline still owns tree cleanup", wait_limit_ms, terminated, retired);
             return WAIT_TIMEOUT_EXIT;
         }
         let mut status = 0u32;
-        GetExitCodeProcess(info.process, &mut status);
+        let queried = GetExitCodeProcess(info.process, &mut status);
+        let query_error = if queried == 0 { GetLastError() } else { 0 };
         CloseHandle(info.process);
+        if queried == 0 {
+            eprintln!("testkit: cannot read hidden-station child exit status [WinError {}]", query_error);
+            return NO_HIDDEN_STATION_EXIT;
+        }
         status as i32
     }
 }
@@ -711,6 +725,16 @@ fn run_in_pseudo_console(limit: f64, guard: &str, args: &[String], type_enter: b
 }
 
 fn main() {
+    // Set this before any child starts. The harness also sets it before this
+    // executable loads, so loader failures cannot open an error dialog either.
+    unsafe {
+        let mode = GetErrorMode() | 0x8003;
+        SetErrorMode(mode);
+        if GetErrorMode() & mode != mode {
+            eprintln!("testkit: could not disable test error dialogs");
+            exit(125);
+        }
+    }
     let args = args_after(1);
     let (name, rest) = match args.split_first() {
         Some((name, rest)) => (name.as_str(), rest),
@@ -1461,6 +1485,20 @@ fn main() {
             // if it cannot be.
             need_at_least(rest, 4, "hidden-station-guard GUARD CAP SECONDS CHILD...");
             exit(run_on_hidden_station(&rest[0], &rest[1], &rest[2], &rest[3..]));
+        }
+        "hidden-station-fixture" => {
+            need_at_least(rest, 2, "hidden-station-fixture LIMIT PROGRAM [ARGS...]");
+            let limit = seconds(&rest[0]);
+            if !(1.0..=120.0).contains(&limit) {
+                usage("hidden-station fixture limit must be between 1 and 120 seconds");
+            }
+            // This entry serves fixed containment argv. Shell payloads must be
+            // --command-b64 values; reject forms the simple serializer cannot quote.
+            if rest[1..].iter().any(|arg| arg.contains('"') || arg.ends_with('\\') || arg.chars().any(char::is_control)) {
+                usage("hidden-station fixture argv cannot contain quotes or control characters, or end in a backslash");
+            }
+            let args: Vec<&str> = rest[1..].iter().map(String::as_str).collect();
+            exit(run_hidden_command(&args, (limit * 1000.0) as u32));
         }
         "pty-guard" => {
             // Run GUARD ARGS... in a pseudo console for at most LIMIT seconds, typing an Enter every 300

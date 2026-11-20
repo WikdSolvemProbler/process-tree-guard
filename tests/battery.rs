@@ -138,7 +138,16 @@ fn b36_to_b41_escape_attempts_are_contained() {
         let dir = TempDir::new("flag-");
         let dir_text = dir.text();
         // The parent leaves once its child has written a marker, however long the child takes to start.
-        let result = guarded("60", &[testkit(), "spawn-marked", flag, &dir_text, "30", testkit(), "mark-dir", &dir_text, "60"]);
+        let result = if id == "B36" {
+            // Keep CREATE_NEW_CONSOLE real, but on a private window station so
+            // a containment test cannot put a console on the user's desktop.
+            let mut command = Command::new(testkit());
+            command.args(["hidden-station-fixture", "90", guard(), "--timeout", "60", "--",
+                testkit(), "spawn-marked", flag, &dir_text, "30", testkit(), "mark-dir", &dir_text, "60"]);
+            exec_with(command, Opts { limit_secs: 110, ..Opts::default() })
+        } else {
+            guarded("60", &[testkit(), "spawn-marked", flag, &dir_text, "30", testkit(), "mark-dir", &dir_text, "60"])
+        };
         let ids = ids_in(dir.path());
         let running = count_alive(&ids);
         checks.check(id, &format!("child with {} contained", name), result.code == 0 && !ids.is_empty() && running == 0, format!("exit {} markers {} alive {}", result.code, ids.len(), running));
@@ -151,7 +160,12 @@ fn b36_to_b41_escape_attempts_are_contained() {
         dir.text(),
         dir.text()
     );
-    let result = shell("60", "cmd", &payload);
+    // cmd start still creates a separate console, on the private station.
+    // Encode the payload before crossing the fixture's simple argv serializer.
+    let mut command = Command::new(testkit());
+    command.args(["hidden-station-fixture", "90", guard(), "--timeout", "60", "--shell", "cmd",
+        "--command-b64", &base64(payload.as_bytes())]);
+    let result = exec_with(command, Opts { limit_secs: 110, ..Opts::default() });
     let ids = ids_in(dir.path());
     let running = count_alive(&ids);
     checks.check("B40", "cmd 'start' child contained", result.code == 0 && !ids.is_empty() && running == 0, format!("exit {} markers {} alive {}", result.code, ids.len(), running));
