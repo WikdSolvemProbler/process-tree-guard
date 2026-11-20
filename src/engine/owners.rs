@@ -388,7 +388,9 @@ pub(super) fn observed_owner(id: u32, kept: Option<Handle>, windows: &str, clean
                     let error = os_error();
                     let image = image_path_of_unopened(id, windows);
                     if !ends_the_walk(crate::file_name_of(&image), &image, windows) {
-                        return Err(error);
+                        return Err(GuardError(format!(
+                            "cannot verify ancestor PID {id}: OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION) failed; image-by-ID did not verify a system boundary: {error}"
+                        )));
                     }
                     return Ok(OwnerObservation { handle: std::ptr::null_mut(), started: None, image, waitable: false });
                 }

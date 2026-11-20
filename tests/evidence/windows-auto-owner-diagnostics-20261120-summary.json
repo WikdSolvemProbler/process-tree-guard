@@ -1,0 +1,68 @@
+{
+  "schema": "ptg-windows-auto-owner-diagnostics-1",
+  "date": "2026-11-20",
+  "base_commit": "7f762688b2debf3c619c971d7805f0105ef81bfd",
+  "scope": "Context for an existing ancestor-verification refusal. No owner check, boundary decision, native call, access right, deadline, containment, cleanup or exit status is changed.",
+  "change": {
+    "path": "src/engine/owners.rs",
+    "location": "The existing rejection after both process opens fail and image-by-ID does not verify a system boundary",
+    "saved_error": "The query-only OpenProcess error remains captured before the image fallback",
+    "added_context": "Attempted ancestor PID, query-only OpenProcess stage and unverified system boundary",
+    "successful_path_calls_or_allocations_added": false,
+    "test_methods_added": 0
+  },
+  "qualification": {
+    "release_build_native_exit": 0,
+    "unit_compile_native_exit": 0,
+    "rust": "1.98.1",
+    "msvc": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "rust_warnings_as_errors": true,
+    "existing_cargo_manifest_deprecation_notices_retained": true,
+    "each_build_whole_tree_deadline_seconds": 600,
+    "source_files_verified_before_and_after": 1024,
+    "other_base_files_verified_unchanged": 1023,
+    "tool_files_verified_before_and_after": 4,
+    "original_six_binaries_unchanged_by_unit_compile": true,
+    "existing_owner_tests": {
+      "filter": "automatic_owner_walk_",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 297,
+      "duration_seconds": 0.04,
+      "whole_tree_deadline_seconds": 60
+    },
+    "actual_auto_probe": {
+      "dispatches": 1,
+      "capture_controller_exit": 0,
+      "product_native_exit": 125,
+      "product_deadline_seconds": 5,
+      "whole_tree_deadline_seconds": 60,
+      "stdout_bytes": 0,
+      "stderr_bytes": 212,
+      "new_rejection_branch_observed": true,
+      "windows_error": 87,
+      "payload_marker_present": false,
+      "successful_auto_execution": false,
+      "historical_readiness_failure_cause_proved": false,
+      "interpretation": "This current invocation reached the contextualized query-only process-open rejection. It remains a refusal; no missing-ancestor check was bypassed. The three prior readiness failures remain failed."
+    }
+  },
+  "evidence_sha256": {
+    "base_archive": "b57644d1ab49f00867acb47b29f3c94819b2ae42535a44b68045913ff1f1698f",
+    "source_manifest": "0c225a1e96fda39cfd951e32940d33962a549be5773429b348e46bdad3bea25c",
+    "owner_worktree_overlay": "d9daef15637b1ffe6001460931b935f7d99116cb80d3bf800352f45f4a3d4bb0",
+    "release_build_recipe": "67c9f2f51926f3a28aed5eded5891084f2b9dc05b2824df1e1c02c358aa8bac0",
+    "release_build_log": "eeb3c8e13a0e34d79141888ce84032bfbe40d29e5701ec1f88289914287b8384",
+    "unit_compile_recipe": "660c5e3dbfd3db53dea026fa41b712a916744288dd90eefd3b954ce449b631bf",
+    "unit_driver": "9f4276bb56e06db10b1475949b13fda1e13fc2de9a71d82f64be4628dbe4652a",
+    "owner_tests_result": "5617e4b3150e24d39e2a55fed38152196149bfa4715b5a24a53bbf3003e817aa",
+    "owner_tests_stdout": "578341aab68c338e031dfad14f4a84b567e7b9118a5b595b316df478248968bb",
+    "auto_main_executable": "89c16b5ed84b86f491cb88b98fb9f39ee3912b1d519ee686b1f5845d0bd6bc84",
+    "auto_probe_result": "bf7c833e53fb0bf1627612ded6e4b0f6fa32af0a27fbf7280910064c126f1952",
+    "auto_probe_stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "auto_probe_stderr": "db4041486d5ebac89d80777dfc3da15d0811e30975ae40be60beee642487cda0"
+  },
+  "limits": "The quiet, bounded calls qualify this diagnostic change only. They do not close automatic-mode readiness, establish performance parity or a winner, or complete the comprehensive benchmark. Private process identities and raw machine/transport records remain local; this summary is not the independently replayable academic benchmark package."
+}
