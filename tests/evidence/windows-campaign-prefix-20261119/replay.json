@@ -1,0 +1,643 @@
+{
+  "analysis_commit": "a95f32b8dea5de48e82de5a00c9c78653230586b",
+  "analysis_sha256": {
+    "tests/campaign/arms.py": "ed9b9721c25ecf375c329fbb57bb34eaaeeddc468c66958aa4726de6b02e959f",
+    "tests/campaign/plan.py": "9909e762cb3ffc731930f5f4d2679d163098d16a5360094e83d90e9206087255",
+    "tests/campaign/report.py": "92e8f5c1776db8ba1a975bc425ac1f8b130b93ac15e50e5965d7eb93c923e245",
+    "tests/campaign/runner.py": "263cd7a4d9c5ecf11e8abb3eaebff2c7624f53e67656106d3b11ff38470fbe4d",
+    "tests/campaign/windows_payload_observer.py": "d4982594d8789e3027156d1a0bff458568177e414c606f09b7101c8bb5de219f",
+    "tests/campaign/windows_slot_job.py": "94f31bffbb6faae728907e88bd7796857309e0ee795f46866a20e9527ddf98e0",
+    "tests/envcase.py": "367761bb63953ce693f9bda1e1a59616e1dd65986b5ac318f1894636dbe4391a"
+  },
+  "canonical_package_validation": {
+    "diagnostic_receipt_sha256": "5a1702028bd79e639e0a646f295379eaab4ccf69d2151cdd78eccf89e39d6888",
+    "exact_findings": [
+      "run.json records no such competitor identity mismatch, but the fingerprints and versions it records give one against the pinned identities in the configuration whose SHA-256 it records: nuewframe: competitor binary not present; identity unconfirmed (expected version 1.0.0); the recorded identity verdict disagrees with the package's evidence",
+      "run.json records no such competitor identity mismatch, but the fingerprints and versions it records give one against the pinned identities in the configuration whose SHA-256 it records: processkit: competitor binary not present; identity unconfirmed (expected version 0.3.4); the recorded identity verdict disagrees with the package's evidence",
+      "run.json records no such competitor identity mismatch, but the fingerprints and versions it records give one against the pinned identities in the configuration whose SHA-256 it records: sysprims: competitor binary not present; identity unconfirmed (expected version 0.2.4); the recorded identity verdict disagrees with the package's evidence"
+    ],
+    "findings_sha256": "8d89a513b200b428dae1e67169574d307ff3b64462131b6831b636c96e2d46e8",
+    "interpretation": "These are the canonical checker's refusals over the untouched provisional run.json and its empty recorded fingerprint/version maps. They do not assert that staged binaries were physically absent. No maps or verdicts are repaired, and full-package acceptance remains open.",
+    "package_clean": false,
+    "verdict": "REFUSED"
+  },
+  "canonical_refusal_ledger_sha256": "2504c61444472837d89b633157b19c64b75704e505d2ff09ffe36ba85078eb6c",
+  "configuration": {
+    "path": "tests/campaign.json",
+    "sha256": "d94850b7bff763719a384f686e1469a47ec12daf00ae5140ff30e0e695c043b4"
+  },
+  "data_state": "REVIEWED_INTERRUPTED_PREFIX_DIAGNOSTIC",
+  "diagnostics": {
+    "canonical_package_verdict": "REFUSED",
+    "floor_diagnostics": [
+      {
+        "agrees_within_5_percent": false,
+        "context": "NO_WINDOW",
+        "direct_median_ms": 72.3111,
+        "direct_recorded": 9,
+        "distance_claim": null,
+        "relative_disagreement": 0.05351460564145746,
+        "spawn_median_ms": 68.4414,
+        "spawn_recorded": 9
+      },
+      {
+        "agrees_within_5_percent": false,
+        "context": "DETACHED",
+        "direct_median_ms": 43.8327,
+        "direct_recorded": 9,
+        "distance_claim": null,
+        "relative_disagreement": 0.16983211164267775,
+        "spawn_median_ms": 36.3885,
+        "spawn_recorded": 9
+      }
+    ],
+    "infrastructure_failure_slot_keys": [
+      [
+        "measured",
+        "guard",
+        "scale",
+        "DETACHED",
+        9,
+        "deep-40"
+      ],
+      [
+        "measured",
+        "guard",
+        "scale",
+        "NO_WINDOW",
+        9,
+        "deep-40"
+      ],
+      [
+        "measured",
+        "processkit",
+        "kill",
+        "DETACHED",
+        43
+      ],
+      [
+        "measured",
+        "sysprims",
+        "scale",
+        "DETACHED",
+        4,
+        "wide-72"
+      ],
+      [
+        "measured",
+        "guard",
+        "scale",
+        "DETACHED",
+        11,
+        "deep-40"
+      ],
+      [
+        "measured",
+        "processkit",
+        "scale",
+        "DETACHED",
+        9,
+        "deep-40"
+      ],
+      [
+        "measured",
+        "processkit",
+        "scale",
+        "DETACHED",
+        10,
+        "deep-40"
+      ]
+    ],
+    "measured_fast_and_kill_descriptives": [
+      {
+        "arm": "guard",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 86
+          },
+          "peak_working_set_bytes": {
+            "median": 6184960.0,
+            "null_count": 0,
+            "numeric_count": 86
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": 169.00515000000001,
+        "eligible_ok_elapsed_samples": 86,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 86,
+        "recorded_outcomes": {
+          "ok": 86
+        }
+      },
+      {
+        "arm": "processkit",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 93.75,
+            "null_count": 0,
+            "numeric_count": 88
+          },
+          "peak_working_set_bytes": {
+            "median": 10326016.0,
+            "null_count": 0,
+            "numeric_count": 88
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": 191.78915,
+        "eligible_ok_elapsed_samples": 88,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 88,
+        "recorded_outcomes": {
+          "ok": 88
+        }
+      },
+      {
+        "arm": "nuewframe",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 86
+          },
+          "peak_working_set_bytes": {
+            "median": 6565888.0,
+            "null_count": 0,
+            "numeric_count": 86
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": 155.54305,
+        "eligible_ok_elapsed_samples": 86,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 86,
+        "recorded_outcomes": {
+          "ok": 86
+        }
+      },
+      {
+        "arm": "sysprims",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 7827456,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": null,
+        "eligible_ok_elapsed_samples": 0,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "output-mismatch": 87
+        }
+      },
+      {
+        "arm": "guard",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 86
+          },
+          "peak_working_set_bytes": {
+            "median": 6279168.0,
+            "null_count": 0,
+            "numeric_count": 86
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": 2365.53115,
+        "eligible_ok_elapsed_samples": 86,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 86,
+        "recorded_outcomes": {
+          "ok": 86
+        }
+      },
+      {
+        "arm": "processkit",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 93.75,
+            "null_count": 0,
+            "numeric_count": 86
+          },
+          "peak_working_set_bytes": {
+            "median": 10930176.0,
+            "null_count": 0,
+            "numeric_count": 86
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": 2435.0834,
+        "eligible_ok_elapsed_samples": 86,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 86,
+        "recorded_outcomes": {
+          "ok": 86
+        }
+      },
+      {
+        "arm": "nuewframe",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 88
+          },
+          "peak_working_set_bytes": {
+            "median": 6623232.0,
+            "null_count": 0,
+            "numeric_count": 88
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": null,
+        "eligible_ok_elapsed_samples": 0,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 88,
+        "recorded_outcomes": {
+          "descendant-survived": 88
+        }
+      },
+      {
+        "arm": "sysprims",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 7823360,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "NO_WINDOW",
+        "eligible_elapsed_median_ms": 2404.9896,
+        "eligible_ok_elapsed_samples": 87,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "ok": 87
+        }
+      },
+      {
+        "arm": "guard",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 31.25,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 6197248,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 167.7854,
+        "eligible_ok_elapsed_samples": 87,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "ok": 87
+        }
+      },
+      {
+        "arm": "processkit",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 93.75,
+            "null_count": 0,
+            "numeric_count": 89
+          },
+          "peak_working_set_bytes": {
+            "median": 10326016,
+            "null_count": 0,
+            "numeric_count": 89
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 462.0243,
+        "eligible_ok_elapsed_samples": 89,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 89,
+        "recorded_outcomes": {
+          "ok": 89
+        }
+      },
+      {
+        "arm": "nuewframe",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 31.25,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 6561792,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 400.2321,
+        "eligible_ok_elapsed_samples": 87,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "ok": 87
+        }
+      },
+      {
+        "arm": "sysprims",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 31.25,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 7815168,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": null,
+        "eligible_ok_elapsed_samples": 0,
+        "path": "fast",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "output-mismatch": 87
+        }
+      },
+      {
+        "arm": "guard",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 31.25,
+            "null_count": 0,
+            "numeric_count": 84
+          },
+          "peak_working_set_bytes": {
+            "median": 6283264.0,
+            "null_count": 0,
+            "numeric_count": 84
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 2321.4919,
+        "eligible_ok_elapsed_samples": 84,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 84,
+        "recorded_outcomes": {
+          "ok": 84
+        }
+      },
+      {
+        "arm": "processkit",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 93.75,
+            "null_count": 0,
+            "numeric_count": 88
+          },
+          "peak_working_set_bytes": {
+            "median": 10921984.0,
+            "null_count": 0,
+            "numeric_count": 88
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 2465.7745,
+        "eligible_ok_elapsed_samples": 87,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 88,
+        "recorded_outcomes": {
+          "infra-failure": 1,
+          "ok": 87
+        }
+      },
+      {
+        "arm": "nuewframe",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 31.25,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 6619136,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 3316.3411,
+        "eligible_ok_elapsed_samples": 1,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "descendant-survived": 86,
+          "ok": 1
+        }
+      },
+      {
+        "arm": "sysprims",
+        "arm_process_resource_descriptives": {
+          "cpu_ms": {
+            "median": 46.875,
+            "null_count": 0,
+            "numeric_count": 87
+          },
+          "peak_working_set_bytes": {
+            "median": 7819264,
+            "null_count": 0,
+            "numeric_count": 87
+          }
+        },
+        "context": "DETACHED",
+        "eligible_elapsed_median_ms": 2402.4834,
+        "eligible_ok_elapsed_samples": 87,
+        "path": "kill",
+        "planned_measured_slots": 90,
+        "recorded_measured_slots": 87,
+        "recorded_outcomes": {
+          "ok": 87
+        }
+      }
+    ],
+    "missing_slots": 59,
+    "per_arm_counts": [
+      {
+        "arm": "floor-direct",
+        "by_kind": {
+          "control": 18
+        },
+        "by_outcome": {
+          "ok": 18
+        },
+        "harness_termination_flags": 0,
+        "recorded_slots": 18
+      },
+      {
+        "arm": "floor-spawn",
+        "by_kind": {
+          "control": 18
+        },
+        "by_outcome": {
+          "ok": 18
+        },
+        "harness_termination_flags": 9,
+        "recorded_slots": 18
+      },
+      {
+        "arm": "guard",
+        "by_kind": {
+          "measured": 401,
+          "warmup": 56
+        },
+        "by_outcome": {
+          "infra-failure": 3,
+          "ok": 454
+        },
+        "harness_termination_flags": 24,
+        "recorded_slots": 457
+      },
+      {
+        "arm": "nuewframe",
+        "by_kind": {
+          "measured": 408,
+          "warmup": 56
+        },
+        "by_outcome": {
+          "descendant-survived": 223,
+          "ok": 241
+        },
+        "harness_termination_flags": 350,
+        "recorded_slots": 464
+      },
+      {
+        "arm": "processkit",
+        "by_kind": {
+          "measured": 406,
+          "warmup": 56
+        },
+        "by_outcome": {
+          "infra-failure": 3,
+          "ok": 459
+        },
+        "harness_termination_flags": 24,
+        "recorded_slots": 462
+      },
+      {
+        "arm": "sysprims",
+        "by_kind": {
+          "measured": 406,
+          "warmup": 56
+        },
+        "by_outcome": {
+          "infra-failure": 1,
+          "ok": 269,
+          "output-mismatch": 192
+        },
+        "harness_termination_flags": 23,
+        "recorded_slots": 462
+      }
+    ],
+    "planned_slots": 1940,
+    "recorded_by_kind": {
+      "control": 36,
+      "measured": 1621,
+      "warmup": 224
+    },
+    "recorded_outcomes": {
+      "descendant-survived": 223,
+      "infra-failure": 7,
+      "ok": 1459,
+      "output-mismatch": 192
+    },
+    "recorded_slot_jobs": {
+      "final_active_zero": 1881,
+      "harness_termination_flags": 430,
+      "termination_by_outcome": {
+        "descendant-survived": 223,
+        "ok": 207
+      }
+    },
+    "recorded_slots": 1881,
+    "retained_canonical_findings": 3,
+    "scope": "DESCRIPTIVE_INTERRUPTED_PREFIX_ONLY_NO_WINNER_RANK_PARITY_OR_CERTIFICATE"
+  },
+  "expected_missing_rows": 59,
+  "expected_planned_rows": 1940,
+  "expected_recorded_rows": 1881,
+  "measurement_source_commit": "a95f32b8dea5de48e82de5a00c9c78653230586b",
+  "missing_sha256": "8a57be1a59bf83f24a731c10f8b62193408488206cf7a07b0b16b06f38f4a36a",
+  "original_input_sha256": {
+    "observations.jsonl": "5aabc4b172e661c34d88452ef88a5fe5e6679092a911c5d0aa1de46ff56c2fea",
+    "postpin-audit.json": "78eb6caa93a4b7e44c008d8c7f3f5055d409a4f0b13b644d966eaee2be38878a",
+    "run.json": "5317f19978d6bf6ba0c7a282c62a9d8e1acf0a148c0c073a8d834d18e924602f"
+  },
+  "original_recorded_state": {
+    "arm_versions": {},
+    "campaign_status": "incomplete",
+    "fingerprints": {},
+    "freeze_gate_fail_count": null,
+    "pricing_probe_observations": 0,
+    "provisional": true,
+    "reduced": false,
+    "seed": 20261029,
+    "slots_planned": 1940,
+    "slots_run": 1881,
+    "standing_loss_count": null
+  },
+  "projection_helper_sha256": {
+    "tests/campaign/harness.py": "c60d0c7b01c99a1b46128cfaafedd3ff7cef42956b11e352bd6ddabbed48996e",
+    "tests/campaign/pricing.py": "fa934c003973032375c669053745b462182f02bd5b96237730567da3fd6ec452"
+  },
+  "proposal_source_sha256": "611c576ab305ab764439b5a202d4ec561ad604f4461ffaddad45b908a54090fb",
+  "recorded_stop": {
+    "classification": "INCOMPLETE_FIXED_BUDGET_TIMEOUT",
+    "original_outer_terminal_recorded": true,
+    "outer_deadline_seconds": 3600,
+    "outer_tool_exit": 1,
+    "saved_audit_report_exists": false,
+    "saved_audit_stage_result_exists": false
+  },
+  "replay_sha256": "ddc524efa2ee5ce2d9e2830e034dbbd2427df57cbf33b5c79be6b724dcb56b56",
+  "schema": "ptg-interrupted-campaign-prefix-replay-1",
+  "seed": 20261029,
+  "slots_sha256": "27353190ded55b50bcb69035618dac9cec330438554349ff09d9ba05821e89e4",
+  "publication_scope": "Interrupted-prefix descriptive replay only; canonical REFUSED and full-campaign acceptance incomplete.",
+  "independent_actual_data_reviews": 2
+}
