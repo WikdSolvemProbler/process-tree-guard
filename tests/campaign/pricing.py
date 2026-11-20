@@ -178,7 +178,7 @@ sys.path.insert(0, os.path.dirname(
 
 from arms import expand_template, expected_exit, \
     materialized_child_args, materialized_list, resolve_template  # noqa: E402
-from envcase import set_env_var  # noqa: E402
+from envcase import hidden_helper_kwargs, set_env_var  # noqa: E402
 from runner import FAST_TIMEOUT_S, SLOT_DEADLINE_S, creation_flags  # noqa: E402
 
 PROBE_REPS = 9            # paired repetitions per item, certifying shape
@@ -294,19 +294,29 @@ def _guard_launcher_main(argv):
     if len(argv) < 3 or argv[1] != "--":
         return 97
     record_path, command = argv[0], argv[2:]
+    # Explicit pricing exception to the helper-only visibility policy: the
+    # user requires unattended runs without desktop windows. An outer hidden
+    # launcher does not control a newly allocated console in this child.
+    # Prepare before the bracket; retain this child's default creation flags.
+    # This is a changed measurement context, not a timing-neutral adjustment.
+    window_kwargs = hidden_helper_kwargs()
     start_ns = time.perf_counter_ns()
     try:
-        proc = subprocess.Popen(command)
+        proc = subprocess.Popen(command, **window_kwargs)
     except OSError as error:
         _write_guard_record(record_path, {
             "pid": None, "error": f"spawn failed: {error}"})
         return 97
     _write_guard_record(record_path,
-                        {"pid": proc.pid, "start_ns": start_ns})
+                        {"pid": proc.pid, "start_ns": start_ns,
+                         "initial_window_visibility_request": (
+                             "SW_HIDE" if os.name == "nt" else "platform-default")})
     exit_code = proc.wait()
     end_ns = time.perf_counter_ns()
     _write_guard_record(record_path, {
         "pid": proc.pid, "start_ns": start_ns, "end_ns": end_ns,
+        "initial_window_visibility_request": (
+            "SW_HIDE" if os.name == "nt" else "platform-default"),
         "elapsed_ms": (end_ns - start_ns) / 1e6,
         "exit_code": exit_code})
     return exit_code
@@ -377,13 +387,20 @@ def _time_guard_run(config, context, child=None, child_args=None,
                        guard_record_path=guard_record_path,
                        guard_launcher=guard_launcher)
     record = {"argv": argv, "context": context,
+              "initial_window_visibility_request": (
+                  "SW_HIDE" if os.name == "nt" else "platform-default"),
               "outcome": None, "elapsed_ms": None, "exit_code": None}
+    # Apply the same explicit pricing visibility policy to the direct shape
+    # and recording launcher, without changing either context's console flags.
+    # Preserve old observations; do not relabel or pool their launch contexts.
+    window_kwargs = hidden_helper_kwargs()
     start = time.perf_counter_ns()
     try:
         proc = subprocess.Popen(
             argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             stdin=subprocess.DEVNULL,
-            creationflags=creation_flags(context), env=env, cwd=cwd)
+            creationflags=creation_flags(context), env=env, cwd=cwd,
+            **window_kwargs)
     except OSError as error:
         record["outcome"] = "infra-failure"
         record["detail"] = f"spawn failed: {error}"
@@ -748,6 +765,19 @@ def pricing_stamp_defects(records, *, platform=None):
         and isinstance(record.get("working_directory"), str)
         and record.get("working_directory")}
     shared_wd = len(resolver_wds) == 1
+    visibility_field = "initial_window_visibility_request"
+    # Absence identifies legacy observations, not a retroactive hide request.
+    # Keep each priced probe in one context across both shapes and all reps.
+    visibility_contexts = {
+        probe: {(visibility_field in record,
+                 record.get(visibility_field)
+                 if isinstance(record.get(visibility_field), str) else None)
+                for record in records
+                if isinstance(record, dict)
+                and record.get("kind") == "pricing-probe"
+                and record.get("probe") == probe
+                and record.get("shape") in ("baseline", "loaded")}
+        for probe in PROBES}
     for record in records:
         if not isinstance(record, dict):
             continue
@@ -790,6 +820,24 @@ def pricing_stamp_defects(records, *, platform=None):
                     "probe": probe, "shape": shape,
                     "rep": record.get("rep"), "field": field,
                     "expected": expected, "actual": actual})
+
+        if visibility_field in record:
+            visibility = record.get(visibility_field)
+            if isinstance(platform, str) and platform:
+                expect(visibility_field, "SW_HIDE" if
+                       platform.lower().startswith("win") else "platform-default")
+            elif visibility not in ("SW_HIDE", "platform-default"):
+                found.append({
+                    "probe": probe, "shape": shape, "rep": record.get("rep"),
+                    "field": visibility_field,
+                    "expected": "SW_HIDE or platform-default; absent only for legacy observations",
+                    "actual": visibility})
+        if len(visibility_contexts[probe]) > 1:
+            found.append({
+                "probe": probe, "shape": shape, "rep": record.get("rep"),
+                "field": visibility_field,
+                "expected": "one visibility context across both shapes and all repetitions",
+                "actual": record.get(visibility_field)})
 
         # The guard fingerprint's companion values (round-25):
         # run_pricing_probes stamps the fingerprint object the
@@ -924,7 +972,7 @@ def pricing_stamp_defects(records, *, platform=None):
         # every record, and (owner loaded only) the loaded-only
         # fields. Any other key is a field no run writes.
         constructed = {
-            "argv", "context", "outcome", "elapsed_ms",
+            "argv", "context", visibility_field, "outcome", "elapsed_ms",
             "exit_code", "detail", "kind", "probe", "item",
             "shape", "rep", "guard_fingerprint", "probe_count",
             "intended_path", "inserted_levels",

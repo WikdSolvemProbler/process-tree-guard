@@ -1,0 +1,112 @@
+{
+  "schema": "ptg-windows-pricing-quiet-launch-1",
+  "date": "2026-11-20",
+  "parent_commit": "cfe7e39c3a5bd5f582f16703a2907bc9944c882f",
+  "scope": "Test pricing launchers only. No production guard code, defaults, protection or deadlines changed. No performance result or full readiness claim.",
+  "changes": [
+    "Request STARTF_USESHOWWINDOW/SW_HIDE at both pricing launch sites, including the recording launcher child; prepare settings before existing timing starts.",
+    "Preserve inherited error-mode bits and verify 0x8003 through the existing process-local helper. No global OS setting changes.",
+    "Preserve creation flags, argv, environment, working directory, streams, process hierarchy and deadlines.",
+    "Record the requested visibility policy; validate values and reject mixed legacy/new or differing policies within each priced probe, while retaining arbitrary-field rejection."
+  ],
+  "measurement_limits": [
+    "Initial visibility is a changed launch context. Old captures are retained without relabelling or pooling into new-context prices.",
+    "Legacy-only absent policy remains unspecified. A recorded platform constrains present policy values; without one, only the two exact producer values are accepted.",
+    "Outer and nested creation flags remain distinct; hiding does not establish equal console allocation or a pure one-owner cost.",
+    "Metadata fixtures observe visibility at one point. They do not prove continuous visibility monitoring or suppression of arbitrary application dialogs."
+  ],
+  "validation": {
+    "independent_source_reviewers": 2,
+    "unresolved_source_objections": 0,
+    "independent_actual_review": {
+      "reviewers": 2,
+      "unresolved_objections": 0
+    },
+    "existing_tests": {
+      "run": 28,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration_seconds": 27.613
+    },
+    "hidden_child_fixtures": [
+      {
+        "parent_context": "NO_WINDOW",
+        "outer_creation_flags": 134217728,
+        "passed": true,
+        "original_child_exit": 7,
+        "child_error_mode": 32771,
+        "observed_console_visible": false,
+        "stderr_preserved": true,
+        "stdio_validation_applicable": true,
+        "metadata_channel": "exclusive child-owned file"
+      },
+      {
+        "parent_context": "DETACHED",
+        "outer_creation_flags": 520,
+        "passed": true,
+        "original_child_exit": 7,
+        "child_error_mode": 32771,
+        "observed_console_visible": false,
+        "stderr_preserved": false,
+        "stdio_validation_applicable": false,
+        "metadata_channel": "exclusive child-owned file"
+      }
+    ],
+    "schema_controls": {
+      "count": 12,
+      "passed": 12,
+      "input_records_unmodified": true,
+      "invalid_controls_require_named_defect_field": true
+    },
+    "source_pins_unchanged": true,
+    "new_permanent_test_methods": 0,
+    "deliberate_crashes": 0,
+    "product_benchmarks": 0,
+    "qualification_method": "Components from attempt3 (28 tests and 2 native metadata fixtures) plus corrected synthetic controls from attempt4 on identical source pins. Attempt3 overall FAIL remains unchanged; tests and native fixtures were not repeated in attempt4."
+  },
+  "retained_failed_attempts": [
+    {
+      "attempt": 1,
+      "original_exit": 1,
+      "outcome": "Checker used Windows path separators as dictionary keys; stopped before loading tests or fixtures."
+    },
+    {
+      "attempt": 2,
+      "original_exit": 1,
+      "tests_run": 16,
+      "tests_failed": 1,
+      "test_errors": 3,
+      "outcome": "New producer field was absent from the strict schema. Corrected without weakening unknown-field checks. DETACHED stream metadata was unavailable and was not counted as coverage."
+    },
+    {
+      "attempt": 3,
+      "original_exit": 1,
+      "tests_run": 28,
+      "tests_failed": 0,
+      "test_errors": 0,
+      "fixtures_passed": 2,
+      "controls_passed": 11,
+      "controls_total": 12,
+      "outcome": "Portable synthetic control incorrectly labelled Windows resolver paths as Linux. Corrected using owner-only records to isolate visibility validation; original overall failure retained."
+    }
+  ],
+  "source_sha256": [
+    {
+      "path": "tests/campaign/pricing.py",
+      "sha256": "729aa559d21d403e64e9c6491a5e8f7439c259d8a07f6fb2eb679fbc78e7142f"
+    },
+    {
+      "path": "tests/envcase.py",
+      "sha256": "15c0fab3a22eb9be3b3e93370963e75ece2e965adefb9bb58c6e3d2b97ef0c8d"
+    }
+  ],
+  "evidence_sha256": {
+    "attempt3_root_result": "df32be788bc40677052bb7b11d11a8bd1f125b321436ddd2d71441b79af7e92d",
+    "attempt3_existing_tests": "c79b31fa7c96e69bb62ff792306533d32db801c132148a2e56775f5ebc064ec7",
+    "attempt3_qualification": "5e49a5ea2bfcad458bdb58ce80de4df84fbb0aae5e9a6502dd6857747431ff11",
+    "attempt4_root_result": "44fd4e1aa5258d9a9dde85773e10375c46934bbc3c67a4dd67e4634115e58949",
+    "attempt4_qualification": "2dc12733aebde10a2d5bcfe22c804154c2e09ae90468a12dcfeec7fcc26e2a5e",
+    "attempt4_controls": "3ae6fa03b805eabf16b258f01da3ab0b598baa1980752bb177fc4fd1f31a69f5"
+  }
+}

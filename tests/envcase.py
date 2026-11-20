@@ -87,7 +87,9 @@ def suppress_windows_error_dialogs():
 def hidden_helper_kwargs():
     """Hide an incidental helper's initial window without changing its flags.
 
-    Do not apply this helper to a measured arm or an explicit console test.
+    Do not apply this helper to an ordinary measured arm or an explicit console
+    test. Pricing alone opts in as a new, recorded visibility context; its
+    creation flags and earlier observations remain unchanged.
     """
     suppress_windows_error_dialogs()
     import os
