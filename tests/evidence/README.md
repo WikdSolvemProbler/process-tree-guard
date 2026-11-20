@@ -15,7 +15,7 @@ This folder holds the recorded evidence of the suite. A test holds each record h
 
 ## Withdrawn private evidence
 
-The [withdrawal index](withdrawn-artifacts.json) lists 89 raw archives removed from the current public tree for publication privacy or because they belong to the removed standalone macOS experiment. Their original bytes and SHA-256 identities are retained locally outside the tracked tree. The raw evidence is unavailable in this public checkout; linked historical summaries do not substitute for independent access to it. This change does not rewrite older Git commits.
+The [withdrawal index](withdrawn-artifacts.json) lists 90 raw archives removed from the current public tree for publication privacy or because they belong to the removed standalone macOS experiment. Their original bytes and SHA-256 identities are retained locally outside the tracked tree. The raw evidence is unavailable in this public checkout; linked historical summaries do not substitute for independent access to it. This change does not rewrite older Git commits.
 
 The public reduced-run package and competitor manifest replace recorded developer home-directory names with `REDACTED`. Numerical observations, executable hashes and benchmark rules are unchanged. Those files are explicitly redacted publication copies, rather than byte-identical original execution records.
 

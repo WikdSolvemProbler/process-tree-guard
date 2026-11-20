@@ -202,6 +202,12 @@
       "reason": "removed-standalone-experiment"
     },
     {
+      "path": "tests/evidence/macos-kqueue-native-20261106.zip",
+      "bytes": 6720,
+      "sha256": "e587ae0dd1c8f4607f33c87e4b16dfbae951a552f94a120ba4565bb21c38efea",
+      "reason": "not-cleared-for-publication"
+    },
+    {
       "path": "tests/evidence/macos-nproc-accounting.zip",
       "bytes": 14271,
       "sha256": "edcf989f29c5769973ab339c9ea07eede811fe38d636245d7ceb931bec085610",
