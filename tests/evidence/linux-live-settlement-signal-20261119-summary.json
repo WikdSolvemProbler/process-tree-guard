@@ -7,6 +7,7 @@
   "method": {
     "build": "Private diagnostic overlay on the canonical source.",
     "private_changes": "Adapter retains the outcome. The client records a single real poll interruption and verifies complete join facts. A test signal shim saves and restores the main thread signal state. The root requests a 300 ms pause after sending a settled result for exit 7, with a check for sufficient remaining original deadline budget.",
+    "clock_span": "The helper span includes diagnostic sender setup through the native poll-return timestamp.",
     "signal": "One bounded sender targets the calling thread after it enters the settlement helper. The helper saves the immediate native poll result and errno before joining the sender.",
     "command": "The fixed payload writes a startup marker and naturally exits 7.",
     "product_deadline_seconds": 10,
@@ -26,7 +27,7 @@
     "poll_return": -1,
     "poll_errno": 4,
     "poll_slice_ms": 10,
-    "observed_poll_span_ns": 2241997,
+    "observed_helper_span_ns": 2241997,
     "sender_joined": true,
     "signal_state_restored": true,
     "full_join_facts_verified": true,
