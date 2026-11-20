@@ -1750,15 +1750,22 @@ class BuildScriptTests(unittest.TestCase):
         # Stop preference, redirected native stderr is surfaced
         # as a terminating error in Windows PowerShell, so the
         # probe must run under a locally relaxed preference that
-        # is restored immediately after it — the version and pin
-        # checks that consume the output are unchanged.
+        # is restored in finally, including after a failed launch or
+        # capture. Restore the saved preference rather than assuming Stop.
         probe_at = text.index("& $src @versionArgs 2>&1")
+        saved_at = text.rindex(
+            '$probeErrorActionPreference = $ErrorActionPreference',
+            0, probe_at)
         relax_at = text.rindex('$ErrorActionPreference = "Continue"',
                                0, probe_at)
-        restore_at = text.index('$ErrorActionPreference = "Stop"',
-                                probe_at)
+        finally_at = text.index('} finally {', probe_at)
+        restore_at = text.index(
+            '$ErrorActionPreference = $probeErrorActionPreference',
+            finally_at)
+        self.assertLess(saved_at, relax_at)
         self.assertLess(relax_at, probe_at)
-        self.assertLess(probe_at, restore_at)
+        self.assertLess(probe_at, finally_at)
+        self.assertLess(finally_at, restore_at)
 
     def test_build_records_the_tree_identity_in_its_build_record(self):
         text = self.build_script()

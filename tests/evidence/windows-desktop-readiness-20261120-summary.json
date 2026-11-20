@@ -1,0 +1,87 @@
+{
+  "schema": "ptg-windows-desktop-readiness-1",
+  "date": "2026-11-20",
+  "frozen_source_commit": "9816e512fc36d117a6371eed86d1264656df0d03",
+  "scope": "One unchanged frozen guard-suite invocation launched from the actual desktop. This qualifies the stated frozen inputs, not subsequent canonical-source edits or the full benchmark.",
+  "invocation": {
+    "arguments": "--nocapture --test-threads=1",
+    "test_filters": [],
+    "inner_seconds": 900,
+    "outer_seconds": 1000,
+    "one_dispatch": true,
+    "quiet_helper_before_children": true
+  },
+  "observed": {
+    "driver_original_exit": 0,
+    "inner_original_exit": 0,
+    "entry_original_exit": 0,
+    "entry_identity_and_held_handle_verified": true,
+    "passed": 82,
+    "failed": 0,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 0,
+    "duration_seconds": 468.78,
+    "unique_raw_test_names_match_frozen_guard_source": 82,
+    "failure_assertions": 0,
+    "original_inner_handle_retained": true,
+    "pre_artifacts_verified": true,
+    "post_artifacts_verified": true,
+    "pre_source_verified": true,
+    "post_source_verified": true,
+    "snapshot_files_rehashed": 1023,
+    "executable_inputs_rehashed": 15,
+    "g47_passed": true,
+    "g59_passed": true,
+    "g99_passed": true
+  },
+  "output": {
+    "guard_stdout_bytes": 246873,
+    "guard_stdout_sha256": "956a4bd71ffc7c800a9e5396a1fbc0a65ac7128ff3a7f82ce0ce02d63913571d",
+    "guard_stderr_bytes": 6228,
+    "guard_stderr_sha256": "4bbd526b4e4af2027f7a00f17b378b712ec6975fac6db3eecdbc9efca2a48fc5",
+    "cmd_stdout_bytes": 0,
+    "cmd_stderr_bytes": 0,
+    "stderr_classification": "Five explicit conditional NOT ASSERTED notices and 15 expected caught G93 panic-hook messages; no other panic thread found.",
+    "carrier_stdout_bytes": 33,
+    "carrier_stderr_bytes": 616,
+    "carrier_stderr_classification": "Only CLIXML completed module-initialization progress records; no controller errors."
+  },
+  "conditional_checks_not_asserted": [
+    "G103",
+    "G87 stdin",
+    "G95",
+    "G97",
+    "G98"
+  ],
+  "preserved_prior_attempt": {
+    "original_exit": 101,
+    "passed": 79,
+    "failed": 3,
+    "duration_seconds": 451.42,
+    "result_sha256": "3818eff03214c00ecce20c20caa687636d572487e400a100bafb30bf7c32de15",
+    "status": "FAILED, unchanged"
+  },
+  "independent_reviews": {
+    "actual_reviewers": 2,
+    "unresolved_objections": 0
+  },
+  "limits": [
+    "Direct-parent metadata is not a full native ancestry or ordinary-token proof.",
+    "The original entry-process native exit was observed with a retained matching handle; the inner guard exit is retained by the carrier. The original outer guard exit was not observed.",
+    "No independent outer Job-emptiness or whole-descendant-retirement proof is inferred from these receipts.",
+    "The successful desktop launch does not establish the sole cause of the earlier failure; launch context changed.",
+    "Five conditional prompt/console checks remain unasserted. Native pass counts do not supply their coverage.",
+    "This run does not qualify subsequent helper repairs, full readiness, performance, speed parity or the outstanding public academic reproduction package.",
+    "Quiet policy and one-point process observations do not establish continuous visibility monitoring or suppression of arbitrary application dialogs."
+  ],
+  "evidence_sha256": {
+    "runner_source": "1d95d2e4211b3e76f2a81ac358eb70c553f29d604218f84842f5d56c1567128e",
+    "source_manifest": "52bc77af2050fc6239d56c8ba270ce2333e9c1de273126f343ba03f247ca32b6",
+    "artifact_manifest": "622b37d33a647a5c595aa2fedbf8dd87852377810003e92c2fa610fefd8cbed8",
+    "guard_result": "f461d56b865c55dc9086a3d9ba7a022d29b9f5b9a2d14a72a8771da68e15ef5d",
+    "carrier_result": "44b69a5ca7a56935df20a05da36b52dda9c9a0566fd83c1e96f991c7403f1944",
+    "entry_metadata": "97f17c81f4c73b47324c2acfe1fd1d9745438871b483ced042188dfe941b0b93",
+    "terminal_entry_observation": "bc40e0a99cb013313805b0775ef98607dfeb53672890aa4362621453e94439ba"
+  }
+}

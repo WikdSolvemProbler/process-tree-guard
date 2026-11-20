@@ -170,18 +170,27 @@ if ($Competitors -ne "") {
             throw "competitor identity mismatch: $arm ($name) sha256 actual '$actualHash' != expected pin '$expectedPin' in campaign.json; refusing to stage"
         }
         $versionArgs = @($spec.version_args)
-        # The version probe merges the native stderr stream into
-        # the captured output. Under the Stop preference set at
-        # the top of this script, a native command whose stderr
-        # is redirected is surfaced as a terminating error in
-        # Windows PowerShell, so any stderr noise from the probed
-        # binary would abort the staging before the version could
-        # be read. The probe therefore runs under Continue and
-        # the script preference is restored immediately after;
-        # the probed version check below is unchanged.
-        $ErrorActionPreference = "Continue"
-        $probeOutput = (& $src @versionArgs 2>&1 | Out-String)
-        $ErrorActionPreference = "Stop"
+        # Keep merged native output without treating stderr as a
+        # PowerShell failure, then restore the caller's exact preference.
+        # Clear the native status slot so a failed launch cannot reuse it.
+        $probeOutput = ""
+        $probeExit = $null
+        $probeFailure = $null
+        $probeErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            $global:LASTEXITCODE = $null
+            $probeOutput = (& $src @versionArgs 2>&1 | Out-String)
+            $probeExit = $global:LASTEXITCODE
+        } catch {
+            $probeExit = $global:LASTEXITCODE
+            $probeFailure = $_.Exception.ToString()
+        } finally {
+            $ErrorActionPreference = $probeErrorActionPreference
+        }
+        if ($null -ne $probeFailure -or $null -eq $probeExit -or $probeExit -ne 0) {
+            throw "competitor version probe failed: $arm ($name), native exit '$probeExit', launch/capture error '$probeFailure'; refusing to stage. Captured output: $probeOutput"
+        }
         $probed = $null
         if ($probeOutput -match "\d+\.\d+\.\d+") { $probed = $Matches[0] }
         if ($probed -ne $spec.version) {

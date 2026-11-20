@@ -1,0 +1,154 @@
+{
+  "schema": "ptg-windows-harness-failure-capture-1",
+  "date": "2026-11-20",
+  "source_base_commit": "82e9cf3ce2650e6883b7de6add9946d7492e26b1",
+  "scope": "Windows test harness only. No production guard source, defaults, protection, process hierarchy, creation flags or deadlines changed. No full readiness or performance result.",
+  "problems": [
+    "Native test-output readers treated read errors as EOF and ignored incomplete/disconnected completion; ordinary Out could conceal a capture failure.",
+    "Competitor version staging parsed matching text without checking the original native exit, and restored an assumed error preference."
+  ],
+  "behavior": [
+    "Only EOF on both streams permits ordinary Out. Interrupted reads retry; read faults, receive timeouts and disconnected completion fail capture.",
+    "Both stream captures are collected before refusal. Raw writes of retained partial bytes to existing harness streams are attempted, with separate completion/count/native-status and write-error diagnostics; keep_stdout=false intentionally retains only its count.",
+    "Version probes clear stale native status, capture it immediately, reject absent/nonzero/collection-failure results before parsing or staging, and restore the exact saved preference in finally."
+  ],
+  "validation": {
+    "source_reviewers": 2,
+    "actual_reviewers": 2,
+    "unresolved_objections": 0,
+    "native_compile": {
+      "original_exit": 0,
+      "rust": "1.98.1",
+      "msvc": "14.51.36231",
+      "sdk": "10.0.28000.0",
+      "target": "x86_64-pc-windows-msvc",
+      "source_files": 1026,
+      "binaries": 7,
+      "post_source_mismatches": 0,
+      "post_binary_mismatches": 0,
+      "cargo_manifest_deprecation_notices_retained": true
+    },
+    "selected_native_methods": [
+      {
+        "test": "common::drain_keeps_errors_and_incomplete_reads_distinct_from_eof",
+        "original_exit": 0,
+        "one_named_test_passed": true
+      },
+      {
+        "test": "g02_to_g09_argument_errors_return_125_never_2",
+        "original_exit": 0,
+        "one_named_test_passed": true
+      },
+      {
+        "test": "g10_help_exits_zero",
+        "original_exit": 0,
+        "one_named_test_passed": true
+      },
+      {
+        "test": "g16_streams_exit_code_and_stdin",
+        "original_exit": 0,
+        "one_named_test_passed": true
+      }
+    ],
+    "new_regression_functions": 1,
+    "grouped_reader_cases": [
+      "binary prefix then EOF, retained",
+      "binary prefix then EOF, count only",
+      "Interrupted then data and EOF",
+      "binary prefix then synthetic io::Error with raw OS code5",
+      "real reader panic then disconnected completion, retaining prefix",
+      "paused reader timeout, release and source-drop notification under the original five-second fixture bound"
+    ],
+    "python": {
+      "existing_tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "source_pins_unchanged": true
+    },
+    "version_probe_cases": [
+      {
+        "case": "stdout-version-exit0",
+        "accepted": true,
+        "native_exit": 0,
+        "prior_preference": "Stop",
+        "restored_preference": "Stop",
+        "passed": true
+      },
+      {
+        "case": "stdout-version-exit7",
+        "accepted": false,
+        "native_exit": 7,
+        "prior_preference": "SilentlyContinue",
+        "restored_preference": "SilentlyContinue",
+        "passed": true
+      },
+      {
+        "case": "stderr-version-exit0",
+        "accepted": true,
+        "native_exit": 0,
+        "prior_preference": "Continue",
+        "restored_preference": "Continue",
+        "passed": true
+      },
+      {
+        "case": "missing-executable-stale0",
+        "accepted": false,
+        "native_exit": null,
+        "prior_preference": "Stop",
+        "restored_preference": "Stop",
+        "passed": true
+      },
+      {
+        "case": "stdout-no-version-exit0",
+        "accepted": false,
+        "native_exit": 0,
+        "prior_preference": "Continue",
+        "restored_preference": "Continue",
+        "passed": true
+      }
+    ],
+    "version_completed_cases": 5
+  },
+  "retained_failed_preparation": {
+    "original_exit": 1,
+    "phase": "Before capture reservation or any version fixture",
+    "error": "Windows PowerShell could not autoload Get-FileHash in the inherited module environment.",
+    "correction": "Fresh controller selects pinned Windows-native Utility files through a local absolute import, after streaming .NET hash verification. No module-path, profile, system configuration or shared-runtime reset.",
+    "prior_capture_absent": true
+  },
+  "limits": [
+    "The IO fault is injected through Read; this is not evidence of a naturally occurring Windows ReadFile fault.",
+    "The exec_with failure diagnostic raw-write/native-status branch is source-reviewed, not separately fault-injected end to end.",
+    "Receive waits retain their existing ten-second bound per stream. Mutex acquisition and diagnostic writes rely on the finite enclosing process deadline; no reader cancellation or OS-thread join is promised.",
+    "Source-drop notification is not an OS-thread-signaled observation. The intentional reader panic appears in retained stderr and is expected.",
+    "The existing child-timeout branch remains unchanged and still fails before output draining; this patch does not add partial-output preservation on that path.",
+    "The version qualification executes the exact harness segment only; no real competitor build/staging or product payload is qualified.",
+    "Raw machine/tooling records remain private; these summaries do not replace the outstanding public reproduction package."
+  ],
+  "source_sha256": [
+    {
+      "path": "tests/common/mod.rs",
+      "sha256": "dab8086a4e85acc6ea5e58f47afd2d96daed46f6e57b7a5d9215164cf709f943"
+    },
+    {
+      "path": "tests/build.ps1",
+      "sha256": "ae06ba4341272c74eb254fa70be00bf6787226c3ef4a4c0b12aac826a353cee2"
+    },
+    {
+      "path": "tests/tests/test_campaign_logic.py",
+      "sha256": "4fadec867ad558a7df25fbafd31c11c3cfcd7f4d7535b017fe2636a3d7a9c690"
+    }
+  ],
+  "evidence_sha256": {
+    "source_manifest": "ea6a3a07be6fb970f26e81cb1f70db44ce6d6b15b274aa8d035d1325d598b04f",
+    "compile_recipe": "39be2c22984422f4ad76e3557e940a9a27d3d614a5e58c7635df0e2f6e4e69a0",
+    "compile_result": "4f3c0b7757b72d922870fdb4d9eecd8b12e5a7e929db58aee757fe6799119905",
+    "native_checks": "1b3d04e9c676f556fa7e11dd61481fbba3d5372a734720dab5981307ead64446",
+    "python_checks": "bd20749e9a3dbfa5de377506619b846d1d9aaeef213c15cf4ac976a8592c1eaf",
+    "version_source": "a7d3484310e27549dcf0f51e7798fec69c2416805f677dad8714ee0e39c55655",
+    "version_result": "193dc617eb85e411b2d46faa1bc53e9897cd1aac6b93389630e838961e280b5f",
+    "version_outer_result": "5d57cb8e44bf2da7a1db0f49fdd78ab21725262eb1796c8f851dac79f7272e6e",
+    "prior_failed_outer_result": "e44d34d1784153b94c87d79ca8356177f12528bd2afafe2dee60b05f611e6aaa"
+  }
+}

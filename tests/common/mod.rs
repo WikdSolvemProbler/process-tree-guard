@@ -279,10 +279,24 @@ impl Default for Opts {
     }
 }
 
+#[derive(Debug)]
+enum DrainCompletion {
+    Eof,
+    ReadError(std::io::Error),
+    TimedOut,
+    Disconnected,
+}
+
+struct DrainCapture {
+    bytes: Vec<u8>,
+    length: u64,
+    completion: DrainCompletion,
+}
+
 struct Drain {
     buffer: Arc<Mutex<Vec<u8>>>,
     length: Arc<AtomicU64>,
-    done: mpsc::Receiver<()>,
+    done: mpsc::Receiver<DrainCompletion>,
 }
 
 fn drain<R: Read + Send + 'static>(mut source: R, keep: bool) -> Drain {
@@ -292,29 +306,125 @@ fn drain<R: Read + Send + 'static>(mut source: R, keep: bool) -> Drain {
     let (shared_buffer, shared_length) = (buffer.clone(), length.clone());
     thread::spawn(move || {
         let mut chunk = vec![0u8; 64 * 1024];
-        loop {
+        let completion = loop {
             match source.read(&mut chunk) {
-                Ok(0) | Err(_) => break,
+                Ok(0) => break DrainCompletion::Eof,
                 Ok(n) => {
                     shared_length.fetch_add(n as u64, Ordering::Relaxed);
                     if keep {
                         shared_buffer.lock().unwrap().extend_from_slice(&chunk[..n]);
                     }
                 }
+                Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+                Err(error) => break DrainCompletion::ReadError(error),
             }
-        }
-        let _ = sender.send(());
+        };
+        let _ = sender.send(completion);
     });
     Drain { buffer, length, done }
 }
 
 impl Drain {
-    /// Wait a bounded time for the stream to close, then return what arrived.
-    fn finish(self, wait: Duration) -> (Vec<u8>, u64) {
-        let _ = self.done.recv_timeout(wait);
-        let data = std::mem::take(&mut *self.buffer.lock().unwrap());
-        (data, self.length.load(Ordering::Relaxed))
+    /// Wait a bounded time, keeping EOF distinct from a failed or unfinished reader.
+    /// Without EOF these are observed partial bytes/counts, not a completed capture.
+    fn finish(self, wait: Duration) -> DrainCapture {
+        let completion = match self.done.recv_timeout(wait) {
+            Ok(completion) => completion,
+            Err(mpsc::RecvTimeoutError::Timeout) => DrainCompletion::TimedOut,
+            Err(mpsc::RecvTimeoutError::Disconnected) => DrainCompletion::Disconnected,
+        };
+        // A reader panic must not discard its partial buffer or mask the other
+        // stream's completion. Disconnection still makes this capture fail.
+        let bytes = std::mem::take(&mut *self.buffer.lock().unwrap_or_else(|error| error.into_inner()));
+        DrainCapture { bytes, length: self.length.load(Ordering::Relaxed), completion }
     }
+}
+
+#[test]
+fn drain_keeps_errors_and_incomplete_reads_distinct_from_eof() {
+    use std::collections::VecDeque;
+    use std::io::{Error, ErrorKind};
+
+    const PREFIX: &[u8] = &[0, 0xff, b'x'];
+    const WAIT: Duration = Duration::from_secs(5);
+    enum Step { Bytes(&'static [u8]), Interrupted, Error(i32), Panic }
+    struct Script(VecDeque<Step>);
+    impl Read for Script {
+        fn read(&mut self, target: &mut [u8]) -> std::io::Result<usize> {
+            match self.0.pop_front() {
+                Some(Step::Bytes(bytes)) => {
+                    target[..bytes.len()].copy_from_slice(bytes);
+                    Ok(bytes.len())
+                }
+                Some(Step::Interrupted) => Err(Error::from(ErrorKind::Interrupted)),
+                Some(Step::Error(code)) => Err(Error::from_raw_os_error(code)),
+                Some(Step::Panic) => panic!("intentional reader panic: disconnect fixture"),
+                None => Ok(0),
+            }
+        }
+    }
+    let capture = |steps: Vec<Step>, keep| drain(Script(steps.into()), keep).finish(WAIT);
+    for keep in [true, false] {
+        let result = capture(vec![Step::Bytes(PREFIX)], keep);
+        assert!(matches!(result.completion, DrainCompletion::Eof));
+        assert_eq!(result.length, PREFIX.len() as u64);
+        assert_eq!(result.bytes, if keep { PREFIX } else { &[][..] });
+    }
+    let result = capture(vec![Step::Interrupted, Step::Bytes(PREFIX)], true);
+    assert!(matches!(result.completion, DrainCompletion::Eof));
+    assert_eq!((result.bytes.as_slice(), result.length), (PREFIX, PREFIX.len() as u64));
+
+    let result = capture(vec![Step::Bytes(PREFIX), Step::Error(5)], true);
+    assert_eq!((result.bytes.as_slice(), result.length), (PREFIX, PREFIX.len() as u64));
+    match result.completion {
+        DrainCompletion::ReadError(error) => {
+            assert_eq!(error.raw_os_error(), Some(5));
+            assert_eq!(error.kind(), ErrorKind::PermissionDenied);
+        }
+        completion => panic!("read error became {:?}", completion),
+    }
+    let result = capture(vec![Step::Bytes(PREFIX), Step::Panic], true);
+    assert!(matches!(result.completion, DrainCompletion::Disconnected));
+    assert_eq!((result.bytes.as_slice(), result.length), (PREFIX, PREFIX.len() as u64));
+
+    struct Paused {
+        prefix: bool,
+        entered: mpsc::Sender<()>,
+        release: mpsc::Receiver<()>,
+        retired: mpsc::Sender<()>,
+        until: Instant,
+    }
+    impl Read for Paused {
+        fn read(&mut self, target: &mut [u8]) -> std::io::Result<usize> {
+            if self.prefix {
+                self.prefix = false;
+                target[..PREFIX.len()].copy_from_slice(PREFIX);
+                return Ok(PREFIX.len());
+            }
+            let _ = self.entered.send(());
+            self.release.recv_timeout(self.until.saturating_duration_since(Instant::now()))
+                .map_err(|_| Error::from(ErrorKind::TimedOut))?;
+            Ok(0)
+        }
+    }
+    impl Drop for Paused {
+        fn drop(&mut self) { let _ = self.retired.send(()); }
+    }
+    let until = Instant::now() + WAIT;
+    let (entered_send, entered) = mpsc::channel();
+    let (release, release_read) = mpsc::channel();
+    let (retired_send, retired) = mpsc::channel();
+    let reader = drain(Paused { prefix: true, entered: entered_send, release: release_read,
+        retired: retired_send, until }, true);
+    let entered = entered.recv_timeout(until.saturating_duration_since(Instant::now()));
+    let result = reader.finish(Duration::from_millis(10));
+    // Release and observe source Drop before any assertion. The source also has
+    // its own deadline if this test unwinds; this is not an OS-thread join claim.
+    let released = release.send(());
+    let retired = retired.recv_timeout(until.saturating_duration_since(Instant::now()));
+    assert!(entered.is_ok() && released.is_ok() && retired.is_ok(), "paused reader did not retire");
+    assert!(matches!(result.completion, DrainCompletion::TimedOut));
+    assert_eq!((result.bytes.as_slice(), result.length), (PREFIX, PREFIX.len() as u64));
 }
 
 /// Wait for a child to exit, at most `secs` seconds. None means still running.
@@ -365,9 +475,22 @@ pub fn exec_with(mut command: Command, opts: Opts) -> Out {
             panic!("{:?} did not finish within {} seconds", command.get_program(), limit_secs);
         }
     };
-    let (stdout, stdout_len) = out.finish(Duration::from_secs(10));
-    let (stderr, _) = err.finish(Duration::from_secs(10));
-    Out { code: status.code().unwrap_or(-1) as u32, stdout, stdout_len, stderr, elapsed: began.elapsed(), began_unix_ms }
+    let stdout = out.finish(Duration::from_secs(10));
+    let stderr = err.finish(Duration::from_secs(10));
+    let code = status.code().unwrap_or(-1) as u32;
+    if !matches!(stdout.completion, DrainCompletion::Eof) || !matches!(stderr.completion, DrainCompletion::Eof) {
+        // Preserve retained bytes without allocating a Debug string of potentially
+        // large output. A failed diagnostic write must still end in test failure.
+        // keep_stdout=false intentionally keeps only its observed byte count.
+        let stdout_write = std::io::stdout().lock().write_all(&stdout.bytes);
+        let stderr_write = std::io::stderr().lock().write_all(&stderr.bytes);
+        panic!("capture failed for {:?}: native status {:?} (code {}); stdout {:?}, observed {} bytes, retained {} bytes, diagnostic write {:?}; \
+            stderr {:?}, observed {} bytes, retained {} bytes, diagnostic write {:?}",
+            command.get_program(), status, code,
+            stdout.completion, stdout.length, stdout.bytes.len(), stdout_write.as_ref().err(),
+            stderr.completion, stderr.length, stderr.bytes.len(), stderr_write.as_ref().err());
+    }
+    Out { code, stdout: stdout.bytes, stdout_len: stdout.length, stderr: stderr.bytes, elapsed: began.elapsed(), began_unix_ms }
 }
 
 /// Run a command whose standard streams the caller has already set.
