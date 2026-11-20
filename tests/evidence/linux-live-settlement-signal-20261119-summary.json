@@ -1,0 +1,61 @@
+{
+  "schema": "ptg-linux-live-settlement-signal-1",
+  "date": "2026-11-19",
+  "source_commit": "d4569053b411c667f7a96c9ddabe6a287585c3b3",
+  "platform": "ARM64 GNU Linux",
+  "rust": "1.88.0",
+  "method": {
+    "build": "Private diagnostic overlay on the canonical source.",
+    "private_changes": "Adapter retains the outcome. The client records a single real poll interruption and verifies complete join facts. A test signal shim saves and restores the main thread signal state. The root requests a 300 ms pause after sending a settled result for exit 7, with a check for sufficient remaining original deadline budget.",
+    "signal": "One bounded sender targets the calling thread after it enters the settlement helper. The helper saves the immediate native poll result and errno before joining the sender.",
+    "command": "The fixed payload writes a startup marker and naturally exits 7.",
+    "product_deadline_seconds": 10,
+    "observer_bound_seconds": 6,
+    "attempts": 1,
+    "binary_sha256": {
+      "root_service": "1635a87986fcb6cd659824d6a17de398b022d992a6626e86498c1c22d79a4eb6",
+      "library_adapter": "88d6713afa05a251b7a7d45b73caebb16b8360013428f08c82807143423b11ec"
+    }
+  },
+  "results": {
+    "library_exit": 7,
+    "error": null,
+    "timeout_cause": null,
+    "complete": true,
+    "native_settled": true,
+    "poll_return": -1,
+    "poll_errno": 4,
+    "poll_slice_ms": 10,
+    "observed_poll_span_ns": 2241997,
+    "sender_joined": true,
+    "signal_state_restored": true,
+    "full_join_facts_verified": true,
+    "service_terminal_exit": 7,
+    "runtime_and_cgroup_absent_before_fixture_cleanup": true,
+    "caller_and_parent_alive_with_outcome_held": true,
+    "residual_caller_connection_observed": false,
+    "call_gate_to_prerelease_witness_ns": 382122358,
+    "fixture_cleanup_passed": true,
+    "scope_retired": true,
+    "fallback_timer_fired": false,
+    "existing_client_tests": {
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "evidence_sha256": {
+    "source_binding": "7adde1fcd75390d82297694a603662f181b410d3ecc5a4573b371a7f4e520b25",
+    "runtime_result": "b262b46810ed8b189125c33811d99579d56d184a2af651649676784377c6ffdf",
+    "runtime_bundle": "a6cd522839a454d688476f183abb24ffc258b1fe7060171fb852a816e8ecb0c1",
+    "build_result": "68ae0250b899b6f5e751f0cd96cd90ff0d5f8ddfb63b1eb1b84cf4875175f072",
+    "diagnostic_changes": {
+      "src/bin/process-tree-guard-linux-client.rs": "cf912e19e181118459fbbe322ef6c12dbed087900822f1266147ee24cb7d4671",
+      "src/sys/linux/client.rs": "04f692d7e4241e3ff3bb1cad000435c2a17775749db4842a39a37e6c19df29d3",
+      "src/sys/linux/entry.rs": "7f82ed45ef9888d56f6f3c4ac614307a8c6d4b0610824b9333585f147c46c6bb",
+      "src/sys/linux/entry_timer.c": "a2ef55b3b53825641b6aba980eb0f03a4823bce914fb07a3ef7cb72428d7913f",
+      "src/sys/linux/mod.rs": "144c39afb011090d9a648e2817f3a7ef5f71deb28cf25fd903ab867139f328e4"
+    }
+  },
+  "scope": "One private instrumented ARM64 service lifecycle verifies recovery at the actual settlement helper and the subsequent complete join. The service pause changes diagnostic timing. Stock latency, other interrupted poll sites, failed joins and complete backend qualification remain open.",
+  "nested_raw_records_verified": 54
+}
