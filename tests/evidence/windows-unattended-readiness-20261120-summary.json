@@ -1,0 +1,89 @@
+{
+  "schema": "ptg-windows-unattended-readiness-1",
+  "date": "2026-11-20",
+  "source_commit": "9816e512fc36d117a6371eed86d1264656df0d03",
+  "popup_fix_commit": "6df7861128e2ab8c9b73a9ddfaa8db61ee4856a6",
+  "scope": "Native guard regression after the unattended test UI repair. This is neither a benchmark result nor a complete readiness pass.",
+  "execution": {
+    "dispatches": 1,
+    "whole_tree_deadline_seconds": 900,
+    "native_exit": 101,
+    "outer_tool_exit": 1,
+    "passed": 79,
+    "failed": 3,
+    "ignored": 0,
+    "measured": 0,
+    "filtered": 0,
+    "duration_seconds": 451.42,
+    "failed_tests": [
+      "g47_library_run_auto_returns_the_command_code_and_124_at_the_deadline",
+      "g59_extension_arguments_are_checked_before_anything_runs",
+      "g99_a_guard_under_any_program_of_the_guard_is_refused_by_name"
+    ],
+    "acceptance": "FAILED",
+    "retry_or_resume": false,
+    "following_auto_or_battery_case_dispatched": false,
+    "four_raw_streams_preserved": true,
+    "runner_errors": [],
+    "post_source_files_verified": 1023,
+    "post_artifact_files_verified": 15,
+    "source_and_artifacts_unchanged": true,
+    "job_empty_independently_proved": false
+  },
+  "ui_observation": {
+    "policy": "Inherited process-local error mode preserves prior bits and adds 0x8003; incidental command windows start hidden. Explicit interactive-prompt opt-ins are refused when present.",
+    "obvious_test_error_dialogs_in_two_root_point_observations": 0,
+    "complete_window_attribution_proved": false,
+    "continuous_visibility_monitoring": false,
+    "arbitrary_application_dialog_suppression_proved": false,
+    "failure_output_preserved": true,
+    "production_guard_behavior_changed_for_ui_repair": false
+  },
+  "not_asserted_checks": [
+    "G103: optional desktop-prompt test not enabled",
+    "G87 standard input: enclosing guard causes earlier refusal",
+    "G95: optional desktop-prompt test not enabled",
+    "G97: enclosing guard causes earlier refusal",
+    "G98: enclosing guard causes earlier refusal"
+  ],
+  "failure_investigation": {
+    "independent_source_and_result_reviewers": 2,
+    "non_test_product_rust_or_cargo_build_source_changed_from_previously_passing_predecessor": false,
+    "g47_and_g59_actual_failure": "Windows error 87 in automatic mode",
+    "g99_observation": "Six automatic-name cases fail; their outer log records 77-byte stderr lengths without retaining those individual stderr texts.",
+    "historical_failing_native_call_identified": false,
+    "separate_current_chain_diagnostic": {
+      "whole_tree_deadline_seconds": 60,
+      "outer_exit": 0,
+      "sut_invoked": false,
+      "native_process_records": 5,
+      "native_identity_and_creation_order_verified": true,
+      "both_exact_process_open_masks_fail_with_error_87_at_unavailable_ancestor": true,
+      "process_open_masks": [
+        "SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION",
+        "PROCESS_QUERY_LIMITED_INFORMATION"
+      ],
+      "complete_production_boundary_fallback_reproduced": false,
+      "historical_failure_cause_proved": false,
+      "runtime_reset_or_external_target_process_state_change": false,
+      "source_reviewers": 2,
+      "unresolved_source_review_objections": 0,
+      "actual_result_reviewers": 2,
+      "unresolved_actual_result_review_objections": 0
+    },
+    "disposition": "Preserve all three readiness failures. The current ancestry observation supports further diagnosis; it does not establish a product defect, a new merge regression, or a readiness pass. No owner checks, defaults, deadlines or containment guarantees were relaxed."
+  },
+  "evidence_sha256": {
+    "readiness_source_index": "2add5d06d551da615f4eb2e6788361ed6296464e4610c64abd35f3fe708b48b5",
+    "readiness_runner": "d718233efd467c53d0c24265d0ec5c6c129ba9222ef715b2ca31d83b49f5fa71",
+    "selected_main_executable": "ede32961fad9851c1447a6698dbdfb0d2e8c9fb9045253fd6288987be58fd9bb",
+    "native_result": "3818eff03214c00ecce20c20caa687636d572487e400a100bafb30bf7c32de15",
+    "native_stdout": "d99147fbe05bec84b6925a844c3032aa0b997c98a98a2416da02a2d88da65d5b",
+    "native_stderr": "75a39e12fa8fdb2e6eccd6dbf20ddbcd47a7dd9eab42313ca488670fd44f554e",
+    "cmd_startup_stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "cmd_startup_stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native_diagnostic_source": "7c944804183d4a247ff093827c2e2568858dcf60be17398b3cdf064e503881da",
+    "native_diagnostic_result": "92ab5a23d7b021f85f8ba153c0049c2f55b79bf7078e0986dc16fd518e2b0561"
+  },
+  "publication_limits": "This sanitized summary omits private host, process, path and window inventories. Hashes bind retained private evidence; they do not make this summary an independently replayable benchmark package or a complete chain-of-custody proof."
+}
