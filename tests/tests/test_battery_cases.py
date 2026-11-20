@@ -668,6 +668,102 @@ class Round3ProbeTests(unittest.TestCase):
             self.assertTrue(
                 module.consumers_checked_for(entry), entry["name"])
 
+        # Reuse the source-audit scratch tree to check the actual mutation and
+        # restoration path without invoking Cargo or any native workload.
+        from types import SimpleNamespace
+        from unittest import mock
+        root = scratch_tree()
+        native_rel = "src/sys/windows.rs"
+        native_path = os.path.join(root, native_rel)
+        os.makedirs(os.path.dirname(native_path), exist_ok=True)
+        shutil.copy(os.path.join(TREE, native_rel), native_path)
+        originals = {}
+        for rel in (*AUDIT_FILES, native_rel):
+            with open(os.path.join(root, rel), "rb") as handle:
+                originals[rel] = handle.read()
+        declaration = "    pub fn GetCurrentThread() -> Handle;\n"
+        try:
+            # A missing or changed secondary declaration must refuse before
+            # writing either the primary or secondary source file.
+            thread_site = battery_mod.PSEUDO_SITES[1]
+            native_source = originals[native_rel].decode("utf-8").replace("\r\n", "\n")
+            for replacement in ("", declaration.replace("Handle", "usize")):
+                damaged = native_source.replace(declaration, replacement, 1)
+                with open(native_path, "w", encoding="utf-8") as handle:
+                    handle.write(damaged)
+                with open(native_path, "rb") as handle:
+                    damaged_bytes = handle.read()
+                self.assertFalse(module.substitute_site(root, thread_site))
+                with open(os.path.join(root, thread_site[1]), "rb") as handle:
+                    self.assertEqual(handle.read(), originals[thread_site[1]])
+                with open(native_path, "rb") as handle:
+                    self.assertEqual(handle.read(), damaged_bytes)
+                with open(native_path, "wb") as handle:
+                    handle.write(originals[native_rel])
+
+            commands = []
+            retired = []
+            remove = shutil.rmtree
+
+            def inspect_command(argv, *, timeout_s, cwd, env):
+                site = battery_mod.PSEUDO_SITES[len(commands) // 2]
+                name, rel, func, needle = site
+                self.assertEqual(argv, ["cargo", "build" if len(commands) % 2 == 0
+                                        else "test", "--release"])
+                self.assertEqual(env["RUSTFLAGS"], "-D warnings")
+                self.assertEqual(timeout_s, module.dc.BUILD_TIMEOUT_S)
+                source = originals[rel].decode("utf-8").replace("\r\n", "\n")
+                span = battery_mod.extract_function(source, func)
+                expression = (needle if rel == "src/diagnostics.rs"
+                              else "unsafe { " + needle + " }")
+                expected = (source[:span["body_start"]]
+                            + span["body"].replace(expression, module.CONSTANTS[needle], 1)
+                            + source[span["body_end"]:])
+                if rel != "src/engine/owners.rs":
+                    expected = expected.replace(needle[:-2] + ", ", "", 1)
+                for other_rel, original_bytes in originals.items():
+                    with open(os.path.join(cwd, other_rel), "rb") as handle:
+                        actual = handle.read()
+                    if other_rel == rel:
+                        text = actual.decode("utf-8").replace("\r\n", "\n")
+                        self.assertEqual(text, expected, name)
+                        if rel == "src/diagnostics.rs":
+                            self.assertIn("unsafe { TerminateProcess(", text)
+                    elif other_rel == native_rel and needle == "GetCurrentThread()":
+                        self.assertEqual(actual.decode("utf-8").replace("\r\n", "\n"),
+                                         native_source.replace(declaration, "", 1))
+                    else:
+                        # This includes both files restored from the prior site.
+                        self.assertEqual(actual, original_bytes, (name, other_rel))
+                commands.append(argv)
+                # A failed thread-mutant test must still restore both files.
+                return {"exit_code": 1 if len(commands) == 4 else 0,
+                        "stdout": "", "stderr": ""}
+
+            def inspect_retirement(path, ignore_errors=False):
+                try:
+                    for rel, original_bytes in originals.items():
+                        with open(os.path.join(path, "tree", rel), "rb") as handle:
+                            self.assertEqual(handle.read(), original_bytes, rel)
+                    retired.append(True)
+                finally:
+                    remove(path, ignore_errors=ignore_errors)
+
+            with mock.patch.dict(os.environ, {"RUSTFLAGS": "-D warnings"}), \
+                    mock.patch.object(module.dc, "run_command", side_effect=inspect_command), \
+                    mock.patch.object(module.shutil, "rmtree", side_effect=inspect_retirement):
+                observed, records = module.collect_windows(SimpleNamespace(tree=root))
+            self.assertEqual(len(commands), 8)
+            self.assertEqual(len(records), 8)
+            self.assertEqual(len(observed["sites"]), 4)
+            self.assertTrue(all(site["build_ok"] for site in observed["sites"]))
+            self.assertEqual([site["tests_ok"] for site in observed["sites"]],
+                             [True, False, True, True])
+            self.assertEqual(retired, [True])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
     def test_case_m_driver_timeout_covers_sub_deadlines(self):
         module = load_driver_module("m")
         self.assertEqual(module.PER_SITE_TIMEOUT_S, 2 * 1800)

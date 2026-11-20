@@ -44,6 +44,7 @@ Stub tier: the same decision logic over stub_probe.py's records.
 """
 
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -53,8 +54,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import driver_common as dc  # noqa: E402
 import battery as battery_mod  # noqa: E402
 
-CONSTANTS = {"GetCurrentProcess()": "(usize::MAX as crate::sys::windows::Handle)",
-             "GetCurrentThread()": "((usize::MAX - 1) as Handle)"}
+CONSTANTS = {"GetCurrentProcess()": "usize::MAX as crate::sys::windows::Handle",
+             "GetCurrentThread()": "(usize::MAX - 1) as Handle"}
 
 # The driver's deadline budget: per site, one build and one test
 # run, each allowed BUILD_TIMEOUT_S; over the four counted sites
@@ -185,20 +186,70 @@ def decide(obs):
 
 
 def substitute_site(tree, site):
-    """Replace the needle inside the site's enclosing function, in
-    the copied tree at `tree`. Returns True when exactly the scoped
-    substitution was made."""
+    """Substitute one scoped fetch, keeping its mutant valid under strict lints."""
     _name, rel, func, needle = site
-    path = os.path.join(tree, rel)
+    path = os.path.normpath(os.path.join(tree, rel))
     with open(path, encoding="utf-8") as handle:
         src = handle.read()
     span = battery_mod.extract_function(src, func)
-    if span is None or needle not in span["body"]:
+    if span is None or span["body"].count(needle) != 1:
         return False
-    body = span["body"].replace(needle, CONSTANTS[needle], 1)
+    # These three fetches are the sole operations in their unsafe expressions.
+    # The exit-path fetch shares an unsafe block with TerminateProcess instead.
+    expression = (needle if rel == "src/diagnostics.rs"
+                  else "unsafe { " + needle + " }")
+    if span["body"].count(expression) != 1:
+        return False
+    body = span["body"].replace(expression, CONSTANTS[needle], 1)
     src = src[:span["body_start"]] + body + src[span["body_end"]:]
-    with open(path, "w", encoding="utf-8") as handle:
-        handle.write(src)
+    identifier = needle[:-2]
+    imports = [match for match in re.finditer(
+        r"\buse\s+crate::sys::windows::\{([^{}]*)\};", src)
+        if re.search(r"\b" + re.escape(identifier) + r"\b", match[1])]
+    if len(imports) != 1:
+        return False
+    imported = imports[0]
+    import_token = identifier + ", "
+    if imported[1].count(import_token) != 1:
+        return False
+    without_import = (src[:imported.start(1)]
+                      + imported[1].replace(import_token, "", 1)
+                      + src[imported.end(1):])
+    # Absence even in comments proves there is no remaining code use. If any
+    # occurrence remains, conservatively retain the import (as owners.rs needs).
+    if not re.search(r"\b" + re.escape(identifier) + r"\b", without_import):
+        src = without_import
+    changes = [(path, src)]
+    if identifier == "GetCurrentThread":
+        # This fetch is the declaration's sole user. Remove the now-dead
+        # declaration only from this scratch mutant, never by a lint allowance.
+        native_path = os.path.normpath(os.path.join(tree, "src/sys/windows.rs"))
+        with open(native_path, encoding="utf-8") as handle:
+            native = handle.read()
+        declaration = "    pub fn GetCurrentThread() -> Handle;\n"
+        if native.count(declaration) != 1:
+            return False
+        native = native.replace(declaration, "", 1)
+        for directory, _dirs, names in os.walk(os.path.join(tree, "src")):
+            for name in names:
+                if not name.endswith(".rs"):
+                    continue
+                other_path = os.path.normpath(os.path.join(directory, name))
+                if other_path == path:
+                    other = src
+                elif other_path == native_path:
+                    other = native
+                else:
+                    with open(other_path, encoding="utf-8") as handle:
+                        other = handle.read()
+                if re.search(r"\bGetCurrentThread\b", other):
+                    return False
+        changes.append((native_path, native))
+    # Validate every primary and secondary edit before writing either file.
+    # collect_windows restores their original bytes even after a failed write.
+    for changed_path, changed_source in changes:
+        with open(changed_path, "w", encoding="utf-8") as handle:
+            handle.write(changed_source)
     return True
 
 
@@ -229,10 +280,12 @@ def collect_windows(args):
         execution_blocked = False
         for site in battery_mod.PSEUDO_SITES:
             name, rel = site[0], site[1]
-            path = os.path.join(variant, rel)
-            if rel not in originals:
-                with open(path, encoding="utf-8") as handle:
-                    originals[rel] = handle.read()
+            restore_paths = ((rel, "src/sys/windows.rs")
+                             if site[3] == "GetCurrentThread()" else (rel,))
+            for restore_rel in restore_paths:
+                if restore_rel not in originals:
+                    with open(os.path.join(variant, restore_rel), "rb") as handle:
+                        originals[restore_rel] = handle.read()
             entry = site_report.get(name, {})
             misuse = any("INVALID_HANDLE_VALUE" in text
                          for text in entry.get("consumer_lines", []))
@@ -288,8 +341,9 @@ def collect_windows(args):
                     "spawn_failed": spawn_failed,
                     "not_attempted": False})
             finally:
-                with open(path, "w", encoding="utf-8") as handle:
-                    handle.write(originals[rel])
+                for restore_rel in restore_paths:
+                    with open(os.path.join(variant, restore_rel), "wb") as handle:
+                        handle.write(originals[restore_rel])
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
     return {"sites": sites, "shared_target_dir": True,

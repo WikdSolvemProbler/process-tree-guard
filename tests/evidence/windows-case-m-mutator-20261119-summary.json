@@ -1,0 +1,127 @@
+{
+  "schema": "ptg-case-m-mutator-repair-1",
+  "date": "2026-11-19",
+  "parent_commit": "6df7861128e2ab8c9b73a9ddfaa8db61ee4856a6",
+  "change": "Keep the four temporary pseudo-handle substitutions compilable under strict Rust lints. Remove only obsolete unsafe wrappers/imports and the scratch-only unused thread declaration. Select the unique import block containing the fetched identifier, preserving unrelated nested imports. Restore exact original bytes after each variant.",
+  "production_guard_source_changed": false,
+  "decision_rules_changed": false,
+  "source_sha256": [
+    {
+      "path": "tests/battery/drivers/case_m.py",
+      "sha256": "4163cc79fecdf0df3ff21b10028de6d62f30b76372e6fea1b30d240532f503b0"
+    },
+    {
+      "path": "tests/tests/test_battery_cases.py",
+      "sha256": "120e0f99f30e8d5a5d3f4ff79c72153d7bf0b254b50e94151983ae91b0646817"
+    }
+  ],
+  "validation": {
+    "independent_source_reviews": 2,
+    "unresolved_source_objections": 0,
+    "windows_regression": {
+      "passed": 69,
+      "failed": 0,
+      "test_methods_added": 0,
+      "existing_extended_method": "test_battery_cases.Round3ProbeTests.test_case_m_consumers_checked_requires_enumeration",
+      "mocked_cargo_commands": 8,
+      "failure_restoration_and_refusal_checks": true
+    },
+    "windows_compile_checks": {
+      "native_exit": 0,
+      "rust": "1.98.1",
+      "msvc": "14.51.36231",
+      "sdk": "10.0.28000.0",
+      "rustflags": "-D warnings",
+      "command_scope": "cargo check --release --all-targets --locked --offline --target x86_64-pc-windows-msvc",
+      "checks": [
+        {
+          "site": "hardening process fetch",
+          "historical_negative_control": true,
+          "native_exit": 101,
+          "source_restored": true,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "eda1e7ab9e3598f8066101e75c4133ecc9943f5cfee1a76e62ec9b32b078c5c5"
+        },
+        {
+          "site": "hardening process fetch",
+          "historical_negative_control": false,
+          "native_exit": 0,
+          "source_restored": true,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "2acde6e751e2808b81c87ba15514c1dc2b662da47c7b56aaad17d4a279eeb4c9"
+        },
+        {
+          "site": "hardening thread fetch",
+          "historical_negative_control": false,
+          "native_exit": 0,
+          "source_restored": true,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "2c3a7609ffd443022307a7a3e0f5eca8d99934e387b3b7c2166f511de8c596db"
+        },
+        {
+          "site": "owner facts self fetch",
+          "historical_negative_control": false,
+          "native_exit": 0,
+          "source_restored": true,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "9690813f3db441044607824d0480bd8bc2fecfaa7dd5f3a3036b1b445c8519cc"
+        },
+        {
+          "site": "exit path process fetch",
+          "historical_negative_control": false,
+          "native_exit": 0,
+          "source_restored": true,
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "bfeba148bb179dc8819d6812a46262d603a86b8097d254df949a61db7f8336ce"
+        }
+      ],
+      "original_source_files": 1017,
+      "exact_restorations": 5,
+      "per_check_tree_deadline_seconds": 180,
+      "controller_tree_deadline_seconds": 1050
+    },
+    "portable_secondary_platform": {
+      "platform": "Darwin",
+      "architecture": "arm64",
+      "python": [
+        3,
+        12,
+        15
+      ],
+      "selected": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "Same existing mutation/restoration regression, with Cargo mocked; no administrator or backend validation",
+      "scratch_removed": true,
+      "blocked_runtime_events": 0
+    },
+    "preserved_failed_attempt": "The first revised-driver regression had one failure among69 tests: a second unrelated Windows import block caused the fourth variant to be skipped. It reached6 mocked commands instead of8. Corrected import selection passed the same existing regression; original logs and unexecuted protocol preparations remain retained.",
+    "strict_lint_control": "Historical first-site substitution fails with Cargo101 and unused import, unnecessary parentheses and unnecessary unsafe diagnostics at src/cli_process/harden.rs. All four repaired substitutions return0.",
+    "qualifications": "These are lint/type compilation and regression results. cargo check does not link or run the variants. Case M adoption still requires the unchanged charged behavioral tests; no performance result follows. Cargo manifest deprecation notices remain in original streams."
+  },
+  "evidence_sha256": {
+    "windows_SOURCE.json": "44080930657727d9bc67f13d65e27ca021b0de4661e83e42d561b0fe88925a9d",
+    "windows_QUALIFY.py": "e988ccc56886788613ac1e6200bd8692bfbd341d29c1f69c99e21bacdf3cf17b",
+    "windows_QUALIFY.cmd": "788034ded735b555b48cf44184f6010e4d34890cf9a46bf3ca96974030552203",
+    "windows_TOOL-PINS.json": "f1d5a6da04b45b0b5157d82a4a672c75c74c6516d7b9dba3efe115567c039311",
+    "windows_QUALIFICATION.json": "b8370baded5d66e80529765b1f0d468ac202769c4d0a5fbde04184a3f768aaa6",
+    "windows_REGRESSION.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "windows_REGRESSION.stderr": "d4eddda3eca6a255b1f17d9a3552e0447d66a62a95a0bd1f3275edaec7def28e",
+    "windows_REGRESSION-RESULT.json": "72de81643600cb219b24b45cf83a8475b6561159fb9b4b9800f7a05a855ed7a5",
+    "windows_CONTROLLER.stdout": "6f744e385df90ec062b041cd4b3f012d3ac1fe932951554115c1bba67d6c9b3a",
+    "windows_CONTROLLER.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "windows_NATIVE-ROOT-RESULT.json": "bd218fda550377841affb58702244e2a65c07cf7c14a134c15c2b93058e3fef9",
+    "portable_SOURCE.json": "595fe71e6c96ebe8ac2ac37c72f732059aead212222a2c4c18a8d6cd57d390c9",
+    "portable_PLAN.json": "cc42c06682f81bc759156e28f4e95c5531dc6477f253bbec1531c015c08b02bf",
+    "portable_macos.py": "5f6b6ec55e9d1a0fdf32f429a0b57f782e9aec7e8bddc43026b4c91bfc8109e6",
+    "portable_invoke.py": "ffb6631f1f2aa5fb70971fa031b58b18629cab305e6e2e21f254ea33b5deaac2",
+    "portable_audit.py": "b96edf8623463074d6f5051f0a233dc4c61befdc1a748e26194d88075a49b764",
+    "portable_source.tar.gz": "543089a5d65eefb19aefa543b1482a0318940af8494cd7a8f03fe27d5f00312f",
+    "portable_macos-INTENT.json": "9b9d9e35f62bbb0f8d553799a6cb962c6fd85457d081f950fc90f6ee551d448e",
+    "portable_macos-RESULT.json": "64fdfe4850fc68a7086736322bf710b1ed891be9af765bf796fb3a17a9d48a2f",
+    "portable_macos.stdout": "e1e41893f0d4f736d936ccb26f9a1f56fc5b76fa15a396799efceed0c20cca06",
+    "portable_macos.stderr": "a5f5e4f85ab6c67e39ea28beaf16d7eaf120ba1ffa38c9af1fc8e420fd3fe7e4",
+    "portable_macos-AUDIT.json": "9c4bb8b37de6a45ac4fc7777b21bbf0e813b3576b70d31dfe2db03b8460237ba"
+  }
+}
