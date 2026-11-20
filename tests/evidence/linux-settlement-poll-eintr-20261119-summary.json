@@ -1,0 +1,43 @@
+{
+  "schema": "ptg-linux-settlement-poll-eintr-1",
+  "date": "2026-11-19",
+  "production_client_sha256": "2665f48583862cccc41c70ec2f6a4a41cf3b010390239d51a03be986a8368dfc",
+  "source_archive_parent": "948cd55d056c205054c8806edc5c4dd1ba6599d6",
+  "method": {
+    "platform": "ARM64 GNU Linux",
+    "rust": "1.88.0",
+    "control": "A private test ran the previous wait clause and the current helper on owned socket pairs. Each poll used the production wait slice of up to 10 ms and the same 400 ms absolute deadline rule.",
+    "interruption": "A scoped thread delivered a caught signal only to the test waiter. The native return confirmed errno 4. The peer wrote before the cutoff in the readiness controls and after the cutoff in the expiry control.",
+    "scope": "The native comparison exercised the polling helper. Service and manager operations were outside the component test."
+  },
+  "results": {
+    "old_wait": "Reported the first interruption as an error before readiness.",
+    "patched_wait": "Recovered for timely readiness and returned the original deadline error before the late write.",
+    "kernel_interruptions": {
+      "baseline": 1,
+      "recovered": 7,
+      "expired": 24
+    },
+    "observer_ns": {
+      "baseline_error_after_start": 13433998,
+      "successful_helper_return_after_start": 100286023,
+      "expiry_after_cutoff": 1296223
+    },
+    "existing_client_tests": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native_scratch_removed": true,
+    "native_scope_retired": true
+  },
+  "evidence_sha256": {
+    "native_input": "95c18bfb12e88ea4b14a234c4610daab7a0d2138852004299c7515f06fc4c0bb",
+    "manifest": "47f587c5743e5f0b9f55aaaecea88f1b53f5c58e92a173aa34f1081797182243",
+    "instrumented_client": "395eb9260e391bda543bd6a91b40746684049b524a3c6ca96ee548c1b7dd718c",
+    "test_signal_source": "a2ef55b3b53825641b6aba980eb0f03a4823bce914fb07a3ef7cb72428d7913f",
+    "terminal": "b47eb9ed19089f0f421ea5173e3abd32f17316ebb140cc7c8982b8962c391a7d",
+    "bundle": "442b2636e651c330ac80caf588f5d91ed9b3b61c28d212d738bd8719ed1b53c1",
+    "audit": "cd64257b0628476e39c0c960596756ed5fa9e6dac0058cc83e96caf9e4173099"
+  }
+}

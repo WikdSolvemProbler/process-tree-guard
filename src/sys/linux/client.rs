@@ -62,6 +62,16 @@ fn settlement_poll(service: RawFd, terminal: bool, left_ns: u64) -> (PollFd, c_i
     let timeout = left_ns.div_ceil(1_000_000).min(10) as c_int;
     (PollFd { fd, events: POLLIN, revents: 0 }, timeout)
 }
+fn wait_to_resample_settlement(watched: &mut PollFd, timeout: c_int) -> std::result::Result<(), String> {
+    if unsafe { poll(watched, 1, timeout) } < 0 {
+        let error = io::Error::last_os_error();
+        // The outer join loop rechecks the original absolute deadline.
+        if error.kind() != io::ErrorKind::Interrupted {
+            return Err(format!("root settlement poll: {error}"));
+        }
+    }
+    Ok(())
+}
 fn join_service(outcome:&mut ClientOutcome,unit:&mut manager::UnitReference,reported:Option<i32>,until:u64,facts:&mut JoinFacts)->std::result::Result<(),String>{
  let hello=outcome.hello.as_ref().ok_or("missing service hello for join")?.clone();
  loop{
@@ -70,8 +80,7 @@ fn join_service(outcome:&mut ClientOutcome,unit:&mut manager::UnitReference,repo
   if terminal{facts.service_terminal=true;before(until)?;if !outcome.completion.as_mut().ok_or("missing exact completion authority")?.population_after_terminal(service,hello.pid)?{facts.domain_empty=true;break;}}
   before(until)?;let left=until.checked_sub(supervisor::boottime_ns()?).filter(|n|*n>0).ok_or("join poll deadline expired")?;
   let (mut watched, timeout) = settlement_poll(service.as_raw_fd(), terminal, left);
-  let result = unsafe { poll(&mut watched, 1, timeout) };
-  if result<0{return Err(format!("root settlement poll: {}",io::Error::last_os_error()));}
+  wait_to_resample_settlement(&mut watched, timeout)?;
  }
  before(until)?;let code=match reported{Some(code)=>code,None=>unit.terminal_code(until)?};facts.manager_status=Some(code);
  let status=unit.final_status(code,outcome.completion.as_ref().ok_or("missing completion")?.retired(),until)?;

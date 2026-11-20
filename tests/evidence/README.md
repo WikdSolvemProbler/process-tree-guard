@@ -719,3 +719,7 @@ On ARM64 Linux, one ordinary delegated-library call returned 125 with the settle
 ## Linux library deadline and natural exit 124 - 2026-11-19
 
 Two ordinary delegated-library calls on ARM64 Linux returned 124. The command that exited naturally carried no timeout cause. The command stopped at its original deadline carried the typed terminal-timeout result and the matching original deadline in the native record. For each, the original caller and parent remained live with the result held while the service was terminal, its runtime directory and cgroup were absent, and the same broker showed no residual caller connection. Fixture cleanup passed and the fallback timer stayed unused. [Both results, timing endpoints and hashes](linux-library-exit124-pair-20261119-summary.json)
+
+## Linux client settlement polling under interruption - 2026-11-19
+
+The old Linux client settlement wait treated an interrupted poll as terminal. The patch sends that interruption back to the same bounded loop for another service and domain observation. On ARM64, an owned-socket control with an actual caught signal made the old wait return errno 4. The patched wait accepted timely readiness after seven interruptions and still observed its original cutoff in the late-readiness case after 24 interruptions. All 12 existing client tests passed. This qualifies the polling component. Full service settlement under interruption remains unverified. [Method, times and evidence hashes](linux-settlement-poll-eintr-20261119-summary.json)
