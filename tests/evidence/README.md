@@ -715,3 +715,7 @@ A bounded ARM64 comparison used real ready poll events on owned socket pairs and
 ## Linux library cleanup after a missing executable - 2026-11-19
 
 On ARM64 Linux, one ordinary delegated-library call returned 125 with the settled native error for a missing executable. It reported no timeout. Systemd matched the original service and reported terminal exit 125. The runtime directory and cgroup were absent while the caller, parent and returned outcome remained live. The observer found no caller connection on the same broker. Exact fixture teardown passed, the scope retired and the fallback timer stayed unused. Failed-join behavior and full Linux qualification remain open. [Method, outcomes and evidence pins](linux-library-settled-exec-error-20261119-summary.json)
+
+## Linux library deadline and natural exit 124 - 2026-11-19
+
+Two ordinary delegated-library calls on ARM64 Linux returned 124. The command that exited naturally carried no timeout cause. The command stopped at its original deadline carried the typed terminal-timeout result and the matching original deadline in the native record. For each, the original caller and parent remained live with the result held while the service was terminal, its runtime directory and cgroup were absent, and the same broker showed no residual caller connection. Fixture cleanup passed and the fallback timer stayed unused. [Both results, timing endpoints and hashes](linux-library-exit124-pair-20261119-summary.json)

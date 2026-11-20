@@ -1,0 +1,69 @@
+{
+  "schema": "ptg-linux-library-exit124-pair-1",
+  "date": "2026-11-19",
+  "source_commit": "11c49b055badd4a445f2e19183e19cd85b4f5d98",
+  "platform": "ARM64 GNU Linux",
+  "rust": "1.88.0",
+  "method": {
+    "binary_roles": {
+      "root_service": "53abe4bcbc5aee266d4927bbbe509c982338f0ffe6d1738264e4c7b9caeda5f0",
+      "fixture_library_adapter": "19d0c730ae96f8fd6e6fb7a8ae985e710af979c316de4fb089896031421beeea"
+    },
+    "fixed_sequence": [
+      "natural",
+      "deadline"
+    ],
+    "requested_deadline_seconds": 4,
+    "payloads": "Both printed a startup marker. The natural case then exited 124. The deadline case ran sleep with a duration longer than the guard deadline.",
+    "return_timing": "The observer timestamped receipt of the API outcome and compared that timestamp to the original deadline from HELLO.",
+    "custody": "Each adapter retained its returned result until the observer verified the exact service termination and original caller identities.",
+    "broker_observation": "Same broker and zero caller connections at the before and after observations for each call.",
+    "attempts": 1,
+    "nested_raw_records_verified": 54
+  },
+  "results": {
+    "natural": {
+      "library_exit": 124,
+      "timeout_cause": null,
+      "native_settled": true,
+      "wire_cause": 0,
+      "wire_reported_original_deadline": false,
+      "original_service_exit": 124,
+      "caller_and_parent_alive_before_release": true,
+      "runtime_and_cgroup_absent_before_cleanup": true,
+      "residual_caller_connection_observed": false,
+      "return_observed_relative_to_original_cutoff_ns": -3934292215,
+      "prerelease_witness_ns_after_call_gate": 72075079
+    },
+    "deadline": {
+      "library_exit": 124,
+      "timeout_cause": "Joined(Terminal)",
+      "native_settled": true,
+      "wire_cause": 3,
+      "wire_reported_original_deadline": true,
+      "original_service_exit": 124,
+      "caller_and_parent_alive_before_release": true,
+      "runtime_and_cgroup_absent_before_cleanup": true,
+      "residual_caller_connection_observed": false,
+      "return_observed_relative_to_original_cutoff_ns": 21466083,
+      "prerelease_witness_ns_after_call_gate": 4030912920
+    }
+  },
+  "cleanup": {
+    "deployment_assets": 6,
+    "fixture_cleanup_succeeded": true,
+    "scope_retired": true,
+    "fallback_timer_fired": false
+  },
+  "existing_serial_client_tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "evidence_sha256": {
+    "source_binding": "c48fb1f447a64b854cad638622c58a579f7c1daa8e2ee1b378ce63adbd3d053a",
+    "runtime_result": "9f1cc26b9ae4ee02bc366ee9f959dc7eb835a822b6261d19795c25ab0354b363",
+    "runtime_bundle": "4ca2be550ecf17391b51a6b4201b3ac661d8568f301e8eafef7675d1c048fbdd",
+    "build_result": "280a3a4a1f92616c64ea418d9189e908f2767f0633a4082c92b0b6cf92e7eaae"
+  },
+  "scope": "Two native settled returns from one ordinary ARM64 delegated-library configuration. Failed joins, exclusive cleanup causality, performance and full backend qualification have separate criteria."
+}
