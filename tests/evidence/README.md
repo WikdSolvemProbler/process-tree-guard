@@ -727,3 +727,7 @@ The old Linux client settlement wait treated an interrupted poll as terminal. Th
 ## Linux live service join under a caught signal - 2026-11-19
 
 An ARM64 delegated-library diagnostic recorded actual errno 4 in the live settlement helper. It then completed the join and returned the command's natural exit 7 with no error or timeout. The caller, parent and returned outcome remained live while the matching service was terminal, its runtime directory and cgroup were absent, and the same broker showed no caller connection. A private service build requested a 300 ms pause after sending its settled result so the signal could reach the wait. The sender joined and the original signal state was restored. Fixture teardown passed and the fallback timer stayed unused. [Diagnostic changes, outcomes and evidence hashes](linux-live-settlement-signal-20261119-summary.json)
+
+## Windows AUTO directory reuse - 2026-11-19
+
+The AUTO owner walk now passes its captured Windows directory to native image mapping and the system-boundary check. The direct and snapshot paths share that value. This removes up to two redundant directory queries in the unopened-boundary fallback. The release library suite passed all 301 tests, including the native image mapping and strict boundary checks. The operation count does not establish a timing gain. Manual-mode speed acceptance remains open. [Source identities and validation](windows-auto-directory-reuse-20261119-summary.json)

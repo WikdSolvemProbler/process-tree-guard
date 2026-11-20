@@ -1,0 +1,29 @@
+{
+  "schema": "ptg-windows-auto-directory-reuse-1",
+  "date": "2026-11-19",
+  "parent_commit": "d3acf21e5426ae7f551b86ec9eff14895a220c72",
+  "change": "The AUTO owner walk passes its captured Windows directory into unopened-image mapping and the system-boundary check, including the snapshot fallback.",
+  "native_work": "When both process opens fail, this removes two repeated Windows-directory queries if the native image query succeeds, and one if it fails before mapping.",
+  "validation": {
+    "platform": "Windows x64 MSVC",
+    "rust": "1.98.1",
+    "library_release_tests": {
+      "passed": 301,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0
+    },
+    "native_image_mapping_regression": "The existing test compares the child's held image path with native identifier mapping using the captured directory. An empty supplied directory returns no mapped image.",
+    "tracked_source_hashes_verified": 1014,
+    "no_test_methods_added": true,
+    "initial_preparation": "The first source edit refused mixed line endings before writing. The first launcher used a forward-slash CMD path and failed before compilation. The corrected invocation ran once."
+  },
+  "evidence_sha256": {
+    "owners": "1749f36e99d5882e90c0ad8df9a7a162736555b5374dde388ffd1bccb791a992",
+    "tests": "cbbb07a142810fa2f23f4787a0fd45fc630de052d0223d4f5b92d2970fa34f05",
+    "native_log": "447dc9c26640b7e552b65c705319d3802909626681a5573054b706c024ee413f",
+    "source_manifest": "52dd8998ada34f7db8b75f5cf5b5dcb30d36a270c4eae7f4da423f3ac91e3065",
+    "native_script": "97271375e118d538563fa51e94954581e7acbe1c9b0cb6b381e89b80ed8a5d2e"
+  },
+  "scope": "The change affects the AUTO unopened-system-boundary fallback. No timing comparison or explanation of the manual-mode slowdown follows from the operation count."
+}

@@ -802,11 +802,16 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             .stdin(std::process::Stdio::null()).stdout(std::process::Stdio::null()).spawn().expect("start a process");
         let path = image_path_of_handle(child.as_raw_handle() as Handle);
         let by_identifier = image_path_of_id(child.id());
+        let windows = windows_folder();
+        let without_open = image_path_of_unopened(child.id(), &windows);
+        let without_drive = image_path_of_unopened(child.id(), "");
         let _ = child.kill();
         let _ = child.wait();
         assert!(path.to_ascii_lowercase().ends_with("\\cmd.exe"), "{}", path);
         assert_ne!(path, path.to_ascii_lowercase(), "the path is as the system gives it: {}", path);
         assert_eq!(path, by_identifier);
+        assert_eq!(path, without_open);
+        assert!(without_drive.is_empty(), "an absent Windows drive cannot map a native image");
         // The parent of this process: the path keeps its case; the old name is the same path in lower case.
         let parent = parent_image_path();
         assert!(!parent.is_empty() && parent_image() == parent.to_ascii_lowercase(), "{} {}", parent, parent_image());

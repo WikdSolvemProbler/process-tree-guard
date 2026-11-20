@@ -367,7 +367,7 @@ pub(super) fn owner_parent_map() -> Result<ParentMap, GuardError> {
 /// Open once with both rights, then verify on that held process object. A
 /// query-only fallback can identify an excluded system boundary, but can never
 /// silently remove a required live ancestor from the wait set.
-pub(super) fn observed_owner(id: u32, kept: Option<Handle>, cleanup: &mut HandleList) -> Result<OwnerObservation, GuardError> {
+pub(super) fn observed_owner(id: u32, kept: Option<Handle>, windows: &str, cleanup: &mut HandleList) -> Result<OwnerObservation, GuardError> {
     let (handle, waitable) = match kept {
         Some(handle) => (handle, true),
         None => unsafe {
@@ -386,8 +386,8 @@ pub(super) fn observed_owner(id: u32, kept: Option<Handle>, cleanup: &mut Handle
                     // no creation time, so the walk ends there and cannot
                     // admit it; any other such process keeps the refusal.
                     let error = os_error();
-                    let image = image_path_of_unopened(id);
-                    if !ends_the_walk(crate::file_name_of(&image), &image, &windows_folder()) {
+                    let image = image_path_of_unopened(id, windows);
+                    if !ends_the_walk(crate::file_name_of(&image), &image, windows) {
                         return Err(error);
                     }
                     return Ok(OwnerObservation { handle: std::ptr::null_mut(), started: None, image, waitable: false });
@@ -421,7 +421,7 @@ pub(super) fn direct_owner_chain(ours: u64, kept: &[Handle], cleanup: &mut Handl
     *windows = Some(windows_folder());
     let windows = windows.as_deref().unwrap_or("");
     direct_owner_chain_with(ours, parent, kept, seed, levels, windows, (
-        |id, kept| observed_owner(id, kept, cleanup),
+        |id, kept| observed_owner(id, kept, windows, cleanup),
         |handle| unsafe { WaitForSingleObject(handle, 0) == 0 },
         |handle| {
             let mut basic: ProcessBasicInformation = unsafe { std::mem::zeroed() };
@@ -542,9 +542,10 @@ pub(super) fn watched_owner_handles(watch_ancestors: bool, kept: &[Handle], clea
     // The direct chain has already placed the run's one Windows folder
     // string in the slot; the fallback reads it from there instead of
     // querying and converting the folder a second time.
-    collect_owner_handles_with_levels(&map, me, ours, windows.as_deref().unwrap_or(""), |id| {
+    let windows = windows.as_deref().unwrap_or("");
+    collect_owner_handles_with_levels(&map, me, ours, windows, |id| {
         let retained = if Some(id) == first { seed.map(|seed| seed.handle).or_else(|| kept.first().copied()) } else { None };
-        observed_owner(id, retained, cleanup)
+        observed_owner(id, retained, windows, cleanup)
     }, levels).map(|owners| (owners, None))
 }
 
@@ -651,7 +652,7 @@ pub(crate) fn image_path_of_handle(handle: Handle) -> String {
 /// written back as that drive's letter; empty when it cannot be read or the
 /// file is on another device. For a process that this user cannot open, this
 /// is the only path there is to tell a boundary of the walk by.
-pub(super) fn image_path_of_unopened(id: u32) -> String {
+pub(super) fn image_path_of_unopened(id: u32, windows: &str) -> String {
     let mut buffer = [0u16; 1024];
     let mut info = ProcessIdInformation {
         process_id: id as usize, length: 0, maximum_length: (buffer.len() * 2) as u16, buffer: buffer.as_mut_ptr(),
@@ -663,7 +664,6 @@ pub(super) fn image_path_of_unopened(id: u32) -> String {
     let native = String::from_utf16_lossy(&buffer[..(info.length as usize / 2).min(buffer.len())]);
     // The native path names a device (`\Device\HarddiskVolume3\...`);
     // only the device behind the Windows folder's drive is mapped back.
-    let windows = windows_folder();
     let Some(drive) = windows.get(..2).filter(|drive| drive.ends_with(':')) else { return String::new() };
     let wide: Vec<u16> = drive.encode_utf16().chain(Some(0)).collect();
     let mut target = [0u16; 512];
