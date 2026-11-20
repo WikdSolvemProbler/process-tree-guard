@@ -31,7 +31,9 @@
       "config_sha256": "d94850b7bff763719a384f686e1469a47ec12daf00ae5140ff30e0e695c043b4",
       "evidence": {
         "path": "../evidence/windows-campaign-20261106.zip",
-        "sha256": "ef653c4fb2921adc9e466f767225ba257b26e0b9adecf354b8000f30ccf751bd"
+        "sha256": "ef653c4fb2921adc9e466f767225ba257b26e0b9adecf354b8000f30ccf751bd",
+        "status": "withdrawn-raw-archive",
+        "availability": "../evidence/README.md#withdrawn-private-evidence"
       },
       "guard_binary_sha256": "589c7e505b10482d9313b885166b433b97fd77900eacae411e37c57f9f17561b",
       "guard_build_commit": "435671d8d7c99ef47463b860cc6abe01c65189c4",
@@ -52,6 +54,63 @@
       "standing_loss_count": 44
     },
     {
+      "aggregate_source_revision": "45edf9bd9a44f9259ad4783ba67fb4c97925afca",
+      "campaign_status": "incomplete",
+      "config_sha256": "d94850b7bff763719a384f686e1469a47ec12daf00ae5140ff30e0e695c043b4",
+      "date_utc": "2026-11-17",
+      "evidence": {
+        "path": "../evidence/windows-campaign-20261117/replay.json",
+        "sha256": "60472aaed5b6760508fa2d467b9b41aecac52af351499029ca16449c8a66a910",
+        "recorded_slots_sha256": "23f48ee09c6773dc8a11337d11ebf5fa0fc746e7fb6518e5bfe0c96f689f0c0c",
+        "replay_output_sha256": "13eaa51021681a16d2159752d4fd8e74a62b5e33153e647b200afdd062eec292",
+        "reproduction_instructions": "../evidence/windows-campaign-20261117/README.md",
+        "report_correction": "../evidence/windows-campaign-report-correction-20261117-summary.json",
+        "scope": "Numerical replay of public slot projections. Exact executable, process, byte-output and Job verification requires private originals.",
+        "status": "public-numerical-replay"
+      },
+      "guard_binary_sha256": "57d73cc12e49ee634f2308e676614aa379cfde6efb11f0c681ce3b7218b33833",
+      "guard_build_commit": "d9537ba6156fa44e0fbbcd9c62a155d5fc7c23b2",
+      "original_freeze_gate_failures": 0,
+      "original_standing_loss_count": 42,
+      "outcome": "All 1,940 slots were recorded. Campaign certification remained incomplete.",
+      "plan_counts": {
+        "control": 36,
+        "measured": 1680,
+        "warmup": 224
+      },
+      "quiet_host_certified": false,
+      "record": "November 17 full Windows competitor campaign",
+      "reduced": false,
+      "replay": {
+        "analysis_commit": "e4e14fa9c5ea97e3afb06855c9395e470bf013cb",
+        "fast_latency": {
+          "NO_WINDOW": {
+            "outcome": "FAIL",
+            "guard_median_ms": 93.74325,
+            "nuewframe_median_ms": 86.7151,
+            "sysprims_median_ms": null
+          },
+          "DETACHED": {
+            "outcome": "UNEVALUATED",
+            "guard_median_ms": 95.2911,
+            "nuewframe_median_ms": 279.9394,
+            "sysprims_median_ms": null
+          }
+        },
+        "floor_controls_agreed_by_context": {
+          "NO_WINDOW": false,
+          "DETACHED": false
+        },
+        "recorded_harness_termination_flags": 443,
+        "resource_compared_units": 144,
+        "resource_loss_units": 31,
+        "resource_failing_ranks": 78
+      },
+      "scope": "Observed shared Windows laptop load",
+      "slots_planned": 1940,
+      "slots_run": 1940
+    },
+    {
       "binary_sha256": {
         "main": "f7f6e1fca2533e651ece4b44f6a484e6903612252d3aa466870314b920dc2e02",
         "wake": "50f73d903f03ab580d4dbe1335a055febcd2aef4a79d04c5a5a179d358324770"
@@ -62,7 +121,10 @@
       },
       "evidence": {
         "path": "../evidence/windows-wake-directional-20261106.zip",
-        "sha256": "56d7e8282ce249dc5bfc3ab984ea03e97d99b463bb85e96db1684a7992f47038"
+        "sha256": "56d7e8282ce249dc5bfc3ab984ea03e97d99b463bb85e96db1684a7992f47038",
+        "status": "withdrawn-raw-archive",
+        "availability": "../evidence/README.md#withdrawn-private-evidence",
+        "public_numerical_replay": "../evidence/windows-reference-20261106/README.md"
       },
       "manual_startup_raw_p90": {
         "endpoint": "raw_q90",
@@ -87,7 +149,9 @@
       "calibration_passed": false,
       "evidence": {
         "path": "../evidence/windows-wake-phase-20261106.zip",
-        "sha256": "f13a78229c9b66c963dca3748c32fdbd813a6dfcbd95eb0e1c5bf37973c802a0"
+        "sha256": "f13a78229c9b66c963dca3748c32fdbd813a6dfcbd95eb0e1c5bf37973c802a0",
+        "status": "withdrawn-raw-archive",
+        "availability": "../evidence/README.md#withdrawn-private-evidence"
       },
       "outcome": "Phase localization remained inconclusive.",
       "record": "Windows Wake startup phase diagnostic",
@@ -106,7 +170,9 @@
       },
       "evidence": {
         "path": "../evidence/windows-wake-anchor-20261106.zip",
-        "sha256": "d6427f0343c829dff858cf850fee22b86cf8352e3047c7946c79ea8f2b33cf4c"
+        "sha256": "d6427f0343c829dff858cf850fee22b86cf8352e3047c7946c79ea8f2b33cf4c",
+        "status": "withdrawn-raw-archive",
+        "availability": "../evidence/README.md#withdrawn-private-evidence"
       },
       "manual_startup_raw_p90": {
         "endpoint": "raw_q90",
