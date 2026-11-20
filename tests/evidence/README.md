@@ -711,3 +711,7 @@ The selected ordinary-user ARM64 macOS run passed all 136 existing offline tests
 ## Linux socket readiness at the deadline - 2026-11-19
 
 A bounded ARM64 comparison used real ready poll events on owned socket pairs and a test-only pause before the readiness decision. Both variants accepted early readiness. With the pause extending past the original deadline, the old branch still accepted readiness and the patched branch reported deadline expiry. The byte stayed readable in every case. All 12 existing client tests passed. This qualifies the passive wait's decision at its clock sample. Linux backend qualification remains open. [Method, results and evidence pins](linux-ready-cutoff-20261119-summary.json)
+
+## Linux library cleanup after a missing executable - 2026-11-19
+
+On ARM64 Linux, one ordinary delegated-library call returned 125 with the settled native error for a missing executable. It reported no timeout. Systemd matched the original service and reported terminal exit 125. The runtime directory and cgroup were absent while the caller, parent and returned outcome remained live. The observer found no caller connection on the same broker. Exact fixture teardown passed, the scope retired and the fallback timer stayed unused. Failed-join behavior and full Linux qualification remain open. [Method, outcomes and evidence pins](linux-library-settled-exec-error-20261119-summary.json)

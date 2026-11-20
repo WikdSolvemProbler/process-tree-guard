@@ -135,9 +135,10 @@ jobs:
       - name: Test the opt-in Linux client, release
         timeout-minutes: 4
         run: |
+          # This test binary measures the process-wide descriptor table.
           timeout --signal=KILL 180s cargo test --release --locked --offline \
             --target x86_64-unknown-linux-gnu --features linux-separate-service \
-            --bin process-tree-guard-client
+            --bin process-tree-guard-client -- --test-threads=1
 
       - name: Record native Linux program checksums
         working-directory: target/x86_64-unknown-linux-gnu/release

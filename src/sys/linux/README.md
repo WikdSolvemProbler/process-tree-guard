@@ -10,8 +10,10 @@ The source package now includes the native C, headers and inactive deployment as
 
 ```sh
 cargo build --locked --release --features linux-separate-service --bin process-tree-guard-root --bin process-tree-guard-client
-cargo test --locked --release --features linux-separate-service --bin process-tree-guard-client
+cargo test --locked --release --features linux-separate-service --bin process-tree-guard-client -- --test-threads=1
 ```
+
+Run this client suite serially so its descriptor leak checks can compare the process-wide file descriptor count between observations.
 
 Select these binaries explicitly. Cross-compilation, non-GNU targets and other architectures refuse this opt-in build; default no-feature Linux builds retain the existing unsupported-backend error. Windows all-feature builds compile only exit-125 stubs for these two entries. The six native objects and archive are built inside Cargo's output directory and linked only to the two named binary targets, including the client's existing test harness.
 

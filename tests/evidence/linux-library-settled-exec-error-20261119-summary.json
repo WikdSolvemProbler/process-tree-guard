@@ -1,0 +1,45 @@
+{
+  "schema": "ptg-linux-library-settled-exec-error-1",
+  "date": "2026-11-19",
+  "source_commit": "d282c727bb14b268527d3da894a65caf8294d8d6",
+  "platform": "ARM64 GNU Linux",
+  "rust": "1.88.0",
+  "method": {
+    "binary_roles": {
+      "root_service": "53abe4bcbc5aee266d4927bbbe509c982338f0ffe6d1738264e4c7b9caeda5f0",
+      "fixture_library_adapter": "4b0beac0f8ee4f0e18d88e5f90962815b3853111fce86e093bd40c22a659d819"
+    },
+    "request": "The ordinary delegated-library caller requested a fixed absolute executable whose path was verified absent before and after.",
+    "custody": "The adapter retained its returned outcome until the observer verified exact service terminal status and live original caller identities.",
+    "broker_observation": "Same broker and zero caller connections at the before and after observations.",
+    "attempts": 1,
+    "independent_evidence_checks": 54
+  },
+  "result": {
+    "library_exit": 125,
+    "native_errno": 2,
+    "native_settled": true,
+    "timeout": false,
+    "library_completion": true,
+    "caller_and_parent_alive_before_release": true,
+    "exact_service_terminal_exit": 125,
+    "runtime_and_cgroup_absent_before_cleanup": true,
+    "residual_caller_bus_connection_observed": false,
+    "elapsed_ns_from_call_gate_to_prerelease_witness": 75116214,
+    "deployment_assets": 6,
+    "fixture_cleanup_success": true,
+    "scope_retired": true,
+    "fallback_timer_fired": false,
+    "existing_serial_client_tests": {
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "evidence_sha256": {
+    "source_binding": "9d859cfca6bafda25ba2257b201ae5b5cff63786112848b7d1d3b05f4a8a28e2",
+    "runtime_result": "83cfc2de322d45cd22752ffa25c0a9f25cc128c4ff0533a3257027c3c0fff6a8",
+    "runtime_bundle": "83ccd5df4a414b7d55f0ec998073f33a147b7f1b14448f2c584b3c428ee1ba87",
+    "build_result": "991a1749939a9b2bd3ab48b4c5ebb1fce1d680e366170d43f2d7cf8555c19891"
+  },
+  "scope": "One native settled exec error after authenticated presentation. The evidence covers the successful join on this error path. Failed join, exclusive cleanup causality and Linux backend qualification remain open."
+}
