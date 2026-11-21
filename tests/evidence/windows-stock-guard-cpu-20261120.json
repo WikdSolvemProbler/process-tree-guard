@@ -1,0 +1,514 @@
+{
+  "schema": "windows-stock-guard-cpu-diagnostic-v1",
+  "capture": "stock-ab-guard-cpu-165-002",
+  "status": "descriptive_only",
+  "question": "How does original guard process CPU accounting differ across two historical stock Windows images under one natural-exit workload?",
+  "images": {
+    "A": {
+      "source": "9c6f0df93cee92dcaca0e89ebc3f09134eeab53d",
+      "origin": "681ad230",
+      "scope": "Windows-repaired historical source archive",
+      "source_files": 14,
+      "pe_bytes": 371712,
+      "pe_sha256": "65b5f879941d69ad8a98fd33d59ae9a4648380b276dad1c6e5f00ac18caedd52"
+    },
+    "B": {
+      "source": "e16ea4aaef9b55155486912f1ad30a58be5d69cd",
+      "scope": "Earliest reachable already-integrated checkpoint",
+      "source_files": 865,
+      "pe_bytes": 808960,
+      "pe_sha256": "324d731777334af288408ad00f702289f9d749696e204a42bf76d57902d4dc0c"
+    }
+  },
+  "build": {
+    "target": "x86_64-pc-windows-msvc",
+    "rust": "1.98.1",
+    "cargo": "1.98.1",
+    "llvm": "22.1.8",
+    "msvc": "14.51.36231",
+    "sdk": "10.0.28000.0",
+    "features": "default",
+    "opt_level": 3,
+    "lto": "fat",
+    "codegen_units": 1,
+    "panic": "abort",
+    "strip": "symbols",
+    "incremental": false,
+    "jobs": 2,
+    "offline": true,
+    "locked": true,
+    "matched_build_path_layout": true
+  },
+  "provenance": {
+    "private_sha256": {
+      "source_manifest": "d5f4b34bc0000783950950cad7d2791bf3415ca6087f14d7cc1010dcefb171fa",
+      "plan": "1ef7e9255217cce58df6f0471af8a801092dd81dd09ae9c5a78e4224b6d4b6a0",
+      "launcher": "19bf315f8c61ac5f075bedb75fd87b41121680f4a161311a19ca92eba7c6f048",
+      "authorization": "d460389dc13088d9d3bee4b4d35710da447be68e82293707dcfba823344be054",
+      "root_approval": "33ee98ebefcddc701359c44bdd7d1a79c475e4c080ec61981f32e3afcb347f49",
+      "reviewer_approval": "ef8c1f73c63990cfcfd0ae32e58dfc61eb7281a737a32aad5dfd5ed9772cedff",
+      "root_invocation": "382e8a72e78dff9f0f89b8ee6c2fd237e4a228ad7678887e66d5a88f19bd3337",
+      "materialization": "e13cc696f50a1e7d40fb80033a93b7b30098084945c321e234629803760cb9ea",
+      "controller": "fe4438de16456f28d1b5a08184011d1a02c30f9b2dd75ee23dd155ca320fbb73",
+      "accounting_helper": "40d4d7aceafe1ccd99afed30980fabb60a1557345e8d9ff96164f049b1e335e3",
+      "mark_fixture": "bdac8b60e109bafdfb2c6507010605ece5e849845153d9c61bb9714af67f6ef0",
+      "receipt": "177a08401b0e896d588d4226764a4c6bad9dac75a716a56b3845207b00d0bdc8",
+      "root_analysis": "8a500040316854b4081a3a1ba91dcc842ec0ce19e12c2d839866a20a1696450c",
+      "root_terminal": "c941ce6041d946e14e7637c6b6d475abab30dc6ac2459a92f3d6c3f9c41cb93a"
+    },
+    "prior_refusal": {
+      "capture": "stock-ab-guard-cpu-165-001",
+      "workload_dispatches": 0,
+      "guard_runs": 0,
+      "reason": "The hidden-launch and native handle mismatch suspended source approval and blocked dispatch. The follow-up corrected the source contract before dispatch.",
+      "source_manifest_sha256": "0740826a2f70b28eb7c81a9db6ca08f9993ae1d22bafdd3284a405362f45ee18",
+      "dispatch_hold_sha256": "ef876d6b5b8a1427a22813255b8e6661c28f55af3cf607b43f9abf95b8a5536a"
+    },
+    "completed": {
+      "workload_dispatches": 1,
+      "tool_exit_code": 0,
+      "tool_elapsed_seconds": "5.393744",
+      "retries": 0,
+      "qualification_passed": 4,
+      "measured_passed": 32
+    }
+  },
+  "protocol": {
+    "workload": "External testkit mark fixture with fresh marker file and 50 ms payload sleep. Natural exit zero.",
+    "bounds_seconds": {
+      "product": 2,
+      "slot": 3,
+      "guardian": 55,
+      "backup": 60,
+      "outer": 60
+    },
+    "cells": {
+      "A": ["A", 0],
+      "B": ["B", 0],
+      "C": ["A", 1],
+      "D": ["B", 1]
+    },
+    "qualification_order": "ABDC",
+    "measured_sequences": ["ABDC", "BCAD", "CDBA", "DACB"],
+    "repeats": 2,
+    "elapsed_scope": "Parent CreateProcessW through the retained original guard native wait. Includes overlap with observer and payload.",
+    "accounting_scope": "GetProcessTimes and QueryProcessCycleTime sampled on the retained original guard handle after the elapsed endpoint, first payload poll and settlement checks, with original identity and native wait rechecked before sampling. The helper then called CloseHandle. Its individual return value was not captured.",
+    "checks": "All 36 slots passed. Both APIs returned BOOL 1 with zero last-error on all 36 slots. Original guard and payload exited zero with zero active processes in the slot Job and no cleanup assistance.",
+    "placement": "Both images staged at two sites with matching basenames and 120-character paths. Each cell appears twice per measured position."
+  },
+  "numerical_format": {
+    "row_fields": ["disposition", "block", "position", "cell", "image", "site", "elapsed_ns", "guard_kernel_100ns", "guard_user_100ns", "guard_total_100ns", "guard_cycles"],
+    "summary_fields": ["n", "median", "mean", "positive", "negative", "zero"],
+    "contrast_fields": ["balanced", "site0", "site1"],
+    "metric_order": ["elapsed_ns", "guard_kernel_100ns", "guard_user_100ns", "guard_total_100ns", "guard_cycles"],
+    "integers": "Raw measurements are unsigned base-10 strings. Exact contrasts and summary fractions are canonical signed integer strings or reduced numerator/denominator strings.",
+    "contrasts": "Image B minus image A. Site 0 uses cell B minus A and site 1 uses cell D minus C. Balanced is the arithmetic mean of the two site contrasts. Only the 32 measured slots contribute."
+  },
+  "interpretation": [
+    "Whole-guard cycles were higher for image B in all eight balanced contrasts and seven of eight contrasts at each site. Balanced elapsed was higher in six of eight blocks.",
+    "Elapsed and guard-process CPU/cycles cover different scopes. Do not subtract CPU from elapsed, sum the medians, convert cycles to time, or subtract measurements from other epochs.",
+    "The recorded kernel and user amounts are in 100 ns units. Nonzero observations in this capture were multiples of 156250 units. Among 32 measured rows, kernel was zero in 21, user in 25, total in 17, and cycles in zero. These sampled quantities do not establish the counter resolution.",
+    "Image identity, site, cache state, order, carryover and observer cadence remain possible influences. The observations cannot isolate the cost of a phase, an API, or a source change.",
+    "Both inputs are historical diagnostic images. Image A has a recorded G28 failure and neither input is comprehensively qualified. Current consolidated commit 6d2a14e5ed43343d511a7bb9e171a9f75e4fdd4f was not measured in this capture.",
+    "The natural-exit fixture did not exercise product timeout termination. Individual CloseHandle BOOLs were not captured. The descriptive sample does not establish performance parity or ranking. The complete public reproduction and acceptance benchmark remain open."
+  ],
+  "api_references": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes",
+    "https://learn.microsoft.com/en-us/windows/win32/api/realtimeapiset/nf-realtimeapiset-queryprocesscycletime"
+  ],
+  "replay": "process-tree-guard --timeout 30 -- python tests/evidence/replay_windows_stock_guard_cpu.py",
+  "observations": [
+    ["qualification_excluded", null, 0, "A", "A", 0, "190417300", "156250", "156250", "312500", "37232982"],
+    ["qualification_excluded", null, 1, "B", "B", 0, "128708400", "156250", "0", "156250", "26814063"],
+    ["qualification_excluded", null, 2, "D", "B", 1, "127012800", "156250", "0", "156250", "27487317"],
+    ["qualification_excluded", null, 3, "C", "A", 1, "126818300", "156250", "156250", "312500", "26309277"],
+    ["measured", 0, 0, "A", "A", 0, "92126500", "312500", "0", "312500", "23451602"],
+    ["measured", 0, 1, "B", "B", 0, "93221100", "156250", "156250", "312500", "25725244"],
+    ["measured", 0, 2, "D", "B", 1, "92870800", "156250", "156250", "312500", "24633232"],
+    ["measured", 0, 3, "C", "A", 1, "91276200", "0", "0", "0", "24922659"],
+    ["measured", 1, 0, "B", "B", 0, "89822300", "312500", "0", "312500", "23815872"],
+    ["measured", 1, 1, "C", "A", 1, "88852300", "0", "0", "0", "21805699"],
+    ["measured", 1, 2, "A", "A", 0, "88566700", "0", "0", "0", "20898124"],
+    ["measured", 1, 3, "D", "B", 1, "90065600", "156250", "0", "156250", "23404498"],
+    ["measured", 2, 0, "C", "A", 1, "89452900", "312500", "0", "312500", "21763579"],
+    ["measured", 2, 1, "D", "B", 1, "91771100", "0", "0", "0", "23296319"],
+    ["measured", 2, 2, "B", "B", 0, "93070000", "0", "156250", "156250", "25360378"],
+    ["measured", 2, 3, "A", "A", 0, "98558200", "0", "0", "0", "24753992"],
+    ["measured", 3, 0, "D", "B", 1, "90796800", "0", "0", "0", "24925051"],
+    ["measured", 3, 1, "A", "A", 0, "88421800", "0", "0", "0", "22398513"],
+    ["measured", 3, 2, "C", "A", 1, "93548600", "0", "156250", "156250", "23746806"],
+    ["measured", 3, 3, "B", "B", 0, "91368600", "0", "0", "0", "23907290"],
+    ["measured", 4, 0, "A", "A", 0, "88520500", "0", "0", "0", "21503506"],
+    ["measured", 4, 1, "B", "B", 0, "89924300", "156250", "156250", "312500", "22490726"],
+    ["measured", 4, 2, "D", "B", 1, "89440700", "0", "0", "0", "21996722"],
+    ["measured", 4, 3, "C", "A", 1, "90305800", "156250", "0", "156250", "21666783"],
+    ["measured", 5, 0, "B", "B", 0, "89916900", "0", "0", "0", "21792523"],
+    ["measured", 5, 1, "C", "A", 1, "92450000", "0", "0", "0", "21789734"],
+    ["measured", 5, 2, "A", "A", 0, "92186700", "0", "0", "0", "22447417"],
+    ["measured", 5, 3, "D", "B", 1, "90465600", "0", "0", "0", "23251398"],
+    ["measured", 6, 0, "C", "A", 1, "91147500", "468750", "0", "468750", "22224265"],
+    ["measured", 6, 1, "D", "B", 1, "93597100", "0", "156250", "156250", "23224058"],
+    ["measured", 6, 2, "B", "B", 0, "91091000", "0", "0", "0", "24059188"],
+    ["measured", 6, 3, "A", "A", 0, "90037000", "156250", "0", "156250", "20420279"],
+    ["measured", 7, 0, "D", "B", 1, "89642000", "0", "0", "0", "22015280"],
+    ["measured", 7, 1, "A", "A", 0, "90397800", "0", "0", "0", "21979753"],
+    ["measured", 7, 2, "C", "A", 1, "88630000", "0", "156250", "156250", "20941826"],
+    ["measured", 7, 3, "B", "B", 0, "91327800", "312500", "0", "312500", "23039426"]
+  ],
+  "blocks": [
+    {
+      "index": 0,
+      "order": "ABDC",
+      "first_image": "A",
+      "site0_first_image": "A",
+      "site1_first_image": "B",
+      "contrasts": {
+        "elapsed_ns": ["1344600", "1094600", "1594600"],
+        "guard_kernel_100ns": ["0", "-156250", "156250"],
+        "guard_user_100ns": ["156250", "156250", "156250"],
+        "guard_total_100ns": ["156250", "0", "312500"],
+        "guard_cycles": ["1984215/2", "2273642", "-289427"]
+      }
+    },
+    {
+      "index": 1,
+      "order": "BCAD",
+      "first_image": "B",
+      "site0_first_image": "B",
+      "site1_first_image": "A",
+      "contrasts": {
+        "elapsed_ns": ["1234450", "1255600", "1213300"],
+        "guard_kernel_100ns": ["234375", "312500", "156250"],
+        "guard_user_100ns": ["0", "0", "0"],
+        "guard_total_100ns": ["234375", "312500", "156250"],
+        "guard_cycles": ["4516547/2", "2917748", "1598799"]
+      }
+    },
+    {
+      "index": 2,
+      "order": "CDBA",
+      "first_image": "A",
+      "site0_first_image": "B",
+      "site1_first_image": "A",
+      "contrasts": {
+        "elapsed_ns": ["-1585000", "-5488200", "2318200"],
+        "guard_kernel_100ns": ["-156250", "0", "-312500"],
+        "guard_user_100ns": ["78125", "156250", "0"],
+        "guard_total_100ns": ["-78125", "156250", "-312500"],
+        "guard_cycles": ["1069563", "606386", "1532740"]
+      }
+    },
+    {
+      "index": 3,
+      "order": "DACB",
+      "first_image": "B",
+      "site0_first_image": "A",
+      "site1_first_image": "B",
+      "contrasts": {
+        "elapsed_ns": ["97500", "2946800", "-2751800"],
+        "guard_kernel_100ns": ["0", "0", "0"],
+        "guard_user_100ns": ["-78125", "0", "-156250"],
+        "guard_total_100ns": ["-78125", "0", "-156250"],
+        "guard_cycles": ["1343511", "1508777", "1178245"]
+      }
+    },
+    {
+      "index": 4,
+      "order": "ABDC",
+      "first_image": "A",
+      "site0_first_image": "A",
+      "site1_first_image": "B",
+      "contrasts": {
+        "elapsed_ns": ["269350", "1403800", "-865100"],
+        "guard_kernel_100ns": ["0", "156250", "-156250"],
+        "guard_user_100ns": ["78125", "156250", "0"],
+        "guard_total_100ns": ["78125", "312500", "-156250"],
+        "guard_cycles": ["1317159/2", "987220", "329939"]
+      }
+    },
+    {
+      "index": 5,
+      "order": "BCAD",
+      "first_image": "B",
+      "site0_first_image": "B",
+      "site1_first_image": "A",
+      "contrasts": {
+        "elapsed_ns": ["-2127100", "-2269800", "-1984400"],
+        "guard_kernel_100ns": ["0", "0", "0"],
+        "guard_user_100ns": ["0", "0", "0"],
+        "guard_total_100ns": ["0", "0", "0"],
+        "guard_cycles": ["403385", "-654894", "1461664"]
+      }
+    },
+    {
+      "index": 6,
+      "order": "CDBA",
+      "first_image": "A",
+      "site0_first_image": "B",
+      "site1_first_image": "A",
+      "contrasts": {
+        "elapsed_ns": ["1751800", "1054000", "2449600"],
+        "guard_kernel_100ns": ["-312500", "-156250", "-468750"],
+        "guard_user_100ns": ["78125", "0", "156250"],
+        "guard_total_100ns": ["-234375", "-156250", "-312500"],
+        "guard_cycles": ["2319351", "3638909", "999793"]
+      }
+    },
+    {
+      "index": 7,
+      "order": "DACB",
+      "first_image": "B",
+      "site0_first_image": "A",
+      "site1_first_image": "B",
+      "contrasts": {
+        "elapsed_ns": ["971000", "930000", "1012000"],
+        "guard_kernel_100ns": ["156250", "312500", "0"],
+        "guard_user_100ns": ["-78125", "0", "-156250"],
+        "guard_total_100ns": ["78125", "312500", "-156250"],
+        "guard_cycles": ["2133127/2", "1059673", "1073454"]
+      }
+    }
+  ],
+  "summary": {
+    "elapsed_ns": {
+      "balanced": [8, "620175", "244575", 6, 2, 0],
+      "site0": [8, "1074300", "115850", 6, 2, 0],
+      "site1": [8, "1112650", "373300", 5, 3, 0],
+      "sequence": {
+        "ABDC": [2, "806975", "806975", 2, 0, 0],
+        "BCAD": [2, "-446325", "-446325", 1, 1, 0],
+        "CDBA": [2, "83400", "83400", 1, 1, 0],
+        "DACB": [2, "534250", "534250", 2, 0, 0]
+      },
+      "first_image": {
+        "A": [4, "806975", "890375/2", 3, 1, 0],
+        "B": [4, "534250", "87925/2", 3, 1, 0]
+      },
+      "within_site_order": {
+        "site0": {
+          "A": [4, "1249200", "1593800", 4, 0, 0],
+          "B": [4, "-607900", "-1362100", 2, 2, 0]
+        },
+        "site1": {
+          "A": [4, "1765750", "999175", 3, 1, 0],
+          "B": [4, "73450", "-252575", 2, 2, 0]
+        }
+      },
+      "position": {
+        "0": {
+          "A": [4, "90300200", "90311850", 4, 0, 0],
+          "B": [4, "89869600", "90044500", 4, 0, 0],
+          "B_minus_A_marginal_mean": "-267350"
+        },
+        "1": {
+          "A": [4, "89625050", "90030475", 4, 0, 0],
+          "B": [4, "92496100", "92128400", 4, 0, 0],
+          "B_minus_A_marginal_mean": "2097925"
+        },
+        "2": {
+          "A": [4, "90408350", "90733000", 4, 0, 0],
+          "B": [4, "91980900", "91618125", 4, 0, 0],
+          "B_minus_A_marginal_mean": "885125"
+        },
+        "3": {
+          "A": [4, "90791000", "92544300", 4, 0, 0],
+          "B": [4, "90896700", "90806900", 4, 0, 0],
+          "B_minus_A_marginal_mean": "-1737400"
+        }
+      },
+      "measured_zero_count": 0
+    },
+    "guard_kernel_100ns": {
+      "balanced": [8, "0", "-78125/8", 2, 2, 4],
+      "site0": [8, "0", "234375/4", 3, 2, 3],
+      "site1": [8, "0", "-78125", 2, 3, 3],
+      "sequence": {
+        "ABDC": [2, "0", "0", 0, 0, 2],
+        "BCAD": [2, "234375/2", "234375/2", 1, 0, 1],
+        "CDBA": [2, "-234375", "-234375", 0, 2, 0],
+        "DACB": [2, "78125", "78125", 1, 0, 1]
+      },
+      "first_image": {
+        "A": [4, "-78125", "-234375/2", 0, 2, 2],
+        "B": [4, "78125", "390625/4", 2, 0, 2]
+      },
+      "within_site_order": {
+        "site0": {
+          "A": [4, "78125", "78125", 2, 1, 1],
+          "B": [4, "0", "78125/2", 1, 1, 2]
+        },
+        "site1": {
+          "A": [4, "-156250", "-156250", 1, 2, 1],
+          "B": [4, "0", "0", 1, 1, 2]
+        }
+      },
+      "position": {
+        "0": {
+          "A": [4, "312500", "546875/2", 3, 0, 1],
+          "B": [4, "0", "78125", 1, 0, 3],
+          "B_minus_A_marginal_mean": "-390625/2"
+        },
+        "1": {
+          "A": [4, "0", "0", 0, 0, 4],
+          "B": [4, "78125", "78125", 2, 0, 2],
+          "B_minus_A_marginal_mean": "78125"
+        },
+        "2": {
+          "A": [4, "0", "0", 0, 0, 4],
+          "B": [4, "0", "78125/2", 1, 0, 3],
+          "B_minus_A_marginal_mean": "78125/2"
+        },
+        "3": {
+          "A": [4, "78125", "78125", 2, 0, 2],
+          "B": [4, "78125", "234375/2", 2, 0, 2],
+          "B_minus_A_marginal_mean": "78125/2"
+        }
+      },
+      "measured_zero_count": 21
+    },
+    "guard_user_100ns": {
+      "balanced": [8, "78125/2", "234375/8", 4, 2, 2],
+      "site0": [8, "0", "234375/4", 3, 0, 5],
+      "site1": [8, "0", "0", 2, 2, 4],
+      "sequence": {
+        "ABDC": [2, "234375/2", "234375/2", 2, 0, 0],
+        "BCAD": [2, "0", "0", 0, 0, 2],
+        "CDBA": [2, "78125", "78125", 2, 0, 0],
+        "DACB": [2, "-78125", "-78125", 0, 2, 0]
+      },
+      "first_image": {
+        "A": [4, "78125", "390625/4", 4, 0, 0],
+        "B": [4, "-78125/2", "-78125/2", 0, 2, 2]
+      },
+      "within_site_order": {
+        "site0": {
+          "A": [4, "78125", "78125", 2, 0, 2],
+          "B": [4, "0", "78125/2", 1, 0, 3]
+        },
+        "site1": {
+          "A": [4, "0", "78125/2", 1, 0, 3],
+          "B": [4, "-78125", "-78125/2", 1, 2, 1]
+        }
+      },
+      "position": {
+        "0": {
+          "A": [4, "0", "0", 0, 0, 4],
+          "B": [4, "0", "0", 0, 0, 4],
+          "B_minus_A_marginal_mean": "0"
+        },
+        "1": {
+          "A": [4, "0", "0", 0, 0, 4],
+          "B": [4, "156250", "234375/2", 3, 0, 1],
+          "B_minus_A_marginal_mean": "234375/2"
+        },
+        "2": {
+          "A": [4, "78125", "78125", 2, 0, 2],
+          "B": [4, "78125", "78125", 2, 0, 2],
+          "B_minus_A_marginal_mean": "0"
+        },
+        "3": {
+          "A": [4, "0", "0", 0, 0, 4],
+          "B": [4, "0", "0", 0, 0, 4],
+          "B_minus_A_marginal_mean": "0"
+        }
+      },
+      "measured_zero_count": 25
+    },
+    "guard_total_100ns": {
+      "balanced": [8, "78125/2", "78125/4", 4, 3, 1],
+      "site0": [8, "78125", "234375/2", 4, 1, 3],
+      "site1": [8, "-156250", "-78125", 2, 5, 1],
+      "sequence": {
+        "ABDC": [2, "234375/2", "234375/2", 2, 0, 0],
+        "BCAD": [2, "234375/2", "234375/2", 1, 0, 1],
+        "CDBA": [2, "-156250", "-156250", 0, 2, 0],
+        "DACB": [2, "0", "0", 1, 1, 0]
+      },
+      "first_image": {
+        "A": [4, "0", "-78125/4", 2, 2, 0],
+        "B": [4, "78125/2", "234375/4", 2, 1, 1]
+      },
+      "within_site_order": {
+        "site0": {
+          "A": [4, "156250", "156250", 2, 0, 2],
+          "B": [4, "78125", "78125", 2, 1, 1]
+        },
+        "site1": {
+          "A": [4, "-156250", "-234375/2", 1, 2, 1],
+          "B": [4, "-156250", "-78125/2", 1, 3, 0]
+        }
+      },
+      "position": {
+        "0": {
+          "A": [4, "312500", "546875/2", 3, 0, 1],
+          "B": [4, "0", "78125", 1, 0, 3],
+          "B_minus_A_marginal_mean": "-390625/2"
+        },
+        "1": {
+          "A": [4, "0", "0", 0, 0, 4],
+          "B": [4, "234375", "390625/2", 3, 0, 1],
+          "B_minus_A_marginal_mean": "390625/2"
+        },
+        "2": {
+          "A": [4, "78125", "78125", 2, 0, 2],
+          "B": [4, "78125", "234375/2", 2, 0, 2],
+          "B_minus_A_marginal_mean": "78125/2"
+        },
+        "3": {
+          "A": [4, "78125", "78125", 2, 0, 2],
+          "B": [4, "78125", "234375/2", 2, 0, 2],
+          "B_minus_A_marginal_mean": "78125/2"
+        }
+      },
+      "measured_zero_count": 17
+    },
+    "guard_cycles": {
+      "balanced": [8, "4272253/4", "5055667/4", 8, 0, 0],
+      "site0": [8, "1284225", "12337461/8", 7, 1, 0],
+      "site1": [8, "2251699/2", "7885207/8", 7, 1, 0],
+      "sequence": {
+        "ABDC": [2, "1650687/2", "1650687/2", 2, 0, 0],
+        "BCAD": [2, "5323317/4", "5323317/4", 2, 0, 0],
+        "CDBA": [2, "1694457", "1694457", 2, 0, 0],
+        "DACB": [2, "4820149/4", "4820149/4", 2, 0, 0]
+      },
+      "first_image": {
+        "A": [4, "4123341/4", "5039601/4", 4, 0, 0],
+        "B": [4, "4820149/4", "5071733/4", 4, 0, 0]
+      },
+      "within_site_order": {
+        "site0": {
+          "A": [4, "1284225", "1457328", 4, 0, 0],
+          "B": [4, "1762067", "6508149/4", 3, 1, 0]
+        },
+        "site1": {
+          "A": [4, "1497202", "1398249", 4, 0, 0],
+          "B": [4, "1403393/2", "2292211/4", 3, 1, 0]
+        }
+      },
+      "position": {
+        "0": {
+          "A": [4, "21993922", "22235738", 4, 0, 0],
+          "B": [4, "22915576", "46274363/2", 4, 0, 0],
+          "B_minus_A_marginal_mean": "1802887/2"
+        },
+        "1": {
+          "A": [4, "21892726", "87973699/4", 4, 0, 0],
+          "B": [4, "46520377/2", "94736347/4", 4, 0, 0],
+          "B_minus_A_marginal_mean": "1690662"
+        },
+        "2": {
+          "A": [4, "43389243/2", "88034173/4", 4, 0, 0],
+          "B": [4, "24346210", "24012380", 4, 0, 0],
+          "B_minus_A_marginal_mean": "8015347/4"
+        },
+        "3": {
+          "A": [4, "46420775/2", "91763713/4", 4, 0, 0],
+          "B": [4, "23327948", "23400653", 4, 0, 0],
+          "B_minus_A_marginal_mean": "1838899/4"
+        }
+      },
+      "measured_zero_count": 0
+    }
+  }
+}
