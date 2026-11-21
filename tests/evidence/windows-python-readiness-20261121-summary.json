@@ -1,0 +1,207 @@
+{
+  "schema": "ptg-windows-python-readiness-1",
+  "date_utc": "2026-11-21",
+  "scope": "Two full frozen Windows Python correctness-suite invocations around documentation and source-audit repairs.",
+  "method": {
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "release",
+    "suite_entry": "tests/run_tests.py load_suite",
+    "python_sha256": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a",
+    "windows_error_policy": "Process-local inherited error mode adds 0x8003 before launching the hidden CMD carrier.",
+    "discovery_outer_whole_tree_seconds": 60,
+    "test_outer_whole_tree_seconds": 3600,
+    "original_native_handle_retained_for_both_attempts": true,
+    "full_and_alias_selection": "Both use the feature-free default release candidate. Companion and compatibility fixtures use prior staged testkit-feature builds.",
+    "artifact_build_commit": "6d2a14e5ed43343d511a7bb9e171a9f75e4fdd4f",
+    "tested_source_commit": "24fd66ae0710035038d9060e0f8deb8b950325f9",
+    "candidate_rebuilt_for_tested_source": false,
+    "reuse_basis": "The complete tracked delta is two newly added historical evidence files and five modified documentation or source-audit files. Product and build inputs are unchanged.",
+    "identical_ordered_test_ids_and_binary_role_pins_between_attempts": true
+  },
+  "attempts": {
+    "before_documentation_and_audit_repairs": {
+      "source_commit": "6d2a14e5ed43343d511a7bb9e171a9f75e4fdd4f",
+      "tracked_archive_files": 1028,
+      "discovered": 651,
+      "pass": 641,
+      "fail": 6,
+      "skip": 4,
+      "error": 0,
+      "expected_failures": 0,
+      "unexpected_successes": 0,
+      "duration_seconds": 623.097,
+      "original_native_exit": 1,
+      "ordered_test_ids_matched_discovery": true,
+      "post_run_source_and_roles_verified": true,
+      "recognized_fixture_markers": 4,
+      "evidence_sha256": {
+        "source_archive": "8c3f010a0c72359ac70da77a6d8743269e26d3bb1b580ab5e81b35c7b42daa35",
+        "source_manifest": "93aba374100bd0d4cf467f09a11793d144047a796aa0bcdd4fe1e673e5fbdd2f",
+        "artifact_manifest": "9cb5b6476dab92c8b5c3ac6bb924f73ad6ceb45789ac3b896a3f5789861e7a46",
+        "python_runner": "de4c45fae073f5dd024f11e88b9e4cf597f61e7a3dbf256105cd7db4a24cf091",
+        "powershell_carrier": "da7ccdaec5b1372b968afce21df7396b3c520af35384452a81638cb2d55d3b7b",
+        "frozen_discovery": "85185660ba5a7a30a9c952456c5ca3b7a0cd650c8db629fd9cd812855346d3ef",
+        "discovery_carrier_receipt": "1b35fadd46b4ed0f7dbae601c36f917a17e195c4b88624b218743383989926bf",
+        "per_test_results": "e9624dc5bcc4e324fc9d91dadfded91edae5cdb6a2556e2f16be0eb3b44216c4",
+        "execution_carrier_receipt": "0dfa619f1e26f707dceb9fa10e66ed0eafb17081dc7309d16d6437e488359dac"
+      },
+      "captures": {
+        "stdout.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr.bin": {
+          "bytes": 109135,
+          "sha256": "6b6440509d801d0496aefa4d5c919cdf37b130543404d96ff316f2a69d87dca5"
+        },
+        "cmd-stdout.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "cmd-stderr.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    "after_documentation_and_audit_repairs": {
+      "source_commit": "24fd66ae0710035038d9060e0f8deb8b950325f9",
+      "tracked_archive_files": 1030,
+      "discovered": 651,
+      "pass": 647,
+      "fail": 0,
+      "skip": 4,
+      "error": 0,
+      "expected_failures": 0,
+      "unexpected_successes": 0,
+      "duration_seconds": 1079.806,
+      "original_native_exit": 0,
+      "ordered_test_ids_matched_discovery": true,
+      "post_run_source_and_roles_verified": true,
+      "recognized_fixture_markers": 4,
+      "evidence_sha256": {
+        "source_archive": "76e6d80401f5651c04523ce1188220674c96482f72dac1a4cacecebced50f65c",
+        "source_manifest": "3c2e4cc526a1385b6c84ec31e0ed32f95866a38a1229e2b543030dc8bfdc41ee",
+        "artifact_manifest": "db7ac53549a98c4dd354077b236aaf56e617119f4f0666ca52410d282d74e254",
+        "python_runner": "f1422bc0f29c60f676b65feffb9ed9255c63b50f0c9feab3c185c0bba8d6dd24",
+        "powershell_carrier": "4863ec04bdb0cda2c54a1ae63489e6bf740761d743e4d405c8f5e962fd527e40",
+        "frozen_discovery": "0ea9359c58dc48ed7c39785d8411a1009482ae92d2eb3903f8197d2bbcb721a9",
+        "discovery_carrier_receipt": "75d52c728c3850e9b11c0d02f1e035feddff5b9830680834fdeaccb3b82832ba",
+        "per_test_results": "5327dc0d94cae1c5446de98f03ac57d40fa4dd79cdbb9f17841ecb989ea9a54c",
+        "execution_carrier_receipt": "15004f4c6cccc9da54c3343fff078fbb312f548a0e51f75fa7dec3f938630abc"
+      },
+      "captures": {
+        "stdout.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr.bin": {
+          "bytes": 103417,
+          "sha256": "793b7d27acdb05a737c4907ac38952b82058e53a4b578f8e99012de283d89f0b"
+        },
+        "cmd-stdout.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "cmd-stderr.bin": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  },
+  "changes_in_test_outcome": [
+    {
+      "test": "test_battery_cases.FunctionScopedAuditTests.test_case_m_audit_enumerates_handle_consumers",
+      "before": "fail",
+      "after": "pass",
+      "prior_failure_reason": "Case M expected the owner-query consumer at line 514. The fresh audit found it at line 516."
+    },
+    {
+      "test": "test_battery_cases.RecordedBatteryEvidenceTests.test_recorded_battery_evidence_matches_a_fresh_run",
+      "before": "fail",
+      "after": "pass",
+      "prior_failure_reason": "The recorded Case M owner fetch and consumer coordinates were stale. The fetch moved from line 506 to 508, and each of its five listed consumer coordinates advanced by two lines."
+    },
+    {
+      "test": "test_campaign_logic.CensusConsistencyTests.test_documents_printing_the_census_state_the_recomputed_totals",
+      "before": "fail",
+      "after": "pass",
+      "prior_failure_reason": "The documentation reported 484 in-tree Rust tests. The source recount found 485."
+    },
+    {
+      "test": "test_campaign_logic.CensusConsistencyTests.test_verification_section4_prose_coordinates_match_the_fresh_battery_record",
+      "before": "fail",
+      "after": "pass",
+      "prior_failure_reason": "VERIFICATION section 4 still named the old Case M owner fetch and consumer lines 506 and 514."
+    },
+    {
+      "test": "test_campaign_logic.CensusConsistencyTests.test_verification_section4_prose_subjects_and_duration_match_the_fresh_record",
+      "before": "fail",
+      "after": "pass",
+      "prior_failure_reason": "VERIFICATION section 4 still associated watched_owner_handles with line 506. The fresh source audit gave line 508."
+    },
+    {
+      "test": "test_campaign_logic.Round25NeighbourTests.test_documents_next_ring_copies_recount",
+      "before": "fail",
+      "after": "pass",
+      "prior_failure_reason": "The next-ring check first failed on README's 484 count against the recount of 485. It also checks the same count in FAILURE-TREE."
+    }
+  ],
+  "identical_conditional_skips": [
+    {
+      "test": "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+      "reason": "the real cases run their Windows drivers there"
+    },
+    {
+      "test": "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+      "reason": "guard binaries are built here; the recorded split is the no-guard Linux run's and the gated families execute on this machine"
+    },
+    {
+      "test": "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+      "reason": "Windows presents the shape as written"
+    },
+    {
+      "test": "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing",
+      "reason": "binaries present; absence control not applicable"
+    }
+  ],
+  "binary_roles": {
+    "full": {
+      "name": "process-tree-guard.exe",
+      "bytes": 818688,
+      "sha256": "47a3a7cf64eb438581e9bd6fe7de7e14fa195c94249638e0839bd36e1632fcd8"
+    },
+    "deadline": {
+      "name": "process-tree-guard-deadline.exe",
+      "bytes": 716288,
+      "sha256": "0f79fdfc41d8dc44647ace6937bf82a3efbe78cf027663ee4c6c3a415ed30b85"
+    },
+    "gate": {
+      "name": "process-tree-guard-gate.exe",
+      "bytes": 328704,
+      "sha256": "d4f1294cd68b55c528caf7849261df5ef49994eb4c2e2cfb308302858c6954e3"
+    },
+    "contain": {
+      "name": "process-tree-guard-contain.exe",
+      "bytes": 373760,
+      "sha256": "631f24d74215d4ed3958be940a17cbab51fa2225dbe3d1ba85fd38dfbfffd8f4"
+    },
+    "testkit": {
+      "name": "testkit.exe",
+      "bytes": 630272,
+      "sha256": "eab916ed38517d35cdca0e991daae3c73eef42264033c9331286ba4641552ac1"
+    },
+    "alias": {
+      "name": "ptg.exe",
+      "bytes": 818688,
+      "sha256": "47a3a7cf64eb438581e9bd6fe7de7e14fa195c94249638e0839bd36e1632fcd8"
+    }
+  },
+  "limits": [
+    "The 485 in-tree Rust tests are a static source recount. This receipt covers the separate 651-case Python suite.",
+    "These receipts qualify the frozen correctness suite and its stated inputs. Native driver suites, interactive branches, window visibility and competitive performance require separate evidence.",
+    "The reported durations are unittest runtimes for the complete correctness suite.",
+    "Original captures and per-test records remain private and preserved. This summary contains their identity hashes."
+  ]
+}
