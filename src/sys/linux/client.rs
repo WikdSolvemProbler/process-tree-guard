@@ -2,6 +2,7 @@
 // Copyright 2026 Peter Shiller
 //! Original in-process caller; no sudo, daemon, relay or library NNP mutation.
 use super::*;
+use super::invocation::InvocationError;
 use std::ffi::{OsString,CString,c_long,c_char};
 use std::os::fd::AsFd;
 use std::os::unix::ffi::{OsStrExt,OsStringExt};
@@ -24,6 +25,12 @@ pub(crate) struct ClientOutcome{
 }
 impl ClientOutcome{
  fn empty()->Self{Self{code:125,error:None,timeout:None,original:None,activation:None,private:None,service:None,events:None,completion:None,private_runtime:None,protected:Vec::new(),hello:None,raw_hello:Vec::new(),raw_result:Vec::new(),result_read:entry::PacketAttempt::default(),cancellation_join:None,join_facts:JoinFacts::default(),result:None,exit_timer:None,presentation_attempted:false,completed:false}}
+ fn record_failure(&mut self, diagnostic: String, pre_activation_error: Option<&InvocationError>) {
+     self.code = pre_activation_error.map_or(125, InvocationError::exit_code);
+     self.timeout = matches!(pre_activation_error, Some(InvocationError::Expired))
+         .then_some(ClientTimeout::NoLaunch);
+     self.error = Some(diagnostic);
+ }
  pub(crate) fn exit_code(&self)->i32{self.code}
  pub(crate) fn error(&self)->Option<&str>{self.error.as_deref()}
  pub(crate) fn timeout_cause(&self)->Option<ClientTimeout>{self.timeout}
@@ -36,7 +43,22 @@ impl ClientOutcome{
 fn joined_timeout(cause:Option<TimeoutCause>,settled:bool,error_free:bool,facts:JoinFacts)->Option<ClientTimeout>{
  if settled&&error_free&&facts.service_terminal&&facts.domain_empty&&facts.manager_status==Some(124)&&facts.manager_verified&&facts.unit_unreferenced{cause.map(ClientTimeout::Joined)}else{None}
 }
-fn capture_failure(error:invocation::InvocationError)->ClientOutcome{let mut result=ClientOutcome::empty();result.code=error.exit_code();result.timeout=matches!(error,invocation::InvocationError::Expired).then_some(ClientTimeout::NoLaunch);result.error=Some(format!("original invocation: {error:?}"));result}
+fn capture_failure(error: InvocationError) -> ClientOutcome {
+    let mut result = ClientOutcome::empty();
+    result.record_failure(format!("original invocation: {error:?}"), Some(&error));
+    result
+}
+
+fn record_pre_activation_validation(
+    validation: std::result::Result<(), InvocationError>,
+    failure: &mut Option<InvocationError>,
+) -> std::result::Result<(), String> {
+    validation.map_err(|error| {
+        let diagnostic = format!("{error:?}");
+        *failure = Some(error);
+        diagnostic
+    })
+}
 fn error<T>(value:super::Result<T>)->std::result::Result<T,String>{value.map_err(|e|format!("{e:?}"))}
 fn caller_io()->std::result::Result<CallerIo,String>{
  let mut fds=Vec::new();for number in 0..3{let duplicate=error(os_result(unsafe{fcntl(number,1030,3 as c_int)} as isize))? as RawFd;let fd=unsafe{OwnedFd::from_raw_fd(duplicate)};error(io_flags(fd.as_raw_fd(),number as usize))?;fds.push(fd);}
@@ -136,6 +158,8 @@ fn cancel_and_join(outcome:&mut ClientOutcome,unit:&mut manager::UnitReference){
 
 fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)->ClientOutcome{
  let mut outcome=ClientOutcome::empty();outcome.original=Some(original);
+ // Set only by the checks before the first connection, each of which returns on failure.
+ let mut pre_activation_error = None;
  // Keep the dedicated manager connection through the final bounded join only.
  let mut unit=None;
  let result=(||->std::result::Result<i32,String>{
@@ -146,14 +170,15 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
   if standalone{if unsafe{prctl(38,1 as c_long,0 as c_long,0 as c_long,0 as c_long)}!=0{return Err(format!("CLI NNP set: {}",io::Error::last_os_error()));}}
   let nnp=unsafe{prctl(39,0 as c_long,0 as c_long,0 as c_long,0 as c_long)};
   if nnp!=1{return Err("Linux library requires existing NoNewPrivs=1; caller policy was not changed".into());}
-  let original=outcome.original.as_ref().expect("captured original owner");original.revalidate().map_err(|e|format!("{e:?}"))?;
+  let original=outcome.original.as_ref().expect("captured original owner");
+  record_pre_activation_validation(original.revalidate(), &mut pre_activation_error)?;
   let end=original.metadata().deadline_ns.checked_add(entry::GRACE).ok_or("client cleanup deadline overflow")?;
   let observation_end=end.checked_add(OBSERVE_GRACE).ok_or("client observation deadline overflow")?;
   let argv=command_absolute(command)?;let env=environment();let io=caller_io()?;
   let args:Vec<_>=argv.iter().map(Vec::as_slice).collect();let env:Vec<_>=env.iter().map(Vec::as_slice).collect();
   // Resolve/validate all context before activation, under the original cutoff.
   request::encode(original.metadata(),&args,&env).map_err(|e|format!("{e:?}"))?;
-  original.revalidate().map_err(|e|format!("{e:?}"))?;
+  record_pre_activation_validation(original.revalidate(), &mut pre_activation_error)?;
   outcome.activation=Some(entry::connect_root(manager::ACTIVATE,original,None)?);
   let activation=outcome.activation.as_ref().expect("activation owned");
   error(send_request(activation,original,&args,&env,io.stdio.each_ref().map(|fd|fd.as_fd()),io.cwd.as_fd()))?;
@@ -191,9 +216,7 @@ fn run_captured(original:OriginalInvocation,command:&[OsString],standalone:bool)
  match result {
   Ok(code) => outcome.code = code,
   Err(primary) => {
-   outcome.code = 125;
-   outcome.timeout = None;
-   outcome.error = Some(primary);
+   outcome.record_failure(primary, pre_activation_error.as_ref());
    if outcome.presentation_attempted {
     cancel_and_join(&mut outcome,unit.as_mut().expect("presented with unit reference"));
    } else {
@@ -266,5 +289,29 @@ pub(crate) fn exit(result:ClientOutcome)->!{entry::cli_exit(result.exit_code(),r
  for index in 0..5{let mut bad=facts;match index{0=>bad.service_terminal=false,1=>bad.domain_empty=false,2=>bad.manager_status=Some(125),3=>bad.manager_verified=false,_=>bad.unit_unreferenced=false}assert_eq!(joined_timeout(Some(TimeoutCause::Terminal),true,true,bad),None);}
  let expired=capture_failure(invocation::InvocationError::Expired);assert_eq!(expired.timeout_cause(),Some(ClientTimeout::NoLaunch));assert_eq!(expired.exit_code(),124);assert!(!expired.may_have_active_service());assert!(!expired.complete());
  let failure=capture_failure(invocation::InvocationError::Kernel("124".into()));assert_eq!(failure.timeout_cause(),None);assert_eq!(failure.exit_code(),125);
+ let mut witness = None;
+ assert_eq!(record_pre_activation_validation(Ok(()), &mut witness), Ok(()));
+ assert!(witness.is_none());
+ for (error, code, timeout) in [
+     (InvocationError::Expired, 124, Some(ClientTimeout::NoLaunch)),
+     (InvocationError::OwnerLost, 125, None),
+     (InvocationError::Kernel("Expired".into()), 125, None),
+ ] {
+     let expected_diagnostic = format!("{error:?}");
+     let mut witness = None;
+     let diagnostic = record_pre_activation_validation(Err(error), &mut witness).unwrap_err();
+     let mut outcome = ClientOutcome::empty();
+     outcome.record_failure(diagnostic, witness.as_ref());
+     assert_eq!(outcome.error(), Some(expected_diagnostic.as_str()));
+     assert_eq!(outcome.exit_code(), code);
+     assert_eq!(outcome.timeout_cause(), timeout);
+     assert!(outcome.activation.is_none() && outcome.cancellation_join.is_none());
+     assert!(!outcome.may_have_active_service() && !outcome.complete());
+ }
+ let mut ordinary_failure = ClientOutcome::empty();
+ ordinary_failure.record_failure("Expired".into(), None);
+ assert_eq!(ordinary_failure.exit_code(), 125);
+ assert_eq!(ordinary_failure.timeout_cause(), None);
  eprintln!("typed_timeout_postjoin_latch_and_capture_no_launch_verified");
+ eprintln!("typed_timeout_pre_activation_validation_no_launch_verified");
 }
