@@ -55,7 +55,24 @@ fn command_absolute(command:&[OsString])->std::result::Result<Vec<Vec<u8>>,Strin
  let mut argv=vec![absolute.into_os_string().into_vec()];argv.extend(command[1..].iter().map(|v|v.as_bytes().to_vec()));Ok(argv)
 }
 fn environment()->Vec<Vec<u8>>{std::env::vars_os().map(|(key,value)|{let mut bytes=key.into_vec();bytes.push(b'=');bytes.extend(value.into_vec());bytes}).collect()}
-fn service_gone(fd:&OwnedFd)->std::result::Result<bool,String>{let mut entry=PollFd{fd:fd.as_raw_fd(),events:POLLIN,revents:0};let count=error(os_result(unsafe{poll(&mut entry,1,0)} as isize))?;if count==0&&entry.revents==0{return Ok(false);}if count==1&&entry.revents&(POLLIN|0x10)!=0&&entry.revents&!(POLLIN|0x10)==0{return Ok(true);}Err("service pidfd poll unverified".into())}
+// None represents an interrupted poll with no verified observation.
+fn classify_service_poll(result: io::Result<c_int>, flags: c_short) -> std::result::Result<Option<bool>, String> {
+    let terminal_flags = POLLIN | 0x10; // POLLIN or POLLHUP
+    match result {
+        Err(error) if error.kind() == io::ErrorKind::Interrupted => Ok(None),
+        Err(error) => Err(format!("{:?}", Refusal::from(error))),
+        Ok(0) if flags == 0 => Ok(Some(false)),
+        Ok(1) if flags & terminal_flags != 0 && flags & !terminal_flags == 0 => Ok(Some(true)),
+        Ok(_) => Err("service pidfd poll unverified".into()),
+    }
+}
+
+fn service_gone(fd: &OwnedFd) -> std::result::Result<Option<bool>, String> {
+    let mut entry = PollFd { fd: fd.as_raw_fd(), events: POLLIN, revents: 0 };
+    let count = unsafe { poll(&mut entry, 1, 0) };
+    let result = if count < 0 { Err(io::Error::last_os_error()) } else { Ok(count) };
+    classify_service_poll(result, entry.revents)
+}
 fn settlement_poll(service: RawFd, terminal: bool, left_ns: u64) -> (PollFd, c_int) {
     // A terminal pidfd stays ready. Let poll wait for the next cgroup observation.
     let fd = if terminal { -1 } else { service };
@@ -76,7 +93,7 @@ fn join_service(outcome:&mut ClientOutcome,unit:&mut manager::UnitReference,repo
  let hello=outcome.hello.as_ref().ok_or("missing service hello for join")?.clone();
  loop{
   before(until)?;let service=outcome.service.as_ref().ok_or("missing exact service capability")?;
-  let terminal = service_gone(service)?;
+  let Some(terminal) = service_gone(service)? else { continue; };
   if terminal{facts.service_terminal=true;before(until)?;if !outcome.completion.as_mut().ok_or("missing exact completion authority")?.population_after_terminal(service,hello.pid)?{facts.domain_empty=true;break;}}
   before(until)?;let left=until.checked_sub(supervisor::boottime_ns()?).filter(|n|*n>0).ok_or("join poll deadline expired")?;
   let (mut watched, timeout) = settlement_poll(service.as_raw_fd(), terminal, left);
@@ -223,6 +240,21 @@ pub(crate) fn run_cli(arguments:Vec<OsString>)->ClientOutcome{
 pub(crate) fn exit(result:ClientOutcome)->!{entry::cli_exit(result.exit_code(),result.error(),result.exit_timer.as_deref(),result.timeout_cause())}
 
 #[cfg(test)]pub(super) fn timeout_cause_regression(){
+ const POLLHUP: c_short = 0x10;
+ const POLLNVAL: c_short = 0x20;
+ assert_eq!(classify_service_poll(Ok(0), 0), Ok(Some(false)));
+ for terminal_flags in [POLLIN, POLLHUP, POLLIN | POLLHUP] {
+     assert_eq!(classify_service_poll(Ok(1), terminal_flags), Ok(Some(true)));
+ }
+ assert_eq!(classify_service_poll(Err(io::ErrorKind::Interrupted.into()), 0), Ok(None));
+ let bad_fd_errno = 9; // EBADF
+ assert_eq!(
+     classify_service_poll(Err(io::Error::from_raw_os_error(bad_fd_errno)), 0),
+     Err(format!("Os(Some({bad_fd_errno}))"))
+ );
+ for (count, flags) in [(0, POLLIN), (1, 0), (1, POLLIN | POLLNVAL), (2, POLLIN)] {
+     assert_eq!(classify_service_poll(Ok(count), flags), Err("service pidfd poll unverified".into()));
+ }
  let (active, long_wait) = settlement_poll(17, false, 40_000_000);
  let (terminal, short_wait) = settlement_poll(17, true, 250_000);
  assert_eq!((active.fd, active.events, long_wait), (17, POLLIN, 10));
