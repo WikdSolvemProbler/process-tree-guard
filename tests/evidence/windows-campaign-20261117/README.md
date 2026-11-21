@@ -7,7 +7,7 @@ The public rows retain all 1,940 recorded slots in seed order. That includes 36 
 
 ## Reproduce the calculations
 
-Use a checkout that includes this package and the analysis files pinned in `replay.json`. From the repository root, give the Python 3.12 command a 30-second whole-process deadline. Use `python3` where that is the installed name.
+Download and extract the [source ZIP for commit `aa634674cf09e595667694655375a4692532e199`](https://github.com/WikdSolvemProbler/process-tree-guard/archive/aa634674cf09e595667694655375a4692532e199.zip) into a separate directory. That snapshot includes the replay package and every analysis file pinned in `replay.json`. From the extracted snapshot root, give the Python 3.12 command a 30-second whole-process deadline. Use `python3` where that is the installed name.
 
 ```sh
 python -B -X utf8 tests/evidence/windows-campaign-20261117/replay.py
