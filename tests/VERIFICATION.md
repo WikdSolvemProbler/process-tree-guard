@@ -486,12 +486,12 @@ was run under finite deadlines. Raw outputs are in `evidence/`.
    `src/engine/environment.rs`, function `environment_block`,
    line 72. The audit enumerates the four pseudo-handle fetch
    sites in `harden_self` (lines 212, 219), `watched_owner_handles`
-   (line 506), and `cli_exit` (line 277), with their consumers,
-   including `deny_acl` line 213, `parent_process_id_on` line 514,
+   (line 508), and `cli_exit` (line 277), with their consumers,
+   including `deny_acl` line 213, `parent_process_id_on` line 516,
    and `TerminateProcess` line 277.
    `Console::finish` at `src/cli_process.rs` line 173; and
    `CreateIoCompletionPort` inside `Extension::start` at
-   `src/extend/server.rs` line 140. (Coordinates refreshed from the current source on 2026-11-16,
+   `src/extend/server.rs` line 140. (Coordinates refreshed from the current source on 2026-11-20,
    using the driver-blocked Linux audit context on Windows.
    This replay checks source locations only; all five native
    behavior verdicts remain BLOCKED-WINDOWS. The record is held
