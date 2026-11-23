@@ -262,7 +262,7 @@ def _read_guard_record(path):
         return None
 
 
-def _complete_guard_elapsed(receipt, launcher_exit, outer_elapsed_ms):
+def _complete_guard_elapsed(receipt, launcher_exit, outer_start_ns, outer_end_ns):
     """Return the guard's lifetime only for a complete, consistent receipt."""
     if receipt is None:
         return None
@@ -271,10 +271,10 @@ def _complete_guard_elapsed(receipt, launcher_exit, outer_elapsed_ms):
     elapsed = receipt.get("elapsed_ms")
     exit_code = receipt.get("exit_code")
     if (type(start) is not int or type(end) is not int
-            or not 0 <= start <= end
+            or not 0 <= outer_start_ns <= start <= end <= outer_end_ns
             or not _is_pid_form(receipt.get("pid"))
             or type(exit_code) is not int
-            or not _is_plausible_time(elapsed) or elapsed > outer_elapsed_ms):
+            or not _is_plausible_time(elapsed)):
         return None
     # On POSIX the Python launcher passes the child's status to sys.exit.
     # A signal status remains negative in the receipt and wraps in wait().
@@ -390,6 +390,13 @@ def _time_guard_run(config, context, child=None, child_args=None,
               "initial_window_visibility_request": (
                   "SW_HIDE" if os.name == "nt" else "platform-default"),
               "outcome": None, "elapsed_ms": None, "exit_code": None}
+    # On older Windows and macOS runtimes, perf_counter's origin is local
+    # to the process. An inner receipt cannot be compared with this bracket.
+    if (guard_record_path is not None and sys.version_info < (3, 10)
+            and sys.platform in ("win32", "darwin")):
+        record["outcome"] = "infra-failure"
+        record["detail"] = "owner-verification timing requires Python 3.10 or later"
+        return record
     # Apply the same explicit pricing visibility policy to the direct shape
     # and recording launcher, without changing either context's console flags.
     # Preserve old observations; do not relabel or pool their launch contexts.
@@ -418,12 +425,13 @@ def _time_guard_run(config, context, child=None, child_args=None,
         record["detail"] = "probe run exceeded its finite deadline"
         record["elapsed_ms"] = (time.perf_counter_ns() - start) / 1e6
         return record
-    outer_elapsed_ms = (time.perf_counter_ns() - start) / 1e6
+    outer_end_ns = time.perf_counter_ns()
+    outer_elapsed_ms = (outer_end_ns - start) / 1e6
     if guard_record_path is not None:
         record["outer_elapsed_ms"] = outer_elapsed_ms
         guard_record = _read_guard_record(guard_record_path)
         elapsed = _complete_guard_elapsed(
-            guard_record, record["exit_code"], outer_elapsed_ms)
+            guard_record, record["exit_code"], start, outer_end_ns)
         if elapsed is None:
             record["outcome"] = "infra-failure"
             record["detail"] = (

@@ -72,6 +72,8 @@ The failure names the missing item and its remedy.
 - Python 3 on PATH as `python`.
   `run.ps1` and the suite call bare `python`.
   Install Python 3 and put `python` on PATH.
+  Owner-verification pricing on Windows and macOS requires Python 3.10 or later
+  so the launcher and harness can compare performance-counter timestamps.
 - A Rust toolchain with the `x86_64-pc-windows-msvc` target.
   Install the toolchain with rustup.
   Then run `rustup target add x86_64-pc-windows-msvc`.

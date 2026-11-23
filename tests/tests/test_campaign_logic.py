@@ -5475,6 +5475,35 @@ class OwnerVerificationTimingTests(unittest.TestCase):
     def test_refusing_launcher_is_infra_failure_never_a_price(self):
         import pricing as pricing_mod
         with tempfile.TemporaryDirectory() as tmp:
+            config = stub_config(tmp)
+            for start_ns, end_ns, outcome in (
+                (100, 200, "ok"),
+                (99, 199, "infra-failure"),
+                (101, 201, "infra-failure"),
+            ):
+                with self.subTest(start_ns=start_ns, end_ns=end_ns):
+                    receipt = {"pid": 25, "start_ns": start_ns,
+                               "end_ns": end_ns, "elapsed_ms": 100 / 1e6,
+                               "exit_code": 0}
+                    with mock.patch.object(
+                        pricing_mod.time, "perf_counter_ns", side_effect=[100, 200]
+                    ), mock.patch.object(
+                        pricing_mod.subprocess, "Popen"
+                    ) as popen, mock.patch.object(
+                        pricing_mod, "_read_guard_record", return_value=receipt
+                    ):
+                        popen.return_value.wait.return_value = 0
+                        result = pricing_mod._time_guard_run(
+                            config, "NO_WINDOW",
+                            guard_record_path=os.path.join(tmp, "record.json"))
+                    self.assertEqual(result["outcome"], outcome, result)
+                    if outcome == "ok":
+                        self.assertEqual(result["guard_pid"], 25)
+                    else:
+                        self.assertNotIn("guard_pid", result)
+                        self.assertIn("timing record missing or inconsistent",
+                                      result["detail"])
+
             pricing_import = (
                 "import sys\n"
                 f"sys.path.insert(0, {CAMPAIGN!r})\n"
