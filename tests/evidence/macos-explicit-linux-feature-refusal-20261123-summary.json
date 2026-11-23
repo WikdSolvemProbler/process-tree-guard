@@ -1,0 +1,52 @@
+{
+  "schema": "ptg-macos-explicit-linux-feature-refusal-1",
+  "date_utc": "2026-11-23",
+  "source_commit": "17d6f192f139107fa680811960a67b38db86de0c",
+  "source_archive": {
+    "sha256": "9a20a8048b8bf83136b63a96284c5843eca58ca2942687653634d803c79c893d",
+    "bytes": 2396160,
+    "members": 148,
+    "tracked_files": 129
+  },
+  "environment": {
+    "native_host_target": "aarch64-apple-darwin",
+    "rustc": "1.99.0",
+    "cargo": "1.99.0",
+    "ordinary_user": true
+  },
+  "command": "cargo check --locked --offline --lib --message-format=json --target aarch64-apple-darwin --features linux-separate-service",
+  "result": {
+    "cargo_exit": 101,
+    "build_finished_success": false,
+    "expected_diagnostic": "linux-separate-service requires a native x86_64/aarch64 GNU Linux build (HOST == TARGET)",
+    "host_build_script_artifacts": 1,
+    "product_artifacts": 0,
+    "scratch_removed": true,
+    "independent_compiler_group_members_observed": 0
+  },
+  "deadlines_seconds": {
+    "host_archive": 30,
+    "host_compile": 60,
+    "host_retire": 25,
+    "ssh_compile": 55,
+    "macos_compile": 45,
+    "macos_compile_kill_grace": 3,
+    "ssh_retire": 21,
+    "macos_retire": 12,
+    "macos_retire_kill_grace": 2
+  },
+  "sha256": {
+    "host_receipts": {
+      "archive": "960cb8363925b15bf3b23e58c0885b009a7e11248535809a48024f612a0e306f",
+      "compile": "752e70b7c1e4af149726270b7e22b6404cc582424aa2fe382a932a2f670cfd6d",
+      "retire": "587157488dc9100d798b40eb226ace7a6a9538679ada96054da32af9a2b68f95"
+    },
+    "compile_receipt": "219b7ecda4524cf576434836f47c201cafc121b587f348412fc62f479de14fb5",
+    "retire_receipt": "8d19d05d9d1e6ff35aa945d6eb253f5e5320c7ed5c3b2819738f1e5e06b63d33",
+    "compile_native_stdout": "93fd9cd28d1127485c2b70f59d35831406df81c10ad996edf2dfc2ac0205d6ea",
+    "compile_native_stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "retire_native_stdout": "f71dd88c4349f528ef835cc0f558cd19fa703304487cf31a8420ecbfe8e3cdb2",
+    "retire_native_stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "scope": "Native ordinary-user verification of the unsupported-target build refusal on macOS ARM64. Native macOS containment and administrator qualification remain open."
+}
