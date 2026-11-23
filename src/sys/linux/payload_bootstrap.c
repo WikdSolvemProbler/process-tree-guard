@@ -43,7 +43,9 @@ _Static_assert(sizeof(struct ptg_resource_limit)==16
 _Static_assert(PTG_RESOURCE_LIMIT_COUNT==16 && RLIM_NLIMITS>=PTG_RESOURCE_LIMIT_COUNT,
     "initial Linux resource count");
 _Static_assert(RLIMIT_CORE==4,"Linux core resource ABI");
-_Static_assert(sizeof(struct ptg_payload_spawn)==128,"payload spawn ABI");
+_Static_assert(sizeof(struct ptg_payload_spawn)==136
+    && offsetof(struct ptg_payload_spawn,before_clone_ns)==112
+    && offsetof(struct ptg_payload_spawn,cancel_previous)==132,"payload spawn ABI");
 _Static_assert(sizeof(struct ptg_payload_ready)==96,"payload readiness ABI");
 _Static_assert(sizeof(struct ptg_payload_release)==88
     && offsetof(struct ptg_payload_release,cancel_previous)==68
@@ -104,6 +106,9 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 45:return ETIMEDOUT;
     case 46:return offsetof(struct ptg_payload_release,cancel_previous);
     case 47:return offsetof(struct ptg_payload_release,before_ns);
+    case 48:return PTG_PAYLOAD_SPAWN_PRE_CLONE_DEADLINE;
+    case 49:return offsetof(struct ptg_payload_spawn,before_clone_ns);
+    case 50:return offsetof(struct ptg_payload_spawn,cancel_previous);
     default:return UINT64_MAX;
     }
 }
@@ -523,25 +528,59 @@ static void restore_mask(const struct ptg_payload_spec *s,struct ptg_payload_spa
     if(out->mask_restore_result!=0 || out->mask_restore_error)
         cancel_kill(s,&out->kill_result,&out->kill_error);
 }
-void ptg_payload_spawn(const struct ptg_payload_spec *s,struct ptg_payload_spawn *out) {
+/* Slots 0 and 1 hold the original owners and original timer in both polls.
+ * Only the held original timer may be ready on a deadline-only path. */
+static int deadline_poll_allows_timer(int result,const struct pollfd *fds,unsigned count) {
+    if(result!=0 && (result!=1 || fds[1].revents!=POLLIN))return 0;
+    for(unsigned i=0;i<count;i++){
+        if(fds[i].revents && (i!=1 || result!=1))return 0;
+    }
+    return 1;
+}
+
+void ptg_payload_spawn(const struct ptg_payload_spec *s,int32_t peer,struct ptg_payload_spawn *out) {
     if(!out)return;
     memset(out,0,sizeof(*out));out->schema=PTG_PAYLOAD_SCHEMA;out->stage=1;
     out->pid=out->pidfd=-1;out->clone_result=out->initial_poll_result=INT32_MIN;
-    out->mask_set_result=out->mask_restore_result=out->kill_result=INT32_MIN;
+    out->mask_set_result=out->mask_restore_result=out->kill_result=out->cancel_previous=INT32_MIN;
     int error=spec_valid(s);
     if(!error && !kernel_abi_ok())error=EPROTO;
+    if(!error && (peer<0 || peer==s->timer_fd || peer==s->supervisor_fd
+        || peer==s->watchdog_fd || peer==s->kill_fd))error=EINVAL;
     if(error){out->error=error;cancel_kill(s,&out->kill_result,&out->kill_error);return;}
     out->gate_state=ptg_payload_gate_state(s->gate);
     if(out->gate_state!=PTG_PAYLOAD_HELD){out->error=ECANCELED;cancel_kill(s,&out->kill_result,&out->kill_error);return;}
-    struct pollfd fds[4]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
-        {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN}};
+    struct pollfd fds[5]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+        {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},
+        {.fd=peer,.events=POLLIN|POLLRDHUP}};
     const int polled=ptg_owner_poll(&s->owners,fds,4,0,0);const int poll_error=polled<0?errno:0;
     out->initial_poll_result=polled;
     for(unsigned int i=0;i<4;i++)out->initial_revents[i]=fds[i].revents;
     out->before_clone_ns=now_ns(&error);
-    if(polled!=0 || error || out->before_clone_ns>=s->deadline_ns){
-        out->error=error?error:(polled<0?poll_error:(polled?ECANCELED:ETIMEDOUT));
+    if(error || (polled!=0 && !deadline_poll_allows_timer(polled,fds,4))){
+        out->error=error?error:(polled<0?poll_error:ECANCELED);
         cancel_kill(s,&out->kill_result,&out->kill_error);return;
+    }
+    if(out->before_clone_ns>=s->deadline_ns){
+        /* Confirm competing watches after the cutoff sample, before changing
+         * the mask or reaching the clone. Cancellation orders observed causes. */
+        out->initial_poll_result=ptg_owner_poll(&s->owners,fds,5,0,0);
+        for(unsigned int i=0;i<5;i++)out->initial_revents[i]=fds[i].revents;
+        if(!deadline_poll_allows_timer(out->initial_poll_result,fds,5)){
+            out->error=out->initial_poll_result<0?errno:ECANCELED;
+            cancel_kill(s,&out->kill_result,&out->kill_error);return;
+        }
+        out->error=ETIMEDOUT;
+        out->cancel_previous=cancel_kill(s,&out->kill_result,&out->kill_error);
+        out->gate_state=ptg_payload_gate_state(s->gate);
+        if(out->cancel_previous==PTG_PAYLOAD_HELD && out->gate_state==PTG_PAYLOAD_CANCELLED
+           && out->kill_result==1 && out->kill_error==0){
+            out->stage=PTG_PAYLOAD_SPAWN_PRE_CLONE_DEADLINE;
+        }
+        return;
+    }
+    if(polled!=0){
+        out->error=ECANCELED;cancel_kill(s,&out->kill_result,&out->kill_error);return;
     }
     const uint64_t blocked=PTG_BLOCKED_MASK;
     out->mask_set_result=raw_mask(&blocked,&out->original_mask);
@@ -608,15 +647,6 @@ void ptg_payload_wait_ready(const struct ptg_payload_spec *s,int32_t reader,int3
 refused:
     cancel_kill(s,&out->kill_result,&out->kill_error);
 }
-/* Only the held original timer may be ready on the deadline-only path. */
-static int release_poll_allows_deadline(int result,const struct pollfd *fds,unsigned count) {
-    if(result!=0 && (result!=1 || fds[1].revents!=POLLIN))return 0;
-    for(unsigned i=0;i<count;i++){
-        if(fds[i].revents && (i!=1 || result!=1))return 0;
-    }
-    return 1;
-}
-
 void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t writer,
     int32_t peer,struct ptg_payload_release *out) {
     if(!out)return;
@@ -633,7 +663,7 @@ void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t w
         {.fd=child,.events=POLLIN},{.fd=peer,.events=POLLIN|POLLRDHUP}};
     out->poll_result=ptg_owner_poll(&s->owners,fds,5,0,0);
     for(unsigned int i=0;i<5;i++)out->revents[i]=fds[i].revents;
-    if(out->poll_result!=0 && !release_poll_allows_deadline(out->poll_result,fds,5)){
+    if(out->poll_result!=0 && !deadline_poll_allows_timer(out->poll_result,fds,5)){
         out->error=out->poll_result<0?errno:ECANCELED;goto refused;
     }
     int error=0;out->before_ns=now_ns(&error);
@@ -643,7 +673,7 @@ void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t w
          * orders the observed causes without assigning order to unseen events. */
         out->poll_result=ptg_owner_poll(&s->owners,fds,6,0,0);
         for(unsigned int i=0;i<6;i++)out->revents[i]=fds[i].revents;
-        if(!release_poll_allows_deadline(out->poll_result,fds,6)){
+        if(!deadline_poll_allows_timer(out->poll_result,fds,6)){
             out->error=out->poll_result<0?errno:ECANCELED;goto refused;
         }
         out->error=ETIMEDOUT;

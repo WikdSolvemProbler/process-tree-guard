@@ -107,6 +107,11 @@ struct PlacedChild {
     exec_report: terminal_controller::ExecReport,
 }
 
+enum Placement {
+    Child(PlacedChild),
+    DeadlineBeforeClone,
+}
+
 struct PayloadChild {
     identity: DirectChild,
     exec_report: terminal_controller::ExecReport,
@@ -141,7 +146,7 @@ trait OneShotPort {
     // means no clone succeeded. After a clone, return the exact child even
     // when readiness fails. A ready permit certifies trusted child readiness,
     // FD scrubbing and credential drop. A readiness error closes the writer.
-    fn place_held(&mut self, domain: &ArmedDomain, child: ChildPlan<'_>) -> Probe<PlacedChild>;
+    fn place_held(&mut self, domain: &ArmedDomain, child: ChildPlan<'_>) -> Probe<Placement>;
 
     // Use the proof's held-to-released shared gate and its single permit byte.
     // An independent cancellation can win at either side of this observation.
@@ -167,6 +172,12 @@ struct ActiveRun {
 }
 
 impl ActiveRun {
+    fn confirm_native_deadline(&self) -> Probe<Decision> {
+        check(self.prepared.lease.sample()?.decision == Decision::Deadline,
+            "original deadline lost its native proof")?;
+        Ok(Decision::Deadline)
+    }
+
     fn place_and_sample_release(&mut self, port: &mut impl OneShotPort) -> Probe<Decision> {
         self.domain.controls.revalidate()?;
         let decision = self.prepared.lease.sample()?.decision;
@@ -184,7 +195,10 @@ impl ActiveRun {
         );
         // Record the last attempted raw mask even when clone did NOT succeed.
         self.payload_mask=port.payload_parent_mask();
-        let PlacedChild { identity, ready_permit, exec_report }=placed?;
+        let PlacedChild { identity, ready_permit, exec_report } = match placed? {
+            Placement::Child(child) => child,
+            Placement::DeadlineBeforeClone => return self.confirm_native_deadline(),
+        };
         let child = self.child.insert(PayloadChild { identity, exec_report });
         let permit_writer = ready_permit?;
 
@@ -198,8 +212,7 @@ impl ActiveRun {
         let release = port.commit_permit(&self.domain, &child.identity, &permit_writer)?;
         drop(permit_writer);
         if release == Decision::Deadline {
-            check(self.prepared.lease.sample()?.decision == Decision::Deadline,
-                "original deadline lost its release proof")?;
+            return self.confirm_native_deadline();
         }
         Ok(release)
     }

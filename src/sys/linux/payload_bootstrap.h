@@ -11,8 +11,9 @@
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 8u
+#define PTG_PAYLOAD_SCHEMA 9u
 #define PTG_PAYLOAD_RELEASE_PRE_SEND_DEADLINE 4u
+#define PTG_PAYLOAD_SPAWN_PRE_CLONE_DEADLINE 5u
 #define PTG_RESOURCE_LIMIT_COUNT 16u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
@@ -77,19 +78,23 @@ struct ptg_payload_spec {
 struct ptg_payload_spawn {
     uint32_t schema, stage;
     int32_t child_created, pid, pidfd, error;
-    int32_t clone_result, initial_poll_result, initial_revents[4];
+    int32_t clone_result, initial_poll_result, initial_revents[5];
     int32_t mask_set_result, mask_set_error, mask_restore_result, mask_restore_error;
     int32_t kill_result, kill_error, scratch_unmap_result, scratch_unmap_error;
     uint64_t original_mask, blocked_mask, restored_mask, before_clone_ns, after_clone_ns;
-    int32_t gate_state, reserved;
+    int32_t gate_state, cancel_previous;
 };
 /* A successful clone ALWAYS publishes child_created=1 and the exact positive
  * PID/kernel-installed pidfd before mask restoration, clocks, or later errors.
  * Parent MUST own/reap that child even if stage/error subsequently refuse.
- * No successful clone can be translated into a no-child error. The child branch
- * NEVER returns to Rust, allocates Rust memory, formats, or invokes exec wrappers.
+ * No successful clone can be translated into a no-child error. A pre-clone
+ * deadline receipt proves the original cutoff, clean competing watches and
+ * successful cancellation before either mask setup or clone was attempted.
+ * The peer descriptor stays with the supervisor. The child branch NEVER
+ * returns to Rust, allocates Rust memory, formats, or invokes exec wrappers.
  */
-void ptg_payload_spawn(const struct ptg_payload_spec *spec, struct ptg_payload_spawn *out);
+void ptg_payload_spawn(const struct ptg_payload_spec *spec, int32_t peer,
+    struct ptg_payload_spawn *out);
 
 struct ptg_payload_ready {
     uint32_t schema, stage;

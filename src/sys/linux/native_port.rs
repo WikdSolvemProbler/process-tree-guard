@@ -6,10 +6,11 @@ use std::ffi::{c_char, CString};
 use std::ptr::NonNull;
 use super::cgroup_authority::settlement::Deadline;
 
-const PAYLOAD_SCHEMA:u32=8;
-const PAYLOAD_ABI_WORDS:usize=32+RESOURCE_LIMIT_COUNT;
+const PAYLOAD_SCHEMA:u32=9;
+const PAYLOAD_ABI_WORDS:usize=35+RESOURCE_LIMIT_COUNT;
 const RELEASE_PRE_SEND_DEADLINE:u32=4;
-const RELEASE_ETIMEDOUT:c_int=110;
+const SPAWN_PRE_CLONE_DEADLINE:u32=5;
+const ETIMEDOUT:c_int=110;
 const BLOCKED_MASK:u64=u64::MAX & !(1u64<<8) & !(1u64<<18);
 #[repr(C)]
 struct PayloadSpec {
@@ -25,11 +26,44 @@ struct PayloadSpec {
 #[derive(Clone,Copy,Debug,Default)]
 struct Spawn {
     schema:u32,stage:u32,child_created:c_int,pid:c_int,pidfd:c_int,error:c_int,
-    clone_result:c_int,initial_poll_result:c_int,initial_revents:[c_int;4],
+    clone_result:c_int,initial_poll_result:c_int,initial_revents:[c_int;5],
     mask_set_result:c_int,mask_set_error:c_int,mask_restore_result:c_int,mask_restore_error:c_int,
     kill_result:c_int,kill_error:c_int,scratch_unmap_result:c_int,scratch_unmap_error:c_int,
     original_mask:u64,blocked_mask:u64,restored_mask:u64,before_clone_ns:u64,after_clone_ns:u64,
-    gate_state:c_int,reserved:c_int,
+    gate_state:c_int,cancel_previous:c_int,
+}
+
+fn only_original_timer_ready<const N: usize>(result: c_int, events: &[c_int; N]) -> bool {
+    let mut expected = [0; N];
+    match result {
+        0 => {}
+        1 => expected[1] = c_int::from(POLLIN),
+        _ => return false,
+    }
+    *events == expected
+}
+
+impl Spawn {
+    fn proves_pre_clone_deadline(&self, deadline_ns: u64) -> bool {
+        self.schema == PAYLOAD_SCHEMA
+            && self.stage == SPAWN_PRE_CLONE_DEADLINE
+            && self.error == ETIMEDOUT
+            && only_original_timer_ready(self.initial_poll_result, &self.initial_revents)
+            && self.before_clone_ns >= deadline_ns
+            && self.after_clone_ns == 0
+            && self.child_created == 0
+            && self.pid == -1
+            && self.pidfd == -1
+            && self.clone_result == c_int::MIN
+            && self.mask_set_result == c_int::MIN
+            && self.mask_set_error == 0
+            && self.mask_restore_result == c_int::MIN
+            && self.mask_restore_error == 0
+            && self.cancel_previous == 0
+            && self.gate_state == 2
+            && self.kill_result == 1
+            && self.kill_error == 0
+    }
 }
 #[derive(Clone,Copy,Debug)]
 pub(super) struct ParentMaskObservation {
@@ -63,14 +97,11 @@ struct Release {
 
 impl Release {
     fn proves_pre_send_deadline(&self, deadline_ns: u64) -> bool {
-        let clear = self.poll_result == 0 && self.revents == [0; 6];
-        let timer_only = self.poll_result == 1
-            && self.revents == [0, c_int::from(POLLIN), 0, 0, 0, 0];
         self.schema == PAYLOAD_SCHEMA
             && self.stage == RELEASE_PRE_SEND_DEADLINE
             && self.result == c_int::MIN
-            && self.error == RELEASE_ETIMEDOUT
-            && (clear || timer_only)
+            && self.error == ETIMEDOUT
+            && only_original_timer_ready(self.poll_result, &self.revents)
             && self.before_ns >= deadline_ns
             && self.after_ns == 0
             && self.gate_before == 0
@@ -88,7 +119,8 @@ const _:()={
     assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,caller_limits)==160);
     assert!(size_of::<ResourceLimits>()==256);
     assert!(size_of::<PayloadSpec>()==416 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
-    assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==88);
+    assert!(size_of::<Spawn>()==136 && size_of::<Ready>()==96 && size_of::<Release>()==88);
+    assert!(std::mem::offset_of!(Spawn,before_clone_ns)==112 && std::mem::offset_of!(Spawn,cancel_previous)==132);
     assert!(std::mem::offset_of!(Release,cancel_previous)==68 && std::mem::offset_of!(Release,before_ns)==72);
 };
 unsafe extern "C" {
@@ -102,7 +134,7 @@ unsafe extern "C" {
     #[cfg(test)]fn ptg_payload_gate_commit(gate:*mut c_void)->c_int;
     fn ptg_payload_gate_peer_cancelled(gate:*const c_void)->c_int;
     fn ptg_payload_gate_destroy(gate:*mut c_void,error:*mut c_int)->c_int;
-    fn ptg_payload_spawn(spec:*const PayloadSpec,out:*mut Spawn);
+    fn ptg_payload_spawn(spec:*const PayloadSpec,peer:c_int,out:*mut Spawn);
     fn ptg_payload_wait_ready(spec:*const PayloadSpec,reader:c_int,child:c_int,setup:c_int,until:u64,out:*mut Ready);
     fn ptg_payload_commit(spec:*const PayloadSpec,child:c_int,permit:c_int,peer:c_int,out:*mut Release);
 }
@@ -110,11 +142,12 @@ unsafe extern "C" {
 fn sample_payload_abi()->[u64;PAYLOAD_ABI_WORDS]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
 fn require_payload_abi(abi:&[u64;PAYLOAD_ABI_WORDS])->Probe<()> {
     let expected=[
-        u64::from(PAYLOAD_SCHEMA),416,128,96,88,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,
+        u64::from(PAYLOAD_SCHEMA),416,136,96,88,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,
         SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,160,5,16,0,8,4,
         SYS_PRLIMIT64 as u64,1,RESOURCE_LIMIT_COUNT as u64,
         0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
-        u64::from(RELEASE_PRE_SEND_DEADLINE),RELEASE_ETIMEDOUT as u64,68,72,
+        u64::from(RELEASE_PRE_SEND_DEADLINE),ETIMEDOUT as u64,68,72,
+        u64::from(SPAWN_PRE_CLONE_DEADLINE),112,132,
     ];
     check(*abi==expected,"payload C/Rust bridge ABI differs")
 }
@@ -294,6 +327,12 @@ impl NativePort {
             argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,caller_limits:self.caller_limits,
         })
     }
+    fn deadline_peer_clear(&mut self) -> bool {
+        let observation = self.launch.cancellation.sample();
+        self.receipt.deadline_cancellation = Some(observation);
+        observation.state() == super::super::super::entry::CancellationState::Clear
+    }
+
     fn cancel(&mut self,domain:&ArmedDomain) {
         domain.controls.cancel_release();
         let mut raw=native_arming::KillObservation::default();
@@ -334,7 +373,7 @@ impl OneShotPort for NativePort {
         }
         unsafe{native_arming::arm(watch,&self.scope)}
     }
-    fn place_held(&mut self,domain:&ArmedDomain,child:ChildPlan<'_>)->Probe<PlacedChild> {
+    fn place_held(&mut self,domain:&ArmedDomain,child:ChildPlan<'_>)->Probe<Placement> {
         check(domain.controls.belongs_to(&self.scope),"payload domain belongs to a different managed service scope")?;
         check(self.receipt.spawn.is_none(),"native port may place only one payload")?;
         check(child.directory.as_raw_fd()==domain.controls.directory.as_raw_fd()
@@ -351,14 +390,20 @@ impl OneShotPort for NativePort {
         let spec=self.spec(domain,permit_reader.as_raw_fd(),ready_writer.as_raw_fd(),exec_writer.as_raw_fd())?;
         self.receipt.expected_mask=Some(spec.original_mask);
         let mut raw=Spawn::default();
-        unsafe{ptg_payload_spawn(&spec,&mut raw)};
+        unsafe{ptg_payload_spawn(&spec,self.launch.cancellation.fd(),&mut raw)};
         // No formatting/clock/readiness/decoding before actual clone ownership.
         let child=if raw.child_created==1 {
             Some(unsafe{DirectChild::from_successful_clone(raw.pid,OwnedFd::from_raw_fd(raw.pidfd))})
         } else {None};
         self.receipt.spawn=Some(raw);
         drop((permit_reader,ready_writer,exec_writer));
-        let Some(child)=child else {self.cancel(domain);return Err("payload clone did not succeed".into());};
+        let Some(child) = child else {
+            if raw.proves_pre_clone_deadline(spec.deadline_ns) && self.deadline_peer_clear() {
+                return Ok(Placement::DeadlineBeforeClone);
+            }
+            self.cancel(domain);
+            return Err("payload clone did not succeed".into());
+        };
         let exec_report=unsafe{terminal_controller::ExecReport::from_trusted_child(exec_reader)};
         let ready_permit=(||->Probe<OwnedFd>{
             check(raw.schema==PAYLOAD_SCHEMA && raw.child_created==1 && raw.pid>0 && raw.pidfd>=0 && raw.clone_result==raw.pid
@@ -378,7 +423,7 @@ impl OneShotPort for NativePort {
             Ok(permit_writer)
         })();
         if ready_permit.is_err(){self.cancel(domain);}
-        Ok(PlacedChild{identity:child,ready_permit,exec_report})
+        Ok(Placement::Child(PlacedChild{identity:child,ready_permit,exec_report}))
     }
     fn payload_parent_mask(&self)->Option<ParentMaskObservation> {
         self.receipt.spawn.zip(self.receipt.expected_mask).map(|(raw,expected)|ParentMaskObservation::from_spawn(raw,expected))
@@ -396,12 +441,8 @@ impl OneShotPort for NativePort {
         if valid {
             return Ok(Decision::Permit);
         }
-        if release.proves_pre_send_deadline(spec.deadline_ns) {
-            let observation=cancellation.sample();
-            self.receipt.deadline_cancellation=Some(observation);
-            if observation.state()==super::super::super::entry::CancellationState::Clear {
-                return Ok(Decision::Deadline);
-            }
+        if release.proves_pre_send_deadline(spec.deadline_ns) && self.deadline_peer_clear() {
+            return Ok(Decision::Deadline);
         }
         self.cancel(domain);
         Err("payload release refused".into())
@@ -497,7 +538,7 @@ fn pre_send_deadline_regression() {
         schema: PAYLOAD_SCHEMA,
         stage: RELEASE_PRE_SEND_DEADLINE,
         result: c_int::MIN,
-        error: RELEASE_ETIMEDOUT,
+        error: ETIMEDOUT,
         gate_after: 2,
         write_result: c_int::MIN,
         kill_result: 1,
@@ -531,10 +572,10 @@ fn pre_send_deadline_regression() {
 }
 
 #[cfg(test)]
-fn native_pre_send_deadline_regression() {
+fn native_held_deadline_regression() {
     use std::io::{ErrorKind, Read};
 
-    for competing_peer in [false, true] {
+    for (before_clone, competing_peer) in [(false, false), (false, true), (true, false), (true, true)] {
         // Quiet local descriptors stand in for the original watches. The kill
         // sink is a pipe, and the writable permit socket stays open for readback.
         let watches: [(OwnedFd, OwnedFd); 6] =
@@ -543,36 +584,56 @@ fn native_pre_send_deadline_regression() {
             watches.each_ref().map(|(reader, _)| reader.as_raw_fd());
         let owners = [requester, parent];
         let (kill_reader, kill_writer) = pipe().expect("kill sink pipe");
+        // A pipe can never be a clone target. It keeps this regression
+        // non-spawning even if a failure reaches the clone syscall.
+        let (non_cgroup, _write_end) = pipe().expect("inert placement descriptor");
+        let (cwd_and_stdio, _stdio_writer) = pipe().expect("inert process descriptors");
+        let (_ready_reader, ready_writer) = pipe().expect("readiness pipe");
+        let (_exec_reader, exec_writer) = pipe().expect("exec report pipe");
         let (permit_receiver, permit_writer) = permit_pair().expect("permit pair");
         let (peer, counterpart) = permit_pair().expect("peer pair");
         let _counterpart = if competing_peer { drop(counterpart); None } else { Some(counterpart) };
         let gate = SharedGate::create().expect("native gate allocation");
         let cutoff = boottime_ns().expect("read the test clock").checked_sub(1).expect("past cutoff");
+        let program = c"/usr/bin/true".as_ptr();
+        let argv = [program, ptr::null()];
+        let envp = [ptr::null()];
         let spec = PayloadSpec {
             schema: PAYLOAD_SCHEMA, bytes: size_of::<PayloadSpec>() as u32,
-            cgroup_fd: -1, kill_fd: kill_writer.as_raw_fd(),
+            cgroup_fd: non_cgroup.as_raw_fd(), kill_fd: kill_writer.as_raw_fd(),
             owners: OwnerWatch { fds: owners.as_ptr(), count: owners.len() as u32, reserved: 0 },
             timer_fd: timer, supervisor_fd: supervisor, watchdog_fd: watchdog,
-            cwd_fd: -1, stdio_fd: [-1; 3], permit_reader: -1, ready_writer: -1, exec_writer: -1,
-            uid: 0, gid: 0, group_count: 0, argc: 0, envc: 0, umask: 0,
-            deadline_ns: cutoff, original_mask: 0, groups: ptr::null(),
-            program: ptr::null(), argv: ptr::null(), envp: ptr::null(),
+            cwd_fd: cwd_and_stdio.as_raw_fd(), stdio_fd: [cwd_and_stdio.as_raw_fd(); 3],
+            permit_reader: permit_receiver.as_raw_fd(), ready_writer: ready_writer.as_raw_fd(),
+            exec_writer: exec_writer.as_raw_fd(), uid: 1, gid: 1, group_count: 0, argc: 1,
+            envc: 0, umask: 0, deadline_ns: cutoff, original_mask: 0, groups: ptr::null(),
+            program, argv: argv.as_ptr(), envp: envp.as_ptr(),
             gate: gate.as_ptr(), host_dumpability: 0,
             caller_limits: [ResourceLimit::default(); RESOURCE_LIMIT_COUNT],
         };
-        let mut release = Release::default();
-        // All descriptors stay owned through this call. The proved expired
-        // cutoff skips send, and no native placement or child creation occurs.
-        unsafe {
-            ptg_payload_commit(&spec, child, permit_writer.as_raw_fd(), peer.as_raw_fd(), &mut release);
+        // All descriptor and argument owners remain in scope over the call.
+        if before_clone {
+            let mut spawn = Spawn::default();
+            unsafe { ptg_payload_spawn(&spec, peer.as_raw_fd(), &mut spawn); }
+            assert!(spawn.before_clone_ns >= cutoff, "native clock reached the cutoff");
+            assert_eq!(spawn.proves_pre_clone_deadline(cutoff), !competing_peer);
+            assert_eq!(spawn.initial_revents[4] != 0, competing_peer);
+            assert_eq!(spawn.clone_result, c_int::MIN, "clone was never attempted");
+            assert_eq!(spawn.mask_set_result, c_int::MIN, "the signal mask was untouched");
+            assert_eq!(spawn.child_created, 0);
+        } else {
+            let mut release = Release::default();
+            unsafe {
+                ptg_payload_commit(&spec, child, permit_writer.as_raw_fd(), peer.as_raw_fd(), &mut release);
+            }
+            assert!(release.before_ns >= cutoff, "native clock reached the cutoff");
+            assert_eq!(release.proves_pre_send_deadline(cutoff), !competing_peer);
+            assert_eq!(release.revents[5] != 0, competing_peer);
+            assert_eq!(release.write_result, c_int::MIN, "the permit send was never attempted");
         }
         let state = gate.state();
         assert!(unsafe { gate.destroy() }.is_ok(), "unmap the native gate");
         assert_eq!(state, 2);
-        assert!(release.before_ns >= cutoff, "native clock reached the cutoff");
-        assert_eq!(release.proves_pre_send_deadline(cutoff), !competing_peer);
-        assert_eq!(release.revents[5] != 0, competing_peer);
-        assert_eq!(release.write_result, c_int::MIN, "the permit send was never attempted");
 
         let mut sink = std::fs::File::from(kill_reader);
         let mut byte = [0];
@@ -587,7 +648,7 @@ fn native_pre_send_deadline_regression() {
 #[cfg(test)]pub(super) fn gate_first_cause_regression(){
  let abi=sample_payload_abi();require_payload_abi(&abi).expect("actual compiled payload ABI must match production validator");
  pre_send_deadline_regression();
- native_pre_send_deadline_regression();
+ native_held_deadline_regression();
  let observe=|released:bool,generic_first:bool|{
   let gate=SharedGate::create().expect("actual native gate allocation");let mut raw=[-9;8];
   raw[0]=gate.state();raw[1]=gate.peer_cancelled();
