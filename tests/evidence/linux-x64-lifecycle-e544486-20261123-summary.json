@@ -1,0 +1,89 @@
+{
+  "schema": "ptg-linux-x64-lifecycle-checks-1",
+  "date_utc": "2026-11-23",
+  "scope": "Normal completion, deadline expiry, and ordinary direct-owner exit using the opt-in separate-service CLI.",
+  "source_commit": "e544486582234db3d35585eed5ff252b89837906",
+  "build": {
+    "workflow_run": 45235852510,
+    "artifact_id": 14849845844,
+    "artifact_archive_sha256": "1813bb712518089f4e4e69b73746d3616416c15505a3d1f22059c51175cc5e80",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "sha256": {
+      "process-tree-guard-root": "091600028a001d1ff0373a0a3c16e3ed1842a052032165ff0d9968b715772baa",
+      "process-tree-guard-client": "69fa1c559fab85dccdc6f3be6f83cc056dfaad5270d03b2603acd7a1eeb3cf82"
+    }
+  },
+  "environment": {
+    "kernel": "6.8.0-147-generic",
+    "suid_dumpable": 2,
+    "network_enabled": false,
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105
+  },
+  "normal_and_deadline": {
+    "normal": {
+      "client_exit": 0,
+      "stdout_empty": true,
+      "stderr_empty": true,
+      "service_inactive": true
+    },
+    "deadline": {
+      "seconds": 10,
+      "payload_started": true,
+      "client_exit": 124,
+      "service_terminal_exit": 124,
+      "timeout_diagnostic_present": true
+    },
+    "original_host_handle_retained": true,
+    "host_native_exit": 0,
+    "emulator_exit": 0,
+    "emulator_processes_remaining": 0,
+    "evidence_sha256": {
+      "host_result": "43b8197cc3e65dc094212e4c01845985a9ab3802f27763db9c375be4b2cc281d",
+      "emulator_result": "13d8a8fc8028909ef4be56091650af2e16567e7de6bcdce582dfd5a8dab850c9",
+      "serial": "b3e96f81f1d7f39ac2a728a6cd61a6692afaaa83728a3e3761ac1ed0f1923b04",
+      "intent": "652fe553c5c4d57835cc0f3986f303a73e5f4928edba5c10aa9c18c8e8516efa",
+      "host_runner": "70c8aa52213fc38503e79d801e32dbc9ae809c89aae62b605620900bbe8ea2a1",
+      "guest_driver": "05cdbd34b90158c9388872ab84f41523c3ec83e7f7a659243c4f27dc5e8c70c7",
+      "postflight": "46173d33043b1cd6a148cc9325e5b7f170794b2e6df479fb8a73fdb3bb1e2e12"
+    }
+  },
+  "owner_exit": {
+    "mode": "manual",
+    "product_deadline_seconds": 60,
+    "observed_direct_parent_exit": 0,
+    "client_exit": 125,
+    "client_owner_loss_notice": true,
+    "controller_live_at_first_full_cohort_sample": true,
+    "original_pidfds_terminal_at_first_full_cohort_sample": [
+      "owner",
+      "client",
+      "service",
+      "payload"
+    ],
+    "original_service_domain_before_fixture_teardown": "absent",
+    "original_payload_leaf_before_fixture_teardown": "absent",
+    "original_host_handle_retained": true,
+    "host_native_exit": 0,
+    "emulator_exit": 0,
+    "emulator_processes_remaining": 0,
+    "evidence_sha256": {
+      "host_result": "c5b822b4ced810c3e6bb62f881ccf36c960ab20dfd93270842b105e090dbc173",
+      "emulator_result": "f99724cdd98e69678c69c09021336206e88d739daf2518eaed057d8c8f82ca0c",
+      "serial": "15e5db0827c426e1c619805115d5459fa07243e717ed0362ebaddafaf2f5412a",
+      "intent": "3052acfcab917090f65223b11c649aef1105611e7bba731303fc462aecb9e875",
+      "host_runner": "fe96df8081e71a82847af058c1c23162c05f6f30f1c588fdddd35c1b06cffd97",
+      "guest_driver": "a953d85877045552842952c4dd25a497cacff1858a26815fb9701eddfcb1b8f3",
+      "postflight": "1ad781bcbff483193a4915191ccbf1ec18d28aad8e852f6face31dbb644bf54b",
+      "owner_observer": "ab0d71d8dbfbc68ae51cc3a387e3d4a6e9c6a4b3faf1977b208a99bbe713c4b0",
+      "scope": "914381def3295e998c495369e1e74dbb0a5ae27560d803cc9b13aa2fb03e1115"
+    }
+  },
+  "limits": [
+    "The owner observer took a full-cohort sample after the original client pidfd reported termination. The sample establishes terminal state at observation, not exact exit ordering.",
+    "The cases cover ordinary x64 offline lifecycle behavior only. AUTO ancestry, detached descendants, the specific retirement-retry branch, full caller confinement, Tailscale transport, and benchmark performance remain open.",
+    "Raw captures and independently bounded attempts are preserved locally."
+  ]
+}
