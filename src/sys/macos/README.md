@@ -15,6 +15,10 @@ This folder is a named place for a macOS backend. It holds this README and nothi
 
 macOS is a named place, not a backend. The revival condition stands on the wiki Platform Support page.
 
+## Native target refusal
+
+On ARM64 macOS, the native Cargo check for the Linux-only feature returned the expected unsupported-target diagnostic and produced zero product artifacts. An independent check confirmed that the temporary scratch directory and compiler group had retired. [Current native build evidence](../../../tests/evidence/macos-explicit-linux-feature-refusal-20261123-summary.json)
+
 ## UID witness probe
 
 XNU charges a fork to the caller's real UID before admitting the child. A dedicated-UID design can use a non-root verifier with `RLIMIT_NPROC=2` as a conservative emptiness witness, provided an exclusive lease prevents new work under that UID. [XNU fork accounting](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_fork.c)

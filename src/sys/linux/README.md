@@ -55,6 +55,10 @@ The timed workload printed its start marker before reaching its ten-second deadl
 
 The two earlier fixture runs remain incomplete. Both verified normal exit 0. The second retained disk also recorded the timed workload's start, the client deadline diagnostic, and the service exit 124. Its fixture returned 1 before reporting completion. The passing retry captured each boot's transcript in a regular file before copying it to serial. The disks and raw logs are retained privately.
 
+## Current ARM64 build and component evidence
+
+Native Rust 1.88 built both opt-in release programs from revision 17d6f19 in an existing ARM64 Linux guest. All 12 serial client component tests passed, including the native held-release deadline regression and its peer-veto control. The ordinary-user scope retired and its temporary storage was removed. [Current ARM64 build and test evidence](../../../tests/evidence/linux-arm64-current-native-20261123-summary.json)
+
 ## Normal exit on ARM64
 
 The Linux client and service built from `7b2e6d5` with Rust 1.88 passed one mode 2 invocation of `--separate-service-context --timeout 10 -- /usr/bin/true`. The client returned 0 with empty standard output and error. The fixture observed the retained client terminal before reaping it, while the original caller was live. The same protected systemd slice was empty before launch and at the later observation before fixture cleanup. The product service was absent at the later observation.

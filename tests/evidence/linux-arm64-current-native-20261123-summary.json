@@ -1,0 +1,58 @@
+{
+  "schema": "ptg-linux-arm64-native-1",
+  "date_utc": "2026-11-23",
+  "source_commit": "17d6f192f139107fa680811960a67b38db86de0c",
+  "source_archive_sha256": "7614ad28b91bf526c298a247bd8c612a987b7a9f22ae583ec3a89caa0530c45c",
+  "source_files": 134,
+  "native_target": "aarch64-unknown-linux-gnu",
+  "rustc": "1.88.0",
+  "cargo": "1.88.0",
+  "build": "Locked offline release build of process-tree-guard-root and process-tree-guard-client with linux-separate-service.",
+  "test": "Locked offline serial release client component suite with linux-separate-service.",
+  "execution": "Existing ARM64 Linux guest reached via authenticated SSH. The toolchain used temporary ordinary-user storage and the build ran inside a bounded user scope.",
+  "result": {
+    "build_exit": 0,
+    "tests_exit": 0,
+    "tests_passed": 12,
+    "tests_failed": 0,
+    "tests_ignored": 0,
+    "native_held_release_regression_passed": true,
+    "native_payload_abi_schema": 8,
+    "native_payload_abi_words": 48,
+    "verified_artifact_members": 161,
+    "user_scope_retired": true,
+    "scratch_cleanup_verified": true
+  },
+  "deadlines_seconds": {
+    "build_body": 230,
+    "coordinator": 263,
+    "guest": 275,
+    "mac": 285,
+    "owned_scope": 260,
+    "per_cargo_max": 90,
+    "ssh": 300,
+    "windows": 330
+  },
+  "release_executables": {
+    "process-tree-guard-root": {
+      "bytes": 660000,
+      "sha256": "5beff03fe0d767b948f2aa3c70074892ee69a92940d60e25f5ff6a972d50cb9c"
+    },
+    "process-tree-guard-client": {
+      "bytes": 528928,
+      "sha256": "3134fce1b23b9c59a2eb229c350a8164ff9683bb8651a4a7d95824afe6eb61f7"
+    }
+  },
+  "scope": "Native compile, link, and component tests. Linux service lifecycle, transparent caller context, and comparative performance remain separate qualification requirements.",
+  "sha256": {
+    "raw_git_blob_manifest": "52f5303b2e3b0c99db0ff1a534e40c38b6bce12abc2b7ee000668c270d53fbd6",
+    "input": "7f6efd96b28aa7c4e41dbbea9a4837db1c185dbff37506acfce2a11d39b7a0f7",
+    "runner": "f42cedcb7560232f339d53909515adf37df1aa0c7c9f619ed5b1bac50c3dbb3d",
+    "scope_coordinator": "90e9caa3eb5a80812709e96d6d783c167f897b98a7437243bf456d23231a138d",
+    "host_receipt": "fdfe2c821abecb2ee9a4588a6c143a2ef693ab8c031662bf00e05d263d0149bb",
+    "run_intent": "48b78c01b0c315fa2e52ae05fd37db55ea13e8e7a630c55eae92f8777606e003",
+    "remote_result": "53c93508996cb971a5cfd3cea8f62b64542b27f467b09db6d8512fa6656395a2",
+    "guest_bundle": "9f91f23268ff4a63612a42d671b3b88f0d77a8bd6d358b086d03284aa8ca403d",
+    "test_stdout": "f4c25361ab7a42bba77f917bc8768d87a479d5c6e6a455f420e76fa194c02e0e"
+  }
+}
