@@ -530,9 +530,64 @@ fn pre_send_deadline_regression() {
     }
 }
 
+#[cfg(test)]
+fn native_pre_send_deadline_regression() {
+    use std::io::{ErrorKind, Read};
+
+    for competing_peer in [false, true] {
+        // Quiet local descriptors stand in for the original watches. The kill
+        // sink is a pipe, and the writable permit socket stays open for readback.
+        let watches: [(OwnedFd, OwnedFd); 6] =
+            std::array::from_fn(|_| pipe().expect("quiet watch pipe"));
+        let [requester, parent, timer, supervisor, watchdog, child] =
+            watches.each_ref().map(|(reader, _)| reader.as_raw_fd());
+        let owners = [requester, parent];
+        let (kill_reader, kill_writer) = pipe().expect("kill sink pipe");
+        let (permit_receiver, permit_writer) = permit_pair().expect("permit pair");
+        let (peer, counterpart) = permit_pair().expect("peer pair");
+        let _counterpart = if competing_peer { drop(counterpart); None } else { Some(counterpart) };
+        let gate = SharedGate::create().expect("native gate allocation");
+        let cutoff = boottime_ns().expect("read the test clock").checked_sub(1).expect("past cutoff");
+        let spec = PayloadSpec {
+            schema: PAYLOAD_SCHEMA, bytes: size_of::<PayloadSpec>() as u32,
+            cgroup_fd: -1, kill_fd: kill_writer.as_raw_fd(),
+            owners: OwnerWatch { fds: owners.as_ptr(), count: owners.len() as u32, reserved: 0 },
+            timer_fd: timer, supervisor_fd: supervisor, watchdog_fd: watchdog,
+            cwd_fd: -1, stdio_fd: [-1; 3], permit_reader: -1, ready_writer: -1, exec_writer: -1,
+            uid: 0, gid: 0, group_count: 0, argc: 0, envc: 0, umask: 0,
+            deadline_ns: cutoff, original_mask: 0, groups: ptr::null(),
+            program: ptr::null(), argv: ptr::null(), envp: ptr::null(),
+            gate: gate.as_ptr(), host_dumpability: 0,
+            caller_limits: [ResourceLimit::default(); RESOURCE_LIMIT_COUNT],
+        };
+        let mut release = Release::default();
+        // All descriptors stay owned through this call. The proved expired
+        // cutoff skips send, and no native placement or child creation occurs.
+        unsafe {
+            ptg_payload_commit(&spec, child, permit_writer.as_raw_fd(), peer.as_raw_fd(), &mut release);
+        }
+        let state = gate.state();
+        assert!(unsafe { gate.destroy() }.is_ok(), "unmap the native gate");
+        assert_eq!(state, 2);
+        assert!(release.before_ns >= cutoff, "native clock reached the cutoff");
+        assert_eq!(release.proves_pre_send_deadline(cutoff), !competing_peer);
+        assert_eq!(release.revents[5] != 0, competing_peer);
+        assert_eq!(release.write_result, c_int::MIN, "the permit send was never attempted");
+
+        let mut sink = std::fs::File::from(kill_reader);
+        let mut byte = [0];
+        sink.read_exact(&mut byte).expect("the held kill write reached its sink");
+        assert_eq!(byte, [b'1']);
+        assert_eq!(sink.read(&mut byte).unwrap_err().kind(), ErrorKind::WouldBlock);
+        let mut receiver = std::fs::File::from(permit_receiver);
+        assert_eq!(receiver.read(&mut byte).unwrap_err().kind(), ErrorKind::WouldBlock);
+    }
+}
+
 #[cfg(test)]pub(super) fn gate_first_cause_regression(){
  let abi=sample_payload_abi();require_payload_abi(&abi).expect("actual compiled payload ABI must match production validator");
  pre_send_deadline_regression();
+ native_pre_send_deadline_regression();
  let observe=|released:bool,generic_first:bool|{
   let gate=SharedGate::create().expect("actual native gate allocation");let mut raw=[-9;8];
   raw[0]=gate.state();raw[1]=gate.peer_cancelled();
