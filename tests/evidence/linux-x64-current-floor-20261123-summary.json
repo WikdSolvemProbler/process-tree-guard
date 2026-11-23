@@ -1,5 +1,5 @@
 {
-  "schema": "ptg-linux-x64-current-floor-smoke-1",
+  "schema": "ptg-linux-x64-current-floor-smoke-2",
   "date_utc": "2026-11-23",
   "scope": "Normal exit and deadline cleanup for the exact x86-64 Linux 5.14 kernel and Ubuntu userspace combination recorded here, using the opt-in separate-service deployment.",
   "environment": {
@@ -34,7 +34,7 @@
     "normal": {
       "client_exit": 0,
       "service_inactive": true,
-      "service_cgroup_empty_or_absent": true
+      "readable_matching_service_cgroups_reported_unpopulated": true
     },
     "deadline": {
       "payload_started": true,
@@ -42,7 +42,7 @@
       "service_terminal_exit": 124,
       "service_main_pid": 0,
       "service_control_pid": 0,
-      "service_cgroup_empty_or_absent": true
+      "readable_matching_service_cgroups_reported_unpopulated": true
     }
   },
   "run": {

@@ -25,7 +25,9 @@ The acknowledged separate-service binaries built from source revision be25aa6 pa
 
 - **Initial resource limits on Linux 6.8.** With fs.suid_dumpable set to 0 or 2, all 16 numeric soft and hard limits matched the lower observed caller and service values. [Resource limit results](../../../tests/evidence/linux-x64-resource-limit-caps-20261123-summary.json)
 - **Process-count refusal on Linux 6.8.** In both modes, the permissive control completed. A zero process limit returned 125 with no payload output, and the service runtime and cgroup were retired before fixture cleanup. [Process-count results](../../../tests/evidence/linux-x64-nproc-refusal-20261123-summary.json)
-- **Normal exit and deadline on Linux 5.14.** With the AlmaLinux 5.14.0-741.22.1.el9_9.x86_64 kernel, Ubuntu 24.04 userspace, systemd 255, and fs.suid_dumpable set to 2, the normal command returned 0 and the deadline case returned 124. Both service domains were empty or absent after completion. [Lifecycle results](../../../tests/evidence/linux-x64-current-floor-20261123-summary.json)
+- **Normal exit and deadline on Linux 5.14.** With the AlmaLinux 5.14.0-741.22.1.el9_9.x86_64 kernel, Ubuntu 24.04 userspace, systemd 255, and fs.suid_dumpable set to 2, the normal command returned 0 and the deadline case returned 124. After each case the fixture found no matching active service, and every readable matching cgroup reported an empty population. [Lifecycle results](../../../tests/evidence/linux-x64-current-floor-20261123-summary.json)
+
+The held-release deadline repair passed the native C deadline and peer-veto controls, plus normal completion and deadline cleanup on Linux 6.8 in mode 2. Both CI builds produced identical release executables. [Held-release repair results](../../../tests/evidence/linux-x64-held-release-20261123-summary.json)
 
 The service creates the payload in its own security and resource-accounting context. Transparent caller-context execution, broader platform qualification, and comparative performance remain open in [issue #2](https://github.com/WikdSolvemProbler/process-tree-guard/issues/2).
 

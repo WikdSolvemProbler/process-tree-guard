@@ -1,0 +1,64 @@
+{
+  "schema": "ptg-linux-x64-held-release-1",
+  "date_utc": "2026-11-23",
+  "repair_source": "4978bf46c1c51bb738625821d3f774633ebf60ce",
+  "regression_source": "214011831d7467d7ee0f3417d6a12f170c24e539",
+  "native_ci": {
+    "rust_version": "1.88.0",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "repair_run": 45255514727,
+    "repair_job": 137976222305,
+    "repair_artifact_id": 14858541149,
+    "repair_artifact_sha256": "cdf7543849ae107818a7ad8b6669a299d72830e0794eec1f8e8909a347f1e9ed",
+    "regression_run": 45256627391,
+    "regression_job": 137980033171,
+    "regression_artifact_id": 14857314802,
+    "regression_artifact_sha256": "fecb1fc7a8194e11941c2b6161380aee66a8088beaae8c665f4cffca8903a66f",
+    "regression_tests": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "shared_release_executable_sha256": {
+      "process-tree-guard-client": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239",
+      "process-tree-guard-root": "5687947b15b03d558dccd6541cfd4590cb274a5cc02ea7375991c4bb28107dc9"
+    }
+  },
+  "release_gate_control": {
+    "test": "native_gate_first_cancellation_cause_is_irreversible",
+    "method": "Call the actual C commit function with an already-expired original cutoff, a real shared gate, nonblocking local watch and permit descriptors, and a pipe as the held kill write sink.",
+    "quiet_peer": "Typed pre-send deadline receipt, cancelled gate, one held kill byte and empty permit socket with writer open.",
+    "ready_peer": "Peer readiness recorded, typed deadline withheld, cancelled gate, one held kill byte and empty permit socket with writer open.",
+    "scope": "Native decision and write behavior with local descriptor controls. Separate live guest controls record service state and readable cgroup populations."
+  },
+  "offline_guest": {
+    "source": "4978bf46c1c51bb738625821d3f774633ebf60ce",
+    "arch": "x86_64",
+    "kernel": "6.8.0-147-generic",
+    "fs_suid_dumpable": 2,
+    "deployment": "acknowledged separate service",
+    "network_enabled": false,
+    "host_whole_tree_seconds": 280,
+    "emulator_seconds": 230,
+    "guest_driver_seconds": 105,
+    "normal_exit": 0,
+    "normal_service_inactive": true,
+    "started_payload_deadline_exit": 124,
+    "deadline_service_exit": 124,
+    "matching_active_services": 0,
+    "readable_matching_cgroups_reported_unpopulated": true,
+    "emulator_native_exit": 0,
+    "matching_emulator_processes_after_exit": 0,
+    "scope": "Ordinary completion and deadline after payload start on the exact stock repair executables. The rare pre-send cutoff was exercised in the separate native control.",
+    "sha256": {
+      "runner": "89fd6480db5aa2bc944b98fc275b925fb1db8cd59bfc6c0f850f5dd7a5b23d09",
+      "guest_driver": "fb6debafdcf642ea7214c473cf097a7233faa806066dd073f8db3f0bb40eba26",
+      "pristine_base_image": "04e8f2461a16a44e78a370284471f29616cdd9baf1893df25807b71f985b6c94",
+      "serial_log": "40590b9930845c7937617a206595b857b654de17c1bb5541a28168484ee8c1de",
+      "host_result": "dbdda8a8db7126c72eb1c47eac64751ecdc9eb402025d4fd2316f8c16968aba4",
+      "emulator_result": "1443c6f8fcf8483ba660c6d9f4cf1d77c52e649b3fee0fef07dbc99bd33be836",
+      "postflight": "15ed2b2b28d53bf79b732eb557fa30306164baf9096679271972ac0b4657d575"
+    }
+  }
+}
