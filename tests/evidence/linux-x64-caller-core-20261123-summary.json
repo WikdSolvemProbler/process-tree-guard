@@ -1,0 +1,132 @@
+{
+  "schema": "ptg-linux-x64-caller-core-1",
+  "date_utc": "2026-11-23",
+  "scope": "Four opt-in separate-service CLI invocations in two isolated Linux x86-64 guests.",
+  "source_commit": "e544486582234db3d35585eed5ff252b89837906",
+  "build": {
+    "workflow_run": 45235852510,
+    "artifact_id": 14849845844,
+    "artifact_archive_sha256": "1813bb712518089f4e4e69b73746d3616416c15505a3d1f22059c51175cc5e80",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "sha256": {
+      "process-tree-guard-root": "091600028a001d1ff0373a0a3c16e3ed1842a052032165ff0d9968b715772baa",
+      "process-tree-guard-client": "69fa1c559fab85dccdc6f3be6f83cc056dfaad5270d03b2603acd7a1eeb3cf82"
+    }
+  },
+  "method": {
+    "kernel": "6.8.0-147-generic",
+    "network_enabled": false,
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105,
+    "observations": "The caller read its own CORE limits before exec. The observer matched the service identity and cgroup, held service and payload pidfds, and compared the payload self-report with independent kernel readings. The service tuple matched across both controls in each guest."
+  },
+  "modes": [
+    {
+      "suid_dumpable": 0,
+      "controls": [
+        {
+          "caller_core_bytes": [
+            0,
+            0
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            0
+          ],
+          "client_exit": 0
+        },
+        {
+          "caller_core_bytes": [
+            0,
+            4096
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "client_exit": 0
+        }
+      ],
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "host_native_exit": 0,
+      "original_host_handle_retained": true,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "dc01054f5cbeb43b23cdffc9128f4e0bce061ef1a34fac1ffa028b61ae60e12b",
+        "emulator_result": "a7f58f713f879d1c3f1d57c0588d18ecae166521cfd3e1dabe672435ce17d493",
+        "serial": "cf1689bdd6a7ca932f9c9192267a015430fe88b40c626d6e14028c76fdd93b18",
+        "intent": "27d64016046a7065268b2f58b51eec16da0273d88ee8dc40e915a8c054edd3f9",
+        "host_runner": "40ad9029da8363b4a8f4b3f69663f12c4025208555d11a17dca08f8a54eac017",
+        "guest_driver": "e7c7fe4c57c714c12059a988ca11bd960c4fc417af8f089d79d9bbeb0d15a11c",
+        "credential_observer": "b2394e93eb49737648042b94be12bb9564648886d6f64078ecae5cf635511182",
+        "postflight": "4f6895ac367794fce2bbeba998807ffb055401e555ad94173693f15be9937522"
+      }
+    },
+    {
+      "suid_dumpable": 2,
+      "controls": [
+        {
+          "caller_core_bytes": [
+            0,
+            0
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            0
+          ],
+          "client_exit": 0
+        },
+        {
+          "caller_core_bytes": [
+            0,
+            4096
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "client_exit": 0
+        }
+      ],
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "host_native_exit": 0,
+      "original_host_handle_retained": true,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "93ee11818a0903e32515822b5e88cd28cdfa43f5817e513013ea230ed182c14c",
+        "emulator_result": "465d3072243263dbc580971f83bcb5687f747819986168554c4d346c3c70884b",
+        "serial": "39188e394d4fd05f5abdf22c9328a008b60ebed1bcc3e113092dddb15aed9ec6",
+        "intent": "01bc9867f8147ff4603e7a19a186068a46852e53945bb315bce9f1aff8b6f75b",
+        "host_runner": "bcc606c73081445f4dc7044aadc8ee893da6cddf148d4e99256227a03fa08a54",
+        "guest_driver": "f79a60fd9d07e5b766356dad50177a5cae2d80868373ee7d78f1a61ba25d3d07",
+        "credential_observer": "1b0ff1d94815c3c05814e78de06db0f96425008b9ca99994d27052f1538f83a7",
+        "postflight": "eb826d12cdf70242f57efbebd259d61ef3589ebe3cc486ef5d43f43a685d77dd"
+      }
+    }
+  ],
+  "limits": [
+    "The cases verify numeric CORE limits for an observed (0, 0) and a finite nonzero caller control in each guest mode.",
+    "The tests do not exercise core dump delivery or qualify other caller limits, transparent Linux execution, Tailscale access, or performance.",
+    "Raw captures and prior attempts are preserved locally."
+  ]
+}
