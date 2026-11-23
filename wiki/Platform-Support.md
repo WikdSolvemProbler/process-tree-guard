@@ -17,7 +17,8 @@ This page is the platform support page of process-tree-guard and the public home
 | Backend | Tier | State |
 |---|---|---|
 | Windows | Proven backend | One declaration module stands at `src/sys/windows.rs`. The crate refuses a build with no proven backend. |
-| Linux x86-64 and ARM64, GNU | Opt-in execution | The acknowledged separate-service client and service have live test results. [Linux deployment and evidence](../src/sys/linux/README.md) |
+| Linux x86-64, GNU | Opt-in execution | Separate-service resource caps and refusal on Linux 6.8, plus normal and deadline exits on the tested Linux 5.14 kernel and userspace combination. [Runtime evidence](../src/sys/linux/README.md#current-x86-64-runtime-evidence) |
+| Linux ARM64, GNU | Opt-in execution | Separate-service normal exit, ancestor loss, deadline expiry, and overlapping invocations on the tested ARM64 configuration. [Runtime evidence](../src/sys/linux/README.md#normal-exit-on-arm64) |
 | macOS | Theory | No backend exists. A named place stands at `src/sys/macos/`. |
 
 Linux test-harness checks cover the harness. The linked native runtime results identify the separate-service cases verified on each Linux configuration.
