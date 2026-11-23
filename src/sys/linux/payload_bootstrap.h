@@ -11,7 +11,8 @@
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 7u
+#define PTG_PAYLOAD_SCHEMA 8u
+#define PTG_PAYLOAD_RELEASE_PRE_SEND_DEADLINE 4u
 #define PTG_RESOURCE_LIMIT_COUNT 16u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
@@ -97,7 +98,7 @@ struct ptg_payload_ready {
     uint64_t child_mask, before_ns, after_ns;
     int32_t kill_result, kill_error;
 };
-/* READY wire is exactly16 bytes: schema:u32=7, token:u32='R', blocked_mask:u64.
+/* READY wire is exactly16 bytes: schema:u32, token:u32='R', blocked_mask:u64.
  * It follows FD scrub and verified groups/gid/uid/zero caps/NNP/CWD. It certifies
  * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion.
  * host_dumpability and caller_limits are trusted supervisor observations.
@@ -114,18 +115,22 @@ void ptg_payload_wait_ready(const struct ptg_payload_spec *spec,
 
 struct ptg_payload_release {
     uint32_t schema, stage;
-    int32_t result, error, poll_result, revents[5];
+    int32_t result, error, poll_result, revents[6];
     int32_t gate_before, gate_after, write_result, write_error;
-    int32_t kill_result, kill_error;
+    int32_t kill_result, kill_error, cancel_previous;
     uint64_t before_ns, after_ns;
 };
 /* Final poll/clock observation, HELD->RELEASED CAS, and exactly one nonblocking
  * 'G' packet through MSG_NOSIGNAL. Every refusal latches CANCELLED before attempting held cgroup.kill.
+ * A pre-send deadline receipt requires a cutoff sample, confirmation against
+ * the competing watches including the authenticated peer, and a winning
+ * cancellation CAS. The peer descriptor stays with the supervisor.
  * A racing cancellation can win after the observation; the watchdog must then
  * kill/drain. Neither successful send nor pipe EOF proves exec or settlement.
  */
 void ptg_payload_commit(const struct ptg_payload_spec *spec,
-    int32_t payload_pidfd, int32_t permit_writer, struct ptg_payload_release *out);
+    int32_t payload_pidfd, int32_t permit_writer, int32_t peer,
+    struct ptg_payload_release *out);
 
 /* Existing exec report is exactly8 bytes: ASCII EXE1 + positive errno LE32.
  * Bootstrap failure attempts that report then exits125; execve failure exits127.

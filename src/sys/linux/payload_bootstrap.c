@@ -45,7 +45,9 @@ _Static_assert(PTG_RESOURCE_LIMIT_COUNT==16 && RLIM_NLIMITS>=PTG_RESOURCE_LIMIT_
 _Static_assert(RLIMIT_CORE==4,"Linux core resource ABI");
 _Static_assert(sizeof(struct ptg_payload_spawn)==128,"payload spawn ABI");
 _Static_assert(sizeof(struct ptg_payload_ready)==96,"payload readiness ABI");
-_Static_assert(sizeof(struct ptg_payload_release)==80,"payload release ABI");
+_Static_assert(sizeof(struct ptg_payload_release)==88
+    && offsetof(struct ptg_payload_release,cancel_previous)==68
+    && offsetof(struct ptg_payload_release,before_ns)==72,"payload release ABI");
 _Static_assert(sizeof(uid_t)==4 && sizeof(gid_t)==4 && sizeof(pid_t)==4,"Linux credential/PID scalars");
 _Static_assert(ATOMIC_INT_LOCK_FREE==2 && sizeof(unsigned int)==4,"gate atomics must never call a lock helper");
 _Static_assert(SIGCHLD==17 && SIGKILL==9 && SIGSTOP==19 && SIG_SETMASK==2,"raw signal constants");
@@ -98,6 +100,10 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 25:return SYS_prlimit64;
     case 26:return 1;
     case 27:return PTG_RESOURCE_LIMIT_COUNT;
+    case 44:return PTG_PAYLOAD_RELEASE_PRE_SEND_DEADLINE;
+    case 45:return ETIMEDOUT;
+    case 46:return offsetof(struct ptg_payload_release,cancel_previous);
+    case 47:return offsetof(struct ptg_payload_release,before_ns);
     default:return UINT64_MAX;
     }
 }
@@ -177,12 +183,13 @@ static uint64_t now_ns(int *error) {
     }
     *error=0;return (uint64_t)t.tv_sec*UINT64_C(1000000000)+(uint64_t)t.tv_nsec;
 }
-static void cancel_kill(const struct ptg_payload_spec *s,int32_t *result,int32_t *error) {
+static int32_t cancel_kill(const struct ptg_payload_spec *s,int32_t *result,int32_t *error) {
     /* Irreversible shared cancellation always precedes this held kill write. */
-    if(s) (void)ptg_payload_gate_cancel(s->gate);
-    if(!s || s->kill_fd<0){*result=-1;*error=EBADF;return;}
+    const int32_t previous=s?ptg_payload_gate_cancel(s->gate):-1;
+    if(!s || s->kill_fd<0){*result=-1;*error=EBADF;return previous;}
     const long r=syscall(SYS_write,s->kill_fd,"1",1);
     *result=(int32_t)r;*error=r<0?errno:0;
+    return previous;
 }
 static int vector_bytes(const char *const *v,uint32_t count,size_t *remaining) {
     if(!v || count>PTG_PAYLOAD_MAX_VECTOR || v[count]!=NULL)return EINVAL;
@@ -601,22 +608,54 @@ void ptg_payload_wait_ready(const struct ptg_payload_spec *s,int32_t reader,int3
 refused:
     cancel_kill(s,&out->kill_result,&out->kill_error);
 }
+/* Only the held original timer may be ready on the deadline-only path. */
+static int release_poll_allows_deadline(int result,const struct pollfd *fds,unsigned count) {
+    if(result!=0 && (result!=1 || fds[1].revents!=POLLIN))return 0;
+    for(unsigned i=0;i<count;i++){
+        if(fds[i].revents && (i!=1 || result!=1))return 0;
+    }
+    return 1;
+}
+
 void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t writer,
-    struct ptg_payload_release *out) {
+    int32_t peer,struct ptg_payload_release *out) {
     if(!out)return;
     memset(out,0,sizeof(*out));out->schema=PTG_PAYLOAD_SCHEMA;out->stage=1;
-    out->result=out->write_result=out->kill_result=INT32_MIN;
-    if(watch_spec_valid(s) || child<0 || writer<0){out->error=EINVAL;goto refused;}
+    out->result=out->write_result=out->kill_result=out->cancel_previous=INT32_MIN;
+    if(watch_spec_valid(s) || child<0 || writer<0 || peer<0
+       || peer==child || peer==writer || peer==s->timer_fd || peer==s->supervisor_fd
+       || peer==s->watchdog_fd || peer==s->kill_fd){out->error=EINVAL;goto refused;}
     out->error=nonblocking_permit(writer);if(out->error)goto refused;
     out->gate_before=ptg_payload_gate_state(s->gate);
     if(out->gate_before!=PTG_PAYLOAD_HELD){out->error=ECANCELED;goto refused;}
-    struct pollfd fds[5]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
-        {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},{.fd=child,.events=POLLIN}};
+    struct pollfd fds[6]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
+        {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},
+        {.fd=child,.events=POLLIN},{.fd=peer,.events=POLLIN|POLLRDHUP}};
     out->poll_result=ptg_owner_poll(&s->owners,fds,5,0,0);
     for(unsigned int i=0;i<5;i++)out->revents[i]=fds[i].revents;
-    if(out->poll_result!=0){out->error=out->poll_result<0?errno:ECANCELED;goto refused;}
+    if(out->poll_result!=0 && !release_poll_allows_deadline(out->poll_result,fds,5)){
+        out->error=out->poll_result<0?errno:ECANCELED;goto refused;
+    }
     int error=0;out->before_ns=now_ns(&error);
-    if(error || out->before_ns>=s->deadline_ns){out->error=error?error:ETIMEDOUT;goto refused;}
+    if(error){out->error=error;goto refused;}
+    if(out->before_ns>=s->deadline_ns){
+        /* Confirm competing watches after the cutoff sample. A gate CAS
+         * orders the observed causes without assigning order to unseen events. */
+        out->poll_result=ptg_owner_poll(&s->owners,fds,6,0,0);
+        for(unsigned int i=0;i<6;i++)out->revents[i]=fds[i].revents;
+        if(!release_poll_allows_deadline(out->poll_result,fds,6)){
+            out->error=out->poll_result<0?errno:ECANCELED;goto refused;
+        }
+        out->error=ETIMEDOUT;
+        out->cancel_previous=cancel_kill(s,&out->kill_result,&out->kill_error);
+        out->gate_after=ptg_payload_gate_state(s->gate);
+        if(out->cancel_previous==PTG_PAYLOAD_HELD && out->gate_after==PTG_PAYLOAD_CANCELLED
+           && out->kill_result==1 && out->kill_error==0){
+            out->stage=PTG_PAYLOAD_RELEASE_PRE_SEND_DEADLINE;
+        }
+        return;
+    }
+    if(out->poll_result!=0){out->error=ECANCELED;goto refused;}
     if(ptg_payload_gate_commit(s->gate)!=PTG_PAYLOAD_HELD){out->error=ECANCELED;goto refused;}
     out->gate_after=ptg_payload_gate_state(s->gate);
     if(out->gate_after!=PTG_PAYLOAD_RELEASED){out->error=ECANCELED;goto refused;}
@@ -629,6 +668,6 @@ void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t w
        || out->gate_after!=PTG_PAYLOAD_RELEASED){out->error=error?error:ECANCELED;goto refused;}
     out->stage=3;out->result=0;return;
 refused:
-    cancel_kill(s,&out->kill_result,&out->kill_error);
+    out->cancel_previous=cancel_kill(s,&out->kill_result,&out->kill_error);
     out->gate_after=s?ptg_payload_gate_state(s->gate):-1;
 }

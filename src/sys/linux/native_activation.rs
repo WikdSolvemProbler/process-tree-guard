@@ -153,7 +153,7 @@ trait OneShotPort {
         domain: &ArmedDomain,
         child: &DirectChild,
         permit_writer: &OwnedFd,
-    ) -> Probe<()>;
+    ) -> Probe<Decision>;
 }
 
 struct ActiveRun {
@@ -191,12 +191,17 @@ impl ActiveRun {
         // The original timer and owner remain live in the watchdog while the
         // supervisor samples them again at the last release boundary.
         let decision = self.prepared.lease.sample()?.decision;
-        if decision == Decision::Permit {
-            self.domain.controls.revalidate()?;
-            port.commit_permit(&self.domain, &child.identity, &permit_writer)?;
+        if decision != Decision::Permit {
+            return Ok(decision);
         }
+        self.domain.controls.revalidate()?;
+        let release = port.commit_permit(&self.domain, &child.identity, &permit_writer)?;
         drop(permit_writer);
-        Ok(decision)
+        if release == Decision::Deadline {
+            check(self.prepared.lease.sample()?.decision == Decision::Deadline,
+                "original deadline lost its release proof")?;
+        }
+        Ok(release)
     }
 }
 

@@ -6,8 +6,10 @@ use std::ffi::{c_char, CString};
 use std::ptr::NonNull;
 use super::cgroup_authority::settlement::Deadline;
 
-const PAYLOAD_SCHEMA:u32=7;
-const PAYLOAD_ABI_WORDS:usize=28+RESOURCE_LIMIT_COUNT;
+const PAYLOAD_SCHEMA:u32=8;
+const PAYLOAD_ABI_WORDS:usize=32+RESOURCE_LIMIT_COUNT;
+const RELEASE_PRE_SEND_DEADLINE:u32=4;
+const RELEASE_ETIMEDOUT:c_int=110;
 const BLOCKED_MASK:u64=u64::MAX & !(1u64<<8) & !(1u64<<18);
 #[repr(C)]
 struct PayloadSpec {
@@ -54,16 +56,40 @@ struct Ready {
 #[repr(C)]
 #[derive(Clone,Copy,Debug,Default)]
 struct Release {
-    schema:u32,stage:u32,result:c_int,error:c_int,poll_result:c_int,revents:[c_int;5],
+    schema:u32,stage:u32,result:c_int,error:c_int,poll_result:c_int,revents:[c_int;6],
     gate_before:c_int,gate_after:c_int,write_result:c_int,write_error:c_int,kill_result:c_int,kill_error:c_int,
-    before_ns:u64,after_ns:u64,
+    cancel_previous:c_int,before_ns:u64,after_ns:u64,
 }
+
+impl Release {
+    fn proves_pre_send_deadline(&self, deadline_ns: u64) -> bool {
+        let clear = self.poll_result == 0 && self.revents == [0; 6];
+        let timer_only = self.poll_result == 1
+            && self.revents == [0, c_int::from(POLLIN), 0, 0, 0, 0];
+        self.schema == PAYLOAD_SCHEMA
+            && self.stage == RELEASE_PRE_SEND_DEADLINE
+            && self.result == c_int::MIN
+            && self.error == RELEASE_ETIMEDOUT
+            && (clear || timer_only)
+            && self.before_ns >= deadline_ns
+            && self.after_ns == 0
+            && self.gate_before == 0
+            && self.cancel_previous == 0
+            && self.gate_after == 2
+            && self.write_result == c_int::MIN
+            && self.write_error == 0
+            && self.kill_result == 1
+            && self.kill_error == 0
+    }
+}
+
 const _:()={
     assert!(std::mem::offset_of!(PayloadSpec,umask)==92);
     assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,caller_limits)==160);
     assert!(size_of::<ResourceLimits>()==256);
     assert!(size_of::<PayloadSpec>()==416 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
-    assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==80);
+    assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==88);
+    assert!(std::mem::offset_of!(Release,cancel_previous)==68 && std::mem::offset_of!(Release,before_ns)==72);
 };
 unsafe extern "C" {
     #[link_name="socketpair"]
@@ -78,16 +104,17 @@ unsafe extern "C" {
     fn ptg_payload_gate_destroy(gate:*mut c_void,error:*mut c_int)->c_int;
     fn ptg_payload_spawn(spec:*const PayloadSpec,out:*mut Spawn);
     fn ptg_payload_wait_ready(spec:*const PayloadSpec,reader:c_int,child:c_int,setup:c_int,until:u64,out:*mut Ready);
-    fn ptg_payload_commit(spec:*const PayloadSpec,child:c_int,permit:c_int,out:*mut Release);
+    fn ptg_payload_commit(spec:*const PayloadSpec,child:c_int,permit:c_int,peer:c_int,out:*mut Release);
 }
 
 fn sample_payload_abi()->[u64;PAYLOAD_ABI_WORDS]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
 fn require_payload_abi(abi:&[u64;PAYLOAD_ABI_WORDS])->Probe<()> {
     let expected=[
-        u64::from(PAYLOAD_SCHEMA),416,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,
+        u64::from(PAYLOAD_SCHEMA),416,128,96,88,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,
         SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,160,5,16,0,8,4,
         SYS_PRLIMIT64 as u64,1,RESOURCE_LIMIT_COUNT as u64,
         0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+        u64::from(RELEASE_PRE_SEND_DEADLINE),RELEASE_ETIMEDOUT as u64,68,72,
     ];
     check(*abi==expected,"payload C/Rust bridge ABI differs")
 }
@@ -241,7 +268,7 @@ fn duplicate(fd:&OwnedFd)->Probe<OwnedFd> {
     fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})
 }
 #[derive(Default)]
-struct PayloadReceipt {cancellation_authorize:Option<super::super::super::entry::CancellationObservation>,abi:Option<[u64;PAYLOAD_ABI_WORDS]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
+struct PayloadReceipt {cancellation_authorize:Option<super::super::super::entry::CancellationObservation>,abi:Option<[u64;PAYLOAD_ABI_WORDS]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,deadline_cancellation:Option<super::super::super::entry::CancellationObservation>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
 struct NativePort {
     scope:VerifiedServiceScope,
     launch:LaunchContext, watch:Option<OriginalWatch>, receipt:PayloadReceipt, host_policy:ActivationHostReceipt,
@@ -356,17 +383,28 @@ impl OneShotPort for NativePort {
     fn payload_parent_mask(&self)->Option<ParentMaskObservation> {
         self.receipt.spawn.zip(self.receipt.expected_mask).map(|(raw,expected)|ParentMaskObservation::from_spawn(raw,expected))
     }
-    fn commit_permit(&mut self,domain:&ArmedDomain,child:&DirectChild,permit:&OwnedFd)->Probe<()> {
+    fn commit_permit(&mut self,domain:&ArmedDomain,child:&DirectChild,permit:&OwnedFd)->Probe<Decision> {
         if let Err(error)=self.scope.require_delegation(self.launch.caller.uid){self.cancel(domain);return Err(error);}
         let spec=self.spec(domain,-1,-1,-1)?;
         let mut release=Release::default();
-        unsafe{ptg_payload_commit(&spec,child.pidfd.as_raw_fd(),permit.as_raw_fd(),&mut release)};
+        let cancellation=&self.launch.cancellation;
+        unsafe{ptg_payload_commit(&spec,child.pidfd.as_raw_fd(),permit.as_raw_fd(),cancellation.fd(),&mut release)};
         self.receipt.release=Some(release);
         let valid=release.schema==PAYLOAD_SCHEMA && release.result==0 && release.error==0 && release.gate_before==0
             && release.gate_after==1 && release.write_result==1 && release.write_error==0
             && release.before_ns>0 && release.after_ns>=release.before_ns && release.after_ns<spec.deadline_ns;
-        if !valid {self.cancel(domain);return Err("payload release refused".into());}
-        Ok(())
+        if valid {
+            return Ok(Decision::Permit);
+        }
+        if release.proves_pre_send_deadline(spec.deadline_ns) {
+            let observation=cancellation.sample();
+            self.receipt.deadline_cancellation=Some(observation);
+            if observation.state()==super::super::super::entry::CancellationState::Clear {
+                return Ok(Decision::Deadline);
+            }
+        }
+        self.cancel(domain);
+        Err("payload release refused".into())
     }
 }
 
@@ -452,8 +490,49 @@ pub(in super::super) fn before_admission_cause(scope:Option<VerifiedServiceScope
     RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:None},port:None,early_scope:scope,early_cancellation:Some(cancellation),admission}
 }
 
+#[cfg(test)]
+fn pre_send_deadline_regression() {
+    let cutoff = 100;
+    let expired = Release {
+        schema: PAYLOAD_SCHEMA,
+        stage: RELEASE_PRE_SEND_DEADLINE,
+        result: c_int::MIN,
+        error: RELEASE_ETIMEDOUT,
+        gate_after: 2,
+        write_result: c_int::MIN,
+        kill_result: 1,
+        before_ns: cutoff,
+        ..Release::default()
+    };
+    assert!(expired.proves_pre_send_deadline(cutoff));
+    let timer_only = Release { poll_result: 1, revents: [0, 1, 0, 0, 0, 0], ..expired };
+    assert!(timer_only.proves_pre_send_deadline(cutoff));
+    for (label, refused) in [
+        ("ABI", Release { schema: PAYLOAD_SCHEMA - 1, ..expired }),
+        ("generic stage", Release { stage: 1, ..expired }),
+        ("wrong cause", Release { error: 5, ..expired }),
+        ("before cutoff", Release { before_ns: cutoff - 1, ..expired }),
+        ("poll failure", Release { poll_result: -1, ..expired }),
+        ("timer fault", Release { revents: [0, 8, 0, 0, 0, 0], ..timer_only }),
+        ("prior cancellation", Release { cancel_previous: 2, ..expired }),
+        ("permit sent", Release { write_result: 1, ..expired }),
+        ("permit attempted", Release { write_result: -1, write_error: 32, ..expired }),
+        ("post-send sample", Release { after_ns: cutoff, ..expired }),
+        ("kill failed", Release { kill_result: -1, kill_error: 5, ..expired }),
+    ] {
+        assert!(!refused.proves_pre_send_deadline(cutoff), "{label}");
+    }
+    for watch in [0, 2, 3, 4, 5] {
+        let mut competing = expired;
+        competing.poll_result = 1;
+        competing.revents[watch] = 1;
+        assert!(!competing.proves_pre_send_deadline(cutoff), "watch {watch}");
+    }
+}
+
 #[cfg(test)]pub(super) fn gate_first_cause_regression(){
  let abi=sample_payload_abi();require_payload_abi(&abi).expect("actual compiled payload ABI must match production validator");
+ pre_send_deadline_regression();
  let observe=|released:bool,generic_first:bool|{
   let gate=SharedGate::create().expect("actual native gate allocation");let mut raw=[-9;8];
   raw[0]=gate.state();raw[1]=gate.peer_cancelled();
