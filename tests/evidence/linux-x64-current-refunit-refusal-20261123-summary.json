@@ -1,0 +1,56 @@
+{
+  "schema": "ptg-linux-x64-refunit-refusal-1",
+  "date_utc": "2026-11-23",
+  "scope": "One RefUnit authorization refusal in an offline Linux x86-64 VM using the opt-in separate-service CLI.",
+  "source_commit": "0358129d1fe560cb965257f507aefd28d2c3e43f",
+  "build": {
+    "workflow_run": 45227280140,
+    "artifact_id": 14843521890,
+    "artifact_archive_sha256": "aa9fd1b150e2886dd1e92a0869d3f5ed94b0eb071e3c4057a4f89897286c3684",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "sha256": {
+      "process-tree-guard-root": "81ffc145cbba79ebd32ed1e1dfcd1d77c43d571dadfeb1447691d3bac323a343",
+      "process-tree-guard-client": "f80e2122db516fea4d795ab17099f633328bc16867d80b0f09bd1521166a5361"
+    }
+  },
+  "environment": {
+    "kernel": "6.8.0-147-generic",
+    "suid_dumpable": 2,
+    "network_enabled": false,
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105
+  },
+  "prior_fixture": "linux-x64-refunit-refusal-20261119-summary.json",
+  "result": {
+    "expected_authorization_refusal_count": 1,
+    "client_exit": 125,
+    "empty_stdout": true,
+    "payload_marker_observed": false,
+    "service_terminal_exit": 125,
+    "service_main_pid": 0,
+    "service_control_pid": 0,
+    "runtime_absent_before_fixture_teardown": true,
+    "named_cgroup_absent_or_empty_before_fixture_teardown": true,
+    "host_native_exit": 0,
+    "host_original_handle_retained": true,
+    "emulator_exit": 0,
+    "emulator_timed_out": false,
+    "emulator_processes_remaining": 0
+  },
+  "evidence_sha256": {
+    "host_result": "dd2c597e0216cf521b28060dbb87135bbfdbce59974c369f15eec1a90f6ded05",
+    "vm_result": "7b3a20a7e53bf3c23fc3499da163c779ba89c600c547b452cb7b25aa021c604c",
+    "serial": "41a66ca40842be283b9ce43f13e6c83cb00b8ba63c1622ebc7b6555b29f4b6cf",
+    "intent": "60d272c96a44bf3a1d53c5c9cb20dc0c1edb8bd9c8e7e1df5fc6a0e62ec471e7",
+    "host_runner": "5a30f8bbc7d47f4b72079e37a49f66393da4cfc67053e32108725d4842396190",
+    "guest_driver": "4436eb4829b4bd874d382475786129875381c22a97bf3c0f8f583a9d19fa6f01",
+    "postflight": "8d05f6916411a07643abb660ed6030231735ea533b75991974f62711d1b4db11"
+  },
+  "limits": [
+    "The client exited before the retirement observation. Live-library-caller behavior and the specific empty-unit retirement retry require separate evidence.",
+    "This receipt covers one offline refusal and cleanup case. Transparent caller confinement, Tailscale transport, and performance remain open.",
+    "Raw captures are preserved locally."
+  ]
+}
