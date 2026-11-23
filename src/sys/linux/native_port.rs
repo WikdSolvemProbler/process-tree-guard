@@ -6,7 +6,8 @@ use std::ffi::{c_char, CString};
 use std::ptr::NonNull;
 use super::cgroup_authority::settlement::Deadline;
 
-const PAYLOAD_SCHEMA:u32=6;
+const PAYLOAD_SCHEMA:u32=7;
+const PAYLOAD_ABI_WORDS:usize=28+RESOURCE_LIMIT_COUNT;
 const BLOCKED_MASK:u64=u64::MAX & !(1u64<<8) & !(1u64<<18);
 #[repr(C)]
 struct PayloadSpec {
@@ -16,7 +17,7 @@ struct PayloadSpec {
     uid:u32, gid:u32, group_count:u32, argc:u32, envc:u32,umask:u32,
     deadline_ns:u64, original_mask:u64,
     groups:*const u32, program:*const c_char, argv:*const *const c_char, envp:*const *const c_char,
-    gate:*mut c_void,host_dumpability:u32,caller_core:CoreLimit,
+    gate:*mut c_void,host_dumpability:u32,caller_limits:ResourceLimits,
 }
 #[repr(C)]
 #[derive(Clone,Copy,Debug,Default)]
@@ -59,8 +60,9 @@ struct Release {
 }
 const _:()={
     assert!(std::mem::offset_of!(PayloadSpec,umask)==92);
-    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,caller_core)==160);
-    assert!(size_of::<PayloadSpec>()==176 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
+    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,caller_limits)==160);
+    assert!(size_of::<ResourceLimits>()==256);
+    assert!(size_of::<PayloadSpec>()==416 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
     assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==80);
 };
 unsafe extern "C" {
@@ -79,8 +81,16 @@ unsafe extern "C" {
     fn ptg_payload_commit(spec:*const PayloadSpec,child:c_int,permit:c_int,out:*mut Release);
 }
 
-fn sample_payload_abi()->[u64;27]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
-fn require_payload_abi(abi:&[u64;27])->Probe<()>{check(*abi==[u64::from(PAYLOAD_SCHEMA),176,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,160,5,16,0,8,4,SYS_PRLIMIT64 as u64,1],"payload C/Rust bridge ABI differs")}
+fn sample_payload_abi()->[u64;PAYLOAD_ABI_WORDS]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
+fn require_payload_abi(abi:&[u64;PAYLOAD_ABI_WORDS])->Probe<()> {
+    let expected=[
+        u64::from(PAYLOAD_SCHEMA),416,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,
+        SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,160,5,16,0,8,4,
+        SYS_PRLIMIT64 as u64,1,RESOURCE_LIMIT_COUNT as u64,
+        0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+    ];
+    check(*abi==expected,"payload C/Rust bridge ABI differs")
+}
 
 // No Drop cleanup promise: the actual mapping stays with controls/quarantine,
 // or the terminal receipt after all direct/adopted children are reaped.
@@ -151,8 +161,8 @@ struct ActivationHostReceipt {suid_dumpable:Option<Vec<u8>>,status:Option<String
     kernel_release:Option<Vec<u8>>,kernel_family:Option<ReviewedKernelFamily>,core:Option<CoreObservation>,
     image:Option<cgroup_authority::service_scope::ProtectedElfObservation>}
 #[derive(Debug)]
-struct CoreObservation {result:c_long,error:c_int,limit:CoreLimit}
-const _:()={assert!(size_of::<CoreLimit>()==16);assert!(std::mem::offset_of!(CoreLimit,soft)==0);assert!(std::mem::offset_of!(CoreLimit,hard)==8);};
+struct CoreObservation {result:c_long,error:c_int,limit:ResourceLimit}
+const _:()={assert!(size_of::<ResourceLimit>()==16);assert!(std::mem::offset_of!(ResourceLimit,soft)==0);assert!(std::mem::offset_of!(ResourceLimit,hard)==8);};
 #[cfg(target_arch="x86_64")]const SYS_PRLIMIT64:c_long=302;
 #[cfg(target_arch="aarch64")]const SYS_PRLIMIT64:c_long=261;
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
@@ -198,7 +208,7 @@ impl ActivationHostReceipt {
             self.kernel_family=Some(reviewed_mode2_family(self.kernel_release.as_ref().expect("kernel bytes stored"))?);
             self.image=Some(scope.protected_current_elf()?);
             check(valid_current_elf(&self.image.as_ref().expect("protected image stored").header),"mode2 requires the actual protected current LP64 ELF")?;
-            let mut limit=CoreLimit::default();let result=unsafe{syscall(SYS_PRLIMIT64,0 as c_int,4 as c_int,std::ptr::null::<CoreLimit>(),&mut limit as *mut CoreLimit)};
+            let mut limit=ResourceLimit::default();let result=unsafe{syscall(SYS_PRLIMIT64,0 as c_int,4 as c_int,std::ptr::null::<ResourceLimit>(),&mut limit as *mut ResourceLimit)};
             let error=if result<0{io::Error::last_os_error().raw_os_error().unwrap_or(-1)}else{0};
             self.core=Some(CoreObservation{result,error,limit});
             let observed=self.core.as_ref().expect("actual CORE observation stored");
@@ -218,7 +228,7 @@ impl ActivationHostReceipt {
     let mut elf=[0u8;64];elf[..7].copy_from_slice(b"\x7fELF\x02\x01\x01");elf[16..18].copy_from_slice(&3u16.to_le_bytes());let machine=if cfg!(target_arch="aarch64"){183u16}else{62u16};elf[18..20].copy_from_slice(&machine.to_le_bytes());elf[20..24].copy_from_slice(&1u32.to_le_bytes());elf[52..54].copy_from_slice(&64u16.to_le_bytes());assert!(valid_current_elf(&elf));
     for offset in [0,4,5,6,16,18,20,52]{let mut bad=elf;bad[offset]=0;assert!(!valid_current_elf(&bad));}
     assert!(!valid_current_elf(&elf[..63]));
-    cgroup_authority::service_scope::caller_core_limits_regression();
+    cgroup_authority::service_scope::caller_resource_limits_regression();
 }
 struct OriginalWatch { owners:Arc<VerifiedInvocation>,timer:OwnedFd,supervisor:OwnedFd,deadline_ns:u64 }
 fn permit_pair()->Probe<(OwnedFd,OwnedFd)> {
@@ -231,16 +241,16 @@ fn duplicate(fd:&OwnedFd)->Probe<OwnedFd> {
     fd_from_call(unsafe{fcntl(fd.as_raw_fd(),F_DUPFD_CLOEXEC,3 as c_int)})
 }
 #[derive(Default)]
-struct PayloadReceipt {cancellation_authorize:Option<super::super::super::entry::CancellationObservation>,abi:Option<[u64;27]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
+struct PayloadReceipt {cancellation_authorize:Option<super::super::super::entry::CancellationObservation>,abi:Option<[u64;PAYLOAD_ABI_WORDS]>,setup:Option<Deadline>,spawn:Option<Spawn>,ready:Option<Ready>,release:Option<Release>,refused_kill:Option<native_arming::KillObservation>,expected_mask:Option<u64>}
 struct NativePort {
     scope:VerifiedServiceScope,
     launch:LaunchContext, watch:Option<OriginalWatch>, receipt:PayloadReceipt, host_policy:ActivationHostReceipt,
     arguments:Vec<CString>, argv:Vec<*const c_char>, groups:Vec<u32>, uid:u32,gid:u32,
-    caller_core:CoreLimit,
+    caller_limits:ResourceLimits,
 }
 impl NativePort {
-    fn new(launch:LaunchContext,scope:VerifiedServiceScope,caller_core:CoreLimit)->Self {
-        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0,caller_core}
+    fn new(launch:LaunchContext,scope:VerifiedServiceScope,caller_limits:ResourceLimits)->Self {
+        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0,caller_limits}
     }
     fn spec(&self,domain:&ArmedDomain,permit:c_int,ready:c_int,exec:c_int)->Probe<PayloadSpec> {
         let watch=self.watch.as_ref().ok_or("missing original retained watch")?;
@@ -254,7 +264,7 @@ impl NativePort {
             group_count:self.groups.len() as u32,argc:self.arguments.len() as u32,envc:self.launch.environment.len() as u32,umask:u32::from(self.launch.umask),
             deadline_ns:watch.deadline_ns,original_mask:domain.arming.original_mask().ok_or("watchdog lacks original raw mask proof")?,
             groups:self.groups.as_ptr(),program:self.arguments.first().ok_or("missing authorized program")?.as_ptr(),
-            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,caller_core:self.caller_core,
+            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,caller_limits:self.caller_limits,
         })
     }
     fn cancel(&mut self,domain:&ArmedDomain) {
@@ -372,7 +382,7 @@ enum Completion {
 pub(crate) struct RunOutcome {completion:Completion,port:Option<NativePort>,early_scope:Option<VerifiedServiceScope>,early_cancellation:Option<Arc<super::super::super::entry::AuthenticatedCancellation>>,admission:NativeReceipt}
 
 pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt)->RunOutcome {
-    let mut port=NativePort::new(launch,scope,prepared.caller_core);
+    let mut port=NativePort::new(launch,scope,prepared.caller_limits);
     let completion=match unsafe{activate(prepared,&mut port)} {
         Ok(pending)=>Completion::Terminal(pending.run_to_terminal()),
         Err(failure)=>{
@@ -392,7 +402,7 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
 }
 pub(in super::super) fn before_activation(launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt,failure:PreparationFailure)->RunOutcome {
     let cause=failure.cause;let error=failure.error.clone();
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope,CoreLimit{soft:u64::MAX,hard:u64::MAX})),early_scope:None,early_cancellation:None,admission}
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope,[ResourceLimit{soft:u64::MAX,hard:u64::MAX};RESOURCE_LIMIT_COUNT])),early_scope:None,early_cancellation:None,admission}
 }
 
 fn unknown_watchdog_stop(reasons:u32)->bool{reasons&8!=0&&reasons&(1|2|512)==0}
@@ -443,7 +453,7 @@ pub(in super::super) fn before_admission_cause(scope:Option<VerifiedServiceScope
 }
 
 #[cfg(test)]pub(super) fn gate_first_cause_regression(){
- let abi=sample_payload_abi();require_payload_abi(&abi).expect("actual compiled payload ABI27 must match production validator");
+ let abi=sample_payload_abi();require_payload_abi(&abi).expect("actual compiled payload ABI must match production validator");
  let observe=|released:bool,generic_first:bool|{
   let gate=SharedGate::create().expect("actual native gate allocation");let mut raw=[-9;8];
   raw[0]=gate.state();raw[1]=gate.peer_cancelled();
@@ -457,7 +467,7 @@ pub(in super::super) fn before_admission_cause(scope:Option<VerifiedServiceScope
  assert_eq!(held,([0,0,-1,-1,0,2,1,2],1,2));
  assert_eq!(released,([0,0,0,-1,1,2,1,2],1,2));
  assert_eq!(generic,([0,0,-1,0,2,2,0,2],0,2));
- println!("native_payload_abi schema={} spec={} words={} prlimit64={} core_guard_soft={} verified=true",abi[0],abi[1],abi.len(),abi[25],abi[26]);
+ println!("native_payload_abi schema={} spec={} words={} prlimit64={} core_guard_soft={} limits={} verified=true",abi[0],abi[1],abi.len(),abi[25],abi[26],abi[27]);
  println!("native_gate_first_cause held_peer=preserved released_peer=preserved generic_first=not_relabelled gates=3 mappings_destroyed=3");
 }
 

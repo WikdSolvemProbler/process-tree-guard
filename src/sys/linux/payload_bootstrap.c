@@ -30,15 +30,18 @@
 _Static_assert(sizeof(void *)==8 && sizeof(unsigned long)==8,"LP64 private ABI");
 _Static_assert(sizeof(struct clone_args)==88 && offsetof(struct clone_args,cgroup)==80,"clone3 v2 ABI");
 _Static_assert(sizeof(struct pollfd)==8,"native pollfd ABI");
-_Static_assert(sizeof(struct ptg_payload_spec)==176,"payload spec ABI");
+_Static_assert(sizeof(struct ptg_payload_spec)==416,"payload spec ABI");
 _Static_assert(offsetof(struct ptg_payload_spec,gate)==144,"payload gate offset");
 _Static_assert(offsetof(struct ptg_payload_spec,owners)==16,"payload original owner-set offset");
 _Static_assert(offsetof(struct ptg_payload_spec,umask)==92,"explicit caller umask offset");
 _Static_assert(offsetof(struct ptg_payload_spec,host_dumpability)==152
-    && offsetof(struct ptg_payload_spec,caller_core)==160,"trusted core policy offsets");
-_Static_assert(sizeof(struct ptg_core_limits)==16
-    && offsetof(struct ptg_core_limits,soft)==0
-    && offsetof(struct ptg_core_limits,hard)==8,"Linux prlimit64 tuple ABI");
+    && offsetof(struct ptg_payload_spec,caller_limits)==160,"trusted resource policy offsets");
+_Static_assert(sizeof(((struct ptg_payload_spec *)0)->caller_limits)==256,"caller resource array ABI");
+_Static_assert(sizeof(struct ptg_resource_limit)==16
+    && offsetof(struct ptg_resource_limit,soft)==0
+    && offsetof(struct ptg_resource_limit,hard)==8,"Linux prlimit64 tuple ABI");
+_Static_assert(PTG_RESOURCE_LIMIT_COUNT==16 && RLIM_NLIMITS>=PTG_RESOURCE_LIMIT_COUNT,
+    "initial Linux resource count");
 _Static_assert(RLIMIT_CORE==4,"Linux core resource ABI");
 _Static_assert(sizeof(struct ptg_payload_spawn)==128,"payload spawn ABI");
 _Static_assert(sizeof(struct ptg_payload_ready)==96,"payload readiness ABI");
@@ -55,7 +58,17 @@ struct ready_message {uint32_t schema,token;uint64_t mask;};
 _Static_assert(sizeof(struct ready_message)==16,"ready wire ABI");
 extern uint64_t ptg_arm_kernel_signal_abi(uint32_t word);
 
+/* The ABI query checks this exact mapping against the authenticated array
+ * order expected by Rust on both supported Linux architectures. */
+static const unsigned int resource_numbers[PTG_RESOURCE_LIMIT_COUNT] = {
+    RLIMIT_CPU, RLIMIT_FSIZE, RLIMIT_DATA, RLIMIT_STACK,
+    RLIMIT_CORE, RLIMIT_RSS, RLIMIT_NPROC, RLIMIT_NOFILE,
+    RLIMIT_MEMLOCK, RLIMIT_AS, RLIMIT_LOCKS, RLIMIT_SIGPENDING,
+    RLIMIT_MSGQUEUE, RLIMIT_NICE, RLIMIT_RTPRIO, RLIMIT_RTTIME,
+};
+
 uint64_t ptg_payload_abi(uint32_t word) {
+    if(word>=28 && word<28+PTG_RESOURCE_LIMIT_COUNT)return resource_numbers[word-28];
     switch(word) {
     case 0:return PTG_PAYLOAD_SCHEMA;
     case 1:return sizeof(struct ptg_payload_spec);
@@ -76,14 +89,15 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 16:return offsetof(struct ptg_payload_spec,umask);
     case 17:return UINT32_C(0777);
     case 18:return offsetof(struct ptg_payload_spec,host_dumpability);
-    case 19:return offsetof(struct ptg_payload_spec,caller_core);
+    case 19:return offsetof(struct ptg_payload_spec,caller_limits);
     case 20:return UINT32_C(5);
-    case 21:return sizeof(struct ptg_core_limits);
-    case 22:return offsetof(struct ptg_core_limits,soft);
-    case 23:return offsetof(struct ptg_core_limits,hard);
+    case 21:return sizeof(struct ptg_resource_limit);
+    case 22:return offsetof(struct ptg_resource_limit,soft);
+    case 23:return offsetof(struct ptg_resource_limit,hard);
     case 24:return RLIMIT_CORE;
     case 25:return SYS_prlimit64;
     case 26:return 1;
+    case 27:return PTG_RESOURCE_LIMIT_COUNT;
     default:return UINT64_MAX;
     }
 }
@@ -212,8 +226,10 @@ static int nonblocking_permit(int fd) {
 static int watch_spec_valid(const struct ptg_payload_spec *s) {
     if(!s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
        || !gate_valid(s->gate) || !s->deadline_ns || (s->umask&~UINT32_C(0777))
-       || (s->host_dumpability!=0 && s->host_dumpability!=2)
-       || s->caller_core.soft>s->caller_core.hard)return EINVAL;
+       || (s->host_dumpability!=0 && s->host_dumpability!=2))return EINVAL;
+    for(unsigned int i=0;i<PTG_RESOURCE_LIMIT_COUNT;i++){
+        if(s->caller_limits[i].soft>s->caller_limits[i].hard)return EINVAL;
+    }
     const int32_t other[4]={s->kill_fd,s->timer_fd,s->supervisor_fd,s->watchdog_fd};
     return ptg_owner_watch_disjoint(&s->owners,other,4)?0:EINVAL;
 }
@@ -268,8 +284,8 @@ static int child_live(const struct ptg_payload_spec *s) {
     int e=0;const uint64_t now=now_ns(&e);
     return e?e:(now>=s->deadline_ns?ETIMEDOUT:0);
 }
-static int core_limits_read(struct ptg_core_limits *out) {
-    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,NULL,out)!=0)return errno;
+static int resource_limit_read(unsigned int resource,struct ptg_resource_limit *out) {
+    if(syscall(SYS_prlimit64,0,resource,NULL,out)!=0)return errno;
     return out->soft<=out->hard?0:EPROTO;
 }
 /* Linux 5.14/6.8 abort pipe cores at literal1 before starting a helper, and
@@ -278,35 +294,48 @@ static int core_limits_read(struct ptg_core_limits *out) {
  * Real/saved UID0 MUST remain until this tuple has been restored at dumpable0:
  * dumpability alone does not stop a same-credential peer's remote prlimit.
  */
-static int core_fence_begin(struct ptg_core_limits *original) {
-    int error=core_limits_read(original);if(error)return error;
+static int core_fence_begin(struct ptg_resource_limit *original) {
+    int error=resource_limit_read(RLIMIT_CORE,original);if(error)return error;
     if(original->hard<1)return EPERM;
-    const struct ptg_core_limits guarded={.soft=1,.hard=original->hard};
+    const struct ptg_resource_limit guarded={.soft=1,.hard=original->hard};
     if(syscall(SYS_prlimit64,0,RLIMIT_CORE,&guarded,NULL)!=0)return errno;
-    struct ptg_core_limits observed={0,0};
-    error=core_limits_read(&observed);if(error)return error;
+    struct ptg_resource_limit observed={0,0};
+    error=resource_limit_read(RLIMIT_CORE,&observed);if(error)return error;
     return observed.soft==1 && observed.hard==original->hard?0:EPROTO;
 }
-static int core_fence_restore(const struct ptg_core_limits *original) {
-    struct ptg_core_limits observed={0,0};
-    int error=core_limits_read(&observed);if(error)return error;
+static int core_fence_restore(const struct ptg_resource_limit *original) {
+    struct ptg_resource_limit observed={0,0};
+    int error=resource_limit_read(RLIMIT_CORE,&observed);if(error)return error;
     if(observed.soft!=1 || observed.hard!=original->hard)return EPROTO;
     if(syscall(SYS_prlimit64,0,RLIMIT_CORE,original,NULL)!=0)return errno;
-    error=core_limits_read(&observed);if(error)return error;
+    error=resource_limit_read(RLIMIT_CORE,&observed);if(error)return error;
     return observed.soft==original->soft && observed.hard==original->hard?0:EPROTO;
 }
-static int intersect_core_limits(const struct ptg_core_limits *caller,
-                                 const struct ptg_core_limits *inherited) {
-    const struct ptg_core_limits limit={
-        .soft=caller->soft<inherited->soft?caller->soft:inherited->soft,
-        .hard=caller->hard<inherited->hard?caller->hard:inherited->hard,
-    };
-    if(limit.soft==inherited->soft && limit.hard==inherited->hard)return 0;
-    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,&limit,NULL)!=0)return errno;
-    struct ptg_core_limits observed={0,0};
-    const int error=core_limits_read(&observed);
-    if(error)return error;
-    return observed.soft==limit.soft && observed.hard==limit.hard?0:EPROTO;
+static int apply_caller_limits(const struct ptg_payload_spec *s,
+                               const struct ptg_resource_limit *restored_core) {
+    for(unsigned int i=0;i<PTG_RESOURCE_LIMIT_COUNT;i++){
+        const struct ptg_resource_limit *caller=&s->caller_limits[i];
+        if(caller->soft==UINT64_MAX && caller->hard==UINT64_MAX)continue;
+        const unsigned int resource=resource_numbers[i];
+        struct ptg_resource_limit inherited={0,0};
+        if(resource==RLIMIT_CORE && restored_core){
+            inherited=*restored_core;
+        }else{
+            const int error=resource_limit_read(resource,&inherited);
+            if(error)return error;
+        }
+        const struct ptg_resource_limit cap={
+            .soft=caller->soft<inherited.soft?caller->soft:inherited.soft,
+            .hard=caller->hard<inherited.hard?caller->hard:inherited.hard,
+        };
+        if(cap.soft==inherited.soft && cap.hard==inherited.hard)continue;
+        if(syscall(SYS_prlimit64,0,resource,&cap,NULL)!=0)return errno;
+        struct ptg_resource_limit observed={0,0};
+        const int error=resource_limit_read(resource,&observed);
+        if(error)return error;
+        if(observed.soft!=cap.soft || observed.hard!=cap.hard)return EPROTO;
+    }
+    return 0;
 }
 static int zero_capabilities_confirmed(void) {
     const struct __user_cap_header_struct header={.version=_LINUX_CAPABILITY_VERSION_3,.pid=0};
@@ -368,7 +397,7 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     /* Irreversible exec privilege barrier precedes every credential change. */
     if(syscall(SYS_prctl,PR_SET_NO_NEW_PRIVS,1,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1)child_fail(s->exec_writer,EPERM,125);
-    struct ptg_core_limits original_core={0,0};
+    struct ptg_resource_limit original_core={0,0};
     uint32_t r=0,e=0,saved=0;
     if(s->host_dumpability==2) {
         if(syscall(SYS_getresuid,&r,&e,&saved)!=0)child_fail(s->exec_writer,errno,125);
@@ -376,12 +405,10 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
             child_fail(s->exec_writer,EPERM,125);
         const int error=core_fence_begin(&original_core);
         if(error)child_fail(s->exec_writer,error,125);
-    } else if(s->caller_core.soft!=UINT64_MAX || s->caller_core.hard!=UINT64_MAX) {
-        /* Sample and restrict the inherited limits while caller credentials
-         * cannot yet match this child. */
-        int error=core_limits_read(&original_core);
-        if(error)child_fail(s->exec_writer,error,125);
-        error=intersect_core_limits(&s->caller_core,&original_core);
+    } else {
+        /* All FD staging is complete, and caller credentials cannot yet
+         * match this child. In particular apply NPROC before real UID changes. */
+        const int error=apply_caller_limits(s,NULL);
         if(error)child_fail(s->exec_writer,error,125);
     }
     if(syscall(SYS_prctl,PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
@@ -420,7 +447,7 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     if(s->host_dumpability==2) {
         int error=core_fence_restore(&original_core);
         if(error)child_fail(s->exec_writer,error,125);
-        error=intersect_core_limits(&s->caller_core,&original_core);
+        error=apply_caller_limits(s,&original_core);
         if(error)child_fail(s->exec_writer,error,125);
         /* Only real/saved IDs change now: effective/fs IDs and all capability
          * sets already match. Reviewed setresuid/commoncap/commit_creds leaves

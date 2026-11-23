@@ -143,8 +143,8 @@ impl VerifiedServiceScope {
         anchor.origin.delegation.as_ref().ok_or("delegation owner missing")?.revalidate(uid)
     }
     pub(in super::super) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{self.anchor.origin.authority.protected_current_elf()}
-    pub(in super::super::super) fn caller_core_limits(&self, pid: u32) -> Probe<CoreLimit> {
-        self.anchor.origin.authority.caller_core_limits(pid)
+    pub(in super::super::super) fn caller_resource_limits(&self, pid: u32) -> Probe<ResourceLimits> {
+        self.anchor.origin.authority.caller_resource_limits(pid)
     }
     pub(in super::super) fn require_delegation(&self,uid:u32)->Probe<()>{
         self.anchor.origin.delegation.as_ref().ok_or("service has no administrator delegation grant")?.revalidate(uid)
@@ -348,62 +348,106 @@ fn require_full_map(raw:&[u8])->Probe<()>{let text=std::str::from_utf8(raw).map_
 pub(in super::super::super) fn require_initial_mappings()->Probe<()>{
  let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;let process=proc_process(&proc,std::process::id())?;let _held=checked_maps(&process)?;Ok(())
 }
-fn parse_core_limits(raw: &[u8]) -> Probe<CoreLimit> {
-    let limits = std::str::from_utf8(raw).map_err(|_| "requester limits are not UTF-8")?;
-    check(limits.ends_with('\n'), "incomplete requester limits")?;
-    let mut rows = limits.lines().filter_map(|line| {
-        line.strip_prefix("Max core file size")
-            .filter(|rest| rest.starts_with([' ', '\t']))
-    });
-    let row = rows.next().ok_or("requester limits lack CORE")?;
-    check(rows.next().is_none(), "duplicate requester CORE limit")?;
-    let mut fields = row.split_ascii_whitespace();
-    let Some(soft) = fields.next() else { return Err("missing requester CORE soft limit".into()) };
-    let Some(hard) = fields.next() else { return Err("missing requester CORE hard limit".into()) };
-    check(fields.next() == Some("bytes") && fields.next().is_none(), "invalid requester CORE units")?;
+// Linux x86-64 and AArch64 procfs report resource indices in this order.
+// The native bridge asserts the matching Linux UAPI values.
+const RESOURCE_LIMIT_ROWS: [(&str, Option<&str>); RESOURCE_LIMIT_COUNT] = [
+    ("Max cpu time", Some("seconds")),
+    ("Max file size", Some("bytes")),
+    ("Max data size", Some("bytes")),
+    ("Max stack size", Some("bytes")),
+    ("Max core file size", Some("bytes")),
+    ("Max resident set", Some("bytes")),
+    ("Max processes", Some("processes")),
+    ("Max open files", Some("files")),
+    ("Max locked memory", Some("bytes")),
+    ("Max address space", Some("bytes")),
+    ("Max file locks", Some("locks")),
+    ("Max pending signals", Some("signals")),
+    ("Max msgqueue size", Some("bytes")),
+    ("Max nice priority", None),
+    ("Max realtime priority", None),
+    ("Max realtime timeout", Some("us")),
+];
+
+fn parse_resource_limits(raw: &[u8]) -> Probe<ResourceLimits> {
+    let text = std::str::from_utf8(raw).map_err(|_| "requester limits are not UTF-8")?;
+    check(text.ends_with('\n'), "incomplete requester limits")?;
+    let mut rows = text.lines();
+    let header = rows.next().ok_or("requester limits lack a header")?;
+    check(
+        header.split_ascii_whitespace().eq(["Limit", "Soft", "Limit", "Hard", "Limit", "Units"]),
+        "invalid requester limits header",
+    )?;
 
     fn limit(value: &str) -> Probe<u64> {
         if value == "unlimited" {
             return Ok(u64::MAX);
         }
-        check(value.bytes().all(|digit| digit.is_ascii_digit()), "invalid requester CORE limit")?;
-        let parsed = value.parse::<u64>().map_err(|_| "invalid requester CORE limit")?;
-        check(parsed < u64::MAX, "invalid finite requester CORE limit")?;
+        check(value.bytes().all(|digit| digit.is_ascii_digit()), "invalid requester resource limit")?;
+        let parsed = value.parse::<u64>().map_err(|_| "invalid requester resource limit")?;
+        check(parsed < u64::MAX, "invalid finite requester resource limit")?;
         Ok(parsed)
     }
 
-    let soft = limit(soft)?;
-    let hard = limit(hard)?;
-    check(soft <= hard, "requester CORE soft limit exceeds hard limit")?;
-    Ok(CoreLimit { soft, hard })
+    let mut limits = [ResourceLimit::default(); RESOURCE_LIMIT_COUNT];
+    for (slot, (label, unit)) in limits.iter_mut().zip(RESOURCE_LIMIT_ROWS) {
+        let row = rows.next().and_then(|line| line.strip_prefix(label))
+            .filter(|rest| rest.starts_with([' ', '\t']))
+            .ok_or_else(|| format!("requester limits lack the expected {label} row"))?;
+        let mut fields = row.split_ascii_whitespace();
+        let soft = limit(fields.next().ok_or("missing requester soft limit")?)?;
+        let hard = limit(fields.next().ok_or("missing requester hard limit")?)?;
+        check(fields.next() == unit && fields.next().is_none(), "invalid requester limit units")?;
+        check(soft <= hard, "requester soft limit exceeds hard limit")?;
+        *slot = ResourceLimit { soft, hard };
+    }
+    check(rows.next().is_none(), "unexpected requester limit row")?;
+    Ok(limits)
 }
 
 #[cfg(test)]
-pub(in super::super::super) fn caller_core_limits_regression() {
-    for (row, expected) in [
-        ("Max core file size     0  0          bytes\n", CoreLimit { soft: 0, hard: 0 }),
-        ("Max core file size     0  unlimited  bytes\n", CoreLimit { soft: 0, hard: u64::MAX }),
-        ("Max core file size     7  10         bytes\n", CoreLimit { soft: 7, hard: 10 }),
-        ("Max core file size     unlimited  unlimited  bytes\n", CoreLimit { soft: u64::MAX, hard: u64::MAX }),
+pub(in super::super::super) fn caller_resource_limits_regression() {
+    // The kernel includes a header and uses no units for NICE and RTPRIO.
+    let valid = concat!(
+        "Limit                    Soft Limit           Hard Limit           Units     \n",
+        "Max cpu time              10                   12                   seconds   \n",
+        "Max file size             unlimited            unlimited            bytes     \n",
+        "Max data size             unlimited            unlimited            bytes     \n",
+        "Max stack size            8388608              unlimited            bytes     \n",
+        "Max core file size        0                    4096                 bytes     \n",
+        "Max resident set          unlimited            unlimited            bytes     \n",
+        "Max processes             123                  456                  processes \n",
+        "Max open files            384                  512                  files     \n",
+        "Max locked memory         65536                65536                bytes     \n",
+        "Max address space         unlimited            unlimited            bytes     \n",
+        "Max file locks            unlimited            unlimited            locks     \n",
+        "Max pending signals       321                  654                  signals   \n",
+        "Max msgqueue size         819200               819200               bytes     \n",
+        "Max nice priority         0                    0                    \n",
+        "Max realtime priority     0                    0                    \n",
+        "Max realtime timeout      unlimited            unlimited            us        \n",
+    );
+    let limits = parse_resource_limits(valid.as_bytes()).unwrap();
+    assert_eq!(limits[0], ResourceLimit { soft: 10, hard: 12 });
+    assert_eq!(limits[4], ResourceLimit { soft: 0, hard: 4096 });
+    assert_eq!(limits[6], ResourceLimit { soft: 123, hard: 456 });
+    assert_eq!(limits[7], ResourceLimit { soft: 384, hard: 512 });
+    assert_eq!(limits[15], ResourceLimit { soft: u64::MAX, hard: u64::MAX });
+    for invalid in [
+        valid.trim_end().to_owned(),
+        valid.replacen("Max open files", "Max processes", 1),
+        valid.replacen("384                  512", "513                  512", 1),
+        valid.replacen("384                  512", "384                  18446744073709551615", 1),
+        valid.replacen("384                  512", "384                  18446744073709551616", 1),
+        valid.replacen("files     \n", "bytes     \n", 1),
+        format!("{valid}Max extra limit 0 0 bytes\n"),
     ] {
-        assert_eq!(parse_core_limits(row.as_bytes()).unwrap(), expected);
-    }
-    for row in [
-        "Limit Soft Limit Hard Limit Units\n",
-        "Max core file size 0 0 bytes",
-        "Max core file size 0 0 bytes\nMax core file size 0 0 bytes\n",
-        "Max core file size +0 0 bytes\n",
-        "Max core file size 1 0 bytes\n",
-        "Max core file size 0 0 pages\n",
-        "Max core file size 0 18446744073709551615 bytes\n",
-        "Max core file size 0 18446744073709551616 bytes\n",
-    ] {
-        assert!(parse_core_limits(row.as_bytes()).is_err(), "{row:?}");
+        assert!(parse_resource_limits(invalid.as_bytes()).is_err());
     }
 }
 
 impl EntryKernelAuthority{
- pub(in super::super::super::super) fn caller_core_limits(&self, pid: u32) -> Probe<CoreLimit> {
+ pub(in super::super::super::super) fn caller_resource_limits(&self, pid: u32) -> Probe<ResourceLimits> {
      require_proc_self(&self.proc)?;
      check(
          require_root_mode(&descriptor_stat(&self.proc)?, S_IFDIR)? == self.proc_identity,
@@ -413,7 +457,7 @@ impl EntryKernelAuthority{
      let limits = proc_leaf(&process, c"limits")?;
      let raw = bounded_fd_bytes(&limits, 4096)?;
      require_name_matches(process.as_raw_fd(), c"limits", &limits)?;
-     parse_core_limits(&raw)
+     parse_resource_limits(&raw)
  }
 
  pub(crate) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{

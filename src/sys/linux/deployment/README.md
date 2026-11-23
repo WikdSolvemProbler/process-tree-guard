@@ -100,17 +100,19 @@ creation and permit. Snapshot changes refuse admission/release, not an atomic
 promise to revoke an already executing run. Both requests bind byte7=1 in the
 40-byte PTGEX6 header; mask remains at38.
 
-The service reads CORE limits from the authenticated original caller's procfs
-entry before starting a payload. It sets each payload CORE limit to the lower
-of the observed caller value and the child's inherited service value, and
-verifies changes while the child's credentials are still protected. The
-payload can later adjust its soft value within the resulting hard limit.
+The service reads all 16 numeric resource limits from the authenticated
+original caller's procfs entry before starting a payload. It applies the lower
+observed value from the caller and the child's inherited service limits and
+verifies each change while the child's credentials are still protected.
+Payloads can later adjust soft limits within their resulting hard limits.
 
 A deployment must allow the service to read the requester's kernel limits
 file. An unavailable or invalid file causes refusal before payload creation.
-Other resource limits, seccomp, LSM, Landlock, and cgroup ancestry still follow
-the separate-service context. Transparent caller context and default Linux
-dispatch remain open.
+The kernel can still refuse payload setup or execution under the resulting
+limits. These initial numeric caps do not preserve the caller's resource
+accounting context. Seccomp, LSM, Landlock, and cgroup ancestry still
+follow the separate-service context. Transparent caller context and default
+Linux dispatch remain open.
 
 The mode2 CORE-window source compiles and its12 ordinary tests pass; its actual native protection remains unqualified: it accepts host2 only through the reviewed family/protected-current-ELF/hard-limit gate and protected credential choreography. No sysctl or caller/parent limit is changed. The existing private runtime001 capsule remains frozen0-only and is incompatible with the observed host2 until root explicitly reviews/replaces its inputs after qualification. No installation is authorized by this source work.
 

@@ -11,7 +11,8 @@
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 6u
+#define PTG_PAYLOAD_SCHEMA 7u
+#define PTG_RESOURCE_LIMIT_COUNT 16u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
 #define PTG_PAYLOAD_CANCELLED 2
@@ -40,7 +41,7 @@ int32_t ptg_payload_gate_peer_cancelled(const struct ptg_payload_gate *gate);
  * Does not deliver a permit. Duplicate commit is a refusal, not success. */
 int32_t ptg_payload_gate_commit(struct ptg_payload_gate *gate);
 
-struct ptg_core_limits {uint64_t soft,hard;};
+struct ptg_resource_limit {uint64_t soft,hard;};
 
 struct ptg_payload_spec {
     uint32_t schema, bytes;
@@ -56,7 +57,7 @@ struct ptg_payload_spec {
     const char *const *envp;
     struct ptg_payload_gate *gate;
     uint32_t host_dumpability;
-    struct ptg_core_limits caller_core;
+    struct ptg_resource_limit caller_limits[PTG_RESOURCE_LIMIT_COUNT];
 };
 /* All FDs are BORROWED by C. Parent Rust owns every endpoint and closes its own
  * child-only writers/readers immediately after spawn. No C function closes a
@@ -96,15 +97,15 @@ struct ptg_payload_ready {
     uint64_t child_mask, before_ns, after_ns;
     int32_t kill_result, kill_error;
 };
-/* READY wire is exactly16 bytes: schema:u32=6, token:u32='R', blocked_mask:u64.
+/* READY wire is exactly16 bytes: schema:u32=7, token:u32='R', blocked_mask:u64.
  * It follows FD scrub and verified groups/gid/uid/zero caps/NNP/CWD. It certifies
  * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion.
- * host_dumpability and caller_core are trusted supervisor observations.
+ * host_dumpability and caller_limits are trusted supervisor observations.
  * Mode2 retains real/saved UID0 through the reviewed CORE1 fence and restores
- * the exact inherited limits at dumpable0 before applying the caller bounds.
+ * the exact inherited CORE limits at dumpable0 before applying the caller bounds.
  * Mode0 applies the bounds before the credential transition. Both use the
- * componentwise minimum of the inherited and caller tuples. Unknown modes and
- * invalid caller tuples refuse. setup_timer is an
+ * componentwise minimum in each resource pair before assigning the final real UID.
+ * Unknown modes and invalid caller tuples refuse. setup_timer is an
  * independently armed finite readiness timer; no C-owned timer is introduced.
  */
 void ptg_payload_wait_ready(const struct ptg_payload_spec *spec,
@@ -139,9 +140,10 @@ int ptg_payload_reset_dispositions(int32_t *failed_signal, int32_t *error);
  * 10=CLOCK_BOOTTIME,11=kernel blocked mask,12=spec.gate offset,
  * 13=owner-watch bytes,14=maximum owner-watch count,15=spec.owners offset,
  * 16=umask offset,17=umask maximum,18=host-dumpability offset,
- * 19=caller-core offset,20=allowed host-mode bitset,21=core-limit ABI bytes,
- * 22=core soft offset,23=core hard offset,24=RLIMIT_CORE,25=prlimit64 syscall,
- * 26=the reviewed pipe-recursion/file-size barrier value.
+ * 19=caller-limits offset,20=allowed host-mode bitset,21=resource-limit ABI bytes,
+ * 22=limit soft offset,23=limit hard offset,24=RLIMIT_CORE,25=prlimit64 syscall,
+ * 26=the reviewed pipe-recursion/file-size barrier value,27=limit count,
+ * 28..43=Linux resource numbers in caller-limits array order.
  */
 uint64_t ptg_payload_abi(uint32_t word);
 #endif

@@ -152,17 +152,20 @@ struct VerifiedIdentity {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub(super) struct CoreLimit {
+pub(super) struct ResourceLimit {
     pub(super) soft: u64,
     pub(super) hard: u64,
 }
+
+pub(super) const RESOURCE_LIMIT_COUNT: usize = 16;
+pub(super) type ResourceLimits = [ResourceLimit; RESOURCE_LIMIT_COUNT];
 
 struct PreparedRun {
     owner_pid: c_int,
     identity: VerifiedIdentity,
     plan: request::ExecPlan,
     lease: RetainedLease,
-    caller_core: CoreLimit,
+    caller_limits: ResourceLimits,
 }
 
 fn status_field<'a>(status: &'a str, name: &str) -> Probe<&'a str> {
@@ -238,7 +241,7 @@ fn prepare(scope:&VerifiedServiceScope,peer:Credentials,invocation:VerifiedInvoc
     authorizes:impl FnOnce(&VerifiedIdentity)->bool)->std::result::Result<PreparedRun,PreparationFailure> {
     let invocation=Arc::new(invocation);
     let mut lease=None;
-    let result=(||->std::result::Result<(VerifiedIdentity,CoreLimit),(String,PrelaunchCause)>{
+    let result=(||->std::result::Result<(VerifiedIdentity,ResourceLimits),(String,PrelaunchCause)>{
         invocation.check_live().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
         invocation.check_time().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
         let identity=verify_identity(invocation.requester(),peer).map_err(|e|(e,PrelaunchCause::Failure))?;
@@ -251,15 +254,15 @@ fn prepare(scope:&VerifiedServiceScope,peer:Credentials,invocation:VerifiedInvoc
             .map_err(|e| (e, PrelaunchCause::Failure))?;
         let caller_pid = u32::try_from(peer.pid)
             .map_err(|_| ("invalid requester PID".into(), PrelaunchCause::Failure))?;
-        let caller_core = scope.caller_core_limits(caller_pid)
-            .map_err(|e| (format!("read requester CORE limit: {e}"), PrelaunchCause::Failure))?;
+        let caller_limits = scope.caller_resource_limits(caller_pid)
+            .map_err(|e| (format!("read requester resource limits: {e}"), PrelaunchCause::Failure))?;
         native(validate_pidfd(invocation.requester(), peer.pid, &mut identity_receipt))
             .map_err(|e| (e, PrelaunchCause::Failure))?;
         require_preparation_permit(retained)?;
-        Ok((identity, caller_core))
+        Ok((identity, caller_limits))
     })();
     match result {
-        Ok((identity,caller_core))=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer"),caller_core}),
+        Ok((identity,caller_limits))=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer"),caller_limits}),
         Err((error,cause))=>Err(PreparationFailure{invocation,plan,lease,error,cause}),
     }
 }
