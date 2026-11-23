@@ -1,0 +1,70 @@
+{
+  "schema": "ptg-linux-x64-current-floor-smoke-1",
+  "date_utc": "2026-11-23",
+  "scope": "Normal exit and deadline cleanup for the exact x86-64 Linux 5.14 kernel and Ubuntu userspace combination recorded here, using the opt-in separate-service deployment.",
+  "environment": {
+    "arch": "x86_64",
+    "kernel": "5.14.0-741.22.1.el9_9.x86_64",
+    "kernel_packaging": "AlmaLinux",
+    "userspace": "Ubuntu 24.04",
+    "systemd_major": 255,
+    "delegate_subgroup_property_observed": true,
+    "cgroup_v2": true,
+    "fs_suid_dumpable": 2,
+    "network_enabled": false
+  },
+  "build": {
+    "source_commit": "be25aa646210babf0601a35b6b9a8e927e021a78",
+    "workflow_run": 45246235773,
+    "artifact_id": 14853562745,
+    "artifact_archive_sha256": "4ebdcf4304451abd0c82a236ce32a208c4ea8270c27523b521c30d638a399e3b",
+    "sha256": {
+      "process-tree-guard-root": "579a40cada2bc09d9f54e5ed60e45e8cfad60016286b5bac415c9a4eca12f4b4",
+      "process-tree-guard-client": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239"
+    }
+  },
+  "limits": {
+    "host_whole_tree_seconds": 580,
+    "prep_emulator_seconds": 290,
+    "floor_emulator_seconds": 245,
+    "prep_guest_driver_seconds": 125,
+    "floor_guest_driver_seconds": 105
+  },
+  "cases": {
+    "normal": {
+      "client_exit": 0,
+      "service_inactive": true,
+      "service_cgroup_empty_or_absent": true
+    },
+    "deadline": {
+      "payload_started": true,
+      "client_exit": 124,
+      "service_terminal_exit": 124,
+      "service_main_pid": 0,
+      "service_control_pid": 0,
+      "service_cgroup_empty_or_absent": true
+    }
+  },
+  "run": {
+    "host_native_exit": 0,
+    "original_host_handle_retained": true,
+    "prep_emulator_exit": 0,
+    "floor_emulator_exit": 0,
+    "prep_guest_powerdown": true,
+    "floor_guest_powerdown": true,
+    "matching_qemu_processes_after_exit": 0
+  },
+  "sha256": {
+    "kernel_bundle": "eb7beba78083e3c3b21ce76b0961d37924ffb9cb1ddca2e67783c7dfe70a4adc",
+    "pristine_base_image": "04e8f2461a16a44e78a370284471f29616cdd9baf1893df25807b71f985b6c94",
+    "runner": "fca2d34e47e4200bf6f098d20a52ae325711b2953e443f06d4e412a7ad7d88b1",
+    "initramfs_preparation": "d737a6613849ad262eee48457adb8378b902be02da4d515f2c8c5e57adfdd20a",
+    "guest_driver": "8ab1e8a14b4e9048cfe1935063d47d166a614a895a7b4f6c91c92f486c66f55d",
+    "prep_serial_log": "f9f8a44a08150e80de50050ec2d47424504592c75428abb644ac07ba55d421e6",
+    "floor_serial_log": "be784d8dbdb461d53c1009a68a4de27ba576d49fa2a42beab3e5b0ea459d8ee3",
+    "host_result": "5907c38d9b2a9a6bc4444564122046229e49e9cb0cbc7eb47434804ec1cf2fc1",
+    "emulator_result": "49195c907340f2341af45060ffcf2208c7257c9736f59338f31cf5219fb7eb4e",
+    "postflight_receipt": "24d5383a8f16eafc1362571b270f770e84b9389d2fa1107fe1bcefe0d5d27e0e"
+  },
+  "limits_of_evidence": "This qualification covers the paired lifecycle cases on the mixed kernel and userspace configuration. Stock AlmaLinux userspace, other kernels and managers, arbitrary caller-context inheritance, and performance remain separate questions."
+}
