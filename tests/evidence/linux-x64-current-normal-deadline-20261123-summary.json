@@ -1,0 +1,62 @@
+{
+  "schema": "ptg-linux-x64-vm-normal-deadline-1",
+  "date_utc": "2026-11-23",
+  "scope": "Two ordinary invocations in an offline Linux x86-64 VM using the opt-in separate-service mode.",
+  "source_commit": "0358129d1fe560cb965257f507aefd28d2c3e43f",
+  "build": {
+    "workflow_run": 45227280140,
+    "artifact_id": 14843521890,
+    "artifact_archive_sha256": "aa9fd1b150e2886dd1e92a0869d3f5ed94b0eb071e3c4057a4f89897286c3684",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "sha256": {
+      "process-tree-guard-root": "81ffc145cbba79ebd32ed1e1dfcd1d77c43d571dadfeb1447691d3bac323a343",
+      "process-tree-guard-client": "f80e2122db516fea4d795ab17099f633328bc16867d80b0f09bd1521166a5361"
+    }
+  },
+  "environment": {
+    "kernel": "6.8.0-147-generic",
+    "suid_dumpable": 2,
+    "network_enabled": false,
+    "fixture_checks": "The guest driver kept the prior normal and deadline assertions and verified the current binary hashes before launch.",
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105
+  },
+  "normal": {
+    "original_invocation_deadline_seconds": 12,
+    "client_exit": 0,
+    "stdout_empty": true,
+    "stderr_empty": true,
+    "service_inactive": true
+  },
+  "deadline": {
+    "original_invocation_deadline_seconds": 10,
+    "client_exit": 124,
+    "payload_started": true,
+    "service_terminal_exit": 124,
+    "timeout_diagnostic_present": true
+  },
+  "completion": {
+    "host_native_exit": 0,
+    "original_host_handle_retained": true,
+    "emulator_exit": 0,
+    "emulator_deadline_expired": false,
+    "guest_cleanup_marker_present": true,
+    "emulator_processes_remaining": 0
+  },
+  "evidence_sha256": {
+    "host_result": "b8a4894a56a9fd2db3e72da43395629fd68253fc149f356e7b0575112cdbf6bd",
+    "emulator_result": "80a915ff0729369de7d627b358c4f63cf6d18975c116fbaae6250ec3f763ccbf",
+    "intent": "279ee1555c9c74b8a1af30586e8c91c61e5527e797b5ad7de5327a479490dcde",
+    "guest_serial": "dc0245d215f9fda3962376dc0784a012c97148a6df9281f7bcd3b5670d3a2899",
+    "host_runner": "f04c6b0599be1bafe58394b0b8c4ae479d4e5c64fade9235767975be070d0c35",
+    "guest_driver": "98ff56203b9ff4d23f057bfc1cfe5bac4432dbbb9e2ff6b9ba9e0949a26dd238",
+    "postflight": "625107eef84d47777c9e3ac17a0b0b7d482672f44a5a310bf304dd15e033f66f"
+  },
+  "limits": [
+    "These two cases qualify ordinary CLI completion and deadline settlement in the tested VM.",
+    "The receipt does not identify the client retirement branch or establish transparent caller confinement, Tailscale transport, or benchmark performance.",
+    "Raw VM captures and earlier experiments are preserved locally."
+  ]
+}
