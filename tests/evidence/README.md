@@ -731,3 +731,15 @@ An ARM64 delegated-library diagnostic recorded actual errno 4 in the live settle
 ## Windows AUTO directory reuse - 2026-11-19
 
 The AUTO owner walk now passes its captured Windows directory to native image mapping and the system-boundary check. The direct and snapshot paths share that value. This removes up to two redundant directory queries in the unopened-boundary fallback. The release library suite passed all 301 tests, including the native image mapping and strict boundary checks. The operation count does not establish a timing gain. Manual-mode speed acceptance remains open. [Source identities and validation](windows-auto-directory-reuse-20261119-summary.json)
+
+## Windows Python source archive - 2026-11-23
+
+The Windows Python run used a Git archive created with `core.autocrlf=true`. Git converted applicable text files to CRLF in that archive. [Run summary and recorded source hash](windows-python-readiness-20261123-summary.json)
+
+From a clone that contains the recorded commit, recreate the source archive with this command.
+
+```sh
+git -c core.autocrlf=true archive --format=tar --output=source.tar 0358129d1fe560cb965257f507aefd28d2c3e43f
+```
+
+The command reproduced the recorded 23,275,520-byte archive with SHA-256 `849fc19f4787fed4bfe79762f1467d340243c284a65173e81ae2199c27f47fd3`.
