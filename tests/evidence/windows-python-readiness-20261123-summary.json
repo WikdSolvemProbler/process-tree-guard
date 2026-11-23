@@ -1,0 +1,70 @@
+{
+  "schema": "ptg-windows-python-readiness-1",
+  "date_utc": "2026-11-23",
+  "scope": "Full Windows x86-64 Python correctness suite.",
+  "method": {
+    "suite_entry": "tests/run_tests.py load_suite",
+    "source_commit": "0358129d1fe560cb965257f507aefd28d2c3e43f",
+    "source_archive_files": 1031,
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "release",
+    "artifact_build_commit": "6d2a14e5ed43343d511a7bb9e171a9f75e4fdd4f",
+    "candidate_rebuilt_for_tested_source": false,
+    "reuse_basis": "The delta from the previous tested source touches only Linux code, Python harness and test code, and documentation or evidence. All six Windows binary role identities matched the previous full run.",
+    "python_sha256": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a",
+    "windows_error_policy": "The hidden command carrier inherited process-local error mode 0x8003.",
+    "discovery_outer_whole_tree_seconds": 60,
+    "run_outer_whole_tree_seconds": 3600,
+    "original_native_handle_retained": true,
+    "prior_full_run": "windows-python-readiness-20261121-summary.json",
+    "matched_prior_ordered_test_ids": true
+  },
+  "result": {
+    "discovered": 651,
+    "completed": 651,
+    "pass": 647,
+    "skip": 4,
+    "fail": 0,
+    "error": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "native_exit": 0,
+    "unittest_runtime_seconds": 503.985
+  },
+  "identical_conditional_skips": [
+    "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+    "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+    "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+    "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing"
+  ],
+  "evidence_sha256": {
+    "source_archive": "849fc19f4787fed4bfe79762f1467d340243c284a65173e81ae2199c27f47fd3",
+    "source_manifest": "3773416beac431014fc15fc39e273068d18d0fb1404525665c877230459376dd",
+    "binary_manifest": "456fcf7aeb9920b79fb38879d053d87d28825761267863f7a3c9b6fc198600b9",
+    "frozen_discovery": "58d0d44df5c607e2619a811569de67b7923b9c28d490de2b58a2e1e532a95eee",
+    "runner_result": "1c7337b76b15381f0b7468a2fe5fb3055c0a45376bdf5dd0072ecebe95325631",
+    "carrier_result": "24f3d70621913c67cc8b6f9ba5f35cf509d3e194762a426cf0a056e9d084e544"
+  },
+  "capture_identities": {
+    "stdout.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr.bin": {
+      "bytes": 103416,
+      "sha256": "59bf382b597f16622be3ba66ec0fcc67d4e1475851cb70ff6fb0cb0d663043df"
+    },
+    "cmd-stdout.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cmd-stderr.bin": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "limits": [
+    "The 651-case run qualifies Python correctness for the frozen inputs. Native driver readiness and competitive performance require separate evidence.",
+    "Raw logs and individual records are preserved locally. The public summary records their identity hashes."
+  ]
+}
