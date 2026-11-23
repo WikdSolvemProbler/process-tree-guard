@@ -1,0 +1,163 @@
+{
+  "schema": "ptg-linux-x64-caller-core-caps-1",
+  "date_utc": "2026-11-23",
+  "scope": "Six opt-in separate-service CLI invocations in two isolated Linux x86-64 guests.",
+  "source_commit": "25f7be2dc6fee7c68be6c770cf3ebcfdcc67a415",
+  "prior_observations": "linux-x64-caller-core-20261123-summary.json",
+  "build": {
+    "workflow_run": 45242404455,
+    "artifact_id": 14852121429,
+    "artifact_archive_sha256": "58557fb4bf3d02f98eabbbfca87b3ca6a2041a9bdf7c89884da7c9f4bf74aaf5",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "sha256": {
+      "process-tree-guard-root": "e0613e8b89ba47ff0d3118a344f90d470d9554829103b904dcfa82b0d5a13bf2",
+      "process-tree-guard-client": "bc4f993bccfb79e6da53b567358e4cb7ab5fbd410344f38cc57e263683b6a38f"
+    }
+  },
+  "method": {
+    "kernel": "6.8.0-147-generic",
+    "network_enabled": false,
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105,
+    "observations": "The caller read its own CORE limits immediately before exec. The observer held the original service and payload pidfds, verified their service and cgroup identities, and compared the payload report with independent kernel readings. The service tuple was (0, unlimited) in every observation."
+  },
+  "modes": [
+    {
+      "suid_dumpable": 0,
+      "controls": [
+        {
+          "caller_core_bytes": [
+            0,
+            0
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            0
+          ],
+          "client_exit": 0
+        },
+        {
+          "caller_core_bytes": [
+            0,
+            4096
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            4096
+          ],
+          "client_exit": 0
+        },
+        {
+          "caller_core_bytes": [
+            128,
+            4096
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            4096
+          ],
+          "client_exit": 0
+        }
+      ],
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "host_native_exit": 0,
+      "original_host_handle_retained": true,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "ffedf6351171edb84b5854d7623dfa9423f7aeadf041846bb8b9c6a2850c7ad2",
+        "emulator_result": "7dc1c3e40f4f6e24e9c334b1901c336904629a55569670a8d207150e6e0ecebd",
+        "serial": "5e2bf86ab9a67a040eaaa4d948eb1447f6dbd8f98011b8cc2ca9a2e5cb6ef00c",
+        "intent": "0e143d989cd025b16a18a22bfc1b38de334e5352b7683eca7230b5439080bb21",
+        "host_runner": "d2c0acadb51ffbaaa98767e2430aa05361833db6ee09f323c7846c0b5cd8cfeb",
+        "guest_driver": "b9704dfa05e74c731ccfa57ab5feaaf7dace6f93a79027e01ed60829e2b89f0e",
+        "credential_observer": "5ac30243e3050980e116ea8252d129b4629824287a3afcb0075ec39d04fc3330",
+        "postflight": "04f35397e8524cc7bb129cf9dd7f0409892841352dee0f4802ed76024b1cfee8"
+      }
+    },
+    {
+      "suid_dumpable": 2,
+      "controls": [
+        {
+          "caller_core_bytes": [
+            0,
+            0
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            0
+          ],
+          "client_exit": 0
+        },
+        {
+          "caller_core_bytes": [
+            0,
+            4096
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            4096
+          ],
+          "client_exit": 0
+        },
+        {
+          "caller_core_bytes": [
+            128,
+            4096
+          ],
+          "service_core_bytes": [
+            0,
+            "unlimited"
+          ],
+          "payload_core_bytes": [
+            0,
+            4096
+          ],
+          "client_exit": 0
+        }
+      ],
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "host_native_exit": 0,
+      "original_host_handle_retained": true,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "5689a3d6dfcb6c0ccebcee540aa0c17fbb5806ede1925b1bd9f90b3f90285d2e",
+        "emulator_result": "1b699404fe636131bb93b7268a1d0d716dbc4fa6b847442843052be58402dbf5",
+        "serial": "3f6bdc3ae36c08120d95c31c2eb5a3f9741d9eadd49be819af1dd40b0ba2c44a",
+        "intent": "71b0416a899230d0de36d2278301a22e645eba1ba531bec4396f95b4889bd879",
+        "host_runner": "7c946fff2b500a2cdd0fc61a945fdb85d044f8a805f5f29bf0f44e99cf42a6da",
+        "guest_driver": "7d1c02ca775771ff32dfe32b64f618d5e34147743c494490b715d0b3df1b33fa",
+        "credential_observer": "812a18b65fbd1bb82e31296db4596e02e9a582f2c046415030054d7bf79d1b2c",
+        "postflight": "1d5117ee24552580b6ad65d95f08cf1053d70d356e4e4acee41514461bfb142c"
+      }
+    }
+  ],
+  "limits": [
+    "The mixed control witnesses the lower service soft limit and the lower caller hard limit in both modes. These guests did not exercise a finite service hard limit.",
+    "The result covers initial numeric CORE limits. Core dump delivery, other caller limits, transparent Linux execution, Tailscale transport, and performance require separate evidence.",
+    "Raw captures and earlier attempts are preserved locally."
+  ]
+}
