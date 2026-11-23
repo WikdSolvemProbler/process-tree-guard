@@ -1,0 +1,90 @@
+{
+  "schema": "ptg-linux-x64-nproc-refusal-1",
+  "date_utc": "2026-11-23",
+  "scope": "Paired initial RLIMIT_NPROC controls in two fresh offline x86-64 Linux guests using the opt-in separate-service deployment.",
+  "environment": {
+    "kernel": "6.8.0-147-generic",
+    "network_enabled": false,
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105
+  },
+  "build": {
+    "source_commit": "be25aa646210babf0601a35b6b9a8e927e021a78",
+    "workflow_run": 45246235773,
+    "artifact_id": 14853562745,
+    "artifact_archive_sha256": "4ebdcf4304451abd0c82a236ce32a208c4ea8270c27523b521c30d638a399e3b",
+    "sha256": {
+      "process-tree-guard-root": "579a40cada2bc09d9f54e5ed60e45e8cfad60016286b5bac415c9a4eca12f4b4",
+      "process-tree-guard-client": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239"
+    }
+  },
+  "method": "The same unprivileged launcher verified its own soft and hard limit before exec of the CLI in the same process. The observer corroborated the value while holding caller and parent pidfds. Both cases used the same protected benign marker executable in the same guest.",
+  "modes": [
+    {
+      "fs_suid_dumpable": 0,
+      "control": {
+        "caller_nproc_soft": 64,
+        "caller_nproc_hard": 64,
+        "exit": 0,
+        "payload_marker_observed": true
+      },
+      "refusal": {
+        "caller_nproc_soft": 0,
+        "caller_nproc_hard": 0,
+        "exit": 125,
+        "setup_or_exec_errno": 11,
+        "stdout_bytes": 0,
+        "payload_marker_observed": false,
+        "service_state": "failed",
+        "service_result": "exit-code",
+        "service_exit": 125,
+        "service_main_pid": 0,
+        "service_control_pid": 0,
+        "runtime_retired_before_fixture_cleanup": true,
+        "service_cgroup_before_fixture_cleanup": "absent"
+      },
+      "sha256": {
+        "guest_driver": "5291f5085b59e187e9b4ed73a8a6f59e068387c51f04f593af9e0e8c67728a4c",
+        "guest_observer": "724b2a1f0d958829c4e72a6a7eafeb23744e837b2ccd4215cda45990542dd968",
+        "serial_log": "ca7f937427de19fbad2c0ff1c44ef523f93e7b29dd0221a2bf070f225e8be3dd",
+        "emulator_result": "99d2f9eb31033189e667e17cf4a3be686d518215374ca911b8366a0277546289",
+        "host_result": "36814d81772cfda529fe32e18b7b72d983a729a8e756f5052ff15134bf8769f7",
+        "postflight_receipt": "f8522193fa3b8b90606881d0fb2ed3403acb72bfdcdbd2ce25bb97b9d84293a5"
+      }
+    },
+    {
+      "fs_suid_dumpable": 2,
+      "control": {
+        "caller_nproc_soft": 64,
+        "caller_nproc_hard": 64,
+        "exit": 0,
+        "payload_marker_observed": true
+      },
+      "refusal": {
+        "caller_nproc_soft": 0,
+        "caller_nproc_hard": 0,
+        "exit": 125,
+        "setup_or_exec_errno": 11,
+        "stdout_bytes": 0,
+        "payload_marker_observed": false,
+        "service_state": "failed",
+        "service_result": "exit-code",
+        "service_exit": 125,
+        "service_main_pid": 0,
+        "service_control_pid": 0,
+        "runtime_retired_before_fixture_cleanup": true,
+        "service_cgroup_before_fixture_cleanup": "absent"
+      },
+      "sha256": {
+        "guest_driver": "fe35a7022b1d798a09131a7546a904cd04a39cd2b65587bd86883e5f6922df40",
+        "guest_observer": "724b2a1f0d958829c4e72a6a7eafeb23744e837b2ccd4215cda45990542dd968",
+        "serial_log": "cbf7051549bce71a97391776336d8b5082dba4ecbb05d9a91029ad2250d11b59",
+        "emulator_result": "db8dc4dc57c8a27ec2b77d5046db779929aa1fab00fe6f3bb918b8d94737061c",
+        "host_result": "f6b1c7cec1d096d96e8762f096bcb96e1ef2e5b4a19651da4fa9256810d02478",
+        "postflight_receipt": "4e8a58729f1053d846cdb2906c56646d7c392d6f82b8a212a2d12f174097dafb"
+      }
+    }
+  ],
+  "interpretation": "The restrictive value refused the command in both tested modes while the matched permissive control completed. The diagnostic covers payload setup or exec. The result does not identify the syscall that returned errno 11 or establish that no contained bootstrap was created."
+}
