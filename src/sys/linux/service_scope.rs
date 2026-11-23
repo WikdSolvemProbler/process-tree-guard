@@ -449,7 +449,51 @@ fn read_completion_events(fd:&OwnedFd)->EventRead{
   Ok(count)=>{raw.extend_from_slice(&chunk[..count]);if raw.len()>=4097{return EventRead{bytes:raw,seek_errno:None,read_errno:None,read_failed:false};}}
  }}
 }
-struct RetirementLookup{result:c_int,errno:Option<c_int>,observed:Option<Identity>}
+const COMPLETION_ENOENT: c_int = 2;
+const COMPLETION_ENODEV: c_int = 19;
+
+struct RetirementLookup {
+    result: c_int,
+    errno: Option<c_int>,
+    observed: Option<Identity>,
+    mask: u32,
+}
+
+impl RetirementLookup {
+    fn observe(parent: RawFd, name: &CStr) -> Self {
+        let mut observed = Statx::default();
+        let result = unsafe {
+            fd_statx(
+                parent, name.as_ptr(), AT_SYMLINK_NOFOLLOW,
+                STATX_BASIC_STATS | STATX_MNT_ID, &mut observed,
+            )
+        };
+        let errno = if result < 0 { io::Error::last_os_error().raw_os_error() } else { None };
+        Self {
+            result,
+            errno,
+            observed: (result == 0).then(|| Identity::from(&observed)),
+            mask: observed.mask,
+        }
+    }
+
+    fn absent(&self) -> bool {
+        self.result < 0 && self.errno == Some(COMPLETION_ENOENT)
+    }
+
+    fn retry_after_empty_read(&self, populated: bool) -> bool {
+        !populated && self.absent()
+    }
+
+    fn require_original(&self, expected: Identity) -> Probe<()> {
+        let observed = self.observed.ok_or_else(|| format!("Os({:?})", self.errno))?;
+        check(
+            self.mask & REQUIRED_STATX == REQUIRED_STATX && observed.inode != 0,
+            "authority statx omitted required fields",
+        )?;
+        check(expected == observed, "authority directory entry changed during open")
+    }
+}
 #[must_use="original unit completion capabilities must remain held"]
 pub(crate) struct ClientCompletion{nodes:Vec<CompletionNode>,events:OwnedFd,event_identity:Identity,group:String,baseline:EventRead,last:Option<EventRead>,first_failure:Option<EventRead>,last_lookup:Option<RetirementLookup>,retired:Option<RetiredUnit>}
 // Private fields: only the exact ENODEV/held-parent ENOENT path below mints this.
@@ -457,11 +501,25 @@ pub(crate) struct ClientCompletion{nodes:Vec<CompletionNode>,events:OwnedFd,even
 pub(crate) struct RetiredUnit{group:String,unit:Identity,parent:Identity,name:CString,event:Identity,event_errno:c_int,lookup_result:c_int,lookup_errno:c_int,observed_ns:u64}
 impl RetiredUnit{pub(crate) fn matches_group(&self,group:&str)->bool{self.group==group}}
 impl ClientCompletion{
- fn revalidate_ancestry(&self,bind_unit:bool)->Probe<()>{
+ fn revalidate_directories(&self,bind_unit:bool)->Probe<()>{
   let actual=directory(AT_FDCWD,c"/")?;check(require_root_mode(&descriptor_stat(&actual)?,S_IFDIR)?==self.nodes[0].identity,"completion root view changed")?;
   let last=self.nodes.len()-1;
   for(index,node)in self.nodes.iter().enumerate(){check(require_root_mode(&descriptor_stat(&node.fd)?,S_IFDIR)?==node.identity,"held completion directory changed")?;if node.cgroup{require_cgroup2(&node.fd)?;}if index>0&&(index!=last||bind_unit){require_name_matches(self.nodes[index-1].fd.as_raw_fd(),node.name.as_ref().ok_or("completion component name missing")?,&node.fd)?;}}
-  require_cgroup2(&self.events)?;check(require_root_mode(&descriptor_stat(&self.events)?,S_IFREG)?==self.event_identity,"held completion event identity changed")?;Ok(())
+  Ok(())
+ }
+ fn revalidate_events(&self)->Probe<()>{
+  require_cgroup2(&self.events)?;
+  check(require_root_mode(&descriptor_stat(&self.events)?,S_IFREG)?==self.event_identity,"held completion event identity changed")
+ }
+ fn revalidate_ancestry(&self,bind_unit:bool)->Probe<()>{
+  self.revalidate_directories(bind_unit)?;
+  self.revalidate_events()
+ }
+ fn original_unit(&self)->Probe<(&CompletionNode,&CompletionNode,&CString)>{
+  let (unit,ancestors)=self.nodes.split_last().ok_or("original completion unit missing")?;
+  let parent=ancestors.last().ok_or("original completion parent missing")?;
+  let name=unit.name.as_ref().ok_or("original unit basename missing")?;
+  Ok((unit,parent,name))
  }
  pub(crate) fn population_after_terminal(&mut self,service:&OwnedFd,pid:u32)->Probe<bool>{
   // No retirement inference is permitted until this ORIGINAL service object is
@@ -470,24 +528,55 @@ impl ClientCompletion{
   let count=unsafe{super::super::super::super::poll(&mut event,1,0)};
   check(count==1&&event.revents&(1|0x10)!=0&&event.revents&!(1|0x10)==0&&pid>1,"original service pidfd is not terminal")?;
   self.revalidate_ancestry(false)?;
-  let raw=read_completion_events(&self.events);let decision=raw.populated();self.last=Some(raw.clone());
-  let result=(||->Probe<bool>{match decision{
-   Ok(value)=>{self.revalidate_ancestry(true)?;Ok(value)},
-   Err(error)=>{
-    if self.first_failure.is_none(){self.first_failure=Some(raw.clone());}
-    // Only the raw read ENODEV of the original, previously-live core file
-    // enables retirement lookup. Seek/parse/EOF/EACCES/ESTALE never do so.
-    check(raw.seek_errno.is_none()&&raw.read_failed&&raw.read_errno==Some(19),&error)?;
-    let unit=self.nodes.last().ok_or("original completion unit missing")?;let parent=&self.nodes[self.nodes.len()-2];let name=unit.name.as_ref().ok_or("original unit basename missing")?;
-    let mut observed=Statx::default();let result=unsafe{fd_statx(parent.fd.as_raw_fd(),name.as_ptr(),AT_SYMLINK_NOFOLLOW,STATX_BASIC_STATS|STATX_MNT_ID,&mut observed)};
-    let errno=if result<0{io::Error::last_os_error().raw_os_error()}else{None};
-    self.last_lookup=Some(RetirementLookup{result,errno,observed:if result==0{Some(Identity::from(&observed))}else{None}});
-    // A replacement/different inode is NOT the original and cannot settle it.
-    check(result<0&&errno==Some(2),"original unit name is not strictly absent under held parent")?;
-    self.revalidate_ancestry(false)?;
-    self.retired=Some(RetiredUnit{group:self.group.clone(),unit:unit.identity,parent:parent.identity,name:name.clone(),event:self.event_identity,event_errno:19,lookup_result:result,lookup_errno:2,observed_ns:boottime_ns()?});Ok(false)
-   }
-  }})();result.map_err(|error|raw.failure(CompletionReadStage::AfterTerminal,error))
+  let mut raw=read_completion_events(&self.events);
+  let mut retried_after_empty=false;
+  self.last=Some(raw.clone());
+  let result=(||->Probe<bool>{
+   let error=match raw.populated(){
+    Ok(populated)=>{
+     self.revalidate_directories(false)?;
+     let (unit,parent,name)=self.original_unit()?;
+     let lookup=RetirementLookup::observe(parent.fd.as_raw_fd(),name);
+     if !lookup.retry_after_empty_read(populated){
+      lookup.require_original(unit.identity)?;
+      self.revalidate_events()?;
+      return Ok(populated);
+     }
+     self.revalidate_events()?;
+
+     // The manager can prune the empty unit between read and lookup.
+     // Resample the same open file once from offset zero.
+     self.last_lookup=Some(lookup);
+     retried_after_empty=true;
+     raw=read_completion_events(&self.events);
+     self.last=Some(raw.clone());
+     raw.populated().err().ok_or("original events remained readable after unit name disappeared")?
+    }
+    Err(error)=>error,
+   };
+   if self.first_failure.is_none(){self.first_failure=Some(raw.clone());}
+   // Only raw ENODEV from the original events file enables retirement lookup.
+   check(raw.seek_errno.is_none()&&raw.read_failed&&raw.read_errno==Some(COMPLETION_ENODEV),&error)?;
+   let (unit,parent,name)=self.original_unit()?;
+   let unit_identity=unit.identity;
+   let parent_identity=parent.identity;
+   let lookup=RetirementLookup::observe(parent.fd.as_raw_fd(),name);
+   let name=name.clone();
+   let absent=lookup.absent();
+   let result=lookup.result;
+   self.last_lookup=Some(lookup);
+   check(absent,"original unit name is not strictly absent under held parent")?;
+   self.revalidate_ancestry(false)?;
+   self.retired=Some(RetiredUnit{
+    group:self.group.clone(),unit:unit_identity,parent:parent_identity,name,event:self.event_identity,
+    event_errno:COMPLETION_ENODEV,lookup_result:result,lookup_errno:COMPLETION_ENOENT,observed_ns:boottime_ns()?,
+   });
+   Ok(false)
+  })();
+  result.map_err(|error|{
+   let error=if retried_after_empty{format!("empty original unit disappeared before verification: {error}")}else{error};
+   raw.failure(CompletionReadStage::AfterTerminal,error)
+  })
  }
  pub(crate) fn retired(&self)->Option<&RetiredUnit>{self.retired.as_ref()}
 }
@@ -607,6 +696,21 @@ pub(in super::super::super) fn capture_calling_umask()->Probe<u16>{
  let failed=EventRead::read_error(b"populated 0\n".to_vec(),io::Error::from(io::ErrorKind::Other));assert!(failed.read_failed);assert_eq!(failed.read_errno,None);assert!(failed.populated().is_err());let diagnostic=failed.failure(CompletionReadStage::AfterTerminal,"completion event read not complete".into());assert!(diagnostic.contains("read_failed=true read_errno=None"));assert!(diagnostic.contains("completion_stage=after_terminal"));assert!(diagnostic.len()<=512);
  let missing=EventRead::read_error(b"populated 0\n".to_vec(),io::Error::from_raw_os_error(19));assert!(missing.read_failed);assert_eq!(missing.read_errno,Some(19));assert!(missing.populated().is_err());
  for populated in [b"populated 0\n".as_slice(),b"populated 1\nfrozen 0\n".as_slice()]{let raw=EventRead{bytes:populated.to_vec(),seek_errno:None,read_errno:None,read_failed:false};assert_eq!(raw.populated().unwrap(),populated.contains(&b'1'));}
+ let absent=RetirementLookup{result:-1,errno:Some(COMPLETION_ENOENT),observed:None,mask:0};
+ assert!(absent.retry_after_empty_read(false));
+ assert!(!absent.retry_after_empty_read(true));
+ for errno in [None,Some(13),Some(116)]{
+  let failed_lookup=RetirementLookup{errno,..absent};
+  assert!(!failed_lookup.retry_after_empty_read(false));
+ }
+ let original=Identity{device:(1,2),mount:3,inode:4};
+ let replaced=RetirementLookup{result:0,errno:None,observed:Some(Identity{inode:5,..original}),mask:REQUIRED_STATX};
+ assert!(!replaced.retry_after_empty_read(false));
+ assert!(replaced.require_original(original).is_err());
+ let incomplete=RetirementLookup{observed:Some(original),mask:0,..replaced};
+ assert!(incomplete.require_original(original).is_err());
+ let bound=RetirementLookup{mask:REQUIRED_STATX,..incomplete};
+ assert!(bound.require_original(original).is_ok());
  let long=failed.failure(CompletionReadStage::Adoption,"é".repeat(300));assert!(long.len()<=512);assert!(long.contains("completion_stage=adoption"));
  eprintln!("completion_read_same_ofd_cursor1_repeat_fullEOF4097_faults_verified");
 }
