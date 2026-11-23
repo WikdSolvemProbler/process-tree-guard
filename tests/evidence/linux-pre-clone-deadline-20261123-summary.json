@@ -1,0 +1,55 @@
+{
+  "schema": "ptg-linux-pre-clone-deadline-1",
+  "date_utc": "2026-11-23",
+  "repair_source": "f2f530b7fa5b0762da73fc041eb7c59370a2d157",
+  "release_test": {
+    "suite": "Locked offline serial release client component suite with linux-separate-service.",
+    "rust": "1.88.0",
+    "component": "native_gate_first_cancellation_cause_is_irreversible",
+    "payload_abi_schema": 9,
+    "payload_abi_words": 51,
+    "observation": "The C pre-clone and pre-send branches run against an already-expired original cutoff. The quiet-peer cases classify the deadline, and the ready-peer cases refuse that classification. The local descriptors verify one kill-sink write, no clone or signal-mask attempt before the pre-clone refusal, and an empty permit socket.",
+    "isolation": "The test uses an inert placement descriptor, local pipe and socket controls, and a real shared gate. Service lifecycle qualification is separate."
+  },
+  "x86_64": {
+    "target": "x86_64-unknown-linux-gnu",
+    "workflow_run": 45263345264,
+    "job": 138003710201,
+    "artifact_id": 14860249118,
+    "archive_sha256": "1670ded668bd7dedecb1ff9aebe3d1f58cc0501ffa33099e7712f5a59d231239",
+    "release_executable_sha256": {
+      "process-tree-guard-client": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239",
+      "process-tree-guard-root": "8bcbc1c849ad36ab181b3e2b279b492a56a6da9674d4f4ff9995cb0b04c76a72"
+    },
+    "tests": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "native_job_log_sha256": "6384f9a51f380f5a417eb492c80fc67cee0cff64ffaba9101cb30032c2867941"
+  },
+  "aarch64": {
+    "target": "aarch64-unknown-linux-gnu",
+    "execution": "Authenticated SSH to an existing Linux guest in a bounded ordinary-user scope.",
+    "source_archive_sha256": "7c499826c7d3f4f68da546eda644ded9d499b8ff3ba8d4612374279c0191750a",
+    "source_files": 134,
+    "verified_artifacts": 161,
+    "tests": {
+      "passed": 12,
+      "failed": 0,
+      "ignored": 0
+    },
+    "release_executable_sha256": {
+      "process-tree-guard-root": "706541047b7f95c3f8c47d01bbeef29daf2c1d216e9b7aa5c3e5c657e2f3a251",
+      "process-tree-guard-client": "3134fce1b23b9c59a2eb229c350a8164ff9683bb8651a4a7d95824afe6eb61f7"
+    },
+    "scratch_cleanup_verified": true,
+    "user_scope_retired": true,
+    "sha256": {
+      "host_receipt": "f1cfde124b7cb47325fcd7b94b6e299131ce626905be97589d2b522dd891f3d0",
+      "remote_result": "de94dbbc99c01aeac6e1a6449816ac1bbb0498cdc890a4ea3363baf3467b03ff",
+      "guest_bundle": "415d92aaf434e9629b7db0f88f335bd5587a00bcdd36fc3bc670f0c692a53df6",
+      "test_stdout": "8843b4d6a60b9517fcda1dce39777ebb6dfddecefded2b735d7177584a46b9cc"
+    }
+  }
+}
