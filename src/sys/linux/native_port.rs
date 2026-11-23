@@ -6,7 +6,7 @@ use std::ffi::{c_char, CString};
 use std::ptr::NonNull;
 use super::cgroup_authority::settlement::Deadline;
 
-const PAYLOAD_SCHEMA:u32=5;
+const PAYLOAD_SCHEMA:u32=6;
 const BLOCKED_MASK:u64=u64::MAX & !(1u64<<8) & !(1u64<<18);
 #[repr(C)]
 struct PayloadSpec {
@@ -16,7 +16,7 @@ struct PayloadSpec {
     uid:u32, gid:u32, group_count:u32, argc:u32, envc:u32,umask:u32,
     deadline_ns:u64, original_mask:u64,
     groups:*const u32, program:*const c_char, argv:*const *const c_char, envp:*const *const c_char,
-    gate:*mut c_void,host_dumpability:u32,zero_caller_core:u32,
+    gate:*mut c_void,host_dumpability:u32,caller_core:CoreLimit,
 }
 #[repr(C)]
 #[derive(Clone,Copy,Debug,Default)]
@@ -59,8 +59,8 @@ struct Release {
 }
 const _:()={
     assert!(std::mem::offset_of!(PayloadSpec,umask)==92);
-    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,zero_caller_core)==156);
-    assert!(size_of::<PayloadSpec>()==160 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
+    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,caller_core)==160);
+    assert!(size_of::<PayloadSpec>()==176 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
     assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==80);
 };
 unsafe extern "C" {
@@ -80,7 +80,7 @@ unsafe extern "C" {
 }
 
 fn sample_payload_abi()->[u64;27]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
-fn require_payload_abi(abi:&[u64;27])->Probe<()>{check(*abi==[u64::from(PAYLOAD_SCHEMA),160,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,156,5,16,0,8,4,SYS_PRLIMIT64 as u64,1],"payload C/Rust bridge ABI differs")}
+fn require_payload_abi(abi:&[u64;27])->Probe<()>{check(*abi==[u64::from(PAYLOAD_SCHEMA),176,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,160,5,16,0,8,4,SYS_PRLIMIT64 as u64,1],"payload C/Rust bridge ABI differs")}
 
 // No Drop cleanup promise: the actual mapping stays with controls/quarantine,
 // or the terminal receipt after all direct/adopted children are reaped.
@@ -150,9 +150,6 @@ impl LaunchContext {
 struct ActivationHostReceipt {suid_dumpable:Option<Vec<u8>>,status:Option<String>,confirmed:bool,mode:Option<u32>,
     kernel_release:Option<Vec<u8>>,kernel_family:Option<ReviewedKernelFamily>,core:Option<CoreObservation>,
     image:Option<cgroup_authority::service_scope::ProtectedElfObservation>}
-#[repr(C)]
-#[derive(Clone,Copy,Debug,Default)]
-struct CoreLimit {soft:u64,hard:u64}
 #[derive(Debug)]
 struct CoreObservation {result:c_long,error:c_int,limit:CoreLimit}
 const _:()={assert!(size_of::<CoreLimit>()==16);assert!(std::mem::offset_of!(CoreLimit,soft)==0);assert!(std::mem::offset_of!(CoreLimit,hard)==8);};
@@ -239,11 +236,11 @@ struct NativePort {
     scope:VerifiedServiceScope,
     launch:LaunchContext, watch:Option<OriginalWatch>, receipt:PayloadReceipt, host_policy:ActivationHostReceipt,
     arguments:Vec<CString>, argv:Vec<*const c_char>, groups:Vec<u32>, uid:u32,gid:u32,
-    zero_caller_core:bool,
+    caller_core:CoreLimit,
 }
 impl NativePort {
-    fn new(launch:LaunchContext,scope:VerifiedServiceScope,zero_caller_core:bool)->Self {
-        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0,zero_caller_core}
+    fn new(launch:LaunchContext,scope:VerifiedServiceScope,caller_core:CoreLimit)->Self {
+        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0,caller_core}
     }
     fn spec(&self,domain:&ArmedDomain,permit:c_int,ready:c_int,exec:c_int)->Probe<PayloadSpec> {
         let watch=self.watch.as_ref().ok_or("missing original retained watch")?;
@@ -257,7 +254,7 @@ impl NativePort {
             group_count:self.groups.len() as u32,argc:self.arguments.len() as u32,envc:self.launch.environment.len() as u32,umask:u32::from(self.launch.umask),
             deadline_ns:watch.deadline_ns,original_mask:domain.arming.original_mask().ok_or("watchdog lacks original raw mask proof")?,
             groups:self.groups.as_ptr(),program:self.arguments.first().ok_or("missing authorized program")?.as_ptr(),
-            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,zero_caller_core:u32::from(self.zero_caller_core),
+            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,caller_core:self.caller_core,
         })
     }
     fn cancel(&mut self,domain:&ArmedDomain) {
@@ -375,7 +372,7 @@ enum Completion {
 pub(crate) struct RunOutcome {completion:Completion,port:Option<NativePort>,early_scope:Option<VerifiedServiceScope>,early_cancellation:Option<Arc<super::super::super::entry::AuthenticatedCancellation>>,admission:NativeReceipt}
 
 pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt)->RunOutcome {
-    let mut port=NativePort::new(launch,scope,prepared.zero_caller_core);
+    let mut port=NativePort::new(launch,scope,prepared.caller_core);
     let completion=match unsafe{activate(prepared,&mut port)} {
         Ok(pending)=>Completion::Terminal(pending.run_to_terminal()),
         Err(failure)=>{
@@ -395,7 +392,7 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
 }
 pub(in super::super) fn before_activation(launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt,failure:PreparationFailure)->RunOutcome {
     let cause=failure.cause;let error=failure.error.clone();
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope,false)),early_scope:None,early_cancellation:None,admission}
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope,CoreLimit{soft:u64::MAX,hard:u64::MAX})),early_scope:None,early_cancellation:None,admission}
 }
 
 fn unknown_watchdog_stop(reasons:u32)->bool{reasons&8!=0&&reasons&(1|2|512)==0}

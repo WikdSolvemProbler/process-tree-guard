@@ -101,14 +101,16 @@ promise to revoke an already executing run. Both requests bind byte7=1 in the
 40-byte PTGEX6 header; mask remains at38.
 
 The service reads CORE limits from the authenticated original caller's procfs
-entry before starting a payload. It applies a verified soft and hard limit of
-zero to the payload and reads both limits back before release. A deployment
-must allow the service to read the requester's kernel limits file. An
-unavailable or invalid file causes refusal before payload creation.
+entry before starting a payload. It sets each payload CORE limit to the lower
+of the observed caller value and the child's inherited service value, and
+verifies changes while the child's credentials are still protected. The
+payload can later adjust its soft value within the resulting hard limit.
 
-This covers the zero CORE setting. Other limits, seccomp, LSM, Landlock, and
-cgroup ancestry still follow the separate-service context. Transparent caller
-context and default Linux dispatch remain open.
+A deployment must allow the service to read the requester's kernel limits
+file. An unavailable or invalid file causes refusal before payload creation.
+Other resource limits, seccomp, LSM, Landlock, and cgroup ancestry still follow
+the separate-service context. Transparent caller context and default Linux
+dispatch remain open.
 
 The mode2 CORE-window source compiles and its12 ordinary tests pass; its actual native protection remains unqualified: it accepts host2 only through the reviewed family/protected-current-ELF/hard-limit gate and protected credential choreography. No sysctl or caller/parent limit is changed. The existing private runtime001 capsule remains frozen0-only and is incompatible with the observed host2 until root explicitly reviews/replaces its inputs after qualification. No installation is authorized by this source work.
 

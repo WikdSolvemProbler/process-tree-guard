@@ -341,8 +341,8 @@ if self.bus.invocation(&self.path,until)?!=self.invocation||self.bus.number::<u3
  pub(super) fn require_running(&self)->Probe<()>{if self.phase==UnitPhase::Running{Ok(())}else{Err("service has no completed runtime handoff".into())}}
 
  pub(super) fn protected_current_elf(&self)->Probe<supervisor::native_activation::ProtectedElfObservation>{self.protected.protected_current_elf()}
- pub(super) fn caller_zero_core(&self, pid: u32) -> Probe<bool> {
-     self.protected.caller_zero_core(pid)
+ pub(super) fn caller_core_limits(&self, pid: u32) -> Probe<supervisor::CoreLimit> {
+     self.protected.caller_core_limits(pid)
  }
  pub(super) fn group(&self)->&str{&self.control_group}
  pub(super) fn name(&self)->&CStr{&self.name}

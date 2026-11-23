@@ -150,12 +150,19 @@ struct VerifiedIdentity {
     groups: Vec<u32>,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(super) struct CoreLimit {
+    pub(super) soft: u64,
+    pub(super) hard: u64,
+}
+
 struct PreparedRun {
     owner_pid: c_int,
     identity: VerifiedIdentity,
     plan: request::ExecPlan,
     lease: RetainedLease,
-    zero_caller_core: bool,
+    caller_core: CoreLimit,
 }
 
 fn status_field<'a>(status: &'a str, name: &str) -> Probe<&'a str> {
@@ -231,7 +238,7 @@ fn prepare(scope:&VerifiedServiceScope,peer:Credentials,invocation:VerifiedInvoc
     authorizes:impl FnOnce(&VerifiedIdentity)->bool)->std::result::Result<PreparedRun,PreparationFailure> {
     let invocation=Arc::new(invocation);
     let mut lease=None;
-    let result=(||->std::result::Result<(VerifiedIdentity,bool),(String,PrelaunchCause)>{
+    let result=(||->std::result::Result<(VerifiedIdentity,CoreLimit),(String,PrelaunchCause)>{
         invocation.check_live().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
         invocation.check_time().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
         let identity=verify_identity(invocation.requester(),peer).map_err(|e|(e,PrelaunchCause::Failure))?;
@@ -244,15 +251,15 @@ fn prepare(scope:&VerifiedServiceScope,peer:Credentials,invocation:VerifiedInvoc
             .map_err(|e| (e, PrelaunchCause::Failure))?;
         let caller_pid = u32::try_from(peer.pid)
             .map_err(|_| ("invalid requester PID".into(), PrelaunchCause::Failure))?;
-        let zero_caller_core = scope.caller_zero_core(caller_pid)
+        let caller_core = scope.caller_core_limits(caller_pid)
             .map_err(|e| (format!("read requester CORE limit: {e}"), PrelaunchCause::Failure))?;
         native(validate_pidfd(invocation.requester(), peer.pid, &mut identity_receipt))
             .map_err(|e| (e, PrelaunchCause::Failure))?;
         require_preparation_permit(retained)?;
-        Ok((identity, zero_caller_core))
+        Ok((identity, caller_core))
     })();
     match result {
-        Ok((identity,zero_caller_core))=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer"),zero_caller_core}),
+        Ok((identity,caller_core))=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer"),caller_core}),
         Err((error,cause))=>Err(PreparationFailure{invocation,plan,lease,error,cause}),
     }
 }

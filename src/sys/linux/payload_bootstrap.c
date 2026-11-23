@@ -30,13 +30,12 @@
 _Static_assert(sizeof(void *)==8 && sizeof(unsigned long)==8,"LP64 private ABI");
 _Static_assert(sizeof(struct clone_args)==88 && offsetof(struct clone_args,cgroup)==80,"clone3 v2 ABI");
 _Static_assert(sizeof(struct pollfd)==8,"native pollfd ABI");
-_Static_assert(sizeof(struct ptg_payload_spec)==160,"payload spec ABI");
+_Static_assert(sizeof(struct ptg_payload_spec)==176,"payload spec ABI");
 _Static_assert(offsetof(struct ptg_payload_spec,gate)==144,"payload gate offset");
 _Static_assert(offsetof(struct ptg_payload_spec,owners)==16,"payload original owner-set offset");
 _Static_assert(offsetof(struct ptg_payload_spec,umask)==92,"explicit caller umask offset");
 _Static_assert(offsetof(struct ptg_payload_spec,host_dumpability)==152
-    && offsetof(struct ptg_payload_spec,zero_caller_core)==156,"trusted core policy offsets");
-struct ptg_core_limits {uint64_t soft,hard;};
+    && offsetof(struct ptg_payload_spec,caller_core)==160,"trusted core policy offsets");
 _Static_assert(sizeof(struct ptg_core_limits)==16
     && offsetof(struct ptg_core_limits,soft)==0
     && offsetof(struct ptg_core_limits,hard)==8,"Linux prlimit64 tuple ABI");
@@ -77,7 +76,7 @@ uint64_t ptg_payload_abi(uint32_t word) {
     case 16:return offsetof(struct ptg_payload_spec,umask);
     case 17:return UINT32_C(0777);
     case 18:return offsetof(struct ptg_payload_spec,host_dumpability);
-    case 19:return offsetof(struct ptg_payload_spec,zero_caller_core);
+    case 19:return offsetof(struct ptg_payload_spec,caller_core);
     case 20:return UINT32_C(5);
     case 21:return sizeof(struct ptg_core_limits);
     case 22:return offsetof(struct ptg_core_limits,soft);
@@ -213,7 +212,8 @@ static int nonblocking_permit(int fd) {
 static int watch_spec_valid(const struct ptg_payload_spec *s) {
     if(!s || s->schema!=PTG_PAYLOAD_SCHEMA || s->bytes!=sizeof(*s)
        || !gate_valid(s->gate) || !s->deadline_ns || (s->umask&~UINT32_C(0777))
-       || (s->host_dumpability!=0 && s->host_dumpability!=2) || s->zero_caller_core>1)return EINVAL;
+       || (s->host_dumpability!=0 && s->host_dumpability!=2)
+       || s->caller_core.soft>s->caller_core.hard)return EINVAL;
     const int32_t other[4]={s->kill_fd,s->timer_fd,s->supervisor_fd,s->watchdog_fd};
     return ptg_owner_watch_disjoint(&s->owners,other,4)?0:EINVAL;
 }
@@ -295,13 +295,18 @@ static int core_fence_restore(const struct ptg_core_limits *original) {
     error=core_limits_read(&observed);if(error)return error;
     return observed.soft==original->soft && observed.hard==original->hard?0:EPROTO;
 }
-static void clamp_core_limits_to_zero(int report) {
-    const struct ptg_core_limits zero={.soft=0,.hard=0};
-    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,&zero,NULL)!=0)child_fail(report,errno,125);
+static int intersect_core_limits(const struct ptg_core_limits *caller,
+                                 const struct ptg_core_limits *inherited) {
+    const struct ptg_core_limits limit={
+        .soft=caller->soft<inherited->soft?caller->soft:inherited->soft,
+        .hard=caller->hard<inherited->hard?caller->hard:inherited->hard,
+    };
+    if(limit.soft==inherited->soft && limit.hard==inherited->hard)return 0;
+    if(syscall(SYS_prlimit64,0,RLIMIT_CORE,&limit,NULL)!=0)return errno;
     struct ptg_core_limits observed={0,0};
     const int error=core_limits_read(&observed);
-    if(error)child_fail(report,error,125);
-    if(observed.soft!=0 || observed.hard!=0)child_fail(report,EPROTO,125);
+    if(error)return error;
+    return observed.soft==limit.soft && observed.hard==limit.hard?0:EPROTO;
 }
 static int zero_capabilities_confirmed(void) {
     const struct __user_cap_header_struct header={.version=_LINUX_CAPABILITY_VERSION_3,.pid=0};
@@ -371,6 +376,13 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
             child_fail(s->exec_writer,EPERM,125);
         const int error=core_fence_begin(&original_core);
         if(error)child_fail(s->exec_writer,error,125);
+    } else if(s->caller_core.soft!=UINT64_MAX || s->caller_core.hard!=UINT64_MAX) {
+        /* Sample and restrict the inherited limits while caller credentials
+         * cannot yet match this child. */
+        int error=core_limits_read(&original_core);
+        if(error)child_fail(s->exec_writer,error,125);
+        error=intersect_core_limits(&s->caller_core,&original_core);
+        if(error)child_fail(s->exec_writer,error,125);
     }
     if(syscall(SYS_prctl,PR_CAP_AMBIENT,PR_CAP_AMBIENT_CLEAR_ALL,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_prctl,PR_SET_KEEPCAPS,0,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
@@ -406,9 +418,10 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
     if(syscall(SYS_prctl,PR_SET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,errno,125);
     if(syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,EPERM,125);
     if(s->host_dumpability==2) {
-        const int error=core_fence_restore(&original_core);
+        int error=core_fence_restore(&original_core);
         if(error)child_fail(s->exec_writer,error,125);
-        if(s->zero_caller_core)clamp_core_limits_to_zero(s->exec_writer);
+        error=intersect_core_limits(&s->caller_core,&original_core);
+        if(error)child_fail(s->exec_writer,error,125);
         /* Only real/saved IDs change now: effective/fs IDs and all capability
          * sets already match. Reviewed setresuid/commoncap/commit_creds leaves
          * dumpable0 unchanged. Full peer-credential matching begins only here. */
@@ -428,8 +441,6 @@ static _Noreturn void payload_child(const struct ptg_payload_spec *s) {
         if(cap_error)child_fail(s->exec_writer,cap_error,125);
         if(syscall(SYS_prctl,PR_GET_NO_NEW_PRIVS,0,0,0,0)!=1
            || syscall(SYS_prctl,PR_GET_DUMPABLE,0,0,0,0)!=0)child_fail(s->exec_writer,EPERM,125);
-    } else if(s->zero_caller_core) {
-        clamp_core_limits_to_zero(s->exec_writer);
     }
     /* Caller credentials, not root, must be able to enter the trusted CWD. */
     if(syscall(SYS_fchdir,s->cwd_fd)!=0 || syscall(SYS_close,s->cwd_fd)!=0)child_fail(s->exec_writer,errno,125);

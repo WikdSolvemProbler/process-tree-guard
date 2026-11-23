@@ -143,8 +143,8 @@ impl VerifiedServiceScope {
         anchor.origin.delegation.as_ref().ok_or("delegation owner missing")?.revalidate(uid)
     }
     pub(in super::super) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{self.anchor.origin.authority.protected_current_elf()}
-    pub(in super::super::super) fn caller_zero_core(&self, pid: u32) -> Probe<bool> {
-        self.anchor.origin.authority.caller_zero_core(pid)
+    pub(in super::super::super) fn caller_core_limits(&self, pid: u32) -> Probe<CoreLimit> {
+        self.anchor.origin.authority.caller_core_limits(pid)
     }
     pub(in super::super) fn require_delegation(&self,uid:u32)->Probe<()>{
         self.anchor.origin.delegation.as_ref().ok_or("service has no administrator delegation grant")?.revalidate(uid)
@@ -348,7 +348,7 @@ fn require_full_map(raw:&[u8])->Probe<()>{let text=std::str::from_utf8(raw).map_
 pub(in super::super::super) fn require_initial_mappings()->Probe<()>{
  let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;let process=proc_process(&proc,std::process::id())?;let _held=checked_maps(&process)?;Ok(())
 }
-fn parse_zero_core_limit(raw: &[u8]) -> Probe<bool> {
+fn parse_core_limits(raw: &[u8]) -> Probe<CoreLimit> {
     let limits = std::str::from_utf8(raw).map_err(|_| "requester limits are not UTF-8")?;
     check(limits.ends_with('\n'), "incomplete requester limits")?;
     let mut rows = limits.lines().filter_map(|line| {
@@ -367,24 +367,26 @@ fn parse_zero_core_limit(raw: &[u8]) -> Probe<bool> {
             return Ok(u64::MAX);
         }
         check(value.bytes().all(|digit| digit.is_ascii_digit()), "invalid requester CORE limit")?;
-        value.parse().map_err(|_| "invalid requester CORE limit".into())
+        let parsed = value.parse::<u64>().map_err(|_| "invalid requester CORE limit")?;
+        check(parsed < u64::MAX, "invalid finite requester CORE limit")?;
+        Ok(parsed)
     }
 
     let soft = limit(soft)?;
     let hard = limit(hard)?;
     check(soft <= hard, "requester CORE soft limit exceeds hard limit")?;
-    Ok(soft == 0 && hard == 0)
+    Ok(CoreLimit { soft, hard })
 }
 
 #[cfg(test)]
 pub(in super::super::super) fn caller_core_limits_regression() {
     for (row, expected) in [
-        ("Max core file size     0  0          bytes\n", true),
-        ("Max core file size     0  unlimited  bytes\n", false),
-        ("Max core file size     7  10         bytes\n", false),
-        ("Max core file size     unlimited  unlimited  bytes\n", false),
+        ("Max core file size     0  0          bytes\n", CoreLimit { soft: 0, hard: 0 }),
+        ("Max core file size     0  unlimited  bytes\n", CoreLimit { soft: 0, hard: u64::MAX }),
+        ("Max core file size     7  10         bytes\n", CoreLimit { soft: 7, hard: 10 }),
+        ("Max core file size     unlimited  unlimited  bytes\n", CoreLimit { soft: u64::MAX, hard: u64::MAX }),
     ] {
-        assert_eq!(parse_zero_core_limit(row.as_bytes()).unwrap(), expected);
+        assert_eq!(parse_core_limits(row.as_bytes()).unwrap(), expected);
     }
     for row in [
         "Limit Soft Limit Hard Limit Units\n",
@@ -393,14 +395,15 @@ pub(in super::super::super) fn caller_core_limits_regression() {
         "Max core file size +0 0 bytes\n",
         "Max core file size 1 0 bytes\n",
         "Max core file size 0 0 pages\n",
+        "Max core file size 0 18446744073709551615 bytes\n",
         "Max core file size 0 18446744073709551616 bytes\n",
     ] {
-        assert!(parse_zero_core_limit(row.as_bytes()).is_err(), "{row:?}");
+        assert!(parse_core_limits(row.as_bytes()).is_err(), "{row:?}");
     }
 }
 
 impl EntryKernelAuthority{
- pub(crate) fn caller_zero_core(&self, pid: u32) -> Probe<bool> {
+ pub(in super::super::super::super) fn caller_core_limits(&self, pid: u32) -> Probe<CoreLimit> {
      require_proc_self(&self.proc)?;
      check(
          require_root_mode(&descriptor_stat(&self.proc)?, S_IFDIR)? == self.proc_identity,
@@ -410,7 +413,7 @@ impl EntryKernelAuthority{
      let limits = proc_leaf(&process, c"limits")?;
      let raw = bounded_fd_bytes(&limits, 4096)?;
      require_name_matches(process.as_raw_fd(), c"limits", &limits)?;
-     parse_zero_core_limit(&raw)
+     parse_core_limits(&raw)
  }
 
  pub(crate) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{
