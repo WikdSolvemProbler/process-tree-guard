@@ -6,6 +6,7 @@ use std::ffi::{c_char, CString};
 use std::ptr::NonNull;
 use super::cgroup_authority::settlement::Deadline;
 
+const PAYLOAD_SCHEMA:u32=5;
 const BLOCKED_MASK:u64=u64::MAX & !(1u64<<8) & !(1u64<<18);
 #[repr(C)]
 struct PayloadSpec {
@@ -15,7 +16,7 @@ struct PayloadSpec {
     uid:u32, gid:u32, group_count:u32, argc:u32, envc:u32,umask:u32,
     deadline_ns:u64, original_mask:u64,
     groups:*const u32, program:*const c_char, argv:*const *const c_char, envp:*const *const c_char,
-    gate:*mut c_void,host_dumpability:u32,core_reserved:u32,
+    gate:*mut c_void,host_dumpability:u32,zero_caller_core:u32,
 }
 #[repr(C)]
 #[derive(Clone,Copy,Debug,Default)]
@@ -58,7 +59,7 @@ struct Release {
 }
 const _:()={
     assert!(std::mem::offset_of!(PayloadSpec,umask)==92);
-    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,core_reserved)==156);
+    assert!(std::mem::offset_of!(PayloadSpec,host_dumpability)==152 && std::mem::offset_of!(PayloadSpec,zero_caller_core)==156);
     assert!(size_of::<PayloadSpec>()==160 && std::mem::offset_of!(PayloadSpec,gate)==144 && std::mem::offset_of!(PayloadSpec,owners)==16);
     assert!(size_of::<Spawn>()==128 && size_of::<Ready>()==96 && size_of::<Release>()==80);
 };
@@ -79,7 +80,7 @@ unsafe extern "C" {
 }
 
 fn sample_payload_abi()->[u64;27]{std::array::from_fn(|i|unsafe{ptg_payload_abi(i as u32)})}
-fn require_payload_abi(abi:&[u64;27])->Probe<()>{check(*abi==[4,160,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,156,5,16,0,8,4,SYS_PRLIMIT64 as u64,1],"payload C/Rust bridge ABI differs")}
+fn require_payload_abi(abi:&[u64;27])->Probe<()>{check(*abi==[u64::from(PAYLOAD_SCHEMA),160,128,96,80,16,8,CLONE_PIDFD|CLONE_INTO_CGROUP,SIGCHLD,435,7,BLOCKED_MASK,144,16,249,16,92,511,152,156,5,16,0,8,4,SYS_PRLIMIT64 as u64,1],"payload C/Rust bridge ABI differs")}
 
 // No Drop cleanup promise: the actual mapping stays with controls/quarantine,
 // or the terminal receipt after all direct/adopted children are reaped.
@@ -220,6 +221,7 @@ impl ActivationHostReceipt {
     let mut elf=[0u8;64];elf[..7].copy_from_slice(b"\x7fELF\x02\x01\x01");elf[16..18].copy_from_slice(&3u16.to_le_bytes());let machine=if cfg!(target_arch="aarch64"){183u16}else{62u16};elf[18..20].copy_from_slice(&machine.to_le_bytes());elf[20..24].copy_from_slice(&1u32.to_le_bytes());elf[52..54].copy_from_slice(&64u16.to_le_bytes());assert!(valid_current_elf(&elf));
     for offset in [0,4,5,6,16,18,20,52]{let mut bad=elf;bad[offset]=0;assert!(!valid_current_elf(&bad));}
     assert!(!valid_current_elf(&elf[..63]));
+    cgroup_authority::service_scope::caller_core_limits_regression();
 }
 struct OriginalWatch { owners:Arc<VerifiedInvocation>,timer:OwnedFd,supervisor:OwnedFd,deadline_ns:u64 }
 fn permit_pair()->Probe<(OwnedFd,OwnedFd)> {
@@ -237,16 +239,17 @@ struct NativePort {
     scope:VerifiedServiceScope,
     launch:LaunchContext, watch:Option<OriginalWatch>, receipt:PayloadReceipt, host_policy:ActivationHostReceipt,
     arguments:Vec<CString>, argv:Vec<*const c_char>, groups:Vec<u32>, uid:u32,gid:u32,
+    zero_caller_core:bool,
 }
 impl NativePort {
-    fn new(launch:LaunchContext,scope:VerifiedServiceScope)->Self {
-        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0}
+    fn new(launch:LaunchContext,scope:VerifiedServiceScope,zero_caller_core:bool)->Self {
+        Self{scope,launch,watch:None,receipt:PayloadReceipt::default(),host_policy:ActivationHostReceipt::default(),arguments:Vec::new(),argv:Vec::new(),groups:Vec::new(),uid:0,gid:0,zero_caller_core}
     }
     fn spec(&self,domain:&ArmedDomain,permit:c_int,ready:c_int,exec:c_int)->Probe<PayloadSpec> {
         let watch=self.watch.as_ref().ok_or("missing original retained watch")?;
         let gate=domain.controls.gate.as_ref().ok_or("missing shared cancellation authority")?;
         Ok(PayloadSpec{
-            schema:4,bytes:size_of::<PayloadSpec>() as u32,cgroup_fd:domain.controls.directory.as_raw_fd(),
+            schema:PAYLOAD_SCHEMA,bytes:size_of::<PayloadSpec>() as u32,cgroup_fd:domain.controls.directory.as_raw_fd(),
             kill_fd:domain.controls.supervisor_kill.as_raw_fd(),owners:watch.owners.watch(),timer_fd:watch.timer.as_raw_fd(),
             supervisor_fd:watch.supervisor.as_raw_fd(),watchdog_fd:domain.watchdog.pidfd.as_raw_fd(),
             cwd_fd:self.launch.cwd.as_raw_fd(),stdio_fd:self.launch.stdio.each_ref().map(AsRawFd::as_raw_fd),
@@ -254,7 +257,7 @@ impl NativePort {
             group_count:self.groups.len() as u32,argc:self.arguments.len() as u32,envc:self.launch.environment.len() as u32,umask:u32::from(self.launch.umask),
             deadline_ns:watch.deadline_ns,original_mask:domain.arming.original_mask().ok_or("watchdog lacks original raw mask proof")?,
             groups:self.groups.as_ptr(),program:self.arguments.first().ok_or("missing authorized program")?.as_ptr(),
-            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,core_reserved:0,
+            argv:self.argv.as_ptr(),envp:self.launch.envp.as_ptr(),gate:gate.as_ptr(),host_dumpability:self.host_policy.mode()?,zero_caller_core:u32::from(self.zero_caller_core),
         })
     }
     fn cancel(&mut self,domain:&ArmedDomain) {
@@ -324,7 +327,7 @@ impl OneShotPort for NativePort {
         let Some(child)=child else {self.cancel(domain);return Err("payload clone did not succeed".into());};
         let exec_report=unsafe{terminal_controller::ExecReport::from_trusted_child(exec_reader)};
         let ready_permit=(||->Probe<OwnedFd>{
-            check(raw.schema==4 && raw.child_created==1 && raw.pid>0 && raw.pidfd>=0 && raw.clone_result==raw.pid
+            check(raw.schema==PAYLOAD_SCHEMA && raw.child_created==1 && raw.pid>0 && raw.pidfd>=0 && raw.clone_result==raw.pid
                 && raw.error==0 && raw.mask_set_result==0 && raw.mask_set_error==0
                 && raw.mask_restore_result==0 && raw.mask_restore_error==0
                 && raw.blocked_mask==BLOCKED_MASK && raw.restored_mask==raw.original_mask
@@ -334,8 +337,8 @@ impl OneShotPort for NativePort {
             let mut ready=Ready::default();
             unsafe{ptg_payload_wait_ready(&spec,ready_reader.as_raw_fd(),child.pidfd.as_raw_fd(),setup.timer_fd(),until,&mut ready)};
             self.receipt.ready=Some(ready);
-            check(ready.schema==4 && ready.result==0 && ready.error==0 && ready.read_count==16
-                && ready.message_schema==4 && ready.message_token==u32::from(b'R') && ready.child_mask==BLOCKED_MASK
+            check(ready.schema==PAYLOAD_SCHEMA && ready.result==0 && ready.error==0 && ready.read_count==16
+                && ready.message_schema==PAYLOAD_SCHEMA && ready.message_token==u32::from(b'R') && ready.child_mask==BLOCKED_MASK
                 && ready.before_ns>=raw.after_clone_ns && ready.after_ns>=ready.before_ns && ready.after_ns<until,
                 "payload readiness refused")?;
             Ok(permit_writer)
@@ -352,7 +355,7 @@ impl OneShotPort for NativePort {
         let mut release=Release::default();
         unsafe{ptg_payload_commit(&spec,child.pidfd.as_raw_fd(),permit.as_raw_fd(),&mut release)};
         self.receipt.release=Some(release);
-        let valid=release.schema==4 && release.result==0 && release.error==0 && release.gate_before==0
+        let valid=release.schema==PAYLOAD_SCHEMA && release.result==0 && release.error==0 && release.gate_before==0
             && release.gate_after==1 && release.write_result==1 && release.write_error==0
             && release.before_ns>0 && release.after_ns>=release.before_ns && release.after_ns<spec.deadline_ns;
         if !valid {self.cancel(domain);return Err("payload release refused".into());}
@@ -372,7 +375,7 @@ enum Completion {
 pub(crate) struct RunOutcome {completion:Completion,port:Option<NativePort>,early_scope:Option<VerifiedServiceScope>,early_cancellation:Option<Arc<super::super::super::entry::AuthenticatedCancellation>>,admission:NativeReceipt}
 
 pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt)->RunOutcome {
-    let mut port=NativePort::new(launch,scope);
+    let mut port=NativePort::new(launch,scope,prepared.zero_caller_core);
     let completion=match unsafe{activate(prepared,&mut port)} {
         Ok(pending)=>Completion::Terminal(pending.run_to_terminal()),
         Err(failure)=>{
@@ -392,7 +395,7 @@ pub(in super::super) unsafe fn run_admitted(prepared:PreparedRun,launch:LaunchCo
 }
 pub(in super::super) fn before_activation(launch:LaunchContext,scope:VerifiedServiceScope,admission:NativeReceipt,failure:PreparationFailure)->RunOutcome {
     let cause=failure.cause;let error=failure.error.clone();
-    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope)),early_scope:None,early_cancellation:None,admission}
+    RunOutcome{completion:Completion::RefusedBeforeActivation{error,cause,preparation:Some(failure)},port:Some(NativePort::new(launch,scope,false)),early_scope:None,early_cancellation:None,admission}
 }
 
 fn unknown_watchdog_stop(reasons:u32)->bool{reasons&8!=0&&reasons&(1|2|512)==0}

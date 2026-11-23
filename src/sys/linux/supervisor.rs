@@ -155,6 +155,7 @@ struct PreparedRun {
     identity: VerifiedIdentity,
     plan: request::ExecPlan,
     lease: RetainedLease,
+    zero_caller_core: bool,
 }
 
 fn status_field<'a>(status: &'a str, name: &str) -> Probe<&'a str> {
@@ -217,22 +218,41 @@ struct PreparationFailure {
     invocation:Arc<VerifiedInvocation>,plan:request::ExecPlan,
     lease:Option<RetainedLease>,error:String,cause:PrelaunchCause,
 }
-fn prepare(peer:Credentials,invocation:VerifiedInvocation,plan:request::ExecPlan,
+fn require_preparation_permit(lease: &RetainedLease) -> std::result::Result<(), (String, PrelaunchCause)> {
+    let decision = lease.sample().map_err(|e| (e, PrelaunchCause::Failure))?.decision;
+    match decision {
+        Decision::Permit => Ok(()),
+        Decision::Deadline => Err(("original invocation expired during preparation".into(), PrelaunchCause::OriginalDeadline)),
+        Decision::OwnerLost => Err(("original invocation owner lost during preparation".into(), PrelaunchCause::Failure)),
+    }
+}
+
+fn prepare(scope:&VerifiedServiceScope,peer:Credentials,invocation:VerifiedInvocation,plan:request::ExecPlan,
     authorizes:impl FnOnce(&VerifiedIdentity)->bool)->std::result::Result<PreparedRun,PreparationFailure> {
     let invocation=Arc::new(invocation);
     let mut lease=None;
-    let result=(||->std::result::Result<VerifiedIdentity,(String,PrelaunchCause)>{
+    let result=(||->std::result::Result<(VerifiedIdentity,bool),(String,PrelaunchCause)>{
         invocation.check_live().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
         invocation.check_time().map_err(|e|(format!("{e:?}"),PrelaunchCause::invocation(&e)))?;
         let identity=verify_identity(invocation.requester(),peer).map_err(|e|(e,PrelaunchCause::Failure))?;
         check(authorizes(&identity),POLICY_REFUSAL).map_err(|e|(e,PrelaunchCause::Failure))?;
         lease=Some(RetainedLease::from_invocation(Arc::clone(&invocation)).map_err(|e|(e,PrelaunchCause::Failure))?);
-        let decision=lease.as_ref().expect("stored private timer").sample().map_err(|e|(e,PrelaunchCause::Failure))?.decision;
-        match decision {Decision::Permit=>Ok(identity),Decision::Deadline=>Err(("original invocation expired during preparation".into(),PrelaunchCause::OriginalDeadline)),
-            Decision::OwnerLost=>Err(("original invocation owner lost during preparation".into(),PrelaunchCause::Failure))}
+        let retained = lease.as_ref().expect("stored private timer");
+        require_preparation_permit(retained)?;
+        let mut identity_receipt = NativeReceipt::default();
+        native(validate_pidfd(invocation.requester(), peer.pid, &mut identity_receipt))
+            .map_err(|e| (e, PrelaunchCause::Failure))?;
+        let caller_pid = u32::try_from(peer.pid)
+            .map_err(|_| ("invalid requester PID".into(), PrelaunchCause::Failure))?;
+        let zero_caller_core = scope.caller_zero_core(caller_pid)
+            .map_err(|e| (format!("read requester CORE limit: {e}"), PrelaunchCause::Failure))?;
+        native(validate_pidfd(invocation.requester(), peer.pid, &mut identity_receipt))
+            .map_err(|e| (e, PrelaunchCause::Failure))?;
+        require_preparation_permit(retained)?;
+        Ok((identity, zero_caller_core))
     })();
     match result {
-        Ok(identity)=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer")}),
+        Ok((identity,zero_caller_core))=>Ok(PreparedRun{owner_pid:peer.pid,identity,plan,lease:lease.expect("successful preparation armed timer"),zero_caller_core}),
         Err((error,cause))=>Err(PreparationFailure{invocation,plan,lease,error,cause}),
     }
 }
@@ -294,7 +314,7 @@ pub(super) unsafe fn run_admitted_in_service(scope:VerifiedServiceScope,admitted
     let Admitted{peer,invocation,plan,io}=admitted;
     let launch=LaunchContext::from_received(peer,io,plan.environment().to_vec(),plan.invocation().umask,cancellation);
     let program=plan.program().to_owned();
-    let prepared=match prepare(peer,invocation,plan,
+    let prepared=match prepare(&scope,peer,invocation,plan,
         |identity|authorizes(identity.uid,identity.gid,&identity.groups,&program)) {
         Ok(value)=>value,Err(error)=>return native_activation::before_activation(launch,scope,admission,error),
     };

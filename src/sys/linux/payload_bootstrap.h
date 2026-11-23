@@ -11,7 +11,7 @@
  * Linux LP64 aarch64/x86-64 only. This is a PRIVATE trusted-supervisor ABI,
  * never a request packet. No raw request-controlled descriptor/pointer is valid.
  */
-#define PTG_PAYLOAD_SCHEMA 4u
+#define PTG_PAYLOAD_SCHEMA 5u
 #define PTG_PAYLOAD_HELD 0
 #define PTG_PAYLOAD_RELEASED 1
 #define PTG_PAYLOAD_CANCELLED 2
@@ -53,7 +53,7 @@ struct ptg_payload_spec {
     const char *const *argv;
     const char *const *envp;
     struct ptg_payload_gate *gate;
-    uint32_t host_dumpability, core_reserved;
+    uint32_t host_dumpability, zero_caller_core;
 };
 /* All FDs are BORROWED by C. Parent Rust owns every endpoint and closes its own
  * child-only writers/readers immediately after spawn. No C function closes a
@@ -93,14 +93,14 @@ struct ptg_payload_ready {
     uint64_t child_mask, before_ns, after_ns;
     int32_t kill_result, kill_error;
 };
-/* READY wire is exactly16 bytes: schema:u32=4, token:u32='R', blocked_mask:u64.
+/* READY wire is exactly16 bytes: schema:u32=5, token:u32='R', blocked_mask:u64.
  * It follows FD scrub and verified groups/gid/uid/zero caps/NNP/CWD. It certifies
  * bootstrap preparation (including verified dumpable0), NOT exec or terminal completion.
- * host_dumpability is trusted host policy, never request data. Mode0 retains the
- * legacy path. Mode2 uses the reviewed ELF/kernel CORE1 barrier while real/saved
- * UID0 prevents nonroot prlimit changes, restores exact original core limits at
- * dumpable0, and drops every root identity before READY. Unknown modes and a
- * nonzero core_reserved refuse. setup_timer is an
+ * host_dumpability and zero_caller_core are trusted supervisor observations.
+ * Mode2 retains real/saved UID0 through the reviewed CORE1 fence and restores
+ * the exact inherited limits at dumpable0. If zero_caller_core is 1, both modes
+ * then set and verify (0,0) before READY, with mode2 doing so before dropping
+ * the protected IDs. Unknown modes and flag values outside 0/1 refuse. setup_timer is an
  * independently armed finite readiness timer; no C-owned timer is introduced.
  */
 void ptg_payload_wait_ready(const struct ptg_payload_spec *spec,
@@ -135,7 +135,7 @@ int ptg_payload_reset_dispositions(int32_t *failed_signal, int32_t *error);
  * 10=CLOCK_BOOTTIME,11=kernel blocked mask,12=spec.gate offset,
  * 13=owner-watch bytes,14=maximum owner-watch count,15=spec.owners offset,
  * 16=umask offset,17=umask maximum,18=host-dumpability offset,
- * 19=core-reserved offset,20=allowed host-mode bitset,21=core-limit ABI bytes,
+ * 19=zero-caller-core offset,20=allowed host-mode bitset,21=core-limit ABI bytes,
  * 22=core soft offset,23=core hard offset,24=RLIMIT_CORE,25=prlimit64 syscall,
  * 26=the reviewed pipe-recursion/file-size barrier value.
  */

@@ -143,6 +143,9 @@ impl VerifiedServiceScope {
         anchor.origin.delegation.as_ref().ok_or("delegation owner missing")?.revalidate(uid)
     }
     pub(in super::super) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{self.anchor.origin.authority.protected_current_elf()}
+    pub(in super::super::super) fn caller_zero_core(&self, pid: u32) -> Probe<bool> {
+        self.anchor.origin.authority.caller_zero_core(pid)
+    }
     pub(in super::super) fn require_delegation(&self,uid:u32)->Probe<()>{
         self.anchor.origin.delegation.as_ref().ok_or("service has no administrator delegation grant")?.revalidate(uid)
     }
@@ -345,7 +348,71 @@ fn require_full_map(raw:&[u8])->Probe<()>{let text=std::str::from_utf8(raw).map_
 pub(in super::super::super) fn require_initial_mappings()->Probe<()>{
  let proc=directory(AT_FDCWD,c"/proc")?;require_fs(&proc,PROC_MAGIC)?;require_root_mode(&descriptor_stat(&proc)?,S_IFDIR)?;require_proc_self(&proc)?;let process=proc_process(&proc,std::process::id())?;let _held=checked_maps(&process)?;Ok(())
 }
+fn parse_zero_core_limit(raw: &[u8]) -> Probe<bool> {
+    let limits = std::str::from_utf8(raw).map_err(|_| "requester limits are not UTF-8")?;
+    check(limits.ends_with('\n'), "incomplete requester limits")?;
+    let mut rows = limits.lines().filter_map(|line| {
+        line.strip_prefix("Max core file size")
+            .filter(|rest| rest.starts_with([' ', '\t']))
+    });
+    let row = rows.next().ok_or("requester limits lack CORE")?;
+    check(rows.next().is_none(), "duplicate requester CORE limit")?;
+    let mut fields = row.split_ascii_whitespace();
+    let Some(soft) = fields.next() else { return Err("missing requester CORE soft limit".into()) };
+    let Some(hard) = fields.next() else { return Err("missing requester CORE hard limit".into()) };
+    check(fields.next() == Some("bytes") && fields.next().is_none(), "invalid requester CORE units")?;
+
+    fn limit(value: &str) -> Probe<u64> {
+        if value == "unlimited" {
+            return Ok(u64::MAX);
+        }
+        check(value.bytes().all(|digit| digit.is_ascii_digit()), "invalid requester CORE limit")?;
+        value.parse().map_err(|_| "invalid requester CORE limit".into())
+    }
+
+    let soft = limit(soft)?;
+    let hard = limit(hard)?;
+    check(soft <= hard, "requester CORE soft limit exceeds hard limit")?;
+    Ok(soft == 0 && hard == 0)
+}
+
+#[cfg(test)]
+pub(in super::super::super) fn caller_core_limits_regression() {
+    for (row, expected) in [
+        ("Max core file size     0  0          bytes\n", true),
+        ("Max core file size     0  unlimited  bytes\n", false),
+        ("Max core file size     7  10         bytes\n", false),
+        ("Max core file size     unlimited  unlimited  bytes\n", false),
+    ] {
+        assert_eq!(parse_zero_core_limit(row.as_bytes()).unwrap(), expected);
+    }
+    for row in [
+        "Limit Soft Limit Hard Limit Units\n",
+        "Max core file size 0 0 bytes",
+        "Max core file size 0 0 bytes\nMax core file size 0 0 bytes\n",
+        "Max core file size +0 0 bytes\n",
+        "Max core file size 1 0 bytes\n",
+        "Max core file size 0 0 pages\n",
+        "Max core file size 0 18446744073709551616 bytes\n",
+    ] {
+        assert!(parse_zero_core_limit(row.as_bytes()).is_err(), "{row:?}");
+    }
+}
+
 impl EntryKernelAuthority{
+ pub(crate) fn caller_zero_core(&self, pid: u32) -> Probe<bool> {
+     require_proc_self(&self.proc)?;
+     check(
+         require_root_mode(&descriptor_stat(&self.proc)?, S_IFDIR)? == self.proc_identity,
+         "requester procfs identity changed",
+     )?;
+     let process = proc_process(&self.proc, pid)?;
+     let limits = proc_leaf(&process, c"limits")?;
+     let raw = bounded_fd_bytes(&limits, 4096)?;
+     require_name_matches(process.as_raw_fd(), c"limits", &limits)?;
+     parse_zero_core_limit(&raw)
+ }
+
  pub(crate) fn protected_current_elf(&self)->Probe<ProtectedElfObservation>{
   use std::io::{Read,Seek,SeekFrom};self.revalidate()?;
   let link=metadata(self.own_proc.as_raw_fd(),c"exe",AT_SYMLINK_NOFOLLOW)?;
