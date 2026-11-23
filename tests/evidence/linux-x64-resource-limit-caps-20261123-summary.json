@@ -1,0 +1,221 @@
+{
+  "schema": "ptg-linux-x64-resource-limit-caps-1",
+  "date_utc": "2026-11-23",
+  "scope": "One predecessor baseline and two patched initial numeric resource-limit controls in separate offline Linux x86-64 guests.",
+  "environment": {
+    "kernel": "6.8.0-147-generic",
+    "target": "x86_64-unknown-linux-gnu",
+    "profile": "release",
+    "network_enabled": false,
+    "host_whole_tree_deadline_seconds": 280,
+    "emulator_timeout_seconds": 230,
+    "guest_driver_timeout_seconds": 105
+  },
+  "builds": {
+    "predecessor": {
+      "source_commit": "25f7be2dc6fee7c68be6c770cf3ebcfdcc67a415",
+      "workflow_run": 45242404455,
+      "artifact_id": 14852121429,
+      "artifact_archive_sha256": "58557fb4bf3d02f98eabbbfca87b3ca6a2041a9bdf7c89884da7c9f4bf74aaf5",
+      "sha256": {
+        "process-tree-guard-root": "e0613e8b89ba47ff0d3118a344f90d470d9554829103b904dcfa82b0d5a13bf2",
+        "process-tree-guard-client": "bc4f993bccfb79e6da53b567358e4cb7ab5fbd410344f38cc57e263683b6a38f"
+      }
+    },
+    "patched": {
+      "source_commit": "be25aa646210babf0601a35b6b9a8e927e021a78",
+      "workflow_run": 45246235773,
+      "artifact_id": 14853562745,
+      "artifact_archive_sha256": "4ebdcf4304451abd0c82a236ce32a208c4ea8270c27523b521c30d638a399e3b",
+      "sha256": {
+        "process-tree-guard-root": "579a40cada2bc09d9f54e5ed60e45e8cfad60016286b5bac415c9a4eca12f4b4",
+        "process-tree-guard-client": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239"
+      }
+    }
+  },
+  "observations": "Each pair shows the soft and hard limits in kernel units. The observed caller and service pairs matched across all three runs. Each caller read its own limits before exec. Held service and payload pidfds bound independent reads to the original instances.",
+  "resource_limits": {
+    "CPU": {
+      "caller": "unlimited:unlimited",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "unlimited:unlimited",
+      "patched_payload_mode2": "unlimited:unlimited"
+    },
+    "FSIZE": {
+      "caller": "8388608:16777216",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "8388608:16777216",
+      "patched_payload_mode2": "8388608:16777216"
+    },
+    "DATA": {
+      "caller": "unlimited:unlimited",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "unlimited:unlimited",
+      "patched_payload_mode2": "unlimited:unlimited"
+    },
+    "STACK": {
+      "caller": "8388608:unlimited",
+      "service": "8388608:unlimited",
+      "predecessor_payload": "8388608:unlimited",
+      "patched_payload_mode0": "8388608:unlimited",
+      "patched_payload_mode2": "8388608:unlimited"
+    },
+    "CORE": {
+      "caller": "128:4096",
+      "service": "0:unlimited",
+      "predecessor_payload": "0:4096",
+      "patched_payload_mode0": "0:4096",
+      "patched_payload_mode2": "0:4096"
+    },
+    "RSS": {
+      "caller": "unlimited:unlimited",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "unlimited:unlimited",
+      "patched_payload_mode2": "unlimited:unlimited"
+    },
+    "NPROC": {
+      "caller": "5510:5510",
+      "service": "5510:5510",
+      "predecessor_payload": "5510:5510",
+      "patched_payload_mode0": "5510:5510",
+      "patched_payload_mode2": "5510:5510"
+    },
+    "NOFILE": {
+      "caller": "384:512",
+      "service": "8192:8192",
+      "predecessor_payload": "8192:8192",
+      "patched_payload_mode0": "384:512",
+      "patched_payload_mode2": "384:512"
+    },
+    "MEMLOCK": {
+      "caller": "191086592:191086592",
+      "service": "8388608:8388608",
+      "predecessor_payload": "8388608:8388608",
+      "patched_payload_mode0": "8388608:8388608",
+      "patched_payload_mode2": "8388608:8388608"
+    },
+    "AS": {
+      "caller": "unlimited:unlimited",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "unlimited:unlimited",
+      "patched_payload_mode2": "unlimited:unlimited"
+    },
+    "LOCKS": {
+      "caller": "unlimited:unlimited",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "unlimited:unlimited",
+      "patched_payload_mode2": "unlimited:unlimited"
+    },
+    "SIGPENDING": {
+      "caller": "5510:5510",
+      "service": "5510:5510",
+      "predecessor_payload": "5510:5510",
+      "patched_payload_mode0": "5510:5510",
+      "patched_payload_mode2": "5510:5510"
+    },
+    "MSGQUEUE": {
+      "caller": "819200:819200",
+      "service": "819200:819200",
+      "predecessor_payload": "819200:819200",
+      "patched_payload_mode0": "819200:819200",
+      "patched_payload_mode2": "819200:819200"
+    },
+    "NICE": {
+      "caller": "0:0",
+      "service": "0:0",
+      "predecessor_payload": "0:0",
+      "patched_payload_mode0": "0:0",
+      "patched_payload_mode2": "0:0"
+    },
+    "RTPRIO": {
+      "caller": "0:0",
+      "service": "0:0",
+      "predecessor_payload": "0:0",
+      "patched_payload_mode0": "0:0",
+      "patched_payload_mode2": "0:0"
+    },
+    "RTTIME": {
+      "caller": "unlimited:unlimited",
+      "service": "unlimited:unlimited",
+      "predecessor_payload": "unlimited:unlimited",
+      "patched_payload_mode0": "unlimited:unlimited",
+      "patched_payload_mode2": "unlimited:unlimited"
+    }
+  },
+  "cases": [
+    {
+      "source_commit": "25f7be2dc6fee7c68be6c770cf3ebcfdcc67a415",
+      "guest_mode": 2,
+      "variant": "baseline",
+      "client_exit": 0,
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "original_host_handle_retained": true,
+      "host_native_exit": 0,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "c034a422216da2ca1b415380b1439ecd4bc6d0a95bdbbfda716fdf7a4711a2cd",
+        "emulator_result": "346fba94f6d6c198677959bf822bcb34661d9b5273108af84329eb6a1591b163",
+        "serial": "d9011bf15d33a57b1c6483ac2989da334a20b0a5af6df7cad2fb3354a596ee47",
+        "intent": "1adbe42c7f2898c178b912aa47b00f57d654e93aeee24611d6eeeb4eda6315b1",
+        "host_runner": "e57dec3ca2a56454ff1907731cecc0b708b4e8dcb94ea1f463debc9e566a3a42",
+        "guest_driver": "d01b3300a7517ee82d79a8612b7741a2205afca19feab6631d09b039f5629b8d",
+        "observer": "fe16e77994786eb18867ec165e910fec2a2a263894eb380667d3bbc3a2f59aaf",
+        "postflight": "49506e2db1f2fb93b94f0b14102b5cbc17423eb5663ad4a53f07d96b7113ec25"
+      }
+    },
+    {
+      "source_commit": "be25aa646210babf0601a35b6b9a8e927e021a78",
+      "guest_mode": 0,
+      "variant": "capped",
+      "client_exit": 0,
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "original_host_handle_retained": true,
+      "host_native_exit": 0,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "246de2cca2a1005f77cc1ceae4a1a678ccad50449a775a5f6c56fee110cf3da8",
+        "emulator_result": "87a644829bb5b3cb78914f1b1d4c5c2756de66c3c9b194bd133253ee0edddf43",
+        "serial": "056e74636ade046429a123b8ddc850063d61b6d1b37d8d866f6d34870effb632",
+        "intent": "d114d39fa5174ac30393fbcea146d9f3c5b7bb88ea8b4909e3601a06cd5e5a8e",
+        "host_runner": "f0c2c352535fc08af7cef7ce5d566f676a1563a3d7346170c3c225affa86e246",
+        "guest_driver": "5fa10de8945a259726c5cb1db06b1b13c860887990d73ced690fe6c33c1855b7",
+        "observer": "fd7e6156373127431b5067f44548f56578f4e3d0ec682ee4b2093d853328cbd5",
+        "postflight": "c5dc715c568583ce60d790bf64fb9e63421eda25b322dc3d2fe07b976ec89c96"
+      }
+    },
+    {
+      "source_commit": "be25aa646210babf0601a35b6b9a8e927e021a78",
+      "guest_mode": 2,
+      "variant": "capped",
+      "client_exit": 0,
+      "original_service_and_payload_terminal_before_fixture_cleanup": true,
+      "original_host_handle_retained": true,
+      "host_native_exit": 0,
+      "emulator_exit": 0,
+      "emulator_processes_remaining": 0,
+      "evidence_sha256": {
+        "host_result": "3413bd5fddbe5ef306edf925a4bf9ac24bbd8baf1a51486d91318f3438220dde",
+        "emulator_result": "a68fa1788f3da654a52a2508c5ab7e69bb3160711a4e266e210ff4570600994c",
+        "serial": "1233213f581a1a1569d893c87822203c59682263c3d3e4bb900ab894ab3ae679",
+        "intent": "c309a404ee4414372e609d9ef51745721efa4bc8758df00c80f573029cd94b48",
+        "host_runner": "2c51a5a7902b4e4958f8b9ea878a308d0dfd2417f1202792a1b28b49c260c649",
+        "guest_driver": "03de013646b0586666b21ac3299bee11862c5ea82b60b22d94dc7808d4ddd448",
+        "observer": "07d3cf578e8db8b5694f62a93eeb472bbd826a9658b23d28cd6dd70fb993dd8f",
+        "postflight": "2341f066c3e9fae89655ecb74a9ec0ab99e9519b1472ed19dc0a22d205c6f915"
+      }
+    }
+  ],
+  "limits": [
+    "The patched payload vector matched the componentwise minimum in both sampled guest modes. The predecessor retained the service values outside CORE.",
+    "The test measured initial numeric limits using ordinary commands. Enforcement under resource exhaustion, shared accounting, full caller confinement, Tailscale transport, and performance require separate evidence.",
+    "Original captures and prior results are retained locally."
+  ]
+}
