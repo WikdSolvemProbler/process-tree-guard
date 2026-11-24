@@ -81,6 +81,26 @@ class LaptopContractTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "unbound inputs or a bytecode cache"):
                 laptop_launch.bind_observers(manifest)
 
+    def test_describe_vetoes_the_current_and_historical_fixture_images(self):
+        historical = "d55d6b947c921b9d28e803a5057dac51e8df044fbdd7106b88880292c4c47a2f"
+        current = "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3"
+        with tempfile.TemporaryDirectory(prefix="ptg-laptop-offline-") as tmp:
+            root = Path(tmp)
+            names = (*laptop_launch.BUNDLE_PATHS, "primary_guard", "tool_guard", "config", "python")
+            files = {
+                name: {"path": str(root / name), "sha256": f"{idx:064x}"}
+                for idx, name in enumerate(names, 1)
+            }
+            files["fixture"] = {"path": str(root / "testkit.exe"), "sha256": current}
+            with (patch.object(laptop_launch, "isolated_inputs", return_value=({}, files, {})),
+                  patch.object(laptop_launch, "normalized_environment", return_value="a" * 64)):
+                manifest = laptop_launch.describe(root / "inputs.json", root / "capture",
+                                                  "laptop-182-001-a-offline")
+        self.assertEqual(manifest["files"]["fixture"]["sha256"], current)
+        self.assertEqual(laptop_launch.LITERAL_PINS["fixture"], current)
+        self.assertIn("testkit.exe", manifest["image_policy"]["pinned_basenames"])
+        self.assertTrue({current, historical} <= set(manifest["image_policy"]["veto_sha256"]))
+
     def test_pricing_keeps_stock_rows_and_joins_post_timing_job_witness(self):
         original = {"outcome": "exit-mismatch"}
 

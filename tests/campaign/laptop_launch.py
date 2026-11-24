@@ -52,12 +52,16 @@ PROTOCOL_PINS = {
     "ADDENDUM-A-A-001.md": "4743e6037cf51dba5beedbd9c875afb315519a78908b075969033e65b0d79468",
     "REVIEW-CRITIC-ADDENDUM-A-A-001.json": "a821745c3b4d7992ada8b604f93bfb98d0e9cdae0c3d0f7a7d9c6b65590fdb05",
     "REVIEW-DESIGNER-ADDENDUM-A-A-001.json": "7c6ab02b541c798310550739ea9ff8d07dc596a9c1c965900d9d2ecff50deb61",
+    "AMD-QUIET-FIXTURE-001.md": "883b5f4019f9c23d2d1be7b7556a095c0f64a3c9389ec5ece45e1f8fb203394a",
+    "REVIEW-CRITIC-QUIET-FIXTURE-001.json": "26e92f6850ad95b25dcb8c0e28f54e5adcff643ff208699c120ac3652c9f4817",
+    "REVIEW-DESIGNER-QUIET-FIXTURE-001.json": "5e6121a3caa382fe04d1f94a0cc036ee04a229a3288a5e350396eb93f33ddad1",
     "REVIEW-CRITIC-FINAL.json": "3a59ab41a721b73575917f612ab8a35f5f43d4a2e7d2bc614d4bb052a0f6d898",
     "REVIEW-DESIGNER-FINAL.json": "3bfd5afd156f1c6a6006127b7773b7cf5d9b90e641b1ae577c526fd92148aa99",
 }
+HISTORICAL_FIXTURE_SHA256 = "d55d6b947c921b9d28e803a5057dac51e8df044fbdd7106b88880292c4c47a2f"
 LITERAL_PINS = {
-    "config": "dbd53f039277755f40d9c3156e85c6e92a67a018778109f11e5effd71d1e2ce5",
-    "fixture": "d55d6b947c921b9d28e803a5057dac51e8df044fbdd7106b88880292c4c47a2f",
+    "config": "16b551edb24a42dd2cc8db1ffb822e0a4359c4f522981a3bff35554bc1cfafb9",
+    "fixture": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
     "processkit": "a79542cfe449f6916921845c2d7e02ea425c496c1a12d6359f7ca6b5f75141bb",
     "nuewframe": "765a364afd529c10b58b7cfa1cd9f13cf955e7a053f1e4a2d467038f064d16e9",
     "sysprims": "0a3144a6ca7b2df7ee382bbbac85d89f5ed75ee2643e1036356a8eaa4d490867",
@@ -240,6 +244,8 @@ def describe(input_path, capture, run_id):
     measurement = hashlib.sha256(canonical_bytes(pinned)).hexdigest()
     images = [files[role] for role in ("guard", "fixture", "nuewframe", "processkit", "sysprims",
                                        "primary_guard", "tool_guard")]
+    veto = {row["sha256"] for row in images}
+    veto.add(HISTORICAL_FIXTURE_SHA256)
     destination = input_path.with_name("manifest.json")
     entry = str(Path(__file__).resolve())
     execute_argv = [
@@ -259,7 +265,7 @@ def describe(input_path, capture, run_id):
         "capture": str(capture),
         "run_id": run_id,
         "image_policy": {
-            "veto_sha256": sorted({row["sha256"] for row in images}),
+            "veto_sha256": sorted(veto),
             "pinned_basenames": sorted({Path(row["path"]).name.casefold() for row in images}),
             "enclosing_guards": {
                 role: {key: files[role][key] for key in ("path", "sha256")}

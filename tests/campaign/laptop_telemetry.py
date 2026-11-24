@@ -20,6 +20,8 @@ from laptop_barrier import (
 )
 
 
+# DETACHED_PROCESS keeps the long-lived instrumentation worker console-free.
+INSTRUMENTATION_WORKER_FLAGS = 0x00000008
 PERIOD = 5 * NS
 OUTSIDE_WINDOWS = 12
 TRANSITION_NS = 50_000_000
@@ -441,13 +443,15 @@ def during(observer, server, clocks, job, handles, worker_argv, manifest, previo
     deadline = start + allowance
     dispatch = time.perf_counter_ns()
     within_transition(start, dispatch)
-    worker = job.launch(worker_argv, subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL,
+    worker = job.launch(worker_argv, INSTRUMENTATION_WORKER_FLAGS,
+                        stdin=subprocess.DEVNULL,
                         stdout=handles[0], stderr=handles[1], cwd=manifest["working_directory"])
     handles.append(worker)
     launched = time.perf_counter_ns()
     require(dispatch <= launched < start + PERIOD, "launch outside first counter window")
     receipt = held_worker_launch(job, worker, worker_argv, manifest["files"]["python"])
     observer.emit("worker_dispatched", **receipt, dispatch_ns=dispatch,
+                  creation_flags=INSTRUMENTATION_WORKER_FLAGS,
                   launched_ns=launched, deadline_ns=deadline)
     served = server.bind_worker(job, worker, dispatch, deadline)
     next_sample = start + PERIOD
@@ -631,6 +635,7 @@ def telemetry_rows(capture_dir, manifest_sha):
                     "worker dispatch not bound to the during baseline")
             require(type(row["pid"]) is int and row["pid"] > 0
                     and type(row["creation_filetime"]) is int and row["creation_filetime"] > 0
+                    and row["creation_flags"] == INSTRUMENTATION_WORKER_FLAGS
                     and row["job_member"] is True and isinstance(row["image_path"], str) and row["image_path"]
                     and all(isinstance(row[key], str) and HEX.fullmatch(row[key])
                             for key in ("image_sha256", "worker_recipe_sha256")),
