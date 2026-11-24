@@ -1,0 +1,84 @@
+{
+  "schema": "ptg-linux-arm64-native-lifecycle-1",
+  "date_utc": "2026-11-24",
+  "source_commit": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "execution": "Authenticated SSH into an existing ARM64 Linux guest with temporary protected deployment.",
+  "environment": {
+    "arch": "aarch64",
+    "kernel": "6.8.0-147-generic",
+    "fs_suid_dumpable": 2,
+    "cgroup_v2": true
+  },
+  "release_executable_sha256": {
+    "process-tree-guard-root": "a95893b6def7688e8ae48ca69766762c4579cac53bb9f7985b3bd46542cec121",
+    "process-tree-guard-client": "3134fce1b23b9c59a2eb229c350a8164ff9683bb8651a4a7d95824afe6eb61f7"
+  },
+  "cases": {
+    "normal": {
+      "command": "/usr/bin/true",
+      "configured_deadline_seconds": 12,
+      "client_exit": 0,
+      "stdout_bytes": 0,
+      "stderr_bytes": 0,
+      "matching_live_or_failed_guard_units_after_join": 0
+    },
+    "deadline": {
+      "configured_original_deadline_seconds": 10,
+      "client_exit": 124,
+      "original_deadline_notice_verified": true,
+      "client_began_to_ended_boottime_ns": "10031235759",
+      "original_owner_observed_alive": true,
+      "two_original_payload_pidfds_terminal_at_first_client_completion": true,
+      "original_service_pidfd_terminal": true,
+      "same_service_instance_terminal_exit": 124,
+      "service_main_pid": 0,
+      "service_control_pid": 0,
+      "original_guard_slice_populated_zero": true,
+      "original_service_and_payload_cgroups_retired": true,
+      "prestop_before_fixture_assistance": true
+    }
+  },
+  "cleanup": {
+    "independent_timer_armed_before_product": true,
+    "timer_fired": false,
+    "timer_cancelled": true,
+    "temporary_deployment_removed": true,
+    "preexisting_runtime_directory_preserved": true,
+    "protected_rule_absent_after_cleanup": true,
+    "managed_root_controller_runtime_seconds": 150,
+    "managed_root_controller_retired": true,
+    "root_controller_cgroup_absent": true
+  },
+  "preserved_attempts": [
+    {
+      "attempt": "native-001",
+      "result": "Admission rejected the existing runtime parent directory."
+    },
+    {
+      "attempt": "native-002",
+      "result": "Read-only admission passed. Runtime remained undispatched while its privileged deadline was repaired."
+    },
+    {
+      "attempt": "native-003",
+      "result": "Manager refused unsupported job properties before controller start. Controller absence verified."
+    },
+    {
+      "attempt": "native-004",
+      "result": "Normal command passed. Deadline observer rejected stale executable pins before READY. Cleanup passed."
+    },
+    {
+      "attempt": "native-005",
+      "result": "Both current-product cases and cleanup passed."
+    }
+  ],
+  "evidence_limits": "One native ARM64 mode-2 normal and deadline run. Private product native and manager joins remain source inferred because the internal result frame was not exported. Root-controller retirement was separately observed. No post-return guest user-scope manager observation or exclusive product reaping is claimed. Broader lifecycle, transparent caller context, and comparative performance remain open.",
+  "sha256": {
+    "frozen_inputs": "5c49110eb4e817fb01da06b57aae78688183743132bd5ab1b1eba7ac2af66416",
+    "host_runtime_result": "18cc00b9a93d603aabca8e076b21e89853f77c19e43e2bf841f218d53ffbee77",
+    "runtime_result": "c71e80f9e3c9bd5cf430b51b1da29e7eb79809982ac1498b63869f332bab3d0f",
+    "remote_stdout": "ba8616effc2e2f81330f3be8474f4fb85249c775c795656bf8558cb183f3e681",
+    "remote_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+    "guest_runtime_bundle": "46ea9cec1ea3f4aba79d9cb60175eaa2af59c37c95e1668b5bfb8d74f0e32fb9",
+    "ordinary_case_result": "d8ab47bde5406994793a0b9b61fb294903cc6810bc2ddcc522e8f4ad644547d3"
+  }
+}

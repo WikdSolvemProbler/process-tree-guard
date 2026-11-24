@@ -59,6 +59,10 @@ The two earlier fixture runs remain incomplete. Both verified normal exit 0. The
 
 Native Rust 1.88 built both opt-in release programs from revision 17d6f19 in an existing ARM64 Linux guest. All 12 serial client component tests passed, including the native held-release deadline regression and its peer-veto control. The ordinary-user scope retired and its temporary storage was removed. [Current ARM64 build and test evidence](../../../tests/evidence/linux-arm64-current-native-20261123-summary.json)
 
+## Current native ARM64 lifecycle
+
+The release binaries from revision caebd14 passed a normal command and an original-deadline case in a native ARM64 Linux guest with kernel 6.8.0-147-generic and fs.suid_dumpable set to 2. The client returned 0 for normal completion and 124 for the ten-second deadline case. Retained payload pidfds were terminal at the first client-completion observation. The fixture verified cleanup, cancelled its unused fallback timer, and observed the bounded root controller retired. Earlier failed preparations remain preserved. [Native ARM64 lifecycle results](../../../tests/evidence/linux-arm64-native-lifecycle-20261124-summary.json)
+
 ## Normal exit on ARM64
 
 The Linux client and service built from `7b2e6d5` with Rust 1.88 passed one mode 2 invocation of `--separate-service-context --timeout 10 -- /usr/bin/true`. The client returned 0 with empty standard output and error. The fixture observed the retained client terminal before reaping it, while the original caller was live. The same protected systemd slice was empty before launch and at the later observation before fixture cleanup. The product service was absent at the later observation.
