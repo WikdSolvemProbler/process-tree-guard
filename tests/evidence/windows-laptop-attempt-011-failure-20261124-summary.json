@@ -1,0 +1,121 @@
+{
+  "schema": "ptg-partial-warmup-census-refusal-v1",
+  "date": "2026-11-24",
+  "run_id": "laptop-182-001-a-as-used-011",
+  "manifest_sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549",
+  "measurement_sha256": "560c656b561aaa26149fcf98dbe53bd7bc847cd1a471dd01cb7aaf69a9ae52cf",
+  "disposition": "FAILED_DURING_WARMUPS",
+  "original_invocation_exit": 1,
+  "primary_exit": 1,
+  "primary_handle_retained": true,
+  "timed_out": false,
+  "controls": 36,
+  "warmups": 148,
+  "measured": 0,
+  "pricing": 0,
+  "raw_setup_outcomes": [
+    {
+      "rows": 18,
+      "group": "floor-direct, ok"
+    },
+    {
+      "rows": 18,
+      "group": "floor-spawn, ok"
+    },
+    {
+      "rows": 37,
+      "group": "guard, ok"
+    },
+    {
+      "rows": 18,
+      "group": "nuewframe, descendant-survived"
+    },
+    {
+      "rows": 19,
+      "group": "nuewframe, ok"
+    },
+    {
+      "rows": 37,
+      "group": "processkit, ok"
+    },
+    {
+      "rows": 37,
+      "group": "sysprims, ok"
+    }
+  ],
+  "failed_census": {
+    "native_resource_errors": 0,
+    "label": "warmup:kill:DETACHED:2:",
+    "operation_recorded": false,
+    "index": 73,
+    "winerror": 87,
+    "state": "membership_unverified",
+    "generic_process_name": "python.exe",
+    "error": "OSError",
+    "image_recorded": false,
+    "creation_recorded": false,
+    "historical_span_annotation": true
+  },
+  "abort_job": {
+    "terminated": true,
+    "active_before": 1,
+    "active_after": 0
+  },
+  "custody": {
+    "original_host": {
+      "bytes": 944,
+      "sha256": "6263856fd7af0cb9bf1405ad0c7e8260ab952bdb7bd553ed48c873047aeba6f4"
+    },
+    "carrier_stderr": {
+      "bytes": 59,
+      "sha256": "4f1a7e5cbe25edce5bdf10c26c6e9b06f336f67ba4df8ae9387df0ab54c73df4"
+    },
+    "launch": {
+      "bytes": 12926,
+      "sha256": "a3afd24c133626b7ece22f0e6b46e9fc0d86cd27da874d5d8d367c39ccadb02a"
+    },
+    "schedule": {
+      "bytes": 218338,
+      "sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e"
+    },
+    "observer": {
+      "bytes": 138061,
+      "sha256": "062fbd6bd71eb6ab916d5de18e971af2651bda1b60561cb7b9e0638ffb71a9e1"
+    },
+    "inventory": {
+      "bytes": 236806,
+      "sha256": "dd76600aac225d7fb7d98bc985c53f7889990d21f7e816dec914a7fe5da120ca"
+    },
+    "barriers": {
+      "bytes": 40165,
+      "sha256": "12340ffabb722d80a0447b3fa9c9fc236ec31c8692314a708ff6c6ac16626024"
+    },
+    "terminal": {
+      "bytes": 401,
+      "sha256": "c22e2412b19ecb3445cf4a85185e67ff09bf7cbf008f1e809e5f35981ffd0f62"
+    },
+    "worker_journal": {
+      "bytes": 79314,
+      "sha256": "da9aedc41aac4a123111183b1fe74ae619394e19b95ebb3af23f753ad1cad3e6"
+    },
+    "pricing_journal": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "observations": {
+      "bytes": 250251,
+      "sha256": "11dca0bd0fa56df1bf13e564a6f84077dd457162301a764a9486e2a0afe16d38"
+    },
+    "provisional_run": {
+      "bytes": 132124,
+      "sha256": "ab126e255be041c25fd7c9ba78b86db875985761adc0be1b071acaf7147e5ab0"
+    }
+  },
+  "limits": [
+    "Setup counts are raw partial observations, not ranked competitive evidence. No measured trials or pricing results were collected.",
+    "The unverified process cannot be attributed or declared gone/noncompeting from these records. Failure could occur while opening or initially querying it, or from cleanup overriding that failure.",
+    "Ambient CPU labels and available memory were not this rejection; the held enclosing guards remained verified.",
+    "Preserve this failure and prior qualification under their original identities. No retrospective acceptance, stitching or pooling."
+  ],
+  "privacy": "Private paths, process IDs, nonce and host details remain in restricted raw records; role digests identify exact bytes."
+}
