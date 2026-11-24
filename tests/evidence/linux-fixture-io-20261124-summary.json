@@ -1,0 +1,36 @@
+{
+  "schema": "ptg-linux-fixture-io-helper-validation-v1",
+  "date": "2026-11-24",
+  "scope": "Standalone fixture safety helper and bounded ordinary-user unit CI; not an integrated or privileged runtime result.",
+  "source": {
+    "helper": "tests/support/linux_fixture_io.py",
+    "helper_sha256": "4de1ed45a393233f7b7f657da7a2a3d16e5b73cde190fac47d1e113d5a6df0a8",
+    "tests": "tests/support/test_linux_fixture_io.py",
+    "tests_sha256": "a2b89a5d9162e372c90bebb53f128bcc8cd12ca18abaf34118b6393a86654c1a",
+    "generated_bootstrap_bytes": 6810,
+    "generated_bootstrap_sha256": "6e1028b9d046579f0f0b45875d16752f14ccf36325a622cb12e3a76aba789f0e"
+  },
+  "behavior": [
+    "Fixed bootstrap source is intended for independent administrator authorization. It opens bounded held regular-file bytes and authenticates the exact digest before compiling and executing the accepted immutable bytes.",
+    "Descriptor-relative metadata acquisition rejects links and special files before the read-open, then checks the opened inode and enforces file and aggregate byte bounds.",
+    "The collector accepts only LIVE.json, DONE.json and result.json under the declared reduced credentials, and retains missing/refused outcomes."
+  ],
+  "validation": {
+    "offline_modeled_and_temp_tests_passed": 13,
+    "linux_native_test": "SKIPPED on Windows; not counted as passed",
+    "independent_additional_checks": [
+      "Wrong reopened inode refused before any read and descriptors closed",
+      "Authenticated SystemExit propagated with original argv restored"
+    ],
+    "static": "Generated bootstrap closes over standard-library imports; pyflakes reported zero findings",
+    "reviews": "Two independent Sols approved the exact final helper, tests and bounded non-root CI addition with zero unresolved objections in that scope.",
+    "ci": "One 45-second command with a two-second kill grace added to the existing Ubuntu minimum-toolchain job, under a two-minute step bound. Native execution is pending at this publication."
+  },
+  "limits": [
+    "The existing privileged packet has not been integrated or executed. Current root entry, ordinary evidence acquisition and unsafe service teardown remain withheld.",
+    "The launcher must independently authorize the exact generated bootstrap and arguments, establish trusted procfs and ancestor custody, clear capabilities and inherited authority, and enforce a native whole-process deadline.",
+    "Matching stat metadata does not prove an atomic snapshot of mutable ordinary records; those records remain untrusted. A supplied fixed digest authenticates the accepted fixture-code bytes.",
+    "Full-lifetime exclusive activation and verified safe teardown of stock services remain required. This helper does not establish VM lifetime or isolation.",
+    "The guard's Rust source and six stock Linux product/deployment assets are unchanged. No speed, parity, backend qualification or issue-closure claim follows."
+  ]
+}

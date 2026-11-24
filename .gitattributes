@@ -7,3 +7,6 @@ tests/campaign/qualification/** -text
 tests/evidence/windows-laptop-native-qualification-stage012-20261124-summary.json -text
 tests/support/linux_root_witness_binding.py -text
 tests/evidence/linux-witness-binding-repair-20261124-summary.json -text
+tests/support/linux_fixture_io.py -text
+tests/support/test_linux_fixture_io.py -text
+tests/evidence/linux-fixture-io-20261124-summary.json -text

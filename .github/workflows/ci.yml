@@ -82,6 +82,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Test fixture I/O under an ordinary Linux uid
+        timeout-minutes: 2
+        run: |
+          timeout --signal=KILL --kill-after=2s 45s python3 -I -B -X utf8 -c 'import os,runpy,sys; assert os.getuid() != 0, "ordinary Linux uid required"; sys.argv=["tests/support/test_linux_fixture_io.py","-v"]; runpy.run_path(sys.argv[0],run_name="__main__")'
+
       - name: Install the declared minimum toolchain and the target
         run: |
           version="$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' Cargo.toml)"
