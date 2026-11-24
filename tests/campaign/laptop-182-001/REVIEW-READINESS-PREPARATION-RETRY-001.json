@@ -1,0 +1,18 @@
+{
+  "schema": "ptg-readiness-preparation-retry-reviews-v1",
+  "recording": "These exact review objects were supplied independently by the Sol agents in their messages and recorded here by the coordinating agent.",
+  "designer": {
+    "role": "designer",
+    "note_sha256": "8f500b61f8f2422916f67fd02d776de880abae8627f304e47bd2637c8de583a6",
+    "approval": "APPROVED",
+    "unresolved_objections": [],
+    "scope": "One metadata-only preparation retry with a 60-second whole-process-tree cap, charged in advance. The original failure, accepted AA008 capture, and accepted replay retain their dispositions."
+  },
+  "critic": {
+    "role": "critic",
+    "note_sha256": "8f500b61f8f2422916f67fd02d776de880abae8627f304e47bd2637c8de583a6",
+    "approval": true,
+    "unresolved_objections": [],
+    "scope": "One metadata-only retry with a 60-second whole-process-tree cap, charged in advance to the existing ledger. Preserve the original failure and charge. Use the accepted capture and replay as inputs. Approval covers preparation of the seven-control summary only."
+  }
+}
