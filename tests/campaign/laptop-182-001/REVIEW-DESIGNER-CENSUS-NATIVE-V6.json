@@ -1,0 +1,44 @@
+{
+  "schema": "ptg-private-native-census-evidence-review-v1",
+  "role": "designer",
+  "decision": "SUPPORTED",
+  "open_objections": [],
+  "scope": "Observed V6 native census positive and negative cases only",
+  "seal_sha256": "25540eabcbd4391a91a59263fc846ea23e471fbe4e1f3b5989f833cb9af8a656",
+  "baseline_manifest_sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549",
+  "actual_root_capture_sha256": "ee0101b48fcbfed68be275305c68c21908c16cc15541875a6cdcf96c8324f3c6",
+  "actual_original_host_receipt_sha256": "7616ae19615c8c10adb8a44a22018497c0ec19655c1c7c565110c2df7384a632",
+  "cases": {
+    "positive": {
+      "full_entries": [
+        352,
+        351
+      ],
+      "classified_entries": [
+        5,
+        4
+      ],
+      "request_to_receiver_ack_ns": 76819900,
+      "request_to_receiver_return_ns": 76856300,
+      "native_open_process_winerror": 87,
+      "original_side_natural_exit": 0,
+      "side_and_phase_jobs_empty": true,
+      "raw_inventory_sha256": "48ee733b1bc8b6240c5f2d00affb72eb60f1ab5ea5a84fc8fbffd00f4121f71a",
+      "raw_ack_sha256": "7988fac73c870b83ba70487eecb877a2dd8f92f5dca20aebe9af033740b4879a"
+    },
+    "negative": {
+      "full_entries": 352,
+      "classified_entries": 5,
+      "live_pinned_outside_veto": true,
+      "native_ack_count": 0,
+      "original_side_natural_exit": 0,
+      "side_and_phase_jobs_empty": true,
+      "raw_inventory_sha256": "a19abeefd2900f5e54bb961769542369b72b3b6a4e12b6e77907e4fdfec78604"
+    }
+  },
+  "limits": [
+    "One controlled stale OpenProcess and one isolated live pinned negative. Independent raw replay is separately required.",
+    "Source enforces sender submission cutoff and receiver checkpoint QPC is observed. No sender ACK completion ledger or pre/during/post CPU acceptance cohort was captured.",
+    "No competitive benchmark, canonical candidate execution, protection change or reclassification of prior attempts."
+  ]
+}

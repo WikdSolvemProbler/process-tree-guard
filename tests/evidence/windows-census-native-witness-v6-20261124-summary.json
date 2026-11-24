@@ -1,0 +1,351 @@
+{
+  "audit_method": "Exact staged production validate_census independently replayed both complete native positive rounds and the actual sticky outside-image veto. Original case, worker, barrier, census, host and parent content hashes verified.",
+  "candidate_executions": 0,
+  "controlled_cases": {
+    "negative": {
+      "accepted_ack_count": 0,
+      "admitted": false,
+      "census_span_from_request_ns": [
+        566400,
+        30807000
+      ],
+      "entries": [
+        352
+      ],
+      "live_outside_veto": "pinned_testkit",
+      "native_barrier_acks": 0,
+      "native_rounds": 1,
+      "ordinary_side_action": "sleep 10",
+      "original_side_native_exit": 0,
+      "original_worker_native_exit": 0,
+      "phase_job_drain": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "replacement_required": false,
+      "round_start_finish_from_request_ns": [
+        [
+          984300,
+          30132300
+        ]
+      ],
+      "side_job_drain": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      }
+    },
+    "positive": {
+      "actual_open_process_winerror": 87,
+      "admitted": true,
+      "barrier_authorized_from_request_ns": 76137200,
+      "census_appended_from_request_ns": 76058800,
+      "census_span_from_request_ns": [
+        6232900,
+        74584300
+      ],
+      "entries": [
+        352,
+        351
+      ],
+      "native_barrier_acks": 1,
+      "native_rounds": 2,
+      "original_side_native_exit": 0,
+      "original_worker_native_exit": 0,
+      "phase_job_drain": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "receiver_release_from_request_ns": 76819900,
+      "receiver_return_from_request_ns": 76856300,
+      "replacement_full_snapshot_side_absent": true,
+      "replacement_required": true,
+      "round_start_finish_from_request_ns": [
+        [
+          6847400,
+          45658400
+        ],
+        [
+          46394000,
+          73642500
+        ]
+      ],
+      "side_job_drain": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "side_snapshot_signal_terminal_close_from_request_ns": [
+        32757000,
+        32783800,
+        42877100,
+        43178700
+      ]
+    }
+  },
+  "custody": {
+    "artifacts_by_role": {
+      "REVIEW-CRITIC-NATIVE-V6.json": {
+        "bytes": 1137,
+        "sha256": "81d892cba14748625a73dcf55327bb40c562e62c7a6467e85e43160ba0825298"
+      },
+      "REVIEW-DESIGNER-NATIVE-V6.json": {
+        "bytes": 1456,
+        "sha256": "16e46d9341a57d6cbfcc126577d46c5fe13031e006ab64af1794a9c1154494bb"
+      },
+      "RUN.ps1": {
+        "bytes": 2563,
+        "sha256": "da36f48e4a2203095568417acb694df76126096bcb0b2436c105390404189ec8"
+      },
+      "SEAL.json": {
+        "bytes": 8113,
+        "sha256": "25540eabcbd4391a91a59263fc846ea23e471fbe4e1f3b5989f833cb9af8a656"
+      },
+      "hidden_carrier_helper": {
+        "bytes": 1118,
+        "sha256": "d38c33b4759b2ea2174db4e55557cea377c4fe8c8866ecf85e2245a5802f2be4"
+      },
+      "host_original_intent": {
+        "bytes": 533,
+        "sha256": "78395a783ddb33e9f5f4d0b1b96c11f8971defdfd2e8ed1e0aba4b7ef01dcc85"
+      },
+      "host_original_primary_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "host_original_primary_stdout": {
+        "bytes": 103,
+        "sha256": "a29a794245eb015d804e079802fcb2376954dc761232fde01f0a79bea4a677c1"
+      },
+      "host_original_terminal": {
+        "bytes": 465,
+        "sha256": "7616ae19615c8c10adb8a44a22018497c0ec19655c1c7c565110c2df7384a632"
+      },
+      "native_parent_result": {
+        "bytes": 4541,
+        "sha256": "ee0101b48fcbfed68be275305c68c21908c16cc15541875a6cdcf96c8324f3c6"
+      },
+      "negative.RESULT.json": {
+        "bytes": 2349,
+        "sha256": "46733880dbf46f1eaf0ff5312eddb8ce6fe4f0f23142d391d4fca15e7137734d"
+      },
+      "negative.WORKER.json": {
+        "bytes": 308,
+        "sha256": "54ecdbc48f6b663c9bc408163e89d8940b326ba4f6b264e74bb4d2ae3ac5df83"
+      },
+      "negative.barrier.jsonl": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative.inventory.jsonl": {
+        "bytes": 24596,
+        "sha256": "a19abeefd2900f5e54bb961769542369b72b3b6a4e12b6e77907e4fdfec78604"
+      },
+      "negative.supervisor.jsonl": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative.worker.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative.worker.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive.RESULT.json": {
+        "bytes": 2820,
+        "sha256": "bec46029952480489cd618db0b00ed751c4def09c06ca65a635790f8f206f60f"
+      },
+      "positive.WORKER.json": {
+        "bytes": 269,
+        "sha256": "9ff630f6a95fc786a6dbaa14f502ea08f62a2572db6b2ff99a607d34f6bb8617"
+      },
+      "positive.barrier.jsonl": {
+        "bytes": 660,
+        "sha256": "7988fac73c870b83ba70487eecb877a2dd8f92f5dca20aebe9af033740b4879a"
+      },
+      "positive.inventory.jsonl": {
+        "bytes": 45501,
+        "sha256": "48ee733b1bc8b6240c5f2d00affb72eb60f1ab5ea5a84fc8fbffd00f4121f71a"
+      },
+      "positive.supervisor.jsonl": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive.worker.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive.worker.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "sealed_image/fixture": {
+        "bytes": 630272,
+        "sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3"
+      },
+      "sealed_image/guard": {
+        "bytes": 818688,
+        "sha256": "aac42d721e32b2e6ef73829c6dc7d9c01d9c548657051489092de2551387e00e"
+      },
+      "sealed_image/primary_guard": {
+        "bytes": 826368,
+        "sha256": "8fa4e58bb6becf3e3c4536557be187b2b4163498d37b55a5ee8c030846fe0cf0"
+      },
+      "sealed_image/python": {
+        "bytes": 104952,
+        "sha256": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a"
+      },
+      "sealed_image/tool_guard": {
+        "bytes": 403968,
+        "sha256": "5656311ee75af9596864bdb8e5e89b0a4c0dad2812bcdf34205610193f2e8133"
+      },
+      "sealed_source/RUN.ps1": {
+        "bytes": 2563,
+        "sha256": "da36f48e4a2203095568417acb694df76126096bcb0b2436c105390404189ec8"
+      },
+      "sealed_source/tests/campaign/arms.py": {
+        "bytes": 77487,
+        "sha256": "e7c463e1a5ba52dea911d62f54b9566d1fa73f28399c2694dbcda8c5f0ed1b07"
+      },
+      "sealed_source/tests/campaign/harness.py": {
+        "bytes": 169862,
+        "sha256": "a4daf18b4ed1e16e2cd0a3f66c93a9f5e029301fe65c51ccaf0b5b7d9cdff1eb"
+      },
+      "sealed_source/tests/campaign/laptop_analysis.py": {
+        "bytes": 10987,
+        "sha256": "874b5006026ffde65230dfbdf3ea0ce8bf4f5482082d08ec7513d08bb4ece7c3"
+      },
+      "sealed_source/tests/campaign/laptop_ancestry.py": {
+        "bytes": 7177,
+        "sha256": "c2f079362f632e5fcfd10452300e6ee9279a264a2fa67eb321896cd4c907afb0"
+      },
+      "sealed_source/tests/campaign/laptop_audit.py": {
+        "bytes": 13580,
+        "sha256": "6262f6087c2d9053197a09bf24b32238590ebd34584e9c38aea47a874e2e0da9"
+      },
+      "sealed_source/tests/campaign/laptop_barrier.py": {
+        "bytes": 26141,
+        "sha256": "e9749e269401b3aef5618ca9846e6cf316f99b895ccfd8f9b346e2eda9f7d670"
+      },
+      "sealed_source/tests/campaign/laptop_census.py": {
+        "bytes": 8229,
+        "sha256": "12176b0c728511b260a5c3687c7c61b8bed67aca9da3550bcaacca9a5dc43560"
+      },
+      "sealed_source/tests/campaign/laptop_launch.py": {
+        "bytes": 26941,
+        "sha256": "cb79ba559bdda827ff78636a8286b9dbbdae2d9e532d163fde7dbd386099e220"
+      },
+      "sealed_source/tests/campaign/laptop_schedule.py": {
+        "bytes": 4931,
+        "sha256": "02058065001487e59330648a44724d200e1dc6fcc77f04858d7fba3f8202781f"
+      },
+      "sealed_source/tests/campaign/laptop_telemetry.py": {
+        "bytes": 52228,
+        "sha256": "7755edb317e4966c5fe8f8db7fbccc34a039e24c7ffe77ae75a78559f439253a"
+      },
+      "sealed_source/tests/campaign/laptop_worker.py": {
+        "bytes": 10802,
+        "sha256": "71d3d66f8f9a49faf3ce6120a39c9f36107d2e92e33690466b459025a1cb9660"
+      },
+      "sealed_source/tests/campaign/observer-laptop-185-001/audit_package.py": {
+        "bytes": 7938,
+        "sha256": "3908c9db44e2696fd535c1a1c9b87a4867573a42a4d825d648da6981370669d2"
+      },
+      "sealed_source/tests/campaign/observer-laptop-185-001/image_policy.py": {
+        "bytes": 542,
+        "sha256": "f9ca5e411de733df0e44cec6b3604790ed21336213850ef7f35b8acd0d54ff9d"
+      },
+      "sealed_source/tests/campaign/observer-laptop-185-001/inventory_gate.py": {
+        "bytes": 11937,
+        "sha256": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f"
+      },
+      "sealed_source/tests/campaign/observer-laptop-185-001/quiet_gate.py": {
+        "bytes": 10467,
+        "sha256": "c8995c81f6d05c4f17f8b1a00551065665f97a7ef15e5407212f63c3d1135ac3"
+      },
+      "sealed_source/tests/campaign/plan.py": {
+        "bytes": 21646,
+        "sha256": "a616a82dbeebfe5041fc55d55733d06c4b0c2af27614884c097ae3b0bb52a3bf"
+      },
+      "sealed_source/tests/campaign/pricing.py": {
+        "bytes": 66239,
+        "sha256": "c5e72ed6b6a0a027077d234fe4a45521819684e854624597de9a9f6fe8aba0a3"
+      },
+      "sealed_source/tests/campaign/probe.py": {
+        "bytes": 2570,
+        "sha256": "5858ad7e97c93e95941965c4c15ae295f147f091c3cedb482d68257a16733433"
+      },
+      "sealed_source/tests/campaign/report.py": {
+        "bytes": 352055,
+        "sha256": "92e8f5c1776db8ba1a975bc425ac1f8b130b93ac15e50e5965d7eb93c923e245"
+      },
+      "sealed_source/tests/campaign/runner.py": {
+        "bytes": 49529,
+        "sha256": "732e52bae27aac1c71d3bb3dacfdd7c132592c5ba93b7b4c315e4ddb457572d6"
+      },
+      "sealed_source/tests/campaign/stubs.py": {
+        "bytes": 11419,
+        "sha256": "4cb54deed12a96a8221c0c5ca2d8bb2b18297aff81c70d1fdddba7cec677659d"
+      },
+      "sealed_source/tests/campaign/windows_payload_observer.py": {
+        "bytes": 10650,
+        "sha256": "d4982594d8789e3027156d1a0bff458568177e414c606f09b7101c8bb5de219f"
+      },
+      "sealed_source/tests/campaign/windows_slot_job.py": {
+        "bytes": 10723,
+        "sha256": "a2e76ee9b872ff19bbb261f38cb88a8214e01926cd53165d767e6581ef8300aa"
+      },
+      "sealed_source/tests/envcase.py": {
+        "bytes": 4142,
+        "sha256": "15c0fab3a22eb9be3b3e93370963e75ece2e965adefb9bb58c6e3d2b97ef0c8d"
+      },
+      "sealed_source/witness.py": {
+        "bytes": 19405,
+        "sha256": "eedeb8b2c45115f0c5866772ce9546a87abc376b79f0fa130a03101cf0061566"
+      },
+      "stage011_final_policy_manifest": {
+        "bytes": 15707,
+        "sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549"
+      },
+      "stage011_pending_template_manifest": {
+        "bytes": 15478,
+        "sha256": "ddf8be21d4647428134390f953a0ee5a5a415254c2f72d55f4bd3e2cb9ce48fd"
+      },
+      "witness.py": {
+        "bytes": 19405,
+        "sha256": "eedeb8b2c45115f0c5866772ce9546a87abc376b79f0fa130a03101cf0061566"
+      }
+    },
+    "historical_v5_result": "tests/evidence/windows-census-native-witness-v5-20261124-summary.json",
+    "private_audit": {
+      "bytes": 15571,
+      "sha256": "6f52fb7bea6e21a79ca4ef9582b0d984e93c94e26be2cc8ced86fef5af6c0827"
+    }
+  },
+  "limits": [
+    "Original raw data and host/process identities are retained privately. This hash summary does not publish the raw dataset.",
+    "The supervising guard served as harness only. No candidate slot ran and no comparative speed, product rank, or CPU/observer qualification is inferred.",
+    "Prior failed or unrun witnesses retain their original dispositions. This controlled pair does not replace fresh A/A and pricing qualification."
+  ],
+  "original_supervising_harness": {
+    "held_original_handle": true,
+    "native_exit": 0,
+    "outer_deadline_s": 300,
+    "primary_deadline_s": 280,
+    "stderr_bytes": 0,
+    "wait_cap_s": 290
+  },
+  "policy": {
+    "effective_final_stage011_sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549",
+    "inherited_pending_template_sha256": "ddf8be21d4647428134390f953a0ee5a5a415254c2f72d55f4bd3e2cb9ce48fd",
+    "python_added_to_veto": false
+  },
+  "schema": "ptg-windows-census-native-witness-v6-summary-v1",
+  "scope": "One controlled Windows native census replacement and one live outside-image refusal under the unchanged campaign image policy.",
+  "status": "independent_replay_pass",
+  "timing_scope": "The original positive request, durable census append, barrier authorization, and actual client ACK timing are recorded. Sender ACK-completion timestamps are absent from the retained witness."
+}

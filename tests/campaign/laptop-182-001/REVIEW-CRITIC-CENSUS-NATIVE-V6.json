@@ -1,0 +1,8 @@
+{
+  "role": "critic",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "seal_sha256": "25540eabcbd4391a91a59263fc846ea23e471fbe4e1f3b5989f833cb9af8a656",
+  "positive_receive_ns": 76819900,
+  "scope": "Native disappearance and live-veto witnesses only. Sender ACK completion was not recorded separately. No full qualification, candidate CLI or performance claim."
+}
