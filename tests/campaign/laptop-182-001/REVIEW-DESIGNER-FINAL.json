@@ -1,0 +1,15 @@
+{
+  "schema": "ptg-laptop-design-review-v1",
+  "protocol": "PROTOCOL.md",
+  "protocol_sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+  "protocol_bytes": 41312,
+  "source_commit": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "reviewer_role": "designer",
+  "reviewer_model": "gpt-6.2-sol",
+  "decision": "APPROVED_DESIGN_ONLY",
+  "unresolved_material_methodology_objections": [],
+  "execution_authorized": false,
+  "execution_manifest_approval": "PENDING",
+  "native_measurement_and_safety_controls": "PENDING",
+  "wake_reference_protection_qualification": "PENDING"
+}

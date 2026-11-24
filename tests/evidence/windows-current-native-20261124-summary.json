@@ -1,0 +1,91 @@
+{
+  "schema": "ptg-windows-current-native-1",
+  "date_utc": "2026-11-24",
+  "source_commit": "6d2a14e5ed43343d511a7bb9e171a9f75e4fdd4f",
+  "current_source_compared": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "build_input_comparison": "Cargo files, build script, and Windows/shared Rust source match. The source differences are Linux files and the macOS README.",
+  "selected_windows_executable_sha256": "47a3a7cf64eb438581e9bd6fe7de7e14fa195c94249638e0839bd36e1632fcd8",
+  "launch": "Codex normal shell, hidden process launch using the exact pinned guard target and argument vector.",
+  "deadlines_seconds": {
+    "host": 3300,
+    "outer_guard": 3200,
+    "per_suite": 900
+  },
+  "result": {
+    "passed": 155,
+    "failed": 0,
+    "ignored": 0,
+    "outer_guard_exit": 0,
+    "original_outer_handle_retained": true,
+    "carrier_errors": 0
+  },
+  "suites": [
+    {
+      "name": "guard",
+      "passed": 83,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "measured": 0,
+      "driver_exit": 0,
+      "inner_guard_exit": 0,
+      "source_and_artifacts_verified_before_and_after": true,
+      "stdout_bytes": 246462,
+      "stderr_bytes": 6341,
+      "driver_result_sha256": "95ce0294f009666c61b2ad7d939171d653f16a05ed2640e7daf55ddec5ca9b8a",
+      "stdout_sha256": "12475dc9d7c480ec1f7e406ac1e46948fbef7c2f4e529af0f9265fac14f2cd95",
+      "stderr_sha256": "a4da480cb4396c500499c7bee11c261ecca152c4147b7f2f449048887621d33a"
+    },
+    {
+      "name": "auto",
+      "passed": 22,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "measured": 0,
+      "driver_exit": 0,
+      "inner_guard_exit": 0,
+      "source_and_artifacts_verified_before_and_after": true,
+      "stdout_bytes": 29543,
+      "stderr_bytes": 191,
+      "driver_result_sha256": "d4ae9b11dc6330417c2b35947121e1aaa64c88f42713c2311e221eab39c8aff0",
+      "stdout_sha256": "9f2b648b27624915e6e7d4d1fe55276da5552155b6d3f1f09ada1343a1039b75",
+      "stderr_sha256": "96e6830e729878f80ffcaec7c0d6b14ecee407db3ba4b8a5074df7e8e277bf29"
+    },
+    {
+      "name": "battery",
+      "passed": 50,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "measured": 0,
+      "driver_exit": 0,
+      "inner_guard_exit": 0,
+      "source_and_artifacts_verified_before_and_after": true,
+      "stdout_bytes": 143519,
+      "stderr_bytes": 191,
+      "driver_result_sha256": "443f73d9f9da9b1b5c163b272478e49879955e1894a64ea7c0fa481ca60fb2f4",
+      "stdout_sha256": "29b5c8681d19f6045da988dfdb644aad3b5e78b2f32617664da03e9cf2309d3c",
+      "stderr_sha256": "7df6f99fe25bc608e7aa7db953cf06303f4ccedcf37932ccc4d6b987aea35a52"
+    }
+  ],
+  "source_files_verified": 1028,
+  "artifacts_verified": 16,
+  "tools_verified": 3,
+  "ui_policy": "The launcher applies process-local error mode 0x8003 and starts command windows hidden. Interactive prompt opt-ins were absent.",
+  "ui_observation": "Continuous window monitoring was not performed.",
+  "conditional_assertions_not_exercised": [
+    "G103 desktop-prompt opt-in absent",
+    "G87 standard-input assertion bypassed by earlier guarded-parent refusal",
+    "G95 desktop-prompt opt-in absent",
+    "G97 console-prompt assertion bypassed by earlier guarded-parent refusal",
+    "G98 console-owner-loss assertion bypassed by earlier guarded-parent refusal"
+  ],
+  "scope": "Native regression results for the stated build and launch context. Interactive prompt opt-ins and competitive performance remain separate qualifications.",
+  "sha256": {
+    "host_intent": "2a7dff5b55d1aa4699be2d32c0127ca2aff756af15556dfef5373fbdf84cb07b",
+    "host_result": "e6f9ee52bdb5760617314e7e16abc9e2018f6adb98d8dea8ed292b77b1ac3d13",
+    "native_carrier_result": "2a1e8659a90feb9e006930abbacd99007d09b996fa6502a22fe6a6b4735fd456",
+    "artifact_manifest": "9cb5b6476dab92c8b5c3ac6bb924f73ad6ceb45789ac3b896a3f5789861e7a46"
+  }
+}

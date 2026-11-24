@@ -1,0 +1,18 @@
+{
+  "schema": "private-sol-critic-design-review-v1",
+  "role": "independent critic",
+  "decision": "APPROVED_DESIGN_ONLY_ZERO_UNRESOLVED_MATERIAL_METHODOLOGY_OBJECTIONS",
+  "protocol_file": "PROTOCOL.md",
+  "protocol_sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+  "protocol_bytes": 41312,
+  "repository_head": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "previous_protocol_sha256": "96c92346a95339f33f3f24a2fd025ceaaf7141c9d1f437737be48a2d62426e26",
+  "previous_review_file": "REVIEW-CRITIC.json",
+  "previous_review_sha256": "d4bba6d92b803e7c18b8d5a4354b9f4960f4c859871cad053bd8682c9acc5c02",
+  "exclusive_delta_before": "Add only outside-bracket raw stamp fields and a context-agnostic barrier around the anchored run loop, as required above.",
+  "exclusive_delta_after": "Add outside-bracket raw stamp fields and a context-agnostic barrier around the anchored run loop. Retain budget-bounded stream copies and their digests in _run_slot only after the original timed endpoint, slot Job drain and stdio handle close, before owned temporary unlink.",
+  "reverse_recreated_previous_exact_bytes": true,
+  "delta_assessment": "Current tests/campaign/runner.py assigns measured elapsed before its finally block drains the slot Job, closes the stdio handles and unlinks the owned files. This addition puts raw byte/hash retention after measurement and original cleanup, preserving custody, failure attribution and the unchanged timing endpoint. The existing A scope, hard timing and cleanup gates, purpose and judgments still apply.",
+  "unresolved_material_methodology_objections": [],
+  "workload_execution_authorized": false
+}
