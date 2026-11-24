@@ -1,0 +1,14 @@
+{
+  "schema": "laptop-182-prospective-amendment-review-v1",
+  "reviewer": "laptop_design_sol",
+  "reviewed_utc": "2026-11-24T06:49:11.6605118Z",
+  "scope": "prospective pricing settlement methodology only",
+  "amendment_sha256": "f453c3f0d07be8077fcc94663271799983498357e62f3f216e609e3d01c86a0c",
+  "approved": true,
+  "unresolved_objections": [],
+  "notes": [
+    "First eligible query is immediate, complete valid extra members may settle naturally, retries have 25 ms cooldown and 50 ms receipt reserve within the original one-second or tighter group deadline.",
+    "Exact original sole worker and ordered durable attempt hashes are required for acceptance. Native error or malformed evidence fails closed and a persistent extra member is refused with original cleanup.",
+    "Earlier 004 remains a refusal with an unidentified extra PID. Exact implementation, independent replay, and launch evidence require separate review before new native execution."
+  ]
+}

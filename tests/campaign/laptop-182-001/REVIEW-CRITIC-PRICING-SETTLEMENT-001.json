@@ -1,0 +1,15 @@
+{
+  "schema": "laptop-182-prospective-amendment-review-v1",
+  "reviewer": "laptop_critic_sol",
+  "reviewed_utc": "2026-11-24T06:48:57.0150104Z",
+  "scope": "prospective pricing Job settlement method",
+  "amendment_sha256": "f453c3f0d07be8077fcc94663271799983498357e62f3f216e609e3d01c86a0c",
+  "approved": true,
+  "unresolved_objections": [],
+  "notes": [
+    "The original one-second-or-earlier authorization bound, stock workloads and timing endpoints, exact sole-worker proof and fail-closed behavior apply.",
+    "Each complete extra-member snapshot may retry after at least 25 ms on the same cancellation event. No query starts after the last 50 ms reserve. API, shape and identity failures never retry.",
+    "Individually durable attempt rows, ordered line-digest binding, final acknowledgment, complete replay and separate settlement reporting are required. A persistent extra member receives no acknowledgment and cannot advance the cursor.",
+    "Original attempt 004 remains a refusal. An additional PID was listed before abort, and final accounting had one active process. The extra PID identity and liveness were not established. Implementation and exact native launch approval remain separate."
+  ]
+}
