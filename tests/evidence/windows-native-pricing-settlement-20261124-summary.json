@@ -1,0 +1,163 @@
+{
+  "schema": "ptg-windows-native-pricing-settlement-summary-v1",
+  "date": "2026-11-24",
+  "scope": "Native Windows pricing-settlement controls for the frozen laptop protocol. Six stock rows cover one repetition of each of three paired probes. The full campaign requires 54 pricing rows.",
+  "pins": {
+    "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+    "protocol_sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+    "amendment": "tests/campaign/laptop-182-001/AMD-PRICING-SETTLEMENT-001.md",
+    "amendment_sha256": "f453c3f0d07be8077fcc94663271799983498357e62f3f216e609e3d01c86a0c",
+    "stage_manifest_sha256": "ca794c93e52c4086be26c477e5c2ae0d7937e645b5b4810190007157a033a708",
+    "measurement_sha256": "677c7231abd7162dd13c4df9ac92e5c70a1ddfffcf789f7124d7f120615e58e1",
+    "candidate_sha256": "aac42d721e32b2e6ef73829c6dc7d9c01d9c548657051489092de2551387e00e",
+    "fixture_sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
+    "capture_source_sha256": "03a2f69282472fb5330fd61e45e0b09e239ea74b2ceb1da8008cd3905c1fa623",
+    "offline_replay_source_sha256": "23b9e58327de4bf028890236fe6e5d3f6dac5ad5624e83fea4725f7ab146ffc6"
+  },
+  "limits": {
+    "request_cap_ns": 1000000000,
+    "group_ceiling_s": 220,
+    "minimum_query_cooldown_ns": 25000000,
+    "query_start_reserve_ns": 50000000,
+    "internal_global_seconds": 300,
+    "primary_whole_tree_seconds": 320,
+    "outer_whole_tree_seconds": 340
+  },
+  "positive": {
+    "capture_revision": "006",
+    "primary_exit_code": 0,
+    "worker_exit_code": 0,
+    "original_primary_handle_retained": true,
+    "pricing_rows": 6,
+    "native_queries": 10,
+    "acknowledged": 6,
+    "settled_through": 5,
+    "phase_job": {
+      "active_after": 0,
+      "active_before": 0,
+      "terminated": false
+    },
+    "stock_stamp_replay": true,
+    "cases": [
+      {
+        "probe": "console-probe-finish",
+        "shape": "loaded",
+        "stock_exit_code": 0,
+        "native_queries": 2,
+        "sender_and_receiver_met_effective_deadline": true
+      },
+      {
+        "probe": "console-probe-finish",
+        "shape": "baseline",
+        "stock_exit_code": 0,
+        "native_queries": 1,
+        "sender_and_receiver_met_effective_deadline": true
+      },
+      {
+        "probe": "owner-verification",
+        "shape": "loaded",
+        "stock_exit_code": 0,
+        "native_queries": 1,
+        "sender_and_receiver_met_effective_deadline": true
+      },
+      {
+        "probe": "owner-verification",
+        "shape": "baseline",
+        "stock_exit_code": 0,
+        "native_queries": 2,
+        "sender_and_receiver_met_effective_deadline": true
+      },
+      {
+        "probe": "resolver-probe-count",
+        "shape": "loaded",
+        "stock_exit_code": 0,
+        "native_queries": 2,
+        "sender_and_receiver_met_effective_deadline": true
+      },
+      {
+        "probe": "resolver-probe-count",
+        "shape": "baseline",
+        "stock_exit_code": 0,
+        "native_queries": 2,
+        "sender_and_receiver_met_effective_deadline": true
+      }
+    ]
+  },
+  "negative": {
+    "capture_revision": "007",
+    "primary_exit_code": 0,
+    "worker_exit_code": 0,
+    "original_primary_handle_retained": true,
+    "pricing_rows": 0,
+    "native_queries": 29,
+    "request_to_refusal_ns": 940836500,
+    "acknowledged": 0,
+    "settled_through": -1,
+    "held_live_extra_fixture": true,
+    "phase_job": {
+      "active_after": 0,
+      "active_before": 1,
+      "terminated": true
+    },
+    "extra_terminal_exit_code_hex": "0xE0000071"
+  },
+  "custody": {
+    "digest_algorithm": "SHA-256",
+    "raw_evidence": "Retained privately. The digest list identifies exact raw bytes by evidence role.",
+    "files": {
+      "positive_stock_pricing": {
+        "sha256": "72c45fd44481a5503190e01aa41f240a8baeae289e7011e6de604d62a4779662",
+        "bytes": 6550
+      },
+      "positive_native_membership": {
+        "sha256": "e69d4514a6560b31930ce954e82ba8c571aed4112e143ea454ce374554647679",
+        "bytes": 9678
+      },
+      "positive_worker": {
+        "sha256": "2760bfda30ea313b274abc71b8b828140fe8ec16320306afdee97331c975aebb",
+        "bytes": 4022
+      },
+      "positive_supervisor": {
+        "sha256": "0c7d710299cb3ff9de6a1eba6cceecc3a78768ceb400530c0bc57ae09d18ef04",
+        "bytes": 2469
+      },
+      "positive_host": {
+        "sha256": "8c6558aa28fbb6e52e9bec1a74c169b05611916ec9c4d038f498fadad678232a",
+        "bytes": 1597
+      },
+      "positive_replay": {
+        "sha256": "61b58edbfd6c079a60483de7bb934b1b1393b20b7d7e34c56e4d7efa181a56c9",
+        "bytes": 1516
+      },
+      "negative_native_membership": {
+        "sha256": "a5df7ca94f5a97668a3d468ab25ef9e380907a142aebe3c5b6c002134981c3a9",
+        "bytes": 18452
+      },
+      "negative_worker": {
+        "sha256": "30d2871ecbb74ab1034b5bb25fdb72a193c88a44fe2cacb5677ac6221eebd02e",
+        "bytes": 384
+      },
+      "negative_supervisor": {
+        "sha256": "12c3940a0580608e18dd52656a05799cb57a27f21e802c3eddaf005f70bbe7f3",
+        "bytes": 2648
+      },
+      "negative_host": {
+        "sha256": "eab2fb970dc9ab487fc3cf8b033366396c6c7176f53733536b09c7f61200cb07",
+        "bytes": 1615
+      },
+      "negative_replay": {
+        "sha256": "21c23b1f2bdffe36e3acfe9ae76f906477bb6289b32446e6f1e315786442c3d0",
+        "bytes": 976
+      },
+      "original_positive_reader_stderr": {
+        "sha256": "40be375d8f90861b177cc38dc08a6f5eeb84137fb3a4b8fe9d2aa1ecae03653d",
+        "bytes": 647
+      }
+    }
+  },
+  "dispositions": [
+    "The original positive reader failed offline because an inventory variable shadowed the worker terminal record. Its stderr is retained. A separate replay-only reader held and verified the original capture source and its own distinct source. It validated both preserved captures without recapture.",
+    "The earlier pricing 004 failure remains failed. A/A 006 and 007 remain failed before any matched pairs. A/A 007 rejected an optional direct-child marker that the frozen workload does not publish; its stock timeout and marked-grandchild checks passed, and the private checker requires a prospective correction.",
+    "These controls establish observed pricing settlement, refusal and cleanup behavior for their exact frozen artifacts. They provide no speed, product equivalence, whole-campaign readiness, or native-ready verdict."
+  ]
+}
