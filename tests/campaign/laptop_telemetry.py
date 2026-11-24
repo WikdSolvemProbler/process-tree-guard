@@ -9,13 +9,14 @@ from dataclasses import asdict, replace
 from functools import lru_cache
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import time
 from statistics import median
 
 from laptop_barrier import (
-    BARRIER_NS, EMPTY_JOB, GROUP_NS, HEX, NS, BarrierError, BarrierServer, append_row,
+    BARRIER_NS, EMPTY_JOB, GROUP_NS, HEX, NS, RESERVE_NS, BarrierError, BarrierServer, append_row,
     PRICING_COOLDOWN_NS, PRICING_EVIDENCE_RESERVE_NS, barrier_occupation_ns, checked,
     no_duplicates, pricing_witness_outcome, process_in_job, require, require_admission, wait_ms,
 )

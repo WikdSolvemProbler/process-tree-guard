@@ -1,0 +1,19 @@
+{
+  "schema": "laptop-controller-imports-exact-review-v1",
+  "role": "designer",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "scope": "Exact public controller import repair and focused offline regression",
+  "protocol_amendment_sha256": "e9c823b11c5af16ffae98d2de6c8051f19b65e5a82176776484bd39459071d1a",
+  "telemetry_sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+  "previous_telemetry_sha256": "1750cf4b425c6e3e300b295ba80cd84794f884b02262f1d990e8eb312181de2c",
+  "contract_tests_sha256": "e59f56d38e083f7c4e80f6cfde233737b861c0fa18a3cf959dfdee69bcb2dbba",
+  "red_receipt_sha256": "61734aced02a678290a795731c105a6790d45fadb43b8edc85b9d59925fb761a",
+  "green_receipt_sha256": "3940f8399a150174f4ffdeb886340f2399ee2425c9a3b989dc3bcc0f5da1456a",
+  "observations": [
+    "The runtime diff adds the missing os import and imports the existing 5 * NS reserve from laptop_barrier. No method, deadline, or protection changes.",
+    "The added offline regression calls the real capture controller with mocked native seams, verifies the durable origin and terminal records, forwards the pre/during/post phases, and checks owned cleanup. The retained red test reaches the original os NameError; the corresponding fifteen-test green record and eight-module static check pass.",
+    "A010 remains failed. Fresh exact qualification and launch approvals remain separate."
+  ]
+}

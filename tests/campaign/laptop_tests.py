@@ -63,6 +63,109 @@ class _Gate:
 
 
 class LaptopContractTests(unittest.TestCase):
+    def test_capture_controller_origin_and_retirement_offline(self):
+        """Exercise the controller with mocked native operations."""
+        import json
+        import os
+        import sys
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock, Mock, patch
+
+        import laptop_telemetry as telemetry
+
+        manifest_sha, nonce = "a" * 64, "b" * 64
+        pipe = r"\\.\pipe\ptg-offline-controller"
+        groups = [(0, "tail", -1)]
+        argv = ["python.exe", "-I", "-B", "worker.py"]
+        manifest = {"image_policy": {"offline": True}}
+        guard = (117, object(), 987654)
+        ancestry = SimpleNamespace(proof={"offline": "mocked-peer"}, primary_guard=lambda: guard)
+        observer, server, clocks, job, worker = (Mock() for _ in range(5))
+        slot_job = Mock(return_value=job)
+        server.thread.native_id = 177
+        context = MagicMock()
+        context.__enter__.return_value = server
+        before, after = object(), object()
+        phases, owned_files = [], []
+
+        def make_observer(output, records, inventory, held, policy):
+            self.assertEqual(output, capture)
+            self.assertIs(held, ancestry)
+            self.assertIs(policy, manifest["image_policy"])
+            owned_files.extend((records, inventory))
+            observer.emit.side_effect = lambda kind, **fields: telemetry.append_row(
+                records, {"kind": kind, **fields},
+            )
+            return observer
+
+        def outside(o, gate, clock, phase, after=None):
+            self.assertIs(o, observer)
+            self.assertIs(gate, server)
+            self.assertIs(clock, clocks)
+            phases.append((phase, after))
+            return before
+
+        def during(o, gate, clock, owned_job, handles, command, frozen, previous, allowance):
+            self.assertIs(o, observer)
+            self.assertIs(gate, server)
+            self.assertIs(clock, clocks)
+            self.assertIs(owned_job, job)
+            self.assertEqual(command, argv)
+            self.assertIs(frozen, manifest)
+            self.assertIs(previous, before)
+            self.assertEqual(allowance, 2 * telemetry.NS)
+            self.assertEqual(len(handles), 2)
+            self.assertTrue(all(not stream.closed for stream in handles))
+            owned_files.extend(handles)
+            handles.append(worker)
+            phases.append(("during", previous))
+            return after
+
+        with tempfile.TemporaryDirectory(prefix="ptg-laptop-controller-offline-") as folder:
+            capture = Path(folder)
+            with (
+                patch.object(telemetry, "Observer", side_effect=make_observer),
+                patch.object(telemetry, "BarrierServer", return_value=context) as barrier,
+                patch.object(telemetry, "InvasiveThreadClock", return_value=clocks) as thread_clock,
+                patch.object(telemetry, "job_cpu") as job_cpu,
+                patch.object(telemetry, "outside", side_effect=outside),
+                patch.object(telemetry, "during", side_effect=during),
+                patch.dict(sys.modules, {"windows_slot_job": SimpleNamespace(SlotJob=slot_job)}),
+            ):
+                result = telemetry.capture(
+                    manifest, capture, argv, pipe_name=pipe, nonce=nonce, groups=groups,
+                    manifest_sha=manifest_sha, guard_ancestry=ancestry, max_during_seconds=2,
+                )
+            self.assertTrue(result["accepted"], result["problems"])
+            rows = [json.loads(line) for line in (capture / "telemetry.jsonl").read_bytes().splitlines()]
+
+        self.assertEqual([row["kind"] for row in rows], ["started", "terminal"])
+        started, terminal = rows
+        self.assertEqual(started["observer_pid"], os.getpid())
+        self.assertEqual(started["manifest_sha256"], manifest_sha)
+        self.assertEqual(started["barrier_nonce"], nonce)
+        self.assertEqual(started["guard_ancestry"], ancestry.proof)
+        self.assertEqual((started["guard_pid"], started["guard_created_ticks"]), (guard[0], guard[2]))
+        self.assertEqual(started["worker_argv"], argv)
+        self.assertEqual(started["max_during_seconds"], 2)
+        self.assertEqual(phases, [("pre", None), ("during", before), ("post", after)])
+        self.assertEqual(barrier.call_args.args[:5], (pipe, nonce, manifest_sha, groups, capture / "barrier.jsonl"))
+        context.__enter__.assert_called_once()
+        context.__exit__.assert_called_once()
+        thread_clock.assert_called_once_with(177)
+        slot_job.assert_called_once_with()
+        job_cpu.assert_called_once_with(job)
+        server.check.assert_called_once_with()
+        clocks.close.assert_called_once_with()
+        worker.close.assert_called_once_with()
+        job.close.assert_called_once_with()
+        job.drain.assert_not_called()
+        observer.trace_end.assert_called_once_with()
+        self.assertEqual(len(owned_files), 4)
+        self.assertTrue(all(stream.closed for stream in owned_files))
+        self.assertIs(terminal["accepted"], True)
+        self.assertEqual(terminal["problems"], [])
+
     def test_describe_only_manifest_cannot_enter_worker_or_load_shadow_observer(self):
         with tempfile.TemporaryDirectory(prefix="ptg-laptop-offline-") as tmp:
             capture = Path(tmp) / "absent"

@@ -1,0 +1,51 @@
+{
+  "schema": "ptg-campaign-zero-row-failure-summary-v1",
+  "date": "2026-11-24",
+  "run_id": "laptop-182-001-a-as-used-010",
+  "manifest_sha256": "f2394f676321917ce80788ada7d4f0542865472eecc9fdcee8c3fb31845a4a78",
+  "measurement_sha256": "677c7231abd7162dd13c4df9ac92e5c70a1ddfffcf789f7124d7f120615e58e1",
+  "disposition": "FAILED_BEFORE_SAMPLING",
+  "guarded_invocation_exit": 1,
+  "primary_guard_exit": 1,
+  "original_primary_handle_retained": true,
+  "timed_out": false,
+  "competitive_rows": 0,
+  "native_sampling_windows": 0,
+  "inventory_rows": 0,
+  "telemetry_rows": 1,
+  "failure": "NameError: name 'os' is not defined",
+  "source_scope": "The public capture entry could not emit its started event. It had not constructed its barrier server or entered sampling and worker dispatch.",
+  "separate_static_finding": "The full pricing replay also references RESERVE_NS without importing it. The readonly pyflakes inspection identified both undefined names.",
+  "custody": {
+    "launch": {
+      "sha256": "3ef952356b0eb48838c3d107c4643153c1e79ff35a63c229046ad7c4f969af79",
+      "bytes": 12911
+    },
+    "schedule": {
+      "sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e",
+      "bytes": 218338
+    },
+    "telemetry": {
+      "sha256": "34a88b52aa34bb043cbbad525f2f43d57b6af863f593d5e3258168fe96fa09a9",
+      "bytes": 173
+    },
+    "inventory": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "terminal": {
+      "sha256": "3b0bf47cd39cc1170a0d2c6e350990f2a7a5552f6e4ba75dcee852919045702d",
+      "bytes": 340
+    },
+    "original_primary": {
+      "sha256": "9df7b8c132e02b413055b63941f2ca45eacc9e9103edf071d7e1b48d8a85692c",
+      "bytes": 944
+    },
+    "carrier_stderr": {
+      "sha256": "4f1a7e5cbe25edce5bdf10c26c6e9b06f336f67ba4df8ae9387df0ab54c73df4",
+      "bytes": 59
+    }
+  },
+  "privacy": "Raw records, process identifiers, local paths and launch arguments are retained privately; digests identify exact evidence.",
+  "limits": "No ranking or timing inference. Preserve this failure without rescore. Prior native qualification remains under its original input identity."
+}

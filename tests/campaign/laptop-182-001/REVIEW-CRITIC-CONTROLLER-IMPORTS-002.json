@@ -1,0 +1,12 @@
+{
+  "schema": "ptg-controller-imports-review-v1",
+  "role": "critic",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "telemetry_sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+  "tests_sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772",
+  "red_receipt_sha256": "520b48ae11dcd35f0c8c0f6d7c34f6a62bb856922c5c1fbd152756d520f04158",
+  "green_receipt_sha256": "19e0dc355cd31c1d703a7d2b49e732886c0b022014a9a7050d616739425707ef",
+  "scope": "Exact two-import repair and one mocked offline capture-entry regression. Original code fails at its missing os import under the test canary. Repaired suite passes 15 tests. A010 remains a zero-row failure and native qualification remains separately required."
+}

@@ -1,0 +1,169 @@
+{
+  "schema": "ptg-windows-controller-import-repair-v1",
+  "date": "2026-11-24",
+  "scope": "Windows-hosted offline validation of the laptop capture controller and static inspection.",
+  "public_references": {
+    "original_zero_row_failure": "tests/evidence/windows-laptop-attempt-010-failure-20261124-summary.json",
+    "prospective_repair_amendment": "tests/campaign/laptop-182-001/AMD-CONTROLLER-ENTRY-REPAIR-001.md"
+  },
+  "runtime_change": {
+    "imports": [
+      "os",
+      "laptop_barrier.RESERVE_NS"
+    ],
+    "existing_reserve_expression": "5 * NS",
+    "final_sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088"
+  },
+  "historical_first_regression": {
+    "test_sha256": "e59f56d38e083f7c4e80f6cfde233737b861c0fa18a3cf959dfdee69bcb2dbba",
+    "red_telemetry_sha256": "1750cf4b425c6e3e300b295ba80cd84794f884b02262f1d990e8eb312181de2c",
+    "green_telemetry_sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+    "red": {
+      "cases": 1,
+      "observed_exit": 1,
+      "expected_failure": "NameError for missing os import"
+    },
+    "green": {
+      "cases": 15,
+      "observed_exit": 0,
+      "failures": 0,
+      "errors": 0
+    }
+  },
+  "final_fake_module_seam": {
+    "test_sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772",
+    "runtime_matches_historical_green": true,
+    "red2": {
+      "cases": 1,
+      "observed_exit": 1,
+      "expected_failure": "NameError for missing os import",
+      "real_slot_job_import_canary_denied": true
+    },
+    "green2": {
+      "cases": 15,
+      "observed_exit": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "imports": "Exact source snapshots bypassed existing bytecode caches."
+  },
+  "static": {
+    "original_green_modules": 8,
+    "findings": 0,
+    "observed_exit": 0,
+    "pyflakes_version": "4.0.0",
+    "pyflakes_api_sha256": "ea793a15f2980b9f6ab38352d5ce363dcf03a202c55565ee385d10facd610da2",
+    "applicability": "The seam revision changed only the new offline test. The production files were unchanged by that revision."
+  },
+  "custody": {
+    "algorithm": "SHA-256",
+    "artifacts": {
+      "red_receipt": {
+        "sha256": "61734aced02a678290a795731c105a6790d45fadb43b8edc85b9d59925fb761a",
+        "bytes": 331
+      },
+      "red_stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "red_stderr": {
+        "sha256": "f826fbee70e2d2f8cb62dfd3117f171c91671795ddb5084d70f559bc6434f8cb",
+        "bytes": 981
+      },
+      "green_receipt": {
+        "sha256": "3940f8399a150174f4ffdeb886340f2399ee2425c9a3b989dc3bcc0f5da1456a",
+        "bytes": 584
+      },
+      "green_stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "green_stderr": {
+        "sha256": "b0c1e77f69d7346116336858287c0f65c71c2a9da57b779069d928f96c341b32",
+        "bytes": 2628
+      },
+      "red2_receipt": {
+        "sha256": "520b48ae11dcd35f0c8c0f6d7c34f6a62bb856922c5c1fbd152756d520f04158",
+        "bytes": 334
+      },
+      "red2_stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "red2_stderr": {
+        "sha256": "1896c8e321d943583671830dd382efd636abbdb96f86e554fb019d3545a6bc15",
+        "bytes": 981
+      },
+      "green2_receipt": {
+        "sha256": "19e0dc355cd31c1d703a7d2b49e732886c0b022014a9a7050d616739425707ef",
+        "bytes": 338
+      },
+      "green2_stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "green2_stderr": {
+        "sha256": "6d4a891f3846c91449acf2024ba62d68400d09efe3f8fe49e9a1bfb144286e08",
+        "bytes": 2628
+      },
+      "original_runtime_import_diff": {
+        "sha256": "31835486ef27267191aac1fa72aadb571aeef43542e63b6f225a9457837eca33",
+        "bytes": 670
+      },
+      "test_only_seam_diff": {
+        "sha256": "e3875797abdf5ab0e5d5d311feee357575f4efc8e2d7bf3b3a6c743c9d3bbeb5",
+        "bytes": 1283
+      },
+      "original_pyflakes_stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "original_pyflakes_stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "frozen_original_red_telemetry": {
+        "sha256": "1750cf4b425c6e3e300b295ba80cd84794f884b02262f1d990e8eb312181de2c",
+        "bytes": 49295
+      },
+      "red2_telemetry_snapshot": {
+        "sha256": "1750cf4b425c6e3e300b295ba80cd84794f884b02262f1d990e8eb312181de2c",
+        "bytes": 49295
+      },
+      "red2_tests_snapshot": {
+        "sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772",
+        "bytes": 38443
+      },
+      "green2_telemetry_snapshot": {
+        "sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+        "bytes": 49317
+      },
+      "green2_tests_snapshot": {
+        "sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772",
+        "bytes": 38443
+      },
+      "final_telemetry_source": {
+        "sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+        "bytes": 49317
+      },
+      "final_tests_source": {
+        "sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772",
+        "bytes": 38443
+      },
+      "public_original_zero_row_failure": {
+        "sha256": "9617f18c6ccdbeeef352511ff687169bb73834750ca8fa4eee02906feae92ca6",
+        "bytes": 2241
+      },
+      "public_prospective_repair_amendment": {
+        "sha256": "e9c823b11c5af16ffae98d2de6c8051f19b65e5a82176776484bd39459071d1a",
+        "bytes": 1998
+      }
+    },
+    "raw_material": "Retained privately"
+  },
+  "dispositions": [
+    "Attempt A010 remains an original failed capture with zero comparative rows. Its dataset identity and disposition are preserved.",
+    "The original red and green receipts retain the first regression identity. RED2 and GREEN2 retain exact source snapshots for the fake-module seam.",
+    "Stage011 is qualification-only. These offline and static results do not establish native behavior, a Linux suite verdict, or comparative performance."
+  ]
+}

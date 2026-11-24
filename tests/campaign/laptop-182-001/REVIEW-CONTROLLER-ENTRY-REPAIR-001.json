@@ -1,0 +1,16 @@
+{
+  "schema": "ptg-controller-entry-repair-reviews-v1",
+  "recording": "Independent no-tool method approvals after the exact proposed scope was supplied; exact code and native recipes still require both reviews.",
+  "designer": {
+    "role": "designer",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "A separate 3600-second, prospectively charged repair and qualification allocation. Limit the repair to the two missing imports, the focused public-entry regression, and the specified offline checks. Preserve A010 as a failed zero-row attempt and retain the earlier qualification under its original measurement. Require exact review and fresh native evidence for Stage011 before one newly approved Campaign A capture. Existing protections, workloads, timing, cleanup, and scoring remain in force. Stop on any unexpected native or replay failure."
+  },
+  "critic": {
+    "role": "critic",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "Narrow Stage011 import repair and bounded requalification, one real public-capture entry regression and both undefined-name checks. Preserve A010 and prior qualification under their original identities. Fresh native evidence, independent replay and both exact manifest approvals are required before A011."
+  }
+}
