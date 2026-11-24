@@ -1,0 +1,79 @@
+{
+  "schema": "ptg-laptop-182-001-failed-capture-summary-v1",
+  "date": "2026-11-24",
+  "run_id": "laptop-182-001-a-as-used-012",
+  "disposition": "FAILED_DURING_MEASUREMENT",
+  "accepted": false,
+  "product_source": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "manifest_sha256": "807548bf94147a17b1ed771c7605de86e2007adeae194baebfe353aaadeaf096",
+  "measurement_sha256": "7304b81fbf2a20d9f7932bd455884440e3a7e307cb3ef64603c21632317dc0ba",
+  "preregistration_sha256": "2fd368af1aee0baca9843808df67951e0fdaccd1f5bbbdece20222d58f08f371",
+  "original_guard": {
+    "terminal_exit": 1,
+    "original_handle_retained": true,
+    "elapsed_seconds_rounded": 1265.741,
+    "outer_whole_tree_seconds": 6920,
+    "primary_whole_tree_seconds": 6900,
+    "during_seconds": 6600,
+    "ended_before_deadline": true
+  },
+  "population": {
+    "planned": {
+      "controls": 36,
+      "warmups": 224,
+      "measured": 1680,
+      "pricing": 54
+    },
+    "retained_observations": {
+      "controls": 36,
+      "warmups": 224,
+      "measured": 496,
+      "pricing": 0,
+      "total": 756
+    },
+    "worker_begun": 757,
+    "worker_settled": 756,
+    "last_fully_completed_group_zero_based": 215,
+    "last_released_group_zero_based": 216,
+    "last_group": "First ProcessKit DETACHED kill lane began without a settled observation; the other three arm lanes did not begin."
+  },
+  "refusal": {
+    "predicate": "emergency_physical_memory",
+    "physical_available_bytes": 991330304,
+    "physical_floor_bytes": 1073741824,
+    "below_floor_bytes": 82411520,
+    "commit_available_bytes": 13180133376,
+    "native_errors": [],
+    "cpu_condition": "Soft annotation only, not the abort cause",
+    "cause": "The independently recorded physical-memory predicate rejected a during-phase sample."
+  },
+  "cleanup": {
+    "phase_job_active_before": 6,
+    "phase_job_active_after": 0,
+    "terminated": true,
+    "scope": "Aggregate harness abort-drain receipt only. It does not establish per-member identity, an independently retained worker terminal exit, candidate cleanup success or retirement of other application trees."
+  },
+  "custody": {
+    "original_file_count": 841,
+    "original_bytes": 7853588,
+    "private_custody_index_sha256": "ac8ca5850be4392a4aaa69b9625b3087db87e4d711e6b7674bfa01c7bcf113f4",
+    "metadata_note": "An earlier private custody index retained correct per-file lengths and hashes but a null aggregate byte sum. The separate arithmetic correction retains that predecessor and changes no original file or observation.",
+    "raw_sha256": {
+      "original_host_terminal": "a19d8d1a83e037593e72f008323796aef1d8548ba07baeeba57ee834c0d07a2e",
+      "capture_terminal": "31ec4c07a9fe692d9ab394302e191fd73b769f3639fbacd16f7fd298a1e21fac",
+      "telemetry": "f260ecfb46ec671aa6b96746ded9b206797812c7e68e057003cdec837d75262f",
+      "inventory": "64d868062a7380e1ba8b20c91b26b28f20f9fe55068cdf6b64aac82d33804e93",
+      "barrier": "0d1b23c3ddc7773c984114832a9ba566e75187139b3d49e92930d679c320506d",
+      "worker": "2ca5a99b1877424b0cf45d824906bda3694d22b02ff711b4248de8ffcb44b786",
+      "observations": "38e00694902120c47ed56939bb1e4c061d5491fe68325413afa53974d0696c37"
+    }
+  },
+  "limits": [
+    "No replacement, restart, stitching, rescoring or pooling of this attempt.",
+    "No product ranking, speed acceptance, equivalence or overall verdict from this incomplete capture. Full replay and promotion were not attempted for this failed study.",
+    "The short A/A readiness qualification does not justify changing the independent safety reserve.",
+    "The original capture did not retain historical per-process memory counters. Post-exit snapshots cannot attribute the earlier memory loss; no process was reset or stopped for memory diagnosis.",
+    "The original inclusive setup-budget accounting remains incomplete. Earlier qualification and failure dispositions remain unchanged.",
+    "Raw records remain private. Digests provide binding, not public raw-data access or a complete research package."
+  ]
+}
