@@ -575,7 +575,13 @@ fn pre_send_deadline_regression() {
 fn native_held_deadline_regression() {
     use std::io::{ErrorKind, Read};
 
-    for (before_clone, competing_peer) in [(false, false), (false, true), (true, false), (true, true)] {
+    for (before_clone, competing_peer, expired) in [
+        (false, false, true),
+        (false, true, true),
+        (false, true, false),
+        (true, false, true),
+        (true, true, true),
+    ] {
         // Quiet local descriptors stand in for the original watches. The kill
         // sink is a pipe, and the writable permit socket stays open for readback.
         let watches: [(OwnedFd, OwnedFd); 6] =
@@ -594,7 +600,12 @@ fn native_held_deadline_regression() {
         let (peer, counterpart) = permit_pair().expect("peer pair");
         let _counterpart = if competing_peer { drop(counterpart); None } else { Some(counterpart) };
         let gate = SharedGate::create().expect("native gate allocation");
-        let cutoff = boottime_ns().expect("read the test clock").checked_sub(1).expect("past cutoff");
+        let now = boottime_ns().expect("read the test clock");
+        let cutoff = if expired {
+            now.checked_sub(1).expect("past cutoff")
+        } else {
+            now.checked_add(60_000_000_000).expect("future cutoff")
+        };
         let program = c"/usr/bin/true".as_ptr();
         let argv = [program, ptr::null()];
         let envp = [ptr::null()];
@@ -611,10 +622,21 @@ fn native_held_deadline_regression() {
             gate: gate.as_ptr(), host_dumpability: 0,
             caller_limits: [ResourceLimit::default(); RESOURCE_LIMIT_COUNT],
         };
+        let mut spawn = Spawn::default();
+        let mut release = Release::default();
         // All descriptor and argument owners remain in scope over the call.
         if before_clone {
-            let mut spawn = Spawn::default();
             unsafe { ptg_payload_spawn(&spec, peer.as_raw_fd(), &mut spawn); }
+        } else {
+            unsafe {
+                ptg_payload_commit(&spec, child, permit_writer.as_raw_fd(), peer.as_raw_fd(), &mut release);
+            }
+        }
+        let state = gate.state();
+        assert!(unsafe { gate.destroy() }.is_ok(), "unmap the native gate");
+        assert_eq!(state, 2);
+
+        if before_clone {
             assert!(spawn.before_clone_ns >= cutoff, "native clock reached the cutoff");
             assert_eq!(spawn.proves_pre_clone_deadline(cutoff), !competing_peer);
             assert_eq!(spawn.initial_revents[4] != 0, competing_peer);
@@ -622,18 +644,20 @@ fn native_held_deadline_regression() {
             assert_eq!(spawn.mask_set_result, c_int::MIN, "the signal mask was untouched");
             assert_eq!(spawn.child_created, 0);
         } else {
-            let mut release = Release::default();
-            unsafe {
-                ptg_payload_commit(&spec, child, permit_writer.as_raw_fd(), peer.as_raw_fd(), &mut release);
+            if competing_peer {
+                assert_eq!(release.poll_result, 1);
+                assert_eq!(release.revents[..5], [0; 5]);
+                assert_ne!(release.revents[5], 0);
+                assert_eq!(release.before_ns, 0, "peer readiness refused the initial poll");
+            } else {
+                assert!(release.before_ns >= cutoff, "native clock reached the cutoff");
             }
-            assert!(release.before_ns >= cutoff, "native clock reached the cutoff");
+            if !expired {
+                assert!(boottime_ns().expect("recheck the test clock") < cutoff);
+            }
             assert_eq!(release.proves_pre_send_deadline(cutoff), !competing_peer);
-            assert_eq!(release.revents[5] != 0, competing_peer);
             assert_eq!(release.write_result, c_int::MIN, "the permit send was never attempted");
         }
-        let state = gate.state();
-        assert!(unsafe { gate.destroy() }.is_ok(), "unmap the native gate");
-        assert_eq!(state, 2);
 
         let mut sink = std::fs::File::from(kill_reader);
         let mut byte = [0];

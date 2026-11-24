@@ -661,9 +661,9 @@ void ptg_payload_commit(const struct ptg_payload_spec *s,int32_t child,int32_t w
     struct pollfd fds[6]={{.fd=-1,.events=POLLIN},{.fd=s->timer_fd,.events=POLLIN},
         {.fd=s->supervisor_fd,.events=POLLIN},{.fd=s->watchdog_fd,.events=POLLIN},
         {.fd=child,.events=POLLIN},{.fd=peer,.events=POLLIN|POLLRDHUP}};
-    out->poll_result=ptg_owner_poll(&s->owners,fds,5,0,0);
-    for(unsigned int i=0;i<5;i++)out->revents[i]=fds[i].revents;
-    if(out->poll_result!=0 && !deadline_poll_allows_timer(out->poll_result,fds,5)){
+    out->poll_result=ptg_owner_poll(&s->owners,fds,6,0,0);
+    for(unsigned int i=0;i<6;i++)out->revents[i]=fds[i].revents;
+    if(out->poll_result!=0 && !deadline_poll_allows_timer(out->poll_result,fds,6)){
         out->error=out->poll_result<0?errno:ECANCELED;goto refused;
     }
     int error=0;out->before_ns=now_ns(&error);
