@@ -1,0 +1,17 @@
+{
+  "schema": "ptg-readiness-publication-transport-reviews-v1",
+  "note_sha256": "5fd6e42b7336953fddb92921b2cc388a27c72ea263fa74a9ef9044d1a6ac8fcd",
+  "recording": "Approval objects supplied independently in agent messages after reading the exact relayed note text.",
+  "designer": {
+    "role": "designer",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "One 90-second metadata-only command. Publish and remotely verify this correction and both approvals before retrying the review-path publication. Preserve the failed invocation and its full charge. Stop on any further failure. No native capture, replay, build, or measurement change is authorized."
+  },
+  "critic": {
+    "role": "critic",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "One 90-second metadata-only command under the existing allocation. Preserve the failed command and its charge. Publish and remotely verify the new reason and both approvals before starting the retry of the earlier path-correction publication. Preserve any further failure and stop."
+  }
+}
