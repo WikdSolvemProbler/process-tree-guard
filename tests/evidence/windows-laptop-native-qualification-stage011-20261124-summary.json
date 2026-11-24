@@ -1,0 +1,395 @@
+{
+  "schema": "ptg-laptop-182-001-native-qualification-v1",
+  "date": "2026-11-24",
+  "measurement_sha256": "560c656b561aaa26149fcf98dbe53bd7bc847cd1a471dd01cb7aaf69a9ae52cf",
+  "controls": {
+    "actual_candidate_protection": "PASS",
+    "independent_guard_cleanup": "PASS",
+    "clock_and_observer": "PASS",
+    "barrier_and_witness": "PASS",
+    "record_retention": "PASS",
+    "instrumentation_a_a": "PASS",
+    "raw_replay": "PASS"
+  },
+  "evidence_by_control": {
+    "actual_candidate_protection": {
+      "malformed_exit": 125,
+      "marked_deadline_exit": 124,
+      "pre_assistance_marked_survivor": false,
+      "stock_relay_lanes": 120
+    },
+    "independent_guard_cleanup": {
+      "trusted_marked_deadline_exit": 124,
+      "pre_assistance_marked_survivor": false,
+      "known_live_sleeper_drain": {
+        "active_after": 0,
+        "active_before": 1,
+        "terminated": true
+      },
+      "known_live_sleeper_exit_hex": "0xE0000071"
+    },
+    "clock_and_observer": {
+      "complete_windows": {
+        "pre": 12,
+        "during": 13,
+        "post": 12
+      },
+      "qpc_resolution_seconds": 1e-07
+    },
+    "barrier_and_witness": {
+      "authenticated_group_barriers": 73,
+      "native_inventory_receipts": 99,
+      "barrier_occupied_ns": 2168938200
+    },
+    "record_retention": {
+      "verified_relay_streams": 240,
+      "relay_stream_bytes": 3720,
+      "catalog_encoding": "Compact sorted-key UTF-8 JSON array in lane order, stdout then stderr, terminal LF"
+    },
+    "instrumentation_a_a": {
+      "capture_revision": "009",
+      "private_source_revision": "005",
+      "pairs": 72,
+      "assigned_lanes": 144,
+      "relay_pairs": 60,
+      "long_pairs": 12
+    },
+    "raw_replay": {
+      "runs": 1,
+      "exit_code": 0,
+      "stderr_bytes": 0,
+      "negative_mutations": [
+        "missing",
+        "duplicate",
+        "wrong_image",
+        "barrier_crossing",
+        "oversleep",
+        "decreasing_cpu_counter"
+      ]
+    }
+  },
+  "cohort": {
+    "pending_manifest_sha256": "ddf8be21d4647428134390f953a0ee5a5a415254c2f72d55f4bd3e2cb9ce48fd",
+    "candidate_sha256": "aac42d721e32b2e6ef73829c6dc7d9c01d9c548657051489092de2551387e00e",
+    "fixture_sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
+    "plan_sha256": "bea76475491b90cb4953e310cc9383faacc7a8c666cbc0cea454ec0c8539b8dc",
+    "controller_sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+    "offline_test_sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772"
+  },
+  "aa_terminal": {
+    "original_guarded_execution_exit": 0,
+    "original_primary_exit": 0,
+    "original_primary_handle_retained": true,
+    "worker_exit": 0,
+    "phase_job": {
+      "active_before": 0,
+      "active_after": 0,
+      "terminated": false
+    }
+  },
+  "force_observations": {
+    "stock_controls": 1,
+    "aa_lanes": 1,
+    "rows": [
+      {
+        "control": "candidate_malformed",
+        "context": "NO_WINDOW",
+        "path": "malformed",
+        "drain": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      },
+      {
+        "pair": 2,
+        "lane": 5,
+        "context": "NO_WINDOW",
+        "mode": "on",
+        "recipe": "relay",
+        "drain": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      }
+    ],
+    "excluded_lanes": 0
+  },
+  "fresh_pricing": {
+    "positive": {
+      "capture_revision": "008",
+      "original_guarded_execution_exit": 0,
+      "original_primary_exit": 0,
+      "worker_exit": 0,
+      "native_queries": 10,
+      "acknowledgments": 6,
+      "settled_through": 5,
+      "phase_job": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "pricing_rows": 6,
+      "stock_stamp_replay": true,
+      "queries_by_stock_row": [
+        {
+          "probe": "console-probe-finish",
+          "shape": "loaded",
+          "native_queries": 2
+        },
+        {
+          "probe": "console-probe-finish",
+          "shape": "baseline",
+          "native_queries": 1
+        },
+        {
+          "probe": "owner-verification",
+          "shape": "loaded",
+          "native_queries": 1
+        },
+        {
+          "probe": "owner-verification",
+          "shape": "baseline",
+          "native_queries": 2
+        },
+        {
+          "probe": "resolver-probe-count",
+          "shape": "loaded",
+          "native_queries": 2
+        },
+        {
+          "probe": "resolver-probe-count",
+          "shape": "baseline",
+          "native_queries": 2
+        }
+      ]
+    },
+    "negative": {
+      "capture_revision": "009",
+      "original_guarded_execution_exit": 0,
+      "original_primary_exit": 0,
+      "worker_exit": 0,
+      "native_queries": 29,
+      "acknowledgments": 0,
+      "settled_through": -1,
+      "phase_job": {
+        "active_after": 0,
+        "active_before": 1,
+        "terminated": true
+      },
+      "pricing_rows": 0,
+      "request_to_refusal_ns": 930453600,
+      "extra_terminal_exit_hex": "0xE0000071"
+    }
+  },
+  "budget": {
+    "original_inclusive_record": "INCOMPLETE",
+    "repair_allocation_seconds": 3600,
+    "charged_upper_seconds_at_recorded_prefix": 2600,
+    "charges_in_prefix": 43,
+    "scope": "The captured ledger is a prefix. Later terminal dispositions and charges fall outside it."
+  },
+  "custody": {
+    "algorithm": "SHA-256",
+    "raw_material": "Retained privately",
+    "artifact_identities": {
+      "pending_stage011_manifest": {
+        "sha256": "ddf8be21d4647428134390f953a0ee5a5a415254c2f72d55f4bd3e2cb9ce48fd",
+        "bytes": 15478
+      },
+      "aa_capture_source": {
+        "sha256": "8aad21491dcc105c25fec7dc469aab63d6f6e378ad5a56a3d2024421435746c1",
+        "bytes": 27936
+      },
+      "aa_replay_source": {
+        "sha256": "ad45e04bcef3df3ec393df5b4d8f55ae091c9ec2e97479776ea01f885b519694",
+        "bytes": 21447
+      },
+      "aa_replay_receipt": {
+        "sha256": "3dcd65cec2aa7a9d8c4b1d1c02f6b0eb05fa149e823d190e2c9db77adbd72053",
+        "bytes": 67581
+      },
+      "aa_replay_stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_host_terminal": {
+        "sha256": "ec6ce6dd88518cb4990e0dfa8d2861f61832cd2f040e7b9c22c631e5549e5e9c",
+        "bytes": 2006
+      },
+      "aa_host_stdout.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_host_stderr.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_worker.stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_worker.stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_dispatch.bin": {
+        "sha256": "299bf03be70a3ffa7846902e467fe439002195167803d45b30041bc7850a0ee2",
+        "bytes": 24
+      },
+      "aa_recipe": {
+        "sha256": "8a575d16f9d8c32453373cb31db4825581dc829798f61cec60744c72d40f2970",
+        "bytes": 13987
+      },
+      "aa_plan": {
+        "sha256": "bea76475491b90cb4953e310cc9383faacc7a8c666cbc0cea454ec0c8539b8dc",
+        "bytes": 5724
+      },
+      "aa_supervisor": {
+        "sha256": "83532378eb8caae9aae52ad32d762591c02001373e5b15b9968651cf9009b230",
+        "bytes": 228678
+      },
+      "aa_worker": {
+        "sha256": "6be0e6de57daf14827bd0493e928f180df23724e9b27c844ace4e2af38a36b69",
+        "bytes": 211876
+      },
+      "aa_barrier": {
+        "sha256": "e43035eb535327f8590fff9bfc2c93e5b73a3e5df923d659adfdbc4a57358adf",
+        "bytes": 38475
+      },
+      "aa_inventory": {
+        "sha256": "39f19fab3f7aa47643be87d8eccdb4681f3f14528e97ae03e9a5e5a0b37f7f98",
+        "bytes": 267944
+      },
+      "relay_stream_catalog": {
+        "sha256": "3ee3e56df43fd40ec4f29772a9dadffc28cdb2097925a5591221009b1a0c0bda",
+        "bytes": 28134
+      },
+      "pricing_capture_source": {
+        "sha256": "03a2f69282472fb5330fd61e45e0b09e239ea74b2ceb1da8008cd3905c1fa623",
+        "bytes": 25190
+      },
+      "pricing_replay_source": {
+        "sha256": "23b9e58327de4bf028890236fe6e5d3f6dac5ad5624e83fea4725f7ab146ffc6",
+        "bytes": 15724
+      },
+      "pricing_positive_host": {
+        "sha256": "571fea995e79350f91dfa43adb852708055dc7576e49d518c305b18846955589",
+        "bytes": 1597
+      },
+      "pricing_positive_replay": {
+        "sha256": "49814500903c2d4d228f7aee06e8b8a9fbffa9d75133f7f2dce64751d816343d",
+        "bytes": 1516
+      },
+      "pricing_positive_pricing-membership": {
+        "sha256": "29b2c4e3b659ac415949f89545032a247c9973be4312ea863435efffcd77951b",
+        "bytes": 9678
+      },
+      "pricing_positive_worker": {
+        "sha256": "24a9cc8a658481d466ac7931f63af63b69325256e1cf0606f285038452fb9ce9",
+        "bytes": 4022
+      },
+      "pricing_positive_supervisor": {
+        "sha256": "e06b561327f5a28627f9e0bd91111ef1f1ff8a3d5d754aeae914b941e43ad957",
+        "bytes": 2469
+      },
+      "pricing_positive_stock_rows": {
+        "sha256": "a2b8b631bbd7ea227bcb51c0a2e78973820cddfd581f0c1d247d242758262826",
+        "bytes": 6550
+      },
+      "pricing_negative_host": {
+        "sha256": "571a911740a8e5de5ef5f6de7c99ea5c955956ce07eea32f9497368463d9d683",
+        "bytes": 1615
+      },
+      "pricing_negative_replay": {
+        "sha256": "dda2a1b24b6361da6aa41eb45e23dd6dd19e2844ad8e50428fb3f6c8fd76da24",
+        "bytes": 976
+      },
+      "pricing_negative_pricing-membership": {
+        "sha256": "7a5e7b8c24facd81f150379260ff120b1f72a206b0513e0d5155e45107589eae",
+        "bytes": 18452
+      },
+      "pricing_negative_worker": {
+        "sha256": "dc3a35e8a4dd1f8b416e816dee804a64aa7f716fcbffe5c7a5943720e847963a",
+        "bytes": 384
+      },
+      "pricing_negative_supervisor": {
+        "sha256": "a2353a4e719e03e3edf80f8d7113e622f67b266582ab66609c022cd1331b6b1c",
+        "bytes": 2648
+      },
+      "pricing_negative_stock_rows": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "method": {
+        "sha256": "e9c823b11c5af16ffae98d2de6c8051f19b65e5a82176776484bd39459071d1a",
+        "bytes": 1998
+      },
+      "method_reviews": {
+        "sha256": "6f6ffd5b8b7c8b8b42895a7eefac5c69ba48c1b788d2013063f583ac89aa52ef",
+        "bytes": 1291
+      },
+      "final_designer_review": {
+        "sha256": "963a43c46c5fbcc83ceeed149b31433fcc8101d0b7ce903da5053159a4ccd3b1",
+        "bytes": 974
+      },
+      "final_critic_review": {
+        "sha256": "10cdafc6eefc363b3e20e1825fad88688245c830896a1f86ad03451939875156",
+        "bytes": 783
+      },
+      "protocol": {
+        "sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+        "bytes": 41312
+      },
+      "aa_addendum": {
+        "sha256": "4743e6037cf51dba5beedbd9c875afb315519a78908b075969033e65b0d79468",
+        "bytes": 3303
+      },
+      "controller_import_repair": {
+        "sha256": "d7262581c34a331da6c9daec4e0e84b66b9f0e22a7419142bcaffab5dfa7f25c",
+        "bytes": 6335
+      },
+      "original_A010_failure": {
+        "sha256": "9617f18c6ccdbeeef352511ff687169bb73834750ca8fa4eee02906feae92ca6",
+        "bytes": 2241
+      },
+      "native_batch_designer_review": {
+        "sha256": "134ed121748887ab0940b415a4e611398735980ed06da192133b414f64a00b8f",
+        "bytes": 1847
+      },
+      "native_batch_critic_review": {
+        "sha256": "415695cd77339b7533083f4e43bed6ee06acd3ae5576e1d1524889f524ad5cb3",
+        "bytes": 2322
+      },
+      "controller_runtime": {
+        "sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+        "bytes": 49317
+      },
+      "controller_offline_test": {
+        "sha256": "7da3c5aa8f069ddfc22333561568f2de08ab725ded41e0c25781840f19c10772",
+        "bytes": 38443
+      },
+      "repair_budget_ledger_prefix": {
+        "sha256": "7b6442b6394e8e6d0dec24c78744db05840530454c4f5a75ecbbcbe16d17fab8",
+        "bytes": 6164
+      }
+    },
+    "public_references": {
+      "method": "tests/campaign/laptop-182-001/AMD-CONTROLLER-ENTRY-REPAIR-001.md",
+      "method_reviews": "tests/campaign/laptop-182-001/REVIEW-CONTROLLER-ENTRY-REPAIR-001.json",
+      "final_designer_review": "tests/campaign/laptop-182-001/REVIEW-DESIGNER-CONTROLLER-IMPORTS-002.json",
+      "final_critic_review": "tests/campaign/laptop-182-001/REVIEW-CRITIC-CONTROLLER-IMPORTS-002.json",
+      "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+      "aa_addendum": "tests/campaign/laptop-182-001/ADDENDUM-A-A-001.md",
+      "controller_import_repair": "tests/evidence/windows-controller-import-repair-20261124-summary.json",
+      "original_A010_failure": "tests/evidence/windows-laptop-attempt-010-failure-20261124-summary.json"
+    }
+  },
+  "scope_limits": [
+    "These controls apply to the exact Stage011 readiness cohort. Earlier evidence retains its own cohort, outcome and dataset identity.",
+    "The current candidate evidence covers the malformed refusal, marked timeout and stock relay. An unavailable direct PID leaves direct-child termination unobserved.",
+    "The historical 155-case Windows suite supports source-level continuity and used a different whole-image hash.",
+    "Forced drains remain independent of product oracles. Original A010 failed before comparative rows. Neither this qualification nor prior readiness evidence establishes rankings, speed, or parity."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "ptg-laptop-182-001-exact-execution-review-v1",
+  "role": "designer",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "manifest_sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549",
+  "open_objections": [],
+  "measurement_sha256": "560c656b561aaa26149fcf98dbe53bd7bc847cd1a471dd01cb7aaf69a9ae52cf",
+  "qualification_sha256": "d2084b34f98607b9f31ccc79552a1bd34f76391571103bfc7a07b6498774bebe",
+  "preregistration_sha256": "e2f0aa8c23201052d811001d9a411fe0f69296c710304e81efd414ed93d9a848",
+  "carrier_sha256": "3360817e750c81fdf008a8bc458c8443d48b57df997b308727a1c4670155d90f",
+  "controller_source_review_sha256": "963a43c46c5fbcc83ceeed149b31433fcc8101d0b7ce903da5053159a4ccd3b1",
+  "accepted_qualification_replays": {
+    "pricing_positive": "49814500903c2d4d228f7aee06e8b8a9fbffa9d75133f7f2dce64751d816343d",
+    "pricing_expected_negative": "dda2a1b24b6361da6aa41eb45e23dd6dd19e2844ad8e50428fb3f6c8fd76da24",
+    "instrumentation_aa": "3dcd65cec2aa7a9d8c4b1d1c02f6b0eb05fa149e823d190e2c9db77adbd72053"
+  },
+  "limits_seconds": {
+    "outer_whole_tree": 6920,
+    "primary_whole_tree": 6900,
+    "during": 6600,
+    "original_handle_observation": 6910,
+    "independent_full_replay": 360
+  },
+  "scope": "One exact prospective Campaign A011 capture after publication and final admission",
+  "notes": [
+    "The new measurement is tied to the repaired controller and fresh native evidence for all seven controls. Capture and replay receipts, bound artifact pins, and the unchanged workload and analysis scope were verified.",
+    "A010 and metadata failures retain their original dispositions. No qualification-only data enters comparative results. One full independent replay and negative packet mutation are required before promotion, within the specified replay bound. No ranking or speed conclusion follows from this review."
+  ]
+}

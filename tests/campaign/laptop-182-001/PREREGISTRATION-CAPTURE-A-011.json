@@ -1,0 +1,43 @@
+{
+  "schema": "ptg-laptop-182-001-public-preregistration-v1",
+  "date": "2026-11-24",
+  "run_id": "laptop-182-001-a-as-used-011",
+  "manifest_sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549",
+  "measurement_sha256": "560c656b561aaa26149fcf98dbe53bd7bc847cd1a471dd01cb7aaf69a9ae52cf",
+  "native_qualification_sha256": "d2084b34f98607b9f31ccc79552a1bd34f76391571103bfc7a07b6498774bebe",
+  "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+  "populations": {
+    "controls": 36,
+    "warmups": 224,
+    "measured_slots": 1680,
+    "pricing_rows": 54,
+    "groups": 540
+  },
+  "arms": [
+    "guard",
+    "nuewframe",
+    "processkit",
+    "sysprims"
+  ],
+  "contexts": [
+    "NO_WINDOW",
+    "DETACHED"
+  ],
+  "whole_tree_deadlines_seconds": {
+    "outer": 6920,
+    "primary": 6900,
+    "during": 6600,
+    "full_offline_replay": 360
+  },
+  "analysis": "Use the frozen protocol, all planned observations and failures, independent raw replay and negative packet mutation before promotion. No pooling with historical or qualification data. No equivalence from statistical nonsignificance.",
+  "state": "Prospective; A011 competitive capture has not begun.",
+  "privacy": "Private absolute paths, host details and raw user-dependent records are retained privately; exact artifact digests bind this public record.",
+  "controller_repair_amendment_sha256": "e9c823b11c5af16ffae98d2de6c8051f19b65e5a82176776484bd39459071d1a",
+  "repair_selected_cap_budget_seconds": 3600,
+  "previous_attempt": {
+    "run_id": "laptop-182-001-a-as-used-010",
+    "disposition": "FAILED_BEFORE_SAMPLING",
+    "competitive_rows": 0,
+    "failure_summary_sha256": "9617f18c6ccdbeeef352511ff687169bb73834750ca8fa4eee02906feae92ca6"
+  }
+}

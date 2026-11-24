@@ -1,0 +1,14 @@
+{
+  "role": "critic",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "manifest_sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549",
+  "native_qualification_sha256": "d2084b34f98607b9f31ccc79552a1bd34f76391571103bfc7a07b6498774bebe",
+  "preregistration_sha256": "e2f0aa8c23201052d811001d9a411fe0f69296c710304e81efd414ed93d9a848",
+  "carrier_sha256": "3360817e750c81fdf008a8bc458c8443d48b57df997b308727a1c4670155d90f",
+  "measurement_sha256": "560c656b561aaa26149fcf98dbe53bd7bc847cd1a471dd01cb7aaf69a9ae52cf",
+  "controller_sha256": "2c665e88d7d90d7b2e6329064f12f33315894af3c3cb4cc743bed8f69a9b1088",
+  "aa_replay_sha256": "3dcd65cec2aa7a9d8c4b1d1c02f6b0eb05fa149e823d190e2c9db77adbd72053",
+  "scope": "One exact bounded Campaign A011 capture. Require independent raw replay and a negative packet mutation within 360 seconds before promotion. Prior cohorts keep their dispositions. Readiness supplies no ranking or speed claim."
+}
