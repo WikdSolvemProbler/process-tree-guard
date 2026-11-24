@@ -1,0 +1,1074 @@
+{
+  "aa_native": {
+    "barrier_occupied_ns": 2274455500,
+    "capture_revision": "010",
+    "census_and_gate_clocks": {
+      "group_receipts": 73,
+      "maximum_sender_ack_settlement_ns": 42891600,
+      "round_count_distribution": {
+        "1": 73
+      }
+    },
+    "complete_windows": {
+      "during": 13,
+      "post": 12,
+      "pre": 12
+    },
+    "context_recipe_distributions": [
+      {
+        "context": "DETACHED",
+        "dispatch_to_stock_start": {
+          "max_ns": 115200,
+          "median_ns": 69400.0,
+          "min_ns": 52500,
+          "n": 12,
+          "p90_ns": 78400
+        },
+        "off": {
+          "max_ns": 2148793200,
+          "median_ns": 2143476550.0,
+          "min_ns": 2131734000,
+          "n": 6,
+          "p90_ns": 2148793200
+        },
+        "on": {
+          "max_ns": 2154146900,
+          "median_ns": 2141381750.0,
+          "min_ns": 2131603600,
+          "n": 6,
+          "p90_ns": 2154146900
+        },
+        "on_actual_native_overlap_count": 6,
+        "on_minus_off": {
+          "max_ns": 22412900,
+          "median_ns": -4224900.0,
+          "min_ns": -17189600,
+          "n": 6,
+          "p90_ns": 22412900
+        },
+        "recipe": "long",
+        "wake_delay": {
+          "max_ns": 480600,
+          "median_ns": 97700.0,
+          "min_ns": 68100,
+          "n": 12,
+          "p90_ns": 149800
+        }
+      },
+      {
+        "context": "DETACHED",
+        "dispatch_to_stock_start": {
+          "max_ns": 237200,
+          "median_ns": 65300.0,
+          "min_ns": 47200,
+          "n": 60,
+          "p90_ns": 114600
+        },
+        "off": {
+          "max_ns": 56405000,
+          "median_ns": 46275650.0,
+          "min_ns": 41676900,
+          "n": 30,
+          "p90_ns": 49048800
+        },
+        "on": {
+          "max_ns": 91690800,
+          "median_ns": 46092400.0,
+          "min_ns": 42463600,
+          "n": 30,
+          "p90_ns": 51760100
+        },
+        "on_actual_native_overlap_count": 30,
+        "on_minus_off": {
+          "max_ns": 46275600,
+          "median_ns": -473200.0,
+          "min_ns": -10190000,
+          "n": 30,
+          "p90_ns": 5971400
+        },
+        "recipe": "relay",
+        "wake_delay": {
+          "max_ns": 635100,
+          "median_ns": 93950.0,
+          "min_ns": 67100,
+          "n": 60,
+          "p90_ns": 374200
+        }
+      },
+      {
+        "context": "NO_WINDOW",
+        "dispatch_to_stock_start": {
+          "max_ns": 121900,
+          "median_ns": 69100.0,
+          "min_ns": 55300,
+          "n": 12,
+          "p90_ns": 113400
+        },
+        "off": {
+          "max_ns": 2160191100,
+          "median_ns": 2154537950.0,
+          "min_ns": 2134590000,
+          "n": 6,
+          "p90_ns": 2160191100
+        },
+        "on": {
+          "max_ns": 2155965800,
+          "median_ns": 2149758700.0,
+          "min_ns": 2137084800,
+          "n": 6,
+          "p90_ns": 2155965800
+        },
+        "on_actual_native_overlap_count": 6,
+        "on_minus_off": {
+          "max_ns": 2494800,
+          "median_ns": -991850.0,
+          "min_ns": -13213700,
+          "n": 6,
+          "p90_ns": 2494800
+        },
+        "recipe": "long",
+        "wake_delay": {
+          "max_ns": 431500,
+          "median_ns": 101150.0,
+          "min_ns": 77400,
+          "n": 12,
+          "p90_ns": 222500
+        }
+      },
+      {
+        "context": "NO_WINDOW",
+        "dispatch_to_stock_start": {
+          "max_ns": 1251800,
+          "median_ns": 67350.0,
+          "min_ns": 51000,
+          "n": 60,
+          "p90_ns": 121400
+        },
+        "off": {
+          "max_ns": 52749700,
+          "median_ns": 45016650.0,
+          "min_ns": 41026400,
+          "n": 30,
+          "p90_ns": 49246100
+        },
+        "on": {
+          "max_ns": 53126000,
+          "median_ns": 45582900.0,
+          "min_ns": 41474900,
+          "n": 30,
+          "p90_ns": 49177700
+        },
+        "on_actual_native_overlap_count": 30,
+        "on_minus_off": {
+          "max_ns": 8580700,
+          "median_ns": 232850.0,
+          "min_ns": -9116100,
+          "n": 30,
+          "p90_ns": 5331900
+        },
+        "recipe": "relay",
+        "wake_delay": {
+          "max_ns": 642400,
+          "median_ns": 92100.0,
+          "min_ns": 67900,
+          "n": 60,
+          "p90_ns": 251600
+        }
+      }
+    ],
+    "excluded_lanes": 0,
+    "forced_lanes": [
+      {
+        "context": "NO_WINDOW",
+        "lane": 120,
+        "mode": "on",
+        "pair": 60,
+        "path": "fast",
+        "recipe": "relay",
+        "slot_job": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      },
+      {
+        "context": "NO_WINDOW",
+        "lane": 123,
+        "mode": "off",
+        "pair": 61,
+        "path": "fast",
+        "recipe": "relay",
+        "slot_job": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      }
+    ],
+    "forced_stock_control_count": 1,
+    "lanes": 144,
+    "long_pairs": 12,
+    "named_negative_controls": [
+      "missing",
+      "duplicate",
+      "wrong_image",
+      "barrier_crossing",
+      "oversleep",
+      "decreasing_cpu_counter"
+    ],
+    "native_inventory_by_phase": {
+      "during": 73,
+      "post": 13,
+      "pre": 13
+    },
+    "natural_samples": 41,
+    "ordinary_anchor_count": 37,
+    "original_primary_handle_retained": true,
+    "owned_sleeper_cleanup": {
+      "active_after": 0,
+      "active_before": 1,
+      "terminated": true
+    },
+    "owned_sleeper_cleanup_exit": "0xe0000071",
+    "pairs": 72,
+    "phase_job": {
+      "active_after": 0,
+      "active_before": 0,
+      "terminated": false
+    },
+    "primary_exit": 0,
+    "recorded_paths": [
+      {
+        "lanes": 24,
+        "path": "kill",
+        "recipe": "long"
+      },
+      {
+        "lanes": 120,
+        "path": "fast",
+        "recipe": "relay"
+      }
+    ],
+    "relay_executable_counts": {
+      "candidate": 120
+    },
+    "relay_pairs": 60,
+    "relay_stream_bytes": 3720,
+    "relay_streams": 240,
+    "stock_controls": {
+      "backup_timeout": {
+        "context": "NO_WINDOW",
+        "direct_child_pid_present": false,
+        "exit": 124,
+        "harness_slot_job": {
+          "active_after": 0,
+          "active_before": 0,
+          "terminated": false
+        },
+        "marked_payload_survivor_before_assistance": false,
+        "path": "kill"
+      },
+      "candidate_malformed": {
+        "context": "NO_WINDOW",
+        "exit": 125,
+        "harness_slot_job": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        },
+        "path": "malformed"
+      },
+      "candidate_timeout": {
+        "context": "NO_WINDOW",
+        "direct_child_pid_present": false,
+        "exit": 124,
+        "harness_slot_job": {
+          "active_after": 0,
+          "active_before": 0,
+          "terminated": false
+        },
+        "marked_payload_survivor_before_assistance": false,
+        "path": "kill"
+      }
+    },
+    "worker_exit": 0
+  },
+  "budget": {
+    "charged_prefix_seconds": 2095,
+    "later_entries_outside_prefix": true,
+    "selected_allocation_seconds": 2200
+  },
+  "cohort": {
+    "candidate_sha256": "aac42d721e32b2e6ef73829c6dc7d9c01d9c548657051489092de2551387e00e",
+    "candidate_source_commit": "caebd14329e454584fe5d263efe7f4213d77aa54",
+    "effective_environment_sha256": "3c13949fbf5d3be28625fdddca80d4cf289347871e9fdf71d0dc4fcae7283c27",
+    "fixture_sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
+    "manifest_sha256": "d3ab9065503475e3ff54ae4cfb716fc837d0ef31eea315102ff8051766b6aa54",
+    "matched_stage011_artifacts": 15,
+    "observer_identities": {
+      "audit_package.py": {
+        "bytes": 7938,
+        "sha256": "3908c9db44e2696fd535c1a1c9b87a4867573a42a4d825d648da6981370669d2"
+      },
+      "image_policy.py": {
+        "bytes": 542,
+        "sha256": "f9ca5e411de733df0e44cec6b3604790ed21336213850ef7f35b8acd0d54ff9d"
+      },
+      "inventory_gate.py": {
+        "bytes": 11937,
+        "sha256": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f"
+      },
+      "quiet_gate.py": {
+        "bytes": 10467,
+        "sha256": "c8995c81f6d05c4f17f8b1a00551065665f97a7ef15e5407212f63c3d1135ac3"
+      }
+    },
+    "runtime_identities": {
+      "../envcase.py": {
+        "bytes": 4142,
+        "sha256": "15c0fab3a22eb9be3b3e93370963e75ece2e965adefb9bb58c6e3d2b97ef0c8d"
+      },
+      "../usability-evidence.json": {
+        "bytes": 5431,
+        "sha256": "f3cce602034e45086d28ff1d13be4bdca691f26a7676f7e2b5a864d81e3a8bd2"
+      },
+      "arms.py": {
+        "bytes": 77487,
+        "sha256": "e7c463e1a5ba52dea911d62f54b9566d1fa73f28399c2694dbcda8c5f0ed1b07"
+      },
+      "harness.py": {
+        "bytes": 169862,
+        "sha256": "a4daf18b4ed1e16e2cd0a3f66c93a9f5e029301fe65c51ccaf0b5b7d9cdff1eb"
+      },
+      "laptop_analysis.py": {
+        "bytes": 10987,
+        "sha256": "874b5006026ffde65230dfbdf3ea0ce8bf4f5482082d08ec7513d08bb4ece7c3"
+      },
+      "laptop_ancestry.py": {
+        "bytes": 7177,
+        "sha256": "c2f079362f632e5fcfd10452300e6ee9279a264a2fa67eb321896cd4c907afb0"
+      },
+      "laptop_audit.py": {
+        "bytes": 13580,
+        "sha256": "6262f6087c2d9053197a09bf24b32238590ebd34584e9c38aea47a874e2e0da9"
+      },
+      "laptop_barrier.py": {
+        "bytes": 26141,
+        "sha256": "e9749e269401b3aef5618ca9846e6cf316f99b895ccfd8f9b346e2eda9f7d670"
+      },
+      "laptop_census.py": {
+        "bytes": 8229,
+        "sha256": "12176b0c728511b260a5c3687c7c61b8bed67aca9da3550bcaacca9a5dc43560"
+      },
+      "laptop_launch.py": {
+        "bytes": 26941,
+        "sha256": "cb79ba559bdda827ff78636a8286b9dbbdae2d9e532d163fde7dbd386099e220"
+      },
+      "laptop_schedule.py": {
+        "bytes": 4931,
+        "sha256": "02058065001487e59330648a44724d200e1dc6fcc77f04858d7fba3f8202781f"
+      },
+      "laptop_telemetry.py": {
+        "bytes": 52228,
+        "sha256": "7755edb317e4966c5fe8f8db7fbccc34a039e24c7ffe77ae75a78559f439253a"
+      },
+      "laptop_worker.py": {
+        "bytes": 10802,
+        "sha256": "71d3d66f8f9a49faf3ce6120a39c9f36107d2e92e33690466b459025a1cb9660"
+      },
+      "plan.py": {
+        "bytes": 21646,
+        "sha256": "a616a82dbeebfe5041fc55d55733d06c4b0c2af27614884c097ae3b0bb52a3bf"
+      },
+      "pricing.py": {
+        "bytes": 66239,
+        "sha256": "c5e72ed6b6a0a027077d234fe4a45521819684e854624597de9a9f6fe8aba0a3"
+      },
+      "probe.py": {
+        "bytes": 2570,
+        "sha256": "5858ad7e97c93e95941965c4c15ae295f147f091c3cedb482d68257a16733433"
+      },
+      "report.py": {
+        "bytes": 352055,
+        "sha256": "92e8f5c1776db8ba1a975bc425ac1f8b130b93ac15e50e5965d7eb93c923e245"
+      },
+      "runner.py": {
+        "bytes": 49529,
+        "sha256": "732e52bae27aac1c71d3bb3dacfdd7c132592c5ba93b7b4c315e4ddb457572d6"
+      },
+      "windows_payload_observer.py": {
+        "bytes": 10650,
+        "sha256": "d4982594d8789e3027156d1a0bff458568177e414c606f09b7101c8bb5de219f"
+      },
+      "windows_slot_job.py": {
+        "bytes": 10723,
+        "sha256": "a2e76ee9b872ff19bbb261f38cb88a8214e01926cd53165d767e6581ef8300aa"
+      }
+    }
+  },
+  "controls": {
+    "actual_candidate_protection": "PASS",
+    "barrier_and_witness": "PASS",
+    "clock_and_observer": "PASS",
+    "independent_guard_cleanup": "PASS",
+    "instrumentation_a_a": "PASS",
+    "raw_replay": "PASS",
+    "record_retention": "PASS"
+  },
+  "custody": {
+    "algorithm": "SHA-256",
+    "generic_source_directory": "tests/campaign/qualification",
+    "identities_by_role": {
+      "aa_barriers": {
+        "bytes": 48476,
+        "sha256": "c8bab169f9e4f480c3c3ca1cd60d4f05f180e6159ff1de3346f8ea0b7e998365"
+      },
+      "aa_dispatch.bin": {
+        "bytes": 24,
+        "sha256": "e668c082b39f13c1e166f651b45858a3c5afe9af8248eefb3ca519c7ab69b3cb"
+      },
+      "aa_host_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "aa_host_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "aa_host_terminal": {
+        "bytes": 2021,
+        "sha256": "401b5b05d5583b19e38395af2d883b118dc535ae8765e58b89f037bb96e48569"
+      },
+      "aa_independent_replay": {
+        "bytes": 67514,
+        "sha256": "927712e4e87bc3b7690bef37b48ce500206746ea6ec4ffa10732ef5873342030"
+      },
+      "aa_inventory": {
+        "bytes": 1805830,
+        "sha256": "b84c574f9031c5dc852c88b92df97c0c1a491196fe544214cf30e5e82b74943a"
+      },
+      "aa_plan": {
+        "bytes": 5724,
+        "sha256": "bea76475491b90cb4953e310cc9383faacc7a8c666cbc0cea454ec0c8539b8dc"
+      },
+      "aa_recipe": {
+        "bytes": 14447,
+        "sha256": "91fe5f0067129794c3884e53bd7f9b36df6f16dddbac6dd55cb3e5c5f76cfd37"
+      },
+      "aa_relay_catalog": {
+        "bytes": 28134,
+        "sha256": "3ee3e56df43fd40ec4f29772a9dadffc28cdb2097925a5591221009b1a0c0bda"
+      },
+      "aa_replay_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "aa_replay_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "aa_supervisor": {
+        "bytes": 228669,
+        "sha256": "6a18b0e63d433dc800c4c05f2fee9e1d8f4f9576c330df14e4defd625160f98b"
+      },
+      "aa_worker": {
+        "bytes": 211852,
+        "sha256": "92ff267f46c181369f39bba651346558a784d6ffb9bc28a5474fcf6c95ab2fef"
+      },
+      "aa_worker.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "aa_worker.stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "batch_review_critic": {
+        "bytes": 7313,
+        "sha256": "55d05c3be6c01a834345456c170b61e7df95a53413688de6d57b74a3f6ce8b39"
+      },
+      "batch_review_designer": {
+        "bytes": 2564,
+        "sha256": "5b3d69ad4525f641009a62d53754d5de11fa5af0c158a6619ce8bc759d7c7f5a"
+      },
+      "carrier_pins": {
+        "bytes": 1037,
+        "sha256": "cf9661e69ae99b6296bdf29cd66dfc3608e8a4021bc4365d34861a6be12817bb"
+      },
+      "execution_script/REPLAY-AA010.ps1": {
+        "bytes": 2536,
+        "sha256": "89f8fc6f7cc3728d7598c90ba8998b1c03f16a56e650b350e437491af875d0fc"
+      },
+      "execution_script/REPLAY-NEGATIVE-011.ps1": {
+        "bytes": 2761,
+        "sha256": "38d22532060827cc9efba146c295073bee22a70a254778f4b0448e103abe3989"
+      },
+      "execution_script/REPLAY-POSITIVE-010.ps1": {
+        "bytes": 2739,
+        "sha256": "dfd1f0dc8f027fd450af4b89b59beed2b038b1233ae37a2bf4b9f0f039c1bc72"
+      },
+      "execution_script/RUN-AA010.ps1": {
+        "bytes": 4185,
+        "sha256": "422e82bc8919b7f280b641802327a93046e5a4a23f031b1ea82d6c9199f8c3a3"
+      },
+      "execution_script/RUN-NEGATIVE-011.ps1": {
+        "bytes": 3541,
+        "sha256": "33e303f492e0ef3f09680aacb926fe12bb9f742566e23ed3b0129bd504e082c6"
+      },
+      "execution_script/RUN-POSITIVE-010.ps1": {
+        "bytes": 3529,
+        "sha256": "63e2b14fbd1e1596fc7d1fa4bd25634f58604d55ef489c2e910a814ae00431e5"
+      },
+      "generic_source/aa/qualify.py": {
+        "bytes": 27936,
+        "sha256": "8aad21491dcc105c25fec7dc469aab63d6f6e378ad5a56a3d2024421435746c1"
+      },
+      "generic_source/aa/replay_aa.py": {
+        "bytes": 21763,
+        "sha256": "cf0f34e2e6b31cb0792f54fa21f42c9b7f8613ed4df8ea558610a53e59901a3e"
+      },
+      "generic_source/pricing/witness.py": {
+        "bytes": 25190,
+        "sha256": "03a2f69282472fb5330fd61e45e0b09e239ea74b2ceb1da8008cd3905c1fa623"
+      },
+      "generic_source/pricing/witness_replay.py": {
+        "bytes": 17689,
+        "sha256": "38d4bae05888ad38de29655ce69f0375a1a29573e517c1e52a621211c57ddbb1"
+      },
+      "negative_barriers": {
+        "bytes": 686,
+        "sha256": "e95a0a1b3159610a58f1c99e1db5dabee817a4b9f89558c214e7122f33e9f0ef"
+      },
+      "negative_host_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative_host_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative_host_terminal": {
+        "bytes": 1615,
+        "sha256": "f9017ed51b15d7095f52521568fb11eb015723296d9f9e0d41b3d25839e7ed78"
+      },
+      "negative_independent_replay": {
+        "bytes": 993,
+        "sha256": "4dac56b3be53796d2daeeb5dc39b9af159aacd0d869268dd488df1fbe4afab6c"
+      },
+      "negative_inventory": {
+        "bytes": 24551,
+        "sha256": "73ab4a595f91b8c2a3d3646382a453daaf4586fc1e4e6b5f7f647adfca12470a"
+      },
+      "negative_pricing_membership": {
+        "bytes": 18452,
+        "sha256": "5243f0dd7a262b3ff0f0ecc9c7f583b1049e9e4c09e146d42246d76403616ff0"
+      },
+      "negative_recipe": {
+        "bytes": 2989,
+        "sha256": "da9bdddecfef308ff4d3788c111b9eb3087b681c29fbfeab8549523667dba48a"
+      },
+      "negative_replay_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative_replay_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative_stock_rows": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "negative_supervisor": {
+        "bytes": 2648,
+        "sha256": "df52ba12721a2166718f1296e99d7d12e962fe3f0e76070cecd6fa4469406749"
+      },
+      "negative_worker": {
+        "bytes": 384,
+        "sha256": "724f0d60699913d17bc88727032397bc94234b06351b70005ae1d882bfdd68b5"
+      },
+      "positive_barriers": {
+        "bytes": 2713,
+        "sha256": "e2d8db0f71b3db8db92992e714b80e434389e00d1a1cf9e3de4dd84151167d8c"
+      },
+      "positive_host_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive_host_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive_host_terminal": {
+        "bytes": 1597,
+        "sha256": "4e054411c7dd52561b9cbd1da8d00b8f411ac9236f87bfd7508639b0aef8dcff"
+      },
+      "positive_independent_replay": {
+        "bytes": 1533,
+        "sha256": "1af2e2d0ce026dd5fe65a6f9cc8c9dbf71c39f9fe0d31971f4e6642f14935326"
+      },
+      "positive_inventory": {
+        "bytes": 95176,
+        "sha256": "87050be1ce8b224f6f7805847e1cb951bad402e663714144d05d9b5825b322d6"
+      },
+      "positive_pricing_membership": {
+        "bytes": 9678,
+        "sha256": "8acfd4157ad68891484d1f5a1406eb2051180709e54c4f62ee65a09a91d091c3"
+      },
+      "positive_recipe": {
+        "bytes": 2977,
+        "sha256": "61804a3c479d63bfd02baba1b74802f2b2f10a9e7b46ab5171a51445ee71e0c8"
+      },
+      "positive_replay_stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive_replay_stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "positive_stock_rows": {
+        "bytes": 6549,
+        "sha256": "2dd041ff14e5db27a5305b0b7bf8c09a36a49f78bd6f774ea327d5e8e330a5d9"
+      },
+      "positive_supervisor": {
+        "bytes": 2469,
+        "sha256": "ade1ad8d549ef4d87964337ab647c05a8597abf2d619071f164ca88d3ecf9a31"
+      },
+      "positive_worker": {
+        "bytes": 4022,
+        "sha256": "40aeee3c2e23db7c5647567087e94d797cf5f882cbebbb3fb3dc05d79a3503af"
+      },
+      "reader_offline_checks": {
+        "bytes": 1781,
+        "sha256": "e853981285579f0bb46335ee7e71195072d4da82fa9d11e0b6e5dc4d6ac5cf3c"
+      },
+      "retained_first_metadata_failure": {
+        "bytes": 14520,
+        "sha256": "0e3b8da86387e680a910d3997280aa22ac06fe221789f88a1126697a86433e19"
+      },
+      "retained_second_metadata_failure": {
+        "bytes": 18629,
+        "sha256": "55682518797e5b3170ef28140593e57ddfef40436f27ea5e4f483948e5b8d0a5"
+      },
+      "scope_v2": {
+        "bytes": 2754,
+        "sha256": "52dde84e787cd421ea1e053af61f0e723a8aa0b819fb8fcb5513fb5960f0bb38"
+      },
+      "selection_ledger_prefix": {
+        "bytes": 3279,
+        "sha256": "faf2f8c1245e5dba0e5fa8054b1351e2597243106f4424d04b37c76f53b7e886"
+      },
+      "stage011_context_only": {
+        "bytes": 13647,
+        "sha256": "d2084b34f98607b9f31ccc79552a1bd34f76391571103bfc7a07b6498774bebe"
+      },
+      "stage011_final_identity_comparison": {
+        "bytes": 15707,
+        "sha256": "c666b38480ee954b6230a71f222ac418cf1953e84ddfcb719a7bcbbbbafa1549"
+      },
+      "stage012_pending_manifest": {
+        "bytes": 16017,
+        "sha256": "d3ab9065503475e3ff54ae4cfb716fc837d0ef31eea315102ff8051766b6aa54"
+      },
+      "v6_actual_review_critic": {
+        "bytes": 369,
+        "sha256": "1aa00aea9326715662f5e251b42f7408c8c1bf77f709a1880fcc916ae69ca799"
+      },
+      "v6_actual_review_designer": {
+        "bytes": 1982,
+        "sha256": "ac5c1c53e08975d655c9570f9f89e0e76d86356d3db745dd860e1d757368da28"
+      },
+      "v6_controlled_actual": {
+        "bytes": 13349,
+        "sha256": "149ab72491f5f9b01c557195bb0b5c46c171420a018fb6e1cd83e9de0f3221d8"
+      }
+    },
+    "private_assembly_audit": {
+      "bytes": 56539,
+      "sha256": "5a5847c0ab2e4eea0a6b8e813b94d40bbb29c910a8ffa6ef8757998460183d6f"
+    },
+    "raw_data_scope": "Original artifacts are retained privately. Public hashes do not publish their contents."
+  },
+  "date": "2026-11-24",
+  "evidence_by_control": {
+    "actual_candidate_protection": {
+      "fresh_controls": {
+        "candidate_malformed": {
+          "context": "NO_WINDOW",
+          "exit": 125,
+          "harness_slot_job": {
+            "active_after": 0,
+            "active_before": 1,
+            "terminated": true
+          },
+          "path": "malformed"
+        },
+        "candidate_timeout": {
+          "context": "NO_WINDOW",
+          "direct_child_pid_present": false,
+          "exit": 124,
+          "harness_slot_job": {
+            "active_after": 0,
+            "active_before": 0,
+            "terminated": false
+          },
+          "marked_payload_survivor_before_assistance": false,
+          "path": "kill"
+        }
+      },
+      "limit": "The current candidate evidence is scoped to the observed malformed refusal and marked deadline, plus the stock relay evidence by recorded executable. A missing direct PID leaves direct-child termination unobserved.",
+      "relay_executable_counts": {
+        "candidate": 120
+      }
+    },
+    "barrier_and_witness": {
+      "aa_native": {
+        "group_receipts": 73,
+        "maximum_sender_ack_settlement_ns": 42891600,
+        "round_count_distribution": {
+          "1": 73
+        }
+      },
+      "limit": "The negative pricing group admitted its census then refused pricing. The V6 live outside image instead refused the census itself.",
+      "negative_pricing": {
+        "group_receipts": 1,
+        "maximum_sender_ack_settlement_ns": 32525000,
+        "round_count_distribution": {
+          "1": 1
+        }
+      },
+      "positive_pricing": {
+        "group_receipts": 4,
+        "maximum_sender_ack_settlement_ns": 33627200,
+        "round_count_distribution": {
+          "1": 4
+        }
+      },
+      "v6_native": {
+        "complete_positive_rounds": 2,
+        "open_process_error": 87,
+        "outside_veto_ack": 0
+      }
+    },
+    "clock_and_observer": {
+      "barrier_occupied_ns": 2274455500,
+      "complete_windows": {
+        "during": 13,
+        "post": 12,
+        "pre": 12
+      },
+      "limit": "Qualification windows for this exact cohort.",
+      "native_sample_count": 41,
+      "ordinary_anchor_count": 37
+    },
+    "independent_guard_cleanup": {
+      "cleanup_exit": "0xe0000071",
+      "known_owned_sleeper_cleanup": {
+        "active_after": 0,
+        "active_before": 1,
+        "terminated": true
+      },
+      "limit": "Outer cleanup is measured separately from stock guard outcomes.",
+      "trusted_marked_deadline": {
+        "context": "NO_WINDOW",
+        "direct_child_pid_present": false,
+        "exit": 124,
+        "harness_slot_job": {
+          "active_after": 0,
+          "active_before": 0,
+          "terminated": false
+        },
+        "marked_payload_survivor_before_assistance": false,
+        "path": "kill"
+      }
+    },
+    "instrumentation_a_a": {
+      "context_recipe_distributions": [
+        {
+          "context": "DETACHED",
+          "dispatch_to_stock_start": {
+            "max_ns": 115200,
+            "median_ns": 69400.0,
+            "min_ns": 52500,
+            "n": 12,
+            "p90_ns": 78400
+          },
+          "off": {
+            "max_ns": 2148793200,
+            "median_ns": 2143476550.0,
+            "min_ns": 2131734000,
+            "n": 6,
+            "p90_ns": 2148793200
+          },
+          "on": {
+            "max_ns": 2154146900,
+            "median_ns": 2141381750.0,
+            "min_ns": 2131603600,
+            "n": 6,
+            "p90_ns": 2154146900
+          },
+          "on_actual_native_overlap_count": 6,
+          "on_minus_off": {
+            "max_ns": 22412900,
+            "median_ns": -4224900.0,
+            "min_ns": -17189600,
+            "n": 6,
+            "p90_ns": 22412900
+          },
+          "recipe": "long",
+          "wake_delay": {
+            "max_ns": 480600,
+            "median_ns": 97700.0,
+            "min_ns": 68100,
+            "n": 12,
+            "p90_ns": 149800
+          }
+        },
+        {
+          "context": "DETACHED",
+          "dispatch_to_stock_start": {
+            "max_ns": 237200,
+            "median_ns": 65300.0,
+            "min_ns": 47200,
+            "n": 60,
+            "p90_ns": 114600
+          },
+          "off": {
+            "max_ns": 56405000,
+            "median_ns": 46275650.0,
+            "min_ns": 41676900,
+            "n": 30,
+            "p90_ns": 49048800
+          },
+          "on": {
+            "max_ns": 91690800,
+            "median_ns": 46092400.0,
+            "min_ns": 42463600,
+            "n": 30,
+            "p90_ns": 51760100
+          },
+          "on_actual_native_overlap_count": 30,
+          "on_minus_off": {
+            "max_ns": 46275600,
+            "median_ns": -473200.0,
+            "min_ns": -10190000,
+            "n": 30,
+            "p90_ns": 5971400
+          },
+          "recipe": "relay",
+          "wake_delay": {
+            "max_ns": 635100,
+            "median_ns": 93950.0,
+            "min_ns": 67100,
+            "n": 60,
+            "p90_ns": 374200
+          }
+        },
+        {
+          "context": "NO_WINDOW",
+          "dispatch_to_stock_start": {
+            "max_ns": 121900,
+            "median_ns": 69100.0,
+            "min_ns": 55300,
+            "n": 12,
+            "p90_ns": 113400
+          },
+          "off": {
+            "max_ns": 2160191100,
+            "median_ns": 2154537950.0,
+            "min_ns": 2134590000,
+            "n": 6,
+            "p90_ns": 2160191100
+          },
+          "on": {
+            "max_ns": 2155965800,
+            "median_ns": 2149758700.0,
+            "min_ns": 2137084800,
+            "n": 6,
+            "p90_ns": 2155965800
+          },
+          "on_actual_native_overlap_count": 6,
+          "on_minus_off": {
+            "max_ns": 2494800,
+            "median_ns": -991850.0,
+            "min_ns": -13213700,
+            "n": 6,
+            "p90_ns": 2494800
+          },
+          "recipe": "long",
+          "wake_delay": {
+            "max_ns": 431500,
+            "median_ns": 101150.0,
+            "min_ns": 77400,
+            "n": 12,
+            "p90_ns": 222500
+          }
+        },
+        {
+          "context": "NO_WINDOW",
+          "dispatch_to_stock_start": {
+            "max_ns": 1251800,
+            "median_ns": 67350.0,
+            "min_ns": 51000,
+            "n": 60,
+            "p90_ns": 121400
+          },
+          "off": {
+            "max_ns": 52749700,
+            "median_ns": 45016650.0,
+            "min_ns": 41026400,
+            "n": 30,
+            "p90_ns": 49246100
+          },
+          "on": {
+            "max_ns": 53126000,
+            "median_ns": 45582900.0,
+            "min_ns": 41474900,
+            "n": 30,
+            "p90_ns": 49177700
+          },
+          "on_actual_native_overlap_count": 30,
+          "on_minus_off": {
+            "max_ns": 8580700,
+            "median_ns": 232850.0,
+            "min_ns": -9116100,
+            "n": 30,
+            "p90_ns": 5331900
+          },
+          "recipe": "relay",
+          "wake_delay": {
+            "max_ns": 642400,
+            "median_ns": 92100.0,
+            "min_ns": 67900,
+            "n": 60,
+            "p90_ns": 251600
+          }
+        }
+      ],
+      "lanes": 144,
+      "limit": "Incremental assigned native probe and recording cost relative to ordinary sampling in both conditions.",
+      "long_pairs": 12,
+      "pairs": 72,
+      "relay_pairs": 60
+    },
+    "raw_replay": {
+      "fresh_accepted_replays": 3,
+      "limit": "Current receipts keep sender completion timing. The separate V6 witness did not persist sender completion timestamps.",
+      "named_aa_mutations": [
+        "missing",
+        "duplicate",
+        "wrong_image",
+        "barrier_crossing",
+        "oversleep",
+        "decreasing_cpu_counter"
+      ],
+      "pyflakes_findings": 0,
+      "stderr_bytes": 0,
+      "targeted_reader_checks": 12
+    },
+    "record_retention": {
+      "limit": "Private raw data is retained; the public package publishes exact content identities.",
+      "relay_catalog_identity": {
+        "bytes": 28134,
+        "sha256": "3ee3e56df43fd40ec4f29772a9dadffc28cdb2097925a5591221009b1a0c0bda"
+      },
+      "relay_stream_bytes": 3720,
+      "verified_relay_streams": 240
+    }
+  },
+  "fresh_pricing": {
+    "negative": {
+      "capture_revision": "011",
+      "census_and_gate_clocks": {
+        "group_receipts": 1,
+        "maximum_sender_ack_settlement_ns": 32525000,
+        "round_count_distribution": {
+          "1": 1
+        }
+      },
+      "extra_terminal_exit_hex": "0xe0000071",
+      "native_queries": 29,
+      "original_primary_exit": 0,
+      "original_primary_handle_retained": true,
+      "phase_job": {
+        "active_after": 0,
+        "active_before": 1,
+        "terminated": true
+      },
+      "pricing_acknowledgments": 0,
+      "pricing_rows": 0,
+      "request_to_refusal_ns": 933325900,
+      "settled_through": -1,
+      "worker_exit": 0
+    },
+    "positive": {
+      "capture_revision": "010",
+      "census_and_gate_clocks": {
+        "group_receipts": 4,
+        "maximum_sender_ack_settlement_ns": 33627200,
+        "round_count_distribution": {
+          "1": 4
+        }
+      },
+      "native_queries": 10,
+      "original_primary_exit": 0,
+      "original_primary_handle_retained": true,
+      "phase_job": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "pricing_acknowledgments": 6,
+      "pricing_rows": 6,
+      "queries_by_shape": [
+        {
+          "native_queries": 2,
+          "post_return_settlement_ns": 38028900,
+          "probe": "console-probe-finish",
+          "shape": "loaded"
+        },
+        {
+          "native_queries": 1,
+          "post_return_settlement_ns": 1504300,
+          "probe": "console-probe-finish",
+          "shape": "baseline"
+        },
+        {
+          "native_queries": 1,
+          "post_return_settlement_ns": 1933700,
+          "probe": "owner-verification",
+          "shape": "loaded"
+        },
+        {
+          "native_queries": 2,
+          "post_return_settlement_ns": 41112800,
+          "probe": "owner-verification",
+          "shape": "baseline"
+        },
+        {
+          "native_queries": 2,
+          "post_return_settlement_ns": 29591300,
+          "probe": "resolver-probe-count",
+          "shape": "loaded"
+        },
+        {
+          "native_queries": 2,
+          "post_return_settlement_ns": 43341700,
+          "probe": "resolver-probe-count",
+          "shape": "baseline"
+        }
+      ],
+      "settled_through": 5,
+      "stock_stamp_replay": true,
+      "worker_exit": 0
+    }
+  },
+  "measurement_sha256": "7304b81fbf2a20d9f7932bd455884440e3a7e307cb3ef64603c21632317dc0ba",
+  "schema": "ptg-laptop-182-001-native-qualification-v1",
+  "scope_limits": [
+    "All seven controls use fresh Stage012 evidence. Stage011 is separate source and artifact continuity context. No earlier timing was pooled or failed attempt reclassified.",
+    "Product oracles precede separate harness assistance. The two forced A/A lane drains and one forced stock control retain the original force evidence with zero exclusions.",
+    "Qualified exact readiness only. No product-versus-rival measurement, ranking, speed parity, or equivalence claim."
+  ]
+}

@@ -3,3 +3,5 @@
 # Frozen observer/protocol hashes must survive a Windows checkout unchanged.
 tests/campaign/observer-laptop-*/*.py -text
 tests/campaign/laptop-182-001/* -text
+tests/campaign/qualification/** -text
+tests/evidence/windows-laptop-native-qualification-stage012-20261124-summary.json -text
