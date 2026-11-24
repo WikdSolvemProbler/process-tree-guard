@@ -11,12 +11,15 @@ import json
 import os
 from queue import Queue
 import re
-from threading import Event, Thread
+from threading import Event, Lock, Thread
 import time
 
 
 NS = 1_000_000_000
 BARRIER_NS = NS
+PRICING_COOLDOWN_NS = 25_000_000
+PRICING_EVIDENCE_RESERVE_NS = 50_000_000
+PRICING_PID_CAPACITY = 2
 GROUP_NS = 220 * NS
 RESERVE_NS = 5 * NS
 FRAME_BYTES = 8192
@@ -171,7 +174,7 @@ def process_in_job(handle, job_handle):
 
 class ProcessIdList(C.Structure):
     _fields_ = [
-        ("assigned", W.DWORD), ("listed", W.DWORD), ("pids", C.c_size_t * 2),
+        ("assigned", W.DWORD), ("listed", W.DWORD), ("pids", C.c_size_t * PRICING_PID_CAPACITY),
     ]
 
 
@@ -190,6 +193,30 @@ def describe_pricing_membership(job, worker, identity):
         "accepted": before == after == identity and data.assigned == data.listed == 1
                     and pids == [identity["pid"]],
     }
+
+
+def pricing_witness_outcome(witness, identity):
+    """Classify a complete sample of the original phase Job and worker."""
+    if (type(witness) is dict and set(witness) == {"accepted", "error"}
+            and witness["accepted"] is False and isinstance(witness["error"], str) and witness["error"]):
+        return "native-error"
+    if type(witness) is not dict or set(witness) != {
+        "accepted", "before", "after", "assigned", "listed", "pids",
+    }:
+        return "invalid-native-list"
+    members = witness["pids"]
+    for stamp in (witness["before"], witness["after"]):
+        if (type(stamp) is not dict or stamp != identity
+                or any(type(value) is not int for value in stamp.values())):
+            return "invalid-native-list"
+    if (type(members) is not list or not 1 <= len(members) <= PRICING_PID_CAPACITY
+            or not all(type(pid) is int and pid > 0 for pid in members)
+            or type(witness["assigned"]) is not int or type(witness["listed"]) is not int
+            or not witness["assigned"] == witness["listed"] == len(members) == len(set(members))
+            or identity["pid"] not in members or type(witness["accepted"]) is not bool
+            or witness["accepted"] != (len(members) == 1)):
+        return "invalid-native-list"
+    return "sole-worker" if witness["accepted"] else "extra-members"
 
 
 class Pipe:
@@ -236,9 +263,11 @@ class Pipe:
         require(type(row) is dict, "pipe frame must be an object")
         return row
 
-    def write(self, frame, deadline):
+    def write(self, frame, deadline, *, before_submit=None):
         blob = packed(frame)
         require(0 < len(blob) <= FRAME_BYTES, "oversize pipe frame")
+        if before_submit is not None:
+            before_submit()
         operation, status = self.win.WriteFile(self.handle, blob, overlapped=True)
         count, settled = self._finish(operation, deadline, pending=status == self.win.ERROR_IO_PENDING)
         require(count == len(blob), "short pipe write")
@@ -306,13 +335,14 @@ class BarrierClient:
         self.pipe.write(request, deadline)
         ack = self.pipe.read(deadline)
         received = time.perf_counter_ns()
-        require(set(ack) == set(request) | {"authorized_ns", "receipt_sha256"}
+        require(set(ack) == set(request) | {"authorized_ns", "deadline_ns", "receipt_sha256"}
                 and all(ack[key] == value for key, value in request.items())
-                and type(ack["authorized_ns"]) is int
-                and asked <= ack["authorized_ns"] <= received <= deadline
+                and type(ack["authorized_ns"]) is int and type(ack["deadline_ns"]) is int
+                and asked <= ack["authorized_ns"] <= received <= ack["deadline_ns"] <= deadline
                 and isinstance(ack["receipt_sha256"], str) and HEX.fullmatch(ack["receipt_sha256"]),
-                "pricing settlement does not bind its native witness")
-        return ack["receipt_sha256"]
+                "pricing settlement does not bind its native witness and effective deadline")
+        return {"receipt_sha256": ack["receipt_sha256"], "received_ns": received,
+                "deadline_ns": ack["deadline_ns"]}
 
     def __exit__(self, *_):
         self.pipe.close()
@@ -337,6 +367,8 @@ class BarrierServer:
         self.pricing_ack_settled_ns = []
         self.thread = Thread(target=self._run, name="laptop-invasive-observer")
         self.win, self.kernel, _ = native()
+        self._pricing_ack_lock = Lock()
+        self._pricing_stopping = False
         self.stop_handle = checked(self.kernel.CreateEventW(None, True, False, None))
         try:
             self.failed_handle = checked(self.kernel.CreateEventW(None, True, False, None))
@@ -432,6 +464,20 @@ class BarrierServer:
                             pricing_file, job, worker, identity, ordinal, index, preceding_authorization,
                             min(prior + GROUP_NS, during_deadline - RESERVE_NS))
 
+    def _pricing_stop_requested(self):
+        status = self.win.WaitForSingleObject(self.stop_handle, 0)
+        require(status in (self.win.WAIT_TIMEOUT, self.win.WAIT_OBJECT_0),
+                "invalid pricing stop-event status")
+        return self._pricing_stopping or status == self.win.WAIT_OBJECT_0
+
+    def _commit_pricing_ack(self, deadline):
+        stopped = self._pricing_stop_requested()
+        with self._pricing_ack_lock:
+            # Order the submission claim against shutdown without holding a
+            # lock during the native write or its overlapped completion.
+            require(not stopped and not self._pricing_stopping, "pricing ACK canceled before submission")
+            require(time.perf_counter_ns() <= deadline, "pricing membership evidence exceeded its deadline")
+
     def _pricing_settlement(self, stream, job, worker, identity, group, index, current, end):
         request = self.pipe.read(end)
         asked = request.get("requested_ns")
@@ -439,23 +485,67 @@ class BarrierServer:
         expected = {**self.context, "kind": "pricing-settlement", "group": group,
                     "index": index, "requested_ns": asked}
         require(request == expected and all(type(request[key]) is int for key in ("group", "index"))
-                and type(asked) is int and current <= asked <= admitted <= min(asked + BARRIER_NS, end),
-                "invalid pricing settlement request")
-        try:
-            witness = describe_pricing_membership(job, worker, identity)
-        except (OSError, BarrierError) as error:
-            witness = {"accepted": False, "error": f"{type(error).__name__}: {error}"}
-        authorized = time.perf_counter_ns()
-        receipt = {**request, "authorized_ns": authorized, "witness": witness}
+                and type(asked) is int, "invalid pricing settlement request")
+        deadline = min(asked + BARRIER_NS, end)
+        require(current <= asked <= admitted <= deadline, "invalid pricing settlement request")
+        cutoff = deadline - PRICING_EVIDENCE_RESERVE_NS
+        attempt_hashes = []
+        outcome = "insufficient-budget"
+        witness = None
+        due = admitted
+        while due <= cutoff:
+            while time.perf_counter_ns() < due:
+                status = self.win.WaitForSingleObject(self.stop_handle, wait_ms(due))
+                if status == self.win.WAIT_OBJECT_0:
+                    break
+                require(status == self.win.WAIT_TIMEOUT, "invalid pricing retry wait status")
+            else:
+                status = self.win.WaitForSingleObject(self.stop_handle, 0)
+                require(status in (self.win.WAIT_TIMEOUT, self.win.WAIT_OBJECT_0),
+                        "invalid pricing stop-event status")
+            if status == self.win.WAIT_OBJECT_0:
+                outcome = "stopped"
+                break
+            started = time.perf_counter_ns()
+            if started > cutoff:
+                break
+            try:
+                witness = describe_pricing_membership(job, worker, identity)
+            except (OSError, BarrierError) as error:
+                witness = {"accepted": False, "error": f"{type(error).__name__}: {error}"}
+            finished = time.perf_counter_ns()
+            sampled = pricing_witness_outcome(witness, identity)
+            attempt_hashes.append(append_row(stream, {
+                **request, "kind": "pricing-membership-attempt", "ordinal": len(attempt_hashes),
+                "query_start_ns": started, "query_end_ns": finished, "outcome": sampled, "witness": witness,
+            }))
+            if sampled != "extra-members":
+                outcome = sampled
+                break
+            outcome = "persistent-extra"
+            due = finished + PRICING_COOLDOWN_NS
+        if outcome in ("sole-worker", "persistent-extra", "insufficient-budget") and self._pricing_stop_requested():
+            outcome = "stopped"
+        decided = time.perf_counter_ns()
+        if decided > deadline and outcome in ("sole-worker", "persistent-extra"):
+            outcome = "deadline"
+        authorized = decided if outcome == "sole-worker" else None
+        receipt = {**request, "admitted_ns": admitted, "deadline_ns": deadline,
+                   "decision_ns": decided, "authorized_ns": authorized, "outcome": outcome,
+                   "witness": witness, "attempt_sha256s": attempt_hashes}
         digest = append_row(stream, receipt)
-        require(witness["accepted"] is True, "pricing phase Job does not contain only the exact worker")
-        ack_settled = self.pipe.write({**request, "authorized_ns": authorized, "receipt_sha256": digest},
-                                      min(asked + BARRIER_NS, end))
+        require(authorized is not None, "pricing phase Job does not contain only the exact worker")
+        ack_settled = self.pipe.write(
+            {**request, "authorized_ns": authorized, "deadline_ns": deadline, "receipt_sha256": digest},
+            deadline, before_submit=lambda: self._commit_pricing_ack(deadline),
+        )
         self.pricing_authorizations.append(receipt)
         self.pricing_ack_settled_ns.append(ack_settled)
         return authorized
 
     def __exit__(self, *_):
+        with self._pricing_ack_lock:
+            self._pricing_stopping = True
         checked(self.kernel.SetEvent(self.stop_handle))
         self.tasks.put(None)
         self.thread.join(RESERVE_NS / NS)

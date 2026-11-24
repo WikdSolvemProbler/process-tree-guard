@@ -9,6 +9,7 @@ import unittest
 from argparse import Namespace
 from collections import Counter
 from pathlib import Path
+from threading import Lock
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -20,6 +21,7 @@ import laptop_launch
 import laptop_worker
 import pricing
 from laptop_schedule import SLOT_GROUPS, TAIL_GROUP, build_schedule, canonical_bytes, schedule_bytes
+from laptop_telemetry import read_pricing_membership
 from laptop_worker import WorkerExecution, append_record, group_plan
 from plan import build_plan
 
@@ -122,26 +124,68 @@ class LaptopContractTests(unittest.TestCase):
         worker = {"pid": 70, "creation_filetime": 100}
         manifest = {"files": {"python": {"path": "python"}},
                     "sources": {"pricing.py": {"path": "pricing"}}}
-        membership = {
-            "kind": "pricing-settlement", "nonce": nonce, "manifest_sha256": manifest_sha,
-            "group": SLOT_GROUPS, "index": 1940, "requested_ns": 11, "authorized_ns": 12,
-            "witness": {"accepted": True, "before": worker, "after": worker,
-                        "assigned": 1, "listed": 1, "pids": [70]},
-        }
-        settlement = {"group": SLOT_GROUPS, "index": 1940, "timing_end_ns": 10, "settled_ns": 13}
+        asked = 1_000_000
+        deadline = asked + 90_000_000
+        context = {"nonce": nonce, "manifest_sha256": manifest_sha, "group": SLOT_GROUPS,
+                   "index": 1940, "requested_ns": asked}
+        sole = {"accepted": True, "before": worker, "after": worker,
+                "assigned": 1, "listed": 1, "pids": [70]}
+        extra = dict(sole, accepted=False, assigned=2, listed=2, pids=[70, 71])
+        early = {**context, "kind": "pricing-membership-attempt", "ordinal": 0,
+                 "query_start_ns": asked, "query_end_ns": asked + 10_000,
+                 "outcome": "extra-members", "witness": extra}
+        next_ns = early["query_end_ns"] + laptop_barrier.PRICING_COOLDOWN_NS
+        final = {**early, "ordinal": 1, "query_start_ns": next_ns, "query_end_ns": next_ns + 10_000,
+                 "outcome": "sole-worker", "witness": sole}
+        authorized = final["query_end_ns"] + 10_000
+        settlement = {"group": SLOT_GROUPS, "index": 1940,
+                      "timing_end_ns": asked - 1, "settled_ns": authorized + 10_000,
+                      "pricing_ack_received_ns": authorized + 1, "pricing_ack_deadline_ns": deadline}
         with tempfile.TemporaryDirectory(prefix="ptg-laptop-offline-") as tmp:
             receipt_path = Path(tmp) / "pricing-membership.jsonl"
-            def save_witness():
-                raw = canonical_bytes(membership)
-                receipt_path.write_bytes(raw)
-                settlement["pricing_membership_sha256"] = hashlib.sha256(raw).hexdigest()
 
-            save_witness()
-            bind_price_jobs(receipt_path, [record], [settlement], manifest, manifest_sha, worker, nonce)
-            membership["witness"]["pids"] = [70, 71]
-            save_witness()
-            with self.assertRaisesRegex(ValueError, "sole held worker"):
-                bind_price_jobs(receipt_path, [record], [settlement], manifest, manifest_sha, worker, nonce)
+            def save_witness(*attempts, omit_first=False):
+                lines = [canonical_bytes(attempt) for attempt in attempts]
+                membership = {**context, "kind": "pricing-settlement", "admitted_ns": asked,
+                              "deadline_ns": deadline,
+                              "decision_ns": authorized, "authorized_ns": authorized,
+                              "outcome": "sole-worker", "witness": sole,
+                              "attempt_sha256s": [hashlib.sha256(line).hexdigest() for line in lines]}
+                terminal = canonical_bytes(membership)
+                receipt_path.write_bytes(b"".join(lines[int(omit_first):]) + terminal)
+                settlement["pricing_membership_sha256"] = hashlib.sha256(terminal).hexdigest()
+
+            def replay():
+                row = dict(record, probe="console-probe-finish", shape="loaded")
+                return bind_price_jobs(receipt_path, [row], [settlement],
+                                       manifest, manifest_sha, worker, nonce)
+
+            save_witness(early, final)
+            self.assertEqual(replay(), {"console-probe-finish:loaded": {
+                "attempt_counts": [2],
+                "post_return_settlement_ns": [settlement["settled_ns"] - settlement["timing_end_ns"]],
+            }})
+            defects = [
+                (early, dict(final, query_start_ns=next_ns - 1)),
+                (dict(early, outcome="sole-worker", witness=sole), final),
+                (dict(early, witness=dict(extra, pids=[70, 70])), final),
+                (dict(early, witness=dict(extra, assigned=3, listed=3, pids=[70, 71, 72])), final),
+            ]
+            for first, second in defects:
+                with self.subTest(first=first, second=second):
+                    save_witness(first, second)
+                    with self.assertRaises((ValueError, laptop_barrier.BarrierError)):
+                        replay()
+            save_witness(early, final, omit_first=True)
+            with self.assertRaises((ValueError, laptop_barrier.BarrierError)):
+                replay()
+            save_witness(early, final)
+            settlement.update(pricing_ack_received_ns=deadline + 1, settled_ns=deadline + 2)
+            with self.assertRaises((ValueError, laptop_barrier.BarrierError)):
+                replay()
+            settlement.update(pricing_ack_received_ns=authorized + 1, pricing_ack_deadline_ns=deadline + 1)
+            with self.assertRaises((ValueError, laptop_barrier.BarrierError)):
+                replay()
 
     def test_pipe_client_uses_integer_nulls_for_winapi_create_file(self):
         win = SimpleNamespace(GENERIC_READ=0x80000000, GENERIC_WRITE=0x40000000,
@@ -192,6 +236,167 @@ class LaptopContractTests(unittest.TestCase):
             receipt = laptop_barrier.describe_pricing_membership(job, worker, identity)
             self.assertEqual(receipt["pids"], [70, 80])
             self.assertFalse(receipt["accepted"])
+
+    def test_pricing_pipe_checks_commit_before_native_write(self):
+        order = []
+        frame = {"kind": "pricing-settlement"}
+        packed = laptop_barrier.packed(frame)
+
+        def write_file(handle, raw, *, overlapped):
+            self.assertEqual((handle, raw, overlapped), (51, packed, True))
+            order.append("native-write")
+            return "overlapped", 997
+
+        def cancel():
+            raise laptop_barrier.BarrierError("cancelled")
+
+        pipe = laptop_barrier.Pipe.__new__(laptop_barrier.Pipe)
+        pipe.handle = 51
+        pipe.win = SimpleNamespace(WriteFile=write_file, ERROR_IO_PENDING=997)
+        pipe._finish = Mock(return_value=(len(packed), 999))
+        with self.assertRaisesRegex(laptop_barrier.BarrierError, "cancelled"):
+            pipe.write(frame, 1000, before_submit=cancel)
+        self.assertEqual(order, [])
+        pipe._finish.assert_not_called()
+
+        self.assertEqual(pipe.write(frame, 1000, before_submit=lambda: order.append("commit")), 999)
+        self.assertEqual(order, ["commit", "native-write"])
+        pipe._finish.assert_called_once_with("overlapped", 1000, pending=True)
+
+    def test_pricing_client_refuses_an_ack_after_the_tighter_server_deadline(self):
+        asked = 2 * laptop_barrier.NS
+        deadline = asked + 100_000_000
+        nonce = "b" * 64
+        manifest_sha = "a" * 64
+        receipt = "c" * 64
+        request = {"nonce": nonce, "manifest_sha256": manifest_sha, "kind": "pricing-settlement",
+                   "group": 3, "index": 17, "requested_ns": asked}
+        ack = {**request, "authorized_ns": asked + 1, "deadline_ns": deadline,
+               "receipt_sha256": receipt}
+        pipe_name = laptop_launch.worker_pipe_name(nonce)
+
+        def accept_at(received, frame):
+            client = laptop_barrier.BarrierClient(pipe_name, nonce, manifest_sha)
+            client.pipe = SimpleNamespace(read=Mock(return_value=frame), write=Mock())
+            stamps = iter([asked, received])
+            with patch.object(laptop_barrier, "time", SimpleNamespace(perf_counter_ns=lambda: next(stamps))):
+                proof = client.pricing_settlement(3, 17)
+            client.pipe.write.assert_called_once_with(request, asked + laptop_barrier.BARRIER_NS)
+            return proof
+
+        self.assertEqual(accept_at(deadline, ack), {"receipt_sha256": receipt,
+                                                   "received_ns": deadline, "deadline_ns": deadline})
+        for received, frame in (
+            (deadline + 1, ack),
+            (deadline, dict(ack, deadline_ns=asked + laptop_barrier.BARRIER_NS + 1)),
+        ):
+            with self.subTest(received=received, deadline=frame["deadline_ns"]):
+                with self.assertRaises(laptop_barrier.BarrierError):
+                    accept_at(received, frame)
+
+    def test_pricing_post_return_wait_settles_naturally_or_refuses_without_ack(self):
+        identity = {"pid": 70, "creation_filetime": 150}
+        sole = {"before": identity, "after": identity, "accepted": True,
+                "assigned": 1, "listed": 1, "pids": [70]}
+        extra = dict(sole, accepted=False, assigned=2, listed=2, pids=[70, 80])
+        cases = (
+            ("settles", [extra, sole], "sole-worker", None),
+            ("persistent", None, "persistent-extra", None),
+            ("native failure", [OSError("native snapshot failed")], "native-error", None),
+            ("invalid list", [dict(extra, pids=[70, 70])], "invalid-native-list", None),
+            ("cancels in query", [sole], "stopped", "query"),
+            ("cancels during final flush", [sole], "sole-worker", "flush"),
+        )
+        for name, snapshots, expected, stop_after in cases:
+            with self.subTest(case=name), tempfile.TemporaryDirectory(prefix="ptg-laptop-offline-") as tmp:
+                now = 2 * laptop_barrier.NS
+                beginning = now
+                context = {"nonce": "b" * 64, "manifest_sha256": "a" * 64}
+                request = {**context, "kind": "pricing-settlement", "group": 3,
+                           "index": 17, "requested_ns": now}
+                deadline = now + 800_000_000
+                candidates = iter(snapshots) if snapshots is not None else None
+                waits = []
+                submitted = []
+                expects_ack = expected == "sole-worker" and stop_after is None
+
+                def wait_for_stop(_handle, milliseconds):
+                    nonlocal now
+                    if server._pricing_stopping:
+                        return 0  # WAIT_OBJECT_0
+                    waits.append(milliseconds)
+                    now += milliseconds * 1_000_000
+                    return 258  # WAIT_TIMEOUT
+
+                def snapshot(_job, _worker, _identity):
+                    nonlocal now
+                    now += 1_000_000
+                    candidate = extra if candidates is None else next(candidates)
+                    if isinstance(candidate, OSError):
+                        raise candidate
+                    if stop_after == "query":
+                        server._pricing_stopping = True
+                    return candidate
+
+                def send(frame, end, *, before_submit):
+                    before_submit()
+                    submitted.append((frame, end))
+                    return now + 1
+
+                append_row = laptop_barrier.append_row
+
+                def retain(stream, row):
+                    digest = append_row(stream, row)
+                    if stop_after == "flush" and row["kind"] == "pricing-settlement":
+                        server._pricing_stopping = True
+                    return digest
+
+                server = laptop_barrier.BarrierServer.__new__(laptop_barrier.BarrierServer)
+                server.context = context
+                server.pipe = SimpleNamespace(read=Mock(return_value=request), write=send)
+                server.stop_handle = 51
+                server.win = SimpleNamespace(WaitForSingleObject=wait_for_stop,
+                                             WAIT_TIMEOUT=258, WAIT_OBJECT_0=0)
+                server._pricing_ack_lock = Lock()
+                server._pricing_stopping = False
+                server.pricing_authorizations = []
+                server.pricing_ack_settled_ns = []
+                output = Path(tmp) / "pricing-membership.jsonl"
+                with (output.open("xb") as stream,
+                      patch.object(laptop_barrier, "time", SimpleNamespace(perf_counter_ns=lambda: now)),
+                      patch.object(laptop_barrier, "describe_pricing_membership", side_effect=snapshot),
+                      patch.object(laptop_barrier, "append_row", side_effect=retain)):
+                    if expects_ack:
+                        accepted = server._pricing_settlement(stream, None, None, identity, 3, 17,
+                                                              beginning, deadline)
+                    else:
+                        with self.assertRaises(laptop_barrier.BarrierError):
+                            server._pricing_settlement(stream, None, None, identity, 3, 17,
+                                                       beginning, deadline)
+                [(terminal, digest, attempts)] = read_pricing_membership(
+                    output, identity, context["manifest_sha256"], context["nonce"], accepted=False)
+                self.assertEqual(terminal["outcome"], expected)
+                self.assertEqual(terminal["deadline_ns"], deadline)
+                self.assertEqual(attempts[0]["query_start_ns"], beginning)
+                if expects_ack:
+                    self.assertEqual([row["outcome"] for row in attempts], ["extra-members", "sole-worker"])
+                    self.assertEqual(max(waits), 25)
+                    self.assertEqual(submitted, [
+                        ({**request, "authorized_ns": accepted, "receipt_sha256": digest,
+                          "deadline_ns": deadline}, deadline),
+                    ])
+                else:
+                    self.assertEqual(submitted, [])
+                    self.assertEqual(server.pricing_authorizations, [])
+                    self.assertEqual(server.pricing_ack_settled_ns, [])
+                    if expected == "persistent-extra":
+                        self.assertGreater(len(attempts), 1)
+                        self.assertTrue(all(row["outcome"] == "extra-members" for row in attempts))
+                        self.assertGreater(attempts[-1]["query_end_ns"] + laptop_barrier.PRICING_COOLDOWN_NS,
+                                           deadline - laptop_barrier.PRICING_EVIDENCE_RESERVE_NS)
+                    else:
+                        self.assertEqual(len(attempts), 1)
+                        self.assertEqual(max(waits), 0)
 
     def test_price_timeout_keeps_failed_row_without_requesting_membership_or_settlement(self):
         rows = build_schedule()

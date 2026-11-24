@@ -16,7 +16,8 @@ from statistics import median
 
 from laptop_barrier import (
     BARRIER_NS, EMPTY_JOB, GROUP_NS, HEX, NS, BarrierError, BarrierServer, append_row,
-    barrier_occupation_ns, checked, no_duplicates, process_in_job, require, require_admission, wait_ms,
+    PRICING_COOLDOWN_NS, PRICING_EVIDENCE_RESERVE_NS, barrier_occupation_ns, checked,
+    no_duplicates, pricing_witness_outcome, process_in_job, require, require_admission, wait_ms,
 )
 
 
@@ -567,6 +568,99 @@ def load_rows(path):
     return rows
 
 
+def check_pricing_membership(terminal, attempts, worker_identity, manifest_sha, nonce):
+    context = {"nonce": nonce, "manifest_sha256": manifest_sha, "group": terminal["group"],
+               "index": terminal["index"], "requested_ns": terminal["requested_ns"]}
+    require(set(terminal) == set(context) | {
+        "kind", "admitted_ns", "deadline_ns", "decision_ns", "authorized_ns",
+        "outcome", "witness", "attempt_sha256s",
+    } and all(terminal[key] == value for key, value in context.items()),
+            "pricing terminal receipt does not bind its exact request")
+    asked, admitted, deadline, decision = (terminal[key] for key in (
+        "requested_ns", "admitted_ns", "deadline_ns", "decision_ns",
+    ))
+    require(all(type(value) is int and value >= 0 for value in (
+        context["group"], context["index"], asked, admitted, deadline, decision,
+    )) and asked <= admitted <= deadline <= asked + BARRIER_NS and decision >= admitted,
+            "invalid pricing request or absolute deadline")
+    require(terminal["attempt_sha256s"] == [digest for _, digest in attempts],
+            "pricing attempt digest history differs")
+    cutoff = deadline - PRICING_EVIDENCE_RESERVE_NS
+    earlier_end = admitted
+    last = None
+    previous_result = None
+    for ordinal, (attempt, _) in enumerate(attempts):
+        require(set(attempt) == set(context) | {
+            "kind", "ordinal", "query_start_ns", "query_end_ns", "outcome", "witness",
+        } and all(attempt[key] == value and type(attempt[key]) is type(value)
+                  for key, value in context.items())
+                and type(attempt["ordinal"]) is int and attempt["ordinal"] == ordinal,
+                "pricing attempt does not bind its request or sequence")
+        start, end = attempt["query_start_ns"], attempt["query_end_ns"]
+        require(type(start) is int and type(end) is int
+                and earlier_end + (PRICING_COOLDOWN_NS if ordinal else 0) <= start <= cutoff
+                and start <= end <= decision, "pricing attempt violated its cooldown or deadline")
+        require(ordinal == 0 or previous_result == "extra-members",
+                "pricing retried after an authoritative terminal observation")
+        last = attempt["witness"]
+        previous_result = pricing_witness_outcome(last, worker_identity)
+        require(attempt["outcome"] == previous_result, "pricing attempt outcome differs from native witness")
+        earlier_end = end
+    require(terminal["witness"] == last, "pricing final witness differs from the last raw query")
+    status = terminal["outcome"]
+    if status == "sole-worker":
+        require(previous_result == status and type(terminal["authorized_ns"]) is int
+                and terminal["authorized_ns"] == decision <= deadline,
+                "pricing ACK lacks a deadline-bounded exact sole-worker witness")
+    else:
+        require(terminal["authorized_ns"] is None, "refused pricing witness carries an authorization")
+        if status in ("native-error", "invalid-native-list"):
+            require(previous_result == status, "pricing terminal error differs from the last native result")
+        elif status == "persistent-extra":
+            require(previous_result == "extra-members" and decision <= deadline
+                    and (earlier_end + PRICING_COOLDOWN_NS > cutoff or decision > cutoff),
+                    "pricing refused extra members before exhausting the original query bound")
+        elif status == "deadline":
+            require(previous_result in ("sole-worker", "extra-members") and decision > deadline,
+                    "pricing deadline refusal lacks the native deadline crossing")
+        elif status == "stopped":
+            require(previous_result in (None, "extra-members", "sole-worker"),
+                    "pricing stop differs from its last native result")
+        else:
+            require(status == "insufficient-budget" and previous_result is None and decision > cutoff,
+                    "unknown pricing refusal or unexhausted first-query budget")
+
+
+def check_pricing_receiver(member, settlement):
+    started, settled = settlement["timing_end_ns"], settlement["settled_ns"]
+    received = settlement.get("pricing_ack_received_ns")
+    deadline = settlement.get("pricing_ack_deadline_ns")
+    require(type(received) is int and type(deadline) is int and deadline == member["deadline_ns"]
+            and started <= member["requested_ns"] <= member["authorized_ns"] <= received
+            <= min(deadline, settled) and settled <= member["requested_ns"] + BARRIER_NS,
+            "pricing receiver ACK crossed the exact effective deadline or stock return")
+
+
+def read_pricing_membership(path, worker_identity, manifest_sha, nonce, *, accepted=True):
+    """Replay the complete, durable history behind each raw settlement digest."""
+    require(type(worker_identity) is dict and set(worker_identity) == {"pid", "creation_filetime"}
+            and all(type(value) is int and value > 0 for value in worker_identity.values()),
+            "invalid exact worker identity for pricing replay")
+    groups = []
+    attempts = []
+    for row, digest in load_rows(path):
+        if row.get("kind") == "pricing-membership-attempt":
+            attempts.append((row, digest))
+            continue
+        require(row.get("kind") == "pricing-settlement", "unbound row in pricing membership evidence")
+        check_pricing_membership(row, attempts, worker_identity, manifest_sha, nonce)
+        require(not accepted or row["outcome"] == "sole-worker", "pricing membership did not settle")
+        groups.append((row, digest, [attempt for attempt, _ in attempts]))
+        attempts = []
+    require(groups and not attempts, "pricing membership contains an unterminated proof history")
+    return groups
+
+
 def validate_sample(row, previous, last_start):
     from quiet_gate import sample_errors
 
@@ -760,10 +854,13 @@ def worker_rows(capture_dir, groups, manifest_sha, nonce, census, spans, timing,
     overlays = []
     require(len(groups) == len(barriers) == len(census), "barrier receipt population differs")
     price_count = 2 * sum(label.startswith("pricing:") for _, label, _ in groups)
-    prices = load_rows(capture_dir / "pricing-membership.jsonl") if price_count else []
+    prices = read_pricing_membership(
+        capture_dir / "pricing-membership.jsonl", identity, manifest_sha, nonce,
+    ) if price_count else []
     require(len(prices) == price_count, "pricing barrier envelope population differs")
-    price_occupied = barrier_occupation_ns([row for row, _ in prices],
-                                           decision.get("pricing_ack_settled_ns", []))
+    price_acks = decision.get("pricing_ack_settled_ns", [])
+    price_occupied = barrier_occupation_ns([row for row, _, _ in prices], price_acks)
+    price_index = 0
     occupied = barrier_occupation_ns([gate for gate, _ in barriers], decision["ack_settled_ns"]) + price_occupied
     require(occupied == decision["occupied_ns"], "recorded barrier occupation differs from native completions")
     for index, ((ordinal, label, through), (gate, gate_digest), (raw, digest)) in enumerate(
@@ -813,7 +910,20 @@ def worker_rows(capture_dir, groups, manifest_sha, nonce, census, spans, timing,
                     stamp_index for stamp_index, (left, right) in enumerate(spans)
                     if lo < hi and left < right and left < hi and lo < right
                 ]})
+            if label.startswith("pricing:"):
+                member, member_digest, _ = prices[price_index]
+                price_deadline = min(member["requested_ns"] + BARRIER_NS,
+                                     requested + GROUP_NS, dispatch["deadline_ns"] - RESERVE_NS)
+                require((member["group"], member["index"]) == (ordinal, item_index)
+                        and member["deadline_ns"] == price_deadline
+                        and end.get("pricing_membership_sha256") == member_digest
+                        and hi is not None
+                        and member["authorized_ns"] <= price_acks[price_index] <= price_deadline,
+                        "pricing sender ACK crossed its original absolute deadline")
+                check_pricing_receiver(member, end)
+                price_index += 1
             settled_at = end["settled_ns"]
+    require(price_index == len(prices), "unbound pricing membership receipt")
     terminal = next(worker)
     require(terminal["kind"] == "worker_terminal" and terminal["success"] is True
             and terminal["settled_through"] == groups[-1][2] and next(worker, None) is None,

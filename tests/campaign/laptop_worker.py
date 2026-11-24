@@ -127,7 +127,7 @@ class WorkerExecution:
         self.active = (index, group, identity, started)
         self.emit("item_begin", index=index, group=group, identity=identity, begun_ns=started)
 
-    def settle(self, index, identity, bounds, *, membership_sha=None):
+    def settle(self, index, identity, bounds, *, pricing_ack=None):
         if self.active is None or self.active[0] != index or self.active[2] != identity:
             raise ValueError("worker cannot settle a different item")
         _, group, _, begun = self.active
@@ -137,8 +137,13 @@ class WorkerExecution:
             raise ValueError("worker timing falls outside its begin/settlement clock")
         receipt = {"index": index, "group": group, "identity": identity,
                    "settled_ns": settled, "timing_start_ns": start, "timing_end_ns": end}
-        if membership_sha is not None:
-            receipt["pricing_membership_sha256"] = membership_sha
+        if pricing_ack is not None:
+            received, deadline = pricing_ack["received_ns"], pricing_ack["deadline_ns"]
+            if (type(received) is not int or type(deadline) is not int
+                    or not end <= received <= min(deadline, settled)):
+                raise ValueError("pricing ACK receipt crossed its deadline or stock return")
+            receipt.update(pricing_membership_sha256=pricing_ack["receipt_sha256"],
+                           pricing_ack_received_ns=received, pricing_ack_deadline_ns=deadline)
         self.emit("item_settled", **receipt)
         self.last_index = index
         self.active = None
@@ -201,8 +206,8 @@ class WorkerExecution:
         append_record(self.pricing_journal, {"index": index, "observation": row})
         if row.get("detail") == PROBE_TIMEOUT_DETAIL:
             raise ValueError(f"pricing item {index} exhausted the finite deadline")
-        membership = self.gate.pricing_settlement(self.next_group - 1, index)
-        self.settle(index, identity, (self.price_start, self.price_end), membership_sha=membership)
+        pricing_ack = self.gate.pricing_settlement(self.next_group - 1, index)
+        self.settle(index, identity, (self.price_start, self.price_end), pricing_ack=pricing_ack)
         self.price_end = None
 
     def finish(self):

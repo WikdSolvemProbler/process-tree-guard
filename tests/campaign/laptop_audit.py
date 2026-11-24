@@ -129,38 +129,40 @@ def bind_worker_launch(launch, telemetry, manifest, manifest_sha):
 
 
 def bind_price_jobs(path, pricing, settlements, manifest, manifest_sha, worker_identity, nonce):
-    raw = path.read_bytes()
-    require(raw.endswith(b"\n"), "pricing membership evidence has a torn record")
-    lines = raw.splitlines(keepends=True)
-    require(len(lines) == len(pricing) == len(settlements), "pricing Job proof population differs")
+    from laptop_barrier import BarrierError
+    from laptop_telemetry import check_pricing_receiver, read_pricing_membership
+
+    try:
+        receipts = read_pricing_membership(path, worker_identity, manifest_sha, nonce)
+    except BarrierError as error:
+        raise ValueError(str(error)) from error
+    require(len(receipts) == len(pricing) == len(settlements), "pricing Job proof population differs")
     helper = [
         manifest["files"]["python"]["path"], "-I", "-B",
         manifest["sources"]["pricing.py"]["path"], GUARD_LAUNCHER_MODE,
     ]
-    for offset, (line, row, settlement) in enumerate(zip(lines, pricing, settlements)):
-        membership = parse_json(line)
-        identity = {"accepted": True, "before": worker_identity, "after": worker_identity,
-                    "assigned": 1, "listed": 1, "pids": [worker_identity["pid"]]}
-        actual = membership.get("witness", {})
-        require(isinstance(actual, dict) and actual.get("accepted") is True
-                and all(type(actual.get(key)) is int for key in ("assigned", "listed"))
-                and membership.get("kind") == "pricing-settlement"
-                and membership.get("nonce") == nonce
-                and membership.get("manifest_sha256") == manifest_sha
-                and type(membership.get("group")) is int
-                and membership["group"] == settlement["group"] == SLOT_GROUPS + offset // 2
-                and type(membership.get("index")) is int
-                and membership["index"] == settlement["index"] and actual == identity
-                and hashlib.sha256(line).hexdigest() == settlement.get("pricing_membership_sha256"),
-                "pricing phase Job proof does not bind the sole held worker")
-        asked, authorized = membership["requested_ns"], membership["authorized_ns"]
-        require(type(asked) is int and type(authorized) is int
-                and settlement["timing_end_ns"] <= asked <= authorized <= settlement["settled_ns"]
-                <= asked + 1_000_000_000 and row.get("detail") != PROBE_TIMEOUT_DETAIL,
-                "pricing proof crossed the timed endpoint or deadline")
+    shapes = {}
+    for offset, ((membership, digest, attempts), row, settlement) in enumerate(
+        zip(receipts, pricing, settlements, strict=True)
+    ):
+        require(membership["group"] == settlement["group"] == SLOT_GROUPS + offset // 2
+                and membership["index"] == settlement["index"]
+                and digest == settlement.get("pricing_membership_sha256"),
+                "pricing phase Job proof does not bind its exact stock item")
+        require(row.get("detail") != PROBE_TIMEOUT_DETAIL,
+                "pricing proof after an exhausted stock watchdog")
+        try:
+            check_pricing_receiver(membership, settlement)
+        except BarrierError as error:
+            raise ValueError(str(error)) from error
         if row.get("probe") == "owner-verification" and row.get("shape") == "loaded":
             require(row["argv"][:len(helper)] == helper, "pricing helper differs from its sealed Python invocation")
-
+        shape = shapes.setdefault(f'{row["probe"]}:{row["shape"]}', {
+            "attempt_counts": [], "post_return_settlement_ns": [],
+        })
+        shape["attempt_counts"].append(len(attempts))
+        shape["post_return_settlement_ns"].append(settlement["settled_ns"] - settlement["timing_end_ns"])
+    return shapes
 
 def audit_capture(path, manifest, manifest_sha, *, full=False):
     """Accept complete replayed custody even when the product verdict is incomplete."""
@@ -204,8 +206,9 @@ def audit_capture(path, manifest, manifest_sha, *, full=False):
     problems = harness.check_run_package(root)
     require(not problems, f"stock package replay failed: {problems[:12]}")
     settlements = bind_worker_items(path, schedule, observations, pricing)
-    bind_price_jobs(path / "pricing-membership.jsonl", pricing, settlements,
-                    manifest, manifest_sha, worker_identity, nonce)
+    pricing_settlement = bind_price_jobs(
+        path / "pricing-membership.jsonl", pricing, settlements, manifest, manifest_sha, worker_identity, nonce,
+    )
     stream_hashes = bind_streams(path, observations)
     events, absent = processkit_event_evidence(
         root, observations,
@@ -232,5 +235,6 @@ def audit_capture(path, manifest, manifest_sha, *, full=False):
         "processkit_parser_refusals_without_event": absent,
         "stock_files_sha256": digests, "processkit_events_sha256": events,
         "retained_streams_sha256": stream_hashes, "telemetry": telemetry, "analysis": analysis,
+        "pricing_settlement": pricing_settlement,
     }
 
