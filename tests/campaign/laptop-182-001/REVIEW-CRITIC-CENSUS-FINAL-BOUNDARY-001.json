@@ -1,0 +1,28 @@
+{
+  "schema": "ptg-census-final-boundary-source-review-v1",
+  "role": "critic",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "pins": {
+    "laptop_census.py": "12176b0c728511b260a5c3687c7c61b8bed67aca9da3550bcaacca9a5dc43560",
+    "test_laptop_census.py": "727aa2ae89e1397b09508571e15e247f084f10dbc770815d7072dfbbe3204ae4",
+    "laptop_tests.py": "380bb1f3a9caa96bf855b974a7d2b9690cf8f6e45579613dfc4dc8c689772181",
+    "laptop_telemetry.py": "7755edb317e4966c5fe8f8db7fbccc34a039e24c7ffe77ae75a78559f439253a",
+    "laptop_barrier.py": "e9749e269401b3aef5618ca9846e6cf316f99b895ccfd8f9b346e2eda9f7d670",
+    "laptop_launch.py": "cb79ba559bdda827ff78636a8286b9dbbdae2d9e532d163fde7dbd386099e220",
+    "observer-laptop-185-001/inventory_gate.py": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f",
+    "laptop-182-001/AMD-CENSUS-FINAL-BOUNDARY-001.md": "a8af9cfcaa73bd1e82778aba08cd490bf7d66c5e7a9cee9ab46708461cb97352"
+  },
+  "offline_validation_sha256": "a1fc53c59973cfc4ed9964058f0b31997fca6f5b425d9eae924dd943bf5df048",
+  "offline_tests": 22,
+  "offline_errors": 0,
+  "offline_failures": 0,
+  "native_workloads": 0,
+  "scope": "Exact during-census source and prospective final-sample interpretation. Controlled native disappearance and live-veto witnesses and their read-only replay remain required. This review does not approve a full campaign or revise A011.",
+  "findings": [
+    "Only an actual original pre-handle OpenProcess error 87 can make a complete replacement eligible. Every prior positive veto, newly classified positive veto and other unknown remains blocking.",
+    "Whole unfiltered snapshot projections and held role identities replay independently. The original one-second request-through-ACK, phase and observer bounds apply.",
+    "Offline controls include simultaneous uncertainties, a newly classified veto and actual replay refusal for forged or missing-round evidence."
+  ]
+}

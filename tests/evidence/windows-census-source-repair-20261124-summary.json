@@ -1,0 +1,170 @@
+{
+  "schema": "ptg-census-source-repair-summary-v1",
+  "production_guard_source": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "production_guard_changed": false,
+  "source_status": "two independent Sol approvals with zero unresolved objections; native qualification required",
+  "scope": "during-phase census final sampled boundary only; first uncertainty and all actual positive vetoes retained",
+  "native_workloads": 0,
+  "competitive_measured_trials": 0,
+  "a011_disposition": "FAILED unchanged; 36 controls,148 warmups,0 measured,0 pricing; no rescore or ranking",
+  "original_failure_limits": "Saved error87 did not identify the native API or prove the process exited",
+  "source_pins": {
+    "tests/campaign/laptop_census.py": {
+      "bytes": 8229,
+      "sha256": "12176b0c728511b260a5c3687c7c61b8bed67aca9da3550bcaacca9a5dc43560"
+    },
+    "tests/campaign/test_laptop_census.py": {
+      "bytes": 8023,
+      "sha256": "727aa2ae89e1397b09508571e15e247f084f10dbc770815d7072dfbbe3204ae4"
+    },
+    "tests/campaign/laptop_tests.py": {
+      "bytes": 45149,
+      "sha256": "380bb1f3a9caa96bf855b974a7d2b9690cf8f6e45579613dfc4dc8c689772181"
+    },
+    "tests/campaign/laptop_telemetry.py": {
+      "bytes": 52228,
+      "sha256": "7755edb317e4966c5fe8f8db7fbccc34a039e24c7ffe77ae75a78559f439253a"
+    },
+    "tests/campaign/laptop_barrier.py": {
+      "bytes": 26141,
+      "sha256": "e9749e269401b3aef5618ca9846e6cf316f99b895ccfd8f9b346e2eda9f7d670"
+    },
+    "tests/campaign/laptop_launch.py": {
+      "bytes": 26941,
+      "sha256": "cb79ba559bdda827ff78636a8286b9dbbdae2d9e532d163fde7dbd386099e220"
+    },
+    "tests/campaign/observer-laptop-185-001/inventory_gate.py": {
+      "bytes": 11937,
+      "sha256": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f"
+    },
+    "tests/campaign/laptop-182-001/AMD-CENSUS-FINAL-BOUNDARY-001.md": {
+      "bytes": 3963,
+      "sha256": "a8af9cfcaa73bd1e82778aba08cd490bf7d66c5e7a9cee9ab46708461cb97352"
+    }
+  },
+  "reviews": {
+    "designer_prior": {
+      "path": "tests/campaign/laptop-182-001/REVIEW-DESIGNER-CENSUS-FINAL-BOUNDARY-001.json",
+      "bytes": 1677,
+      "sha256": "beb9197bff0f86ec3be9b166603326dcd588942351bba4445b8e2dd24bace3ed"
+    },
+    "designer_final": {
+      "path": "tests/campaign/laptop-182-001/REVIEW-DESIGNER-CENSUS-FINAL-BOUNDARY-002.json",
+      "bytes": 1842,
+      "sha256": "f8b93ab8de1d6b904effe27ac7fee7d7fd61b48ed73ad1266520055d26cc170b"
+    },
+    "critic_final": {
+      "path": "tests/campaign/laptop-182-001/REVIEW-CRITIC-CENSUS-FINAL-BOUNDARY-001.json",
+      "bytes": 1953,
+      "sha256": "674f91ec2aab4d76e91260ae8460006d2c062487ecf76c017ba1523b8055c3a5"
+    }
+  },
+  "offline_attempts": {
+    "OFFLINE-DESIGNER-001": {
+      "result": {
+        "bytes": 600,
+        "sha256": "46d8f3fef0d67e4d9bc4368dedf902c35a465cabc2d4dca17be34c0593422107"
+      },
+      "tests": null,
+      "failures": null,
+      "errors": null,
+      "native_workloads": 0
+    },
+    "OFFLINE-ROOT-001": {
+      "result": {
+        "bytes": 802,
+        "sha256": "be876b6712b10700e9dedc0cd2955e52e11f49ff5e6acf048b9ddcf91882113d"
+      },
+      "tests": 20,
+      "failures": 1,
+      "errors": 0,
+      "native_workloads": 0,
+      "TESTS.stderr": {
+        "bytes": 4323,
+        "sha256": "0e2ed8fa330e5c999f97b38abab8bed966d5be391945d385ba7487c81b0c202d"
+      },
+      "HOST.stdout": {
+        "bytes": 743,
+        "sha256": "3e6e380a424b2a5aa73a5f4b07b66d27f05f1ef0cf2f6ed66ebe174f7fe05ea2"
+      },
+      "HOST.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "OFFLINE-ROOT-002": {
+      "result": {
+        "bytes": 1050,
+        "sha256": "9ab48e93539fdb0297c06586a81d53c75b31d028583d113bb1fdf7f8f98a9297"
+      },
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "native_workloads": 0,
+      "TESTS.stderr": {
+        "bytes": 3388,
+        "sha256": "1e8debe033c6b6e6f7238f80cf20825f5576b8b758677f988779c48a8d8229be"
+      },
+      "HOST.stdout": {
+        "bytes": 983,
+        "sha256": "726c3a87767e06e141eebf7e0e660b928d71d07a5e583d9134688088176fdc71"
+      },
+      "HOST.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "OFFLINE-ROOT-003": {
+      "result": {
+        "bytes": 1037,
+        "sha256": "78bd98bfb33014e95c773ebd9a3921b62a028ca7a4eeac75acdb833048c4827c"
+      },
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "native_workloads": 0,
+      "TESTS.stderr": {
+        "bytes": 3575,
+        "sha256": "9e8fae652b2f28043c0c39d967d58fd55a5f651a525763b35541db8aa20e0e09"
+      },
+      "HOST.stdout": {
+        "bytes": 970,
+        "sha256": "be1af7669f3c15e930b6f5d3b15b132bbf67064b983d14a67e8a4b19fbcbbd07"
+      },
+      "HOST.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "OFFLINE-ROOT-004": {
+      "result": {
+        "bytes": 1145,
+        "sha256": "a1fc53c59973cfc4ed9964058f0b31997fca6f5b425d9eae924dd943bf5df048"
+      },
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "native_workloads": 0,
+      "TESTS.stderr": {
+        "bytes": 3760,
+        "sha256": "c22bd000f17acf476342943f0704952a73073ef63d883203fa37e67433b582bd"
+      },
+      "HOST.stdout": {
+        "bytes": 1058,
+        "sha256": "6e5698e4cb8e56455e4d3f0c2c6db3d5e041dba951c15a6934b5120784c89ec9"
+      },
+      "HOST.stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "preserved_failed_attempt": "OFFLINE-ROOT-001 new worker-postcheck fixture allocated100 logical seconds against group220+reserve5; only numeric fixture corrected to500",
+  "further_review_corrections": [
+    "preserve first round and refusal on replacement enumeration RuntimeError",
+    "check original deadline immediately before native ACK submission",
+    "reject two initial uncertainties,new classified replacement veto,and forged or missing production replay rounds"
+  ],
+  "native_requirement": "one controlled real disappearance with actual pre-handle OpenProcess87 and full fresh absence; one still-live pinned-image veto refusal, independently replayed. No full campaign authorized by this summary.",
+  "privacy": "raw originals remain private; hash summaries do not replace publicly accessible raw evidence"
+}

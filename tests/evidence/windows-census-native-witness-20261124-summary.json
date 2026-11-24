@@ -1,0 +1,104 @@
+{
+  "schema": "ptg-census-native-attempt-v1",
+  "passed": false,
+  "native_outer_exit": 1,
+  "original_primary_handle_retained": true,
+  "deadline_timeout_reported": false,
+  "cases": {
+    "positive": {
+      "all_case_raw_hashes_match": true,
+      "passed": false,
+      "fault": {
+        "text": "not enough values to unpack (expected 1, got 0)",
+        "type": "ValueError"
+      },
+      "server_fault": {
+        "text": "invasive observer failed: cannot access local variable 'side' where it is not associated with a value",
+        "type": "BarrierError"
+      },
+      "rounds": null,
+      "side_cleanup": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "phase_cleanup": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "native_acknowledgments": 0
+    }
+  },
+  "skipped_cases": [
+    "negative"
+  ],
+  "custody_roles": {
+    "seal": {
+      "bytes": 7023,
+      "sha256": "86e00d3d7330502aa9f56eb2fc71f755380368dd5a7922f0b2ba5b3c26106b2d"
+    },
+    "source": {
+      "bytes": 19207,
+      "sha256": "c82eb851ab811173e3b736b98757fb7f7d980015a54b849df6f471b883760f08"
+    },
+    "carrier": {
+      "bytes": 2563,
+      "sha256": "da36f48e4a2203095568417acb694df76126096bcb0b2436c105390404189ec8"
+    },
+    "batch_result": {
+      "bytes": 3354,
+      "sha256": "a4e3a5091ab20c70765354c2fb5dde8fe51f8616d220ddf5394ac2fcbb4b3d12"
+    },
+    "host_result": {
+      "bytes": 465,
+      "sha256": "b6ed8b6d198adffc3ee0479fd2a746c9763d59b0f6c5a8034e232f460f92e01a"
+    },
+    "primary_stdout": {
+      "bytes": 104,
+      "sha256": "c1587a9848202c83bc1781c75e64ee828a01d53a9044c032717c307a386b5673"
+    },
+    "primary_stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "critic_approval": {
+      "bytes": 1064,
+      "sha256": "7f9db51c0c4d08e009f6070684afe56bd73fe30434160352cb0786f979d741d3"
+    },
+    "root_attested_designer_approval": {
+      "bytes": 822,
+      "sha256": "4a68dab5bbfd95749ccbd8239cf1f23cc5ac255978b1b3f40e7f1fb1c966d223"
+    },
+    "positive_result": {
+      "bytes": 1878,
+      "sha256": "ac0f356fa62cec590f063799fa257d80bf0525c7b5fc63501c395e938cb2b881"
+    }
+  },
+  "source_files_postmatched": 26,
+  "candidate_guard_slots": 0,
+  "production_source": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "product_source_changed": false,
+  "interpretation": "Native qualification incomplete. Failed attempt retained, no scientific retry or competitive launch under this phase. Supervising guard is a harness, not a product comparison.",
+  "designer_approval_custody": "Technical exact-source approval received; independent reviewer command15 exited1 at a lexical metadata check, so root recorded the approval faithfully instead of claiming an agent-written receipt.",
+  "prior_preparations": "V1 and V2 retained; all local staging failures remain preserved.",
+  "privacy": "Raw originals local; summaries and hashes do not replace accessible raw evidence.",
+  "identified_fixture_defect": "The nested snapshot callback assigned side and side_job without declaring nonlocal; it raised before any controlled stale OpenProcess call. The follow-on empty-census unpack error is secondary.",
+  "unrun_fixture_repair": {
+    "native_runs": 0,
+    "status": "UNRUN pending exact reviews and separately scoped native allocation",
+    "binding_check": "side and side_job are compiler-verified free variables, not unbound local variables",
+    "witness": {
+      "bytes": 19243,
+      "sha256": "03d0e435a31b00706ad8d0e1a595e55bd246d9b1ada42a9958a924a3ecf5c4e8"
+    },
+    "seal": {
+      "bytes": 7348,
+      "sha256": "f42de61abab8d8db953e8d438071dd796ef44a68f643e1480ec1f6c779332b71"
+    },
+    "carrier": {
+      "bytes": 2563,
+      "sha256": "da36f48e4a2203095568417acb694df76126096bcb0b2436c105390404189ec8"
+    }
+  }
+}

@@ -166,6 +166,116 @@ class LaptopContractTests(unittest.TestCase):
         self.assertIs(terminal["accepted"], True)
         self.assertEqual(terminal["problems"], [])
 
+    def test_production_census_replay_rejects_forged_decision_or_missing_round(self):
+        from copy import deepcopy
+        import sys
+        import laptop_telemetry
+        from laptop_census import validate_census
+        from test_laptop_census import fixture
+
+        arguments, first, second = fixture()
+        decision = validate_census([first, second], **arguments)
+        origin = {"guard_ancestry": arguments["ancestry"], "observer_pid": 10,
+                  "guard_pid": 20, "guard_created_ticks": 30}
+        raw = {"phase": "during", "index": 0, "requested_ns": 100,
+               "begin_ns": 101, "finished_ns": 113, "resources": {},
+               "guard_pid": 20, "guard_created_ticks": 30, "errors": [],
+               "above_017_span_threshold": False, "rows": second["rows"],
+               "identity": arguments["worker_identity"], "label": "tail",
+               "held_guards_before": arguments["held_before"],
+               "held_guards_after": arguments["held_after"],
+               "ancestry_admissions": decision["ancestry_admissions"][-1],
+               "census_rounds": [first, second], "census_decision": decision}
+        native = SimpleNamespace(COMPILERS=arguments["compiler_names"],
+                                 WORKLOADS=arguments["workload_names"])
+
+        def replay(row):
+            with (patch.dict(sys.modules, {"inventory_gate": native}),
+                  patch.object(laptop_telemetry, "OUTSIDE_WINDOWS", -1),
+                  patch.object(laptop_telemetry, "resource_stop", return_value=[]),
+                  patch.object(laptop_telemetry, "load_rows", return_value=[(row, "d" * 64)])):
+                return laptop_telemetry.inventory_rows(Path("unused"), arguments["image_policy"],
+                                                       origin, {}, [(0, "tail", -1)], {})
+
+        self.assertEqual(len(replay(raw)), 1)
+        for change in ("forged decision", "missing first", "missing replacement"):
+            with self.subTest(change=change):
+                altered = deepcopy(raw)
+                if change == "forged decision":
+                    altered["census_decision"]["replacement_pid"] = 99
+                elif change == "missing first":
+                    altered["census_rounds"] = [altered["census_rounds"][1]]
+                else:
+                    altered["census_rounds"] = [altered["census_rounds"][0]]
+                with self.assertRaises((ValueError, laptop_barrier.BarrierError)):
+                    replay(altered)
+
+    def test_census_preserves_first_round_after_replacement_enumeration_failure(self):
+        import json
+        import sys
+        import laptop_census
+        import laptop_telemetry
+
+        first = {"rows": [{"pid": 97, "state": "membership_unverified"}]}
+        decision = {"decision": "replacement_required", "replacement_pid": 97,
+                    "ancestry_admissions": [[]]}
+        native = SimpleNamespace(COMPILERS=frozenset(), WORKLOADS=frozenset(), inventory=Mock(),
+                                 inventory_round=Mock(side_effect=[first, RuntimeError("duplicate PID")]))
+        ancestry = SimpleNamespace(primary_guard=lambda: (14, 23, 140), proof={}, verify=lambda: [])
+        with tempfile.TemporaryDirectory(prefix="ptg-census-retention-") as tmp:
+            path = Path(tmp) / "inventory.jsonl"
+            with path.open("xb") as rows:
+                observer = laptop_telemetry.Observer(Path(tmp), None, rows, ancestry, {})
+                with (patch.dict(sys.modules, {"inventory_gate": native}),
+                      patch.object(laptop_telemetry, "resources", return_value={}),
+                      patch.object(laptop_telemetry, "captured_resource_errors", return_value=[]),
+                      patch.object(laptop_census, "validate_census", return_value=decision)):
+                    with self.assertRaisesRegex(laptop_barrier.BarrierError, "duplicate PID"):
+                        observer.census("during", 0, SimpleNamespace(_handle=41), time.perf_counter_ns(),
+                                        {"pid": 82, "creation_filetime": 121}, "tail")
+            preserved = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(preserved["census_rounds"], [first])
+            self.assertEqual(preserved["census_decision"], decision)
+            self.assertEqual(preserved["rows"], first["rows"])
+            self.assertEqual(native.inventory_round.call_count, 2)
+            self.assertIn("RuntimeError: duplicate PID", preserved["errors"][0])
+
+    def test_during_barrier_rechecks_worker_before_any_ack(self):
+        identity = {"pid": 82, "creation_filetime": 121}
+        request = {"group": 0, "label": "warmup:noop", "settled_through": -1,
+                   "requested_ns": 2 * laptop_barrier.NS,
+                   "manifest_sha256": "a" * 64, "nonce": "b" * 64}
+        server = laptop_barrier.BarrierServer.__new__(laptop_barrier.BarrierServer)
+        server.context = {key: request[key] for key in ("manifest_sha256", "nonce")}
+        server.groups = [(0, request["label"], -1)]
+        server.pipe = Mock()
+        server.pipe.read.return_value = request
+        server.kernel = Mock()
+
+        def client_pid(_handle, result):
+            result._obj.value = identity["pid"]
+            return True
+
+        server.kernel.GetNamedPipeClientProcessId.side_effect = client_pid
+        server.on_group = Mock(return_value={"begin_ns": request["requested_ns"],
+                                             "end_ns": request["requested_ns"],
+                                             "sha256": "c" * 64})
+        job, worker = SimpleNamespace(_handle=41), SimpleNamespace(_handle=42)
+        changed = {**identity, "creation_filetime": identity["creation_filetime"] + 1}
+        with tempfile.TemporaryDirectory(prefix="ptg-worker-census-") as tmp:
+            server.path = Path(tmp) / "barrier.jsonl"
+            with (patch.object(laptop_barrier, "process_in_job", side_effect=[identity, changed]) as native,
+                  patch.object(laptop_barrier, "time", SimpleNamespace(
+                      perf_counter_ns=lambda: request["requested_ns"])),
+                  patch.object(laptop_barrier, "append_row") as append):
+                with self.assertRaisesRegex(laptop_barrier.BarrierError, "worker changed during"):
+                    server._serve(job, worker, identity, laptop_barrier.NS, 500 * laptop_barrier.NS)
+            self.assertEqual(native.call_count, 2)
+            self.assertTrue(all(call.args == (42, 41) for call in native.call_args_list))
+            server.on_group.assert_called_once()
+            append.assert_not_called()
+            server.pipe.write.assert_not_called()
+
     def test_describe_only_manifest_cannot_enter_worker_or_load_shadow_observer(self):
         with tempfile.TemporaryDirectory(prefix="ptg-laptop-offline-") as tmp:
             capture = Path(tmp) / "absent"

@@ -440,18 +440,25 @@ class BarrierServer:
                 require(request == expected and type(request["group"]) is int
                         and type(request["settled_through"]) is int, "invalid barrier request fields")
                 require_admission(prior, asked, now, during_deadline)
-                require(process_in_job(worker._handle, job._handle) == identity,
+                worker_before = process_in_job(worker._handle, job._handle)
+                require(worker_before == identity,
                         "worker changed while requesting a barrier")
                 census = self.on_group(job, identity, ordinal, label, asked)
+                worker_after = process_in_job(worker._handle, job._handle)
+                require(worker_after == identity, "worker changed during the census")
                 scan_start = census["begin_ns"]
                 require(prior_scan is None or 0 < scan_start - prior_scan <= GROUP_NS,
                         "during census gap exceeded 220 seconds")
                 authorized = time.perf_counter_ns()
                 receipt = {**request, "admitted_ns": now, "authorized_ns": authorized,
-                           "identity": identity, "census": census, "client_pid": pid.value}
+                           "identity": identity, "census": census, "client_pid": pid.value,
+                           "worker_before": worker_before, "worker_after": worker_after}
                 digest = append_row(file, receipt)
                 settled = self.pipe.write({**request, "authorized_ns": authorized,
-                                           "receipt_sha256": digest}, asked + BARRIER_NS)
+                                           "receipt_sha256": digest}, asked + BARRIER_NS,
+                                          before_submit=lambda: require(
+                                              time.perf_counter_ns() <= asked + BARRIER_NS,
+                                              "census ACK deadline passed before submission"))
                 self.authorizations.append(receipt)
                 # The existing phase decision persists these after all groups. No
                 # receipt write follows an acknowledgment into a timed slot.

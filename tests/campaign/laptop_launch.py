@@ -36,7 +36,7 @@ FORBIDDEN_ENV = frozenset({"PYTHONHOME", "PYTHONPATH", "PYTHONSTARTUP"})
 
 SOURCE_FILES = (
     "arms.py", "harness.py", "laptop_analysis.py", "laptop_ancestry.py", "laptop_audit.py",
-    "laptop_barrier.py", "laptop_launch.py", "laptop_schedule.py", "laptop_telemetry.py",
+    "laptop_barrier.py", "laptop_census.py", "laptop_launch.py", "laptop_schedule.py", "laptop_telemetry.py",
     "laptop_worker.py", "plan.py", "pricing.py", "probe.py", "report.py", "runner.py",
     "windows_payload_observer.py", "windows_slot_job.py", "../envcase.py",
     "../usability-evidence.json",
@@ -44,10 +44,11 @@ SOURCE_FILES = (
 OBSERVER_PINS = {
     "audit_package.py": "3908c9db44e2696fd535c1a1c9b87a4867573a42a4d825d648da6981370669d2",
     "quiet_gate.py": "c8995c81f6d05c4f17f8b1a00551065665f97a7ef15e5407212f63c3d1135ac3",
-    "inventory_gate.py": "4a7b6ce493753ff5b642ad7ca7a7dd04c9487847e0425a35688c8778246e3785",
+    "inventory_gate.py": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f",
     "image_policy.py": "f9ca5e411de733df0e44cec6b3604790ed21336213850ef7f35b8acd0d54ff9d",
 }
 PROTOCOL_PINS = {
+    "AMD-CENSUS-FINAL-BOUNDARY-001.md": "a8af9cfcaa73bd1e82778aba08cd490bf7d66c5e7a9cee9ab46708461cb97352",
     "PROTOCOL.md": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
     "ADDENDUM-A-A-001.md": "4743e6037cf51dba5beedbd9c875afb315519a78908b075969033e65b0d79468",
     "REVIEW-CRITIC-ADDENDUM-A-A-001.json": "a821745c3b4d7992ada8b604f93bfb98d0e9cdae0c3d0f7a7d9c6b65590fdb05",

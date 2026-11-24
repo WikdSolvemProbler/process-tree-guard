@@ -326,19 +326,42 @@ class Observer:
 
     def census(self, phase, index, job, requested_ns, identity=None, label=None):
         from image_policy import ALLOWED
-        from inventory_gate import inventory
+        from inventory_gate import COMPILERS, WORKLOADS, inventory, inventory_round
         from laptop_ancestry import census_admissions, census_allowed
+        from laptop_census import validate_census
 
         begin = time.perf_counter_ns()
         bad = captured_resource_errors(raw_resources := resources(self.output))
         rows, before, after, admissions = [], [], [], []
+        rounds, decision = [], None
         if not bad:
             try:
                 before = self.ancestry.verify()
-                rows = inventory(self.guard, None if job is None else job._handle, self.image_policy)
-                after = self.ancestry.verify()
-                admissions = census_admissions(rows, self.ancestry.proof, before, after)
-            except (OSError, ValueError) as error:
+                if phase == "during":
+                    require(job is not None and identity is not None,
+                            "during census requires the exact worker and Job")
+                    for _ in range(2):
+                        rounds.append(inventory_round(self.guard, job._handle, self.image_policy))
+                        rows = rounds[-1]["rows"]
+                        after = self.ancestry.verify()
+                        decision = validate_census(
+                            rounds, phase=phase, requested_ns=requested_ns,
+                            observer_pid=os.getpid(), worker_identity=identity,
+                            image_policy=self.image_policy, compiler_names=COMPILERS,
+                            workload_names=WORKLOADS, ancestry=self.ancestry.proof,
+                            held_before=before, held_after=after,
+                        )
+                        if decision["decision"] == "admit":
+                            admissions = decision["ancestry_admissions"][-1]
+                            break
+                        require(len(rounds) == 1 and decision["decision"] == "replacement_required",
+                                "unexpected census replacement decision")
+                    require(decision["decision"] == "admit", "census replacement did not admit")
+                else:
+                    rows = inventory(self.guard, None if job is None else job._handle, self.image_policy)
+                    after = self.ancestry.verify()
+                    admissions = census_admissions(rows, self.ancestry.proof, before, after)
+            except (OSError, ValueError, RuntimeError) as error:
                 bad.append(f"ancestry or census proof: {type(error).__name__}: {error}")
         finished = time.perf_counter_ns()
         row = {"phase": phase, "index": index, "requested_ns": requested_ns,
@@ -347,7 +370,8 @@ class Observer:
                "guard_created_ticks": self.guard[2], "identity": identity, "label": label,
                "rows": rows, "above_017_span_threshold": finished - begin > TRANSITION_NS,
                "held_guards_before": before, "held_guards_after": after,
-               "ancestry_admissions": admissions, "errors": bad}
+               "ancestry_admissions": admissions, "errors": bad,
+               "census_rounds": rounds, "census_decision": decision}
         digest = append_row(self.inventories, row)
         end = time.perf_counter_ns()
         require(not bad and census_allowed(rows, admissions, ALLOWED),
@@ -778,8 +802,9 @@ def telemetry_rows(capture_dir, manifest_sha):
 
 def inventory_rows(capture_dir, image_policy, origin, phases, groups, outside_censuses):
     from image_policy import ALLOWED, classify
-    from inventory_gate import COMPILERS
+    from inventory_gate import COMPILERS, WORKLOADS
     from laptop_ancestry import census_admissions, census_allowed, validate_ancestry
+    from laptop_census import validate_census
 
     ancestry = origin["guard_ancestry"]
     validate_ancestry(ancestry, image_policy, origin["observer_pid"])
@@ -807,6 +832,24 @@ def inventory_rows(capture_dir, image_policy, origin, phases, groups, outside_ce
                 "invalid census native or timing fields")
         admissions = census_admissions(row["rows"], ancestry,
                                        row["held_guards_before"], row["held_guards_after"])
+        if phase == "during":
+            rounds = row["census_rounds"]
+            derived = validate_census(
+                rounds, phase=phase, requested_ns=row["requested_ns"],
+                observer_pid=origin["observer_pid"], worker_identity=row["identity"],
+                image_policy=image_policy, compiler_names=COMPILERS,
+                workload_names=WORKLOADS, ancestry=ancestry,
+                held_before=row["held_guards_before"], held_after=row["held_guards_after"],
+            )
+            require(derived["decision"] == "admit" and derived == row["census_decision"]
+                    and row["rows"] == rounds[-1]["rows"]
+                    and admissions == derived["ancestry_admissions"][-1]
+                    and row["begin_ns"] <= rounds[0]["begin_ns"]
+                    and rounds[-1]["finished_ns"] <= row["finished_ns"],
+                    "census replacement evidence or final projection differs")
+        else:
+            require(row["census_rounds"] == [] and row["census_decision"] is None,
+                    "outside census asserted a replacement")
         require(admissions == row["ancestry_admissions"]
                 and census_allowed(row["rows"], admissions, ALLOWED),
                 "census advertised an unverified ancestry allowance or competing workload")
@@ -875,6 +918,7 @@ def worker_rows(capture_dir, groups, manifest_sha, nonce, census, spans, timing,
         require_admission(previous_request, requested, admitted, dispatch["deadline_ns"])
         previous_request = requested
         require(identity == gate["identity"] == raw["identity"]
+                and identity == gate["worker_before"] == gate["worker_after"]
                 and identity["pid"] == gate["client_pid"],
                 "worker native identity differs across receipts")
         require(gate["manifest_sha256"] == manifest_sha and gate["nonce"] == nonce
@@ -938,6 +982,7 @@ def worker_rows(capture_dir, groups, manifest_sha, nonce, census, spans, timing,
         "maximum_census_span_ns": max(costs), "median_census_span_ns": median(costs),
         "maximum_census_gap_ns": max(gaps), "median_census_gap_ns": median(gaps),
         "census_spans_above_017_threshold": sum(cost > TRANSITION_NS for cost in costs),
+        "replacement_censuses": sum(len(raw["census_rounds"]) == 2 for (raw, _) in census),
     }
 
 

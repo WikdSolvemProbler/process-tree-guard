@@ -1,0 +1,24 @@
+{
+  "schema": "laptop-census-final-boundary-source-review-v1",
+  "role": "designer",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "native_qualification_required": true,
+  "scope": "Exact final-boundary census implementation and offline tests only",
+  "source_sha256": {
+    "laptop_telemetry.py": "7755edb317e4966c5fe8f8db7fbccc34a039e24c7ffe77ae75a78559f439253a",
+    "laptop_barrier.py": "e9749e269401b3aef5618ca9846e6cf316f99b895ccfd8f9b346e2eda9f7d670",
+    "laptop_launch.py": "cb79ba559bdda827ff78636a8286b9dbbdae2d9e532d163fde7dbd386099e220",
+    "laptop_tests.py": "2d7dd60ca1e3eb0ff125cd7f27fd4865e452b80d3b57f4bfdbaecf38cdacdc3e",
+    "laptop_census.py": "12176b0c728511b260a5c3687c7c61b8bed67aca9da3550bcaacca9a5dc43560",
+    "test_laptop_census.py": "26af3e4ea621c76c15373ffddf80f83f991fa2c4e0344785313c34cad43796e3",
+    "observer-laptop-185-001/inventory_gate.py": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f",
+    "laptop-182-001/AMD-CENSUS-FINAL-BOUNDARY-001.md": "a8af9cfcaa73bd1e82778aba08cd490bf7d66c5e7a9cee9ab46708461cb97352"
+  },
+  "offline_receipt_sha256": "78bd98bfb33014e95c773ebd9a3921b62a028ca7a4eeac75acdb833048c4827c",
+  "observations": [
+    "The first census remains durable if replacement enumeration fails. An effective deadline check precedes native ACK submission. The terminal test record reports 21 offline tests, zero failures and zero native workloads.",
+    "The prospective claim is limited to the final sampled boundary. Earlier evidence and the A011 refusal remain preserved. This source review does not approve a native run or Campaign A capture."
+  ]
+}
