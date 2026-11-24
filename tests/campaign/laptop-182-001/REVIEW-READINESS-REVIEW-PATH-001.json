@@ -1,0 +1,17 @@
+{
+  "schema": "ptg-readiness-review-path-reviews-v1",
+  "note_sha256": "c4a8cee1e3dc9fdb7a1ffc9b09fdd771be4ae11754d9b39e71b5a0d8cc82463f",
+  "recording": "Exact approval objects supplied independently in agent messages after reading the relayed note text.",
+  "designer": {
+    "role": "designer",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "One already-charged 20-second command to verify the exact public source copies and retained custody records and record the critic\u2019s decision. Preserve both earlier charges and the failed read. No capture or replay is authorized."
+  },
+  "critic": {
+    "role": "critic",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "One verification-and-decision command under the already charged 20-second cap, using the corrected public source path and the existing frozen evidence. Preserve both prior charges and the failed read. Preserve any further failure and stop."
+  }
+}
