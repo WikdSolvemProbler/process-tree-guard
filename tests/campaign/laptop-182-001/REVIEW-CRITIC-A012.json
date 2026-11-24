@@ -1,0 +1,16 @@
+{
+  "schema": "ptg-laptop-182-001-exact-execution-review-v1",
+  "role": "critic",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "manifest_sha256": "807548bf94147a17b1ed771c7605de86e2007adeae194baebfe353aaadeaf096",
+  "measurement_sha256": "7304b81fbf2a20d9f7932bd455884440e3a7e307cb3ef64603c21632317dc0ba",
+  "qualification_sha256": "f73a8f91c9ce3037a7baf5122316656f4c92bcc3d23979c0c667511235cb7f0f",
+  "native_qualification_sha256": "f73a8f91c9ce3037a7baf5122316656f4c92bcc3d23979c0c667511235cb7f0f",
+  "preregistration_sha256": "2fd368af1aee0baca9843808df67951e0fdaccd1f5bbbdece20222d58f08f371",
+  "carrier_sha256": "460ea04a27a81f3e4bc64f53ee8e3936db1ccc26c528a3655924a1b417cc21bc",
+  "admission_scope_sha256": "13ccaa7fe2c02e31c991a24571ec19f6e085470a62a669dcafadcdb73deeb3fb",
+  "scope": "One exact A012 capture with original independent deadlines. Full independent replay and negative packet mutation within 360 seconds required before promotion.",
+  "limits": "Final sampled boundary only. Original inclusive setup accounting incomplete. Earlier failures and forced drains preserved. No speed or readiness extension from this review."
+}

@@ -1,0 +1,38 @@
+{
+  "schema": "ptg-laptop-182-001-exact-execution-review-v1",
+  "role": "designer",
+  "model": "gpt-6.2-sol",
+  "manifest_sha256": "807548bf94147a17b1ed771c7605de86e2007adeae194baebfe353aaadeaf096",
+  "measurement_sha256": "7304b81fbf2a20d9f7932bd455884440e3a7e307cb3ef64603c21632317dc0ba",
+  "qualification_sha256": "f73a8f91c9ce3037a7baf5122316656f4c92bcc3d23979c0c667511235cb7f0f",
+  "preregistration_sha256": "2fd368af1aee0baca9843808df67951e0fdaccd1f5bbbdece20222d58f08f371",
+  "carrier_sha256": "460ea04a27a81f3e4bc64f53ee8e3936db1ccc26c528a3655924a1b417cc21bc",
+  "scope_sha256": "13ccaa7fe2c02e31c991a24571ec19f6e085470a62a669dcafadcdb73deeb3fb",
+  "assembly_audit_sha256": "5a5847c0ab2e4eea0a6b8e813b94d40bbb29c910a8ffa6ef8757998460183d6f",
+  "decision": "APPROVED",
+  "open_objections": [],
+  "capture_scope": "One A012 exploratory four-arm attempt by the exact execution carrier and original handle. No retry, restart, replacement or stitching.",
+  "capture_caps_seconds": {
+    "outer": 6920,
+    "primary": 6900,
+    "during": 6600,
+    "original_handle_observation": 6910,
+    "offline_replay": 360
+  },
+  "original_inclusive_preparation_accounting": "INCOMPLETE. Neither compliance nor exhaustion is proven.",
+  "qualification_selected_caps_seconds": 2200,
+  "terminal_and_replay_proofs_sha256": {
+    "positive_host_terminal": "4e054411c7dd52561b9cbd1da8d00b8f411ac9236f87bfd7508639b0aef8dcff",
+    "negative_host_terminal": "f9017ed51b15d7095f52521568fb11eb015723296d9f9e0d41b3d25839e7ed78",
+    "aa_host_terminal": "401b5b05d5583b19e38395af2d883b118dc535ae8765e58b89f037bb96e48569",
+    "positive_independent_replay": "1af2e2d0ce026dd5fe65a6f9cc8c9dbf71c39f9fe0d31971f4e6642f14935326",
+    "negative_independent_replay": "4dac56b3be53796d2daeeb5dc39b9af159aacd0d869268dd488df1fbe4afab6c",
+    "aa_independent_replay": "927712e4e87bc3b7690bef37b48ce500206746ea6ec4ffa10732ef5873342030"
+  },
+  "limits": [
+    "Requires independent exact second approval, publication and live unchanged-input verification before launch.",
+    "Requires full independent raw replay and negative packet mutation before any promotion.",
+    "Final sampled boundary only. Prior failures, incomplete records and assistance, including the unclassified forced stock residue, retain their dispositions. The deliberately live owned sleeper was a separate cleanup control.",
+    "No comparative result, ranking, Wake-lineage acceptance or public research deliverable follows from this readiness decision."
+  ]
+}

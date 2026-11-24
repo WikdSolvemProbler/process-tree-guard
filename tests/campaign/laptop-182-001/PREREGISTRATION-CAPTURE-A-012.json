@@ -1,0 +1,83 @@
+{
+  "schema": "ptg-laptop-182-001-public-preregistration-v1",
+  "date": "2026-11-24",
+  "run_id": "laptop-182-001-a-as-used-012",
+  "manifest_sha256": "807548bf94147a17b1ed771c7605de86e2007adeae194baebfe353aaadeaf096",
+  "measurement_sha256": "7304b81fbf2a20d9f7932bd455884440e3a7e307cb3ef64603c21632317dc0ba",
+  "native_qualification_sha256": "f73a8f91c9ce3037a7baf5122316656f4c92bcc3d23979c0c667511235cb7f0f",
+  "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+  "amendment": "tests/campaign/laptop-182-001/AMD-CENSUS-FINAL-BOUNDARY-001.md",
+  "product_source": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "published_qualification_commit": "1170772302c5b53228228824285966733ff01546",
+  "candidate_sha256": "aac42d721e32b2e6ef73829c6dc7d9c01d9c548657051489092de2551387e00e",
+  "populations": {
+    "controls": 36,
+    "warmups": 224,
+    "measured_slots": 1680,
+    "pricing_rows": 54,
+    "groups": 540
+  },
+  "arms": [
+    "guard",
+    "nuewframe",
+    "processkit",
+    "sysprims"
+  ],
+  "contexts": [
+    "NO_WINDOW",
+    "DETACHED"
+  ],
+  "whole_tree_deadlines_seconds": {
+    "outer": 6920,
+    "primary": 6900,
+    "during": 6600,
+    "original_handle_observation": 6910,
+    "full_offline_replay": 360
+  },
+  "analysis": "Use the frozen protocol, all planned observations and failures, independent raw replay and negative packet mutation before promotion. No pooling with historical or qualification data. No equivalence from statistical nonsignificance. This is an exploratory comparison; it cannot be its own prospective certificate.",
+  "state": "Prospective; A012 competitive capture has not begun. Admission requires two independent exact Sol approvals, public publication and live unchanged-input verification.",
+  "qualification": {
+    "controls_passed": 7,
+    "pricing_positive_rows": 6,
+    "pricing_positive_queries": 10,
+    "pricing_positive_acks": 6,
+    "pricing_expected_negative_queries": 29,
+    "pricing_expected_negative_acks": 0,
+    "aa_pairs": 72,
+    "aa_lanes": 144,
+    "complete_resource_windows": [
+      12,
+      13,
+      12
+    ],
+    "forced_lane_drains_retained": 2,
+    "forced_stock_control_drains_retained": 1,
+    "independent_replays": "Positive pricing, expected-negative pricing and A/A all terminal0",
+    "scope": "Setup readiness and incremental instrumentation cost only, not comparative performance or total observer cost. The candidate_malformed stock forced-drain residue is unclassified; it is distinct from the deliberate owned-sleeper cleanup control."
+  },
+  "preparation_accounting": {
+    "stage012_qualification_selected_cap_seconds": 2200,
+    "stage012_qualification_allocation_seconds": 2200,
+    "publication_finalization_selected_cap_seconds": 90,
+    "current_prospective_admission_selected_cap_seconds": 600,
+    "original_inclusive_30_minute_setup_accounting": "INCOMPLETE; no claim of original setup-budget compliance. Later explicit phase caps and actual attempts are retained separately."
+  },
+  "previous_attempt": {
+    "run_id": "laptop-182-001-a-as-used-011",
+    "disposition": "FAILED_DURING_WARMUP",
+    "controls": 36,
+    "warmups": 148,
+    "measured_slots": 0,
+    "pricing_rows": 0,
+    "failure_summary_sha256": "8ba07afba0356610eba6f660d6ff2a03063bfe19adf149f0c09851bbeb293d1d"
+  },
+  "limits": [
+    "The amended census establishes the final sampled boundary only, not continuous absence. Original unknowns and positive vetoes remain retained.",
+    "Prior readiness and failed experimental exposures are retained; this is not a cold-start study.",
+    "Forced or assisted cleanup is retained explicitly and cannot establish candidate cleanup success.",
+    "Wake-lineage speed acceptance, manual UI evidence, the separate strict quiet-host question and the full public benchmark package remain open. This four-arm campaign alone cannot close them.",
+    "Missing, failed, invalid and incomplete observations retain their dispositions. No restart, replacement, stitching or outcome-dependent stopping is permitted within this attempt.",
+    "Private raw records remain private and their digests do not substitute for public raw-data access. A vetted numerical dataset and replay package are still required for the public research deliverable."
+  ],
+  "privacy": "Private absolute paths, host details, user-dependent raw records and hardware/account ownership information remain private. Only reviewed protocol, executable source and vetted evidence summaries are public."
+}
