@@ -10,7 +10,7 @@ from argparse import Namespace
 from collections import Counter
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from laptop_analysis import analyze
 from laptop_ancestry import census_admissions, census_allowed, role_instances, validate_ancestry
@@ -122,6 +122,31 @@ class LaptopContractTests(unittest.TestCase):
             save_witness()
             with self.assertRaisesRegex(ValueError, "sole held worker"):
                 bind_price_jobs(receipt_path, [record], [settlement], manifest, manifest_sha, worker, nonce)
+
+    def test_pipe_client_uses_integer_nulls_for_winapi_create_file(self):
+        win = SimpleNamespace(GENERIC_READ=0x80000000, GENERIC_WRITE=0x40000000,
+                              OPEN_EXISTING=3, FILE_FLAG_OVERLAPPED=0x40000000,
+                              PIPE_READMODE_MESSAGE=2, CreateFile=Mock(return_value=51),
+                              SetNamedPipeHandleState=Mock(), CloseHandle=Mock())
+
+        def parent_pid(handle, result):
+            self.assertEqual(handle, 51)
+            result._obj.value = 82
+            return True
+
+        module = (win, SimpleNamespace(GetNamedPipeServerProcessId=parent_pid), None)
+        nonce = "b" * 64
+        name = laptop_launch.worker_pipe_name(nonce)
+        with (patch.object(laptop_barrier, "native", return_value=module),
+              patch.object(laptop_barrier.os, "getppid", return_value=82)):
+            with laptop_barrier.BarrierClient(name, nonce, "a" * 64):
+                win.CreateFile.assert_called_once_with(
+                    name, 0xC0000000, 0, 0, win.OPEN_EXISTING, win.FILE_FLAG_OVERLAPPED, 0)
+                call = win.CreateFile.call_args.args
+                self.assertIs(type(call[3]), int)
+                self.assertIs(type(call[6]), int)
+                win.SetNamedPipeHandleState.assert_called_once_with(51, win.PIPE_READMODE_MESSAGE, None, None)
+        win.CloseHandle.assert_called_once_with(51)
 
     def test_pricing_witness_requires_the_exact_live_worker_alone(self):
         job = SimpleNamespace(_handle=100)

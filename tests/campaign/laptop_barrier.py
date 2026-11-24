@@ -269,7 +269,7 @@ class BarrierClient:
     def __enter__(self):
         win, kernel, _ = native()
         handle = win.CreateFile(self.name, win.GENERIC_READ | win.GENERIC_WRITE,
-                                0, None, win.OPEN_EXISTING, win.FILE_FLAG_OVERLAPPED, None)
+                                0, 0, win.OPEN_EXISTING, win.FILE_FLAG_OVERLAPPED, 0)
         self.pipe = Pipe(handle)
         try:
             win.SetNamedPipeHandleState(handle, win.PIPE_READMODE_MESSAGE, None, None)
