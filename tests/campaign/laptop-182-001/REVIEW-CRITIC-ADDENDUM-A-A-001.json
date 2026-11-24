@@ -1,0 +1,17 @@
+{
+  "schema": "ptg-laptop-182-001-a-a-addendum-review-v1",
+  "role": "critic",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "addendum_sha256": "4743e6037cf51dba5beedbd9c875afb315519a78908b075969033e65b0d79468",
+  "addendum_bytes": 3303,
+  "protocol_sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+  "open_objections": [],
+  "findings": [
+    "Both lanes share the actual calendar, observer threads, protection, stock timing and release mechanics; the assigned extra probe is the prospective treatment.",
+    "Explicit pre-bracket dispatch and earliest-due arbitration preserve the fixed timing rule and expose misses instead of hiding them.",
+    "The trusted long fixture and separate present-candidate check have distinct purposes.",
+    "The fixed 65-second during minimum and original independent gates give window coverage without effect-dependent extension."
+  ],
+  "native_execution_authorized": false
+}

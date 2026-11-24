@@ -1,0 +1,15 @@
+{
+  "schema": "ptg-laptop-design-addendum-review-v1",
+  "protocol_sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+  "addendum": "ADDENDUM-A-A-001.md",
+  "addendum_sha256": "4743e6037cf51dba5beedbd9c875afb315519a78908b075969033e65b0d79468",
+  "addendum_bytes": 3303,
+  "reviewer_role": "designer",
+  "reviewer_model": "gpt-6.2-sol",
+  "decision": "APPROVED_PROSPECTIVE_CLARIFICATION_ONLY",
+  "unresolved_material_methodology_objections": [],
+  "accepted_scope": "Incremental one-millisecond probe overhead under a common fixed five-second sampler calendar, with actual overlap, late/missed probes and the predetermined idle minimum retained.",
+  "execution_authorized": false,
+  "exact_qualification_implementation_review": "PENDING",
+  "native_qualification": "PENDING"
+}
