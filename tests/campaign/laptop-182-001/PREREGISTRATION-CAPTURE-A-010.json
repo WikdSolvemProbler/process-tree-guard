@@ -1,0 +1,36 @@
+{
+  "schema": "ptg-laptop-182-001-public-preregistration-v1",
+  "date": "2026-11-24",
+  "run_id": "laptop-182-001-a-as-used-010",
+  "manifest_sha256": "f2394f676321917ce80788ada7d4f0542865472eecc9fdcee8c3fb31845a4a78",
+  "measurement_sha256": "677c7231abd7162dd13c4df9ac92e5c70a1ddfffcf789f7124d7f120615e58e1",
+  "native_qualification_sha256": "155b0d20eb97478d6162a0c7a7d17ec779076c49e332a89a462ac3cebcd70fbc",
+  "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+  "readiness_budget_amendment_sha256": "d9fdc6d6309517d3166448ffa32ee2212b8f167c1ab61f063a335d3905a97f85",
+  "populations": {
+    "controls": 36,
+    "warmups": 224,
+    "measured_slots": 1680,
+    "pricing_rows": 54,
+    "groups": 540
+  },
+  "arms": [
+    "guard",
+    "nuewframe",
+    "processkit",
+    "sysprims"
+  ],
+  "contexts": [
+    "NO_WINDOW",
+    "DETACHED"
+  ],
+  "whole_tree_deadlines_seconds": {
+    "outer": 6920,
+    "primary": 6900,
+    "during": 6600,
+    "full_offline_replay": 360
+  },
+  "analysis": "Use the frozen protocol, all planned observations and failures, independent raw replay and negative packet mutation before promotion. No pooling with historical or qualification data. No equivalence from statistical nonsignificance.",
+  "state": "Prospective; competitive capture has not begun.",
+  "privacy": "Private absolute paths, host details and raw user-dependent records are retained privately; exact artifact digests bind this public record."
+}

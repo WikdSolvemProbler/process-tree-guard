@@ -1,0 +1,29 @@
+{
+  "role": "designer",
+  "model": "gpt-6.2-sol",
+  "decision": "APPROVED",
+  "manifest_sha256": "f2394f676321917ce80788ada7d4f0542865472eecc9fdcee8c3fb31845a4a78",
+  "open_objections": [],
+  "measurement_sha256": "677c7231abd7162dd13c4df9ac92e5c70a1ddfffcf789f7124d7f120615e58e1",
+  "qualification_sha256": "155b0d20eb97478d6162a0c7a7d17ec779076c49e332a89a462ac3cebcd70fbc",
+  "preregistration_sha256": "8233960d87d01f0d0048cce869d5fd351a071e3adda967466792b93a696026db",
+  "carrier_sha256": "2d4857ea372796addf8e96e1f1596fd462f5ee1e4ebb2c9853090f5f9fac35a3",
+  "qualification_sources": {
+    "driver_sha256": "8aad21491dcc105c25fec7dc469aab63d6f6e378ad5a56a3d2024421435746c1",
+    "replay_sha256": "ad45e04bcef3df3ec393df5b4d8f55ae091c9ec2e97479776ea01f885b519694",
+    "readme_sha256": "11e4b11dd1a01f26f0ad2387693f264e288ad4708bcbe2d06a622ab5067feae5",
+    "accepted_replay_receipt_sha256": "61ea5356e0bd980d9bbc675919bec2dc4426113224aeb7a04b123576034b7324"
+  },
+  "limits_seconds": {
+    "outer_whole_tree": 6920,
+    "primary_whole_tree": 6900,
+    "during": 6600,
+    "original_handle_observation": 6910,
+    "independent_full_replay": 360
+  },
+  "scope": "One prospective exact Campaign A capture",
+  "notes": [
+    "Exact approved inputs and qualification evidence are bound to all seven scoped controls. The planned population is 36 controls, 224 warmups, 1680 measured observations and 54 pricing rows across 540 groups.",
+    "Preserve all captured failures and complete independent full raw replay with a negative packet mutation before promotion. The approval supplies no speed result or general protection conclusion."
+  ]
+}

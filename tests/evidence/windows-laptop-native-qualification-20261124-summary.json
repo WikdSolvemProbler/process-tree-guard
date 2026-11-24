@@ -1,0 +1,296 @@
+{
+  "schema": "ptg-laptop-182-001-native-qualification-v1",
+  "date": "2026-11-24",
+  "measurement_sha256": "677c7231abd7162dd13c4df9ac92e5c70a1ddfffcf789f7124d7f120615e58e1",
+  "controls": {
+    "actual_candidate_protection": "PASS",
+    "independent_guard_cleanup": "PASS",
+    "clock_and_observer": "PASS",
+    "barrier_and_witness": "PASS",
+    "record_retention": "PASS",
+    "instrumentation_a_a": "PASS",
+    "raw_replay": "PASS"
+  },
+  "evidence_by_control": {
+    "actual_candidate_protection": {
+      "malformed_exit": 125,
+      "marked_deadline_exit": 124,
+      "pre_assistance_marked_survivor": false,
+      "stock_relay_lanes": 120
+    },
+    "independent_guard_cleanup": {
+      "trusted_marked_deadline_exit": 124,
+      "pre_assistance_marked_survivor": false,
+      "known_live_sleeper_drain": {
+        "active_after": 0,
+        "active_before": 1,
+        "terminated": true
+      },
+      "known_live_sleeper_exit_hex": "0xE0000071"
+    },
+    "clock_and_observer": {
+      "complete_windows": {
+        "pre": 12,
+        "during": 13,
+        "post": 12
+      },
+      "qpc_resolution_seconds": 1e-07
+    },
+    "barrier_and_witness": {
+      "authenticated_group_barriers": 73,
+      "native_inventory_receipts": 99,
+      "barrier_occupied_ns": 2146314900
+    },
+    "record_retention": {
+      "verified_relay_streams": 240,
+      "relay_stream_bytes": 3720,
+      "catalog_encoding": "Compact sorted-key JSON in lane order, stdout then stderr, terminal LF"
+    },
+    "instrumentation_a_a": {
+      "private_source_revision": "005",
+      "capture_revision": "008",
+      "matched_pairs": 72,
+      "lanes": 144,
+      "relay_pairs": 60,
+      "long_pairs": 12
+    },
+    "raw_replay": {
+      "exact_offline_runs": 1,
+      "exit_code": 0,
+      "stderr_bytes": 0,
+      "negative_mutations": [
+        "missing",
+        "duplicate",
+        "wrong_image",
+        "barrier_crossing",
+        "oversleep",
+        "decreasing_cpu_counter"
+      ]
+    }
+  },
+  "cohort": {
+    "candidate_sha256": "aac42d721e32b2e6ef73829c6dc7d9c01d9c548657051489092de2551387e00e",
+    "fixture_sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
+    "stage_manifest_sha256": "ca794c93e52c4086be26c477e5c2ae0d7937e645b5b4810190007157a033a708",
+    "plan_sha256": "bea76475491b90cb4953e310cc9383faacc7a8c666cbc0cea454ec0c8539b8dc"
+  },
+  "terminal": {
+    "original_guarded_execution_exit": 0,
+    "original_primary_guard_exit": 0,
+    "original_primary_handle_retained": true,
+    "worker_exit": 0,
+    "phase_job": {
+      "active_before": 0,
+      "active_after": 0,
+      "terminated": false
+    }
+  },
+  "force_observations": {
+    "stock_control_count": 1,
+    "aa_lane_count": 3,
+    "rows": [
+      {
+        "control": "candidate_malformed",
+        "context": "NO_WINDOW",
+        "path": "malformed",
+        "drain": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      },
+      {
+        "pair": 8,
+        "lane": 16,
+        "context": "NO_WINDOW",
+        "mode": "off",
+        "recipe": "relay",
+        "drain": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      },
+      {
+        "pair": 46,
+        "lane": 93,
+        "context": "NO_WINDOW",
+        "mode": "on",
+        "recipe": "relay",
+        "drain": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      },
+      {
+        "pair": 57,
+        "lane": 114,
+        "context": "NO_WINDOW",
+        "mode": "off",
+        "recipe": "relay",
+        "drain": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      }
+    ],
+    "excluded_lanes": 0
+  },
+  "prior_pricing": {
+    "positive_capture": "006",
+    "negative_capture": "007",
+    "accepted_pricing_rows": 6,
+    "positive_native_queries": 10,
+    "negative_native_queries": 29,
+    "negative_acknowledgments": 0,
+    "capture_source_sha256": "03a2f69282472fb5330fd61e45e0b09e239ea74b2ceb1da8008cd3905c1fa623",
+    "offline_reader_sha256": "23b9e58327de4bf028890236fe6e5d3f6dac5ad5624e83fea4725f7ab146ffc6"
+  },
+  "budget": {
+    "original_inclusive_record": "INCOMPLETE",
+    "additional_allocation_seconds": 1800,
+    "charged_upper_seconds_at_recorded_prefix": 1230,
+    "charges_in_prefix": 15,
+    "scope": "Captured ledger prefix only. Later terminal dispositions and charges fall outside this prefix."
+  },
+  "custody": {
+    "algorithm": "SHA-256",
+    "raw_material": "Retained privately",
+    "artifact_identities": {
+      "stage_manifest": {
+        "sha256": "ca794c93e52c4086be26c477e5c2ae0d7937e645b5b4810190007157a033a708",
+        "bytes": 15478
+      },
+      "aa_capture_source": {
+        "sha256": "8aad21491dcc105c25fec7dc469aab63d6f6e378ad5a56a3d2024421435746c1",
+        "bytes": 27936
+      },
+      "aa_replay_source": {
+        "sha256": "ad45e04bcef3df3ec393df5b4d8f55ae091c9ec2e97479776ea01f885b519694",
+        "bytes": 21447
+      },
+      "aa_replay": {
+        "sha256": "61ea5356e0bd980d9bbc675919bec2dc4426113224aeb7a04b123576034b7324",
+        "bytes": 67560
+      },
+      "aa_replay_stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_original_host": {
+        "sha256": "502760ddb7cdcf2413377d066db91b4c880fd4aaacb04f68071bf0c566910734",
+        "bytes": 2006
+      },
+      "aa_worker.stdout": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_worker.stderr": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_dispatch.bin": {
+        "sha256": "d6a94ee2c6adb187fd5674ae648bb2c9c9ae1834d033b0a53c705b3240f9028a",
+        "bytes": 24
+      },
+      "aa_stdout.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_stderr.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "aa_recipe": {
+        "sha256": "c269ba7b3b5a51ec36f33908240794088843b1df7d8b9e1dcd3d5a0bede8fee8",
+        "bytes": 13988
+      },
+      "aa_plan": {
+        "sha256": "bea76475491b90cb4953e310cc9383faacc7a8c666cbc0cea454ec0c8539b8dc",
+        "bytes": 5724
+      },
+      "aa_supervisor_raw": {
+        "sha256": "087f527eafca462cdec8ce0d9c7f97f16cf509b001a1ef0f2620656a9003fd1b",
+        "bytes": 228540
+      },
+      "aa_worker_raw": {
+        "sha256": "e60c0a440c8e465669f30b722129bd31db15cd0e3547fe949946cf5d05b8d30d",
+        "bytes": 211850
+      },
+      "aa_barrier_raw": {
+        "sha256": "0fd29f0c561fe25226dd40dbf4b347a8b1a032c18fb2820efa15bce2e031f8ad",
+        "bytes": 38475
+      },
+      "aa_inventory_raw": {
+        "sha256": "01add59de2f49d83e8e29eca641e958c652c96c54ea22e19177e3f9d93f86095",
+        "bytes": 267845
+      },
+      "relay_stream_catalog": {
+        "sha256": "3ee3e56df43fd40ec4f29772a9dadffc28cdb2097925a5591221009b1a0c0bda",
+        "bytes": 28134
+      },
+      "prior_positive_pricing_replay": {
+        "sha256": "61b58edbfd6c079a60483de7bb934b1b1393b20b7d7e34c56e4d7efa181a56c9",
+        "bytes": 1516
+      },
+      "prior_negative_pricing_replay": {
+        "sha256": "21c23b1f2bdffe36e3acfe9ae76f906477bb6289b32446e6f1e315786442c3d0",
+        "bytes": 976
+      },
+      "prior_pricing_summary": {
+        "sha256": "565c26daed8854fa97b40d881d8a4e9fcfc75e3322702b25b8e673a102e97480",
+        "bytes": 6404
+      },
+      "protocol": {
+        "sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+        "bytes": 41312
+      },
+      "aa_addendum": {
+        "sha256": "4743e6037cf51dba5beedbd9c875afb315519a78908b075969033e65b0d79468",
+        "bytes": 3303
+      },
+      "budget_amendment": {
+        "sha256": "d9fdc6d6309517d3166448ffa32ee2212b8f167c1ab61f063a335d3905a97f85",
+        "bytes": 2534
+      },
+      "budget_designer": {
+        "sha256": "5717257a07a7f66d7f7483334be2fcbf375adf7a9faa2da1fead87a62b26c849",
+        "bytes": 1827
+      },
+      "budget_critic": {
+        "sha256": "92929c959875f7072421b7217e778961d1d2b504dc2ed5387b811e42220abbf2",
+        "bytes": 2290
+      },
+      "metadata_retry": {
+        "sha256": "8f500b61f8f2422916f67fd02d776de880abae8627f304e47bd2637c8de583a6",
+        "bytes": 1112
+      },
+      "metadata_retry_reviews": {
+        "sha256": "f5634bd20508d1c8711bc599d0168fd62a4b82ac6d71612dde80c0bc7a96b1c4",
+        "bytes": 1071
+      },
+      "additional_budget_ledger_prefix": {
+        "sha256": "1db62286e01bf31d88f89da44d97b86f1ee409b7212261d375965bd8d7c8a5a2",
+        "bytes": 3504
+      }
+    },
+    "public_references": {
+      "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+      "aa_addendum": "tests/campaign/laptop-182-001/ADDENDUM-A-A-001.md",
+      "budget_amendment": "tests/campaign/laptop-182-001/AMD-READINESS-BUDGET-001.md",
+      "budget_designer": "tests/campaign/laptop-182-001/REVIEW-DESIGNER-READINESS-BUDGET-001.json",
+      "budget_critic": "tests/campaign/laptop-182-001/REVIEW-CRITIC-READINESS-BUDGET-001.json",
+      "metadata_retry": "tests/campaign/laptop-182-001/READINESS-PREPARATION-RETRY-001.md",
+      "metadata_retry_reviews": "tests/campaign/laptop-182-001/REVIEW-READINESS-PREPARATION-RETRY-001.json"
+    }
+  },
+  "scope_limits": [
+    "These seven controls cover the exact frozen readiness cohort. Campaign A has no measured comparative data.",
+    "Current candidate evidence covers malformed exit 125, marked timeout exit 124 with the marked payload gone before assistance, and stock relay. An unavailable direct PID leaves direct-child termination unobserved.",
+    "The historical 155-case Windows suite supports source-level continuity and used a different whole-image hash.",
+    "All earlier failures and incomplete attempts retain their original outcomes. Forced drains are recorded independently of product oracles.",
+    "This record supplies no product ranking, speed or parity conclusion, or broader readiness finding."
+  ]
+}
