@@ -1,0 +1,16 @@
+{
+  "schema": "ptg-publication-finalization-reviews-v1",
+  "recording": "Exact independent approval objects received in agent messages after reading the full amendment text.",
+  "designer": {
+    "role": "designer",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "One separate 600-second, metadata-only allocation. Precharge every command\u2019s full whole-tree cap, preserve the exhausted allocation and timeout, and verify remote state before any push. Publish this amendment and both approvals before Campaign A. The exact manifest, scientific inputs, protections, deadlines, and independent replay requirements remain in force."
+  },
+  "critic": {
+    "role": "critic",
+    "decision": "APPROVED",
+    "open_objections": [],
+    "scope": "A separate 600-second metadata-only allocation. Preserve the exhausted prior allocation and timed-out publication record. Charge each full command cap before execution, verify remote state before any push, and publish this amendment with both approvals before Campaign A. The exact reviewed package, accepted evidence, and scientific gates remain unchanged."
+  }
+}
