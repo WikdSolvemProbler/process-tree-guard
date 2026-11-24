@@ -1,0 +1,22 @@
+{
+  "schema": "laptop-182-prospective-amendment-review-v1",
+  "reviewer": "designer",
+  "model": "gpt-6.2-sol",
+  "scope": "prospective additional bounded readiness allocation only",
+  "amendment_sha256": "d9fdc6d6309517d3166448ffa32ee2212b8f167c1ab61f063a335d3905a97f85",
+  "approved": true,
+  "unresolved_objections": [],
+  "unchanged_measurement_sha256": "677c7231abd7162dd13c4df9ac92e5c70a1ddfffcf789f7124d7f120615e58e1",
+  "prior_measurement_manifest_sha256": "ca794c93e52c4086be26c477e5c2ae0d7937e645b5b4810190007157a033a708",
+  "qualification_only": {
+    "driver_sha256": "8aad21491dcc105c25fec7dc469aab63d6f6e378ad5a56a3d2024421435746c1",
+    "replay_sha256": "ad45e04bcef3df3ec393df5b4d8f55ae091c9ec2e97479776ea01f885b519694",
+    "carrier_sha256": "64a1590a5eeb67a9266b38f65b3e1535af7e418f4b80b2d172578ff8b8f316ad",
+    "designer_exact_review_sha256": "b3b2b976d27b8e51694862464df3d40accc5a3bd95099814e9792114bcb3608b"
+  },
+  "notes": [
+    "The historical cumulative 1800-second ledger is incomplete. Neither compliance nor exhaustion is established. The earlier attempts and original dispositions remain recorded.",
+    "The independent additional 1800 seconds are charged prospectively per full chosen whole-tree cap before each authorized root or agent command across every revision, including failures and interruptions. This allocation covers at most one AA008 capture with 640 seconds and one qualification replay with 30 seconds. The current review itself uses the reserved 60 seconds.",
+    "The unchanged 6900-second primary and 6920-second outer campaign bounds, 6600-second during cap and separate 360-second final campaign replay cap remain in force. All controls and exact execution review prerequisites remain required. There is no measurement change or native pass claim."
+  ]
+}

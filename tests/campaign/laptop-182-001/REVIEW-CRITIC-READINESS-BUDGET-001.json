@@ -1,0 +1,35 @@
+{
+  "schema": "laptop-182-prospective-amendment-review-v1",
+  "reviewer": "laptop_critic_sol",
+  "reviewed_utc": "2026-11-24T07:57:29.6916400Z",
+  "scope": "prospective readiness allocation and exact previously reviewed A/A qualification scope",
+  "amendment_sha256": "d9fdc6d6309517d3166448ffa32ee2212b8f167c1ab61f063a335d3905a97f85",
+  "approved": true,
+  "unresolved_objections": [],
+  "aa_revision_005_capture_008_sha256": {
+    "technical_review": "5f1ff42cb73ca06d14836a4884932baa57c372eb57ce0e49e30d1a7c83b816c8",
+    "driver": "8aad21491dcc105c25fec7dc469aab63d6f6e378ad5a56a3d2024421435746c1",
+    "replay": "ad45e04bcef3df3ec393df5b4d8f55ae091c9ec2e97479776ea01f885b519694",
+    "carrier": "64a1590a5eeb67a9266b38f65b3e1535af7e418f4b80b2d172578ff8b8f316ad",
+    "pending_manifest": "ca794c93e52c4086be26c477e5c2ae0d7937e645b5b4810190007157a033a708"
+  },
+  "original_budget_status": "INCOMPLETE",
+  "additional_allocation_seconds": 1800,
+  "remaining_native_capture_limit": 1,
+  "capture_outer_whole_tree_seconds": 640,
+  "capture_primary_whole_tree_seconds": 620,
+  "capture_internal_seconds": 600,
+  "capture_original_handle_wait_seconds": 630,
+  "qualification_replay_limit": 1,
+  "qualification_replay_whole_tree_seconds": 30,
+  "campaign_a_outer_whole_tree_seconds": 6920,
+  "campaign_a_primary_whole_tree_seconds": 6900,
+  "campaign_a_during_seconds": 6600,
+  "full_campaign_a_replay_whole_tree_seconds": 360,
+  "notes": [
+    "The original readiness ledger establishes neither compliance nor exhaustion. All originals, attempts, dispositions and cohorts retain their identities.",
+    "Charge every covered root and agent command at its chosen whole-tree cap before launch, including failure or interruption across all revisions. Preserve terminal dispositions and stop at exhaustion or failed or incomplete evidence.",
+    "The only added native capture is the exact reviewed A/A revision 005 run 008. The allocation adds one bounded qualification replay. The 72-pair and 144-lane design, existing controls and hard gates still apply.",
+    "This review grants no qualification verdict. Exact accepted native evidence, replay and both amendment reviews remain prerequisites to later qualification and prospective campaign approval."
+  ]
+}
