@@ -178,7 +178,7 @@ class SlotJob:
             self.close()
             raise
 
-    def launch(self, argv, creationflags, *, stdin, stdout, stderr):
+    def launch(self, argv, creationflags, *, stdin, stdout, stderr, cwd=None):
         """Create the original process already in this Job, with the same stdio."""
         if self._handle is None:
             raise OSError("slot Job is closed")
@@ -229,7 +229,7 @@ class SlotJob:
                 flags = creationflags | EXTENDED_STARTUPINFO_PRESENT | CREATE_UNICODE_ENVIRONMENT
                 try:
                     _checked(CreateProcessW(
-                        None, command, None, None, True, flags, None, None,
+                        None, command, None, None, True, flags, None, cwd,
                         ctypes.byref(startup.info), ctypes.byref(process)), "CreateProcessW")
                 finally:
                     if process.thread:

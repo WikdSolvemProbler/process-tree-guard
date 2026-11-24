@@ -575,7 +575,7 @@ def descendants_alive(config, descendant_pids):
     return None
 
 
-def run_slot(slot, config):
+def run_slot(slot, config, *, retention=None):
     """Execute one slot and settle its isolation before returning."""
     suppress_windows_error_dialogs()
     job = None
@@ -589,7 +589,7 @@ def run_slot(slot, config):
             if event_root is not None:
                 os.makedirs(event_root, exist_ok=True)
             event_dir = tempfile.mkdtemp(prefix="slot-", dir=event_root)
-        return _run_slot(slot, config, job, event_dir)
+        return _run_slot(slot, config, job, event_dir, retention=retention)
     finally:
         if job is not None:
             job.close()
@@ -597,7 +597,7 @@ def run_slot(slot, config):
             shutil.rmtree(event_dir, ignore_errors=True)
 
 
-def _run_slot(slot, config, job, event_dir):
+def _run_slot(slot, config, job, event_dir, *, retention=None):
     start = time.perf_counter_ns()
     record = {
         "kind": slot.kind, "arm": slot.arm, "path": slot.path,
@@ -635,7 +635,10 @@ def _run_slot(slot, config, job, event_dir):
             # presentation.
             record["outcome"] = "infra-failure"
             record["detail"] = "floor arms present no malformed shapes"
-            record["elapsed_ms"] = (time.perf_counter_ns() - start) / 1e6
+            end = time.perf_counter_ns()
+            record["elapsed_ms"] = (end - start) / 1e6
+            if retention is not None:
+                record["laptop_timing_ns"] = [start, end]
             return record
         if slot.arm == "floor-direct":
             child, child_args = child_for(slot, config, marker)
@@ -653,8 +656,10 @@ def _run_slot(slot, config, job, event_dir):
                 record["detail"] = (
                     f"no scale child configured for variant "
                     f"{slot.variant!r}; the tree was not presented")
-                record["elapsed_ms"] = \
-                    (time.perf_counter_ns() - start) / 1e6
+                end = time.perf_counter_ns()
+                record["elapsed_ms"] = (end - start) / 1e6
+                if retention is not None:
+                    record["laptop_timing_ns"] = [start, end]
                 return record
             child, child_args = built
             argv = [exe] + expand_template(
@@ -719,7 +724,10 @@ def _run_slot(slot, config, job, event_dir):
             record["detail"] = f"spawn failed: {error}"
             record["resource_note"] = \
                 "arm never spawned; no process to account"
-            record["elapsed_ms"] = (time.perf_counter_ns() - start) / 1e6
+            end = time.perf_counter_ns()
+            record["elapsed_ms"] = (end - start) / 1e6
+            if retention is not None:
+                record["laptop_timing_ns"] = [start, end]
             return record
         record["arm_pid"] = proc.pid
         record["resource_note"] = None
@@ -975,7 +983,10 @@ def _run_slot(slot, config, job, event_dir):
                     f"{record['output_stderr_len']} byte(s))")
             else:
                 record["outcome"] = "ok"
-        record["elapsed_ms"] = (time.perf_counter_ns() - start) / 1e6
+        end = time.perf_counter_ns()
+        record["elapsed_ms"] = (end - start) / 1e6
+        if retention is not None:
+            record["laptop_timing_ns"] = [start, end]
         return record
     finally:
         if job is not None:
@@ -999,6 +1010,12 @@ def _run_slot(slot, config, job, event_dir):
                     handle.close()
                 except OSError:
                     pass
+        if (retention is not None and out_path and err_path
+                and record.get("slot_job", {}).get("active_after") == 0):
+            try:
+                retention(record, {"stdout": out_path, "stderr": err_path})
+            except (OSError, ValueError) as error:
+                record["laptop_stream_error"] = f"{type(error).__name__}: {error}"
         for path in (out_path, err_path, in_path):
             if path:
                 try:

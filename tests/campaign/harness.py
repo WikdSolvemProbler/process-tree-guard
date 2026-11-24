@@ -2394,7 +2394,22 @@ def check_run_package(run_dir):
                 "repetitions merely compare equal to the seeded "
                 "order's (a float, a boolean) is not the "
                 "recorded order; order unverifiable"]
-    full = [slot_key(s) for s in build_plan(seed)]
+    plan_mode = meta.get("plan_mode")
+    if plan_mode is None:
+        planned_slots = build_plan(seed)
+    else:
+        from laptop_schedule import MODE, build_schedule, schedule_sha256
+
+        if plan_mode != MODE or meta.get("reduced") is not False:
+            return problems + ["unknown plan mode or reduced laptop campaign"]
+        try:
+            schedule = build_schedule(seed)
+        except ValueError as error:
+            return problems + [f"laptop schedule cannot be reproduced: {error}"]
+        if meta.get("schedule_sha256") != schedule_sha256(schedule):
+            problems.append("laptop schedule digest does not match the generated order")
+        planned_slots = [row.slot for row in schedule]
+    full = [slot_key(slot) for slot in planned_slots]
     expected = full[: len(recorded_order)] if meta.get("reduced") else full
     if recorded_order != expected:
         problems.append(
@@ -2450,7 +2465,7 @@ def check_run_package(run_dir):
     recorded_counts = meta.get("plan_counts")
     if recorded_counts is not None:
         try:
-            derived_counts = check_plan(build_plan(seed))
+            derived_counts = check_plan(planned_slots)
         except (ValueError, TypeError):
             derived_counts = None
         if derived_counts is not None \
@@ -2992,7 +3007,7 @@ def _pricing_for_render(config, probe_records):
     return pricing
 
 
-def cmd_run(args):
+def cmd_run(args, *, laptop=None):
     config_path = os.path.abspath(args.config)
     try:
         raw_config = _read_config_bytes(config_path)
@@ -3018,9 +3033,14 @@ def cmd_run(args):
     seed = args.seed
     if seed is None:
         seed = config.get("seed", DEFAULT_SEED)
-    slots = build_plan(seed)
+    if laptop is None:
+        slots = build_plan(seed)
+    else:
+        slots = laptop.planned_slots(seed)
     counts = check_plan(slots)
     reduced = args.reduced is not None
+    if laptop is not None and reduced:
+        raise ValueError("laptop execution requires the complete planned population")
     if reduced:
         slots = slots[: args.reduced]
     # Pre-flight admission, certifying shape only: before the
@@ -3070,6 +3090,8 @@ def cmd_run(args):
             for arm in PRODUCT_ARMS
         },
     }
+    if laptop is not None:
+        meta.update(laptop.plan_identity())
     # The manifest is written BEFORE the first slot executes and
     # updated as the run proceeds, so a stopped campaign's
     # namespace resolves and reports its partial state.
@@ -3077,29 +3099,45 @@ def cmd_run(args):
     records = []
     obs_path = os.path.join(run_dir, "observations.jsonl")
     with open(obs_path, "w", encoding="utf-8") as sink:
-        for slot in slots:
-            record = run_slot(slot, config)
+        for index, slot in enumerate(slots):
+            if laptop is None:
+                record = run_slot(slot, config)
+            else:
+                laptop.before_slot(index, slot)
+                record = run_slot(slot, config, retention=laptop.retain_streams)
             records.append(record)
             sink.write(json.dumps(record) + "\n")
             sink.flush()
             meta["slots_run"] = len(records)
             _write_run_json(run_dir, meta, indent=None)
+            if laptop is not None:
+                os.fsync(sink.fileno())
             if config["_windows_slot_jobs"]:
                 isolation = record.get("slot_job", {})
                 if not _slot_job_drained(isolation):
                     print(f"slot Job did not prove cleanup: {isolation}",
                           file=sys.stderr)
                     return EXIT_SLOT_CLEANUP_FAILURE
+            if laptop is not None:
+                laptop.after_slot(index, record)
     fps = fingerprints(config)
     versions = arm_versions(config)
     mismatches = identity_mismatches(config, fps, versions)
     guard_fp = fps.get("guard", {})
-    probe_records = pricing_mod.run_pricing_probes(config, guard_fp,
-                                                   reduced=reduced)
+    if laptop is None:
+        probe_records = pricing_mod.run_pricing_probes(config, guard_fp, reduced=reduced)
+    else:
+        probe_records = pricing_mod.run_pricing_probes(
+            config, guard_fp, reduced=reduced, laptop=laptop)
     with open(os.path.join(run_dir, "pricing-observations.jsonl"),
               "w", encoding="utf-8") as sink:
         for record in probe_records:
             sink.write(json.dumps(record) + "\n")
+        if laptop is not None:
+            sink.flush()
+            os.fsync(sink.fileno())
+    if laptop is not None:
+        laptop.finish()
     pricing = _pricing_for_render(config, probe_records)
     expected_output = report_mod.expected_output_from_config(config)
     outcome = campaign_outcome(

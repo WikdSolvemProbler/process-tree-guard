@@ -241,6 +241,7 @@ PROBES = {
 # refuses to run leaves no timing record at all: the harness
 # records that as infrastructure failure, never as a price.
 GUARD_LAUNCHER_MODE = "guard-launcher"
+PROBE_TIMEOUT_DETAIL = "probe run exceeded its finite deadline"
 
 
 def _write_guard_record(path, payload):
@@ -363,7 +364,7 @@ def _guard_argv(config, child=None, child_args=None,
 
 def _time_guard_run(config, context, child=None, child_args=None,
                     env=None, cwd=None, guard_record_path=None,
-                    guard_launcher=None):
+                    guard_launcher=None, defer_timeout_cleanup=False):
     """One timed guard fast-path run in one probe shape. Returns an
     observation dict; outcome is "ok" only when the run completed
     with the fast path's expected exit code.
@@ -416,13 +417,14 @@ def _time_guard_run(config, context, child=None, child_args=None,
     try:
         record["exit_code"] = proc.wait(timeout=SLOT_DEADLINE_S)
     except subprocess.TimeoutExpired:
-        try:
-            proc.kill()
-            proc.wait(timeout=5.0)
-        except (OSError, subprocess.TimeoutExpired):
-            pass
+        if not defer_timeout_cleanup:
+            try:
+                proc.kill()
+                proc.wait(timeout=5.0)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
         record["outcome"] = "infra-failure"
-        record["detail"] = "probe run exceeded its finite deadline"
+        record["detail"] = PROBE_TIMEOUT_DETAIL
         record["elapsed_ms"] = (time.perf_counter_ns() - start) / 1e6
         return record
     outer_end_ns = time.perf_counter_ns()
@@ -559,8 +561,18 @@ def _shapes(config, probe, scratch):
                            "probe_count": 0, **field}
 
 
+def _laptop_price(config, kwargs):
+    if "guard_record_path" in kwargs:
+        if "guard_launcher" in kwargs:
+            raise ValueError("laptop pricing requires its frozen recording helper")
+        kwargs["guard_launcher"] = [
+            sys.executable, "-I", "-B", os.path.abspath(__file__), GUARD_LAUNCHER_MODE,
+        ]
+    return _time_guard_run(config, **kwargs, defer_timeout_cleanup=True)
+
+
 def run_pricing_probes(config, guard_fingerprint, reduced=False,
-                       probes=None):
+                       probes=None, *, laptop=None):
     """Execute every pricing probe and return the raw observation
     records. Each record names its probe, item, shape and repetition,
     and carries the guard fingerprint the probe measured, so a price
@@ -577,6 +589,8 @@ def run_pricing_probes(config, guard_fingerprint, reduced=False,
                 continue
             shapes = list(_shapes(config, probe, scratch))
             for rep in range(reps):
+                if laptop is not None:
+                    laptop.before_pricing_pair(probe, rep)
                 for shape, kwargs in shapes:
                     kwargs = dict(kwargs)
                     if "guard_record_path" in kwargs:
@@ -592,7 +606,12 @@ def run_pricing_probes(config, guard_fingerprint, reduced=False,
                     pathext = kwargs.pop("pathext", None)
                     current_folder_rule = kwargs.pop(
                         "current_folder_rule", None)
-                    record = _time_guard_run(config, **kwargs)
+                    if laptop is None:
+                        record = _time_guard_run(config, **kwargs)
+                    else:
+                        laptop.before_pricing_slot(probe, rep, shape)
+                        record = _laptop_price(config, kwargs)
+                        laptop.after_pricing_slot(probe, rep, shape)
                     record.update({
                         "kind": "pricing-probe", "probe": probe,
                         "item": item, "shape": shape, "rep": rep,
@@ -604,6 +623,8 @@ def run_pricing_probes(config, guard_fingerprint, reduced=False,
                         "pathext": pathext,
                         "current_folder_rule": current_folder_rule,
                     })
+                    if laptop is not None:
+                        laptop.retain_pricing_record(record)
                     records.append(record)
     finally:
         for root, _dirs, files in os.walk(scratch, topdown=False):
