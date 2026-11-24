@@ -1,0 +1,18 @@
+{
+  "schema": "laptop-182-prospective-amendment-review-v1",
+  "reviewer": "laptop_critic_sol",
+  "reviewed_utc": "2026-11-24T06:35:38.9130190Z",
+  "scope": "prospective method and exact frozen fixture inputs",
+  "amendment_sha256": "883b5f4019f9c23d2d1be7b7556a095c0f64a3c9389ec5ece45e1f8fb203394a",
+  "config_sha256": "16b551edb24a42dd2cc8db1ffb822e0a4359c4f522981a3bff35554bc1cfafb9",
+  "fixture_sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
+  "build_result_sha256": "81ef143d3131804a82ff1db3ac1f528dae6c02617038fd3d46a0a2155c89adb7",
+  "approved": true,
+  "unresolved_objections": [],
+  "notes": [
+    "Verified the exact amendment, config, executable, terminal build receipt, log, recipe, source archive, 1044 extracted source paths and census, and all four pinned tool images.",
+    "Reversed the sole marked-spawn flag change to recover the base config. Reviewed the current fixture error-mode and descendant flags and the original control-only native Job evidence.",
+    "Approved DETACHED_PROCESS for persistent instrumentation workers and the two specified direct calibration sleeps. Campaign arms retain original trial and pricing contexts, clocks, deadlines, oracles and cleanup. The fresh fixture forms a separate cohort.",
+    "Exact implementation and launch review, native qualification, and the original campaign gates remain prerequisites."
+  ]
+}
