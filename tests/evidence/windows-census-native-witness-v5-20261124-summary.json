@@ -1,0 +1,98 @@
+{
+  "schema": "ptg-census-native-attempt-v2",
+  "passed": false,
+  "native_outer_exit": 1,
+  "original_primary_handle_retained": true,
+  "cases": {
+    "positive": {
+      "all_case_raw_hashes_match": true,
+      "passed": false,
+      "fault": {
+        "text": "native single-replacement witness did not admit",
+        "type": "RuntimeError"
+      },
+      "server_fault": {
+        "text": "invasive observer failed: during census rejected: ['ancestry or census proof: ValueError: first census contains a veto']",
+        "type": "BarrierError"
+      },
+      "rounds": 1,
+      "side_cleanup": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "phase_cleanup": {
+        "active_after": 0,
+        "active_before": 0,
+        "terminated": false
+      },
+      "native_acknowledgments": 0,
+      "independent_census_refusal": "first census contains a veto"
+    }
+  },
+  "skipped_cases": [
+    "negative"
+  ],
+  "custody_roles": {
+    "SEAL.json": {
+      "bytes": 7658,
+      "sha256": "7d4f3a39f13346d3f3ee9a38dd89f3fbadf97b6711f2faad0769f12dc5d9cc90"
+    },
+    "witness.py": {
+      "bytes": 19211,
+      "sha256": "09e8ad340ef79c2bf8df8867433f151a296d3559332237d3636986bf8c386a5b"
+    },
+    "RUN.ps1": {
+      "bytes": 2563,
+      "sha256": "da36f48e4a2203095568417acb694df76126096bcb0b2436c105390404189ec8"
+    },
+    "capture/RESULT.json": {
+      "bytes": 3358,
+      "sha256": "8938679479f478485ad137d24aa9b3314c17430a3e6bf63504e05d84365cfebe"
+    },
+    "host/RESULT.json": {
+      "bytes": 465,
+      "sha256": "b09edf4bfcf7c843c190d165b61b28073b0306b305a73a7b6cac99766db37680"
+    },
+    "host/PRIMARY.stdout": {
+      "bytes": 104,
+      "sha256": "e40ac7c12c6117a2cbd779a22555255da1fa8b6afcf4d1648803a4cb176fcaf5"
+    },
+    "host/PRIMARY.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "REVIEW-CRITIC-NATIVE-V5.json": {
+      "bytes": 936,
+      "sha256": "dbe7661e4eecf0ab3073ccccfe6b84a9dfe151fe81265eedd729872a8155decb"
+    },
+    "REVIEW-DESIGNER-NATIVE-V5.json": {
+      "bytes": 1199,
+      "sha256": "73644fd4646a62442b6840d5e3561337718b6235dc13d08c3d8b3a1f66a3e328"
+    },
+    "STATIC-CHECK-001.json": {
+      "bytes": 239,
+      "sha256": "df01c7d3d06c6e115382daab552c4a24ff5a53556430ab1926e8e367e764359b"
+    },
+    "positive_result": {
+      "bytes": 2497,
+      "sha256": "afc21465399a74d3d37bfadf0a87006d28e5d99f32cc8f727e404249a6ecb2fd"
+    }
+  },
+  "source_files_postmatched": 26,
+  "candidate_guard_slots": 0,
+  "production_source": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "product_source_changed": false,
+  "prior_failed_native_attempt_retained": true,
+  "scope": "one fixed corrected native census witness; no further native retry in this allocation",
+  "qualification": "incomplete unless both actual controls and independent evidence pass; not a full campaign or product comparison",
+  "privacy": "Raw originals remain private; hash summaries do not replace accessible raw evidence.",
+  "diagnosis": {
+    "owned_controlled_path": "real first snapshot contained held original side process; it was released, joined with native exit0, naturally emptied and closed; actual later OpenProcess returned87 before handle acquisition",
+    "separate_veto": "a separate Python process matched the interpreter digest added to the private witness veto policy; the first-round positive veto correctly prevented replacement and ACK",
+    "baseline_policy_difference": "the sealed Stage011 policy does not veto that interpreter digest; this was private fixture-policy expansion",
+    "ownership_of_other_python": "not established",
+    "qualification": "planned positive remains FAILED; negative SKIPPED; no second snapshot or admission; no native parity or performance result",
+    "next_fixture_change": "restore baseline policy and use a distinct already-pinned fixture image for the live-veto control, subject to fresh exact review and bounded execution"
+  }
+}
