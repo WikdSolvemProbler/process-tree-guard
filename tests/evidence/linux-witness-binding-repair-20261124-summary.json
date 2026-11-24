@@ -1,0 +1,59 @@
+{
+  "schema": "ptg-linux-witness-binding-repair-v1",
+  "date": "2026-11-24",
+  "product_source": "caebd14329e454584fe5d263efe7f4213d77aa54",
+  "scope": "Repair of private Linux test-witness packaging; no product code or deployment asset change.",
+  "diagnosis": {
+    "ordinary_embedded_before_sha256": "b5b2647b0c925b31b23c93dcbac67dc022158da665b5d17acfe15e68ed697df3",
+    "ordinary_packaged_and_after_sha256": "27cf2a7ae6fad357110b014e401738d03104d458a7bd213a68ed76ad63874ea1",
+    "ordinary_difference": "Only the current nonce and proof/output paths; existing witness logic is unchanged.",
+    "installed_root_check_before_sha256": "3368ec504fd0959bb6a26a4c17cc74bbd34e5576baaa582cc83ca4b71719d93d",
+    "installed_root_check_after_sha256": "a95893b6def7688e8ae48ca69766762c4579cac53bb9f7985b3bd46542cec121",
+    "installed_client_check_before_sha256": "193eaaf6be88c8878d549e750ed722ab55fcae31a78c7081d73e4c3bca3e5f24",
+    "installed_client_check_after_sha256": "3134fce1b23b9c59a2eb229c350a8164ff9683bb8651a4a7d95824afe6eb61f7"
+  },
+  "repair": {
+    "source": "tests/support/linux_root_witness_binding.py",
+    "source_sha256": "76e47739d342fa26e7f587f557fe778ca86b5f9b27d60c39e951b1e562f30adb",
+    "operation": "Derive the embedded ordinary witness and its digest from the exact verified packaged member. Derive both installed-image pins from the exact verified release bytes. Require unique replacements and reparse and compare the resulting authorities.",
+    "unchanged": "All six product/deployment byte sequences, ordinary and cleanup actors, case namespace, fixed controller, deadlines and runtime method.",
+    "root_actor_after_sha256": "71662116fed1c1bdb32105d256bace9ea4884699a28ed3bbb4c7b63b6bb8bdc0",
+    "fixture_after_sha256": "3aa5e9e108fdfca3df0fffc974102493441d3accb02ff645d1e908c1d3582c67",
+    "package_after_sha256": "c3dfe60b5d4ca5d5d937b4b2b9148b47ba25755541a1dfb2a5eb8488de6a0262",
+    "frozen_after_sha256": "ea86c38462b2b011fa948c75854830237c56cf73359d49d3567e3d95d357c9ed",
+    "prepared_source_diff_sha256": "f34057e8621f311fc9c4695df68656fcb7422ea9c22041d3bd20fb70ac107a2b",
+    "preparation_receipt_sha256": "7249901de896b5eda97a9164529d8f254b497c5e08ee8679b8116d98dfe61431"
+  },
+  "validation": {
+    "source_preparation": "PASS: actual pinned inputs and six deployment artifacts checked, exact byte/AST authority comparisons, source compile checks and independent reviews.",
+    "independent_reviews": "Two independent Sol reviews approved the same repair and exact read-only carrier with zero objections in that scope.",
+    "readonly_preflight": {
+      "passed": true,
+      "native_exit": 0,
+      "ssh_exit": 0,
+      "original_handle_retained": true,
+      "fixture_digest_freshly_listed_by_existing_sudo_policy": true,
+      "existing_units_absent": true,
+      "visible_collision_targets_absent": true,
+      "root_controller_absent": true,
+      "protected_rule_status": "requires_root_absence_check",
+      "windows_whole_tree_seconds": 60,
+      "ssh_seconds": 55,
+      "host_seconds": 45,
+      "host_kill_grace_seconds": 2,
+      "guest_seconds": 34,
+      "guest_kill_grace_seconds": 2,
+      "hidden_carrier_sha256": "f54561a9e03df36b7164d6546bf0a59f185ac42f5ad66b0e798c3f3879b66c37",
+      "original_receipt_sha256": "ac5533096e0120bb0dfd79ab2867640464d12cb1407a75f97a34389710e71ffe",
+      "driver_stdout_sha256": "6afdedb207a01074c403bc15a2747067856e13f0ccd33dee57cace17a35cc7da",
+      "driver_stderr_bytes": 0
+    }
+  },
+  "limits": [
+    "This preflight reads environment state and lists existing authorization. It does not execute the listed administrator test command, deploy files, start a VM or qualify backend behavior.",
+    "Root-owned materialization and held-file custody require separate runtime review. Runtime is not approved by these records.",
+    "The old failed runtime and every failed or withheld preparation remain preserved. Static defects do not prove the historical runtime failure's cause.",
+    "Full raw actors and user-dependent records remain private; the published binder and digests alone cannot reproduce the complete runtime. The public benchmark package remains incomplete.",
+    "No speed, equivalence, durability or overall issue-closure claim follows from this witness correction."
+  ]
+}
