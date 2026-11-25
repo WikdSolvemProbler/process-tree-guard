@@ -3,6 +3,7 @@
 
     use super::*;
     use std::os::windows::process::CommandExt;
+    use std::time::{Duration, Instant};
 
 
     use crate::sys::windows::{
@@ -665,7 +666,9 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         assert_eq!(unsafe { WaitForSingleObject(event.0, 0) }, WAIT_TIMEOUT);
         let calls = std::cell::Cell::new(0);
         let signaled = std::cell::Cell::new(false);
-        let status = observe_child_cleanup(event.0, false, 5000, |child, milliseconds| {
+        let start = Instant::now();
+        let deadline = start + Duration::from_secs(5);
+        let result = observe_child_cleanup(event.0, false, deadline, || start, |child, milliseconds| {
             calls.set(calls.get() + 1);
             assert_eq!(child, event.0, "use the exact retained object, not its PID or a replacement");
             assert_eq!(milliseconds, 5000, "the existing cleanup bound is unchanged");
@@ -673,14 +676,15 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             unsafe { WaitForSingleObject(child, milliseconds) }
         });
         assert!(signaled.get());
-        assert_eq!(status, Some(WAIT_OBJECT_0), "the terminal result comes from the native wait");
+        assert_eq!(result.status, Some(WAIT_OBJECT_0), "the terminal result comes from the native wait");
+        assert!(result.in_budget);
         assert_eq!(calls.get(), 1, "Job zero cannot elide the original-handle wait");
-        assert_eq!(observe_child_cleanup(event.0, true, 5000, |_, _| {
+        assert_eq!(observe_child_cleanup(event.0, true, deadline, || start, |_, _| {
             calls.set(calls.get() + 1); WAIT_FAILED
-        }), None, "an already-observed natural child exit retains its no-extra-wait fast path");
-        assert_eq!(observe_child_cleanup(std::ptr::null_mut(), false, 5000, |_, _| {
+        }), CleanupWait::default(), "an already-observed natural child exit retains its no-extra-wait fast path");
+        assert_eq!(observe_child_cleanup(std::ptr::null_mut(), false, deadline, || start, |_, _| {
             calls.set(calls.get() + 1); WAIT_FAILED
-        }), None, "no wait on a nonexistent child");
+        }), CleanupWait::default(), "no wait on a nonexistent child");
         assert_eq!(calls.get(), 1);
     }
 
@@ -1266,6 +1270,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         CleanupObservation {
             assigned: true, job_proven_empty: true, member_wait_uncertainty: None, member_capture_failure: None, job_termination_error: None, child_created: true,
             child_exited: true, original_child_wait: None, original_child_wait_error: None,
+            original_child_wait_in_budget: false,
         }
     }
 
@@ -1280,19 +1285,19 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             assert!(error.message().contains("cleanup could not be confirmed"));
             assert!(error.message().contains(&format!("exit code {code}")));
         }
-        // A failed enumeration is a capture fault, not a fabricated wait or
-        // missing-member count. The production callback reads LastError here.
+        // A real event is not a Job. NULL would query the caller's own Job.
         let event = DeepOwnerEvents::new(1);
+        let query_error = with_job_process_ids(event.0[0], |ids| {
+            assert!(ids.is_none(), "querying an event as a Job must fail");
+            unsafe { GetLastError() }
+        });
         let mut native_members = HandleList::new();
         let mut native_capture_failure = None;
-        let mut query_error = None;
-        // A real event is not a Job. NULL would query the caller's own Job.
-        with_job_process_ids(event.0[0], |ids| {
-            if ids.is_none() { query_error = Some(unsafe { GetLastError() }); }
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(1);
+        with_cleanup_job_process_ids(event.0[0], deadline, |ids| {
             capture_job_members(ids, &mut native_members, &mut native_capture_failure,
                 |_| panic!("a failed native Job query has no IDs to open"));
         });
-        let query_error = query_error.expect("querying an event as a Job must fail");
         assert_ne!(query_error, 0);
         assert_eq!(native_capture_failure,
             Some(MemberCaptureFailure::Query { win32_error: query_error }),
@@ -1303,16 +1308,15 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         }).1, "root terminal and Job zero cannot heal the native query failure");
         let mut members = HandleList::new();
         let mut capture_failure = None;
-        unsafe { SetLastError(0x13572468) };
-        capture_job_members(None, &mut members, &mut capture_failure,
+        capture_job_members(Err(MemberCaptureFailure::Query { win32_error: 0x13572468 }),
+            &mut members, &mut capture_failure,
             |_| panic!("a failed query has no IDs to open"));
         let first = capture_failure.expect("failed enumeration must remain unconfirmed");
         assert_eq!(first, MemberCaptureFailure::Query { win32_error: 0x13572468 });
         assert!(members.is_empty());
-        unsafe { SetLastError(0x24681357) };
-        capture_job_members(Some(&[17]), &mut members, &mut capture_failure, |id| {
+        capture_job_members(Ok(&[17]), &mut members, &mut capture_failure, |id| {
             assert_eq!(id, 17);
-            event.0[0]
+            Ok(event.0[0])
         });
         assert_eq!(&*members, &event.0[..]);
         assert_eq!(capture_failure, Some(first), "later success cannot erase query failure");
@@ -1327,7 +1331,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         }
         let mut good_members = HandleList::new();
         let mut good_capture = None;
-        capture_job_members(Some(&[19, 23]), &mut good_members, &mut good_capture, |_| event.0[0]);
+        capture_job_members(Ok(&[19, 23]), &mut good_members, &mut good_capture, |_| Ok(event.0[0]));
         assert_eq!(&*good_members, &[event.0[0], event.0[0]]);
         assert_eq!(good_capture, None, "successful capture keeps the original handle order");
         assert_eq!(finalize_cleanup(Ok(37), CleanupObservation {
@@ -1374,7 +1378,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             assert_eq!(finalize_cleanup(Ok(code), cleanup_observation()), (Ok(code), true));
             assert_eq!(finalize_cleanup(Ok(code), CleanupObservation {
                 child_exited: false, original_child_wait: Some(WAIT_OBJECT_0),
-                ..cleanup_observation()
+                original_child_wait_in_budget: true, ..cleanup_observation()
             }), (Ok(code), true));
         }
     }
@@ -1384,38 +1388,47 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         // A native event supplies an actual nonterminal wait receipt. It is
         // not a claim that a real guarded process escaped or survived cleanup.
         let event = DeepOwnerEvents::new(1);
-        let (status, error) = observe_child_cleanup_with_error(event.0[0], false, 0,
+        let start = Instant::now();
+        let deadline = start + Duration::from_micros(500);
+        let first = observe_child_cleanup(event.0[0], false, deadline, || start,
             |handle, milliseconds| unsafe { WaitForSingleObject(handle, milliseconds) });
-        assert_eq!(status, Some(WAIT_TIMEOUT));
-        assert_eq!(error, None);
+        assert_eq!(first.status, Some(WAIT_TIMEOUT));
+        assert_eq!(first.win32_error, None);
+        assert!(first.in_budget);
         let (result, confirmed) = finalize_cleanup(Ok(124), CleanupObservation {
-            child_exited: false, original_child_wait: status,
-            original_child_wait_error: error, ..cleanup_observation()
+            child_exited: false, original_child_wait: first.status,
+            original_child_wait_error: first.win32_error,
+            original_child_wait_in_budget: first.in_budget, ..cleanup_observation()
         });
         assert!(!confirmed);
         assert!(result.unwrap_err().message().contains("exit code 124"));
         event.signal(0);
-        let (status, error) = observe_child_cleanup_with_error(event.0[0], false, 0,
+        let second = observe_child_cleanup(event.0[0], false, deadline, || start,
             |handle, milliseconds| unsafe { WaitForSingleObject(handle, milliseconds) });
-        assert_eq!(status, Some(WAIT_OBJECT_0));
+        assert_eq!(second.status, Some(WAIT_OBJECT_0));
         assert_eq!(finalize_cleanup(Ok(37), CleanupObservation {
-            child_exited: false, original_child_wait: status,
-            original_child_wait_error: error, ..cleanup_observation()
+            child_exited: false, original_child_wait: second.status,
+            original_child_wait_error: second.win32_error,
+            original_child_wait_in_budget: second.in_budget, ..cleanup_observation()
         }), (Ok(37), true));
     }
 
     #[test]
     fn cleanup_native_wait_error_is_captured_before_later_owned_handle_close() {
         let event = DeepOwnerEvents::new(1);
-        let (status, native_error) = observe_child_cleanup_with_error(event.0[0], false, 0,
+        let start = Instant::now();
+        let deadline = start + Duration::from_micros(500);
+        let result = observe_child_cleanup(event.0[0], false, deadline, || start,
             |_, milliseconds| unsafe { WaitForSingleObject(std::ptr::null_mut(), milliseconds) });
-        assert_eq!(status, Some(WAIT_FAILED));
+        let native_error = result.win32_error;
+        assert_eq!(result.status, Some(WAIT_FAILED));
         assert!(native_error.is_some_and(|error| error != 0));
         drop(event); // Real CloseHandle after the error has been captured.
         unsafe { SetLastError(0x13572468) };
         let (result, confirmed) = finalize_cleanup(Ok(0), CleanupObservation {
-            child_exited: false, original_child_wait: status,
-            original_child_wait_error: native_error, ..cleanup_observation()
+            child_exited: false, original_child_wait: result.status,
+            original_child_wait_error: native_error,
+            original_child_wait_in_budget: result.in_budget, ..cleanup_observation()
         });
         assert!(!confirmed);
         assert!(result.unwrap_err().message().contains(&format!("native_wait_error={native_error:?}")));
@@ -1438,20 +1451,23 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
     fn cleanup_unobserved_or_unexpected_child_receipt_refuses_without_new_waits() {
         for receipt in [None, Some(WAIT_TIMEOUT), Some(WAIT_FAILED), Some(128)] {
             let (result, confirmed) = finalize_cleanup(Ok(0), CleanupObservation {
-                child_exited: false, original_child_wait: receipt, ..cleanup_observation()
+                child_exited: false, original_child_wait: receipt,
+                original_child_wait_in_budget: receipt.is_some(), ..cleanup_observation()
             });
             assert!(!confirmed);
             assert!(result.is_err());
         }
-        let (status, error) = observe_child_cleanup_with_error(std::ptr::null_mut(), false, 0,
-            |_, _| panic!("no wait for a nonexistent child"));
-        assert_eq!((status, error), (None, None));
-        let (status, error) = observe_child_cleanup_with_error(1usize as Handle, true, 0,
-            |_, _| panic!("no extra wait after an actual observed child exit"));
-        assert_eq!((status, error), (None, None));
+        let deadline = Instant::now();
+        let absent = observe_child_cleanup(std::ptr::null_mut(), false, deadline,
+            || panic!("no clock read for a nonexistent child"), |_, _| panic!("no wait for a nonexistent child"));
+        assert_eq!(absent, CleanupWait::default());
+        let prior_exit = observe_child_cleanup(1usize as Handle, true, deadline,
+            || panic!("no clock read after observed child exit"), |_, _| panic!("no extra wait after child exit"));
+        assert_eq!(prior_exit, CleanupWait::default());
         assert_eq!(finalize_cleanup(Err(GuardError("not started".into())), CleanupObservation {
             assigned: false, job_proven_empty: false, member_wait_uncertainty: None, member_capture_failure: None, job_termination_error: None, child_created: false,
             child_exited: false, original_child_wait: None, original_child_wait_error: None,
+            original_child_wait_in_budget: false,
         }), (Err(GuardError("not started".into())), true));
     }
 
@@ -1459,15 +1475,17 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
     fn cleanup_native_member_timeout_survives_later_signal_and_job_zero() {
         let events = DeepOwnerEvents::new(2);
         let mut uncertainty = None;
-        observe_member_cleanup(&events.0, 1, events.0.len(), &mut uncertainty, |handles, milliseconds| unsafe {
+        let start = Instant::now();
+        let deadline = start + Duration::from_millis(1);
+        observe_member_cleanup(&events.0, deadline, || start, events.0.len(), &mut uncertainty, |handles, milliseconds| unsafe {
             WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
         });
         let first = uncertainty.expect("actual unsignaled WaitAll is unconfirmed");
         assert_eq!(first, MemberWaitUncertainty {
-            status: Some(WAIT_TIMEOUT), win32_error: None, unconfirmed_handles: 2,
+            status: Some(WAIT_TIMEOUT), win32_error: None, in_budget: true, unconfirmed_handles: 2,
         });
         for index in 0..2 { events.signal(index); }
-        observe_member_cleanup(&events.0, 1, events.0.len(), &mut uncertainty, |handles, milliseconds| unsafe {
+        observe_member_cleanup(&events.0, deadline, || start, events.0.len(), &mut uncertainty, |handles, milliseconds| unsafe {
             let status = WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds);
             assert_eq!(status, WAIT_OBJECT_0);
             status
@@ -1489,7 +1507,9 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         let event = DeepOwnerEvents::new(1);
         let invalid = [std::ptr::null_mut()];
         let mut uncertainty = None;
-        observe_member_cleanup(&invalid, 1, 1, &mut uncertainty, |handles, milliseconds| unsafe {
+        let start = Instant::now();
+        let deadline = start + Duration::from_millis(1);
+        observe_member_cleanup(&invalid, deadline, || start, 1, &mut uncertainty, |handles, milliseconds| unsafe {
             WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
         });
         let first = uncertainty.expect("native invalid handle is unconfirmed");
@@ -1497,7 +1517,7 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         assert!(first.win32_error.is_some_and(|error| error != 0));
         drop(event);
         unsafe { SetLastError(0x24681357) };
-        observe_member_cleanup(&invalid, 0, 65, &mut uncertainty, |_, _| panic!("spent budget cannot wait"));
+        observe_member_cleanup(&invalid, deadline, || deadline, 65, &mut uncertainty, |_, _| panic!("spent budget cannot wait"));
         assert_eq!(uncertainty, Some(first));
         let (result, confirmed) = finalize_cleanup(Ok(37), CleanupObservation {
             member_wait_uncertainty: uncertainty, ..cleanup_observation()
@@ -1511,21 +1531,25 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         let mut members = HandleList::new();
         let mut capture_failure = None;
         let mut opened = 0;
-        capture_job_members(Some(&[0, 29]), &mut members, &mut capture_failure, |id| {
+        capture_job_members(Ok(&[0, 29]), &mut members, &mut capture_failure, |id| {
             opened += 1;
             if id == 0 {
-                unsafe { crate::sys::windows::OpenProcess(crate::sys::windows::SYNCHRONIZE, 0, 0) }
+                let result = unsafe {
+                    crate::sys::windows::OpenProcess(crate::sys::windows::SYNCHRONIZE, 0, 0)
+                };
+                let win32_error = unsafe { GetLastError() };
+                assert!(result.is_null());
+                Err(MemberCaptureFailure::Open { reported_pid: id, win32_error })
             } else {
                 assert_eq!(id, 29);
-                event.0[0]
+                Ok(event.0[0])
             }
         });
         assert_eq!(opened, 2, "failed open must not skip remaining capture work");
         assert_eq!(&*members, &event.0[..], "only the successful handle is retained");
         let first_capture = capture_failure.expect("failed native member open must remain unconfirmed");
         assert_eq!(first_capture, MemberCaptureFailure::Open { reported_pid: 0, win32_error: 87 });
-        unsafe { SetLastError(0x31415926) };
-        capture_job_members(Some(&[]), &mut members, &mut capture_failure,
+        capture_job_members(Ok(&[]), &mut members, &mut capture_failure,
             |_| panic!("empty successful list needs no open"));
         assert_eq!(capture_failure, Some(first_capture));
         for code in [0, 124, 37] {
@@ -1540,11 +1564,321 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
     }
 
     #[test]
+    fn cleanup_job_list_distinguishes_empty_incomplete_and_unobserved() {
+        const HEADER_BYTES: usize = 2 * std::mem::size_of::<u32>();
+        let mut buffer = Vec::new();
+        let start = std::time::Instant::now();
+        let deadline = start + std::time::Duration::from_secs(1);
+        let write_counts = |words: &mut [usize], assigned: u32, listed: u32| {
+            let header = words.as_mut_ptr().cast::<u32>();
+            unsafe { header.write(assigned); header.add(1).write(listed); }
+        };
+        let empty = cleanup_job_process_ids(&mut buffer, deadline, || start, |words, _| {
+            write_counts(words, 0, 0);
+            Ok(HEADER_BYTES)
+        });
+        assert_eq!(empty, Ok(&[][..]));
+        let incomplete = cleanup_job_process_ids(&mut buffer, deadline, || start, |words, _| {
+            write_counts(words, 1, 0);
+            Ok(HEADER_BYTES)
+        });
+        assert_eq!(incomplete, Err(MemberCaptureFailure::IncompleteList {
+            assigned: 1, listed: 0, returned_bytes: HEADER_BYTES,
+        }));
+        let mut calls = 0;
+        let grown = cleanup_job_process_ids(&mut buffer, deadline, || start, |words, bytes| {
+            assert_eq!(bytes as usize, std::mem::size_of_val(words));
+            calls += 1;
+            let header_words = HEADER_BYTES / std::mem::size_of::<usize>();
+            if calls == 1 {
+                assert_eq!(words.len(), header_words + 1024);
+                return Err(crate::sys::windows::ERROR_MORE_DATA);
+            }
+            assert_eq!(words.len(), header_words + 2048);
+            write_counts(words, 1, 1);
+            words[header_words] = 29;
+            Ok(HEADER_BYTES + std::mem::size_of::<usize>())
+        });
+        assert_eq!(grown, Ok(&[29usize][..]));
+        assert_eq!(calls, 2);
+        let beyond_cap = cleanup_job_process_ids(&mut buffer, deadline, || start, |words, _| {
+            write_counts(words, (1 << 20) + 1, 0);
+            Ok(HEADER_BYTES)
+        });
+        assert_eq!(beyond_cap, Err(MemberCaptureFailure::Capacity {
+            assigned: (1 << 20) + 1, capacity: 1 << 20,
+        }));
+        let unobserved = cleanup_job_process_ids(&mut buffer, deadline, || deadline,
+            |_, _| panic!("the spent deadline cannot begin an enumeration"));
+        assert_eq!(unobserved, Err(MemberCaptureFailure::BudgetExpired));
+        let mut clock = [start, start, deadline].into_iter();
+        let late = cleanup_job_process_ids(&mut buffer, deadline, || clock.next().unwrap(), |words, _| {
+            write_counts(words, 0, 0);
+            Ok(HEADER_BYTES)
+        });
+        assert_eq!(late, Err(MemberCaptureFailure::BudgetExpired));
+
+        let mut caps = 1024;
+        while caps < MAX_CLEANUP_JOB_IDS {
+            let next = bounded_cleanup_capacity(caps, 0);
+            assert!(next > caps && next <= MAX_CLEANUP_JOB_IDS);
+            caps = next;
+        }
+        assert_eq!(bounded_cleanup_capacity(caps - 1, caps), MAX_CLEANUP_JOB_IDS);
+        assert_eq!(bounded_cleanup_capacity(caps, caps), MAX_CLEANUP_JOB_IDS);
+    }
+
+    #[test]
+    fn cleanup_initial_accounting_uses_the_post_probe_deadline() {
+        let start = Instant::now();
+        let deadline = start + Duration::from_secs(5);
+        for (query, after, expected, expected_captures, expected_kills) in [
+            (Ok(0), start, Some(true), 0, 0),
+            (Ok(0), deadline, Some(false), 0, 0),
+            (Ok(1), deadline, Some(false), 0, 1),
+            (Err(6), deadline, Some(false), 0, 1),
+            (Err(6), start, None, 1, 1),
+        ] {
+            let mut clock = [start, after].into_iter();
+            let mut captures = None;
+            let mut termination = None;
+            let mut collections = 0;
+            let mut calls = 0;
+            let observed = begin_job_cleanup(deadline, || clock.next().unwrap(), || query,
+                |_| { collections += 1; },
+                || { calls += 1; 1 }, &mut captures, &mut termination);
+            assert_eq!((observed, collections, calls, termination),
+                (expected, expected_captures, expected_kills, None));
+            if after == deadline {
+                assert_eq!(captures, Some(MemberCaptureFailure::JobAccountingOverdue { result: query }));
+                assert!(!finalize_cleanup(Ok(0), CleanupObservation {
+                    job_proven_empty: observed == Some(true),
+                    member_capture_failure: captures, ..cleanup_observation()
+                }).1);
+            } else {
+                assert_eq!(captures, None, "an on-time optional unknown can proceed");
+            }
+        }
+        let mut captures = None;
+        let mut termination = None;
+        let mut calls = 0;
+        let observed = begin_job_cleanup(deadline, || deadline, || panic!("late query started"),
+            |_| panic!("late capture started"),
+            || { calls += 1; 1 }, &mut captures, &mut termination);
+        assert_eq!((observed, calls, termination), (Some(false), 1, None));
+        assert_eq!(captures, Some(MemberCaptureFailure::BudgetExpired));
+    }
+
+    #[test]
+    fn cleanup_captures_before_kill_even_when_the_list_refuses_or_expires() {
+        use std::cell::{Cell, RefCell};
+        let start = Instant::now();
+        let deadline = start + Duration::from_secs(5);
+        for injected in [None, Some(MemberCaptureFailure::Query { win32_error: 6 }),
+            Some(MemberCaptureFailure::BudgetExpired)] {
+            let clock = Cell::new(start);
+            let order = RefCell::new(Vec::new());
+            let mut buffer = Vec::new();
+            let mut retained = HandleList::new();
+            let mut captures = None;
+            let mut termination = None;
+            let initial = begin_job_cleanup(deadline, || clock.get(), || {
+                order.borrow_mut().push("accounting");
+                Ok(1)
+            }, |fault| {
+                let ids = cleanup_job_process_ids(&mut buffer, deadline, || clock.get(), |words, _| {
+                    order.borrow_mut().push("list");
+                    if let Some(MemberCaptureFailure::Query { win32_error }) = injected {
+                        return Err(win32_error);
+                    }
+                    if injected == Some(MemberCaptureFailure::BudgetExpired) {
+                        clock.set(deadline);
+                    }
+                    let header_bytes = 2 * std::mem::size_of::<u32>();
+                    let header = words.as_mut_ptr().cast::<u32>();
+                    unsafe { header.write(1); header.add(1).write(1); }
+                    words[header_bytes / std::mem::size_of::<usize>()] = 42;
+                    Ok(header_bytes + std::mem::size_of::<usize>())
+                });
+                capture_job_members(ids, &mut retained, fault, |id| {
+                    order.borrow_mut().push("retain");
+                    assert_eq!(id, 42);
+                    Ok(1usize as Handle)
+                });
+            }, || {
+                order.borrow_mut().push("kill");
+                1
+            }, &mut captures, &mut termination);
+            assert_eq!((initial, captures, termination), (None, injected, None));
+            let order = order.into_inner();
+            if injected.is_none() {
+                assert_eq!(order, ["accounting", "list", "retain", "kill"]);
+                assert_eq!(&*retained, &[1usize as Handle]);
+            } else {
+                assert_eq!(order, ["accounting", "list", "kill"]);
+                assert!(retained.is_empty());
+                assert!(!finalize_cleanup(Ok(124), CleanupObservation {
+                    member_capture_failure: captures, ..cleanup_observation()
+                }).1);
+            }
+        }
+    }
+
+    #[test]
+    fn cleanup_retains_a_late_native_receipt_without_certifying_it() {
+        let start = Instant::now();
+        let deadline = start + Duration::from_secs(5);
+        let entry = deadline - Duration::from_millis(3);
+        let child = 27usize as Handle;
+        let mut clock = [entry, deadline].into_iter();
+        let result = observe_child_cleanup(child, false, deadline, || clock.next().unwrap(),
+            |handle, milliseconds| {
+                assert_eq!(handle, child);
+                assert_eq!(milliseconds, 3);
+                WAIT_OBJECT_0
+            });
+        assert_eq!(result, CleanupWait { status: Some(WAIT_OBJECT_0), win32_error: None, in_budget: false });
+        assert!(!finalize_cleanup(Ok(124), CleanupObservation {
+            child_exited: false, original_child_wait: result.status,
+            original_child_wait_in_budget: result.in_budget, ..cleanup_observation()
+        }).1, "an on-time empty Job cannot certify a late first child receipt");
+        let skipped = observe_child_cleanup(child, false, deadline, || deadline,
+            |_, _| panic!("a spent budget cannot start a late child poll"));
+        assert_eq!(skipped, CleanupWait::default());
+
+        let mut clock = [entry, deadline].into_iter();
+        let mut uncertainty = None;
+        assert!(!observe_member_cleanup(&[child], deadline, || clock.next().unwrap(), 1,
+            &mut uncertainty, |_, _| WAIT_OBJECT_0));
+        assert_eq!(uncertainty, Some(MemberWaitUncertainty {
+            status: Some(WAIT_OBJECT_0), win32_error: None, in_budget: false, unconfirmed_handles: 1,
+        }));
+        assert!(!finalize_cleanup(Ok(0), CleanupObservation {
+            member_wait_uncertainty: uncertainty, ..cleanup_observation()
+        }).1);
+    }
+
+    #[test]
+    fn cleanup_census_confirms_the_suspended_original_in_a_nested_job() {
+        use std::cell::Cell;
+        use std::os::windows::io::{AsRawHandle, FromRawHandle, OwnedHandle};
+        use std::rc::Rc;
+
+        struct Observation {
+            child: Handle,
+            retained_child: OwnedHandle,
+            pid: u32,
+            before: u32,
+            outer_member: Bool,
+            inner_member: Bool,
+            listed: Vec<usize>,
+        }
+
+        let _cli_owner = crate::diagnostics::ProcessOwnership::begin();
+        let captured = Rc::new(Cell::new(None));
+        let capture = captured.clone();
+        let resume_attempted = Rc::new(Cell::new(false));
+        let resumed = resume_attempted.clone();
+        let child_wait = Rc::new(Cell::new(None));
+        let waited = child_wait.clone();
+        AFTER_CREATE.with(|hook| *hook.borrow_mut() = Some(Box::new(move |job, child| {
+            let observed = (|| -> Result<Observation, GuardError> {
+                let before = unsafe { WaitForSingleObject(child, 0) };
+                if before == WAIT_FAILED {
+                    return Err(GuardError(format!("query suspended child signal: {}", os_error())));
+                }
+                let pid = unsafe { GetProcessId(child) };
+                if pid == 0 {
+                    return Err(GuardError(format!("query original child PID: {}", os_error())));
+                }
+                let current = unsafe { GetCurrentProcess() };
+                let mut duplicate = std::ptr::null_mut();
+                checked(unsafe {
+                    DuplicateHandle(current, child, current, &mut duplicate, 0, 0, DUPLICATE_SAME_ACCESS)
+                }).map_err(|error| GuardError(format!("retain original child: {error}")))?;
+                let retained_child = unsafe { OwnedHandle::from_raw_handle(duplicate) };
+
+                // A fresh default Job has no kill-on-close limit. The engine's
+                // original Job remains the only owner of child teardown.
+                let inner = unsafe { CreateJobObjectW(std::ptr::null_mut(), std::ptr::null()) };
+                if inner.is_null() {
+                    return Err(GuardError(format!("create inner Job: {}", os_error())));
+                }
+                let _inner_owner = unsafe { OwnedHandle::from_raw_handle(inner) };
+                checked(unsafe { AssignProcessToJobObject(inner, child) })
+                    .map_err(|error| GuardError(format!("assign retained child to inner Job: {error}")))?;
+                let mut inner_member = 0;
+                checked(unsafe { IsProcessInJob(child, inner, &mut inner_member) })
+                    .map_err(|error| GuardError(format!("query inner Job membership: {error}")))?;
+                let mut outer_member = 0;
+                checked(unsafe { IsProcessInJob(child, job, &mut outer_member) })
+                    .map_err(|error| GuardError(format!("query outer Job membership: {error}")))?;
+                let deadline = Instant::now() + Duration::from_secs(5);
+                let listed = with_cleanup_job_process_ids(job, deadline, |result| {
+                    result.map(|ids| ids.to_vec())
+                }).map_err(|error| GuardError(format!("read complete outer Job process list: {error:?}")))?;
+                Ok(Observation { child, retained_child, pid, before, outer_member, inner_member, listed })
+            })();
+            capture.set(Some(observed));
+        })));
+        BEFORE_RESUME.with(|hook| *hook.borrow_mut() = Some(Box::new(move || resumed.set(true))));
+        AFTER_CHILD_CLEANUP.with(|hook| *hook.borrow_mut() = Some(Box::new(move |child, status| {
+            waited.set(Some((child, status)));
+        })));
+        let argv = ["cmd.exe".into(), "/d".into(), "/c".into(), "exit /b 37".into()];
+        let outcome = run_job_with(&argv, 0.0, None, false, &RunMode { library: true, ..RunMode::default() });
+        AFTER_CREATE.with(|hook| *hook.borrow_mut() = None);
+        BEFORE_RESUME.with(|hook| *hook.borrow_mut() = None);
+        AFTER_CHILD_CLEANUP.with(|hook| *hook.borrow_mut() = None);
+
+        let raw = captured.take().expect("the engine created its suspended original child");
+        let observed = raw.unwrap_or_else(|error| panic!("nested Job observation failed: {error}; run: {outcome:?}"));
+        assert_eq!(outcome.expect("the original guarded run cleanup is confirmed"), 124);
+        assert!(!resume_attempted.get(), "the original child never reached ResumeThread");
+        assert_eq!(observed.before, WAIT_TIMEOUT, "the held original was unsignaled before nesting");
+        assert_ne!(observed.inner_member, 0, "the child belongs to the fresh inner Job");
+        assert_ne!(observed.outer_member, 0, "the exact retained child still belongs to the outer Job");
+        let original_entries = observed.listed.iter().filter(|&&pid| pid == observed.pid as usize).count();
+        assert_eq!(original_entries, 1, "complete outer Job list: {:?}", observed.listed);
+        assert_eq!(child_wait.get(), Some((observed.child, Some(WAIT_OBJECT_0))));
+        let retained = observed.retained_child.as_raw_handle();
+        assert_eq!(unsafe { GetProcessId(retained) }, observed.pid);
+        assert_eq!(unsafe { WaitForSingleObject(retained, 0) }, WAIT_OBJECT_0);
+        let mut code = 0;
+        assert_ne!(unsafe { GetExitCodeProcess(retained, &mut code) }, 0);
+        assert_eq!(code, 124, "the original child was terminated by its engine Job");
+    }
+
+    #[test]
+    fn cleanup_member_admission_rejects_a_foreign_opened_process() {
+        use std::os::windows::io::{FromRawHandle, OwnedHandle};
+        let job = unsafe { CreateJobObjectW(std::ptr::null_mut(), std::ptr::null()) };
+        assert!(!job.is_null());
+        let _job_owner = unsafe { OwnedHandle::from_raw_handle(job) };
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(1);
+        with_cleanup_job_process_ids(job, deadline, |ids| assert_eq!(ids, Ok(&[][..])));
+        // Deterministic stale-slot seam: the number opens an actual live
+        // process outside this exact, newly created Job.
+        let reported_pid = unsafe { GetCurrentProcessId() } as usize;
+        let mut members = HandleList::new();
+        let mut failure = None;
+        capture_job_members(Ok(&[reported_pid]), &mut members, &mut failure,
+            |id| open_cleanup_member(job, id, deadline));
+        assert!(members.is_empty(), "the foreign opened process cannot be waited on");
+        assert_eq!(failure, Some(MemberCaptureFailure::OutsideJob { reported_pid }));
+        assert!(!finalize_cleanup(Ok(124), CleanupObservation {
+            member_capture_failure: failure, ..cleanup_observation()
+        }).1);
+    }
+
+    #[test]
     fn cleanup_skipped_member_suffix_cannot_be_erased_by_job_zero() {
         let mut uncertainty = None;
-        observe_member_cleanup(&[1usize as Handle], 0, 72, &mut uncertainty, |_, _| panic!("no new wait after deadline"));
+        let deadline = Instant::now();
+        observe_member_cleanup(&[1usize as Handle], deadline, || deadline, 72, &mut uncertainty,
+            |_, _| panic!("no new wait after deadline"));
         assert_eq!(uncertainty, Some(MemberWaitUncertainty {
-            status: None, win32_error: None, unconfirmed_handles: 72,
+            status: None, win32_error: None, in_budget: false, unconfirmed_handles: 72,
         }));
         assert!(!finalize_cleanup(Ok(0), CleanupObservation {
             member_wait_uncertainty: uncertainty, ..cleanup_observation()
@@ -1556,14 +1890,16 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         // These are status-classification boundary controls, not native proof
         // that every code in the documented WaitAll range occurs on this host.
         let handles = [1usize as Handle; 64];
+        let start = Instant::now();
+        let deadline = start + Duration::from_millis(1);
         for status in [WAIT_OBJECT_0, WAIT_OBJECT_0 + 63] {
             let mut uncertainty = None;
-            observe_member_cleanup(&handles, 1, handles.len(), &mut uncertainty, |_, _| status);
+            observe_member_cleanup(&handles, deadline, || start, handles.len(), &mut uncertainty, |_, _| status);
             assert_eq!(uncertainty, None);
         }
         for status in [WAIT_OBJECT_0 + 64, 128, WAIT_TIMEOUT] {
             let mut uncertainty = None;
-            observe_member_cleanup(&handles, 1, handles.len(), &mut uncertainty, |_, _| status);
+            observe_member_cleanup(&handles, deadline, || start, handles.len(), &mut uncertainty, |_, _| status);
             assert_eq!(uncertainty.unwrap().status, Some(status));
         }
     }

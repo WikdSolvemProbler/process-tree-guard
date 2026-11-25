@@ -4,15 +4,17 @@
 //! The waits of a run: the plain and extendable deadline waits over the child and its owners, and the teardown wait.
 
 use super::*;
+use std::time::Instant;
 
 
 use crate::sys::windows::{
 
     BASIC_ACCOUNTING_CLASS, BasicAccountingInformation, CloseHandle, CreateWaitableTimerExW,
 
-    GetLastError, GetSystemTimeAsFileTime, GetTickCount64, Handle, OpenProcess,
+    ERROR_MORE_DATA, GetLastError, GetSystemTimeAsFileTime, GetTickCount64, Handle, IsProcessInJob,
 
-    PROCESS_ID_LIST_CLASS, QueryInformationJobObject, SYNCHRONIZE, SetLastError, SetWaitableTimer,
+    OpenProcess, PROCESS_ID_LIST_CLASS, PROCESS_QUERY_LIMITED_INFORMATION, QueryInformationJobObject,
+    SYNCHRONIZE, SetLastError, SetWaitableTimer,
 
     Sleep, TIMER_ALL_ACCESS, TerminateJobObject, WAIT_FAILED, WAIT_OBJECT_0, WAIT_TIMEOUT,
 
@@ -325,12 +327,8 @@ thread_local! { static JOB_ID_BUFFER: std::cell::RefCell<Vec<usize>> = const { s
 /// those in jobs nested in it included, as the scratch
 /// buffer holds them (pointer-sized; the list is
 /// JOBOBJECT_BASIC_PROCESS_ID_LIST: two 32 bit counts, then pointer
-/// sized IDs), or with None when the list
-/// cannot be read. Callers that only test membership in the list or
-/// open the processes in it use this form: no vector of the
-/// identifiers is built and copied out for them, on a path the
-/// supervisor walks on every pass while a hold is live and teardown
-/// walks once per run.
+/// sized IDs), or with None when the list cannot be read.
+#[cfg(test)]
 pub(crate) fn with_job_process_ids<R>(job: Handle, use_ids: impl FnOnce(Option<&[usize]>) -> R) -> R {
     with_job_process_ids_form(job, false, use_ids)
 }
@@ -384,53 +382,83 @@ fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(
     })
 }
 
-/// Terminate every process in the job and wait, at most `milliseconds`, until
-/// each has fully exited. Termination is asynchronous, so without this the
-/// guard could return while a descendant is still exiting. Processes are
-/// opened before termination so each one can be waited on by handle.
-/// Returns whether the job emptied, and the unspent remainder of the one
-/// teardown budget: the wait on the child shares that budget, it does not
-/// start a second one.
-pub(super) fn terminate_and_wait(job: Handle, code: u32, milliseconds: u32, member_wait_uncertainty: &mut Option<MemberWaitUncertainty>, member_capture_failure: &mut Option<MemberCaptureFailure>, job_termination_error: &mut Option<u32>) -> (bool, u32) {
-    if active_processes(job) == Some(0) { return (true, milliseconds); }
-    let start = std::time::Instant::now();
-    let deadline = start + std::time::Duration::from_millis(u64::from(milliseconds));
-    // The members are held in the same inline list as the run's other
-    // handle sets: the ordinary handful of processes never allocates,
-    // and a deeper tree spills to one vector, as `HandleList` does
-    // everywhere else. The windows below slice it through its `Deref`,
-    // which is the spill when there is one and the inline array when
-    // there is not — either way one contiguous run of handles.
-    let mut members = HandleList::new();
-    with_job_process_ids(job, |ids| {
-        capture_job_members(ids, &mut members, member_capture_failure, |id| unsafe {
-            OpenProcess(SYNCHRONIZE, 0, id as u32)
-        });
-    });
-    observe_job_termination(job_termination_error, || unsafe { TerminateJobObject(job, code) });
-    // Wait on the members in windows of the native wait's handle
-    // limit, every member of a window at once: one wait and one
-    // clock read per window replace one wait and one clock read per
-    // member, under the same single budget the serial waits shared —
-    // a window's wait spends at most what is left of it, and a window
-    // reached with nothing left is not waited on at all.
-    let mut next = 0;
-    while next < members.len() {
-        let end = (next + 64).min(members.len());
-        let remaining = deadline.saturating_duration_since(std::time::Instant::now()).as_millis() as u32;
-        let chunk = &members[next..end];
-        let unconfirmed_handles = if remaining == 0 { members.len() - next } else { chunk.len() };
-        observe_member_cleanup(chunk, remaining, unconfirmed_handles, member_wait_uncertainty, |handles, milliseconds| unsafe {
-            WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
-        });
-        if remaining == 0 { break; }
-        next = end;
+struct CleanupMemberHandles(HandleList);
+
+impl Drop for CleanupMemberHandles {
+    fn drop(&mut self) {
+        for &handle in self.0.iter() {
+            unsafe { CloseHandle(handle) };
+        }
     }
-    for &handle in members.iter() {
-        unsafe { CloseHandle(handle) };
+}
+
+/// Retain verified original members before terminating the owned Job, so
+/// membership information released by termination cannot elide their waits.
+pub(super) fn terminate_and_wait(
+    job: Handle, code: u32, deadline: Instant,
+    member_wait_uncertainty: &mut Option<MemberWaitUncertainty>,
+    member_capture_failure: &mut Option<MemberCaptureFailure>,
+    job_termination_error: &mut Option<u32>,
+) -> bool {
+    let mut members = CleanupMemberHandles(HandleList::new());
+    if let Some(empty) = begin_job_cleanup(
+        deadline, Instant::now, || active_processes(job),
+        |failure| with_cleanup_job_process_ids(job, deadline, |ids| {
+            capture_job_members(ids, &mut members.0, failure,
+                |id| open_cleanup_member(job, id, deadline));
+        }),
+        || unsafe { TerminateJobObject(job, code) }, member_capture_failure, job_termination_error,
+    ) {
+        return empty;
     }
-    let empty = wait_until_empty(job, deadline);
-    (empty, deadline.saturating_duration_since(std::time::Instant::now()).as_millis() as u32)
+    for (index, chunk) in members.0.chunks(64).enumerate() {
+        let unvisited = members.0.len() - index * 64;
+        if !observe_member_cleanup(chunk, deadline, Instant::now, unvisited, member_wait_uncertainty,
+            |handles, milliseconds| unsafe {
+                WaitForMultipleObjects(handles.len() as u32, handles.as_ptr(), 1, milliseconds)
+            })
+        {
+            break;
+        }
+    }
+    drop(members);
+    wait_until_empty(job, deadline, member_capture_failure)
+}
+
+/// An empty initial result needs no kill. A late result cannot certify cleanup.
+/// For any active or unknown Job, finish or refuse bounded capture before the
+/// one termination request. Capture faults never suppress termination.
+pub(super) fn begin_job_cleanup(
+    deadline: Instant, now: impl FnMut() -> Instant,
+    query: impl FnOnce() -> Result<u32, u32>,
+    capture: impl FnOnce(&mut Option<MemberCaptureFailure>), terminate: impl FnOnce() -> i32,
+    failure: &mut Option<MemberCaptureFailure>, termination_error: &mut Option<u32>,
+) -> Option<bool> {
+    let observed = observe_job_accounting(deadline, now, query);
+    let accounting_fault = match observed {
+        Some((_, true)) => None,
+        Some((result, false)) => Some(MemberCaptureFailure::JobAccountingOverdue { result }),
+        None => Some(MemberCaptureFailure::BudgetExpired),
+    };
+    if let Some(reason) = accounting_fault {
+        failure.get_or_insert(reason);
+    }
+    if matches!(observed, Some((Ok(0), _))) {
+        return Some(accounting_fault.is_none());
+    }
+    if accounting_fault.is_none() {
+        capture(failure);
+    }
+    observe_job_termination(termination_error, terminate);
+    accounting_fault.map(|_| false)
+}
+
+fn observe_job_accounting(
+    deadline: Instant, mut now: impl FnMut() -> Instant, query: impl FnOnce() -> Result<u32, u32>,
+) -> Option<(Result<u32, u32>, bool)> {
+    if now() >= deadline { return None; }
+    let result = query();
+    Some((result, now() < deadline))
 }
 
 /// Retain a failed kill request separately from wait or member-capture facts.
@@ -443,83 +471,209 @@ pub(super) fn observe_job_termination(error: &mut Option<u32>, terminate: impl F
     }
 }
 
-/// A failed capture is not a native wait receipt or a count of missing members.
-/// Keep the first failure even if later captures, waits and Job queries succeed.
+/// The first missing or unverified member observation remains a cleanup fault.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum MemberCaptureFailure {
     Query { win32_error: u32 },
+    Capacity { assigned: usize, capacity: usize },
+    Allocation { capacity: usize },
+    JobAccountingQuery { win32_error: u32 },
+    JobAccountingOverdue { result: Result<u32, u32> },
+    IncompleteList { assigned: usize, listed: usize, returned_bytes: usize },
+    BudgetExpired,
+    InvalidPid { reported_pid: usize },
     Open { reported_pid: usize, win32_error: u32 },
+    Membership { reported_pid: usize, win32_error: u32 },
+    OutsideJob { reported_pid: usize },
 }
 
-/// Capture the same successful handles in the same order. The query failure
-/// reaches this callback before the query helper drops its scratch borrow.
-/// On either failure, read LastError before any later native operation.
+pub(super) fn with_cleanup_job_process_ids<R>(
+    job: Handle,
+    deadline: std::time::Instant,
+    use_ids: impl FnOnce(Result<&[usize], MemberCaptureFailure>) -> R,
+) -> R {
+    JOB_ID_BUFFER.with(|buffer| {
+        let mut buffer = buffer.borrow_mut();
+        let ids = cleanup_job_process_ids(&mut buffer, deadline, Instant::now, |words, buffer_bytes| {
+            let mut returned_bytes = 0;
+            let ok = unsafe {
+                QueryInformationJobObject(job, PROCESS_ID_LIST_CLASS, words.as_mut_ptr().cast(),
+                    buffer_bytes, &mut returned_bytes)
+            };
+            if ok == 0 { Err(unsafe { GetLastError() }) } else { Ok(returned_bytes as usize) }
+        });
+        use_ids(ids)
+    })
+}
+
+pub(super) const MAX_CLEANUP_JOB_IDS: usize = 1 << 20;
+
+pub(super) fn bounded_cleanup_capacity(capacity: usize, assigned: usize) -> usize {
+    capacity.checked_mul(2).unwrap_or(MAX_CLEANUP_JOB_IDS)
+        .max(assigned).min(MAX_CLEANUP_JOB_IDS)
+}
+
+/// Read a complete native list under the teardown deadline. The two DWORD
+/// counts precede the pointer-sized IDs. Size retries cannot exceed the cap.
+pub(super) fn cleanup_job_process_ids(
+    buffer: &mut Vec<usize>, deadline: Instant, mut now: impl FnMut() -> Instant,
+    mut query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
+) -> Result<&[usize], MemberCaptureFailure> {
+    const HEADER_BYTES: usize = 2 * std::mem::size_of::<u32>();
+    const WORD_BYTES: usize = std::mem::size_of::<usize>();
+    const HEADER_WORDS: usize = HEADER_BYTES / WORD_BYTES;
+    let mut capacity = 1024;
+    loop {
+        if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+        let capacity_error = MemberCaptureFailure::Capacity { assigned: capacity, capacity: MAX_CLEANUP_JOB_IDS };
+        let words = HEADER_WORDS.checked_add(capacity).ok_or(capacity_error)?;
+        let byte_capacity = words.checked_mul(WORD_BYTES).ok_or(capacity_error)?;
+        let native_bytes = u32::try_from(byte_capacity).map_err(|_| capacity_error)?;
+        if buffer.len() < words {
+            buffer.try_reserve_exact(words - buffer.len())
+                .map_err(|_| MemberCaptureFailure::Allocation { capacity })?;
+            buffer.resize(words, 0);
+        }
+        buffer[..HEADER_WORDS].fill(0);
+        if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+        let returned_bytes = match query(&mut buffer[..words], native_bytes) {
+            Ok(bytes) => bytes,
+            Err(ERROR_MORE_DATA) if capacity < MAX_CLEANUP_JOB_IDS => {
+                capacity = bounded_cleanup_capacity(capacity, 0);
+                continue;
+            }
+            Err(win32_error) => return Err(MemberCaptureFailure::Query { win32_error }),
+        };
+        if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+        let (assigned, listed) = unsafe {
+            let header = buffer.as_ptr().cast::<u32>();
+            (*header as usize, *header.add(1) as usize)
+        };
+        let incomplete = MemberCaptureFailure::IncompleteList { assigned, listed, returned_bytes };
+        let used_words = HEADER_WORDS.checked_add(listed).ok_or(incomplete)?;
+        let needed = used_words.checked_mul(WORD_BYTES).ok_or(incomplete)?;
+        if listed > capacity || !(needed..=byte_capacity).contains(&returned_bytes) {
+            return Err(incomplete);
+        }
+        if assigned > MAX_CLEANUP_JOB_IDS {
+            return Err(MemberCaptureFailure::Capacity { assigned, capacity: MAX_CLEANUP_JOB_IDS });
+        }
+        if assigned > capacity && listed == capacity {
+            capacity = bounded_cleanup_capacity(capacity, assigned);
+            continue;
+        }
+        if assigned != listed {
+            return Err(incomplete);
+        }
+        return Ok(&buffer[HEADER_WORDS..used_words]);
+    }
+}
+
+/// The PID list is a hint. Wait only on the opened process object that
+/// a native membership query places in the exact held Job.
+pub(super) fn open_cleanup_member(
+    job: Handle, reported_pid: usize, deadline: Instant,
+) -> Result<Handle, MemberCaptureFailure> {
+    if Instant::now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+    let pid = u32::try_from(reported_pid).ok().filter(|pid| *pid != 0)
+        .ok_or(MemberCaptureFailure::InvalidPid { reported_pid })?;
+    let handle = unsafe { OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, 0, pid) };
+    if handle.is_null() {
+        return Err(MemberCaptureFailure::Open { reported_pid, win32_error: unsafe { GetLastError() } });
+    }
+    let failure = if Instant::now() >= deadline {
+        MemberCaptureFailure::BudgetExpired
+    } else {
+        let mut member = 0;
+        if unsafe { IsProcessInJob(handle, job, &mut member) } == 0 {
+            MemberCaptureFailure::Membership { reported_pid, win32_error: unsafe { GetLastError() } }
+        } else if member == 0 {
+            MemberCaptureFailure::OutsideJob { reported_pid }
+        } else if Instant::now() >= deadline {
+            MemberCaptureFailure::BudgetExpired
+        } else {
+            return Ok(handle);
+        }
+    };
+    unsafe { CloseHandle(handle) };
+    Err(failure)
+}
+
+/// Keep validated handles in native list order and the first capture fault.
 pub(super) fn capture_job_members(
-    ids: Option<&[usize]>,
+    ids: Result<&[usize], MemberCaptureFailure>,
     members: &mut HandleList,
     failure: &mut Option<MemberCaptureFailure>,
-    mut open: impl FnMut(usize) -> Handle,
+    mut capture: impl FnMut(usize) -> Result<Handle, MemberCaptureFailure>,
 ) {
-    match ids {
-        Some(ids) => {
-            for &id in ids {
-                let handle = open(id);
-                if handle.is_null() {
-                    let win32_error = unsafe { GetLastError() };
-                    if failure.is_none() {
-                        *failure = Some(MemberCaptureFailure::Open { reported_pid: id, win32_error });
-                    }
-                } else {
-                    members.push(handle);
-                }
-            }
+    let ids = match ids {
+        Ok(ids) => ids,
+        Err(reason) => {
+            failure.get_or_insert(reason);
+            return;
         }
-        None => {
-            let win32_error = unsafe { GetLastError() };
-            if failure.is_none() {
-                *failure = Some(MemberCaptureFailure::Query { win32_error });
+    };
+    for &id in ids {
+        match capture(id) {
+            Ok(handle) => members.push(handle),
+            Err(reason) => {
+                failure.get_or_insert(reason);
+                if reason == MemberCaptureFailure::BudgetExpired { break; }
             }
         }
     }
 }
 
 /// The first retained-member window whose terminality was not confirmed.
-/// None status means the existing budget expired before a native wait; it is
-/// not a fabricated native timeout. The count is the first failed batch, or
-/// the unvisited suffix when the budget first expires; it is not a total.
+/// A missing status means no native call began before the deadline.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct MemberWaitUncertainty {
     pub(super) status: Option<u32>,
     pub(super) win32_error: Option<u32>,
+    pub(super) in_budget: bool,
     pub(super) unconfirmed_handles: usize,
 }
 
-/// Perform the existing bounded WaitAll, capturing its failure before any
-/// owned-handle close. No native call is added on a successful window, and a
-/// spent budget never starts another wait. Preserve the documented success
-/// range rather than interpreting an abandoned or unexpected code as success.
+/// Keep actual status and LastError even if the result returned too late.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(super) struct CleanupWait {
+    pub(super) status: Option<u32>,
+    pub(super) win32_error: Option<u32>,
+    pub(super) in_budget: bool,
+}
+
+fn observe_cleanup_wait(
+    deadline: Instant, mut now: impl FnMut() -> Instant, wait: impl FnOnce(u32) -> u32,
+) -> CleanupWait {
+    let Some(remaining) = deadline.checked_duration_since(now()).filter(|t| !t.is_zero()) else {
+        return CleanupWait::default();
+    };
+    // Rounding down keeps the wait finite. Zero polls fit a positive remainder.
+    let milliseconds = remaining.as_millis().min(u128::from(u32::MAX - 1)) as u32;
+    let status = wait(milliseconds);
+    let win32_error = (status == WAIT_FAILED).then(|| unsafe { GetLastError() });
+    CleanupWait { status: Some(status), win32_error, in_budget: now() < deadline }
+}
+
+/// WaitAll uses the same absolute deadline and keeps the first fault.
 #[inline]
 pub(super) fn observe_member_cleanup(
-    handles: &[Handle],
-    milliseconds: u32,
-    unconfirmed_handles: usize,
-    uncertainty: &mut Option<MemberWaitUncertainty>,
+    handles: &[Handle], deadline: Instant, now: impl FnMut() -> Instant,
+    unvisited_handles: usize, uncertainty: &mut Option<MemberWaitUncertainty>,
     wait: impl FnOnce(&[Handle], u32) -> u32,
-) {
-    let observed = if milliseconds == 0 {
-        Some(MemberWaitUncertainty { status: None, win32_error: None, unconfirmed_handles })
-    } else {
-        let status = wait(handles, milliseconds);
-        let win32_error = if status == WAIT_FAILED { Some(unsafe { GetLastError() }) } else { None };
-        if status.checked_sub(WAIT_OBJECT_0).is_some_and(|index| (index as usize) < handles.len()) {
-            None
-        } else {
-            Some(MemberWaitUncertainty { status: Some(status), win32_error, unconfirmed_handles })
-        }
-    };
-    // Later successful waits or accounting zero cannot erase the first fault.
-    // Continue the pre-existing later waits under their same single deadline.
-    if uncertainty.is_none() { *uncertainty = observed; }
+) -> bool {
+    let result = observe_cleanup_wait(deadline, now, |milliseconds| wait(handles, milliseconds));
+    let complete = result.in_budget && result.status
+        .and_then(|status| status.checked_sub(WAIT_OBJECT_0))
+        .is_some_and(|index| (index as usize) < handles.len());
+    if !complete && uncertainty.is_none() {
+        let unconfirmed_handles = if result.status.is_some() { handles.len() } else { unvisited_handles };
+        *uncertainty = Some(MemberWaitUncertainty {
+            status: result.status, win32_error: result.win32_error, in_budget: result.in_budget,
+            unconfirmed_handles,
+        });
+    }
+    result.in_budget
 }
 
 /// Facts already collected by the one bounded teardown; this performs no wait.
@@ -534,6 +688,7 @@ pub(super) struct CleanupObservation {
     pub(super) child_exited: bool,
     pub(super) original_child_wait: Option<u32>,
     pub(super) original_child_wait_error: Option<u32>,
+    pub(super) original_child_wait_in_budget: bool,
 }
 
 /// Preserve the original result only after the required native cleanup proof.
@@ -545,7 +700,7 @@ pub(super) fn finalize_cleanup(
 ) -> (Result<u32, GuardError>, bool) {
     let job_confirmed = !observed.assigned || observed.job_proven_empty;
     let child_confirmed = !observed.child_created || observed.child_exited
-        || observed.original_child_wait == Some(WAIT_OBJECT_0);
+        || (observed.original_child_wait_in_budget && observed.original_child_wait == Some(WAIT_OBJECT_0));
     if job_confirmed && child_confirmed && observed.member_wait_uncertainty.is_none()
         && observed.member_capture_failure.is_none() && observed.job_termination_error.is_none() {
         (outcome, true)
@@ -561,59 +716,47 @@ fn unconfirmed_cleanup_error(outcome: Result<u32, GuardError>, observed: Cleanup
         Err(error) => format!("original run error: {}", error.message()),
     };
     GuardError(format!(
-        "process-tree cleanup could not be confirmed (job_assigned={}, job_empty={}, member_wait_uncertainty={:?}, member_capture_failure={:?}, job_termination_error={:?}, child_created={}, child_previously_exited={}, original_child_wait={:?}, native_wait_error={:?}); {original}",
+        "process-tree cleanup could not be confirmed (job_assigned={}, job_empty={}, member_wait_uncertainty={:?}, member_capture_failure={:?}, job_termination_error={:?}, child_created={}, child_previously_exited={}, original_child_wait={:?}, native_wait_error={:?}, original_child_wait_in_budget={}); {original}",
         observed.assigned, observed.job_proven_empty, observed.member_wait_uncertainty, observed.member_capture_failure, observed.job_termination_error, observed.child_created, observed.child_exited,
-        observed.original_child_wait, observed.original_child_wait_error,
+        observed.original_child_wait, observed.original_child_wait_error, observed.original_child_wait_in_budget,
     ))
 }
 
-/// Only a prior native observation of this child establishes its terminality.
-/// Job accounting is not a substitute for waiting on the retained child handle.
-/// Return the actual bounded wait result; never manufacture a native signal.
-/// The wait is bounded by `milliseconds`, the unspent remainder of the
-/// teardown budget, never a fresh budget of its own.
-pub(super) fn observe_child_cleanup(child: Handle, child_exited: bool, milliseconds: u32, wait: impl FnOnce(Handle, u32) -> u32) -> Option<u32> {
-    if child.is_null() || child_exited { None } else { Some(wait(child, milliseconds)) }
-}
-
-/// Collect the existing original-object wait and its error before any cleanup
-/// can change LastError. Previously observed exits retain their no-wait path.
-pub(super) fn observe_child_cleanup_with_error(
-    child: Handle,
-    child_exited: bool,
-    milliseconds: u32,
+/// A previously observed exit needs no other wait. Otherwise compute the
+/// remaining allowance immediately before waiting on the original handle.
+pub(super) fn observe_child_cleanup(
+    child: Handle, child_exited: bool, deadline: Instant, now: impl FnMut() -> Instant,
     wait: impl FnOnce(Handle, u32) -> u32,
-) -> (Option<u32>, Option<u32>) {
-    let mut error = None;
-    let status = observe_child_cleanup(child, child_exited, milliseconds, |child, milliseconds| {
-        let status = wait(child, milliseconds);
-        if status == WAIT_FAILED { error = Some(unsafe { GetLastError() }); }
-        status
-    });
-    (status, error)
+) -> CleanupWait {
+    if child.is_null() || child_exited { return CleanupWait::default(); }
+    observe_cleanup_wait(deadline, now, |milliseconds| wait(child, milliseconds))
 }
 
-
-/// Wait, at most `milliseconds`, until the job reports no active process.
-fn active_processes(job: Handle) -> Option<u32> {
+/// Query the exact held Job and retain the native error at the call boundary.
+fn active_processes(job: Handle) -> Result<u32, u32> {
     let mut info = BasicAccountingInformation::default();
     let ok = unsafe { QueryInformationJobObject(job, BASIC_ACCOUNTING_CLASS,
         &mut info as *mut _ as *mut c_void, std::mem::size_of::<BasicAccountingInformation>() as u32,
         std::ptr::null_mut()) };
-    (ok != 0).then_some(info.active_processes)
+    if ok == 0 { Err(unsafe { GetLastError() }) } else { Ok(info.active_processes) }
 }
 
-/// Wait until the job reports no active process, or the teardown
-/// deadline is reached: the one deadline of `terminate_and_wait`,
-/// passed in, not a second budget measured from here.
-fn wait_until_empty(job: Handle, deadline: std::time::Instant) -> bool {
+fn wait_until_empty(job: Handle, deadline: Instant, failure: &mut Option<MemberCaptureFailure>) -> bool {
     loop {
-        match active_processes(job) {
-            Some(0) => return true,
-            None => return false,
-            _ => {}
-        }
-        if std::time::Instant::now() >= deadline { return false; }
-        unsafe { Sleep(10) };
+        let reason = match observe_job_accounting(deadline, Instant::now, || active_processes(job)) {
+            Some((Ok(0), true)) => return true,
+            Some((Ok(_), true)) => {
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                let milliseconds = remaining.as_millis().min(10) as u32;
+                if milliseconds == 0 { return false; }
+                unsafe { Sleep(milliseconds) };
+                continue;
+            }
+            Some((Err(win32_error), true)) => MemberCaptureFailure::JobAccountingQuery { win32_error },
+            Some((result, false)) => MemberCaptureFailure::JobAccountingOverdue { result },
+            None => MemberCaptureFailure::BudgetExpired,
+        };
+        failure.get_or_insert(reason);
+        return false;
     }
 }

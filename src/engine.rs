@@ -656,25 +656,24 @@ fn run_job_core<D: Decisions>(
     let mut member_wait_uncertainty = None;
     let mut member_capture_failure = None;
     let mut job_termination_error = None;
-    // One teardown budget: what terminating the job did not spend of it is
-    // all the wait on the child that follows may spend.
-    let mut teardown_remainder = TEARDOWN_BUDGET_MS;
+    // Anchor once before any Job query. A later child wait computes its own
+    // allowance from this same absolute deadline at the point of the wait.
+    let teardown_deadline = std::time::Instant::now()
+        + std::time::Duration::from_millis(u64::from(TEARDOWN_BUDGET_MS));
     let original_child_cleanup;
     unsafe {
         if assigned {
-            let (empty, remainder) = terminate_and_wait(job, EXIT_TIMEOUT as u32, TEARDOWN_BUDGET_MS, &mut member_wait_uncertainty, &mut member_capture_failure, &mut job_termination_error);
-            job_proven_empty = empty;
-            teardown_remainder = remainder;
-            trace(if empty && member_wait_uncertainty.is_none() && member_capture_failure.is_none() && job_termination_error.is_none() { "job empty" } else { "job cleanup unconfirmed" });
+            job_proven_empty = terminate_and_wait(job, EXIT_TIMEOUT as u32, teardown_deadline,
+                &mut member_wait_uncertainty, &mut member_capture_failure, &mut job_termination_error);
+            trace(if job_proven_empty && member_wait_uncertainty.is_none() && member_capture_failure.is_none() && job_termination_error.is_none() { "job empty" } else { "job cleanup unconfirmed" });
         } else if !info.process.is_null() {
             TerminateProcess(info.process, EXIT_GUARD_ERROR as u32);
         }
-        original_child_cleanup = observe_child_cleanup_with_error(info.process, child_exited, teardown_remainder, |child, milliseconds| {
-            WaitForSingleObject(child, milliseconds)
-        });
+        original_child_cleanup = observe_child_cleanup(info.process, child_exited, teardown_deadline,
+            std::time::Instant::now, |child, milliseconds| WaitForSingleObject(child, milliseconds));
         #[cfg(test)]
         AFTER_CHILD_CLEANUP.with(|hook| {
-            if let Some(observe) = hook.borrow().as_ref() { observe(info.process, original_child_cleanup.0); }
+            if let Some(observe) = hook.borrow().as_ref() { observe(info.process, original_child_cleanup.status); }
         });
     }
     // The channel is closed after the tree is gone, so a stalled client never delays the kill.
@@ -695,8 +694,9 @@ fn run_job_core<D: Decisions>(
     }
     let (outcome, cleanup_confirmed) = finalize_cleanup(outcome, CleanupObservation {
         assigned, job_proven_empty, member_wait_uncertainty, member_capture_failure, job_termination_error, child_created: !info.process.is_null(),
-        child_exited, original_child_wait: original_child_cleanup.0,
-        original_child_wait_error: original_child_cleanup.1,
+        child_exited, original_child_wait: original_child_cleanup.status,
+        original_child_wait_error: original_child_cleanup.win32_error,
+        original_child_wait_in_budget: original_child_cleanup.in_budget,
     });
     if !cleanup_confirmed {
         if let Some(timing) = timing.as_mut() { timing.invalidate_cleanup(); }

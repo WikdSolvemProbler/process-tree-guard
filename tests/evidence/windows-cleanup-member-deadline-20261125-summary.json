@@ -1,0 +1,297 @@
+{
+  "schema": "ptg-windows-cleanup-repair-v1",
+  "base_commit": "81c9a490667d8e3816bfe90fe00f09cffb72a3c1",
+  "status": "QUALIFIED_FOR_TESTED_WINDOWS_CLEANUP_SCOPE",
+  "source": [
+    {
+      "path": "src/engine.rs",
+      "bytes": 38457,
+      "sha256": "0b70c3b27d5b706f9eef43a453292879513a4d788bfdc07e2634d9f789fea2be",
+      "git_blob": "14f6e8e3788a7556b2f35503a5a6c956df592153"
+    },
+    {
+      "path": "src/engine/wait.rs",
+      "bytes": 36184,
+      "sha256": "2f86157728843e06617a6abe812e0ec5e90573aaab2cc3be03878c08d6b49d97",
+      "git_blob": "39b97e05f2e40722594dabbceefcf52531cf3073"
+    },
+    {
+      "path": "src/engine/tests.rs",
+      "bytes": 106965,
+      "sha256": "143bf0719727958e199cc9e792ee4a9df4a633a2c9015e0c7b6f3a55724976c0",
+      "git_blob": "12ce90bb414c1a433406314f7a46de8f4ac801d5"
+    }
+  ],
+  "repairs": [
+    "Check complete native Job PID counts and returned byte length, bounded checked allocation growth, and a strict 1048576-ID ceiling at the prior nominal limit.",
+    "Open noninheritable synchronization/query handles and affirm membership of that exact process object in the exact held Job before retaining it for a wait.",
+    "Retain verified members before the owned Job termination request; a capture failure or expiry cannot suppress that request for active or unknown work.",
+    "Use one absolute five-second confirmation deadline from before the initial query through capture, retained WaitAll batches, final Job accounting, and the original-child wait. Compute the original-child wait allowance at its actual boundary.",
+    "Preserve actual native results and errors; overdue, failed, missing or incomplete required proof vetoes success even if the Job later empties.",
+    "Release retained member handles on every return path and before final Job accounting. Restrict the old unused unsorted query wrapper to tests; leave the live sorted extension helper unchanged."
+  ],
+  "preserved": [
+    "atomic Job assignment before child resume",
+    "owner monitoring and original execution deadline",
+    "Job kill-on-close and no-breakaway policy",
+    "existing console behavior",
+    "published standard-handle inheritance repair",
+    "original cleanup confirmation budget of 5000 milliseconds"
+  ],
+  "no_separate_acquisition_threshold": true,
+  "build": {
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "debug",
+    "jobs": 1,
+    "feature_note": "The existing development dependency enables testkit. These are test builds."
+  },
+  "passed_qualification": {
+    "library_outer_tests_passed": 307,
+    "existing_nested_single_test_child_passed": 1,
+    "nested_child_not_extra_unique_outer_test": true,
+    "g28": {
+      "functions_passed": 1,
+      "timeout_exit": 124,
+      "natural_exit": 0,
+      "memory_touch_markers": "both passed",
+      "existing_native_child_gone_predicates": "both passed",
+      "test_and_helper_oracles_changed": false
+    },
+    "targeted_functions_passed": {
+      "g43": 2,
+      "g44": 1,
+      "g46": 1
+    },
+    "g43": "Return/deadline checks plus all five exact stream, host-handle preservation and unrelated-event isolation cases.",
+    "g44": "Direct-owner loss returned 125 and the existing descendant-gone check passed.",
+    "g46": "The existing shell return-code and deadline cases passed.",
+    "native_unit_evidence": [
+      "Real empty and nonempty Job PID lists accepted by the complete-list parser",
+      "The same suspended original verified in a fresh nested Job and its held outer Job, then terminated without resume",
+      "Actual foreign-process admission rejected without retaining that object for a member wait",
+      "Deterministic count/cap, ordering, expiry, late-result and sticky-error seams"
+    ],
+    "clippy_exit": 0,
+    "changed_line_clippy_diagnostics": 0,
+    "existing_repository_warnings": "Retained; not a warning-free claim.",
+    "original_step_handles_joined": 6,
+    "all_step_exit_codes": 0,
+    "tracked_file_count": 1169,
+    "before_after_pins_equal": true,
+    "outer_guard_seconds": 1080,
+    "selected_step_deadlines_seconds": [
+      300,
+      120,
+      120,
+      120,
+      120,
+      180
+    ],
+    "commands": [
+      "cargo +stable-x86_64-pc-windows-msvc test --locked --target x86_64-pc-windows-msvc --lib -- --test-threads=1",
+      "cargo +stable-x86_64-pc-windows-msvc test --locked --target x86_64-pc-windows-msvc --test guard g28_slow_to_exit_descendant_is_gone_when_the_guard_returns -- --exact --test-threads=1 --nocapture",
+      "cargo +stable-x86_64-pc-windows-msvc test --locked --target x86_64-pc-windows-msvc --test guard g43_library_run -- --test-threads=1 --nocapture",
+      "cargo +stable-x86_64-pc-windows-msvc test --locked --target x86_64-pc-windows-msvc --test guard g44_library_run_ends_the_tree_with_125_when_the_parent_exits_during_the_call -- --exact --test-threads=1 --nocapture",
+      "cargo +stable-x86_64-pc-windows-msvc test --locked --target x86_64-pc-windows-msvc --test guard g46_library_run_shell_returns_the_shell_code_and_124_at_the_deadline -- --exact --test-threads=1 --nocapture",
+      "cargo +stable-x86_64-pc-windows-msvc clippy --locked --all-targets --all-features --target x86_64-pc-windows-msvc"
+    ]
+  },
+  "rejected_candidate": {
+    "status": "FAILED_NOT_PROMOTED",
+    "source_base_commit": "81c9a490667d8e3816bfe90fe00f09cffb72a3c1",
+    "source_patch": "windows-cleanup-rejected-postkill-20261125.patch",
+    "source_patch_pin": {
+      "bytes": 60099,
+      "sha256": "339a3f6a638ad881a4006080e66cd45ecea1e5ae8259d825c1a6c21913b0b158"
+    },
+    "source_patch_line_endings": "The patch contains normalized LF source. The recorded failed working files used CRLF.",
+    "source_pins": {
+      "src/engine.rs": {
+        "bytes": 38457,
+        "sha256": "0b70c3b27d5b706f9eef43a453292879513a4d788bfdc07e2634d9f789fea2be"
+      },
+      "src/engine/wait.rs": {
+        "bytes": 36061,
+        "sha256": "95611f218ec7602ad0d71301a7a356ffe1084b1dc01df8932d8d89ecf9eabe42"
+      },
+      "src/engine/tests.rs": {
+        "bytes": 103978,
+        "sha256": "8d8d8022c71d32e66180ac44b5ab0c6924ce98aae280cc657008b8fd0abca833"
+      }
+    },
+    "change_rejected": "Terminate first, then collect member handles from the Job list.",
+    "first_stage": "Its 305-test library suite and existing nested one-test child passed.",
+    "next_stage": "A genuine nonempty/nested Job companion passed; unchanged G28 then failed and stopped the carrier. G43/G44/G46/Clippy did not run in that failed carrier.",
+    "g28": {
+      "outer_carrier_exit": 1,
+      "cargo_exit": 101,
+      "timeout_exit": 124,
+      "natural_exit": 0,
+      "both_memory_touch_markers_passed": true,
+      "both_child_gone_predicates_passed": false
+    },
+    "failure_interpretation": "The test reopened both marked PIDs and received native WAIT_TIMEOUT. It retained no original descendant creation epoch/handle or per-member accounting trace. The record establishes a failed existing cleanup test, without establishing PID reuse or a specific ordering between Job accounting and the original process signals.",
+    "not_rescored": true,
+    "not_a_competitive_baseline": true,
+    "warning": "The source patch is rejected evidence for reproduction, not code to deploy."
+  },
+  "independent_review": {
+    "reviewers": [
+      "Sol designer",
+      "Sol critic"
+    ],
+    "exact_final_implementation_and_actual_results_approved": true,
+    "unresolved_objections": 0,
+    "scope": "Tested Windows cleanup and the stated source/receipt bindings; public-summary factual review is separate."
+  },
+  "retained_receipt_pins": {
+    "passed": {
+      "clippy.stderr.log": {
+        "bytes": 79610,
+        "sha256": "9611dd1f2f37cf196116604ed9a667ba587946b96d283955cd5844f441b82263"
+      },
+      "clippy.stdout.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "g28.stderr.log": {
+        "bytes": 558,
+        "sha256": "faf3476f5dc5e7badba0b4acc32cd1053414e4479325a463e70caba586238cf1"
+      },
+      "g28.stdout.log": {
+        "bytes": 552,
+        "sha256": "4d5a269faa2f797d6a18d53e971c910e53a6f62aa9a739eeb1f8d729c22c2c28"
+      },
+      "g43.stderr.log": {
+        "bytes": 482,
+        "sha256": "7822b391d12b2973b88012c179aa38d20c83419abfecf350895eaacfc4e89c1f"
+      },
+      "g43.stdout.log": {
+        "bytes": 1727,
+        "sha256": "d74679d5e3b1f0a6ab3242189c6dce3fd40d25bc8b1235fb75ad20dc092f53f4"
+      },
+      "g44.stderr.log": {
+        "bytes": 482,
+        "sha256": "7822b391d12b2973b88012c179aa38d20c83419abfecf350895eaacfc4e89c1f"
+      },
+      "g44.stdout.log": {
+        "bytes": 388,
+        "sha256": "8607b5b5ed84021b8c0a872ce94aa90f3a9538359ccdeaf3bd7404b8941f92fe"
+      },
+      "g46.stderr.log": {
+        "bytes": 482,
+        "sha256": "7822b391d12b2973b88012c179aa38d20c83419abfecf350895eaacfc4e89c1f"
+      },
+      "g46.stdout.log": {
+        "bytes": 941,
+        "sha256": "ee31b7210250ff80976189dc9ccc3bc1455d73e002d45c49ce2de10d68f58acd"
+      },
+      "INTENT.json": {
+        "bytes": 416,
+        "sha256": "d014b690b5e716f59e46458e9eb2936ef0d0b8ce8776c7db19d685320ba72378"
+      },
+      "lib.stderr.log": {
+        "bytes": 5298,
+        "sha256": "792f84432328a06af4273f5c79049986b98d4e82cbdc2403092f84caa8209cbe"
+      },
+      "lib.stdout.log": {
+        "bytes": 29258,
+        "sha256": "be6a72c7458805c2b17b83993879887c08575d0206c80e0f08a8dcb1a6a2586b"
+      },
+      "RESULT.json": {
+        "bytes": 3612,
+        "sha256": "90f2e249cf28fff99592b0013e2f977f47e2a58061c2e0c1fab436424e1ebadd"
+      },
+      "SOURCE-AFTER.json": {
+        "bytes": 225735,
+        "sha256": "f9a826430cfe205eaa78078b7312d70e1d5d42d7db0cd120fe5698b7d5a67747"
+      },
+      "SOURCE-BEFORE.json": {
+        "bytes": 225735,
+        "sha256": "f9a826430cfe205eaa78078b7312d70e1d5d42d7db0cd120fe5698b7d5a67747"
+      },
+      "STEPS.json": {
+        "bytes": 2872,
+        "sha256": "5df5eaafb738143177ed59c411ff08ad0f1499d1c4d88b889b6ffb1658bf9b81"
+      }
+    },
+    "rejected_g28": {
+      "g28.stderr.log": {
+        "bytes": 1279,
+        "sha256": "2fc187e646e2f8f52bd756074c57768662f33261a4f98cfed9c093b9ed0def5a"
+      },
+      "g28.stdout.log": {
+        "bytes": 645,
+        "sha256": "44373c766852a51aeb206b089aad834e2eb03bf206ab9f0c9cc0365b7bbf110a"
+      },
+      "nested.stderr.log": {
+        "bytes": 959,
+        "sha256": "5cddcc73388d187bfc0c67bfa1bd9cbc19fde3609b3937d16b03e74d45838960"
+      },
+      "nested.stdout.log": {
+        "bytes": 204,
+        "sha256": "ccf6e21f4f3ce4a396fe03d2a060e2f48d18efc2b5316b15b42c46233d98a9b4"
+      },
+      "RESULT.json": {
+        "bytes": 1692,
+        "sha256": "50b123310f79e5999b8de32872941092df4aa3dcb527a025c93af25a5fd6345f"
+      },
+      "SOURCE-AFTER.json": {
+        "bytes": 225735,
+        "sha256": "5134196cb2c117c60f7a46e2818a652d864ec1eabf69e86e35f91160b6cd9489"
+      },
+      "SOURCE-BEFORE.json": {
+        "bytes": 225735,
+        "sha256": "5134196cb2c117c60f7a46e2818a652d864ec1eabf69e86e35f91160b6cd9489"
+      },
+      "STEPS.json": {
+        "bytes": 1040,
+        "sha256": "c38d5ba4addb5ddd5cdbdb1277480ccbe611f377e5b778330da0dac01a966e7c"
+      }
+    },
+    "rejected_first_unit_stage": {
+      "lib.stderr.log": {
+        "bytes": 5680,
+        "sha256": "6f75fd3f22562a5b59c2c97afd1eeb06814bbe42824ed7a2ccf44e48c0a990c8"
+      },
+      "lib.stdout.log": {
+        "bytes": 29074,
+        "sha256": "4d80d1bc026d5211e461b61ddcb94177a3ee235613c184eec892a3cbb17e6961"
+      },
+      "RESULT.json": {
+        "bytes": 1057,
+        "sha256": "6e5e8c0db8520af7b6869f490fad5e958e560a73c28e0ec3c5652502a7bc12df"
+      },
+      "SOURCE-AFTER.json": {
+        "bytes": 225735,
+        "sha256": "39ba59cb929de71e5a6b8e7b95fe0aa3a4ffba85b84f743fd7f0cd21b39d0fc3"
+      },
+      "SOURCE-BEFORE.json": {
+        "bytes": 225735,
+        "sha256": "39ba59cb929de71e5a6b8e7b95fe0aa3a4ffba85b84f743fd7f0cd21b39d0fc3"
+      },
+      "STEPS.json": {
+        "bytes": 400,
+        "sha256": "de02a09ae3d8cfd4d1d8a0105e0075e4c7c6a425e9bce4381ceaaa985bb63265"
+      }
+    }
+  },
+  "post_run_built_artifact_pins": {
+    "process-tree-guard.exe": {
+      "bytes": 2720768,
+      "sha256": "cdb889080caaa3adf6d44825e3444aa9edc2998ad509d5a5af519872809bb089"
+    },
+    "testkit.exe": {
+      "bytes": 1696768,
+      "sha256": "378c4bd9a6a08d6b5e9e1f041707dcd407fa6f3a38c532b5381581a081db2ef2"
+    }
+  },
+  "limits": [
+    "This is one selected Windows x64 correctness qualification, not exhaustive race, platform or historical-membership coverage.",
+    "The unchanged G28 test uses a PID reopened after return; its prior failed identities and exact kernel sequence are unestablished.",
+    "Userspace deadline checks cannot preempt a synchronous Windows call; an observed late result cannot certify timely cleanup. No immediate kill-dispatch or hard end-to-end syscall-latency claim follows.",
+    "No release-production speed, parity, comparative ranking or comprehensive benchmark result follows.",
+    "Exact raw runtime logs remain private because some contain machine and account data. The rejected source patch is public. Hashes and this summary do not replace accessible raw evidence or the outstanding public academic benchmark package."
+  ]
+}
