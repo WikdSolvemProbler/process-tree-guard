@@ -763,3 +763,7 @@ Source `bed29a8` produced five release executables with no enabled features and 
 ## Windows endpoint source classification
 
 Two independent reviewers approved the completed source-group classification of the retained repaired reference and qualified production source bed29a8. The audit accounts for all 590 reference and 1,841 current named inventory items. It establishes neither a slowdown cause nor speed parity. The reference rebuild remains ineligible after G28, and the incomplete A013 attempt remains failed. [Scope, findings and review identities](windows-endpoint-classification-20261125-summary.json).
+
+## Same-image Windows startup diagnostic
+
+A single fixed 20-pair diagnostic completed all 40 launches of the same feature-free production executable. Native original-process waits, exact output and cleanup checks passed. All observations, including the slower first launch, are retained. These are descriptive repeatability data; no speed acceptance or competitive comparison was evaluated. [All launch times, predeclared analysis and limits](windows-same-image-startup-20261125-summary.json).
