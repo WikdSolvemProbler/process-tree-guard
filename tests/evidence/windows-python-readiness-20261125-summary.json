@@ -1,0 +1,243 @@
+{
+  "schema": "ptg-windows-python-readiness-1",
+  "date_utc": "2026-11-25",
+  "scope": "Complete Windows x86-64 Python correctness suite across eight stock modules.",
+  "method": {
+    "suite_entry": "tests/run_tests.py load_suite",
+    "source_commit": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+    "source_archive_files": 1161,
+    "source_archive_representation": "Every extracted member matched its exact Git blob bytes.",
+    "artifact_build_commit": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+    "publication_head": "dfe391b0fe38d36a7232d94746bb4539137e1f74",
+    "publication_bridge": "The Git delta adds two Linux evidence summaries and preserves the Windows build and test execution inputs.",
+    "previous_full_run": "windows-python-readiness-20261123-summary.json",
+    "ordered_test_ids_sha256": "68f9ce65c99cc26b32065c88a0f4359567a00ede5e63ebe6c135c311f52b837e",
+    "matched_previous_ordered_test_ids": true,
+    "discovery_outer_whole_tree_seconds": 60,
+    "run_outer_whole_tree_seconds": 3600,
+    "windows_error_policy": "The hidden CMD carrier inherited process-local error mode 0x8003. The helper's pinned archive bytes differ from the previous run only in line endings.",
+    "quiet_helper_sha256": "d38c33b4759b2ea2174db4e55557cea377c4fe8c8866ecf85e2245a5802f2be4"
+  },
+  "native_build": {
+    "target": "x86_64-pc-windows-msvc",
+    "rust_and_cargo": "1.98.1",
+    "rustc_commit": "48a229ceaefd4985c50990b14116b6d856af0985",
+    "rustc_llvm": "22.1.8",
+    "msvc_tools": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "profile": "Offline locked release, opt-level 3, LTO, one codegen unit, panic abort, stripped symbols, RUSTFLAGS=-D warnings.",
+    "tool_sha256": {
+      "cargo": "c37545ec61d48d31bdefce53280ecab61c4ea54eaace372fac6a0316c6e165d9",
+      "cmd": "ccd79a7568ea9240ccd6fe124807b9d3e4dbc3a4cf92954299ac3029f4a91d02",
+      "linker": "a8c42e25c91ca2453e1110540ac08f0fc12d7539454a11b9af8baeecb469837d",
+      "outer_guard": "5656311ee75af9596864bdb8e5e89b0a4c0dad2812bcdf34205610193f2e8133",
+      "python": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a",
+      "rustc": "ca9988af88b1463f6857fdfe909299fee50a63260b3e5f7dbcb5b4d3318b27bc",
+      "vcvars": "6b516d8fcf543c14b2d861e1f45661e0029230fe0dc48e86ce78522801822209"
+    },
+    "default": {
+      "features": [],
+      "original_native_exit": 0,
+      "bounds": {
+        "original_wait_seconds": 260,
+        "outer_seconds": 280
+      },
+      "build_log": {
+        "bytes": 4701,
+        "sha256": "0208df8b0ae7b9f439c520d39ef455a7514a191792590678aafd5cbc3958a117"
+      },
+      "receipt": {
+        "bytes": 1485,
+        "sha256": "8db700da07babc81bdebc93718f5d860cd9e9fd1ae387bc552812f2c2a0d9dec"
+      },
+      "toolchain_log": {
+        "bytes": 575,
+        "sha256": "6990b87f96594bcadbc4f6b0eb859f87f882c3857044ca7b9b8092c4a702f2e2"
+      }
+    },
+    "companions": {
+      "features": [
+        "testkit"
+      ],
+      "original_native_exit": 0,
+      "bounds": {
+        "original_wait_seconds": 300,
+        "outer_seconds": 320
+      },
+      "build_log": {
+        "bytes": 11250,
+        "sha256": "e8f5601437591ee1086145be3bf958cc84b909f3776b414eb6a6c6a88cac0993"
+      },
+      "receipt": {
+        "bytes": 1504,
+        "sha256": "4bb5ef3179621c95694aa04dfb6327101400f75a44ba8323d6aea3d6cacdd83b"
+      },
+      "toolchain_log": {
+        "bytes": 575,
+        "sha256": "6990b87f96594bcadbc4f6b0eb859f87f882c3857044ca7b9b8092c4a702f2e2"
+      }
+    },
+    "source_verified_after_each_build": true,
+    "separate_target_directories": true,
+    "suite_alias": "The alias is an exact copy of the feature-free Full binary. The separate staged testkit-profile alias is an exact copy of that profile's main binary.",
+    "staged_testkit_main_and_alias": {
+      "bytes": 818176,
+      "sha256": "6d7f76ffbff77b1b8d5c9c9897cd311b052085f87fdf9945c5738d8581354edf"
+    }
+  },
+  "result": {
+    "discovered": 651,
+    "completed": 651,
+    "modules": {
+      "test_battery_cases": 69,
+      "test_campaign_logic": 487,
+      "test_coverage_families": 31,
+      "test_guard_families": 36,
+      "test_output_observation": 10,
+      "test_scanner_differential": 14,
+      "test_windows_payload_observer": 2,
+      "test_windows_slot_job": 2
+    },
+    "pass": 647,
+    "skip": 4,
+    "fail": 0,
+    "error": 0,
+    "expected_failures": 0,
+    "unexpected_successes": 0,
+    "discovery_original_native_exit": 0,
+    "original_outer_exit": 0,
+    "native_exit": 0,
+    "original_native_handle_retained": true,
+    "unittest_runtime_seconds": 501.445
+  },
+  "retained_conditional_skips": [
+    {
+      "test": "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+      "reason": "the real cases run their Windows drivers there"
+    },
+    {
+      "test": "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+      "reason": "guard binaries are built here; the recorded split is the no-guard Linux run's and the gated families execute on this machine"
+    },
+    {
+      "test": "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+      "reason": "Windows presents the shape as written"
+    },
+    {
+      "test": "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing",
+      "reason": "binaries present; absence control not applicable"
+    }
+  ],
+  "binary_roles": {
+    "alias": {
+      "bytes": 818176,
+      "name": "ptg.exe",
+      "sha256": "e550f469b55efe358ce663d80ed2032dab3812eeed87b18897a0eebbc834386b"
+    },
+    "contain": {
+      "bytes": 373760,
+      "name": "process-tree-guard-contain.exe",
+      "sha256": "a2ade6ebcf5e7d171af6af68e049136f21674077f8d1dd9a2fb9840bf50791a6"
+    },
+    "deadline": {
+      "bytes": 716288,
+      "name": "process-tree-guard-deadline.exe",
+      "sha256": "51a5c406b76094b808a9012a230b189e45393364199f53a91d63550c42056b0d"
+    },
+    "full": {
+      "bytes": 818176,
+      "name": "process-tree-guard.exe",
+      "sha256": "e550f469b55efe358ce663d80ed2032dab3812eeed87b18897a0eebbc834386b"
+    },
+    "gate": {
+      "bytes": 328704,
+      "name": "process-tree-guard-gate.exe",
+      "sha256": "3391e3f77993f7e260b63ee63047821895f3354135c5a47d808d29ee5fc422f2"
+    },
+    "testkit": {
+      "bytes": 630272,
+      "name": "testkit.exe",
+      "sha256": "e95eaf782f314e4146104cbd077536cc394c3a5bd02f2913dd568b4c22084fc7"
+    }
+  },
+  "post_run_verification": {
+    "tracked_source_files": 1161,
+    "staged_source_tree_images": 6,
+    "selected_suite_roles": 6,
+    "recognized_generated_fixture_markers": 4,
+    "source_tree_membership": "The rehash accepted the exact tracked and staged files plus four generated marker files expected from the stock tests.",
+    "closed_capture_identities": {
+      "cmd-stderr.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "cmd-stdout.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.bin": {
+        "bytes": 103416,
+        "sha256": "cf605eb4a05bddd44ed7417061e1dc53359588e96928cacf94a5dc89f347a4a8"
+      },
+      "stdout.bin": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "evidence_sha256": {
+    "source_archive": "5ec804b669d2d678de53c580c342dd50ba46d567986d890e1136ee3710e35e10",
+    "source_manifest": "cde9c11a1d58818a4678a85ca77a0ce21d38de8f8172a3aea6a412b17006ccb5",
+    "build_plan": "57c78136a8e5f93c0b5f7584a1a04a5056fac5dbc14bcf9a78cc8808ad935a21",
+    "artifact_manifest": "80aac1a861b8025e0ac5fb238848ac529bfe5e8470819cad9a459c0783ffa42a",
+    "finalized_inputs": "e05f929fb77cb8f083820da2c268e1d1493fe9a05bd27a47c7fdeaacfe723697",
+    "suite_runner": "f224e7abd4997fa11539f9c88c141a3deabcb1ff35391797043cb5cfbb6a8afc",
+    "suite_carrier": "c378b99417acc015180e7f9f62b632fcc81c66e7c47e0f187afbe429937e0b0d",
+    "frozen_discovery": "03e08ae39f54a22eaca98efe5d753d5a655dc5b0a3c4d629e8faf43e8b091c08",
+    "discovery_carrier": "060d9540279aa2690bf8c125af873354933824fe56150667ceed761239326512",
+    "runner_result": "d85d40ee1c66a7fa84e1cf7776d48906816c2b39c206b846d46d048eae603343",
+    "run_carrier_result": "5e2b9d832b6c4e31db26e3c37e8c298c0b581416cefafa7ed43e91de2605047e"
+  },
+  "preserved_observations": {
+    "preparation_only": [
+      {
+        "reason": "A carrier template delimiter error stopped before file writes or process launch."
+      },
+      {
+        "reason": "A file metadata check included access time, which changed during a read.",
+        "receipt": {
+          "bytes": 1948,
+          "sha256": "50889bfbfc3be33eec2fdf10e2516315fdb393e826bfae77c1ec8ee58ab6eab0"
+        }
+      },
+      {
+        "reason": "The initial Git archive applied CRLF conversion.",
+        "receipt": {
+          "bytes": 1660,
+          "sha256": "5f63b80072ed51750953d951b7a179a755cdd65751a583c01fcb74224af277c6"
+        }
+      },
+      {
+        "reason": "A tracked binary exceeded the initial per-member read cap.",
+        "receipt": {
+          "bytes": 1591,
+          "sha256": "e3ef658620ee8e4c7e451cbb0a7df632af9919b4d8b02ac8e8d8265e8d7934e9"
+        }
+      },
+      {
+        "reason": "The copied quiet-helper hash described the previous line-ending representation.",
+        "receipt": {
+          "bytes": 1958,
+          "sha256": "15a31441c6cbcb25f8e743f9c559c3e14407a5fc24572d2d02febfdd8795ccf4"
+        }
+      }
+    ],
+    "auxiliary_post_run_check": "A separate check for prebuild source membership refused an expected generated marker. The run and the subsequent exact post-run audit retained and verified all four expected markers.",
+    "previous_attempts": "Historical failures and stopped attempts retain their recorded outcomes."
+  },
+  "limits": [
+    "This result covers the stock Python correctness tests and pinned build inputs. Native driver suites, interactive prompt coverage, and competitive performance require separate results.",
+    "The quiet-launch policy describes inherited error mode and hidden command startup. Window visibility and complete native Job retirement require separate observations.",
+    "Raw individual outcomes, native streams and preparation receipts remain private. Published hashes identify that retained evidence."
+  ]
+}
