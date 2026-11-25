@@ -759,3 +759,7 @@ Cleanup now bounds complete Job PID capture, verifies each retained process agai
 ## Feature-free Windows release build and selected readiness - 2026-11-25
 
 Source `bed29a8` produced five release executables with no enabled features and a separate release testkit. All staged copies matched their Cargo artifacts. The selected four compiler/linker/tool pins matched the earlier stock build; 1,171 tracked file hashes stayed unchanged during the build. The release main then passed the existing large- and small-descendant timeout/normal checks and wrapper-death Job-close check using the pinned debug harness and debug fixture. Both Sol reviewers independently accepted those build and functional results. The separate release fixture, other runtime roles, full battery and speed remain outside this selection. [Feature records, exact binaries, commands and receipts](windows-feature-free-release-bed29-20261125-summary.json)
+
+## Windows endpoint source classification
+
+Two independent reviewers approved the completed source-group classification of the retained repaired reference and qualified production source bed29a8. The audit accounts for all 590 reference and 1,841 current named inventory items. It establishes neither a slowdown cause nor speed parity. The reference rebuild remains ineligible after G28, and the incomplete A013 attempt remains failed. [Scope, findings and review identities](windows-endpoint-classification-20261125-summary.json).

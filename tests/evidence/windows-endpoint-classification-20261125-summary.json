@@ -1,0 +1,53 @@
+{
+  "schema": "process-tree-guard-windows-endpoint-classification-v1",
+  "scope": "Completed source change classification for the retained repaired Windows reference and the qualified bed29 production source. This is not a performance result.",
+  "reference": {
+    "origin": "681ad2300ff86826c600eeccadc4063dedb46b66",
+    "repaired_source": "9c6f0df93cee92dcaca0e89ebc3f09134eeab53d",
+    "common_rebuild_sha256": "f693aab02cfb4f7c2e3ce2c148aa53ae8b31d5efb19e2b6e3c4fbaea5df2dc00",
+    "acceptance_eligible": false,
+    "reason": "The retained common rebuild failed G28. The failed evidence remains preserved; source lineage alone does not qualify a comparator."
+  },
+  "current": {
+    "production_source": "bed29a874f51aa7d25ccc9729b013e6c694eafc8",
+    "feature_free_main_sha256": "3b148ad94e53f833b3fffede44708d0e8f05d5ce1155187c70496ecd72fd01f5",
+    "build_and_readiness_summary": "windows-feature-free-release-bed29-20261125-summary.json"
+  },
+  "coverage": {
+    "reference_named_items": 590,
+    "current_named_items": 1841,
+    "missing_named_items": 0,
+    "reference_context_sites": 297,
+    "current_context_sites": 1221,
+    "reviewed_reference_files": 14,
+    "reviewed_current_files": 70,
+    "current_stock_windows_compilation_input_union": 63,
+    "note": "The inventory includes inactive and test items. Counts are coverage denominators, not executed function counts or a proof of semantic equivalence. Overlapping groups are intentional.",
+    "reference_non_function_inventory_items": 137,
+    "current_non_function_inventory_items": 475
+  },
+  "findings": [
+    "Both versions already use atomic Job assignment. The current implementation adds suspended child admission, including owner and deadline checks before resume.",
+    "Current cleanup retains verified member handles before termination and uses a shared absolute cleanup budget with sticky failure handling. These qualified repairs are protected requirements.",
+    "The one-shot CLI console attachment device probes match. Returning-library handle custody, console cleanup fallback and owner verification differ.",
+    "Normal manual Full dispatch uses AskingDecisions. With no enclosing extension channel, it does not open a pipe or perform optional server I/O; it still reads and caches the environment lookup.",
+    "Entry and argument handling, executable resolution, extension enrollment, other roles, build resources and packaging differ and are classified separately.",
+    "Old and current native timing markers have different child-start boundaries. Historical marker intervals are not interchangeable.",
+    "The canonical repository starts at an import root without the old integration ancestry. Endpoint differences do not identify the historical commit where a slowdown entered."
+  ],
+  "independent_review": {
+    "designer": "APPROVED_ENDPOINT_CHANGE_CLASSIFICATION",
+    "critic": "APPROVED_ENDPOINT_CHANGE_CLASSIFICATION",
+    "unresolved_source_group_objections": 0,
+    "reviewed_union_sha256": "a795c1dd08c31b365d1f023323a120687f15c744c387d5efb92962512d942252",
+    "designer_receipt_sha256": "f9eb399910319d1aeb791477579abf4a9a63fd3ddacc51475a7f270268572088",
+    "critic_receipt_sha256": "0b9cbea878a1f37a10868139aab4390a178015bff208355928302f867a252f9a",
+    "semantic_group_companion_sha256": "8e5a510313928f8187e10bada024fe373e7635eb4f3f9cbba497933935b59664"
+  },
+  "limits": [
+    "The classified groups are not item-by-item implementation equivalence, exhaustive SDK or configuration behavior, native loader reachability, or a latency explanation.",
+    "No retained timing compares the exact feature-free bed29 executable with an eligible repaired reference. Wake-speed acceptance remains unproven.",
+    "No benchmark opportunity was restarted. The incomplete A013 attempt remains failed and cannot be pooled, rescored or replaced.",
+    "Source ledgers and original review receipts are retained privately; this sanitized public summary does not replace a reproducible final benchmark package."
+  ]
+}

@@ -318,8 +318,10 @@ pub fn extend(seconds: f64) -> Result<Grant, GuardError> {
 /// `antigravity`, `antigravity-context` or `powershell-auto`; any other name is
 /// refused with the usage text on standard error and the guard error code,
 /// without reading standard input. Reads the host's payload on standard input and writes the host's
-/// answer on standard output. The payload is read under a 16 MiB cap: decided on its first 16 MiB, with bytes past them never read, and a payload whose deciding text is not complete within them denied. Returns the exit code: 0 allows, 2 blocks (the
-/// `antigravity` vendors and `powershell-auto` always return 0). The files it looks for (the automatic
+/// answer on standard output. The payload is read under a 16 MiB cap: decided on its first 16 MiB, with bytes past them never read, and a payload whose deciding text is not complete within them denied.
+/// For verdict hooks, exit code 0 allows and 2 blocks. The `antigravity` vendors return 0.
+/// `powershell-auto` returns 0 when it delivers the decision and 2 when delivery fails,
+/// so the host blocks the original tool call. The files it looks for (the automatic
 /// copy, `POLICY.md`) and the envelope it accepts follow the file name of the
 /// running program, as for `process-tree-guard hook VENDOR`.
 #[cfg(windows)]
