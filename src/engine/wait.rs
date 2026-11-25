@@ -338,7 +338,7 @@ pub(crate) fn with_job_process_ids<R>(job: Handle, use_ids: impl FnOnce(Option<&
 /// list, once per hold it reaps. Sorting the scratch prefix in place
 /// is safe for that caller — the buffer's contents are not preserved
 /// across calls (only the prefix a call reports is ever read, and
-/// the next call refills it from the header word on) — and membership
+/// the next call refills it from the header onward) — and membership
 /// in the sorted prefix, tested by binary search, is the membership
 /// of the list as the query reported it: sorting moves identifiers,
 /// it neither adds nor removes one, and duplicates search as present
@@ -350,6 +350,18 @@ pub(crate) fn with_job_process_ids_sorted<R>(job: Handle, use_ids: impl FnOnce(O
     with_job_process_ids_form(job, true, use_ids)
 }
 
+// JOBOBJECT_BASIC_PROCESS_ID_LIST places two DWORDs before its ULONG_PTRs.
+const JOB_ID_HEADER_BYTES: usize = 2 * std::mem::size_of::<u32>();
+const JOB_ID_HEADER_WORDS: usize = JOB_ID_HEADER_BYTES / std::mem::size_of::<usize>();
+
+fn job_id_counts(buffer: &[usize]) -> (usize, usize) {
+    let header = &buffer[..JOB_ID_HEADER_WORDS];
+    // The checked prefix covers both initialized DWORDs. A native word is
+    // DWORD-aligned on both supported pointer widths.
+    let [assigned, listed] = unsafe { *header.as_ptr().cast::<[u32; 2]>() };
+    (assigned as usize, listed as usize)
+}
+
 fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(Option<&[usize]>) -> R) -> R {
     JOB_ID_BUFFER.with(|buffer| {
         let mut buffer = buffer.borrow_mut();
@@ -357,14 +369,14 @@ fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(
         let mut capacity = 1024usize;
         let mut ok;
         loop {
-            if buffer.len() < 1 + capacity {
-                buffer.resize(1 + capacity, 0);
+            if buffer.len() < JOB_ID_HEADER_WORDS + capacity {
+                buffer.resize(JOB_ID_HEADER_WORDS + capacity, 0);
             }
             ok = unsafe {
                 QueryInformationJobObject(job, PROCESS_ID_LIST_CLASS, buffer.as_mut_ptr() as *mut c_void,
-                    ((1 + capacity) * std::mem::size_of::<usize>()) as u32, std::ptr::null_mut())
+                    ((JOB_ID_HEADER_WORDS + capacity) * std::mem::size_of::<usize>()) as u32, std::ptr::null_mut())
             };
-            let assigned = (buffer[0] as u64 & 0xffff_ffff) as usize;
+            let assigned = job_id_counts(&buffer).0;
             if ok != 0 || assigned <= capacity || capacity >= 1 << 20 {
                 break;
             }
@@ -373,12 +385,12 @@ fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(
         if ok == 0 {
             return use_ids(None);
         }
-        let count = ((buffer[0] as u64) >> 32) as usize;
-        let listed = 1 + count.min(capacity);
+        let count = job_id_counts(&buffer).1;
+        let listed = JOB_ID_HEADER_WORDS + count.min(capacity);
         if sorted {
-            buffer[1..listed].sort_unstable();
+            buffer[JOB_ID_HEADER_WORDS..listed].sort_unstable();
         }
-        use_ids(Some(&buffer[1..listed]))
+        use_ids(Some(&buffer[JOB_ID_HEADER_WORDS..listed]))
     })
 }
 
@@ -519,14 +531,12 @@ pub(super) fn cleanup_job_process_ids(
     buffer: &mut Vec<usize>, deadline: Instant, mut now: impl FnMut() -> Instant,
     mut query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
 ) -> Result<&[usize], MemberCaptureFailure> {
-    const HEADER_BYTES: usize = 2 * std::mem::size_of::<u32>();
     const WORD_BYTES: usize = std::mem::size_of::<usize>();
-    const HEADER_WORDS: usize = HEADER_BYTES / WORD_BYTES;
     let mut capacity = 1024;
     loop {
         if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
         let capacity_error = MemberCaptureFailure::Capacity { assigned: capacity, capacity: MAX_CLEANUP_JOB_IDS };
-        let words = HEADER_WORDS.checked_add(capacity).ok_or(capacity_error)?;
+        let words = JOB_ID_HEADER_WORDS.checked_add(capacity).ok_or(capacity_error)?;
         let byte_capacity = words.checked_mul(WORD_BYTES).ok_or(capacity_error)?;
         let native_bytes = u32::try_from(byte_capacity).map_err(|_| capacity_error)?;
         if buffer.len() < words {
@@ -534,7 +544,7 @@ pub(super) fn cleanup_job_process_ids(
                 .map_err(|_| MemberCaptureFailure::Allocation { capacity })?;
             buffer.resize(words, 0);
         }
-        buffer[..HEADER_WORDS].fill(0);
+        buffer[..JOB_ID_HEADER_WORDS].fill(0);
         if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
         let returned_bytes = match query(&mut buffer[..words], native_bytes) {
             Ok(bytes) => bytes,
@@ -545,12 +555,9 @@ pub(super) fn cleanup_job_process_ids(
             Err(win32_error) => return Err(MemberCaptureFailure::Query { win32_error }),
         };
         if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
-        let (assigned, listed) = unsafe {
-            let header = buffer.as_ptr().cast::<u32>();
-            (*header as usize, *header.add(1) as usize)
-        };
+        let (assigned, listed) = job_id_counts(buffer);
         let incomplete = MemberCaptureFailure::IncompleteList { assigned, listed, returned_bytes };
-        let used_words = HEADER_WORDS.checked_add(listed).ok_or(incomplete)?;
+        let used_words = JOB_ID_HEADER_WORDS.checked_add(listed).ok_or(incomplete)?;
         let needed = used_words.checked_mul(WORD_BYTES).ok_or(incomplete)?;
         if listed > capacity || !(needed..=byte_capacity).contains(&returned_bytes) {
             return Err(incomplete);
@@ -565,7 +572,7 @@ pub(super) fn cleanup_job_process_ids(
         if assigned != listed {
             return Err(incomplete);
         }
-        return Ok(&buffer[HEADER_WORDS..used_words]);
+        return Ok(&buffer[JOB_ID_HEADER_WORDS..used_words]);
     }
 }
 

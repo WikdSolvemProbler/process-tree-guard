@@ -1772,6 +1772,8 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
             outer_member: Bool,
             inner_member: Bool,
             listed: Vec<usize>,
+            ordinary_listed: Option<Vec<usize>>,
+            sorted_listed: Option<Vec<usize>>,
         }
 
         let _cli_owner = crate::diagnostics::ProcessOwnership::begin();
@@ -1817,7 +1819,12 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
                 let listed = with_cleanup_job_process_ids(job, deadline, |result| {
                     result.map(|ids| ids.to_vec())
                 }).map_err(|error| GuardError(format!("read complete outer Job process list: {error:?}")))?;
-                Ok(Observation { child, retained_child, pid, before, outer_member, inner_member, listed })
+                let ordinary_listed = with_job_process_ids(job, |ids| ids.map(<[usize]>::to_vec));
+                let sorted_listed = with_job_process_ids_sorted(job, |ids| ids.map(<[usize]>::to_vec));
+                Ok(Observation {
+                    child, retained_child, pid, before, outer_member, inner_member, listed,
+                    ordinary_listed, sorted_listed,
+                })
             })();
             capture.set(Some(observed));
         })));
@@ -1847,6 +1854,13 @@ fn deep_owner_expiry_after_extension_wake_keeps_rechecking() {
         let mut code = 0;
         assert_ne!(unsafe { GetExitCodeProcess(retained, &mut code) }, 0);
         assert_eq!(code, 124, "the original child was terminated by its engine Job");
+
+        let ordinary = observed.ordinary_listed.expect("the ordinary outer Job query succeeded");
+        let sorted = observed.sorted_listed.expect("the sorted outer Job query succeeded");
+        let count_original = |ids: &[usize]| ids.iter().filter(|&&pid| pid == observed.pid as usize).count();
+        assert_eq!(count_original(&ordinary), 1, "ordinary outer Job list: {ordinary:?}");
+        assert_eq!(count_original(&sorted), 1, "sorted outer Job list: {sorted:?}");
+        assert!(sorted.is_sorted(), "sorted outer Job list: {sorted:?}");
     }
 
     #[test]

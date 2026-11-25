@@ -34,16 +34,16 @@ pub(crate) fn current_user_sid() -> Result<String, GuardError> {
 
 /// The text form of the security identifier of the user of `token`, which stays open.
 pub(crate) fn token_user_sid(token: Handle) -> Result<String, GuardError> {
+    const ERROR_INSUFFICIENT_BUFFER: u32 = 122;
     unsafe {
         // The kernel writes a TOKEN_USER into the buffer given: a
-        // pointer and attributes (16 bytes) followed by the security
+        // pointer and attributes (up to 16 bytes) followed by the security
         // identifier itself, whose largest form is an 8-byte header
         // and fifteen subauthorities — 84 bytes in all. A 128-byte
         // stack buffer is therefore answered in one call. The sizing
         // call this replaces paid a second GetTokenInformation, and a
-        // zero-filled heap buffer, on every token read; a report
-        // larger than the stack form (no valid token produces one)
-        // takes that heap form, sized as the sizing call sized it.
+        // zero-filled heap buffer, on every token read. Use a larger
+        // buffer only if Windows reports an insufficient buffer.
         let mut stack = [std::mem::MaybeUninit::<u64>::uninit(); 16];
         let mut needed = 0u32;
         if GetTokenInformation(token, TOKEN_USER_CLASS, stack.as_mut_ptr() as *mut c_void, (stack.len() * 8) as u32, &mut needed) != 0 {
@@ -52,11 +52,17 @@ pub(crate) fn token_user_sid(token: Handle) -> Result<String, GuardError> {
             return sid_text(*(stack.as_ptr() as *const *mut c_void));
         }
         let failure = GetLastError();
-        if (needed as usize) <= stack.len() * 8 {
+        if failure != ERROR_INSUFFICIENT_BUFFER || (needed as usize) <= stack.len() * 8 {
             return Err(error_for(failure));
         }
-        let mut buffer = vec![0u64; (needed as usize).div_ceil(8) + 1];
-        checked(GetTokenInformation(token, TOKEN_USER_CLASS, buffer.as_mut_ptr() as *mut c_void, (buffer.len() * 8) as u32, &mut needed))?;
+        let words = (needed as usize).div_ceil(8);
+        let mut buffer = Vec::new();
+        buffer.try_reserve_exact(words)
+            .map_err(|error| GuardError(format!("cannot allocate token user buffer: {error}")))?;
+        buffer.resize(words, 0u64);
+        // Pass the exact DWORD size reported by Windows. The backing allocation
+        // rounds up to an aligned word, which need not itself fit in a DWORD.
+        checked(GetTokenInformation(token, TOKEN_USER_CLASS, buffer.as_mut_ptr() as *mut c_void, needed, &mut needed))?;
         // TOKEN_USER starts with a pointer to the security identifier.
         sid_text(*(buffer.as_ptr() as *const *mut c_void))
     }

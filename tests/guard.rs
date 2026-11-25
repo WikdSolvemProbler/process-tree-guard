@@ -2903,14 +2903,14 @@ fn import_table(path: &str) -> Option<Vec<(String, Vec<String>)>> {
         let mut functions = Vec::new();
         let mut thunk = offset(table)?;
         loop {
-            let value = u32_at(thunk)? | if wide { u32_at(thunk + 4)? << 32 } else { 0 };
+            let value = u32_at(thunk)? as u64 | if wide { (u32_at(thunk + 4)? as u64) << 32 } else { 0 };
             if value == 0 {
                 break;
             }
             // The top bit marks an import by number.
             let by_number = if wide { value >> 63 == 1 } else { value >> 31 == 1 };
             if !by_number {
-                functions.push(text_at(offset(value & 0x7fff_ffff)? + 2)?);
+                functions.push(text_at(offset((value & 0x7fff_ffff) as usize)? + 2)?);
             }
             thunk += step;
         }
