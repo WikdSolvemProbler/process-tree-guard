@@ -1,0 +1,54 @@
+{
+  "schema": "process-tree-guard-windows-enforcement-order-readiness-v1",
+  "status": "READINESS_WITHHELD_PENDING_REPAIR",
+  "production_source": "bed29a874f51aa7d25ccc9729b013e6c694eafc8",
+  "source_pins": {
+    "src/engine.rs": "0b70c3b27d5b706f9eef43a453292879513a4d788bfdc07e2634d9f789fea2be",
+    "src/engine/wait.rs": "2f86157728843e06617a6abe812e0ec5e90573aaab2cc3be03878c08d6b49d97",
+    "src/extend/server.rs": "88622ab8a4c664d65585b81b686ee574d77270212ef9af584e94c216de451148"
+  },
+  "finding": "The intended ordering is to request owned-tree termination when stop is selected, then confirm required cleanup under one shared budget. Current cleanup can do work before that termination request.",
+  "paths": [
+    {
+      "source": "src/engine/wait.rs",
+      "symbols": [
+        "terminate_and_wait",
+        "begin_job_cleanup"
+      ],
+      "detail": "For an active or unknown Job, begin_job_cleanup calls the member-capture closure before the owned TerminateJobObject closure. Capture performs width-dependent enumeration and opens. Its shared software deadline does not prevent that work from delaying the first termination request."
+    },
+    {
+      "source": "src/engine.rs",
+      "related_source": "src/extend/server.rs",
+      "detail": "The supervisor calls D::close before teardown. In extendable mode, Extension::close locks the shared state mutex. This can wait for other state work before termination. Fixed mode does not take this extension lock.",
+      "phase": "post-supervision extension close"
+    }
+  ],
+  "independent_review": {
+    "designer": "WITHHOLD_PREKILL_PORT_AND_DEADLINE_EQUIVALENCE",
+    "critic": "WITHHOLD_PREKILL_PORT_AND_DEADLINE_EQUIVALENCE",
+    "unresolved_objections": [
+      "Preserve prompt first termination of an active or unknown owned tree on timeout, owner exit and normal root exit without post-stop member-discovery delay.",
+      "Keep extension stop linearization off the blocking shared-state mutex while resolving concurrent grants.",
+      "Prove required original-process settlement without substituting Job accounting or best-effort messages for missing original handles."
+    ]
+  },
+  "preserved_evidence": {
+    "cleanup_summary": "windows-cleanup-member-deadline-20261125-summary.json",
+    "release_summary": "windows-feature-free-release-bed29-20261125-summary.json",
+    "same_image_diagnostic": "windows-same-image-startup-20261125-summary.json",
+    "interpretation": "Their recorded focused test outcomes remain unchanged. They do not establish the newly reviewed first-termination ordering contract or general descendant settlement."
+  },
+  "reference_disposition": "The retained repaired reference remains ineligible after G28. Porting the current pre-kill census alone would not resolve this ordering objection.",
+  "limits": [
+    "This is a source-ordering and readiness finding, not a new empirical delayed-kill measurement.",
+    "No accepted replacement implementation or new speed result follows from this finding.",
+    "The intended protection and deadline requirements are retained. No benchmark acceptance rule or expected result is relaxed."
+  ],
+  "primary_api_sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/jobapi2/nf-jobapi2-terminatejobobject",
+    "https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess",
+    "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_associate_completion_port",
+    "https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects"
+  ]
+}

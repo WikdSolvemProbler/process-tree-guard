@@ -767,3 +767,7 @@ Two independent reviewers approved the completed source-group classification of 
 ## Same-image Windows startup diagnostic
 
 A single fixed 20-pair diagnostic completed all 40 launches of the same feature-free production executable. Native original-process waits, exact output and cleanup checks passed. All observations, including the slower first launch, are retained. These are descriptive repeatability data; no speed acceptance or competitive comparison was evaluated. [All launch times, predeclared analysis and limits](windows-same-image-startup-20261125-summary.json).
+
+## Enforcement-order readiness blocker
+
+A subsequent source review withheld deadline-ordering readiness for the current cleanup implementation and a proposed reference port. Earlier passing focused tests and the same-image diagnostic remain unchanged; they do not clear this protection issue. [Current finding, required repairs and primary API sources](windows-enforcement-order-readiness-20261125.json).

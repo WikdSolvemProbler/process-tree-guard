@@ -166,6 +166,8 @@ A plain timeout ends only `npm test`; the red processes keep running. Under proc
 | Walk the tree and kill it, as `taskkill /T` does | The walk follows parent links at kill time. A process whose parent already exited has no link to follow, so it survives. A process can also start during the walk. |
 | process-tree-guard | The command is created suspended, placed in the job at creation with `PROC_THREAD_ATTRIBUTE_JOB_LIST`, then resumed. Every descendant inherits the job. The job refuses breakaway. The job carries kill on close, so closing it ends every process in it. |
 
+**Windows readiness blocker (2026-11-25):** The current cleanup path can collect descendant handles, and the extendable path can wait for shared state, before requesting termination. That ordering does not yet meet the intended deadline contract. Focused passing tests do not clear this blocker; full readiness and speed acceptance remain withheld. [Finding and preserved evidence](tests/evidence/windows-enforcement-order-readiness-20261125.json).
+
 No gap stands between creation and placement. No descendant can leave the job by asking. The guard then uses one bounded 5-second budget to confirm Job emptiness, retained descendant waits, and the original child's exit. If required cleanup cannot be confirmed, it reports a guard error (125) instead of preserving a successful child result. [Guarantees and Limits](wiki/Guarantees-and-Limits.md) states each guarantee with its tier.
 
 [↑ Back to Contents](#contents)
