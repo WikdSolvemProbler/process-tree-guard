@@ -281,9 +281,8 @@ trait Decisions {
     /// Say in the extension's log that an approved run did not start. Only
     /// a run whose exception was approved has anything to say.
     fn note_not_started(ext: &Self::Ext, approved: bool, error: &GuardError);
-    /// Stop granting on the extension of the run, once its command has
-    /// finished or its deadline has passed.
-    fn close(ext: &Self::Ext);
+    /// Seal grant authorization when the run stops, without waiting on a worker.
+    fn seal_grants(ext: &Self::Ext);
     /// End the extension of the run, after its tree is gone.
     fn shutdown(ext: Self::Ext);
 }
@@ -320,9 +319,9 @@ impl Decisions for AskingDecisions {
             }
         }
     }
-    fn close(ext: &Self::Ext) {
+    fn seal_grants(ext: &Self::Ext) {
         if let Some(extension) = ext {
-            extension.close();
+            extension.seal_grants();
         }
     }
     fn shutdown(ext: Self::Ext) {
@@ -352,7 +351,7 @@ impl Decisions for UnaskingDecisions {
     fn wait(_ext: &Self::Ext, waits: &[Handle], fixed: impl FnOnce(&[Handle]) -> u32) -> u32 { fixed(waits) }
     fn elapsed(_ext: &Self::Ext, seconds: f64) -> f64 { seconds }
     fn note_not_started(_ext: &Self::Ext, _approved: bool, _error: &GuardError) {}
-    fn close(_ext: &Self::Ext) {}
+    fn seal_grants(_ext: &Self::Ext) {}
     fn shutdown(_ext: Self::Ext) {}
 }
 
@@ -425,8 +424,11 @@ fn run_job_core<D: Decisions>(
     // Set once the command is running, so that a run whose exception was approved and which then fails to start says so in the log.
     let mut started_command = false;
     let mut extension = D::none();
-    // The notice for the end of the run, written once the tree is gone.
-    let mut notice: Option<String> = None;
+    // Capture the timeout's elapsed time at the decision, but build the
+    // notice only after the owned stop has been attempted.
+    enum StopNotice { Timeout(f64), OwnerExited }
+    let mut notice = None;
+    let mut grants_sealed = false;
     let job = unsafe { CreateJobObjectW(std::ptr::null_mut(), std::ptr::null()) };
     if job.is_null() {
         let error = os_error();
@@ -612,15 +614,16 @@ fn run_job_core<D: Decisions>(
                 })
             };
 
+            D::seal_grants(&extension);
+            grants_sealed = true;
             match status {
                 WAIT_TIMEOUT => {
                     // An extendable run reports the time it ran, since its deadline moved.
-                    let shown = D::elapsed(&extension, seconds);
-                    notice = Some(format!("PROCESS_TIMEOUT: exceeded {} seconds; terminating process tree", format_seconds(shown)));
+                    notice = Some(StopNotice::Timeout(D::elapsed(&extension, seconds)));
                     Ok(EXIT_TIMEOUT as u32)
                 }
                 n if n >= 1 && (n as usize) <= OWNERS_PER_WINDOW && (n as usize) < waits.len() => {
-                    notice = Some("PROCESS_OWNER_EXITED: terminating process tree".into());
+                    notice = Some(StopNotice::OwnerExited);
                     Ok(EXIT_GUARD_ERROR as u32)
                 }
                 0 => {
@@ -633,25 +636,11 @@ fn run_job_core<D: Decisions>(
             }
         }
     })();
+    // Launch and supervision errors using ? can return before a wait status.
+    if !grants_sealed { D::seal_grants(&extension); }
     if let Some(timing) = timing.as_mut() { timing.finish(&outcome); }
     trace("child finished");
 
-    // A log that was opened for an exception and never passed on (the job could not be set up): it says that the approved run
-    // did not start, as the log of the extension does when the failure comes after it was made.
-    if let Some(log) = log.take() {
-        if let Err(error) = &outcome {
-            log.note(&not_started_text(error));
-        }
-        log.finish(LOG_FLUSH_MS);
-    }
-    if let Err(error) = &outcome {
-        if !started_command {
-            let approved = mode.extendable.as_ref().is_some_and(|settings| settings.exception.is_some());
-            D::note_not_started(&extension, approved, error);
-        }
-    }
-    // No more grants once the command has finished or the deadline has passed.
-    D::close(&extension);
     let mut job_proven_empty = false;
     let mut member_wait_uncertainty = None;
     let mut member_capture_failure = None;
@@ -676,7 +665,22 @@ fn run_job_core<D: Decisions>(
             if let Some(observe) = hook.borrow().as_ref() { observe(info.process, original_child_cleanup.status); }
         });
     }
-    // The channel is closed after the tree is gone, so a stalled client never delays the kill.
+    // A log opened for an exception that never reached the extension still
+    // records the failed start. Neither that log nor a server log is waited
+    // on before the owned stop attempt.
+    if let Some(log) = log.take() {
+        if let Err(error) = &outcome {
+            log.note(&not_started_text(error));
+        }
+        log.finish(LOG_FLUSH_MS);
+    }
+    if let Err(error) = &outcome {
+        if !started_command {
+            let approved = mode.extendable.as_ref().is_some_and(|settings| settings.exception.is_some());
+            D::note_not_started(&extension, approved, error);
+        }
+    }
+    // Finish channel shutdown before releasing the Job handle its workers borrow.
     D::shutdown(extension);
     if process_cli && !job_proven_empty { unsafe { CloseHandle(job) }; }
     if process_cli && !info.process.is_null() {
@@ -685,7 +689,10 @@ fn run_job_core<D: Decisions>(
         if let Some(console) = &console { console.finish(first_owner, console_owners.as_deref(), console_windows.as_deref()); }
     }
     // Optional output is queued only after supervision and Job cleanup finish.
-    flush_trace(notice.take());
+    flush_trace(notice.map(|notice| match notice {
+        StopNotice::Timeout(shown) => format!("PROCESS_TIMEOUT: exceeded {} seconds; terminating process tree", format_seconds(shown)),
+        StopNotice::OwnerExited => "PROCESS_OWNER_EXITED: terminating process tree".into(),
+    }));
     unsafe {
         // The real CLI reclaims now-unused handles at its immediate native exit.
         if !process_cli {

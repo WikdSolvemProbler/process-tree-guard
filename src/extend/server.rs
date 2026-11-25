@@ -126,6 +126,7 @@ impl Extension {
             log,
             job: job as usize,
             wake: wake as usize,
+            grants_sealed: AtomicBool::new(false),
             stopping: AtomicBool::new(false),
             serving: AtomicUsize::new(1),
         });
@@ -213,6 +214,9 @@ impl Extension {
     /// None when it has passed, and the run then grants nothing more. A run that grants
     /// nothing more for another reason (its channel stopped serving) goes on to its deadline.
     pub fn remaining(&self) -> Option<u64> {
+        if self.shared.grants_are_sealed() {
+            return None;
+        }
         let mut state = self.shared.lock();
         let now = tick();
         let passed = state.expire(now, Some(self.shared.job as Handle));
@@ -232,9 +236,9 @@ impl Extension {
         assert_eq!(state.grant(tick(), Some(self.shared.job as Handle), seconds, process, 0, None), Ok(None));
     }
 
-    /// Stop granting: the command has finished, or the deadline has passed.
-    pub fn close(&self) {
-        self.shared.lock().closed = true;
+    /// Stop authorizing grants before teardown, without waiting on the server.
+    pub fn seal_grants(&self) {
+        self.shared.seal_grants();
     }
 
     /// Seconds since the run began.
@@ -248,7 +252,7 @@ impl Extension {
             return;
         }
         self.shutdown_done = true;
-        self.close();
+        self.seal_grants();
         self.shared.stopping.store(true, Ordering::SeqCst);
         unsafe {
             if !self.stop.is_null() {

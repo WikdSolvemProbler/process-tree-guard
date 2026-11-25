@@ -26,6 +26,7 @@ type HoldKey = (u32, u64, Token);
 
 struct PendingGrant {
     key: HoldKey,
+    until: u64,
     previous: Option<u64>,
 }
 
@@ -274,7 +275,8 @@ impl State {
         }
         let key = (process.id, process.created, token);
         let (index, previous) = self.apply_grant(now, job, seconds, process, token, parent)?;
-        self.pending.push(PendingGrant { key, previous });
+        let until = self.holds[index].until;
+        self.pending.push(PendingGrant { key, until, previous });
         if let Some(previous) = previous {
             self.holds[index].until = self.holds[index].until.max(previous);
         }
@@ -357,12 +359,31 @@ impl State {
     /// True when the reserved hold was still present.
     pub(super) fn finish_grant(&mut self, back: &Withdraw, delivered: bool) -> bool {
         let key = (back.id, back.created, back.token);
-        let Some(pending) = self.pending.iter().position(|entry| entry.key == key) else { return false };
+        self.finish_grant_for(key, back.until, back.previous, delivered)
+    }
+
+    fn pending_grant_index(&self, key: HoldKey, until: u64, previous: Option<u64>) -> Option<usize> {
+        self.pending.iter().position(|entry| entry.key == key && entry.until == until && entry.previous == previous)
+    }
+
+    fn provisional_hold_index(&self, key: HoldKey, until: u64, previous: Option<u64>) -> Option<usize> {
+        let (id, created, token) = key;
+        let effective_until = until.max(previous.unwrap_or(0));
+        self.holds.iter().position(|hold| hold.process.id == id && hold.process.created == created
+            && hold.token == token && hold.until == effective_until)
+    }
+
+    fn has_grant_reservation(&self, back: &Withdraw) -> bool {
+        let key = (back.id, back.created, back.token);
+        self.pending_grant_index(key, back.until, back.previous).is_some()
+            && self.provisional_hold_index(key, back.until, back.previous).is_some()
+    }
+
+    pub(super) fn finish_grant_for(&mut self, key: (u32, u64, Token), until: u64, previous: Option<u64>, delivered: bool) -> bool {
+        let Some(pending) = self.pending_grant_index(key, until, previous) else { return false };
         self.pending.swap_remove(pending);
-        let effective_until = back.until.max(back.previous.unwrap_or(0));
-        let Some(index) = self.holds.iter().position(|hold| hold.process.id == back.id && hold.process.created == back.created
-            && hold.token == back.token && hold.until == effective_until) else { return false };
-        match if delivered { Some(back.until) } else { back.previous } {
+        let Some(index) = self.provisional_hold_index(key, until, previous) else { return false };
+        match if delivered { Some(until) } else { previous } {
             Some(until) => self.holds[index].until = until,
             None => {
                 self.holds.remove(index);
@@ -444,6 +465,7 @@ pub(super) struct Shared {
     pub(super) log: Log,
     pub(super) job: usize,
     pub(super) wake: usize,
+    pub(super) grants_sealed: AtomicBool,
     pub(super) stopping: AtomicBool,
     /// Serve threads running: one at the start of the run, and one more for
     /// each instance a connection has called into service, up to INSTANCES.
@@ -452,6 +474,40 @@ pub(super) struct Shared {
 
 impl Shared {
     pub(super) fn lock(&self) -> MutexGuard<'_, State> {
-        self.state.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+        let mut state = self.state.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        // Keep the existing end-state visible to every state consumer.
+        // Only lock holders mirror the seal, never the supervisor's stop path.
+        if self.grants_are_sealed() {
+            state.closed = true;
+        }
+        state
+    }
+
+    pub(super) fn seal_grants(&self) {
+        self.grants_sealed.swap(true, Ordering::AcqRel);
+    }
+
+    pub(super) fn grants_are_sealed(&self) -> bool {
+        self.grants_sealed.load(Ordering::Acquire)
+    }
+
+    // A successful read-modify-write is ordered with the one-way seal. A
+    // load alone would not authorize publication of the reservation or reply.
+    pub(super) fn authorize_grant(&self) -> bool {
+        self.grants_sealed.compare_exchange(false, false, Ordering::AcqRel, Ordering::Acquire).is_ok()
+    }
+
+    pub(super) fn authorize_grant_reply(&self, back: &Withdraw) -> Result<(), Refusal> {
+        let state = self.lock();
+        if state.passed || state.closed {
+            return Err(Refusal::Ended);
+        }
+        if !state.has_grant_reservation(back) {
+            return Err(Refusal::NoHold);
+        }
+        if !self.authorize_grant() {
+            return Err(Refusal::Ended);
+        }
+        Ok(())
     }
 }

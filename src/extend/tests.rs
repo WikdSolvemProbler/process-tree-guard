@@ -1195,7 +1195,112 @@
     fn shared_run(job: Handle) -> Shared {
         Shared {
             state: Mutex::new(State::new(tick() + 600_000, 3600.0)), cap_seconds: 3600.0, log: Log { sinks: Vec::new(), file_sink: None, blocked: Arc::new(AtomicBool::new(false)), only: None }, job: job as usize, wake: 0,
-            stopping: AtomicBool::new(false), serving: AtomicUsize::new(0),
+            grants_sealed: AtomicBool::new(false), stopping: AtomicBool::new(false), serving: AtomicUsize::new(0),
+        }
+    }
+
+    fn reserve_test_grant(shared: &Shared, now: u64) -> Withdraw {
+        let process = this_process();
+        let (id, created) = (process.id, process.created);
+        let previous = shared.lock().begin_grant(now, None, 60.0, process, 5, None).unwrap();
+        Withdraw { id, created, token: 5, until: now + millis(60.0), previous, pid: id, image: "client.exe".into(), seconds: 60.0 }
+    }
+
+    #[test]
+    fn stopping_seals_grants_while_another_thread_owns_state() {
+        let shared = shared_run(std::ptr::null_mut());
+        let held = shared.lock();
+        let observed = std::thread::scope(|scope| {
+            let (ready, result) = std::sync::mpsc::sync_channel(1);
+            let worker_shared = &shared;
+            let worker = scope.spawn(move || {
+                worker_shared.seal_grants();
+                let _ = ready.send(());
+            });
+            let observation = result.recv_timeout(Duration::from_secs(5));
+            drop(held);
+            worker.join().unwrap();
+            observation
+        });
+        assert!(observed.is_ok(), "seal must finish while the state lock is held");
+        assert!(!shared.authorize_grant(), "the seal is irreversible");
+        assert!(shared.lock().closed, "state readers see the seal on their next lock");
+    }
+
+    #[test]
+    fn a_sealed_run_refuses_a_new_reservation() {
+        let shared = shared_run(std::ptr::null_mut());
+        shared.seal_grants();
+        let client = this_process();
+        let connected_at = client.created + 1;
+        let arrival = Arrival { id: client.id, image: "client.exe".into(), client: Some(client), in_job: true, shut: None, gone: false };
+        let message = Message::Bytes(MessageBytes::from_slice(&encode_request(Target::Caller, 5, 60.0)));
+        let (reply, line) = evaluate(&shared, arrival, connected_at, &message);
+        assert!(matches!(reply, Reply::Refused { refusal: Refusal::Ended, .. }) && matches!(line, Line::Refused(_)));
+        assert!(shared.lock().holds.is_empty());
+    }
+
+    #[test]
+    fn a_seal_after_reservation_vetoes_submission_and_restores_the_old_hold() {
+        let shared = shared_run(std::ptr::null_mut());
+        assert_eq!(shared.lock().grant(10, None, 20.0, this_process(), 5, None), Ok(None));
+        let back = reserve_test_grant(&shared, 11);
+        assert_eq!(back.previous, Some(20_010));
+        shared.seal_grants();
+        assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::Ended));
+        assert!(withdrawn_before_reply_line(0, &back).ends_with(
+            " requested=60 granted=0 decision=withdrawn reason=\"the grant was withdrawn before its reply could be sent\""
+        ));
+        assert!(withdrawn_line(0, &back, 17).ends_with(
+            " requested=60 granted=0 decision=withdrawn reason=\"the reply was not taken within 17 milliseconds; the hold was withdrawn\""
+        ));
+        assert!(shared.lock().finish_grant(&back, false));
+        assert_eq!(shared.lock().hold_until(back.id, back.created, back.token), Some(20_010));
+        assert!(!shared.lock().finish_grant(&back, false), "withdrawal settles once");
+        assert_eq!(submit_reply(&shared, None, || ()), Ok(()), "a release ACK has no grant permit");
+    }
+
+    #[test]
+    fn reply_permission_requires_the_matching_reservation_and_live_hold() {
+        let shared = shared_run(std::ptr::null_mut());
+        assert_eq!(shared.lock().grant(10, None, 20.0, this_process(), 6, None), Ok(None));
+        let back = reserve_test_grant(&shared, 10);
+        let wrong = Withdraw { until: back.until + 1, image: back.image.clone(), ..back };
+        assert_eq!(submit_reply(&shared, Some(&wrong), || ()), Err(Refusal::NoHold));
+        assert!(!shared.lock().finish_grant(&wrong, false), "another request cannot withdraw the reservation");
+        assert_eq!(submit_reply(&shared, Some(&back), || ()), Ok(()));
+        assert!(shared.lock().drop_hold(back.id, back.created, back.token, false));
+        assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::NoHold), "a released hold no longer backs a grant");
+        assert!(!shared.lock().finish_grant(&back, false));
+        let state = shared.lock();
+        assert!(!state.passed && !state.closed);
+        assert_eq!(state.hold_until(back.id, back.created, 6), Some(20_010));
+        drop(state);
+        reserve_test_grant(&shared, 11);
+    }
+
+    #[test]
+    fn only_submission_authorized_before_the_seal_can_overlap_it() {
+        let shared = shared_run(std::ptr::null_mut());
+        let back = reserve_test_grant(&shared, 10);
+        let sent = submit_reply(&shared, Some(&back), || {
+            shared.seal_grants();
+            true
+        });
+        assert_eq!(sent, Ok(true));
+        assert!(shared.lock().finish_grant(&back, sent == Ok(true)));
+        assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::Ended));
+
+        for passed in [false, true] {
+            let shared = shared_run(std::ptr::null_mut());
+            let back = reserve_test_grant(&shared, 10);
+            {
+                let mut state = shared.lock();
+                state.passed = passed;
+                state.closed = !passed;
+            }
+            assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::Ended));
+            assert!(shared.lock().finish_grant(&back, false));
         }
     }
 

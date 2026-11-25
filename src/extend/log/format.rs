@@ -96,9 +96,7 @@ pub(in crate::extend) fn released_line(unix_ms: u64, pid: u32, image: &str, reas
     out
 }
 
-/// The line for a grant taken back because the process did not take the reply: the run and
-/// the process must not disagree about whether a hold exists. It moves the deadline only earlier.
-pub(in crate::extend) fn withdrawn_line(unix_ms: u64, back: &Withdraw, take_ms: u32) -> String {
+fn withdrawal_line_start(unix_ms: u64, back: &Withdraw) -> String {
     // One buffer, as in `released_line` above.
     use std::fmt::Write as _;
     let mut out = String::with_capacity(192 + back.image.len());
@@ -108,7 +106,22 @@ pub(in crate::extend) fn withdrawn_line(unix_ms: u64, back: &Withdraw, take_ms: 
     escape_into(&back.image, &mut out);
     out.push_str("\" requested=");
     log_seconds_into(back.seconds, &mut out);
-    let _ = write!(out, " granted=0 decision=withdrawn reason=\"the reply was not taken within {} milliseconds; the hold was withdrawn\"", take_ms);
+    out.push_str(" granted=0 decision=withdrawn reason=\"");
+    out
+}
+
+/// A grant taken back because the process did not take the reply.
+pub(in crate::extend) fn withdrawn_line(unix_ms: u64, back: &Withdraw, take_ms: u32) -> String {
+    use std::fmt::Write as _;
+    let mut out = withdrawal_line_start(unix_ms, back);
+    let _ = write!(out, "the reply was not taken within {} milliseconds; the hold was withdrawn\"", take_ms);
+    out
+}
+
+/// A recorded provisional grant withdrawn before its reply was submitted.
+pub(in crate::extend) fn withdrawn_before_reply_line(unix_ms: u64, back: &Withdraw) -> String {
+    let mut out = withdrawal_line_start(unix_ms, back);
+    out.push_str("the grant was withdrawn before its reply could be sent\"");
     out
 }
 
