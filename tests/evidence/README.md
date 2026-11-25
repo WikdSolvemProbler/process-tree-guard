@@ -783,3 +783,7 @@ The six-file repair at 0788c87 checks the initial base deadline without taking S
 ## Current feature-free Windows release
 
 Code 0788c87 produced five feature-free release programs and a separately built testkit. All original build steps joined successfully, and 1,177 tracked file hashes stayed unchanged. The release main passed three existing cleanup integration functions using the pinned current debug harness and its debug fixture. These results preserve the unresolved enforcement-order and populated-state blockers; they contain no timing or full-readiness claim. [Exact artifacts, feature records, selected checks and receipt hashes](windows-feature-free-release-0788-20261125-summary.json).
+
+## Windows native ABI and token fixes
+
+The four-file repair at dea8b5e fixes the 32-bit Job-list layout and token-query failure allocation, and repairs a two-line PE decoder in the existing test harness. Both architectures passed 316 native library tests. A separate follow-up passed G96 and G56 on both targets, G28 on x64, and both Clippy invocations, with warnings retained. Earlier failed batches remain failed and recorded. General cleanup readiness and performance remain open. [Source mapping, outcomes and preserved failures](windows-native-abi-token-20261125-summary.json).

@@ -1,0 +1,459 @@
+{
+  "schema": "ptg-native-windows-abi-token-qualification-v1",
+  "date": "2026-11-25",
+  "status": "SELECTED_PRODUCT_REPAIRS_AND_TARGETED_CHECKS_QUALIFIED",
+  "code_commit": "dea8b5eeda20e5c8da627ea1cb6f24a188dd69ba",
+  "base_commit": "8a0ffff8463b4474c5bf66ba96479d9094271b05",
+  "changes": [
+    "Read the Job PID-list header as two DWORDs followed by pointer-sized IDs on both pointer widths; share the validated layout with cleanup.",
+    "Return the original token-query error unless Windows reports an insufficient buffer; use fallible aligned allocation and the exact DWORD length for the retry.",
+    "Extend the existing suspended nested-Job regression with ordinary and sorted list observations; preserve original-handle cleanup assertions.",
+    "Decode PE import thunks as u64 in the existing test harness so i686 can compile its 32-bit and 63-bit shifts."
+  ],
+  "source_mapping": {
+    "schema": "qualified-native-source-to-commit-mapping-v1",
+    "commit": "dea8b5eeda20e5c8da627ea1cb6f24a188dd69ba",
+    "rows": [
+      {
+        "path": "src/engine/wait.rs",
+        "working_sha256": "b00cb3fe607d6868b0dab0ed848d6b1f1c19a65d01bd3f6f8a3f18950b26d839",
+        "git_lf_bytes": 35883,
+        "git_lf_sha256": "3a18dc788d8b76d4062be9a8df21c1bea9cfbf7d19fbe6731e2fec311000f516",
+        "only_crlf_to_lf": true,
+        "reader_original_handle_joined": true
+      },
+      {
+        "path": "src/engine/tests.rs",
+        "working_sha256": "43f9cd01a0a7d00e0e48d8f8831e8d59baedd2bd45dbb358e5bf2a7fd758454c",
+        "git_lf_bytes": 105999,
+        "git_lf_sha256": "c41456b3a839983d07fadae86f33b1ace71a14469b8a95b73c3c8edff9aad388",
+        "only_crlf_to_lf": true,
+        "reader_original_handle_joined": true
+      },
+      {
+        "path": "src/extend/descriptor.rs",
+        "working_sha256": "0eb62446c8d540c50a9bb0fe76fa267d80c1d25036044eae0f91569d9db902af",
+        "git_lf_bytes": 10831,
+        "git_lf_sha256": "422685cec5251f458df67ebcaaf2285abeebd0b31ce3d7924300fe45b54518d7",
+        "only_crlf_to_lf": true,
+        "reader_original_handle_joined": true
+      },
+      {
+        "path": "tests/guard.rs",
+        "working_sha256": "59b7a1d4016485f4d4cdef2bae0a31808bf82c70a6f56317e024b24bd4f01432",
+        "git_lf_bytes": 256072,
+        "git_lf_sha256": "17805d138e4f1ab5ef5102352a79b5be91a7062efe95a6fda429b68404fb9ab5",
+        "only_crlf_to_lf": true,
+        "reader_original_handle_joined": true
+      }
+    ]
+  },
+  "toolchain": {
+    "locked": true,
+    "offline": true,
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "profile": "debug",
+    "host": "x86_64-pc-windows-msvc",
+    "native_targets": [
+      "i686-pc-windows-msvc",
+      "x86_64-pc-windows-msvc"
+    ],
+    "jobs": 1
+  },
+  "native_library_results": [
+    {
+      "name": "i686-lib",
+      "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target i686-pc-windows-msvc --lib -- --test-threads=1",
+      "started_utc": "2026-11-25T21:07:59.6889623Z",
+      "finished_utc": "2026-11-25T21:09:03.0451501Z",
+      "deadline_seconds": 300,
+      "original_handle_retained": true,
+      "original_handle_joined": true,
+      "native_exit": 0,
+      "stdout": {
+        "bytes": 30051,
+        "sha256": "be9982b38a050494483516af1f8c3ca5370102e025c5be0e082101123815a69e"
+      },
+      "stderr": {
+        "bytes": 5305,
+        "sha256": "3fa2e210592a76c02a9955841eaaf1149230e310d99324fdf27baf8e133f6c83"
+      },
+      "library_passed": 316,
+      "library_failed": 0
+    },
+    {
+      "name": "x64-lib",
+      "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --lib -- --test-threads=1",
+      "started_utc": "2026-11-25T21:09:03.0549833Z",
+      "finished_utc": "2026-11-25T21:09:58.5169952Z",
+      "deadline_seconds": 300,
+      "original_handle_retained": true,
+      "original_handle_joined": true,
+      "native_exit": 0,
+      "stdout": {
+        "bytes": 30051,
+        "sha256": "f4a66965688ba54092d7ebfb17d030174c983c1bc3bf1241311950f72c1848f3"
+      },
+      "stderr": {
+        "bytes": 5307,
+        "sha256": "55ce00c1e1cd89e87faa961003e9e02a8aeab5e998a7a0773153fa5fdeea9088"
+      },
+      "library_passed": 316,
+      "library_failed": 0
+    }
+  ],
+  "library_input_continuity": {
+    "schema": "native-library-input-continuity-v1",
+    "source_manifest_entries": 1178,
+    "changed_files_since_both_native_316_passes": [
+      {
+        "path": "tests/guard.rs",
+        "before": "bc5769cd27e3c6187d280e9f6210208f86bbabf70f136a7ae8d7fff16ebbde18",
+        "after": "59b7a1d4016485f4d4cdef2bae0a31808bf82c70a6f56317e024b24bd4f01432"
+      }
+    ],
+    "library_and_build_inputs_unchanged": true,
+    "native_library_test_images": [
+      {
+        "target": "i686-pc-windows-msvc",
+        "machine": 332,
+        "optional_magic": 267,
+        "bytes": 5841408,
+        "sha256": "2377837a5b8b40bbe275d3b15c8b300a16cd2a95ab54cd4e321e5e717948ca90"
+      },
+      {
+        "target": "x86_64-pc-windows-msvc",
+        "machine": 34404,
+        "optional_magic": 523,
+        "bytes": 6384128,
+        "sha256": "702e17a6c9be15b5c96b3cf16f9d9cd89f8827a0b683873d8cb91cc0e2aeb751"
+      }
+    ],
+    "interpretation": "Two independent native library target results remain valid for unchanged library inputs. Failed multi-step batch002 remains failed; no competitive benchmark population is combined."
+  },
+  "completed_integration_and_lint": {
+    "steps": [
+      {
+        "name": "i686-g96",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target i686-pc-windows-msvc --test guard g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them -- --exact --test-threads=1 --nocapture",
+        "started_utc": "2026-11-25T21:15:41.551662Z",
+        "finished_utc": "2026-11-25T21:16:11.4063417Z",
+        "deadline_seconds": 300,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 4965,
+          "sha256": "cf66f867acbd7f99877a72e99642816b334ba1f14e8197d060279094f9215fdc"
+        },
+        "stderr": {
+          "bytes": 568,
+          "sha256": "6f7e68b615c9cddd8d3f03d4851694b08259458159a2e62e60f008f4f51bdad0"
+        }
+      },
+      {
+        "name": "x64-g96",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them -- --exact --test-threads=1 --nocapture",
+        "started_utc": "2026-11-25T21:16:11.4137626Z",
+        "finished_utc": "2026-11-25T21:16:38.3533982Z",
+        "deadline_seconds": 300,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 4965,
+          "sha256": "cf66f867acbd7f99877a72e99642816b334ba1f14e8197d060279094f9215fdc"
+        },
+        "stderr": {
+          "bytes": 570,
+          "sha256": "6f7e934662ca9f83adffcb11b4de3a55a8c3803161da3923822b862d8370e2c2"
+        }
+      },
+      {
+        "name": "i686-g56",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target i686-pc-windows-msvc --test guard g56_a_hold_ends_when_its_process_exits -- --exact --test-threads=1 --nocapture",
+        "started_utc": "2026-11-25T21:16:38.3569987Z",
+        "finished_utc": "2026-11-25T21:17:01.3816997Z",
+        "deadline_seconds": 120,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 3691,
+          "sha256": "aab35cada6934de624e79f2fc9431a27c4867169b868dfcf468efb37358a517c"
+        },
+        "stderr": {
+          "bytes": 492,
+          "sha256": "cefefb031bb4a9832d1e6c6151f1bb7ccf8d88666d713ca8f2bcf23db6e26c89"
+        }
+      },
+      {
+        "name": "x64-g56",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g56_a_hold_ends_when_its_process_exits -- --exact --test-threads=1 --nocapture",
+        "started_utc": "2026-11-25T21:17:01.3867358Z",
+        "finished_utc": "2026-11-25T21:17:24.1998839Z",
+        "deadline_seconds": 120,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 3691,
+          "sha256": "f679221444375181f47ff59eb133a2f0e5ce2702dbbdd73f0d2683cb64537de9"
+        },
+        "stderr": {
+          "bytes": 494,
+          "sha256": "315ab13cccd208f8fdb1fb6693da2c0e58f81c0b0066903f1a49d1e6950e79f8"
+        }
+      },
+      {
+        "name": "x64-g28",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g28_slow_to_exit_descendant_is_gone_when_the_guard_returns -- --exact --test-threads=1 --nocapture",
+        "started_utc": "2026-11-25T21:17:24.203227Z",
+        "finished_utc": "2026-11-25T21:17:40.9905555Z",
+        "deadline_seconds": 120,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 552,
+          "sha256": "39f466eed6547052046685cbf4d04858263ac49b7b0cb7c3f15540ce31d63302"
+        },
+        "stderr": {
+          "bytes": 494,
+          "sha256": "315ab13cccd208f8fdb1fb6693da2c0e58f81c0b0066903f1a49d1e6950e79f8"
+        }
+      },
+      {
+        "name": "i686-clippy",
+        "command": "cargo +stable-x86_64-pc-windows-msvc clippy --locked --offline --all-targets --all-features --target i686-pc-windows-msvc",
+        "started_utc": "2026-11-25T21:17:40.9934775Z",
+        "finished_utc": "2026-11-25T21:17:58.5814595Z",
+        "deadline_seconds": 180,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "bytes": 79600,
+          "sha256": "09c2137a51a574c9c2d81f7d1c555d99a9104e53f26f8fe19e3df36c92ffc272"
+        }
+      },
+      {
+        "name": "x64-clippy",
+        "command": "cargo +stable-x86_64-pc-windows-msvc clippy --locked --offline --all-targets --all-features --target x86_64-pc-windows-msvc",
+        "started_utc": "2026-11-25T21:17:58.585063Z",
+        "finished_utc": "2026-11-25T21:18:15.5241599Z",
+        "deadline_seconds": 180,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "native_exit": 0,
+        "stdout": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "bytes": 79603,
+          "sha256": "3f0801e9a9c7391270a3fa55a3936b53b52e4cdef3f93f5719c175e56d60034d"
+        }
+      }
+    ],
+    "retries": 0,
+    "outer_seconds": 1440,
+    "clippy": {
+      "i686_warning_headlines": 120,
+      "x64_warning_headlines": 120,
+      "warning_free": false
+    },
+    "outer_exit": 0,
+    "terminal_chunk": "3e19d2",
+    "source_files": 1178,
+    "all_seven_original_handles_joined": true,
+    "original_session": 74357,
+    "source_unchanged": true
+  },
+  "preserved_failures": [
+    {
+      "outer_exit": 1,
+      "native_exit": 101,
+      "status": "FAILED_AS_EXPECTED",
+      "finding": "Original i686 parser returned an empty ordinary list for the held suspended nested-Job child.",
+      "selection": "red"
+    },
+    {
+      "status": "FAILED",
+      "library_passed": 315,
+      "library_failed": 1,
+      "finding": "Existing invalid-file-token test reached capacity overflow; the repaired Job-list regression passed.",
+      "later_steps": "NOT_STARTED",
+      "selection": "first-candidate"
+    },
+    {
+      "native_exit": 101,
+      "status": "FAILED",
+      "finding": "Original executable backtrace reached the old allocation in token_user_sid. The native error number and requested allocation size were not directly recorded.",
+      "selection": "token-diagnostic"
+    },
+    {
+      "later_steps": "NOT_STARTED",
+      "status": "FAILED_BATCH",
+      "finding": "Both native library suites passed316/316, then i686 G56 failed during harness compilation; G56 did not execute in this batch.",
+      "selection": "library-and-compile-failure"
+    }
+  ],
+  "independent_review": {
+    "read_only_review_budget_nonconformance": {
+      "assigned_selected_seconds": 90,
+      "source_review_reads_reported_seconds": 300,
+      "additional_policy_preflight_reported_seconds": 30,
+      "additional_policy_preflight_receipt": "b009d3",
+      "total_reported_selected_seconds": 330,
+      "overrun_seconds": 240,
+      "scope": "All five read-only shell deadlines in the initial ABI review; the first report covered only the four product-source reads.",
+      "retroactively_approved": false,
+      "native_benchmark_data_created": false
+    },
+    "unresolved_source_and_result_objections": 0,
+    "reviewers": 2,
+    "model_family": "Sol",
+    "actual_scoped_results_approved": true,
+    "same_implementation_approved": true
+  },
+  "receipts": [
+    {
+      "bytes": 1178,
+      "sha256": "ea847b6f995eea0b6ceb0811a383a5b49efc08ef631161ebaa254e828574ced9",
+      "selection": "red",
+      "name": "RESULT.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "714b87bfac85768e3ad513a4b66c657badd935b5925d898c2f91ab95a9b00d95",
+      "selection": "red",
+      "name": "SOURCE-BEFORE.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "714b87bfac85768e3ad513a4b66c657badd935b5925d898c2f91ab95a9b00d95",
+      "selection": "red",
+      "name": "SOURCE-AFTER.json"
+    },
+    {
+      "bytes": 538,
+      "sha256": "340510cd1ae88617902c842393121b5cc775ffec2da92ca094066ae8b1d4dc57",
+      "selection": "red",
+      "name": "INTENT.json"
+    },
+    {
+      "bytes": 1121,
+      "sha256": "5b9ce980f9beefe42a0414429e6fca32349e6af00c3a63a3fbc3ee863b0a292c",
+      "selection": "first-candidate",
+      "name": "RESULT.json"
+    },
+    {
+      "bytes": 833,
+      "sha256": "3dca976f1b1d5929b49c39984a3f7205281510a4deb418a0c9f6ead6b8164e49",
+      "selection": "first-candidate",
+      "name": "ORIGINAL-EXECUTION.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "768da7527527f8438b4de10a0cdc8d40493a6a0a1907de8171887a0250795776",
+      "selection": "first-candidate",
+      "name": "SOURCE-BEFORE.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "768da7527527f8438b4de10a0cdc8d40493a6a0a1907de8171887a0250795776",
+      "selection": "first-candidate",
+      "name": "SOURCE-AFTER.json"
+    },
+    {
+      "bytes": 1307,
+      "sha256": "a197a49a527640a447384db7b62cba1ad2688c0626e2c831985b62f624fa503e",
+      "selection": "first-candidate",
+      "name": "INTENT.json"
+    },
+    {
+      "bytes": 565,
+      "sha256": "dd8d4712950dec92487132bbfd0dbcb967ebc4946378cd65ed30e87789f7bf95",
+      "selection": "token-diagnostic",
+      "name": "RESULT.json"
+    },
+    {
+      "bytes": 2104,
+      "sha256": "2f9b9a11858443b8426bb5786fb8aa43ed06c6509413baa4fedb2956531c7ded",
+      "selection": "library-and-compile-failure",
+      "name": "RESULT.json"
+    },
+    {
+      "bytes": 672,
+      "sha256": "0f2e3b168e1cf5478cd752de6053367aa62add55e9aab23bb48cf96cd64b343c",
+      "selection": "library-and-compile-failure",
+      "name": "ORIGINAL-EXECUTION.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "407512aaf7cc4d26addd8c5ca1506f907dc7275484c610299a08c6082f70b99a",
+      "selection": "library-and-compile-failure",
+      "name": "SOURCE-BEFORE.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "407512aaf7cc4d26addd8c5ca1506f907dc7275484c610299a08c6082f70b99a",
+      "selection": "library-and-compile-failure",
+      "name": "SOURCE-AFTER.json"
+    },
+    {
+      "bytes": 1766,
+      "sha256": "59d987869463ea262d8c00968bb6e6e2fcd4da17e13865bd9716c3a95abe2840",
+      "selection": "library-and-compile-failure",
+      "name": "INTENT.json"
+    },
+    {
+      "bytes": 4339,
+      "sha256": "1ad4d1fcd0dfa44281b6a3722594712020ac2ea7176b98fc665f8db8da903952",
+      "selection": "integration-and-lint",
+      "name": "RESULT.json"
+    },
+    {
+      "bytes": 557,
+      "sha256": "fd4483ec87c20e42db297ef9591991f3c8e3690f49f43bf94ac81b70e1c727a0",
+      "selection": "integration-and-lint",
+      "name": "ORIGINAL-EXECUTION.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "6cbbcc7975d18cf197c1b6c8e4aa8660e24a73288fc2a04cf48221758de0b87c",
+      "selection": "integration-and-lint",
+      "name": "SOURCE-BEFORE.json"
+    },
+    {
+      "bytes": 227324,
+      "sha256": "6cbbcc7975d18cf197c1b6c8e4aa8660e24a73288fc2a04cf48221758de0b87c",
+      "selection": "integration-and-lint",
+      "name": "SOURCE-AFTER.json"
+    },
+    {
+      "bytes": 2199,
+      "sha256": "f731568249e0776a0a0ffe878b65380536317419ebbd9c41b2fd5469e8c7dba1",
+      "selection": "integration-and-lint",
+      "name": "INTENT.json"
+    }
+  ],
+  "limits": [
+    "The failed batches remain failed. The retained library results and separate completed integration run are identified separately; no competitive benchmark population is combined.",
+    "The sole change after the native library passes was the integration-test helper, which is not a library-test input.",
+    "The completed checks are G96 and G56 on each target, G28 on x64, and Clippy on each target. This is not the comprehensive benchmark.",
+    "These debug correctness checks contain no speed comparison, production-release performance, full original-descendant custody, or prompt first-kill proof.",
+    "Pre-termination member capture and populated/fallback extension-state waits still withhold full Windows readiness. Linux, macOS, and deferred administrator tests remain separate.",
+    "Private raw logs contain local paths and account data and are not published. Their exact hashes and selected nonpersonal outcome fields are retained here."
+  ],
+  "primary_api_sources": [
+    "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_basic_process_id_list",
+    "https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation",
+    "https://learn.microsoft.com/en-us/windows/win32/secauthz/searching-for-a-sid-in-an-access-token-in-c--"
+  ]
+}
