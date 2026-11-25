@@ -589,6 +589,41 @@ fn g43_library_run_returns_the_command_code_and_124_at_the_deadline() {
 }
 
 #[test]
+fn g43_library_run_inherits_only_selected_standard_handles() {
+    use std::os::windows::process::CommandExt;
+
+    const DETACHED_PROCESS: u32 = 0x0000_0008;
+    const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+    const INPUT: &[u8] = b"returning-stdio\0\r\n";
+    const OUTPUT: &[u8] = b"out|returning-stdio\0\r\n";
+    const ERROR: &[u8] = b"err|\r\n";
+    let dir = TempDir::new("g43-handles-");
+    let cases = [
+        ("redirected", "detached", DETACHED_PROCESS, OUTPUT, ERROR),
+        ("alias", "detached", DETACHED_PROCESS, b"out|returning-stdio\0\r\nerr|\r\n", b""),
+        ("partial", "detached", DETACHED_PROCESS, OUTPUT, b""),
+        ("absent", "detached", DETACHED_PROCESS, b"", b""),
+        ("redirected", "hidden", CREATE_NO_WINDOW, OUTPUT, ERROR),
+    ];
+    for (layout, context, flags, expected_stdout, expected_stderr) in cases {
+        let result = dir.join(&format!("{context}-{layout}.txt"));
+        let mut command = Command::new(testkit());
+        command.args(["lib-handle-parent", &text(&result), layout, context]).creation_flags(flags);
+        without_deadline_variables(&mut command);
+        let input = (layout != "absent").then(|| INPUT.to_vec());
+        let out = exec_with(command, Opts { input, limit_secs: 15, ..Opts::default() });
+        assert_eq!(out.code, 0, "{context}/{layout}: {}", shown(&out));
+        let receipt = std::fs::read_to_string(&result).expect("successful parent result");
+        let (outcome, shape) = receipt.split_once('\n').expect("parent outcome and native child shape");
+        assert_eq!(outcome, "ok 37 host-unchanged event-private", "{context}/{layout}");
+        assert!(!shape.is_empty(), "{context}/{layout}: the native child shape is required");
+        assert_eq!(out.stdout.as_slice(), expected_stdout, "{context}/{layout} stdout");
+        assert_eq!(out.stderr.as_slice(), expected_stderr, "{context}/{layout} stderr");
+        println!("{context}/{layout}: {shape}");
+    }
+}
+
+#[test]
 fn g44_library_run_ends_the_tree_with_125_when_the_parent_exits_during_the_call() {
     let mut checks = Checks::new("library owner exit");
     let dir = TempDir::new("g44-");

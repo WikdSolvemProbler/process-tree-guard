@@ -55,6 +55,10 @@ extern "system" {
     fn GetErrorMode() -> u32;
     fn SetErrorMode(mode: u32) -> u32;
     fn GetStdHandle(which: u32) -> *mut c_void;
+    fn SetStdHandle(which: u32, handle: *mut c_void) -> i32;
+    fn GetConsoleCP() -> u32;
+    fn GetConsoleMode(console: *mut c_void, mode: *mut u32) -> i32;
+    fn GetFileType(file: *mut c_void) -> u32;
     fn CloseHandle(handle: *mut c_void) -> i32;
     fn GetNamedPipeInfo(pipe: *mut c_void, flags: *mut u32, out_buffer: *mut u32, in_buffer: *mut u32, max_instances: *mut u32) -> i32;
     fn CreateNamedPipeW(name: *const u16, open_mode: u32, pipe_mode: u32, max_instances: u32, out_buffer: u32, in_buffer: u32, timeout: u32, attributes: *mut c_void) -> *mut c_void;
@@ -71,6 +75,12 @@ extern "system" {
     fn CreateToolhelp32Snapshot(flags: u32, process_id: u32) -> *mut c_void;
     fn ResumeThread(thread: *mut c_void) -> u32;
     fn SetHandleInformation(handle: *mut c_void, mask: u32, flags: u32) -> i32;
+    fn GetHandleInformation(handle: *mut c_void, flags: *mut u32) -> i32;
+    fn GetCurrentProcess() -> *mut c_void;
+    fn DuplicateHandle(source_process: *mut c_void, source: *mut c_void, target_process: *mut c_void,
+        target: *mut *mut c_void, access: u32, inherit: i32, options: u32) -> i32;
+    fn CreateEventW(attributes: *mut c_void, manual_reset: i32, initial: i32, name: *const u16) -> *mut c_void;
+    fn SetEvent(event: *mut c_void) -> i32;
     fn WaitForSingleObject(handle: *mut c_void, milliseconds: u32) -> u32;
     fn GetExitCodeProcess(process: *mut c_void, code: *mut u32) -> i32;
     fn TerminateProcess(process: *mut c_void, code: u32) -> i32;
@@ -724,6 +734,148 @@ fn run_in_pseudo_console(limit: f64, guard: &str, args: &[String], type_enter: b
     }
 }
 
+const LIBRARY_STD_SLOTS: [u32; 3] = [-10i32 as u32, STD_OUTPUT_HANDLE, -12i32 as u32];
+
+fn library_std_flags(handle: *mut c_void) -> u32 {
+    let mut flags = 0;
+    if unsafe { GetHandleInformation(handle, &mut flags) } == 0 {
+        fail_spawn(&std::io::Error::last_os_error());
+    }
+    flags
+}
+
+fn set_library_test_streams(handles: [*mut c_void; 3]) {
+    for (slot, handle) in LIBRARY_STD_SLOTS.into_iter().zip(handles) {
+        if unsafe { SetStdHandle(slot, handle) } == 0 {
+            fail_spawn(&std::io::Error::last_os_error());
+        }
+    }
+}
+
+fn library_handle_parent(result: &Path, layout: &str, context: &str) {
+    use std::os::windows::io::{FromRawHandle, OwnedHandle};
+    const HANDLE_FLAG_INHERIT: u32 = 1;
+    const DUPLICATE_SAME_ACCESS: u32 = 2;
+    const WAIT_TIMEOUT: u32 = 258;
+
+    match context {
+        "detached" => assert_eq!(unsafe { GetConsoleCP() }, 0, "fixture parent must be detached"),
+        "hidden" => {}
+        _ => usage("unexpected library handle parent context"),
+    }
+    let inherited = LIBRARY_STD_SLOTS.map(|slot| unsafe { GetStdHandle(slot) });
+    let inherited_flags = inherited.map(library_std_flags);
+    let current = unsafe { GetCurrentProcess() };
+    let copies = inherited.map(|handle| {
+        let mut copy = std::ptr::null_mut();
+        if unsafe { DuplicateHandle(current, handle, current, &mut copy, 0, 0, DUPLICATE_SAME_ACCESS) } == 0 {
+            fail_spawn(&std::io::Error::last_os_error());
+        }
+        unsafe { OwnedHandle::from_raw_handle(copy) }
+    });
+    let original = copies.each_ref().map(|handle| handle.as_raw_handle());
+    let original_flags = original.map(library_std_flags);
+    assert!(original_flags.iter().all(|flags| flags & HANDLE_FLAG_INHERIT == 0));
+    let [input, output, error] = original;
+    let absent = std::ptr::null_mut();
+    let supplied = match layout {
+        "redirected" => [input, output, error],
+        "alias" => [input, output, output],
+        "partial" => [input, output, absent],
+        "absent" => [absent; 3],
+        _ => usage("unexpected library handle layout"),
+    };
+
+    let event = unsafe { CreateEventW(std::ptr::null_mut(), 1, 0, std::ptr::null()) };
+    if event.is_null() {
+        fail_spawn(&std::io::Error::last_os_error());
+    }
+    let event_owner = unsafe { OwnedHandle::from_raw_handle(event) };
+    if unsafe { SetHandleInformation(event, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT) } == 0 {
+        fail_spawn(&std::io::Error::last_os_error());
+    }
+    let event_flags = library_std_flags(event);
+    assert_ne!(event_flags & HANDLE_FLAG_INHERIT, 0, "sentinel must be inheritable");
+    assert_eq!(unsafe { WaitForSingleObject(event, 0) }, WAIT_TIMEOUT);
+
+    let me = std::env::current_exe().unwrap_or_else(|error| fail_spawn(&error));
+    let child_shape = result.with_extension("child-shape.txt");
+    let args = [me.to_string_lossy().into_owned(), "lib-handle-child".into(), layout.into(),
+        (event as usize).to_string(), child_shape.to_string_lossy().into_owned()];
+    set_library_test_streams(supplied);
+    let outcome = process_tree_guard::run(&args, 5.0);
+    let still_set = LIBRARY_STD_SLOTS.map(|slot| unsafe { GetStdHandle(slot) });
+    set_library_test_streams(inherited);
+    let shape = fs::read_to_string(&child_shape);
+    if outcome != Ok(37) {
+        write_diagnostics();
+        match &shape {
+            Ok(shape) => eprintln!("testkit: {context}/{layout} child handle shape: {shape}"),
+            Err(error) => eprintln!("testkit: {context}/{layout} child handle shape was unavailable: {error}"),
+        }
+    }
+    assert_eq!(outcome, Ok(37), "the actual fixture child must finish its handle and stream checks");
+    assert_eq!(still_set, supplied, "the returning call changed the host standard handle slots");
+    assert_eq!(original.map(library_std_flags), original_flags, "the returning call changed the host's selected handle flags");
+    assert_eq!(inherited.map(library_std_flags), inherited_flags, "the returning call changed the original harness handle flags");
+    assert_eq!(library_std_flags(event), event_flags, "the returning call changed the host sentinel flags");
+    assert_eq!(unsafe { WaitForSingleObject(event, 0) }, WAIT_TIMEOUT, "the child signaled the original unrelated event");
+    assert_ne!(unsafe { SetEvent(event) }, 0, "the parent's original handle still works");
+    assert_eq!(unsafe { WaitForSingleObject(event, 0) }, 0);
+    drop(event_owner);
+    let shape = shape.expect("actual child handle shape");
+    publish(result, &format!("ok 37 host-unchanged event-private\n{shape}"));
+}
+
+fn library_handle_child(layout: &str, event: usize, result: &Path) -> ! {
+    const FILE_TYPE_CHAR: u32 = 2;
+    let supplied = match layout {
+        "redirected" | "alias" => [true; 3],
+        "partial" => [true, true, false],
+        "absent" => [false; 3],
+        _ => usage("unexpected library handle layout"),
+    };
+    // The number is local to the parent unless this exact event was inherited.
+    // The parent observes its original object, even if the child reuses the value.
+    let event_signal = unsafe { SetEvent(event as *mut c_void) } != 0;
+    let handles = LIBRARY_STD_SLOTS.map(|slot| unsafe { GetStdHandle(slot) });
+    let available = handles.map(|handle| !handle.is_null() && handle as usize != usize::MAX);
+    let file_types = handles.map(|handle| unsafe { GetFileType(handle) });
+    let console_modes = handles.map(|handle| {
+        let mut mode = 0;
+        (unsafe { GetConsoleMode(handle, &mut mode) } != 0).then_some(mode)
+    });
+    let console_cp = unsafe { GetConsoleCP() };
+    // Windows can fill a missing slot with a console default. A non-null
+    // handle or a character device alone does not prove that origin.
+    let slots: [&str; 3] = std::array::from_fn(|i| match (supplied[i], available[i]) {
+        (true, true) => "supplied-present",
+        (true, false) => "supplied-missing",
+        (false, false) => "absent",
+        (false, true) if file_types[i] == FILE_TYPE_CHAR && console_modes[i].is_some() && console_cp != 0 =>
+            "console-default",
+        (false, true) => "unsupplied-unexpected",
+    });
+    publish(result, &format!(
+        "handles={handles:?} present={available:?} supplied={supplied:?} file_types={file_types:?} \
+         console_cp={console_cp} console_modes={console_modes:?} slots={slots:?} child_set_event={event_signal}"
+    ));
+    assert!(slots.iter().all(|&slot| matches!(slot, "supplied-present" | "absent" | "console-default")),
+        "unexpected native child standard handle slots: {slots:?}");
+    if supplied[0] && supplied[1] {
+        let mut input = Vec::new();
+        std::io::stdin().lock().take(128).read_to_end(&mut input).expect("read the child standard input");
+        let mut stdout = std::io::stdout().lock();
+        stdout.write_all(b"out|").expect("write the child standard output prefix");
+        stdout.write_all(&input).expect("forward the child standard input");
+        stdout.flush().expect("flush the child standard output before writing standard error");
+    }
+    if supplied[2] {
+        std::io::stderr().write_all(b"err|\r\n").expect("write the child standard error");
+    }
+    exit(37)
+}
+
 fn main() {
     // Set this before any child starts. The harness also sets it before this
     // executable loads, so loader failures cannot open an error dialog either.
@@ -841,6 +993,14 @@ fn main() {
                 Err(error) => format!("error {}", error),
             };
             publish(Path::new(&rest[0]), &outcome);
+        }
+        "lib-handle-parent" => {
+            need(rest, 3, "lib-handle-parent RESULT LAYOUT CONTEXT");
+            library_handle_parent(Path::new(&rest[0]), &rest[1], &rest[2]);
+        }
+        "lib-handle-child" => {
+            need(rest, 3, "lib-handle-child LAYOUT EVENT RESULT");
+            library_handle_child(&rest[0], number(&rest[1], "EVENT"), Path::new(&rest[2]));
         }
         "lib-run-repeat" => {
             // The library call `run` COUNT times in a row, each for at most SECONDS, in a process that

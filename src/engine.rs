@@ -542,7 +542,12 @@ fn run_job_core<D: Decisions>(
             // Attribute preparation precedes the fixed clock anchor. Failure,
             // including unsupported JOB_LIST, never falls back to a launch gap.
             let mut job_list = [job];
-            let restrict = process_cli.then_some(&mut inherited[..inherited_count]);
+            // Returning hosts may own unrelated inheritable handles.
+            // Limit this launch to the standard handles selected above.
+            if !process_cli && inherited_count == 0 {
+                startup.startup.flags &= !STARTF_USESTDHANDLES;
+            }
+            let restrict = Some(&mut inherited[..inherited_count]);
             let mut attribute_stack = [AttributeBlock([0; 16]); 8];
             let mut attributes = JobAttributeList::new(&mut attribute_stack, &mut job_list, restrict, !process_cli)?;
             startup.attribute_list = attributes.as_mut_ptr();
@@ -554,7 +559,7 @@ fn run_job_core<D: Decisions>(
                 });
             }
             checked(CreateProcessW(application.as_ptr(), command_line.as_mut_ptr(), std::ptr::null_mut(),
-                std::ptr::null_mut(), i32::from(!process_cli || inherited_count > 0),
+                std::ptr::null_mut(), i32::from(inherited_count > 0),
                 CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT | console_flags | environment_flag, environment_pointer,
                 std::ptr::null(), &mut startup.startup, &mut info))?;
             // A successful CreateProcessW already placed the child in this Job.

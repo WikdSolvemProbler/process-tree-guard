@@ -1,0 +1,313 @@
+{
+  "schema": "ptg-windows-library-handle-repair-v1",
+  "base_commit": "2fda3259910caddb36f4182a03127eb8926e534a",
+  "status": "QUALIFIED_FOR_TESTED_WINDOWS_LIBRARY_SCOPE",
+  "problem": "Returning library launches enabled ambient handle inheritance without an explicit allowlist. Unrelated inheritable caller handles could reach the child.",
+  "repair": "Use an explicit list of the selected standard-handle duplicates for returning launches. Enable inheritance only when that list is nonempty. With no selected standard handles, omit the explicit standard-handle startup flag in the returning branch. Original caller handles and flags are unchanged.",
+  "preserved": [
+    "atomic Job assignment at suspended creation",
+    "owner monitoring",
+    "original execution deadline",
+    "required cleanup",
+    "existing CLI native launch arguments and console flags"
+  ],
+  "source": [
+    {
+      "path": "src/engine.rs",
+      "bytes": 37620,
+      "sha256": "e7628f7331a013dc7396e4cc24f7b866ccbb48e27c7365442d62ad85aef97be2",
+      "git_blob": "ad80389eeca34b01edc8a1d3d88652d456bb99b3"
+    },
+    {
+      "path": "tests/support/testkit.rs",
+      "bytes": 86656,
+      "sha256": "555c330b46a7fbc599651a2c8fdab71664905486172e24125bae5b62778f458b",
+      "git_blob": "ce12158b8818730e4e8e2c0f51be529df048477a"
+    },
+    {
+      "path": "tests/guard.rs",
+      "bytes": 259415,
+      "sha256": "bc5769cd27e3c6187d280e9f6210208f86bbabf70f136a7ae8d7fff16ebbde18",
+      "git_blob": "f5d53930e51270429be34c5f8d391020b325fae1"
+    }
+  ],
+  "build": {
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "debug",
+    "cargo_build_jobs": 1,
+    "testkit_feature": "Enabled through the existing development dependency; these are test builds."
+  },
+  "focused_regression": {
+    "name": "g43_library_run_inherits_only_selected_standard_handles",
+    "final_passed_functions": 1,
+    "failed_functions": 0,
+    "filtered_functions": 83,
+    "cases": [
+      "detached parent, separate redirected streams",
+      "detached parent, aliased output streams",
+      "detached parent, missing stderr",
+      "detached parent, all standard handles missing",
+      "explicitly hidden parent, redirected streams"
+    ],
+    "oracles": [
+      "Exact binary stream bytes including NUL and CRLF",
+      "Caller standard-handle slots and original handle flags unchanged",
+      "Unnamed inheritable caller event remains unsignaled after the child attempts SetEvent on its numeric slot",
+      "Original caller event remains usable by its owner",
+      "Every supplied child standard slot exists; an unsupplied slot must be absent or affirmatively verified as a native console handle"
+    ],
+    "observed_defaults": "Windows initialized a console stderr for the partial case and three console handles for the all-missing case. Native file type, console mode and console codepage observations were retained. These defaults do not carry the caller event.",
+    "fixture_deadlines_seconds": {
+      "parent_process_wait": 15,
+      "returning_library_child": 5
+    }
+  },
+  "compatibility": {
+    "library_outer_tests_passed": 301,
+    "existing_nested_single_test_child_passed": 1,
+    "nested_count_note": "The nested child is not an additional unique outer test.",
+    "targeted_functions_passed": {
+      "g43": 2,
+      "g44": 1,
+      "g46": 1
+    },
+    "coverage": "Return codes and deadlines, direct-owner loss with descendant death, shell outcomes, existing library unit coverage, and the focused handle test.",
+    "all_original_step_handles_joined": true,
+    "all_step_exit_codes": 0,
+    "tracked_file_count": 1168,
+    "before_after_pins_equal": true,
+    "test_source_transition": "The broader suite used the prior test declaration with an explicit tuple-array annotation. Only that redundant annotation was then removed. Production and testkit bytes remained identical. The final focused test and Clippy reran on the final test bytes.",
+    "outer_guard_seconds": 900,
+    "selected_step_deadlines_seconds": [
+      300,
+      120,
+      120,
+      120,
+      180
+    ]
+  },
+  "final_qualification": {
+    "tracked_file_count": 1168,
+    "before_after_pins_equal": true,
+    "all_original_step_handles_joined": true,
+    "all_step_exit_codes": 0,
+    "outer_guard_seconds": 360,
+    "commands": [
+      "cargo +stable-x86_64-pc-windows-msvc test --locked --target x86_64-pc-windows-msvc --test guard g43_library_run_inherits_only_selected_standard_handles -- --exact --test-threads=1 --nocapture",
+      "cargo +stable-x86_64-pc-windows-msvc clippy --locked --all-targets --all-features --target x86_64-pc-windows-msvc"
+    ],
+    "clippy": "Exited zero under repository policy. One new test-only type_complexity warning from the broader run was removed. The final diagnostics have no warning on changed lines; existing repository warnings remain."
+  },
+  "preserved_failed_attempts": [
+    {
+      "id": "native001",
+      "outer_exit": 1,
+      "cargo_exit": 101,
+      "phase": "compile",
+      "reason": "Default GNU Rust toolchain lacked the requested MSVC standard library. No test ran."
+    },
+    {
+      "id": "native002",
+      "outer_exit": 1,
+      "cargo_exit": 101,
+      "phase": "test",
+      "reason": "The original partial-stream test used an absence-only stderr expectation. Child exited 101 without a captured child assertion message; stderr was not supplied by its parent, and its native stderr slot was unobserved."
+    },
+    {
+      "id": "native003",
+      "outer_exit": 1,
+      "cargo_exit": 101,
+      "phase": "test",
+      "reason": "Added diagnostics established that Windows supplied native console stderr, causing the original absence assertion to fail. The prospective oracle was corrected for a fresh run; this failed run was not rescored."
+    }
+  ],
+  "independent_review": {
+    "reviewers": [
+      "Sol designer",
+      "Sol critic"
+    ],
+    "same_final_implementation_approved": true,
+    "unresolved_objections": 0,
+    "scope": "The exact returning-library handle repair, final regression, actual receipts, and stated compatibility. Public-summary factual review is a separate step."
+  },
+  "receipt_phase_mapping": {
+    "focused": "Native004 passed with the prior explicit test annotation (guard source SHA-256 32df0fc6a1f1517a34688647ca30291db0fdf895a1ee144d670abb41fe22fe4f).",
+    "compatibility": "The broader compatibility run used that same prior annotation; production and testkit bytes were identical to final qualification.",
+    "final": "The focused test and Clippy reran on the final inferred test declaration (guard source SHA-256 bc5769cd27e3c6187d280e9f6210208f86bbabf70f136a7ae8d7fff16ebbde18)."
+  },
+  "retained_receipt_pins": {
+    "focused": {
+      "INTENT.json": {
+        "bytes": 342,
+        "sha256": "db6ba92d0905f62a574d792585e52111f75259216d6edea0eda0382a38c4e241"
+      },
+      "RESULT.json": {
+        "bytes": 1567,
+        "sha256": "957e61e0cf23f58697aad2c6653923d23678052cb1f6de87cb5207dd4278df91"
+      },
+      "stderr.log": {
+        "bytes": 563,
+        "sha256": "824caaf4424f8240f920426fbd21a88967387febfc00afec820ece4537fa3215"
+      },
+      "stdout.log": {
+        "bytes": 1497,
+        "sha256": "bb39d2479a2dbf804d5bfafce097a515bc84880eeb784060235ac5f933af8a29"
+      },
+      "native_testkit_executable": {
+        "bytes": 1697280,
+        "sha256": "5e8b4bb794333dee30a5459a1de72df7d059db5f2ee0e719cbef19e79b76af36"
+      }
+    },
+    "compatibility": {
+      "clippy.stderr.log": {
+        "bytes": 80037,
+        "sha256": "da43bb13ca2d139cb4187768eba574b5fef318c7ce478de485044dcb50af2c4f"
+      },
+      "clippy.stdout.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "g43.stderr.log": {
+        "bytes": 557,
+        "sha256": "e3b4782c81479d9d715314c43af3acf99179c876191660ca79a7d28511b2d93f"
+      },
+      "g43.stdout.log": {
+        "bytes": 1727,
+        "sha256": "ce5538d7a622585180b28f84a93684d965e2fa59c13ee30e3ce7fb4de8ef5501"
+      },
+      "g44.stderr.log": {
+        "bytes": 482,
+        "sha256": "fe6c50cdb214aeeb8837d3dba3396169d8c3d5e072cc9fa815db33d1b55944ac"
+      },
+      "g44.stdout.log": {
+        "bytes": 388,
+        "sha256": "a9cff30ee7a376a7adea469c1dee5deb79299652545eab149118750046b3e6d9"
+      },
+      "g46.stderr.log": {
+        "bytes": 482,
+        "sha256": "77081dc66235bc1baf66702bbbd1103e037fdbf4308fa8349b03d8b34af40540"
+      },
+      "g46.stdout.log": {
+        "bytes": 941,
+        "sha256": "5cc2a1a0497849807aa000e76fb4c634444b96fc08e55977465674de7daaebe3"
+      },
+      "lib.stderr.log": {
+        "bytes": 5298,
+        "sha256": "dc4fdd86da48b61864453d7e59e8ab2ead7498b2787f1884eb062bc80c97dfc2"
+      },
+      "lib.stdout.log": {
+        "bytes": 28729,
+        "sha256": "75cd8662032ce55aa9aaba20b5c28dc3a66b1d8db204e63e60475c9ca4d9a4f7"
+      },
+      "RESULT.json": {
+        "bytes": 3080,
+        "sha256": "7ba76d70c17fd06b054793db19c5bae2d01e1d18a706dd8cc6d0aa4cd83b423d"
+      },
+      "SOURCE-AFTER.json": {
+        "bytes": 225556,
+        "sha256": "c8bbb147d27a3c67b59c3ae8c9f5415b02bc193fd6a79c15b6a1a17f99cabb99"
+      },
+      "SOURCE-BEFORE.json": {
+        "bytes": 225556,
+        "sha256": "c8bbb147d27a3c67b59c3ae8c9f5415b02bc193fd6a79c15b6a1a17f99cabb99"
+      },
+      "STEPS.json": {
+        "bytes": 2363,
+        "sha256": "1cfc98ec712ecc6a93a5cb00fc0727861b026b6f7532e544196e3ad0fdf603ec"
+      },
+      "native_testkit_executable": {
+        "bytes": 1697280,
+        "sha256": "41fca84a5f81e925112a5c16c9211556ad3cfac4764485f48273d220fda4afde"
+      }
+    },
+    "final": {
+      "clippy.stderr.log": {
+        "bytes": 79610,
+        "sha256": "58b18d1bbb514e1821076cecb9b38ff0cdf1a479aa2f4a8f0a3b0ced0a5a510d"
+      },
+      "clippy.stdout.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "g43.stderr.log": {
+        "bytes": 557,
+        "sha256": "3eeeb9cca33b518c65e1830f45abb020df57d40b5db3606d214c771df16f96a4"
+      },
+      "g43.stdout.log": {
+        "bytes": 1497,
+        "sha256": "5740df8a63a5f62f2d190e2213f41d0dc8ed20621e2d56c8e5e1557c8fe227bd"
+      },
+      "RESULT.json": {
+        "bytes": 1593,
+        "sha256": "58f50a7af9d54a4249ce669f39778fdf5bb767cd2f317ef6295b3a27a1234cec"
+      },
+      "SOURCE-AFTER.json": {
+        "bytes": 225556,
+        "sha256": "e31565a22654ea87186d3f89fec90e72158794db87f0bad82af5a1b600ea1907"
+      },
+      "SOURCE-BEFORE.json": {
+        "bytes": 225556,
+        "sha256": "e31565a22654ea87186d3f89fec90e72158794db87f0bad82af5a1b600ea1907"
+      },
+      "STEPS.json": {
+        "bytes": 942,
+        "sha256": "cb780753c581f1a0fd9b3136843217e69cc0786ad9ebe0020aeb04890eea324c"
+      },
+      "native_testkit_executable": {
+        "bytes": 1697280,
+        "sha256": "0cd73be755b15d3526853b9e7b975fc17c6b5b7121c51bd83acc7066d284df78"
+      }
+    },
+    "failed_001": {
+      "RESULT.json": {
+        "bytes": 1538,
+        "sha256": "1fce8d1558410ddc60310fd2901601fde3f26640682bb2e14d7b8c56e7dd5a79"
+      },
+      "stdout.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr.log": {
+        "bytes": 674,
+        "sha256": "c3a40a380601d9d8b4a6d5a991ee2160ee12e7e3cb29b70d13583d1cb13d3ab7"
+      }
+    },
+    "failed_002": {
+      "RESULT.json": {
+        "bytes": 1569,
+        "sha256": "8c7048af1608db68c82715c29e8200207d9baa05d5debcebf0c8e841b6c262f4"
+      },
+      "stdout.log": {
+        "bytes": 271,
+        "sha256": "2a5361019887fe4d84c32d1a735e4e0d7681ec55ca37b6fa2aae40eb9260fb67"
+      },
+      "stderr.log": {
+        "bytes": 1168,
+        "sha256": "5936bb4954dfce8793dfa288b405850c0843c0904973a46dc236c15ee72e7ac6"
+      }
+    },
+    "failed_003": {
+      "RESULT.json": {
+        "bytes": 1569,
+        "sha256": "6216ab5e144f0cc9faf137ad00fd7dca674063e62e89f6519d86a3908d216c6c"
+      },
+      "stdout.log": {
+        "bytes": 271,
+        "sha256": "358668935f0e9f375ad0bf830c29fe0bfdac7153b09b9f83042687b14de149be"
+      },
+      "stderr.log": {
+        "bytes": 1394,
+        "sha256": "fe5e2953f8321e23b1412df4249de1b4501e43a39bf8c7cca4f8aa3360a777a4"
+      }
+    }
+  },
+  "limits": [
+    "Interactive attached-console and ConPTY parity were not newly established by this selection.",
+    "No unfixed-product native control was executed; baseline runtime sensitivity is not claimed.",
+    "The Job-member identity/deadline repair remains separate and unapplied.",
+    "No release-production performance, speed parity or comprehensive benchmark result follows.",
+    "Exact raw logs remain private because some contain machine and account data. Receipt hashes and this summary do not replace independently accessible raw evidence or the outstanding public academic benchmark package."
+  ],
+  "console_documentation": "https://learn.microsoft.com/en-us/windows/console/getstdhandle"
+}
