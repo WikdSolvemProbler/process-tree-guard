@@ -1,0 +1,121 @@
+{
+  "schema": "ptg-flat-index-component-screen-v1",
+  "date": "2026-11-24",
+  "classification": "completed internal component screen; candidate rejected before product build",
+  "source_anchor": "33f76dbe96082656b5ae4b36527a247228f8d932",
+  "product_changed": false,
+  "third_party_dependencies": 0,
+  "experiment": {
+    "compile_attempts": 1,
+    "run_attempts": 1,
+    "compiler_native_exit": 0,
+    "run_native_exit": 0,
+    "compile_wall_seconds": 20.30491,
+    "run_wall_seconds": 12.369334,
+    "compile_tree_deadline_seconds": 30,
+    "run_tree_deadline_seconds": 120,
+    "original_handles_retained": true,
+    "stderrs_empty": true,
+    "driver_behavior_assertions": "completed",
+    "probe_image_sha256": "fe17a556e8617090a88b14f0281155bc97e611d854a1915eac57ed74bde4bc7f",
+    "rust": "1.98.1",
+    "msvc_tools": "14.51.36231",
+    "sdk": "10.0.28000.0",
+    "target": "x86_64-pc-windows-msvc"
+  },
+  "evidence": {
+    "raw_sha256": "9ff43894a5413054eeff99360f3e19d27b42253308c0db12439fc084308abb30",
+    "replay_sha256": "38aa54b7ff20bca06fdb60ca1c5358fe51179dae2001700932488520fcf702dd",
+    "rows": 792,
+    "starter_rows": 24,
+    "measured_rows": 768,
+    "measured_blocks": 16,
+    "cases": 12,
+    "paired_block_contrasts": 192,
+    "cost_screen_pass": false,
+    "passed_cases": 2,
+    "failed_cases": 10,
+    "independent_reviews": "Two Sols separately replayed all rows and exact fractions; zero objections to rejection in this limited scope"
+  },
+  "decision": "Stop; no full candidate guard builds, startup timing, or production promotion.",
+  "case_results": [
+    {
+      "case": "hit-refund-1",
+      "median_ns_per_operation": "-277275/8192",
+      "p90_ns_per_operation": "-7125/256",
+      "screen_pass": true
+    },
+    {
+      "case": "hit-refund-32",
+      "median_ns_per_operation": "-10425/2048",
+      "p90_ns_per_operation": "31225/2048",
+      "screen_pass": false
+    },
+    {
+      "case": "hit-refund-1024",
+      "median_ns_per_operation": "88425/2048",
+      "p90_ns_per_operation": "623275/4096",
+      "screen_pass": false
+    },
+    {
+      "case": "fill-ascending",
+      "median_ns_per_operation": "-792075/16384",
+      "p90_ns_per_operation": "172975/16384",
+      "screen_pass": false
+    },
+    {
+      "case": "fill-descending",
+      "median_ns_per_operation": "4160425/16384",
+      "p90_ns_per_operation": "5674625/16384",
+      "screen_pass": false
+    },
+    {
+      "case": "first-full-miss",
+      "median_ns_per_operation": "-677225/32",
+      "p90_ns_per_operation": "-267475/16",
+      "screen_pass": true
+    },
+    {
+      "case": "backed-off-miss",
+      "median_ns_per_operation": "192325/8192",
+      "p90_ns_per_operation": "142325/4096",
+      "screen_pass": false
+    },
+    {
+      "case": "one-dead-churn",
+      "median_ns_per_operation": "2246675/128",
+      "p90_ns_per_operation": "1993475/64",
+      "screen_pass": false
+    },
+    {
+      "case": "mostly-retaining-expiry",
+      "median_ns_per_operation": "443825/32",
+      "p90_ns_per_operation": "336325/16",
+      "screen_pass": false
+    },
+    {
+      "case": "alternating-retain",
+      "median_ns_per_operation": "674125/32",
+      "p90_ns_per_operation": "639675/16",
+      "screen_pass": false
+    },
+    {
+      "case": "full-expiry",
+      "median_ns_per_operation": "127575/8",
+      "p90_ns_per_operation": "500575/16",
+      "screen_pass": false
+    },
+    {
+      "case": "shutdown",
+      "median_ns_per_operation": "688275/32",
+      "p90_ns_per_operation": "118325/2",
+      "screen_pass": false
+    }
+  ],
+  "limitations": [
+    "The standalone executable includes both implementations and synthetic clocks/liveness. No native process containment, DLL loading or startup estimate follows.",
+    "The gate is a conservative descriptive screen. A nonpositive contrast or an insignificant difference is not proof of population equivalence.",
+    "All measured rows and positive contrasts are retained. Native success and cost-screen failure are distinct outcomes.",
+    "Confidential original host/compiler-path and reviewer records remain private. This package provides exact numerical replay and source, not independent external reproduction or the complete academic campaign."
+  ]
+}

@@ -1,0 +1,132 @@
+diff --git a/src/extend/state/rate.rs b/src/extend/state/rate.rs
+--- a/src/extend/state/rate.rs
++++ b/src/extend/state/rate.rs
+@@ -62,26 +62,43 @@
+     }
+ }
+ 
++const REMOVED_POSITION: usize = usize::MAX;
++
+ #[derive(Default)]
++struct RateIndex {
++    entries: Vec<(RateKey, usize)>,
++}
++
++impl RateIndex {
++    fn search(&self, key: RateKey) -> Result<usize, usize> {
++        self.entries.binary_search_by_key(&key, |&(entry_key, _)| entry_key)
++    }
++
++    fn position(&self, key: RateKey) -> Option<usize> {
++        self.search(key).ok().map(|slot| self.entries[slot].1)
++    }
++
++    fn insert(&mut self, key: RateKey, position: usize) {
++        let slot = self.search(key).expect_err("a new rate key is absent");
++        self.entries.insert(slot, (key, position));
++    }
++
++    fn set_position(&mut self, key: RateKey, position: usize) {
++        let slot = self.search(key).expect("an existing rate has an index entry");
++        self.entries[slot].1 = position;
++    }
++
++    fn compact(&mut self) {
++        self.entries.retain(|&(_, position)| position != REMOVED_POSITION);
++    }
++}
++
++#[derive(Default)]
+ pub(in crate::extend) struct Limiter {
+     pub(in crate::extend) rates: Vec<Rate>,
+-    /// The position of each rate in `rates`, by its key. The table
+-    /// itself stays in insertion order — the sweep and the retaining
+-    /// passes walk it in that order, and the summaries they produce
+-    /// keep it — and this index is what a key is looked up through:
+-    /// one hash lookup instead of a scan of the whole table, on the
+-    /// path of every connection. It is kept exactly with the table
+-    /// at every change to it: a push records the new entry's
+-    /// position before the entry is appended, and a retaining pass
+-    /// rewrites the position of each entry it keeps and drops the
+-    /// entry it removes, inside its own pass over the table, so no
+-    /// path pays a second pass for the upkeep. No other path moves
+-    /// a rate or changes its key: the refusal-closing pass and the
+-    /// giving-back passes change a rate's counts in place, and the
+-    /// repair of a pushed entry in `arrive` changes the last entry's
+-    /// image alone. The final sweep of a shutdown empties the table
+-    /// through the retaining pass, and the index empties with it.
+-    pub(in crate::extend) index: std::collections::HashMap<RateKey, usize>,
++    /// Rate positions by key, sorted independently of the insertion-ordered
++    /// table that the sweep and summary passes visit.
++    index: RateIndex,
+     pub(in crate::extend) summaries: Vec<Summary>,
+     /// When a pass over a full table last forgot nobody.
+     pub(in crate::extend) unproductive: Option<u64>,
+@@ -134,10 +151,10 @@
+     /// another, so a process that starts many cannot reset the share of the rest.
+     pub(in crate::extend) fn admit(&mut self, key: RateKey, who: (u32, &str), now: u64, alive: &dyn Fn(RateKey) -> bool) -> Admit {
+         self.sweep(now, false);
+-        if self.rates.len() >= MAX_RATE_KEYS && !self.index.contains_key(&key) {
++        if self.rates.len() >= MAX_RATE_KEYS && self.index.position(key).is_none() {
+             self.forget_the_dead(now, alive);
+         }
+-        let Some(position) = self.index.get(&key).copied() else {
++        let Some(position) = self.index.position(key) else {
+             if self.rates.len() >= MAX_RATE_KEYS {
+                 return Admit::Full;
+             }
+@@ -170,7 +187,7 @@
+ 
+     /// Give back the latest request of `key`, which was counted when its connection arrived.
+     pub(in crate::extend) fn refund(&mut self, key: RateKey) {
+-        let close = if let Some(position) = self.index.get(&key).copied() {
++        let close = if let Some(position) = self.index.position(key) {
+             let rate = &mut self.rates[position];
+             rate.times.pop();
+             Self::close_of(rate)
+@@ -184,7 +201,7 @@
+ 
+     /// Take back the latest refusal for the rate of `key`, which was counted when its connection arrived.
+     pub(in crate::extend) fn unrefuse(&mut self, key: RateKey) {
+-        if let Some(position) = self.index.get(&key).copied() {
++        if let Some(position) = self.index.position(key) {
+             let rate = &mut self.rates[position];
+             rate.refused = rate.refused.saturating_sub(1);
+         }
+@@ -196,24 +213,29 @@
+         let rates = &mut self.rates;
+         let summaries = &mut self.summaries;
+         let index = &mut self.index;
+-        // The position each kept entry holds once the pass has
+-        // compacted the table: the pass visits the entries in table
+-        // order and the kept ones take the places in that order, so
+-        // counting the kept ones as they are visited gives each one
+-        // its place, and a removed one's entry goes with it.
++        // Rates keep their insertion order. Update the positions shifted by a
++        // removal, mark removed entries and compact the sorted index once.
++        // No caller reads the index while it contains removal markers.
+         let mut position = 0usize;
++        let mut removed = false;
+         rates.retain(|rate| {
+             let kept = keep(rate);
+             if !kept && rate.refused > 1 {
+                 summaries.push(Summary { pid: rate.pid, image: rate.image.clone(), count: rate.refused - 1 });
+             }
+             if kept {
+-                index.insert(rate.key, position);
++                if removed {
++                    index.set_position(rate.key, position);
++                }
+                 position += 1;
+             } else {
+-                index.remove(&rate.key);
++                index.set_position(rate.key, REMOVED_POSITION);
++                removed = true;
+             }
+             kept
+         });
++        if removed {
++            index.compact();
++        }
+         self.refresh_next_close();
+     }

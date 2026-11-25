@@ -1,0 +1,66 @@
+{
+  "schema": "ptg-flat-index-public-file-manifest-v1",
+  "scope": "All package files except this self-referential manifest; no empirical dataset excluded",
+  "files": [
+    {
+      "path": "check_replay_contract.py",
+      "bytes": 2469,
+      "sha256": "be795897a3e83fb828f60396573ce411cb76c553c38daf2766439d56ff63a132"
+    },
+    {
+      "path": "FLAT-INDEX.patch",
+      "bytes": 5883,
+      "sha256": "f50c92c8d3c3a909a657d577916345c183438ae46c703d9851d0667a90876009"
+    },
+    {
+      "path": "MICRO-PROBE.md",
+      "bytes": 6480,
+      "sha256": "89b84cb0e2f4e3a358cc884b749eebf52ae8c00f8754bcf7ea95a9151b70ebb0"
+    },
+    {
+      "path": "probe/baseline/rate.rs",
+      "bytes": 12091,
+      "sha256": "87a3dfa7da814a3049ba5a3e3f35b5fa725369a7a381e0db508561bfb49adaa8"
+    },
+    {
+      "path": "probe/candidate/rate.rs",
+      "bytes": 12076,
+      "sha256": "483d325d3242724931ba4bf6ee5c2efbce1fa685c8671b3c483f6b7794d8c29e"
+    },
+    {
+      "path": "probe/extend.rs",
+      "bytes": 14822,
+      "sha256": "7b1e0c1a586d1b35035dcc050a9be958c68acaf25f74dc265a783beb1f4b4e84"
+    },
+    {
+      "path": "probe/main.rs",
+      "bytes": 68,
+      "sha256": "ee993e5a2661d401b514a25f17cb7a0bef86a133fc3a2c04aade44346eff65bc"
+    },
+    {
+      "path": "raw.csv",
+      "bytes": 31135,
+      "sha256": "9ff43894a5413054eeff99360f3e19d27b42253308c0db12439fc084308abb30"
+    },
+    {
+      "path": "README.md",
+      "bytes": 7232,
+      "sha256": "ef7a4b3e44a305a74efb189e1441306748f82b96ea09c0380ab127ef6a211e51"
+    },
+    {
+      "path": "replay_cost.py",
+      "bytes": 5371,
+      "sha256": "1401aaa19ab6ef44105ace01a6315df0b6cc73187b79158effbaf64240a6be18"
+    },
+    {
+      "path": "replay.json",
+      "bytes": 6765,
+      "sha256": "38aa54b7ff20bca06fdb60ca1c5358fe51179dae2001700932488520fcf702dd"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 4232,
+      "sha256": "dd0f8175782dadb3f393652e7c4255a82c467e9e351ee41eb8e7defd822c2132"
+    }
+  ]
+}
