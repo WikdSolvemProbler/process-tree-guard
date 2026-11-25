@@ -779,3 +779,7 @@ The seven-file repair at 2ec5bc4 seals post-selection grant authorization withou
 ## Windows prepublication deadline selector
 
 The six-file repair at 0788c87 checks the initial base deadline without taking State, with audit maintenance in the existing monitor and request paths. All 316 library tests and five selected integration functions passed; six original work-step handles joined successfully. The record preserves the partial scope, audit scheduling differences and unchanged populated-state/cleanup blockers. [Source identities and focused results](windows-prepublication-selector-20261125-summary.json).
+
+## Current feature-free Windows release
+
+Code 0788c87 produced five feature-free release programs and a separately built testkit. All original build steps joined successfully, and 1,177 tracked file hashes stayed unchanged. The release main passed three existing cleanup integration functions using the pinned current debug harness and its debug fixture. These results preserve the unresolved enforcement-order and populated-state blockers; they contain no timing or full-readiness claim. [Exact artifacts, feature records, selected checks and receipt hashes](windows-feature-free-release-0788-20261125-summary.json).

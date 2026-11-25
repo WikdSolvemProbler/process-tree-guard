@@ -1,0 +1,348 @@
+{
+  "schema": "ptg-feature-free-release-readiness-v2",
+  "date": "2026-11-25",
+  "status": "BUILD_AND_THREE_SELECTED_MAIN_FUNCTIONAL_TESTS_PASSED",
+  "qualified_code_commit": "0788c87cf7a1c01193b22b69127efc93a6309e44",
+  "build_source_head": "90435abfe6bb432651f742c33dcb35cdd342809e",
+  "product_inputs_unchanged_between_code_commit_and_build_head": true,
+  "build": {
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "release",
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "rustflags": "-D warnings",
+    "jobs": 1,
+    "offline": true,
+    "locked": true,
+    "source_file_count": 1177,
+    "source_unchanged": true,
+    "outer_guard_seconds": 1020,
+    "selected_tool_pins": [
+      {
+        "role": "rustc",
+        "expected_sha256": "ca9988af88b1463f6857fdfe909299fee50a63260b3e5f7dbcb5b4d3318b27bc",
+        "actual_sha256": "ca9988af88b1463f6857fdfe909299fee50a63260b3e5f7dbcb5b4d3318b27bc",
+        "matches": true
+      },
+      {
+        "role": "cargo",
+        "expected_sha256": "c37545ec61d48d31bdefce53280ecab61c4ea54eaace372fac6a0316c6e165d9",
+        "actual_sha256": "c37545ec61d48d31bdefce53280ecab61c4ea54eaace372fac6a0316c6e165d9",
+        "matches": true
+      },
+      {
+        "role": "linker",
+        "expected_sha256": "a8c42e25c91ca2453e1110540ac08f0fc12d7539454a11b9af8baeecb469837d",
+        "actual_sha256": "a8c42e25c91ca2453e1110540ac08f0fc12d7539454a11b9af8baeecb469837d",
+        "matches": true
+      },
+      {
+        "role": "vcvars",
+        "expected_sha256": "6b516d8fcf543c14b2d861e1f45661e0029230fe0dc48e86ce78522801822209",
+        "actual_sha256": "6b516d8fcf543c14b2d861e1f45661e0029230fe0dc48e86ce78522801822209",
+        "matches": true
+      }
+    ],
+    "artifact_feature_records": [
+      {
+        "step": "stock-main",
+        "name": "process-tree-guard",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "process-tree-guard-gate",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "ptg",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "process-tree-guard-contain",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "process-tree-guard-deadline",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "testkit",
+        "name": "testkit",
+        "features": [
+          "testkit"
+        ],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      }
+    ],
+    "steps": [
+      {
+        "name": "stock-main",
+        "command": "cargo +stable-x86_64-pc-windows-msvc build --offline --locked --release --target x86_64-pc-windows-msvc --bin process-tree-guard -v --message-format=json-render-diagnostics",
+        "started_utc": "2026-11-25T20:44:36.2137479Z",
+        "finished_utc": "2026-11-25T20:45:12.5643443Z",
+        "deadline_seconds": 300,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "exit_code": 0
+      },
+      {
+        "name": "stock-roles",
+        "command": "cargo +stable-x86_64-pc-windows-msvc build --offline --locked --release --target x86_64-pc-windows-msvc --bin process-tree-guard-deadline --bin process-tree-guard-gate --bin process-tree-guard-contain --bin ptg -v --message-format=json-render-diagnostics",
+        "started_utc": "2026-11-25T20:45:12.5722109Z",
+        "finished_utc": "2026-11-25T20:45:47.6569306Z",
+        "deadline_seconds": 300,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "exit_code": 0
+      },
+      {
+        "name": "testkit",
+        "command": "cargo +stable-x86_64-pc-windows-msvc build --offline --locked --release --target x86_64-pc-windows-msvc --bin testkit --features testkit -v --message-format=json-render-diagnostics",
+        "started_utc": "2026-11-25T20:45:47.6606938Z",
+        "finished_utc": "2026-11-25T20:46:19.2118589Z",
+        "deadline_seconds": 300,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "exit_code": 0
+      }
+    ],
+    "artifacts": [
+      {
+        "name": "process-tree-guard",
+        "bytes": 823296,
+        "sha256": "8d42279c9d663d385176a1b2833b9abf5c08cec2b65c3f9de0b344cc0f3e6142",
+        "staged_copy_sha256": "8d42279c9d663d385176a1b2833b9abf5c08cec2b65c3f9de0b344cc0f3e6142",
+        "enabled_features": []
+      },
+      {
+        "name": "process-tree-guard-deadline",
+        "bytes": 720896,
+        "sha256": "4dd5a99b9dda8bb17c7c36a4c66b9c26f0ed0beeb94126b0b2a04c391fe07e64",
+        "staged_copy_sha256": "4dd5a99b9dda8bb17c7c36a4c66b9c26f0ed0beeb94126b0b2a04c391fe07e64",
+        "enabled_features": []
+      },
+      {
+        "name": "process-tree-guard-gate",
+        "bytes": 328704,
+        "sha256": "4463719f3da3cbe6634a852ee389eb589e824a6256a55d7e90b027e478f1a099",
+        "staged_copy_sha256": "4463719f3da3cbe6634a852ee389eb589e824a6256a55d7e90b027e478f1a099",
+        "enabled_features": []
+      },
+      {
+        "name": "process-tree-guard-contain",
+        "bytes": 376832,
+        "sha256": "a0aa0d5d35a127a21bb1b36ce183e73b2376631b2f1f2e8fcc908d2286f34e79",
+        "staged_copy_sha256": "a0aa0d5d35a127a21bb1b36ce183e73b2376631b2f1f2e8fcc908d2286f34e79",
+        "enabled_features": []
+      },
+      {
+        "name": "ptg",
+        "bytes": 823296,
+        "sha256": "775758fc70e16597c6c963cbc33bf60679cf594d37247170e8906a81d9a21ba1",
+        "staged_copy_sha256": "775758fc70e16597c6c963cbc33bf60679cf594d37247170e8906a81d9a21ba1",
+        "enabled_features": []
+      },
+      {
+        "name": "testkit",
+        "bytes": 655872,
+        "sha256": "a976f93537ad392721da6abe35fba00611b5d0a760e8f55df5a536a8b671b6bb",
+        "staged_copy_sha256": "a976f93537ad392721da6abe35fba00611b5d0a760e8f55df5a536a8b671b6bb",
+        "enabled_features": "testkit"
+      }
+    ]
+  },
+  "runtime": {
+    "sut": "Feature-free release full-role main",
+    "sut_sha256": "8d42279c9d663d385176a1b2833b9abf5c08cec2b65c3f9de0b344cc0f3e6142",
+    "binding": "PROCESS_TREE_GUARD_EXE selects the stock executable; the previously qualified current debug harness and its embedded debug testkit fixture are retained",
+    "harness_sha256": "dacae5419c977d3845eea78d88606607a777ea0ce8e569d0b1c3ce3780a0d10a",
+    "debug_testkit_sha256": "8b5e15165f910e520ac12cccb0f7477530874b676118b079936291db10bb64d3",
+    "outer_guard_seconds": 480,
+    "test_functions_passed": 3,
+    "test_functions_failed": 0,
+    "steps": [
+      {
+        "name": "g28",
+        "test": "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns",
+        "started_utc": "2026-11-25T20:48:46.2431156Z",
+        "finished_utc": "2026-11-25T20:49:01.5040568Z",
+        "deadline_seconds": 120,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "exit_code": 0
+      },
+      {
+        "name": "g19-g20",
+        "test": "g19_g20_descendant_killed_on_timeout_and_normal_exit",
+        "started_utc": "2026-11-25T20:49:01.5469437Z",
+        "finished_utc": "2026-11-25T20:49:06.7632643Z",
+        "deadline_seconds": 120,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "exit_code": 0
+      },
+      {
+        "name": "g21",
+        "test": "g21_wrapper_killed_closes_job",
+        "started_utc": "2026-11-25T20:49:06.7718354Z",
+        "finished_utc": "2026-11-25T20:49:07.149818Z",
+        "deadline_seconds": 120,
+        "original_handle_retained": true,
+        "original_handle_joined": true,
+        "exit_code": 0
+      }
+    ],
+    "executable_pins_unchanged": true,
+    "retries": 0
+  },
+  "provenance": {
+    "build_original_session": 95875,
+    "build_initial_observation_chunk": "5a7bc9",
+    "build_terminal_observation_chunk": "275ad6",
+    "build_terminal_native_exit": 0,
+    "readiness_original_session": 20169,
+    "readiness_initial_observation_chunk": "ff1b19",
+    "readiness_terminal_observation_chunk": "2a1c8f",
+    "readiness_terminal_native_exit": 0,
+    "receipts": [
+      {
+        "role": "build",
+        "name": "RESULT.json",
+        "bytes": 3811,
+        "sha256": "702e99adf9bf774a3a91684f6e2b1385f6f3930f78ef8425ba59501747c1f956"
+      },
+      {
+        "role": "build",
+        "name": "STEPS.json",
+        "bytes": 1574,
+        "sha256": "3007253afca571da7a9d4515bf7cbbfd7310b7e482079ce50f8c59b01b610397"
+      },
+      {
+        "role": "build",
+        "name": "SOURCE-BEFORE.json",
+        "bytes": 227144,
+        "sha256": "5eab533127b70bd9019c11f09bef719a1603a0d216c95c0a43a6ee72d4e809c0"
+      },
+      {
+        "role": "build",
+        "name": "SOURCE-AFTER.json",
+        "bytes": 227144,
+        "sha256": "5eab533127b70bd9019c11f09bef719a1603a0d216c95c0a43a6ee72d4e809c0"
+      },
+      {
+        "role": "build",
+        "name": "FEATURE-ASSERTION.json",
+        "bytes": 1740,
+        "sha256": "8eeb8de609737dc9339c3216d9339612acdf525462309de0e1a0f3406587cfac"
+      },
+      {
+        "role": "build",
+        "name": "TOOL-PINS.json",
+        "bytes": 951,
+        "sha256": "3a5d2d7ea1e16b68f819f2875b537c3595423386e9106f68d6fedeb2d36f674c"
+      },
+      {
+        "role": "build",
+        "name": "ORIGINAL-EXECUTION.json",
+        "bytes": 387,
+        "sha256": "30d7045b2ad7cb9079f53b11bc9f462569d6c7c81ccad7cfe56ccb8f1caa1508"
+      },
+      {
+        "role": "build",
+        "name": "RUN-BUILD-001.ps1",
+        "bytes": 6191,
+        "sha256": "cfc2037ebc1d3fae4296aa886d8e97b81e5165e6b371d131958f9ec936ee693f"
+      },
+      {
+        "role": "build",
+        "name": "INTENT.json",
+        "bytes": 957,
+        "sha256": "2109ec7aa19dcd20b508ac3577c5a84a077359d88c14b2eb4a8f989976df9c4b"
+      },
+      {
+        "role": "stock-readiness",
+        "name": "RESULT.json",
+        "bytes": 3426,
+        "sha256": "76d36c1bfb565b2641438ba1622952b0cdcd01f3752304c4ab5ab6f18c0a9ac0"
+      },
+      {
+        "role": "stock-readiness",
+        "name": "STEPS.json",
+        "bytes": 1084,
+        "sha256": "ab07ab7cd90c09bad670f4f6b008ff9500e39c081756585d1de4855a004b28f7"
+      },
+      {
+        "role": "stock-readiness",
+        "name": "ORIGINAL-EXECUTION.json",
+        "bytes": 285,
+        "sha256": "7a2256d9f542f92cccada5f911dd4e8fc0d6bb97b0d9bd03c6b72fbfd9ce2a2e"
+      },
+      {
+        "role": "stock-readiness",
+        "name": "RUN-STOCK-001.ps1",
+        "bytes": 4115,
+        "sha256": "b73e9fd0befb5444b3e614f802ac1d0382d1d7bfd0db21e89976666b50f8ee94"
+      },
+      {
+        "role": "stock-readiness",
+        "name": "INTENT.json",
+        "bytes": 1144,
+        "sha256": "ec3a70c158ff2a0d15f9d09b7468f91a63d358993167b8e39996215275e685a8"
+      }
+    ]
+  },
+  "interpretation": [
+    "The latest repaired code now has an exact fresh feature-free release identity; the older bed29 image is not substituted for it.",
+    "Three existing integration test functions passed against that main executable: slow-to-exit descendants, timeout and natural-exit descendant cleanup, and wrapper death.",
+    "The separate release testkit was built and pinned but was not the fixture used by these three tests.",
+    "This run contains no startup timing observations, no performance comparison, no new comprehensive benchmark, and no proof of complete arbitrary-descendant custody.",
+    "Source review still withholds readiness for pre-termination member capture and populated/fallback extension-state waits; the focused passes do not clear those blockers.",
+    "The selected four tool hashes do not attest every SDK, runtime component or environmental input.",
+    "Other CLI roles were built but not executed in this selection; Linux, macOS and deferred administrator tests remain separate.",
+    "Raw private paths and machine identities are withheld; receipt hashes and outcome fields preserve the scope of this public record."
+  ]
+}
