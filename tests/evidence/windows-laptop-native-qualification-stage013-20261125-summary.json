@@ -1,0 +1,192 @@
+{
+  "schema": "ptg-laptop-182-001-public-qualification-summary-v1",
+  "run_id": "laptop-182-001-a-as-used-013",
+  "measurement_sha256": "3a9801fbbf90d38fcadb4b78b7af381420a9ea55525876ed80fb6b999ef04e79",
+  "pending_manifest_sha256": "fa257d969e9fde1c65a76f54c3c2d8fe39b0c9f80bd91794369243ceb5d69c67",
+  "native_ready_manifest_sha256": "ece5fe76e3351ee7e142e302535a8fe902107ff2d49bfe56e4597ad8daf3c18b",
+  "qualification_receipt_sha256": "a7b9da1f293431118306224eecf4cfe13e65bab826180fe91048b71d788380e5",
+  "product_source": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+  "candidate": {
+    "bytes": 818176,
+    "sha256": "e550f469b55efe358ce663d80ed2032dab3812eeed87b18897a0eebbc834386b",
+    "features": "none",
+    "profile": "release"
+  },
+  "source_archive_sha256": "5ec804b669d2d678de53c580c342dd50ba46d567986d890e1136ee3710e35e10",
+  "observer_sources_sha256": {
+    "audit_package.py": "3908c9db44e2696fd535c1a1c9b87a4867573a42a4d825d648da6981370669d2",
+    "image_policy.py": "f9ca5e411de733df0e44cec6b3604790ed21336213850ef7f35b8acd0d54ff9d",
+    "inventory_gate.py": "f8ccb05073144e06d68e2204cf1d5f2c5a2c88bfb788bb0cbbdbb4fc8313d74f",
+    "quiet_gate.py": "c8995c81f6d05c4f17f8b1a00551065665f97a7ef15e5407212f63c3d1135ac3"
+  },
+  "scope": "Native qualification only. Three fixed control cohorts and one independent replay for each established readiness against the named measurement digest.",
+  "controls": {
+    "actual_candidate_protection": "PASS",
+    "barrier_and_witness": "PASS",
+    "clock_and_observer": "PASS",
+    "independent_guard_cleanup": "PASS",
+    "instrumentation_a_a": "PASS",
+    "raw_replay": "PASS",
+    "record_retention": "PASS"
+  },
+  "actual_candidate": {
+    "malformed_exit": 125,
+    "marked_timeout_exit": 124,
+    "marked_grandchild_survivor_before_assistance": false,
+    "retained_native_original_arms": true,
+    "optional_direct_child_marker_present": false,
+    "marked_timeout_owned_slot_natural_empty": true,
+    "malformed_slot_forced_from_one_to_zero": true,
+    "malformed_residue": "unclassified"
+  },
+  "independent_cleanup": {
+    "primary_guard_sha256": "8fa4e58bb6becf3e3c4536557be187b2b4163498d37b55a5ee8c030846fe0cf0",
+    "marked_timeout_exit": 124,
+    "marked_grandchild_survivor_before_assistance": false,
+    "marked_timeout_owned_slot_natural_empty": true,
+    "deliberate_detached_sleeper_original_exit": "0xe0000071",
+    "deliberate_owned_sleeper_forced_from_one_to_zero": true,
+    "aa_owned_phase_worker_exit": 0,
+    "aa_owned_phase_job_natural_empty": true
+  },
+  "pricing": {
+    "positive": {
+      "accepted": 6,
+      "rejected": 0,
+      "rows": 6,
+      "native_membership_queries": 10,
+      "owned_job_natural_empty": true
+    },
+    "expected_negative": {
+      "accepted": 0,
+      "rejected": 1,
+      "rows": 0,
+      "acknowledgments": 0,
+      "settled_cursor": -1,
+      "refusal": "persistent-extra",
+      "native_membership_queries": 29,
+      "request_to_refusal_ns": 957868000,
+      "owned_phase_job_forced_from_one_to_zero": true,
+      "original_extra_terminal_exit": "0xe0000071"
+    }
+  },
+  "aa": {
+    "pairs": 72,
+    "lanes": 144,
+    "excluded_or_ignored_lanes": 0,
+    "native_overlap_on": 72,
+    "native_overlap_off": 0,
+    "signed_contrasts": {
+      "negative": 30,
+      "positive": 42,
+      "zero": 0
+    },
+    "complete_resource_windows": [
+      12,
+      13,
+      12
+    ],
+    "fixed_baseline_endpoints": {
+      "during": 13,
+      "post": 12,
+      "pre": 12
+    },
+    "native_counter_sample_rows": 41,
+    "max_native_counter_read_span_ns": 3084700,
+    "max_baseline_dispatch_lag_ns": 14071100,
+    "max_ordinary_observer_full_span_ns": 8139600,
+    "barrier_occupied_ns": 2349588100,
+    "forced_lane_drains": [
+      {
+        "context": "NO_WINDOW",
+        "lane": 126,
+        "mode": "off",
+        "native_exit": 0,
+        "pair": 63,
+        "path": "fast",
+        "pre_drain_kill": null,
+        "recipe": "relay",
+        "residue_classification": "unclassified",
+        "slot_job": {
+          "active_after": 0,
+          "active_before": 1,
+          "terminated": true
+        }
+      }
+    ],
+    "forced_stock_drains": [
+      {
+        "active_after": 0,
+        "active_before": 1,
+        "case": "candidate_malformed",
+        "residue_classification": "unclassified",
+        "terminated": true
+      }
+    ],
+    "replay_negative_checks": [
+      "missing",
+      "duplicate",
+      "wrong_image",
+      "barrier_crossing",
+      "oversleep",
+      "decreasing_cpu_counter"
+    ]
+  },
+  "census": {
+    "boundary_ack_counts": {
+      "aa": 73,
+      "positive": 4,
+      "expected_negative": 1
+    },
+    "max_sender_request_to_ack_ns": {
+      "aa": 40205800,
+      "positive": 38180400,
+      "expected_negative": 43809900
+    },
+    "actual_during_census_rounds_per_boundary": 1,
+    "historical_replacement_foundation": "Earlier V6 observed the controlled replacement and live-image refusal branches on the same observer source. A013 added the current candidate to the image policy and exercised the ordinary single-round path."
+  },
+  "custody": {
+    "phase_native_exits": {
+      "aa": 0,
+      "positive": 0,
+      "expected_negative": 0
+    },
+    "independent_replay_native_exits": {
+      "aa": 0,
+      "positive": 0,
+      "expected_negative": 0
+    },
+    "exact_replay_receipts": {
+      "aa": {
+        "bytes": 67536,
+        "sha256": "ee1b76376e7b9708d49c8578cfc7324718cf5e4d21f70f3becfba99872436b94"
+      },
+      "negative": {
+        "bytes": 994,
+        "sha256": "fa1d915a4073fa252343ff7619f310c9d9d4668ad6b1fc298b29ac5227969dd0"
+      },
+      "positive": {
+        "bytes": 1534,
+        "sha256": "767f5db45e7df9581050c33ae1eb7bf0135028d413149e0f72635b1591b7b0de"
+      }
+    },
+    "retained_capture_files": {
+      "aa": 249,
+      "positive": 9,
+      "expected_negative": 9
+    },
+    "limits": "Raw native custody records remain private. These hashes identify the exact audited bytes."
+  },
+  "accounting": {
+    "qualification_selected_cap_seconds": 2110,
+    "qualification_allocation_seconds": 2200,
+    "original_inclusive_30_minute_setup_accounting": "INCOMPLETE; neither full compliance nor exhaustion was established.",
+    "priority": "Earlier charges and failed attempts retain their dispositions."
+  },
+  "inference_limits": [
+    "The A/A results concern added instrumentation on the fixed toy lanes. Commercial or comparative speed, total observer cost and protected-workload rankings remain unassessed.",
+    "The census covers the final sampled boundary. Continuous absence was outside the observation.",
+    "The full competitive attempt requires two exact independent prospective reviews, verified public preregistration and actual live admission."
+  ]
+}

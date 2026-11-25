@@ -1,0 +1,99 @@
+{
+  "schema": "ptg-laptop-182-001-public-preregistration-v1",
+  "date": "2026-11-25",
+  "run_id": "laptop-182-001-a-as-used-013",
+  "manifest_sha256": "ece5fe76e3351ee7e142e302535a8fe902107ff2d49bfe56e4597ad8daf3c18b",
+  "measurement_sha256": "3a9801fbbf90d38fcadb4b78b7af381420a9ea55525876ed80fb6b999ef04e79",
+  "native_qualification_sha256": "a7b9da1f293431118306224eecf4cfe13e65bab826180fe91048b71d788380e5",
+  "native_qualification_public_summary": {
+    "path": "tests/evidence/windows-laptop-native-qualification-stage013-20261125-summary.json",
+    "sha256": "812fb5514e84cda641785676e2a23370fb0c0cafc421865a59cae55be87dc545"
+  },
+  "protocol": "tests/campaign/laptop-182-001/PROTOCOL.md",
+  "opportunity_rule": {
+    "path": "tests/campaign/laptop-182-001/AMD-A013-OPPORTUNITY-001.md",
+    "sha256": "c89c07ce61922a93c31d49232658edce0d4d4f3f443a8007ba1bf21f8963cc5b",
+    "published_commit": "ff0ba0e7fdef4c07b0812dba59d8251d347c7761",
+    "dispatch": "One opportunity at the first available dispatch immediately after exact qualification, two independent exact Sol approvals and verified publication. Apply the inherited admission and emergency rules to the first observed context. A refusal or abort consumes the opportunity. Prior memory readings are historical."
+  },
+  "product_source": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+  "candidate_sha256": "e550f469b55efe358ce663d80ed2032dab3812eeed87b18897a0eebbc834386b",
+  "source_archive_sha256": "5ec804b669d2d678de53c580c342dd50ba46d567986d890e1136ee3710e35e10",
+  "fixture_sha256": "346ca22737701fb5e2a7188d0ad9aadca07a496984ca83c7e34747997324f8a3",
+  "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e",
+  "seed": 20261029,
+  "populations": {
+    "controls": 36,
+    "warmups": 224,
+    "measured_slots": 1680,
+    "pricing_rows": 54,
+    "groups": 540
+  },
+  "arms": [
+    "guard",
+    "nuewframe",
+    "processkit",
+    "sysprims"
+  ],
+  "contexts": [
+    "NO_WINDOW",
+    "DETACHED"
+  ],
+  "whole_tree_deadlines_seconds": {
+    "outer": 6920,
+    "primary": 6900,
+    "during": 6600,
+    "original_handle_observation": 6910,
+    "full_offline_replay_with_negative_packet": 360
+  },
+  "analysis": "The fixed protocol governs exact launch contexts, native protection, shutdown, observer boundaries, scoring and all rows, including failures. The campaign is exploratory. Independent full replay and the negative packet check are required before interpreting a complete capture. Pooling with earlier attempts or qualification data is outside scope.",
+  "state": "Prospective. The A013 competitive capture has yet to begin. Admission requires two independent exact Sol approvals, verified public publication and live verification against the same frozen inputs.",
+  "qualification": {
+    "controls_passed": 7,
+    "pricing_positive_rows": 6,
+    "pricing_negative_refused": 1,
+    "aa_pairs": 72,
+    "aa_lanes": 144,
+    "complete_resource_windows": [
+      12,
+      13,
+      12
+    ],
+    "forced_lane_drains_retained": 1,
+    "forced_stock_control_drains_retained": 1,
+    "independent_replays_terminal_exit": [
+      0,
+      0,
+      0
+    ]
+  },
+  "preparation_accounting": {
+    "original_inclusive_30_minute_setup_accounting": "INCOMPLETE; neither compliance nor exhaustion was established.",
+    "stage012_qualification_allocation_seconds": 2200,
+    "stage012_allocation_disposition": "spent; retained",
+    "stage013_native_qualification_allocation_seconds": 2200,
+    "stage013_native_qualification_selected_cap_seconds": 2110,
+    "full_preparation_allocation_seconds": 600,
+    "separate_ledgers": true
+  },
+  "previous_attempts": [
+    {
+      "run_id": "laptop-182-001-a-as-used-010",
+      "disposition": "FAILED_CONTROLLER_ENTRY"
+    },
+    {
+      "run_id": "laptop-182-001-a-as-used-011",
+      "disposition": "FAILED_DURING_WARMUP"
+    },
+    {
+      "run_id": "laptop-182-001-a-as-used-012",
+      "disposition": "FAILED_EMERGENCY_PHYSICAL_MEMORY"
+    }
+  ],
+  "limits": [
+    "The final census describes the sampled boundary. Unverified observations and positive vetoes retain their dispositions.",
+    "Retain invalid, missing, failed, assisted and incomplete observations. The attempt admits no restart, replacement, stitching or discretionary opportunity selection.",
+    "A complete exploratory capture cannot establish final freeze, equivalence or a broad ranking by itself.",
+    "The private custody digests identify exact sealed bytes. A reviewed public numerical dataset and replay package remain required for the public research deliverable."
+  ]
+}
