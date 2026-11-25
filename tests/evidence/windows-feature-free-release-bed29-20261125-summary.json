@@ -1,0 +1,322 @@
+{
+  "schema": "ptg-feature-free-release-readiness-v1",
+  "source_commit": "bed29a874f51aa7d25ccc9729b013e6c694eafc8",
+  "status": "BUILD_AND_SELECTED_MAIN_FUNCTIONAL_CHECKS_PASSED",
+  "build": {
+    "target": "x86_64-pc-windows-msvc",
+    "profile": "release",
+    "rustflags": "-D warnings",
+    "jobs": 1,
+    "rustc": "1.98.1 (48a229cea 2026-09-01)",
+    "selected_four_tool_pins_match_prior_a013_build": true,
+    "selected_tool_roles": [
+      {
+        "role": "rustc",
+        "expected_sha256": "ca9988af88b1463f6857fdfe909299fee50a63260b3e5f7dbcb5b4d3318b27bc",
+        "actual_sha256": "ca9988af88b1463f6857fdfe909299fee50a63260b3e5f7dbcb5b4d3318b27bc",
+        "matches": true
+      },
+      {
+        "role": "cargo",
+        "expected_sha256": "c37545ec61d48d31bdefce53280ecab61c4ea54eaace372fac6a0316c6e165d9",
+        "actual_sha256": "c37545ec61d48d31bdefce53280ecab61c4ea54eaace372fac6a0316c6e165d9",
+        "matches": true
+      },
+      {
+        "role": "linker",
+        "expected_sha256": "a8c42e25c91ca2453e1110540ac08f0fc12d7539454a11b9af8baeecb469837d",
+        "actual_sha256": "a8c42e25c91ca2453e1110540ac08f0fc12d7539454a11b9af8baeecb469837d",
+        "matches": true
+      },
+      {
+        "role": "vcvars",
+        "expected_sha256": "6b516d8fcf543c14b2d861e1f45661e0029230fe0dc48e86ce78522801822209",
+        "actual_sha256": "6b516d8fcf543c14b2d861e1f45661e0029230fe0dc48e86ce78522801822209",
+        "matches": true
+      }
+    ],
+    "actual_binary_rustc_flags_verified": [
+      "opt-level=3",
+      "lto",
+      "codegen-units=1",
+      "panic=abort",
+      "strip=symbols",
+      "-D warnings",
+      "target=x86_64-pc-windows-msvc"
+    ],
+    "artifact_feature_records": [
+      {
+        "step": "stock-main",
+        "name": "process-tree-guard",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "ptg",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "process-tree-guard-deadline",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "process-tree-guard-contain",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "stock-roles",
+        "name": "process-tree-guard-gate",
+        "features": [],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      },
+      {
+        "step": "testkit",
+        "name": "testkit",
+        "features": [
+          "testkit"
+        ],
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": false,
+          "overflow_checks": false,
+          "test": false
+        }
+      }
+    ],
+    "cache_separation": "The five stock executables have no enabled features. The fixture is built in a separate cache with only testkit enabled.",
+    "artifacts": [
+      {
+        "name": "process-tree-guard",
+        "cache": "stock-target",
+        "bytes": 821760,
+        "sha256": "3b148ad94e53f833b3fffede44708d0e8f05d5ce1155187c70496ecd72fd01f5",
+        "staged_copy_sha256": "3b148ad94e53f833b3fffede44708d0e8f05d5ce1155187c70496ecd72fd01f5"
+      },
+      {
+        "name": "process-tree-guard-deadline",
+        "cache": "stock-target",
+        "bytes": 718848,
+        "sha256": "495c4538d9c70d1d478e4af203e17e30271c1f0a14621a923e3d6c2ff8ec108e",
+        "staged_copy_sha256": "495c4538d9c70d1d478e4af203e17e30271c1f0a14621a923e3d6c2ff8ec108e"
+      },
+      {
+        "name": "process-tree-guard-gate",
+        "cache": "stock-target",
+        "bytes": 328704,
+        "sha256": "17de3d995d5924bb1dee86869274863a3293fc9d61b35056bd68cf47bec08954",
+        "staged_copy_sha256": "17de3d995d5924bb1dee86869274863a3293fc9d61b35056bd68cf47bec08954"
+      },
+      {
+        "name": "process-tree-guard-contain",
+        "cache": "stock-target",
+        "bytes": 376832,
+        "sha256": "ce0296721dd3a2f14e2bee9b799fcb74f4ee1c9bd37158f53f4d8701edfc2e90",
+        "staged_copy_sha256": "ce0296721dd3a2f14e2bee9b799fcb74f4ee1c9bd37158f53f4d8701edfc2e90"
+      },
+      {
+        "name": "ptg",
+        "cache": "stock-target",
+        "bytes": 821760,
+        "sha256": "7c06506b17cbec14c888823e6cd0b49fab6d1a6e9abf9b8da54012ebf30e4224",
+        "staged_copy_sha256": "7c06506b17cbec14c888823e6cd0b49fab6d1a6e9abf9b8da54012ebf30e4224"
+      },
+      {
+        "name": "testkit",
+        "cache": "testkit-target",
+        "bytes": 655872,
+        "sha256": "dadc9cc83af560af339c0ceced5ec980af26169bacb019490e1283c2166dbd7a",
+        "staged_copy_sha256": "dadc9cc83af560af339c0ceced5ec980af26169bacb019490e1283c2166dbd7a"
+      }
+    ],
+    "original_step_handles_joined": 3,
+    "all_step_exit_codes": 0,
+    "outer_guard_seconds": 1020,
+    "step_deadlines_seconds": [
+      300,
+      300,
+      300
+    ],
+    "tracked_files_unchanged_before_after": 1171,
+    "warnings": "The two existing Cargo per-binary edition deprecation warnings remain in the logs.",
+    "tool_pin_limit": "These four selected tools and recorded compiler flags do not attest every SDK file or establish an identical execution environment."
+  },
+  "selected_functional_readiness": {
+    "sut": "The feature-free release process-tree-guard main executable.",
+    "sut_sha256": "3b148ad94e53f833b3fffede44708d0e8f05d5ce1155187c70496ecd72fd01f5",
+    "harness": "Previously qualified debug guard harness and its recorded debug testkit fixture.",
+    "selection_binding": "The driver explicitly selects the release main using PROCESS_TREE_GUARD_EXE, which common::guard resolves before the Cargo path fallback.",
+    "executable_pins": [
+      {
+        "role": "release_main",
+        "sha256": "3b148ad94e53f833b3fffede44708d0e8f05d5ce1155187c70496ecd72fd01f5"
+      },
+      {
+        "role": "debug_harness",
+        "sha256": "12c357da3311e8d99dec44829757278d744446bb67a4529fa20cff1c7ab598bf"
+      },
+      {
+        "role": "debug_fixture",
+        "sha256": "378c4bd9a6a08d6b5e9e1f041707dcd407fa6f3a38c532b5381581a081db2ef2"
+      }
+    ],
+    "pins_unchanged_before_after": true,
+    "functions_passed": {
+      "g28": 1,
+      "g19_g20": 1,
+      "g21": 1
+    },
+    "g28": "Both timeout124 and natural0 paths passed the memory-touch marker and existing child-gone predicates.",
+    "g19_g20": "Both timeout124 and natural0 paths passed the marked small-tree descendant-gone predicates.",
+    "g21": "The existing wrapper-death Job-close test passed.",
+    "all_three_original_handles_joined": true,
+    "all_exit_codes": 0,
+    "all_stderr_streams_empty": true,
+    "outer_guard_seconds": 480,
+    "each_parent_wait_seconds": 120,
+    "separate_release_fixture_used_in_these_checks": false
+  },
+  "independent_review": {
+    "reviewers": [
+      "Sol designer",
+      "Sol critic"
+    ],
+    "build_and_actual_selected_readiness_approved": true,
+    "unresolved_objections": 0,
+    "scope": "Exact build/feature/artifact/source provenance and the three named functional checks; public-summary factual review is separate."
+  },
+  "retained_receipt_pins": {
+    "build": {
+      "RESULT.json": {
+        "bytes": 3812,
+        "sha256": "c481e15989af363b443dd1c5355d1ccbf293e59349fc769f9fc1163d4abda24f"
+      },
+      "STEPS.json": {
+        "bytes": 1575,
+        "sha256": "86223b0c96cf5ad7753af82603fb29673b5b8c8066bc411adaff87aac4f084ec"
+      },
+      "SOURCE-BEFORE.json": {
+        "bytes": 226086,
+        "sha256": "2c9ef16ab5fa336255261ae0df1648a25cc52876dadab8c2cf9866c79e4156af"
+      },
+      "SOURCE-AFTER.json": {
+        "bytes": 226086,
+        "sha256": "2c9ef16ab5fa336255261ae0df1648a25cc52876dadab8c2cf9866c79e4156af"
+      },
+      "TOOL-PINS.json": {
+        "bytes": 951,
+        "sha256": "3a5d2d7ea1e16b68f819f2875b537c3595423386e9106f68d6fedeb2d36f674c"
+      },
+      "RUSTC.txt": {
+        "bytes": 201,
+        "sha256": "67d86fbf74071a3c2fbf23eb9e4e28e3ecc0f81b6fce3d35f5bbc88b7de1ecfb"
+      },
+      "FEATURE-ASSERTION.json": {
+        "bytes": 1740,
+        "sha256": "064a5c804e6177f27771094c55003b6cc0a0c74023c22d25dccc14c7859070b7"
+      },
+      "stock-main.stdout.log": {
+        "bytes": 3252,
+        "sha256": "7a311ce169af5b50ffef82233b62e971b2fa793dec51e0c695c0301e067fb0fc"
+      },
+      "stock-main.stderr.log": {
+        "bytes": 3841,
+        "sha256": "f9f4dffdb16fbf2cc024fc364d28da1689615a3c0d544aa99c0d440d5fdbac6d"
+      },
+      "stock-roles.stdout.log": {
+        "bytes": 6436,
+        "sha256": "a7ed6596722c8b694c8eaae7bd796f323424e477b1560e0120e5984b21a3f9b2"
+      },
+      "stock-roles.stderr.log": {
+        "bytes": 6171,
+        "sha256": "5820cd6138aa29422eb8d4998e508f9f75d3aec510d2bde27c32262a2519ff98"
+      },
+      "testkit.stdout.log": {
+        "bytes": 3297,
+        "sha256": "948b1776713fdd49e875f91d9c8252afe4ba9364b71d644f072b52b665af7e85"
+      },
+      "testkit.stderr.log": {
+        "bytes": 3733,
+        "sha256": "e860ceff2e74ff083601e236e591a0f17f808dc51c0c1e25bd17dc8282eb4a3c"
+      }
+    },
+    "readiness": {
+      "RESULT.json": {
+        "bytes": 3364,
+        "sha256": "f9d0962593e23c51a2413a8c2456c8edc5a853ed4d018f8f49f00ee8ab77a82b"
+      },
+      "STEPS.json": {
+        "bytes": 1084,
+        "sha256": "0fad30f637a3663d7f8fa06746aeb0e6a18bb069f9a2ab80551d0e576b317647"
+      },
+      "g28.stdout.log": {
+        "bytes": 552,
+        "sha256": "c83ef3bd66f07f723aff5a086c45d0e311ce98f11a2107e060a720609e6fb1f4"
+      },
+      "g28.stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "g19-g20.stdout.log": {
+        "bytes": 486,
+        "sha256": "78a635e5707769e8d7d2ee0cb831de0054ba03ab7aa95c28915532de3b9341b3"
+      },
+      "g19-g20.stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "g21.stdout.log": {
+        "bytes": 155,
+        "sha256": "33bb81baf10b155d4cea9923dba2f343c83cc7f2108407f43f29ec53fbacc596"
+      },
+      "g21.stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "related_qualification": "windows-cleanup-member-deadline-20261125-summary.json",
+  "limits": [
+    "The named functional checks use a debug fixture. They are not latency measurements.",
+    "The separately built release fixture and four other stock roles were not runtime-qualified by this selection.",
+    "This is not the full battery, a platform-wide qualification, a comparative result, or speed parity.",
+    "The prior incomplete A013 attempt remains failed and consumed. This build/readiness work does not retry, replace, rescore or pool that attempt.",
+    "Exact raw build/runtime records remain private because some contain machine, account and local path data. This summary and hashes do not replace the outstanding public academic benchmark package."
+  ]
+}
