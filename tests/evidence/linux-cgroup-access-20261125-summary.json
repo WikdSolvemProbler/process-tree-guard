@@ -1,0 +1,65 @@
+{
+  "schema": "ptg-ordinary-empty-cgroup-access-v1",
+  "status": "ONE_ORDINARY_EMPTY_LEAF_WRITE_ACCEPTED",
+  "observed_utc": "2026-11-25T08:58:44Z",
+  "product_source_commit": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+  "question": "Can the ordinary test user write to cgroup.kill on one fresh, owned, empty child of its delegated user scope?",
+  "method": {
+    "attempts": 1,
+    "privileged_commands": 0,
+    "tasks_moved_into_leaf": 0,
+    "kill_writes": 1,
+    "held_identity_checks": "The mount, parent, leaf and control descriptors were retained. The leaf was a strict child below the cgroup mount and the worker scope; the worker and its original supervisor stayed outside the leaf.",
+    "empty_checks": ["before_open", "before_write", "after_write", "before_remove"],
+    "operational_assumption": "Cooperating same-user tasks and administrators leave the fresh probe-owned namespace untouched. This was an operational assumption, not a measured global or adversarial isolation guarantee."
+  },
+  "bounds_seconds": {
+    "orchestrator_job": 240,
+    "original_local_handle_wait": 233,
+    "ssh": 225,
+    "transport_hop": 215,
+    "transport_hop_kill_grace": 2,
+    "guest_gnu_timeout": 200,
+    "guest_kill_grace": 2,
+    "user_scope_runtime": 180,
+    "user_scope_stop": 5,
+    "scope_start_admission_from_original_timeout_start": 8,
+    "last_prewrite_check_from_original_timeout_start": 30
+  },
+  "observations": {
+    "local_native_exit": 0,
+    "ssh_native_exit": 0,
+    "managed_worker_native_exit": 0,
+    "timeout_observed": false,
+    "four_leaf_checks": "Each observed domain type, empty cgroup.procs and cgroup.threads, populated 0, and zero descendant cgroups.",
+    "write_returned_bytes": 1,
+    "same_owned_empty_leaf_removed": true,
+    "original_worker_pidfd_terminal": true,
+    "original_scope_events_terminal_errno": 19,
+    "original_scope_name_absent": true,
+    "final_manager_state": "not-found / inactive / dead, empty ControlGroup",
+    "final_manager_defaults": "The unloaded unit's infinity runtime and default stop values were not the active bounds. Active runtime180/stop5/Delegate=yes were checked before the leaf operation.",
+    "readable_config": "The observed ordinary sudo PAM includes did not contain pam_systemd; the login variant did. sudo.conf contained no active directive. sudoers was unreadable to the ordinary user.",
+    "effective_privileged_migration": "UNKNOWN: readable files do not establish the effective PAM service, plugin defaults or absence of all migrations."
+  },
+  "input_sha256": {
+    "seal": "620ba28823bfd6bb3b9c913ab6983d353621eb40bcd663a3a7e856c44b391a2c",
+    "local_carrier": "29224e76e39aa2dc3fad245e8e0153f4a95751922a9ef80bc0b73830b4c35b4f",
+    "guest_source": "c4d8d7dfb26f36fe2a4ffe5059b4e19419e7103efb912b513544e6f91b1b90ca",
+    "host_source": "08a8cd9e7cfaed34878f6a1c51c8ea79d91ba9acac384d98765321119824211d"
+  },
+  "private_receipt_sha256": {
+    "local_result": "3866ab4734a942e1045a59b2d5745997f995e8e0f492150517bd1ab8b9574c86",
+    "ssh_stdout": "19cde472334c8b090e2ec06be369e8f295b5a144c785f04a3c60e048734dc34e",
+    "ssh_stderr": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a",
+    "ssh_result": "f5230f69baaf4c78eaafb69d399465b9a29124d7cdc7be9f10e44c0d74a46654",
+    "normalized_guest_result": "c6f46def696b97f91823d07bd611b9e37896a5b3ff5a736e049e99f998b2f8e8"
+  },
+  "limits": [
+    "An empty-leaf write proves access for this ordinary-user setup, not termination of a root-credential process or successful deadline firing.",
+    "No sudo, root command, payload, production guard invocation, policy change, runtime reset or daemon was started by this probe.",
+    "Continuous containment during sudo policy and PAM phases and survival of a kill-capable supervisor remain unverified. Privileged tests remain withheld.",
+    "No performance or competitive result follows. Linux default dispatch remains disabled and issue #2 remains open.",
+    "Raw transport and machine-specific configuration records remain private. These receipt hashes and this summary do not substitute for independently accessible raw evidence."
+  ]
+}

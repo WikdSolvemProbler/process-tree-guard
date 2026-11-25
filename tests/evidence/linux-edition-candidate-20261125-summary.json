@@ -1,0 +1,230 @@
+{
+  "adopted": false,
+  "binary_comparison": {
+    "process-tree-guard-client": {
+      "build_id_changed": true,
+      "candidate": {
+        "bytes": 528928,
+        "sha256": "1b7235cf9a9859d7df54c4f7eb6de621820537d3ffe3d9452dc515614324d821"
+      },
+      "executable_sections_with_changed_bytes": [
+        ".text"
+      ],
+      "file_offset_differing_bytes": 347543,
+      "literal_byte_equality": false,
+      "original": {
+        "bytes": 528928,
+        "sha256": "3134fce1b23b9c59a2eb229c350a8164ff9683bb8651a4a7d95824afe6eb61f7"
+      },
+      "other_allocated_sections_with_changed_bytes": [
+        ".rela.dyn",
+        ".eh_frame_hdr",
+        ".eh_frame",
+        ".init_array",
+        ".data.rel.ro",
+        ".dynamic",
+        ".got",
+        ".data"
+      ],
+      "program_headers_changed": true,
+      "rodata_bytes_changed": false
+    },
+    "process-tree-guard-root": {
+      "build_id_changed": true,
+      "candidate": {
+        "bytes": 660000,
+        "sha256": "c7a9f044c3f3a7c8c755592ee6333342347db327e0d75e4245bcca55cdb3ca0b"
+      },
+      "executable_sections_with_changed_bytes": [
+        ".text"
+      ],
+      "file_offset_differing_bytes": 530462,
+      "literal_byte_equality": false,
+      "original": {
+        "bytes": 660000,
+        "sha256": "a95893b6def7688e8ae48ca69766762c4579cac53bb9f7985b3bd46542cec121"
+      },
+      "other_allocated_sections_with_changed_bytes": [
+        ".rela.dyn",
+        ".eh_frame_hdr",
+        ".eh_frame",
+        ".gcc_except_table",
+        ".init_array",
+        ".data.rel.ro",
+        ".dynamic",
+        ".got",
+        ".data"
+      ],
+      "program_headers_changed": true,
+      "rodata_bytes_changed": true
+    }
+  },
+  "build": {
+    "client_test_threads": 1,
+    "feature": "linux-separate-service",
+    "locked": true,
+    "native_command_exits": {
+      "ar": 0,
+      "build": 0,
+      "cargo": 0,
+      "cc": 0,
+      "fixture_io": 0,
+      "ld": 0,
+      "linker": 0,
+      "rustc": 0,
+      "test": 0
+    },
+    "native_target": "aarch64-unknown-linux-gnu",
+    "offline": true,
+    "profile": "release",
+    "release_settings": {
+      "opt_level": 3,
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": true
+    },
+    "tools": {
+      "ar": {
+        "sha256": "f4583a612510e038dbc1ae8afb5eae5f0445c435bdd7c4c28e78acc7e757d2b1",
+        "version": "GNU ar (GNU Binutils for Ubuntu) 2.42"
+      },
+      "cargo": {
+        "sha256": "2edad6fc8177aba5d5e785f83b695466685677c8da9e83f458fcd6a15e40e842",
+        "version": "cargo 1.88.0 (873a06493 2025-05-10)"
+      },
+      "cc": {
+        "sha256": "a20520ee21543f243d40636a9181a142c45ecd989de31ab86b99a8ea5ada870d",
+        "version": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+      },
+      "ld": {
+        "sha256": "1e4d3369b76845fa8e099b83513bf28f6f722e046f9b2cde1378c9e27f96d19c",
+        "version": "GNU ld (GNU Binutils for Ubuntu) 2.42"
+      },
+      "rustc": {
+        "sha256": "db982902454e43decfc629a093b7ed7e0542aed9509d93271533c36fc141661f",
+        "version": "rustc 1.88.0 (6b00bc388 2025-06-23)"
+      }
+    }
+  },
+  "checks": {
+    "client": {
+      "failed": 0,
+      "filtered": 0,
+      "ignored": 0,
+      "measured": 0,
+      "passed": 12
+    },
+    "edition_warning_comparison": {
+      "build": {
+        "candidate_stderr": {
+          "bytes": 141,
+          "sha256": "725b0ba498509bd199b88787a32e6819c8e928344158e8b176b07a2f67b9cb2b"
+        },
+        "candidate_warning_lines": 0,
+        "original_edition_warning_lines": 2
+      },
+      "test": {
+        "candidate_stderr": {
+          "bytes": 329,
+          "sha256": "4b5b242e34495cf9aca3d87bc7f2036fe0f6bc3c6e1e74281bbd31535ee800cf"
+        },
+        "candidate_warning_lines": 0,
+        "original_edition_warning_lines": 2
+      }
+    },
+    "fixture_io": {
+      "failed": 0,
+      "passed": 14,
+      "skipped": 0
+    }
+  },
+  "disposition": "UNQUALIFIED",
+  "evidence_availability": "Exact machine-specific raw receipts remain private. This summary and receipt hashes do not replace independently accessible raw evidence.",
+  "interpretation": "The literal comparison failed for both ELFs. Both executable text sections have different bytes. The root read-only data also differs. Changed offsets and branch encodings do not establish a semantic or performance conclusion.",
+  "lifecycle": {
+    "deadlines_seconds": {
+      "intermediate_hop": 215,
+      "linux": 200,
+      "scope_runtime": 180,
+      "scope_stop": 5,
+      "ssh": 225,
+      "start_admission": 8,
+      "transport_outer": 240
+    },
+    "held_events_retirement_errno": 19,
+    "host_qualification_exit": 1,
+    "native_worker_exit": 0,
+    "ordinary_user_scope": true,
+    "original_cgroup_retired": true,
+    "original_scope_terminal_state": "inactive/dead, unloaded",
+    "retained_original_worker_terminal": true,
+    "ssh_exit": 0,
+    "timed_out": false,
+    "worker_identity_joined_to_scope": true
+  },
+  "preserved_preparations_and_audits": [
+    {
+      "id": "191-001",
+      "reason": "The literal TOML anchor missed the archived CRLF representation. No native build ran.",
+      "state": "failed preparation"
+    },
+    {
+      "id": "191-002",
+      "reason": "Superseded by a packet derived from the exact successful 005 archive.",
+      "state": "prepared and unrun"
+    },
+    {
+      "id": "191-003 initial static checks",
+      "reason": "Archive checks first assumed all entries were regular files and then treated the intentional PAX provenance comment as unchanged. Final checks accounted for directories and the comment delta before the native run.",
+      "state": "failed assumptions preserved"
+    }
+  ],
+  "retained_private_receipts": {
+    "baseline_guest": {
+      "bytes": 1600054,
+      "sha256": "66029725b78921493ca90ab3f0a2c3a25a0b517759f4dfdc78a11fa27900bd2a"
+    },
+    "baseline_host": {
+      "bytes": 802,
+      "sha256": "f84f2c61dea95fdc8d21f7a3aa549381033bd2d83f40087fefb722f21c693a46"
+    },
+    "candidate_guest": {
+      "bytes": 1599645,
+      "sha256": "f34610392503b392c590724b04fff835ed518ffc4bdafd885433453f68c94eb1"
+    },
+    "candidate_host": {
+      "bytes": 1724,
+      "sha256": "5095b21c50693cd0a131211fb44ecf8e2f979fddabdad2046fb4b03884d77788"
+    },
+    "candidate_recipe_sha256": "4b7166bada9a7f4beb7c4fd7324d683b723fb8ba6e53424014f34598410a9b7b",
+    "candidate_sealed_inputs_sha256": "3deccf54b6dfd4f1fd828059ee0746131c798eadce18a512a0205fc83fe6d665",
+    "candidate_static_elf_analysis": {
+      "bytes": 20011,
+      "sha256": "82a901357c5c138b3b9a7a98d3ddeb525e3d3c8be2617d8370af546683ebecbe"
+    }
+  },
+  "schema": "ptg-native-arm64-edition-candidate-v1",
+  "scope": "Ordinary native release build, existing component tests and exact comparison only. Privileged lifecycle, root behavior, semantic or performance equivalence, and competitive results are outside the evidence.",
+  "source": {
+    "baseline_005": {
+      "archive_sha256": "95e20d94f7eb3cb9ef6ee5e19dd567232f4fc1bf7465ee02abe5e88f249eec5b",
+      "commit": "9bd332de9b333aa0167afc4da1298d76edf9bc10",
+      "manifest_sha256": "dffdd102183c62cac5437b18782a985ad3d361812d69c450aa59cba17b62e543"
+    },
+    "candidate_191_003": {
+      "archive_regular_file_count": 136,
+      "archive_total_members_including_directories": 157,
+      "archive_sha256": "c8355b8d7d2b65e8e7afa9ff7f3c24f3d35c14fc6018f19bfe96858030be7866",
+      "base_commit": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+      "edited_cargo_keys": 2,
+      "change": "Remove the two per-binary edition2024 overrides, so the Linux targets inherit package edition2021. This was a private candidate, not a change to main.",
+      "manifest_sha256": "682414ab298bfd3805f65450682538f5be4d752aeaf346dd37e862fffcd44006",
+      "original_archive_substrate_sha256": "95e20d94f7eb3cb9ef6ee5e19dd567232f4fc1bf7465ee02abe5e88f249eec5b",
+      "package_edition": "2021",
+      "patch_sha256": "3aa5b297c3b7cd3c520cbec7d8e3b94f9f538de2920d49859bcdcb3dff750d9e",
+      "revision": "61a586c02189f4dcfa63b0319925ba16ffa9f239+remove-linux-bin-editions",
+      "unchanged_other_file_members": 135
+    }
+  }
+}
