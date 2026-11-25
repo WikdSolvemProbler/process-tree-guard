@@ -120,13 +120,16 @@ impl Extension {
                 return Err(error);
             }
         };
+        let base_deadline = started + millis(timeout_seconds);
         let shared = Arc::new(Shared {
-            state: Mutex::new(State::new(started + millis(timeout_seconds), settings.max_seconds)),
+            state: Mutex::new(State::new(base_deadline, settings.max_seconds)),
+            base_deadline,
+            prepublication_notices_due: AtomicU64::new(started.saturating_add(BACKSTOP_WAKE_MS)),
             cap_seconds: settings.max_seconds,
             log,
             job: job as usize,
             wake: wake as usize,
-            grants_sealed: AtomicBool::new(false),
+            grant_phase: AtomicU8::new(GRANTS_UNPUBLISHED),
             stopping: AtomicBool::new(false),
             serving: AtomicUsize::new(1),
         });
@@ -210,12 +213,16 @@ impl Extension {
         self.wake
     }
 
-    /// Milliseconds until the deadline of the run, recalculated now under the lock;
-    /// None when it has passed, and the run then grants nothing more. A run that grants
-    /// nothing more for another reason (its channel stopped serving) goes on to its deadline.
+    /// Milliseconds until the deadline of the run. Before any reservation has been
+    /// published, the fixed base deadline can be selected without the state lock.
+    /// After publication, the live holds determine the deadline under that lock.
+    /// None means the run grants nothing more. A run whose channel stops serving
+    /// still goes on to its deadline.
     pub fn remaining(&self) -> Option<u64> {
-        if self.shared.grants_are_sealed() {
-            return None;
+        match self.shared.base_remaining(tick) {
+            BaseRemaining::Remaining(remaining) => return Some(remaining),
+            BaseRemaining::Expired => return None,
+            BaseRemaining::UseState => {}
         }
         let mut state = self.shared.lock();
         let now = tick();
@@ -234,6 +241,7 @@ impl Extension {
         let process = Process::open(id).expect("open the holder");
         let mut state = self.shared.lock();
         assert_eq!(state.grant(tick(), Some(self.shared.job as Handle), seconds, process, 0, None), Ok(None));
+        assert!(self.shared.publish_grant());
     }
 
     /// Stop authorizing grants before teardown, without waiting on the server.
@@ -267,9 +275,9 @@ impl Extension {
                 PostQueuedCompletionStatus(self.port, 0, 0, std::ptr::null_mut());
             }
         }
-        // These threads wait on the pipe and the port only, with the stop event to wake them,
-        // and never on the log, so the join is bounded. A serve thread started by another is
-        // joined by the one that started it, so the first thread's join covers them all.
+        // The stop event and completion packet wake the pipe and port waits. Join
+        // every producer before the final audit pass and before closing its handles.
+        // A serve thread started by another is joined by the thread that started it.
         for thread in self.servers.drain(..).chain(self.monitor.take()) {
             let _ = thread.join();
         }

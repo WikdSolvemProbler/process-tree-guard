@@ -27,18 +27,48 @@ pub(super) use decide::*;
 
 // ---------------------------------------------------------------------- the threads
 
-/// Tell the supervisor when a process in the job exits. The wait's timeout is
-/// only a backstop for a lost packet: shutdown sets the stopping flag and posts
-/// a packet to the port, which wakes this wait at once, so the long timeout
-/// costs no shutdown latency beyond the bounded wait itself.
+/// Tell the supervisor when a process in the job exits. While the supervisor
+/// uses only the base deadline, also service the rate and audit windows on the
+/// existing backstop cadence. The relative port wait schedules audit work, not
+/// deadline enforcement. Shutdown posts a packet to wake the wait.
 pub(super) fn watch_job(shared: &Shared, port: Handle) {
+    let mut retry_notices_after = 0;
     while !shared.stopping.load(Ordering::SeqCst) {
+        let timeout = if shared.uses_base_deadline() {
+            shared.prepublication_notices_due.load(Ordering::Relaxed).max(retry_notices_after)
+                .saturating_sub(tick()).min(BACKSTOP_WAKE_MS) as u32
+        } else {
+            10_000
+        };
         let (mut message, mut key, mut overlapped) = (0u32, 0usize, std::ptr::null_mut());
-        let got = unsafe { GetQueuedCompletionStatus(port, &mut message, &mut key, &mut overlapped, 10_000) };
+        let got = unsafe { GetQueuedCompletionStatus(port, &mut message, &mut key, &mut overlapped, timeout) };
+        let error = (got == 0).then(|| unsafe { GetLastError() });
         if got != 0 && (message == JOB_OBJECT_MSG_EXIT_PROCESS || message == JOB_OBJECT_MSG_ABNORMAL_EXIT_PROCESS) {
             unsafe { SetEvent(shared.wake as Handle) };
         }
+        // A steady stream of packets is not a reason to skip an audit pass.
+        if shared.uses_base_deadline() && maintain_after_job_poll(shared, tick(), error, &mut retry_notices_after) {
+            unsafe { SetEvent(shared.wake as Handle) };
+        }
     }
+}
+
+pub(super) fn maintain_after_job_poll(shared: &Shared, now: u64, error: Option<u32>, retry_notices_after: &mut u64) -> bool {
+    if shared.stopping.load(Ordering::SeqCst) {
+        return false;
+    }
+    if error.is_some_and(|error| error != WAIT_TIMEOUT) {
+        // The supervisor can resume the existing state-based audit passes.
+        // Keep reading the port for subsequent exit notifications.
+        return shared.require_state();
+    }
+    if shared.uses_base_deadline()
+        && now >= shared.prepublication_notices_due.load(Ordering::Relaxed).max(*retry_notices_after)
+        && !shared.try_service_prepublication_notices(now)
+    {
+        *retry_notices_after = now.saturating_add(BACKSTOP_WAKE_MS);
+    }
+    false
 }
 
 /// The bytes of one client message, held inline: a message is at
@@ -421,7 +451,7 @@ pub(super) fn handle_client(shared: &Shared, io: &Io, connected_at: u64) {
         // would live for the whole body, holding the state lock
         // across the format, the wall-clock sample and the log
         // queue's own locks on every silent client.
-        let allowed = shared.lock().budget.allow(tick());
+        let allowed = shared.allow_refusal();
         if allowed {
             let reason = format!("no request arrived within {} milliseconds", READ_MS);
             let line = log_line(unix_ms_now(), &Entry { pid: arrival.id, image: arrival.image.as_str(), requested: None, granted: None, reason: &reason });

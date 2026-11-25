@@ -98,7 +98,7 @@ pub(in crate::extend) fn arrive(shared: &Shared, id: u32) -> Arrival {
     let mut image: Option<String> = None;
     let shut = {
         let mut state = shared.lock();
-        let now = tick();
+        let now = shared.tick_after_prepublication_notices(&mut state);
         if shared.grants_are_sealed() || state.ended(now, Some(job)) {
             Some(Shut::Refusal(Refusal::Ended))
         } else {
@@ -227,7 +227,7 @@ pub(in crate::extend) fn decide(shared: &Shared, arrival: Arrival, connected_at:
         // across the materialisation (its wall-clock sample and its
         // whole line build) on every refused request.
         Line::Refused(line) => {
-            let allowed = shared.lock().budget.allow(tick());
+            let allowed = shared.allow_refusal();
             (reply, if allowed { Some(line.materialise()) } else { None }, None)
         }
     }
@@ -339,14 +339,14 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
     // the same lock, paid a second full scan per granted request.
     let (outcome, now) = {
         let mut state = shared.lock();
-        let now = tick();
+        let now = shared.tick_after_prepublication_notices(&mut state);
         let outcome = if shared.grants_are_sealed() {
             Err(Refusal::Ended.into())
         } else if holder.is_some() && !client.alive() {
             Err(Refusal::Unverified.into())
         } else {
             match state.begin_grant(now, Some(job), seconds, holder.unwrap_or(client), token, parent_rate) {
-                Ok(previous) if !shared.authorize_grant() => {
+                Ok(previous) if !shared.publish_grant() => {
                     // The reservation is still private under this lock. If
                     // stop won, withdraw it before a deadline reader sees it.
                     state.finish_grant_for((id_held, created_held, token), now + millis(seconds), previous, false);

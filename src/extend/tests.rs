@@ -14,7 +14,7 @@
 
         PIPE_ACCESS_DUPLEX, PIPE_READMODE_MESSAGE, PIPE_REJECT_REMOTE_CLIENTS, PIPE_TYPE_MESSAGE,
 
-        SetEvent, TOKEN_QUERY, wide,
+        SetEvent, TOKEN_QUERY, WAIT_TIMEOUT, wide,
 
     };
     /// Every process of the table is running.
@@ -1193,17 +1193,142 @@
 
     /// The shared state of a run with nothing serving: enough to decide a request.
     fn shared_run(job: Handle) -> Shared {
+        let started = tick();
+        let base_deadline = started + 600_000;
         Shared {
-            state: Mutex::new(State::new(tick() + 600_000, 3600.0)), cap_seconds: 3600.0, log: Log { sinks: Vec::new(), file_sink: None, blocked: Arc::new(AtomicBool::new(false)), only: None }, job: job as usize, wake: 0,
-            grants_sealed: AtomicBool::new(false), stopping: AtomicBool::new(false), serving: AtomicUsize::new(0),
+            state: Mutex::new(State::new(base_deadline, 3600.0)), cap_seconds: 3600.0, log: Log { sinks: Vec::new(), file_sink: None, blocked: Arc::new(AtomicBool::new(false)), only: None }, job: job as usize, wake: 0,
+            base_deadline, prepublication_notices_due: AtomicU64::new(started.saturating_add(BACKSTOP_WAKE_MS)),
+            grant_phase: AtomicU8::new(GRANTS_UNPUBLISHED), stopping: AtomicBool::new(false), serving: AtomicUsize::new(0),
         }
+    }
+
+    fn install_test_hold(shared: &Shared, now: u64, seconds: f64, token: Token) {
+        let mut state = shared.lock();
+        assert_eq!(state.grant(now, None, seconds, this_process(), token, None), Ok(None));
+        assert!(shared.publish_grant());
     }
 
     fn reserve_test_grant(shared: &Shared, now: u64) -> Withdraw {
         let process = this_process();
         let (id, created) = (process.id, process.created);
-        let previous = shared.lock().begin_grant(now, None, 60.0, process, 5, None).unwrap();
+        let mut state = shared.lock();
+        let previous = state.begin_grant(now, None, 60.0, process, 5, None).unwrap();
+        assert!(shared.publish_grant());
         Withdraw { id, created, token: 5, until: now + millis(60.0), previous, pid: id, image: "client.exe".into(), seconds: 60.0 }
+    }
+
+    #[test]
+    fn base_deadline_can_expire_while_a_first_reservation_is_still_private() {
+        let shared = shared_run(std::ptr::null_mut());
+        let base = shared.base_deadline;
+        let mut state = shared.lock();
+        let process = this_process();
+        let key = (process.id, process.created, 5);
+        let previous = state.begin_grant(base - 1, None, 60.0, process, 5, None).unwrap();
+        assert_eq!(shared.base_remaining(|| base - 1), BaseRemaining::Remaining(1));
+        assert_eq!(shared.base_remaining(|| base), BaseRemaining::Expired);
+        assert!(!shared.publish_grant());
+        assert!(state.finish_grant_for(key, base - 1 + millis(60.0), previous, false));
+        assert!(state.holds.is_empty());
+    }
+
+    #[test]
+    fn a_first_publication_wins_against_a_base_expiry_already_sampling() {
+        let shared = shared_run(std::ptr::null_mut());
+        let base = shared.base_deadline;
+        let mut reservation = None;
+        let remaining = shared.base_remaining(|| {
+            reservation = Some(reserve_test_grant(&shared, base - 1));
+            base
+        });
+        assert_eq!(remaining, BaseRemaining::UseState);
+        let back = reservation.unwrap();
+        assert!(shared.lock().finish_grant(&back, false));
+        assert!(shared.lock().holds.is_empty());
+        assert_eq!(shared.base_remaining(|| base), BaseRemaining::UseState);
+    }
+
+    #[test]
+    fn job_monitor_services_due_notices_with_packets_and_during_idle() {
+        let mut shared = shared_run(std::ptr::null_mut());
+        let lines = Arc::new(Mutex::new(Vec::new()));
+        shared.log = Log::capture(lines.clone(), None);
+        let start = tick();
+        let due = start + RATE_WINDOW_MS;
+        shared.prepublication_notices_due.store(due, Ordering::Relaxed);
+        {
+            let mut state = shared.lock();
+            for _ in 0..RATE_LIMIT + 3 {
+                state.limiter.admit((71, 17), (71, "refusing.exe"), start, &live);
+            }
+            for _ in 0..REFUSAL_LINES + 2 {
+                state.budget.allow(start);
+            }
+        }
+        let mut retry = 0;
+        assert!(!maintain_after_job_poll(&shared, due - 1, None, &mut retry));
+        shared.log.wait_for_captured_lines(0, 1000);
+        assert!(!maintain_after_job_poll(&shared, due, None, &mut retry));
+        assert!(!maintain_after_job_poll(&shared, due + 1, None, &mut retry));
+        shared.log.wait_for_captured_lines(1, 1000);
+        assert!(!maintain_after_job_poll(&shared, due + RATE_WINDOW_MS, Some(WAIT_TIMEOUT), &mut retry));
+        shared.log.wait_for_captured_lines(2, 1000);
+        {
+            let lines = lines.lock().unwrap();
+            assert!(lines[0].contains("2 more refused"));
+            assert!(lines[1].contains("2 refusal"));
+        }
+        assert!(shared.uses_base_deadline());
+
+        // The last window is still open. Shutdown takes both final counts even
+        // though no reservation was ever published and no later poll was due.
+        {
+            let mut state = shared.lock();
+            let now = tick();
+            for _ in 0..RATE_LIMIT + 4 {
+                state.limiter.admit((72, 18), (72, "last.exe"), now, &live);
+            }
+            for _ in 0..REFUSAL_LINES + 1 {
+                state.budget.allow(now);
+            }
+            // Make room for the final summary while leaving other counts owed.
+            assert!(state.budget.written.pop().is_some());
+        }
+        let mut extension = Extension {
+            shared: Arc::new(shared), pipes: [std::ptr::null_mut(); INSTANCES as usize],
+            stop: std::ptr::null_mut(), port: std::ptr::null_mut(), wake: std::ptr::null_mut(),
+            servers: Vec::new(), monitor: None, started: start, channel: String::new(), shutdown_done: false,
+        };
+        extension.shutdown();
+        let lines = lines.lock().unwrap();
+        assert_eq!(lines.len(), 4);
+        assert!(lines[2].contains("3 more refused"));
+        assert!(lines[3].contains("1 refusal"));
+    }
+
+    #[test]
+    fn contended_monitor_leaves_the_due_pass_for_a_worker_and_falls_back_once() {
+        let shared = shared_run(std::ptr::null_mut());
+        let due = tick();
+        shared.prepublication_notices_due.store(due, Ordering::Relaxed);
+        let mut retry = 0;
+        {
+            let mut state = shared.lock();
+            assert!(!maintain_after_job_poll(&shared, due, None, &mut retry));
+            assert_eq!(retry, due + BACKSTOP_WAKE_MS);
+            assert_eq!(shared.prepublication_notices_due.load(Ordering::Relaxed), due);
+            let now = shared.tick_after_prepublication_notices(&mut state);
+            assert!(now >= due);
+            assert!(shared.prepublication_notices_due.load(Ordering::Relaxed) > due);
+            state.closed = true;
+        }
+        assert_eq!(shared.base_remaining(|| shared.base_deadline - 1), BaseRemaining::Remaining(1));
+        assert!(maintain_after_job_poll(&shared, due, Some(6), &mut retry));
+        assert_eq!(shared.base_remaining(|| shared.base_deadline), BaseRemaining::UseState);
+        assert!(!maintain_after_job_poll(&shared, due, Some(6), &mut retry));
+        shared.seal_grants();
+        assert!(!maintain_after_job_poll(&shared, due, Some(6), &mut retry));
+        assert_eq!(shared.base_remaining(|| due), BaseRemaining::Expired);
     }
 
     #[test]
@@ -1243,7 +1368,7 @@
     #[test]
     fn a_seal_after_reservation_vetoes_submission_and_restores_the_old_hold() {
         let shared = shared_run(std::ptr::null_mut());
-        assert_eq!(shared.lock().grant(10, None, 20.0, this_process(), 5, None), Ok(None));
+        install_test_hold(&shared, 10, 20.0, 5);
         let back = reserve_test_grant(&shared, 11);
         assert_eq!(back.previous, Some(20_010));
         shared.seal_grants();
@@ -1263,7 +1388,7 @@
     #[test]
     fn reply_permission_requires_the_matching_reservation_and_live_hold() {
         let shared = shared_run(std::ptr::null_mut());
-        assert_eq!(shared.lock().grant(10, None, 20.0, this_process(), 6, None), Ok(None));
+        install_test_hold(&shared, 10, 20.0, 6);
         let back = reserve_test_grant(&shared, 10);
         let wrong = Withdraw { until: back.until + 1, image: back.image.clone(), ..back };
         assert_eq!(submit_reply(&shared, Some(&wrong), || ()), Err(Refusal::NoHold));

@@ -455,8 +455,21 @@ impl State {
     }
 }
 
+pub(super) const GRANTS_UNPUBLISHED: u8 = 0;
+const GRANTS_USE_STATE: u8 = 1;
+const GRANTS_SEALED: u8 = 2;
+
+#[derive(Debug, PartialEq, Eq)]
+pub(super) enum BaseRemaining {
+    Remaining(u64),
+    Expired,
+    UseState,
+}
+
 pub(super) struct Shared {
     pub(super) state: Mutex<State>,
+    pub(super) base_deadline: u64,
+    pub(super) prepublication_notices_due: AtomicU64,
     /// The cap of the run, in seconds: fixed when the run starts and never
     /// written again, so a decision reads it here instead of taking the
     /// state lock for it alone. The state's own copy, used under the lock,
@@ -465,7 +478,7 @@ pub(super) struct Shared {
     pub(super) log: Log,
     pub(super) job: usize,
     pub(super) wake: usize,
-    pub(super) grants_sealed: AtomicBool,
+    pub(super) grant_phase: AtomicU8,
     pub(super) stopping: AtomicBool,
     /// Serve threads running: one at the start of the run, and one more for
     /// each instance a connection has called into service, up to INSTANCES.
@@ -484,17 +497,92 @@ impl Shared {
     }
 
     pub(super) fn seal_grants(&self) {
-        self.grants_sealed.swap(true, Ordering::AcqRel);
+        self.grant_phase.swap(GRANTS_SEALED, Ordering::AcqRel);
     }
 
     pub(super) fn grants_are_sealed(&self) -> bool {
-        self.grants_sealed.load(Ordering::Acquire)
+        self.grant_phase.load(Ordering::Acquire) == GRANTS_SEALED
+    }
+
+    pub(super) fn uses_base_deadline(&self) -> bool {
+        self.grant_phase.load(Ordering::Acquire) == GRANTS_UNPUBLISHED
+    }
+
+    // Once a reservation has been published, or the monitor needs the old
+    // backstop, empty holds alone cannot restore the base-only authority.
+    pub(super) fn require_state(&self) -> bool {
+        self.grant_phase.compare_exchange(
+            GRANTS_UNPUBLISHED, GRANTS_USE_STATE, Ordering::AcqRel, Ordering::Acquire,
+        ).is_ok()
+    }
+
+    pub(super) fn base_remaining(&self, sample: impl FnOnce() -> u64) -> BaseRemaining {
+        match self.grant_phase.load(Ordering::Acquire) {
+            GRANTS_SEALED => return BaseRemaining::Expired,
+            GRANTS_USE_STATE => return BaseRemaining::UseState,
+            _ => {}
+        }
+        let now = sample();
+        if now < self.base_deadline {
+            // A concurrent grant can only make this wake early.
+            return BaseRemaining::Remaining(self.base_deadline - now);
+        }
+        match self.grant_phase.compare_exchange(
+            GRANTS_UNPUBLISHED, GRANTS_SEALED, Ordering::AcqRel, Ordering::Acquire,
+        ) {
+            Err(GRANTS_USE_STATE) => BaseRemaining::UseState,
+            _ => BaseRemaining::Expired,
+        }
+    }
+
+    // The reservation is still private under State. A monitor fallback can
+    // win the first transition without sealing the run, so take the same
+    // permission as any later reservation in that case.
+    pub(super) fn publish_grant(&self) -> bool {
+        (self.uses_base_deadline() && self.require_state()) || self.authorize_grant()
+    }
+
+    pub(super) fn try_service_prepublication_notices(&self, now: u64) -> bool {
+        let mut state = match self.state.try_lock() {
+            Ok(state) => state,
+            Err(std::sync::TryLockError::Poisoned(poisoned)) => poisoned.into_inner(),
+            Err(std::sync::TryLockError::WouldBlock) => return false,
+        };
+        self.service_prepublication_notices(&mut state, now);
+        true
+    }
+
+    // All consumers call this under State, including the pushes, so first
+    // publication cannot pass an earlier batch of notices and the queue is
+    // consumed only once. A stop does not wait for this work.
+    fn service_prepublication_notices(&self, state: &mut State, now: u64) -> bool {
+        if !self.uses_base_deadline() || now < self.prepublication_notices_due.load(Ordering::Relaxed) {
+            return false;
+        }
+        self.prepublication_notices_due.store(now.saturating_add(BACKSTOP_WAKE_MS), Ordering::Relaxed);
+        for line in state.notices_lazy(now, false, &mut || unix_ms_now()) {
+            self.log.push(&line);
+        }
+        true
+    }
+
+    pub(super) fn tick_after_prepublication_notices(&self, state: &mut State) -> u64 {
+        let now = tick();
+        if self.service_prepublication_notices(state, now) { tick() } else { now }
+    }
+
+    pub(super) fn allow_refusal(&self) -> bool {
+        let mut state = self.lock();
+        let now = self.tick_after_prepublication_notices(&mut state);
+        state.budget.allow(now)
     }
 
     // A successful read-modify-write is ordered with the one-way seal. A
     // load alone would not authorize publication of the reservation or reply.
     pub(super) fn authorize_grant(&self) -> bool {
-        self.grants_sealed.compare_exchange(false, false, Ordering::AcqRel, Ordering::Acquire).is_ok()
+        self.grant_phase.compare_exchange(
+            GRANTS_USE_STATE, GRANTS_USE_STATE, Ordering::AcqRel, Ordering::Acquire,
+        ).is_ok()
     }
 
     pub(super) fn authorize_grant_reply(&self, back: &Withdraw) -> Result<(), Refusal> {
