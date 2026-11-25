@@ -743,3 +743,7 @@ git -c core.autocrlf=true archive --format=tar --output=source.tar 0358129d1fe56
 ```
 
 The command reproduced the recorded 23,275,520-byte archive with SHA-256 `849fc19f4787fed4bfe79762f1467d340243c284a65173e81ae2199c27f47fd3`.
+
+## Windows laptop A013 incomplete campaign - 2026-11-25
+
+The preregistered A013 attempt stopped at the 1 GiB emergency physical-memory reserve after 630 of 1,680 planned measured items settled. Its original process returned 1, without a deadline expiry; the recorded abort drained its phase Job from six active processes to zero. No pricing rows were produced. The incomplete prefix establishes no final comparison, parity or winner. The opportunity is consumed and will not be retried, rescored, pooled or stitched into another attempt. Per-process memory history was not captured, so the cause of the host-wide memory decline remains unassigned. [Coverage, qualification links and retained receipt hashes](windows-laptop-a013-incomplete-20261125-summary.json)

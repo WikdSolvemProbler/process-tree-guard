@@ -1,0 +1,61 @@
+{
+  "schema": "ptg-incomplete-campaign-summary-v1",
+  "attempt": "laptop-182-001-a-as-used-013",
+  "status": "INCOMPLETE_EMERGENCY_PHYSICAL_MEMORY",
+  "accepted": false,
+  "exit_code": 1,
+  "timed_out": false,
+  "started_utc": "2026-11-25T11:43:33.3139644Z",
+  "finished_utc": "2026-11-25T12:08:34.2465958Z",
+  "source_commit": "61a586c02189f4dcfa63b0319925ba16ffa9f239",
+  "candidate": {
+    "features": [],
+    "executable_bytes": 818176,
+    "executable_sha256": "e550f469b55efe358ce663d80ed2032dab3812eeed87b18897a0eebbc834386b"
+  },
+  "protocol": {
+    "manifest_sha256": "ece5fe76e3351ee7e142e302535a8fe902107ff2d49bfe56e4597ad8daf3c18b",
+    "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e",
+    "preregistration": "tests/campaign/laptop-182-001/PREREGISTRATION-CAPTURE-A-013.json",
+    "opportunity_rule": "tests/campaign/laptop-182-001/AMD-A013-OPPORTUNITY-001.md",
+    "native_qualification": "tests/evidence/windows-laptop-native-qualification-stage013-20261125-summary.json",
+    "opportunity_consumed": true,
+    "retry_rescore_pool_stitch_or_replacement_permitted": false
+  },
+  "failure": {
+    "observer_problem": "BarrierError: during sample rejected: ['emergency_physical_memory']",
+    "sample_index": 301,
+    "physical_available_bytes": 1050791936,
+    "physical_reserve_bytes": 1073741824,
+    "physical_total_bytes": 33439793152,
+    "ac_line": 1,
+    "battery_saver": 0,
+    "attribution": "Saved samples establish declining host-wide available memory. Retained process identities lack per-process memory history, so the responsible process or tool is not established."
+  },
+  "coverage": {
+    "items_begun": 891,
+    "items_settled": 890,
+    "controls_settled": 36,
+    "warmups_settled": 224,
+    "measured_begun": 631,
+    "measured_settled": 630,
+    "measured_planned": 1680,
+    "groups_released": 250,
+    "groups_planned": 540,
+    "pricing_rows": 0,
+    "pricing_membership_rows": 0,
+    "last_begun_unsettled": ["measured", "nuewframe", "kill", "DETACHED", 34],
+    "abort_phase_job_active_before": 6,
+    "abort_phase_job_active_after": 0,
+    "abort_phase_job_termination_requested": true
+  },
+  "retained_evidence": {
+    "terminal_sha256": "80d8dae68286a687f78ce6cda3e598f494193b0adab2e0627f65235372e1ca0a",
+    "host_result_sha256": "224df3b996f3266026d558d2b25d32d5ef96e8b7bd78e1c57c83d4fd2264f59a",
+    "telemetry_sha256": "1d062eaa3590d6dbf7d081ab1ab4d7ee6ba757774f8a7af470770579364254ba",
+    "inventory_sha256": "40883065e7640d18d37a500f54ac8557dcd1781b63b923eb6b81f26dcbf23643",
+    "worker_journal_sha256": "916f18d0d86413b99c8386d09ffe57373a21aa6fa60f70e204066aff296f9930",
+    "barrier_sha256": "55e2f4a7025f797906d99e8743511c4ceb30644526a47b064bafa0b4a3b25a2e"
+  },
+  "interpretation": "The incomplete prefix establishes no final cell, parity, comparative ranking, or overall winner. Settled-item counts are coverage counts, not claims that all planned requirements passed. Earlier failed attempts remain separate. Subsequent source repairs do not change this frozen attempt."
+}
