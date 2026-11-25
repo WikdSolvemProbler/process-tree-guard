@@ -1,0 +1,5 @@
+warning: `edition` is set on binary `process-tree-guard-root` which is deprecated
+warning: `edition` is set on binary `process-tree-guard-client` which is deprecated
+   Compiling process-tree-guard v0.5.0 (/tmp/ptg-native-build-190-005/source)
+    Finished `release` profile [optimized] target(s) in 6.28s
+     Running unittests src/bin/process-tree-guard-linux-client.rs (/tmp/ptg-native-build-190-005/target/aarch64-unknown-linux-gnu/release/deps/process_tree_guard_client-99597b2b18a10222)

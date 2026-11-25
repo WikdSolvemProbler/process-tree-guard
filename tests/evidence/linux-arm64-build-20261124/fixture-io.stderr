@@ -1,0 +1,19 @@
+test_authenticates_before_compiling_or_executing_altered_code (__main__.FixtureIOTests.test_authenticates_before_compiling_or_executing_altered_code) ... ok
+test_collector_charges_failed_read_and_rejects_aggregate_overflow (__main__.FixtureIOTests.test_collector_charges_failed_read_and_rejects_aggregate_overflow) ... ok
+test_collector_checks_credentials_and_held_directory (__main__.FixtureIOTests.test_collector_checks_credentials_and_held_directory) ... ok
+test_collector_reports_missing_and_refused_only_for_designed_names (__main__.FixtureIOTests.test_collector_reports_missing_and_refused_only_for_designed_names) ... ok
+test_expired_collector_does_not_open_any_evidence (__main__.FixtureIOTests.test_expired_collector_does_not_open_any_evidence) ... ok
+test_rejects_append_and_does_not_read_the_appended_byte (__main__.FixtureIOTests.test_rejects_append_and_does_not_read_the_appended_byte) ... ok
+test_rejects_early_or_overlong_read (__main__.FixtureIOTests.test_rejects_early_or_overlong_read) ... ok
+test_rejects_name_substitution_and_disappearance (__main__.FixtureIOTests.test_rejects_name_substitution_and_disappearance) ... ok
+test_rejects_oversize_before_any_data_read (__main__.FixtureIOTests.test_rejects_oversize_before_any_data_read) ... ok
+test_rejects_untrusted_ancestor_or_different_stage_device (__main__.FixtureIOTests.test_rejects_untrusted_ancestor_or_different_stage_device) ... ok
+test_rejects_wrong_owner_group_mode_link_and_device (__main__.FixtureIOTests.test_rejects_wrong_owner_group_mode_link_and_device) ... ok
+test_special_metadata_never_reaches_read_open (__main__.FixtureIOTests.test_special_metadata_never_reaches_read_open) ... ok
+test_standalone_bootstrap_executes_only_verified_snapshot (__main__.FixtureIOTests.test_standalone_bootstrap_executes_only_verified_snapshot) ... ok
+test_real_regular_file_symlink_and_fifo (__main__.LinuxDescriptorTests.test_real_regular_file_symlink_and_fifo) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.007s
+
+OK

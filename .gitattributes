@@ -11,3 +11,4 @@ tests/support/linux_fixture_io.py -text
 tests/support/test_linux_fixture_io.py -text
 tests/evidence/linux-fixture-io-20261124-summary.json -text
 tests/evidence/windows-flat-index-20261124/** -text
+tests/evidence/linux-arm64-build-20261124/** -text

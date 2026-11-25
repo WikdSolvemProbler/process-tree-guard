@@ -1,0 +1,174 @@
+{
+  "bounds_seconds": {
+    "linux_grace_s": 2,
+    "linux_s": 200,
+    "linux_start_admission_s": 8,
+    "transport_hop_grace_s": 2,
+    "transport_hop_s": 215,
+    "managed_runtime_s": 180,
+    "scope_stop_s": 5,
+    "ssh_s": 225,
+    "orchestrator_job_s": 240
+  },
+  "command_exits": {
+    "ar": 0,
+    "build": 0,
+    "cargo": 0,
+    "cc": 0,
+    "fixture_io": 0,
+    "ld": 0,
+    "linker": 0,
+    "rustc": 0,
+    "test": 0
+  },
+  "custody": {
+    "LOCAL.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "SSH.stderr": {
+      "bytes": 72,
+      "sha256": "d0e14941dee288cc8de19e48436cdf3c2e7939d4b98136c44d954b5f8be73d8a"
+    },
+    "guest_receipt": {
+      "bytes": 1600054,
+      "sha256": "66029725b78921493ca90ab3f0a2c3a25a0b517759f4dfdc78a11fa27900bd2a"
+    },
+    "held_cgroup_events_retirement_errno": 19,
+    "host_receipt": {
+      "bytes": 802,
+      "sha256": "f84f2c61dea95fdc8d21f7a3aa549381033bd2d83f40087fefb722f21c693a46"
+    },
+    "original_cgroup_retired": true,
+    "original_host_exit": 0,
+    "original_ssh_exit": 0,
+    "original_ssh_handle_retained": true,
+    "original_worker_exit": 0,
+    "original_worker_pidfd_terminal": true,
+    "sealed_inputs_sha256": "bdec6212bf13a73691b65ec6092b92d18da179dcf5d3a7f1b10a6c8ed834c218",
+    "sealed_recipe_sha256": "f48ae8001be1d92fcd153dcdcb3fe19380320bf9867aa8f6e813793319fe3bc6",
+    "terminal_scope": {
+      "ActiveState": "inactive",
+      "LoadState": "not-found",
+      "Result": "success",
+      "SubState": "dead"
+    },
+    "worker_receipt_bound_to_original_pid_invocation_and_cgroup": true
+  },
+  "history": "Byte identity with both historical ELFs does not identify their original compiler or toolchain.",
+  "preserved_predecessors": {
+    "002": {
+      "guest_receipt": {
+        "bytes": 187,
+        "sha256": "a2b4b5d6cb31b773064c572522e4cbeb4a9b54370c9025c9333f17c3f3282998"
+      },
+      "state": "failed",
+      "why": "Compiler directory selection missed the installed pair"
+    },
+    "003": {
+      "guest_receipt": {
+        "bytes": 1040,
+        "sha256": "3e768abed81c0e841275a94f03cdb2de2405c16b1a2abdbfdfef32dd43cd88af"
+      },
+      "manager_versions": "Both live managers later reported 255.4-1ubuntu8.18. Exact rejection mechanism unresolved.",
+      "state": "failed",
+      "version_probe_receipt": {
+        "bytes": 1852,
+        "sha256": "1d40ed6f31e4a436c8e2ce32439ed67c70ddda4e1f01bbc8d2cf33ac20e39eca"
+      },
+      "why": "The transient service rejected JobTimeoutUSec before worker execution"
+    },
+    "004": {
+      "prepared_inputs": {
+        "bytes": 784,
+        "sha256": "137bc9b54cdc26b90e07f9d7fc335b3bdcd159acce4ef7777318d9d4419c76b4"
+      },
+      "state": "unrun",
+      "why": "Source review withheld the scope because late startup was not bound to the original Linux timeout"
+    }
+  },
+  "privacy": {
+    "omitted_requested_raw_files": [],
+    "private_retained": "Full raw receipts, transport streams, identities, placement, route, and original command lines remain in private custody.",
+    "published_raw_files": [
+      "build.stderr",
+      "client-tests.stderr",
+      "client-tests.stdout",
+      "failed-003-managed.stderr",
+      "fixture-io.stderr",
+      "rustc-version.stdout",
+      "source-manifest.json"
+    ]
+  },
+  "qualification": "Ordinary ARM64 build and existing component tests only. No privileged bootstrap or product lifecycle, whole backend, escape behavior, performance, ranking or security completeness claim.",
+  "release_elfs": {
+    "process-tree-guard-client": {
+      "byte_identical_to_historical_reference": true,
+      "bytes": 528928,
+      "sha256": "3134fce1b23b9c59a2eb229c350a8164ff9683bb8651a4a7d95824afe6eb61f7"
+    },
+    "process-tree-guard-root": {
+      "byte_identical_to_historical_reference": true,
+      "bytes": 660000,
+      "sha256": "a95893b6def7688e8ae48ca69766762c4579cac53bb9f7985b3bd46542cec121"
+    }
+  },
+  "schema": "ptg-native-arm64-build-evidence-v1",
+  "source": {
+    "archive_members": 136,
+    "archive_sha256": "95e20d94f7eb3cb9ef6ee5e19dd567232f4fc1bf7465ee02abe5e88f249eec5b",
+    "commit": "9bd332de9b333aa0167afc4da1298d76edf9bc10",
+    "manifest_sha256": "dffdd102183c62cac5437b18782a985ad3d361812d69c450aa59cba17b62e543",
+    "native_target": "aarch64-unknown-linux-gnu"
+  },
+  "tests": {
+    "client": {
+      "failed": 0,
+      "filtered": 0,
+      "ignored": 0,
+      "measured": 0,
+      "passed": 12
+    },
+    "fixture_io": {
+      "failed": 0,
+      "passed": 14,
+      "skipped": 0
+    }
+  },
+  "tools": {
+    "ar": {
+      "sha256": "f4583a612510e038dbc1ae8afb5eae5f0445c435bdd7c4c28e78acc7e757d2b1",
+      "version": "GNU ar (GNU Binutils for Ubuntu) 2.42"
+    },
+    "cargo": {
+      "sha256": "2edad6fc8177aba5d5e785f83b695466685677c8da9e83f458fcd6a15e40e842",
+      "version": "cargo 1.88.0 (873a06493 2025-05-10)"
+    },
+    "cc": {
+      "sha256": "a20520ee21543f243d40636a9181a142c45ecd989de31ab86b99a8ea5ada870d",
+      "version": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+    },
+    "ld": {
+      "sha256": "1e4d3369b76845fa8e099b83513bf28f6f722e046f9b2cde1378c9e27f96d19c",
+      "version": "GNU ld (GNU Binutils for Ubuntu) 2.42"
+    },
+    "rustc": {
+      "sha256": "db982902454e43decfc629a093b7ed7e0542aed9509d93271533c36fc141661f",
+      "version": "rustc 1.88.0 (6b00bc388 2025-06-23)"
+    }
+  },
+  "transport_stdout_max_bytes": 4194304,
+  "warnings": [
+    {
+      "binaries": [
+        "process-tree-guard-root",
+        "process-tree-guard-client"
+      ],
+      "category": "per-bin edition deprecation",
+      "one_per_binary_in_each": [
+        "build.stderr",
+        "client-tests.stderr"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "files": {
+    "README.md": {
+      "bytes": 2231,
+      "sha256": "3a89e2c8a2d7dbe07b629368563a3934d5a9040ba759be69fcefce0a6e8cd995"
+    },
+    "SUMMARY.json": {
+      "bytes": 5727,
+      "sha256": "a135a0a0d328631ece298bb52c8ca5e718eeb8779a32e8eda1a73cd12201c8f0"
+    },
+    "build.stderr": {
+      "bytes": 306,
+      "sha256": "3d33d45b7abeacb4abecffe63c142edc4af5b54871b12a27d768956b0be5ae27"
+    },
+    "client-tests.stderr": {
+      "bytes": 493,
+      "sha256": "69c92c3bd2e4c5ce3958b8f23b58f7da9e1f47d47c52cdf8c1b4de2358833a1d"
+    },
+    "client-tests.stdout": {
+      "bytes": 1102,
+      "sha256": "527d9639517219eb4b8fd074c262653c526cce3a2d2ad36b5efcecf56422d83d"
+    },
+    "failed-003-managed.stderr": {
+      "bytes": 159,
+      "sha256": "f71717ae7c83c4295fe8d56e303638361b827dbccec43f5c6a8752247bcb6eab"
+    },
+    "fixture-io.stderr": {
+      "bytes": 2039,
+      "sha256": "561cc83588682e55eb6fd62f4ae5837b53f7de0c4365473e7aa4beb9fd66f933"
+    },
+    "rustc-version.stdout": {
+      "bytes": 197,
+      "sha256": "2333145b399e0b98d2c25225c7528c133426b50c7a43a369202e701d6a7972b9"
+    },
+    "source-manifest.json": {
+      "bytes": 15991,
+      "sha256": "dffdd102183c62cac5437b18782a985ad3d361812d69c450aa59cba17b62e543"
+    }
+  },
+  "schema": "ptg-evidence-file-manifest-v1"
+}

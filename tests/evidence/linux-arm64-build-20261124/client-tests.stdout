@@ -1,0 +1,17 @@
+
+running 12 tests
+test deadline::tests::numeric_deadlines_accept_positive_finite_values_up_to_the_cap ... ok
+test deadline::tests::numeric_deadlines_reject_nonpositive_nonfinite_and_over_cap_values ... ok
+test linux::request::tests::enforces_exact_packet_and_argument_bounds ... ok
+test linux::request::tests::matches_numeric_policy_without_disarming_the_timer ... ok
+test linux::request::tests::preserves_native_bytes_empty_arguments_and_null_terminated_argv ... ok
+test linux::request::tests::rejects_empty_program_and_embedded_nul ... ok
+test linux::request::tests::rejects_malformed_or_mismatched_framing ... ok
+test linux::tests::delegation_policy_is_exact_bounded_and_deny_default ... ok
+test linux::tests::native_gate_first_cancellation_cause_is_irreversible ... ok
+test linux::tests::native_seqpacket_admission_and_refusals ... ok
+test linux::tests::separate_context_ack_precedes_client_capture_and_activation ... ok
+test linux::tests::watchdog_fault125_is_not_hidden_by_later_cancellation ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.01s
+
