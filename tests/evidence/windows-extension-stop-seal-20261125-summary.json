@@ -1,0 +1,144 @@
+{
+  "schema": "process-tree-guard-windows-extension-stop-seal-v1",
+  "product_commit": "2ec5bc4e8c19afb3cbf980380268ae7002ec1e0a",
+  "tested_base_head": "ea4750d9e89ab9c52150e670bad51317d1980670",
+  "tested_patch_sha256": "cf874649853beeb49766bc729ee1ef6ec3dd238204820dc1bf7a054e685d469f",
+  "scope": "Focused qualification of nonblocking post-selection extension stop sealing and grant reply authorization. This is not full Windows readiness or a speed result.",
+  "changes": [
+    "The selected stop seals new grant authorization with a one-way atomic operation, without taking the extension state mutex.",
+    "Workers recheck the exact pending reservation and effective hold at reply submission. A stopped run is Ended; a missing reservation in a live run is NoHold.",
+    "A vetoed audited reservation is rolled back and recorded as withdrawn. Already admitted release acknowledgments retain their behavior.",
+    "An operation authorized before the seal can complete its write afterward. The seal does not claim to revoke an already authorized operation.",
+    "Optional exception-log waits and notice rendering are deferred until after the owned cleanup attempt. The original timeout elapsed-time sample is retained."
+  ],
+  "source_working_tree_sha256": {
+    "src/engine.rs": "9a9042760c1238dd14c6449733ffa520c94d9b552cac2b0c0ec22406b68c4252",
+    "src/extend/server.rs": "8c790ea07ad8109e9838c6adb1a84b91b62b37d9d4c0e4dfa26b2cf566544f31",
+    "src/extend/state.rs": "b15e8bac6817c5e79602bbaa5df3b0c39fd0a9e51eab47cf1973b39c4d9a93a3",
+    "src/extend/serve.rs": "6691418bfe55d23fce30722329f8dbcf97b226e01c895567388149be8c6f5e49",
+    "src/extend/serve/decide.rs": "46ac821617108f2b041625a703395f2f7c31d2fbe0455087c4a9e6c520a011d0",
+    "src/extend/log/format.rs": "4827d312863ef772955b016cf0b0bd545dedb361dd70d45716baee96907bacd6",
+    "src/extend/tests.rs": "bb6f3856fe93449270867131d49f054d53edf49aa52c4a8cabec7cf0a0dd9a5c"
+  },
+  "qualification": {
+    "target": "x86_64-pc-windows-msvc",
+    "toolchain": [
+      "rustc 1.98.1 (48a229cea 2026-09-01)",
+      "binary: rustc",
+      "commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985",
+      "commit-date: 2026-09-01",
+      "host: x86_64-pc-windows-msvc",
+      "release: 1.98.1",
+      "LLVM version: 22.1.8"
+    ],
+    "profile": "debug",
+    "jobs": 1,
+    "locked": true,
+    "offline": true,
+    "outer_deadline_seconds": 1080,
+    "original_execution_exit": 0,
+    "all_original_step_handles_retained_and_joined": true,
+    "tracked_source_files_before_and_after": 1175,
+    "source_unchanged": true,
+    "steps": [
+      {
+        "name": "lib",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --lib -- --test-threads=1",
+        "deadline_seconds": 300,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g28",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g28_slow_to_exit_descendant_is_gone_when_the_guard_returns -- --exact --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g43",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g43_library_run -- --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g44",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g44_library_run_ends_the_tree_with_125_when_the_parent_exits_during_the_call -- --exact --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g46",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g46_library_run_shell_returns_the_shell_code_and_124_at_the_deadline -- --exact --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "clippy",
+        "command": "cargo +stable-x86_64-pc-windows-msvc clippy --locked --offline --all-targets --all-features --target x86_64-pc-windows-msvc",
+        "deadline_seconds": 180,
+        "exit_code": 0,
+        "original_handle_joined": true
+      }
+    ],
+    "library_outer_tests": 312,
+    "new_library_tests_included": 5,
+    "nested_helper_reexecution": 1,
+    "nested_helper_is_not_an_additional_unique_test": true,
+    "selected_guard_test_functions": {
+      "G28": 1,
+      "G43": 2,
+      "G44": 1,
+      "G46": 1
+    },
+    "G28_scope": "The unchanged timeout and natural-exit branches passed their expected exits, fixture markers and existing child-gone predicates. This is not a new universal descendant-settlement proof.",
+    "clippy": "Exited zero. Existing warning diagnostics remain; this summary does not claim warning-free output or complete warning-anchor equivalence.",
+    "new_tests": [
+      "stopping_seals_grants_while_another_thread_owns_state",
+      "a_sealed_run_refuses_a_new_reservation",
+      "a_seal_after_reservation_vetoes_submission_and_restores_the_old_hold",
+      "reply_permission_requires_the_matching_reservation_and_live_hold",
+      "only_submission_authorized_before_the_seal_can_overlap_it"
+    ]
+  },
+  "review": {
+    "independent_sol_source_reviews": 2,
+    "independent_sol_result_reviews": 2,
+    "unresolved_objections_within_this_narrow_repair": 0,
+    "approval_limit": "Only the seven-file repair and its focused qualification. Remaining whole-product protection objections are not waived."
+  },
+  "retained_originals": {
+    "result_sha256": "9b80c2eee6389602e8170abeed1df9d4c08af70b7c5f7b6f1c05f9bb669cccca",
+    "steps_sha256": "d75db082785855dd42cf3d6045658964d0316746481c7763028cef12a84f0628",
+    "source_before_sha256": "73ce3a8d33bc33148c2b766b777f325c654e46ad08c8e7e9c7ef4525d039a4b2",
+    "source_after_sha256": "73ce3a8d33bc33148c2b766b777f325c654e46ad08c8e7e9c7ef4525d039a4b2",
+    "original_execution_observation_sha256": "220ee169bf122c505cbdd37f1c46ab5dd3d98764ac79331e2eb7c737849ff2d0"
+  },
+  "preserved_source_rejected_drafts": [
+    {
+      "patch_sha256": "91bb87315526111e1f2ac92e27e40201f4ffff6fae2dcb7a9218905bf4f9266c",
+      "native_executed": false,
+      "reason": "The new veto was recorded as refused rather than withdrawn; a missing hold was also reported as an ended run."
+    },
+    {
+      "patch_sha256": "c2a713709d5a11e3fbb377440a6c2f0ee4a995b136160956e90f0eb1fb933b62",
+      "native_executed": false,
+      "reason": "Formatter correction retained; missing-hold versus ended-run reply distinction still needed repair."
+    }
+  ],
+  "remaining_blockers": [
+    "Pre-kill descendant discovery can still delay the first termination request.",
+    "Preselection extension state locking remains.",
+    "General descendant settlement and the repaired-reference eligibility problem remain unresolved.",
+    "Speed acceptance and the comprehensive benchmark remain incomplete."
+  ],
+  "limits": [
+    "All five new tests ran inside the 312-test library suite; they are not counted twice.",
+    "The tests include controlled reply-submission interleavings. No new real-pipe race campaign or exhaustive concurrency proof is claimed.",
+    "This run used debug test artifacts. It is not a new stock release build or performance comparison.",
+    "No A013 restart, row reuse, ranking or acceptance-rule relaxation occurred."
+  ]
+}

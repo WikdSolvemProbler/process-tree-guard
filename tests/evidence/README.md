@@ -771,3 +771,7 @@ A single fixed 20-pair diagnostic completed all 40 launches of the same feature-
 ## Enforcement-order readiness blocker
 
 A subsequent source review withheld deadline-ordering readiness for the current cleanup implementation and a proposed reference port. Earlier passing focused tests and the same-image diagnostic remain unchanged; they do not clear this protection issue. [Current finding, required repairs and primary API sources](windows-enforcement-order-readiness-20261125.json).
+
+## Windows extension stop seal
+
+The seven-file repair at 2ec5bc4 seals post-selection grant authorization without waiting for extension state, validates exact pending holds before reply submission, and records vetoes as withdrawals. All 312 library tests and five selected integration functions passed; all six work steps joined successfully. Earlier source drafts and the unchanged cleanup blockers remain recorded. This is focused correctness qualification, not full readiness or speed acceptance. [Scope, source identities and results](windows-extension-stop-seal-20261125-summary.json).
