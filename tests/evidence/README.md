@@ -775,3 +775,7 @@ A subsequent source review withheld deadline-ordering readiness for the current 
 ## Windows extension stop seal
 
 The seven-file repair at 2ec5bc4 seals post-selection grant authorization without waiting for extension state, validates exact pending holds before reply submission, and records vetoes as withdrawals. All 312 library tests and five selected integration functions passed; all six work steps joined successfully. Earlier source drafts and the unchanged cleanup blockers remain recorded. This is focused correctness qualification, not full readiness or speed acceptance. [Scope, source identities and results](windows-extension-stop-seal-20261125-summary.json).
+
+## Windows prepublication deadline selector
+
+The six-file repair at 0788c87 checks the initial base deadline without taking State, with audit maintenance in the existing monitor and request paths. All 316 library tests and five selected integration functions passed; six original work-step handles joined successfully. The record preserves the partial scope, audit scheduling differences and unchanged populated-state/cleanup blockers. [Source identities and focused results](windows-prepublication-selector-20261125-summary.json).

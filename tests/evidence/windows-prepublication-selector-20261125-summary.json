@@ -1,0 +1,129 @@
+{
+  "schema": "process-tree-guard-windows-prepublication-selector-v1",
+  "product_commit": "0788c87cf7a1c01193b22b69127efc93a6309e44",
+  "tested_base_head": "ff94f9885ab0ca4d0ccf0749e950ab35d310df11",
+  "tested_patch_sha256": "18c6a98c159aeaaadaa738e3a0715d86e179017e254139800f8d63677d339f18",
+  "scope": "Focused correctness qualification of base-deadline selection before the first published extension reservation, together with its audit maintenance. This does not clear populated-state or teardown readiness.",
+  "changes": [
+    "One monotonic atomic phase orders observed base expiry against first reservation publication. An expiry winner seals grants; a publication winner uses the existing state-based path.",
+    "The state-based phase is sticky after any publication or monitor fallback. Empty holds do not reactivate the base-only path.",
+    "The fixed base deadline is copied from the same original start and timeout used to create State. Its unpublished selector does not acquire the state mutex.",
+    "Periodic audit work uses the existing Job monitor and existing one-second backstop interval. The monitor tries State without waiting; eligible notices are consumed and enqueued while State remains held.",
+    "Rate-accounting and refusal paths service the same due work under an already-owned State lock. Four accounting entry points are covered, and time is sampled again after due audit work.",
+    "Dequeued native exit notifications are forwarded before audit maintenance. Unexpected monitor errors can switch the unpublished phase to the legacy path without reopening a sealed run.",
+    "The existing child and owner wait, exact reservation rollback, reply authorization and release acknowledgment behavior remain in use."
+  ],
+  "source_working_tree_sha256": {
+    "src/extend.rs": "57602d3f6f75132f392eb8c4abfbbff13c6d1b6c490aebc5db97af4bec09b342",
+    "src/extend/server.rs": "eb34aa23c5f1ea90848bb917341757c2084974fc8358a94066e475b273a716ca",
+    "src/extend/serve.rs": "4e726a900b5b2664dce93a9d2b1560fd0cb4c80648c5a2fa54364dcca15cc3a9",
+    "src/extend/serve/decide.rs": "f1ef6902ebf4a05ca922578cc359df36402cf16dab6dbc255366121c60dfd8a2",
+    "src/extend/state.rs": "e20312e83f2d5081786642950858f90ce91c5daa3ae583fabdbe5b872b1f0746",
+    "src/extend/tests.rs": "1fa6102958de8bfba7b1dec2bbf06c1843e06cb183a8b17f66e3835ba0062b4e"
+  },
+  "qualification": {
+    "target": "x86_64-pc-windows-msvc",
+    "toolchain": [
+      "rustc 1.98.1 (48a229cea 2026-09-01)",
+      "binary: rustc",
+      "commit-hash: 48a229ceaefd4985c50990b14116b6d856af0985",
+      "commit-date: 2026-09-01",
+      "host: x86_64-pc-windows-msvc",
+      "release: 1.98.1",
+      "LLVM version: 22.1.8"
+    ],
+    "profile": "debug",
+    "jobs": 1,
+    "locked": true,
+    "offline": true,
+    "outer_deadline_seconds": 1080,
+    "original_execution_exit": 0,
+    "all_six_original_step_handles_retained_and_joined": true,
+    "tracked_source_files_before_and_after": 1176,
+    "source_unchanged": true,
+    "library_outer_tests": 316,
+    "new_tests_included": 4,
+    "nested_helper_reexecution": 1,
+    "nested_helper_is_not_an_extra_unique_test": true,
+    "selected_guard_test_functions": {
+      "G28": 1,
+      "G43": 2,
+      "G44": 1,
+      "G46": 1
+    },
+    "G28": "Both unchanged timeout and natural-exit branches passed their expected exits, fixture markers and existing child-gone predicates.",
+    "new_tests": [
+      "base_deadline_can_expire_while_a_first_reservation_is_still_private",
+      "a_first_publication_wins_against_a_base_expiry_already_sampling",
+      "job_monitor_services_due_notices_with_packets_and_during_idle",
+      "contended_monitor_leaves_the_due_pass_for_a_worker_and_falls_back_once"
+    ],
+    "steps": [
+      {
+        "name": "lib",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --lib -- --test-threads=1",
+        "deadline_seconds": 300,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g28",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g28_slow_to_exit_descendant_is_gone_when_the_guard_returns -- --exact --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g43",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g43_library_run -- --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g44",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g44_library_run_ends_the_tree_with_125_when_the_parent_exits_during_the_call -- --exact --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "g46",
+        "command": "cargo +stable-x86_64-pc-windows-msvc test --locked --offline --target x86_64-pc-windows-msvc --test guard g46_library_run_shell_returns_the_shell_code_and_124_at_the_deadline -- --exact --test-threads=1 --nocapture",
+        "deadline_seconds": 120,
+        "exit_code": 0,
+        "original_handle_joined": true
+      },
+      {
+        "name": "clippy",
+        "command": "cargo +stable-x86_64-pc-windows-msvc clippy --locked --offline --all-targets --all-features --target x86_64-pc-windows-msvc",
+        "deadline_seconds": 180,
+        "exit_code": 0,
+        "original_handle_joined": true
+      }
+    ],
+    "clippy": "Exited zero; warnings remain. No warning-free or warning-anchor equivalence claim."
+  },
+  "independent_review": {
+    "sol_source_reviews": 2,
+    "sol_actual_result_reviews": 2,
+    "unresolved_objections_within_this_partial_repair": 0
+  },
+  "retained_originals": {
+    "result_sha256": "38789437bf11948311cc859648b30d7e4097ab1dccd4a73c368c4a6f7e9a44a7",
+    "steps_sha256": "24c7e1ef034d184b54eb692d18dbb9ab9b3c08c7838536721351ef0965696150",
+    "source_before_sha256": "15ba4982a15efaf82b21501e80eec2eacde179e28923ff46bce090e033b95495",
+    "source_after_sha256": "15ba4982a15efaf82b21501e80eec2eacde179e28923ff46bce090e033b95495",
+    "original_execution_observation_sha256": "c30589d7b065f1a01d3e971be737c20b16c687651f0eedbeb25c527771ed1985"
+  },
+  "limits": [
+    "The CAS orders the supervisor's observed expiry against reservation publication; it is not proof of an absolute wall-clock publication cutoff.",
+    "The one-second audit schedule uses relative IOCP waits. Notice scheduling and timestamps can differ across suspend and concurrent activity; the existing enforcement clock is unchanged.",
+    "Controlled regression cases do not constitute an exhaustive real native IOCP flood, suspend/resume or concurrency proof.",
+    "Worker and monitor joins do not establish a hard operating-system completion bound.",
+    "This used debug test artifacts, not a fresh stock release or a performance comparison.",
+    "Preselection locking after publication or monitor fallback, prekill descendant discovery and general settlement remain unresolved.",
+    "The repaired reference remains ineligible. Speed acceptance, the comprehensive benchmark and the final public package remain unfinished.",
+    "No A013 retry, row reuse, ranking or acceptance-rule change occurred."
+  ]
+}
