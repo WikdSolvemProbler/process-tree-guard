@@ -1,0 +1,99 @@
+{
+  "schema": "ptg-windows-hook-vendor-validation-v1",
+  "date": "2026-11-24",
+  "scope": "Narrow Windows CLI input-validation repair and selected native correctness checks; no performance or full-benchmark qualification.",
+  "source": {
+    "parent_commit": "b32276d2977f4ee4d4e7fd7bafc16ddaf9ad4b42",
+    "production_file": "src/dispatch.rs",
+    "production_sha256": "86d396942d54812018237bcbeeb761ada267c11ddc1b103cbb0e6498751ab0f4",
+    "production_committed_lf_sha256": "9c2c478cc7603e5da374dd06209a85a5d753f465e85ec9338c82aab901832f69",
+    "regression_file": "tests/battery.rs",
+    "regression_sha256": "6c15bd1dd4eb14771de79e0f23192bc019d8f2d3c7550b5b592efc163325b483",
+    "regression_committed_lf_sha256": "1edb226dfc527c1629f498f46671bf8e70e67c0bb1db00650c2a6e79d42dee6d",
+    "line_endings": "The tested Windows files use CRLF. Before commit, a byte audit independently read both staged Git blobs and established exact equality after only CRLF-to-LF replacement. The tested and committed hashes are distinguished; no other source transformation was accepted.",
+    "regression": "b125_gate_equals_the_full_command_hook_for_every_vendor",
+    "snapshot_files": 1137,
+    "snapshot_manifest_sha256": "2fb4ea922edb93baed176142db2e0c78aadb100edec6d05be60a1f2fe31a3f69"
+  },
+  "problem": "A supplied vendor argument containing an unpaired UTF-16 surrogate lost its conversion error and selected the omitted-vendor default protocol in both Full hook and Gate.",
+  "repair": "Only omission selects the default. A present non-Unicode vendor takes the existing role-specific usage refusal. Gate help, trailing-argument decisions and Full hook precedence keep their order.",
+  "validation": {
+    "platform": "Windows x64 MSVC",
+    "rust": "1.98.1",
+    "compiler_commit": "48a229ceaefd4985c50990b14116b6d856af0985",
+    "msvc_tools": "14.51.36231",
+    "windows_sdk": "10.0.28000.0",
+    "profile": "Release, opt-level3, LTO, one codegen unit and stripped symbols; selected native binaries use panic abort. Rust test targets have their separately recorded compiler behavior.",
+    "features": [
+      "testkit"
+    ],
+    "mode": "Offline locked Cargo; verbose compiler receipts retained.",
+    "whole_tree_deadline_seconds": 300,
+    "hidden_worker": true,
+    "error_dialog_suppression": "Inherited process-local test error mode; no registry change.",
+    "library": {
+      "native_exit": 0,
+      "reported_passed": 301,
+      "reported_failed": 0,
+      "reported_ignored": 0,
+      "raw_log_sha256": "f9d48167262fe8333fb07654918b0c13526a57c61ede8ae094d11a4503d86fe6"
+    },
+    "native_B125": {
+      "native_exit": 0,
+      "harness_functions_passed": 1,
+      "checks_passed": 17,
+      "checks_failed": 0,
+      "other_functions_filtered": 49,
+      "malformed_payload_checks": 2,
+      "malformed_real_role_invocations": 4,
+      "observed": "Both roles returned125, empty decision stdout and their usage text for each payload. Existing named, unknown, context and omitted-vendor checks passed.",
+      "raw_log_sha256": "ac5870f1cf0687112e0c0ae46f3fc45dfe7e0a721be7c0aeb2de202a0be77f15"
+    },
+    "custody": {
+      "canonical_and_copied_source_files_rechecked": 1137,
+      "unchanged": true,
+      "executable_files_preserved": 14,
+      "receipt_sha256": "7b7b5df629c18bb752e537a162fa992a70f47665cbdd675e5324526ed2cf1793"
+    },
+    "review": "Two independent Sols approved the exact implementation and the fixed-only scoped native results with zero unresolved objections to the narrow commit."
+  },
+  "images": {
+    "full": {
+      "sha256": "54cf621509803e50b8564d4e298de02a8bac295eec58988e9adca4d2e0d54718",
+      "bytes": 818176
+    },
+    "gate": {
+      "sha256": "57f802e4d2a222ea0f3e0699df14044d80036abc7c0e4251f0a3534b709a94bf",
+      "bytes": 328704
+    },
+    "qualification": "These are the selected release testkit-enabled artifacts; no default-feature performance result follows."
+  },
+  "preserved_attempts": {
+    "combined_pipeline": {
+      "tool_exit": 1,
+      "worker_native_exit": 3,
+      "original_worker_terminal": true,
+      "retained_handle": true,
+      "elapsed_seconds": 230.4968181,
+      "deadline_expired": false,
+      "status": "FAILED after the two passed fixed-code stages"
+    },
+    "later_preparation": {
+      "native_exit": 3,
+      "error": "Hardcoded PowerShell executable path was absent.",
+      "raw_log_sha256": "83cee69214da2175b5033379ed8853ff7990d883aa32a0acf6b28bef6f404b66",
+      "control_source_modified": false
+    },
+    "additional_control": "UNRUN. A subsequent review was automatically refused with a generic possible-cybersecurity-risk notice and no specific code finding. That approach was stopped; no control execution or sensitivity result is claimed.",
+    "post_run_copy_attempt": "First destination-containment check refused before copying any file because mixed separators were compared. Empty destination and failure preserved; a fresh normalized destination then preserved the artifacts.",
+    "carrier_preparation": "A JavaScript template-delimiter syntax error occurred before evaluation, with zero files written or processes launched. Exact rejected drafts and the corrected source remain preserved."
+  },
+  "limits": [
+    "Source ordering establishes refusal before plugin dispatch and stdin handling. The native regression supplies finite payloads and does not assert a held-open-stdin nonread observation.",
+    "The full combined attempt remains failed. Its passed fixed-code components are reported within scope; the unrun additional control supplies no regression-sensitivity evidence.",
+    "Existing library seams and intentional caught-unwind or conditional observations remain in the raw logs. Harness pass counts do not certify every platform guarantee.",
+    "Manual engine, deadlines, owner monitoring, atomic Job assignment, cleanup and console production files are unchanged by this repair. Their generated image layout and speed remain unmeasured.",
+    "No speed improvement, equivalence, ranking, complete Windows requalification, Linux/macOS backend qualification or issue closure follows.",
+    "Exact machine and transport records stay private. These hashes and curated observations do not replace an independently accessible raw academic benchmark package."
+  ]
+}

@@ -4,7 +4,7 @@
 //! Role dispatch: the choice of which role behaviour a process performs, from its arguments or its own file name.
 
 use crate::{cli, cli_process, diagnostics, engine, plugins, GuardError, Role, EXIT_GUARD_ERROR};
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 
 /// The arguments after the first `skip` as text, or an error when one is not Unicode.
 fn text_args(args: impl Iterator<Item = OsString>) -> Result<Vec<String>, GuardError> {
@@ -25,11 +25,22 @@ pub(crate) fn finish(result: Result<u32, GuardError>) -> i32 {
     }
 }
 
+fn dispatch_hook_vendor(vendor: Option<&OsStr>, role: Role) -> i32 {
+    let vendor = match vendor {
+        None => plugins::DEFAULT_VENDOR,
+        Some(argument) => match argument.to_str() {
+            Some(text) => text,
+            None => return plugins::usage_error(role),
+        },
+    };
+    plugins::main(vendor, role)
+}
+
 pub(crate) fn entry_gate() -> i32 {
     engine::trace("start");
     let mut args = cli_process::take_arguments();
-    let first = args.next().and_then(|v| v.into_string().ok());
-    if matches!(first.as_deref(), Some("-h" | "--help")) {
+    let first = args.next();
+    if matches!(first.as_deref(), Some(argument) if argument == "-h" || argument == "--help") {
         cli::help(cli::GATE_USAGE);
         return 0;
     }
@@ -39,11 +50,7 @@ pub(crate) fn entry_gate() -> i32 {
     if args.next().is_some() {
         return plugins::usage_error(Role::Gate);
     }
-    // The default vendor is a static text: borrowing it (or the
-    // argument's own text) names it with no string built for it,
-    // where materialising the default allocated on every gate call
-    // that named no vendor.
-    plugins::main(first.as_deref().unwrap_or(crate::plugins::DEFAULT_VENDOR), Role::Gate)
+    dispatch_hook_vendor(first.as_deref(), Role::Gate)
 }
 
 pub(crate) fn entry_contain() -> i32 {
@@ -109,15 +116,15 @@ pub(crate) fn entry_full() -> i32 {
     let mut args = cli_process::take_arguments();
     let first = args.next();
     // Explicit hook mode wins over an automatic filename.
-    if first.as_deref() == Some(std::ffi::OsStr::new("hook")) {
-        let vendor = args.next().and_then(|v| v.into_string().ok());
+    if first.as_deref() == Some(OsStr::new("hook")) {
+        let vendor = args.next();
         // A further argument after the vendor is refused through the
         // same fail-loud path as an unrecognised vendor, instead of
         // being discarded in silence.
         if args.next().is_some() {
             return plugins::usage_error(Role::Full);
         }
-        return plugins::main(vendor.as_deref().unwrap_or(crate::plugins::DEFAULT_VENDOR), Role::Full);
+        return dispatch_hook_vendor(vendor.as_deref(), Role::Full);
     }
     // Explicit `auto` and `extend` win over an automatic filename, as
     // `hook` does above: a *-auto file invoked with `auto` or `extend` as

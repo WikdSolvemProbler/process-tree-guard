@@ -838,6 +838,23 @@ fn b125_gate_equals_the_full_command_hook_for_every_vendor() {
         let (a, b) = (hook_as(&full, "unknown-vendor", &input), gate_as(&gate, Some("unknown-vendor"), &input));
         checks.check("B125", "an unknown vendor name is refused by the hook and by the gate: exit 125, usage on standard error, no decision on standard output", a.code == 125 && b.code == 125 && a.out().trim().is_empty() && b.out().trim().is_empty() && a.err().contains("process-tree-guard hook") && b.err().contains("usage: process-tree-guard-gate"), format!("hook {} {:?}; gate {} {:?}", a.code, a.err(), b.code, b.err()));
     }
+    // An explicit Windows argument with an unpaired surrogate must also take
+    // the usage path. Omitting the vendor would let these payloads select
+    // different PreToolUse outcomes.
+    use std::os::windows::ffi::OsStringExt;
+    let malformed = std::ffi::OsString::from_wide(&[0xd800]);
+    for input in [pre(&good).into_bytes(), pre("echo unbounded").into_bytes()] {
+        let mut full_hook = Command::new(&full);
+        full_hook.arg("hook").arg(&malformed);
+        let mut gate_hook = Command::new(&gate);
+        gate_hook.arg(&malformed);
+        let a = exec_with(full_hook, Opts { input: Some(input.clone()), ..Opts::default() });
+        let b = exec_with(gate_hook, Opts { input: Some(input), ..Opts::default() });
+        checks.check("B125", "an explicit vendor with an unpaired UTF-16 surrogate is refused by both native entry paths",
+            a.code == 125 && b.code == 125 && a.out().is_empty() && b.out().is_empty()
+                && a.err().contains("process-tree-guard hook") && b.err().contains("usage: process-tree-guard-gate"),
+            format!("{} {}", detail(&a), detail(&b)));
+    }
     // With no vendor, both read pretooluse.
     let a = exec_with({ let mut c = Command::new(&full); c.arg("hook"); c }, Opts { input: Some(pre(&good).into_bytes()), ..Opts::default() });
     let b = gate_as(&gate, None, pre(&good).as_bytes());

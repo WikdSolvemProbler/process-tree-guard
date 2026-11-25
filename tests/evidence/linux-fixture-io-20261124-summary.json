@@ -26,6 +26,19 @@
     "reviews": "Two independent Sols approved the exact final helper, tests and bounded non-root CI addition with zero unresolved objections in that scope.",
     "ci": "One 45-second command with a two-second kill grace added to the existing Ubuntu minimum-toolchain job, under a two-minute step bound. Native execution is pending at this publication."
   },
+  "native_ci_followup": {
+    "source_commit": "b32276d2977f4ee4d4e7fd7bafc16ddaf9ad4b42",
+    "workflow_run": "https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/45415405579",
+    "job": "minimum-rust",
+    "ordinary_user_assertion": "passed before the test suite",
+    "tests_passed": 14,
+    "tests_skipped": 0,
+    "real_linux_descriptor_checks": "Regular file accepted; symlink and FIFO refused",
+    "python_result": "OK",
+    "workflow_conclusion": "success",
+    "original_job_log_sha256": "7037aa5d6d7fd9b3238fc5d246c17f80eca729990ffa649b6e27bd1ebc8c494a",
+    "interpretation": "Completes the helper's native ordinary-user validation. It does not execute the privileged packet or the process-tree-guard backend. Earlier Windows skips and publication-time pending status remain historical observations."
+  },
   "limits": [
     "The existing privileged packet has not been integrated or executed. Current root entry, ordinary evidence acquisition and unsafe service teardown remain withheld.",
     "The launcher must independently authorize the exact generated bootstrap and arguments, establish trusted procfs and ancestor custody, clear capabilities and inherited authority, and enforce a native whole-process deadline.",
