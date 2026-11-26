@@ -1,0 +1,225 @@
+{
+  "schema": "ptg-linux-x64-offline-vm-normal-exit-v1",
+  "date": "2026-11-26",
+  "status": "ONE_NATIVE_OPT_IN_X64_NORMAL_EXIT_CASE_PASSED",
+  "scope": "One ordinary-client natural exit in an offline Windows-hosted WHPX x86-64 VM using the opt-in Linux separate-service prototype.",
+  "source": {
+    "tested_ci_commit": "8a0ffff8463b4474c5bf66ba96479d9094271b05",
+    "archived_client_sha256": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239",
+    "archived_root_sha256": "c4cb8a73249ea68897f787c8a95db464acf7632af9b4beeb8493d7ac44f1c457",
+    "repository_witness": "tests/linux/normal_exit_vm_witness.py",
+    "witness_sha256": "4b0210019e134669255b650722fe1f3eb65039dd8bc4066585f4e1f75e79886c"
+  },
+  "environment": {
+    "guest_kernel": "6.8.0-147-generic",
+    "guest_systemd_major": 255,
+    "guest_memory_mib": 1536,
+    "guest_vcpus": 2,
+    "guest_network_disabled": true,
+    "guest_host_shares_disabled": true,
+    "sealed_runtime_pe_count": 106,
+    "sealed_firmware_count": 2
+  },
+  "selected_deadlines_seconds": {
+    "outer_host_guard": 300,
+    "inner_host_guard": 270,
+    "original_qemu": 245,
+    "guest_fixture": 85,
+    "guest_fixture_kill_grace": 4
+  },
+  "original_case_006": {
+    "outer_native_exit": 0,
+    "outer_terminal_observation": "Original execution item-completed event. A later observer could not find the finished session. No replacement process was launched.",
+    "outer_execution_wall_seconds": 172.0728698,
+    "inner_native_exit": 0,
+    "inner_original_handle_joined": true,
+    "qemu_native_exit": 0,
+    "qemu_original_handle_joined": true,
+    "host_assistance_used": false,
+    "retry": false,
+    "guest": {
+      "client_natural_exit": 7,
+      "exact_originals": {
+        "client": {
+          "same_original_pidfd": true,
+          "before_release_poll_mask": 0,
+          "first_join_poll_mask": 1
+        },
+        "payload": {
+          "same_original_pidfd": true,
+          "before_release_poll_mask": 0,
+          "first_join_poll_mask": 1
+        },
+        "root_service": {
+          "same_original_pidfd": true,
+          "before_release_poll_mask": 0,
+          "first_join_poll_mask": 1
+        }
+      },
+      "original_unit_cgroup": "retired_enodev",
+      "original_payload_cgroup": "retired_enodev",
+      "same_manager_invocation": true,
+      "manager": {
+        "active_state": "failed",
+        "sub_state": "failed",
+        "result": "exit-code",
+        "main_pid_zero": true,
+        "control_pid_zero": true,
+        "original_exec_main_pid_matches": true,
+        "exec_main_code": 1,
+        "exec_main_status": 7,
+        "restarts": 0,
+        "control_group_blank_after_retirement": true
+      },
+      "manager_failed_label_meaning": "The stock systemd unit retains the original normal nonzero exit as a failed/exit-code record after the processes and cgroups have settled.",
+      "same_owned_socket_invocation": true,
+      "socket_accepted_connections": 1,
+      "native_settlement_before_socket_stop": true,
+      "pre_stop_assistance_used": false,
+      "deployment_assets_retired": true,
+      "natural_guest_poweroff_observed": true
+    }
+  },
+  "preserved_cases": [
+    {
+      "case": "002",
+      "status": "FAILED_NATIVE_ATTEMPT",
+      "scope": "The guest witness rejected the payload placement shape before completion qualification."
+    },
+    {
+      "case": "003",
+      "status": "FAILED_NATIVE_ATTEMPT",
+      "scope": "The witness established original placement but rejected the post-join active-or-failed unit inventory. The actual terminal manager tuple was not captured."
+    },
+    {
+      "case": "004",
+      "status": "PREPARED_ONLY_UNBOOTED"
+    },
+    {
+      "case": "005",
+      "status": "PREPARED_ONLY_UNBOOTED"
+    }
+  ],
+  "limits": [
+    "This is one opt-in separate-service x86-64 guest case using archived CI executables. The default Linux backend and transparent library execution remain unqualified.",
+    "Timeout behavior, owner loss, repeated or long-running use, and ARM64 remain outside this case.",
+    "The outer wall interval records process custody. This run supplies no latency, comparative speed, benchmark acceptance, or general protection claim.",
+    "Exact execution inputs and raw outcome streams are held privately. The repository copy of the guest witness is byte-identical to the injected fixture."
+  ],
+  "receipt_hashes": [
+    {
+      "selection": "006",
+      "artifact": "PREPARED.json",
+      "bytes": 18406,
+      "sha256": "de038536cbfc44a320607833b38fbd90a29d9e0ea260703977e3cbf18bda2639"
+    },
+    {
+      "selection": "006",
+      "artifact": "STATIC-REVIEW.json",
+      "bytes": 4213,
+      "sha256": "ba76cdf3b710873e478d8c7ecf84a0d5f5870f9813e1b27ed97f4b1a62c3befc"
+    },
+    {
+      "selection": "006",
+      "artifact": "ROOT-ADMISSION-CHECK.json",
+      "bytes": 809,
+      "sha256": "bca34dfdc6bf09c7c238073a9db9d7c163d76befff03ec57e864cc8ea231c197"
+    },
+    {
+      "selection": "006",
+      "artifact": "HOST-CARRIER.json",
+      "bytes": 408,
+      "sha256": "f36c4236a38585b80931235f665022f84a859cd549d49df3c9adbf5e93c63ea3"
+    },
+    {
+      "selection": "006",
+      "artifact": "HOST-RESULT.json",
+      "bytes": 5236,
+      "sha256": "82e6812d84ceb1bbc7353c7ac67a3f0a8a6867e20c2b6ad27139ddbbb1199886"
+    },
+    {
+      "selection": "006",
+      "artifact": "ORIGINAL-OUTER-EXECUTION.json",
+      "bytes": 837,
+      "sha256": "fa747b15f01917b14712b6ef5790a3202ab9fcf28ee729e7788ac61d39f720a0"
+    },
+    {
+      "selection": "006",
+      "artifact": "ORIGINAL-OUTER-TERMINAL.event.jsonl",
+      "bytes": 1270,
+      "sha256": "03cb5ea073a205fe8ec8765269ddd478d55633987ef7dc64cd0e66b39bfc809a"
+    },
+    {
+      "selection": "006",
+      "artifact": "serial.log",
+      "bytes": 106779,
+      "sha256": "3bd14b47b2ef7f81c4d1a98828eba4fce8c35e12a8186e4e38a7c38a6790253f"
+    },
+    {
+      "selection": "006",
+      "artifact": "LAUNCH.py",
+      "bytes": 24064,
+      "sha256": "7cfceeb0b050b67d3ce494da65b383480df2103d0bde3d0910373522015ea650"
+    },
+    {
+      "selection": "006",
+      "artifact": "LAUNCH-UNDER-GUARD.ps1",
+      "bytes": 4098,
+      "sha256": "83ad2d34a30398bce71958902ea9d9a2e5a8957e56e0412ef5095cf47c1efef3"
+    },
+    {
+      "selection": "006",
+      "artifact": "seed.raw",
+      "bytes": 1474560,
+      "sha256": "b9877741c6d01c9f618e9b3df6ae2d4ee68537407719b4ac74ff301a1261aad0"
+    },
+    {
+      "selection": "002",
+      "artifact": "HOST-RESULT.json",
+      "bytes": 1368,
+      "sha256": "f08e4859d1e4c0672abc0d5d8d7bfbd8e8da8ff6a373c0cfeca0c6d2827cf8e7"
+    },
+    {
+      "selection": "002",
+      "artifact": "serial.log",
+      "bytes": 101167,
+      "sha256": "6fc8837a0dfc9df680196a33bfa00e768a2609b511c18c16c9aa1791f8b77191"
+    },
+    {
+      "selection": "003",
+      "artifact": "HOST-RESULT.json",
+      "bytes": 1368,
+      "sha256": "8a8b7005386741040f6599e60ab6529c1f9a5ed68e360dfa2c0e792006af0c3f"
+    },
+    {
+      "selection": "003",
+      "artifact": "serial.log",
+      "bytes": 105218,
+      "sha256": "565614e224beff6cdacc56910ab02c6904eb58d9bfc4115c419b289d838b9aab"
+    },
+    {
+      "selection": "004",
+      "artifact": "PREPARED.json",
+      "bytes": 18406,
+      "sha256": "18d1e60e0b66406d16c34ac3a96898286b6aaf4a43d38221eb2b23dca8ca1803"
+    },
+    {
+      "selection": "005",
+      "artifact": "PREPARED.json",
+      "bytes": 18406,
+      "sha256": "77f2441e3efac54b390ba863e7d1a8fd86142e298dfcdc98e9132c7300e73177"
+    },
+    {
+      "selection": "linux-x64-ci-elf-lineage",
+      "artifact": "ARTIFACT-RECEIPT.json",
+      "bytes": 1475,
+      "sha256": "c3f8a91c50e35a9fa9630a900a556224ac0053da9c5ed7f54f615d3ecd137003"
+    },
+    {
+      "selection": "linux-x64-ci-elf-lineage",
+      "artifact": "SOURCE-CUSTODY-002.json",
+      "bytes": 1748,
+      "sha256": "9c9592e9bd2b8361b85a2099834125afae8168a625b9573c86aaafe4f86440cf"
+    }
+  ]
+}
