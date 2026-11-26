@@ -1,0 +1,463 @@
+{
+  "schema": "ptg-windows-rate-index-component-diagnostic-v1",
+  "status": "COMPLETE_COMPONENT_DIAGNOSTIC_FUNCTIONAL_GATE_FAILED",
+  "scope": "One predeclared Windows rate-bookkeeping component observation. The private candidate retains the failed x64 G52 functional gate.",
+  "method": {
+    "selection": "The prospective rate-only amendment selected five bookkeeping brackets from Design 002. The protection, contention and stock manual experiments remained blocked.",
+    "launch": "52 serial native test subjects in separate atomic Jobs. Every original was joined with exit 0, exactly one associated process, zero residual active processes and no termination assistance. Both original image identities remained held through the final join.",
+    "coverage": {
+      "original_subjects": 52,
+      "warmup_pairs": 2,
+      "warmup_subjects": 4,
+      "warmup_observations": 20,
+      "measured_pairs": 24,
+      "measured_subjects": 48,
+      "measured_observations": 240,
+      "unattempted": 0
+    },
+    "clock": {
+      "qpc_frequency_hz": 10000000,
+      "eligibility_seconds": 180,
+      "physical_outer_job_seconds": 210,
+      "host_available_memory_floor_gib": 4
+    },
+    "schedule": "A/B order alternates between pairs. Within measured pairs, the five-bracket order rotates by pair index modulo five. The CSV preserves every observation, including the warmups and extremes.",
+    "analysis": "For each bracket, compute B minus A within each measured pair and take the median of the 24 differences. The descriptive interval uses the 2.5th and 97.5th percentile ranks from 10,000 deterministic bootstrap medians that resample blocks of two adjacent pairs. The AB, BA, first-half and second-half values are separate medians of the same differences. Sign counts use all 24 measured pairs. The estimates exclude warmups.",
+    "bootstrap_reproduction": {
+      "counter_start": 0,
+      "text_prefix": "ptg/rate-study/bootstrap/rate/20261126/",
+      "draw": "Append the decimal counter and use the first eight SHA-256 bytes as an unsigned big-endian integer. Increment the counter for every draw. Reject values at or above floor(2^64 / 23) times 23. Use accepted values modulo 23 to pick the first index of an adjacent pair block.",
+      "blocks_per_resample": 12,
+      "resamples": 10000,
+      "sorted_interval_indices_zero_based": [249, 9749]
+    },
+    "workload_scope": "The adapter uses real Limiter operations with ordered synthetic keys, fixed tick values and scripted liveness. A keeps ordinary randomized HashMap seeding. B replaces the index type. Setup and post-bracket checks verify ordered entries, index positions, decisions, survivors and ordered summaries outside the measured brackets. These workloads run in opt-level 3 test binaries.",
+    "original_run": {
+      "outer_native_exit": 0,
+      "controller_native_exit": 0,
+      "original_app_event_duration_seconds": 9.4554871,
+      "timing_scope": "The original app event records carrier duration. Adapter timings use their own brackets."
+    }
+  },
+  "sources": {
+    "canonical_base": "ad82d8a15a092b1e52ce65f9d68bd526c4e7fc83",
+    "canonical_build_input_bridge": {
+      "commit": "2dc33dec10fc0355693c92c1fbf6b41d61d8ac5a",
+      "scoped_diff_empty": true,
+      "audited_paths": [
+        "src",
+        "build.rs",
+        "Cargo.toml",
+        "Cargo.lock",
+        ".cargo",
+        "rust-toolchain",
+        "rust-toolchain.toml"
+      ]
+    },
+    "intervention": {
+      "path": "src/extend/state/rate.rs",
+      "arm_a": "std::collections::HashMap<RateKey, usize>",
+      "arm_b": "std::collections::BTreeMap<RateKey, usize>"
+    },
+    "per_arm_source_manifest_entries": 1184,
+    "identical_test_only_paths": [
+      "src/extend/tests.rs",
+      "src/extend/rate_study_207.rs",
+      "src/extend/state.rs"
+    ],
+    "adapter_build": {
+      "argv": [
+        "test",
+        "--lib",
+        "--no-run",
+        "--offline",
+        "--locked",
+        "--target",
+        "x86_64-pc-windows-msvc",
+        "--jobs",
+        "1",
+        "--message-format=json"
+      ],
+      "explicit_feature_flags": [],
+      "resolved_cargo_features": [
+        "testkit"
+      ],
+      "resolved_feature_origin": "The existing test self-dev-dependency enables testkit.",
+      "fresh_private_target_per_arm": true,
+      "test_opt_level": 3
+    },
+    "matched_selected_build_environment_sha256": "e85f082cbe53fa500be328b6b1f392955019d12a7da2b6aab6f891613a9d0ca5",
+    "compiled_source_manifest": {
+      "bytes": 517011,
+      "sha256": "799f5a2d07e3bd7dbc3c3a888fdc825214ce0f6877563361d6da25c13a2a521d"
+    },
+    "test_adapter": {
+      "bytes": 13839,
+      "sha256": "4f7400369991124dcc6478a82c8db987fa311c05ef51b6acd226d54f2fe08348"
+    },
+    "image_a": {
+      "bytes": 4121600,
+      "sha256": "38b402541e14dc10695c292e8bf16749ec3ed0c2dbd01fa8044d065522c1bfde"
+    },
+    "image_b": {
+      "bytes": 4130816,
+      "sha256": "7a09e8272376363c97ee8edfef59d25b32a0f7df0775ffb0573bd468a846e5c9"
+    },
+    "build_a": {
+      "bytes": 1646,
+      "sha256": "ca4dd209a9310224f77146dce66cc1902832fb071920b61ea5daf147f3065be9"
+    },
+    "build_b": {
+      "bytes": 1646,
+      "sha256": "7f4875762621fda82e6a54ab43e8a7e440fe72bc7c42c5de310dc8f038a1ca2d"
+    }
+  },
+  "effects": {
+    "hot": {
+      "label": "Existing-key admission and refund",
+      "batch": "4,096 admit/refund pairs (8,192 method calls) in one 1,024-entry table.",
+      "median_b_minus_a_us": 83.6,
+      "descriptive_95_percent_interval_us": [
+        77.2,
+        87.75
+      ],
+      "splits_median_us": {
+        "AB": 86.7,
+        "BA": 80.35,
+        "first_half": 86.2,
+        "second_half": 82.9
+      },
+      "sign_counts": {
+        "positive": 24,
+        "zero": 0,
+        "negative": 0
+      },
+      "paired_minimum_us": 65.9,
+      "paired_maximum_us": 161.2,
+      "median_twice_ticks": 1672,
+      "interval_twice_ticks": [
+        1544,
+        1755
+      ],
+      "split_twice_ticks": {
+        "AB": 1734,
+        "BA": 1607,
+        "first_half": 1724,
+        "second_half": 1658
+      },
+      "direction_for_this_diagnostic": "supported_positive_diagnostic"
+    },
+    "due": {
+      "label": "Due-only sweep",
+      "batch": "64 full tables of 1,024 entries each. The due half is retired.",
+      "median_b_minus_a_us": -2075.4,
+      "descriptive_95_percent_interval_us": [
+        -2220.7,
+        -1632.2
+      ],
+      "splits_median_us": {
+        "AB": -2110.15,
+        "BA": -2035.2,
+        "first_half": -1949.5,
+        "second_half": -2128.4
+      },
+      "sign_counts": {
+        "positive": 0,
+        "zero": 0,
+        "negative": 24
+      },
+      "paired_minimum_us": -4099.6,
+      "paired_maximum_us": -730.2,
+      "median_twice_ticks": -41508,
+      "interval_twice_ticks": [
+        -44414,
+        -32644
+      ],
+      "split_twice_ticks": {
+        "AB": -42203,
+        "BA": -40704,
+        "first_half": -38990,
+        "second_half": -42568
+      },
+      "direction_for_this_diagnostic": "supported_negative_diagnostic"
+    },
+    "forced": {
+      "label": "Forced all-entry sweep",
+      "batch": "64 full tables. All entries retire and the adapter checks the order and count of queued summaries.",
+      "median_b_minus_a_us": -1025.25,
+      "descriptive_95_percent_interval_us": [
+        -1295.9,
+        -596.65
+      ],
+      "splits_median_us": {
+        "AB": -1103.25,
+        "BA": -632.25,
+        "first_half": -596.65,
+        "second_half": -1224.6
+      },
+      "sign_counts": {
+        "positive": 4,
+        "zero": 0,
+        "negative": 20
+      },
+      "paired_minimum_us": -2960.4,
+      "paired_maximum_us": 546.2,
+      "median_twice_ticks": -20505,
+      "interval_twice_ticks": [
+        -25918,
+        -11933
+      ],
+      "split_twice_ticks": {
+        "AB": -22065,
+        "BA": -12645,
+        "first_half": -11933,
+        "second_half": -24492
+      },
+      "direction_for_this_diagnostic": "supported_negative_diagnostic"
+    },
+    "all_live": {
+      "label": "Admission to full tables with all existing keys live",
+      "batch": "64 full tables. The missing key is refused in each table.",
+      "median_b_minus_a_us": -3028.05,
+      "descriptive_95_percent_interval_us": [
+        -3159.4,
+        -2562.95
+      ],
+      "splits_median_us": {
+        "AB": -3101.05,
+        "BA": -2919.05,
+        "first_half": -3020.7,
+        "second_half": -3080.95
+      },
+      "sign_counts": {
+        "positive": 0,
+        "zero": 0,
+        "negative": 24
+      },
+      "paired_minimum_us": -4874.2,
+      "paired_maximum_us": -1023.6,
+      "median_twice_ticks": -60561,
+      "interval_twice_ticks": [
+        -63188,
+        -51259
+      ],
+      "split_twice_ticks": {
+        "AB": -62021,
+        "BA": -58381,
+        "first_half": -60414,
+        "second_half": -61619
+      },
+      "direction_for_this_diagnostic": "supported_negative_diagnostic"
+    },
+    "partly_dead": {
+      "label": "Admission to full tables with some keys dead",
+      "batch": "64 full tables. The synthetic liveness predicate prunes each eighth original key and the missing key is admitted.",
+      "median_b_minus_a_us": -3108.95,
+      "descriptive_95_percent_interval_us": [
+        -3307.5,
+        -2716.7
+      ],
+      "splits_median_us": {
+        "AB": -3164.3,
+        "BA": -3097.7,
+        "first_half": -3019.3,
+        "second_half": -3194.85
+      },
+      "sign_counts": {
+        "positive": 0,
+        "zero": 0,
+        "negative": 24
+      },
+      "paired_minimum_us": -4797.2,
+      "paired_maximum_us": -1238.4,
+      "median_twice_ticks": -62179,
+      "interval_twice_ticks": [
+        -66150,
+        -54334
+      ],
+      "split_twice_ticks": {
+        "AB": -63286,
+        "BA": -61954,
+        "first_half": -60386,
+        "second_half": -63897
+      },
+      "direction_for_this_diagnostic": "supported_negative_diagnostic"
+    }
+  },
+  "observations": {
+    "file": "windows-rate-index-component-20261126-observations.csv",
+    "rows": 260,
+    "bytes": 15675,
+    "sha256": "41261dee1c331fec1c66f721c606475a410f4313eb6ce180cf900caba95acb1c",
+    "projection": "One row per bracket in original adapter stdout order. Exported fields are phase, relative ordinal and pair, arm, bracket, relative elapsed ticks, frequency and oracle counters. Entries before and after are totals over the bracket's whole batch."
+  },
+  "prior_evidence": {
+    "functional_failure": {
+      "file": "windows-rate-index-functional-20261126-summary.json",
+      "bytes": 43942,
+      "sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3",
+      "status": "B x64 G52 returned guard exit 125 with incomplete Job member capture. The candidate gate remains failed and the control qualification remains incomplete."
+    },
+    "earlier_preparations": "Versions 001 and 002 were withheld during source and portable checks. The initial environment probe failed with a SyntaxError during preparation. These attempts remain separate with zero native timing observations.",
+    "predecessor_receipts": {
+      "rate-component-diagnostic-001/SEAL.json": {
+        "bytes": 9228,
+        "sha256": "6a3b1e42d2bd99a9e84499da7dd85dfd9cd01566f9d99539ed9cb7677c150e9e"
+      },
+      "rate-component-diagnostic-001/PORTABLE-CONTROLS.json": {
+        "bytes": 350,
+        "sha256": "c43c817dfa10fede0355f2b4983e87d7a952cf2b67a74ba9f72040a07e744d57"
+      },
+      "rate-component-diagnostic-001/REVIEW-MANAGER-FINAL-SOL.json": {
+        "bytes": 1220,
+        "sha256": "b109596cbd6ba70daf099bceaf3f7060ce8fb95eaf1f894a1efa15e6f146cb33"
+      },
+      "rate-component-diagnostic-002/SEAL.json": {
+        "bytes": 10742,
+        "sha256": "eeee2c9ade98baee88480087b34c592e93072737f04c6bab69dd138c6c62cd8f"
+      },
+      "rate-component-diagnostic-002/PORTABLE-CONTROLS.json": {
+        "bytes": 590,
+        "sha256": "d1aea0aa482ab900cd29531df18f7ffc6e582b3e5535ec1720e47abf2402d6e6"
+      },
+      "rate-component-diagnostic-002/REVIEW-MANAGER-FINAL-SOL.json": {
+        "bytes": 1006,
+        "sha256": "e1541bec73f66e9c34aa0c5733aadb4603d23709a373193f32cc3075ef5b1fae"
+      }
+    }
+  },
+  "evidence": {
+    "private_retention": "The exact capture, original native events, replay and per-subject bytes are retained privately. Independent reviewers examined all 52 subjects and 260 bracket observations.",
+    "raw_roles": {
+      "SEAL.json": {
+        "bytes": 10742,
+        "sha256": "bdae637ad7985a74556ffd3db85bbf1b8b59c0cb174bdbf0bd73242a11816182"
+      },
+      "METHOD.md": {
+        "bytes": 2154,
+        "sha256": "b24d2c228fe3c3b9aec31a105a87c312f358f5a79fbe9036c3d87b897d9b3880"
+      },
+      "NATIVE-REPLAY-001.json": {
+        "bytes": 5483,
+        "sha256": "f10037758da8239a2fa14e2fcb8e03a2f4a291420da613cfc35b57d5c123fff0"
+      },
+      "ORIGINAL-OUTER-TERMINAL-001.event.jsonl": {
+        "bytes": 2037,
+        "sha256": "bcb5c32a9a834f3e9bda60f95e5b866a5eefc95fa2a93c4443377a8096ff5ce7"
+      },
+      "ROOT-LAUNCH-001.json": {
+        "bytes": 1051,
+        "sha256": "f3b738e419137b158e6722e7cf5d4afed336d797e0707217b688b82c14a13ce6"
+      },
+      "ROOT-EVENT-SELECTION-001.json": {
+        "bytes": 387,
+        "sha256": "6261ad7bc4613aaa5ab5a7cb511e355b70337e1b37b511c7ee775a0bf733a791"
+      },
+      "run-rate/CAPTURE.json": {
+        "bytes": 141250,
+        "sha256": "ec0709766c21857a0bca5648bdcbca752b88289572be1cf9daa0360ccec30695"
+      },
+      "run-rate/LEDGER.jsonl": {
+        "bytes": 25450,
+        "sha256": "98029cfe80f814e62c7b208b8931954068ad2885a49b77424aac4bd1852220b0"
+      },
+      "run-rate/CARRIER.json": {
+        "bytes": 1550,
+        "sha256": "c2cf74bf8d023a16b3faf4086aadb245fa1606d653358ae12143f28ec8feee39"
+      }
+    },
+    "reviewed_input_roles": {
+      "adapter_build": {
+        "bytes": 7972,
+        "sha256": "ce36f1d2b83bc53239a8eac4d3af2049aac8a87467c01582b025d23702914bbd"
+      },
+      "design": {
+        "bytes": 14381,
+        "sha256": "2869a428bd4d5c26f0593da9822ab1c003e4704ff239a70c1e9dc150a26032cf"
+      },
+      "foreground_tool_guard": {
+        "bytes": 403968,
+        "sha256": "5656311ee75af9596864bdb8e5e89b0a4c0dad2812bcdf34205610193f2e8133"
+      },
+      "outer_shell": {
+        "bytes": 301360,
+        "sha256": "2a6769a3330dc1084d0154bfde7d164ab750ca7f700f313f9d417c1be78b2233"
+      },
+      "python": {
+        "bytes": 104952,
+        "sha256": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a"
+      },
+      "quiet": {
+        "bytes": 1118,
+        "sha256": "d38c33b4759b2ea2174db4e55557cea377c4fe8c8866ecf85e2245a5802f2be4"
+      },
+      "intent_A": {
+        "bytes": 711,
+        "sha256": "af6f587218ce206e2c375ef89efcb2e7f49138ede9e0cf7377dc26ef8aec4bdd"
+      },
+      "event_A": {
+        "bytes": 1943,
+        "sha256": "246d5bbbea504b633fd95ed8a26c90663299984cf809f38dd6b3728522daddc0"
+      },
+      "intent_B": {
+        "bytes": 711,
+        "sha256": "df02c92e05d33addcb25ec378c4f36fe306d7b92ef44b501295888b5acdd9dec"
+      },
+      "event_B": {
+        "bytes": 1942,
+        "sha256": "1284ccccf7f9146d64c1a3fd209f299e543b863ad482565bfc68a689c9ce1dd9"
+      },
+      "capture": {
+        "bytes": 14138,
+        "sha256": "d442cee6f40e99ca580ed1daf9fc2f8bb158f08f6b97821b56c47fdfa5b0ca9e"
+      },
+      "replay": {
+        "bytes": 19082,
+        "sha256": "7f14fef29ac05014560e4d82a37d7a9b4635c00a75c7071208a856164199f1d1"
+      },
+      "carrier": {
+        "bytes": 5473,
+        "sha256": "4b4b09be15715583bcbb39d300aa6204bd5a374a15a456996ea63d505afcb5b7"
+      },
+      "schedule": {
+        "bytes": 26861,
+        "sha256": "58e7c6d0ad50e4133dbe2a52c5c0161c7ff71e42464c8939e398374dfcf7efb0"
+      },
+      "method": {
+        "bytes": 2154,
+        "sha256": "b24d2c228fe3c3b9aec31a105a87c312f358f5a79fbe9036c3d87b897d9b3880"
+      },
+      "runtime_hold": {
+        "bytes": 3464,
+        "sha256": "cabd4015d9a4eb04ed251cf80a7c7a858219a4b410b4ee3300d249ad7c047219"
+      },
+      "checked_slot_job": {
+        "bytes": 10774,
+        "sha256": "ccfd72d06bc54bb93b71e31f03440fe2054b64da78063ed39a68de5c680e2771"
+      },
+      "failed_control_preimage": {
+        "bytes": 5011,
+        "sha256": "feec9f7382d7ce12e1f284a34573be329c96eb5b98d123f92c6c5c5f882ee83c"
+      },
+      "offline_controls": {
+        "bytes": 640,
+        "sha256": "640f8ef19aa5b2bba415472607f01d777f7437aa25ba35d54241cc3e918bdf79"
+      }
+    },
+    "prelaunch_source_reviews": {
+      "abi": {
+        "bytes": 1398,
+        "sha256": "b67cb1165de80607489f71d2136bafde87282b40a48ce31e1db8a342a7df4be6"
+      },
+      "independent": {
+        "bytes": 998,
+        "sha256": "8332218df47600f380e4e574e75558f3f7c69bfbea692c6149111dfb14347c58"
+      }
+    }
+  },
+  "limits": [
+    "Each reported effect applies to its stated batch. B was slower in every hot pair. B had a negative median in the four batched brackets. Four forced-sweep pairs favored A.",
+    "The synthetic load, key order, tick inputs, liveness rules, randomized seeding in A and optimized test build limit transfer to shipping behavior.",
+    "Whole-guard speed, stock manual launch, competitive rank, protection equivalence and product adoption remain unqualified."
+  ]
+}
