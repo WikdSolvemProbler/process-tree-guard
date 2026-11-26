@@ -1,0 +1,384 @@
+{
+  "schema": "ptg-windows-job-reaper-qualification-v1",
+  "status": "SCOPED_NATIVE_CORRECTNESS_PASS",
+  "scope": "A Windows extension reaper fix. A successful partial Job census no longer makes an omitted, still-live original member lose its hold.",
+  "implementation": {
+    "canonical_base_at_staging": "f0c46e5caba272df662cef4596799e1f18465ceb",
+    "patched_source_roles": [
+      {
+        "repository_path": "src/engine/wait.rs",
+        "preimage_sha256": "b00cb3fe607d6868b0dab0ed848d6b1f1c19a65d01bd3f6f8a3f18950b26d839",
+        "tested_sha256": "ee270577dc4718ce2696886a80b0cb18fa97987459d2760eaadc7ab0f4c165b2"
+      },
+      {
+        "repository_path": "src/extend/state.rs",
+        "preimage_sha256": "e20312e83f2d5081786642950858f90ce91c5daa3ae583fabdbe5b872b1f0746",
+        "tested_sha256": "64d1d9ce3b4a9636f27480c1d996bd27afab192bea05ce11a3668cfdcfa3cc60"
+      },
+      {
+        "repository_path": "src/extend/tests.rs",
+        "preimage_sha256": "1fa6102958de8bfba7b1dec2bbf06c1843e06cb183a8b17f66e3835ba0062b4e",
+        "tested_sha256": "82032b9278cdb0d45aa16d27531e74f1744d62eb1ebb9bf1eccb621ed67bdc00"
+      }
+    ],
+    "exact_candidate_patch": {
+      "bytes": 13343,
+      "sha256": "8044e2801bba64770a8c2573f810cae5fda360889239a002a25fd0c09467d0f6"
+    },
+    "change": "The ordinary extension reaper uses the strict complete-list parser already used for cleanup. An unavailable or incomplete list uses the existing liveness and exact Job membership checks on each retained holder handle. Valid complete lists still supply the sorted PID membership fast path.",
+    "unchanged_scope": "The strict cleanup deadline, termination request order, sticky capture failure and original-object cleanup waits retain their existing rules."
+  },
+  "native_qualification": {
+    "compiled_source_closure": 1193,
+    "build": "Pinned MSVC and Rust tools, SDK 10.0.28000.0, and locked offline Cargo test. Integration selections used Cargo-built test-profile binaries with no stock release or environment image override.",
+    "test_selection": "Full x64 and i686 library suites followed by eight selected native integration tests. Both suites include the focused owned-holder regression.",
+    "focus_regression": {
+      "name": "extend::tests::the_poll_releases_a_holder_that_exited_with_no_message_from_the_job",
+      "context": "A live owned original process and Job with synthetic list responses applied through the actual shared parser. The original holder is retained on the complete hit and on all records that require the exact-handle fallback. The subsequent native retirement confirms the ordinary reap of the same holder.",
+      "responses": [
+        "complete reply containing the original holder",
+        "successful within-cap partial reply omitting the live original holder",
+        "returned length shorter than the listed prefix",
+        "returned length exceeding the supplied buffer",
+        "hard native enumeration error"
+      ]
+    },
+    "scopes": [
+      {
+        "scope": "x64-units",
+        "architecture": "x64",
+        "case": "units",
+        "selected_test": null,
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 330,
+        "native_wait_ms": 300000,
+        "passed": 316,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2412, "0c9fbd539ff3d9d9c442f7fe9157dbc821778b6a84195bebbd803d72ba489b99"],
+          "INTENT.json": [1077, "75f56653aa7ca3c6e76334ddbe21370244b3d2a23ee4490f09043d696b0e1d3d"],
+          "native.cmd": [957, "ea4aa8be2f335237388ec5659942f5a803987c2e9602f6957aa70f49ca8030a4"],
+          "native.stdout": [30342, "3812ff5f00ee339c8442bf7dacd1873b4fc2b75197580b84198ff07b7f83c9c7"],
+          "native.stderr": [6097, "a8cf6e5d2e23867259be434ab05b098c73b5cb4d8759566de736691e815931d8"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1606, "5820e642d3de4f9ec343203528d8ae6ff9ec6513c6e8cf44fa4e877e06698e54"],
+          "ROOT-EVENT-SELECTION.json": [1549, "33f81a066714866f48cef62cd8659003b37f80d10504e46e9623074e0745d800"]
+        }
+      },
+      {
+        "scope": "i686-units",
+        "architecture": "i686",
+        "case": "units",
+        "selected_test": null,
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 330,
+        "native_wait_ms": 300000,
+        "passed": 316,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "environment_sha256": "9e3d7e7b345f92008fafaa9bc26a8c76fabb9b8300c7bc82baaddd9ae441107d",
+        "raw_roles": {
+          "RESULT.json": [2418, "ff96074613a5be658bd2d6c2d9b8040678e7a24ebc07af7ed764a35f2a3c286a"],
+          "INTENT.json": [1076, "48fcdc1deb7443a7b892da825b3bd3537b82970f3064050b27e47ec7a1bc547a"],
+          "native.cmd": [962, "c050ea1bc9e98038602b356c2e89ae1b5358b930675e375cf2712cba2b04f1e3"],
+          "native.stdout": [30342, "0bbb377410344422c4e3286e99a22d1168c9d607a01797ba91b04f282a50abde"],
+          "native.stderr": [6098, "33195d136e35bf49776789cfe10cffe964ea9cd6c968815562530940594eb2ca"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1614, "7ba7bd7bbc6c6d3d37aec14f7e5949caec30bc7baf431168c295983f5b27b68e"],
+          "ROOT-EVENT-SELECTION.json": [1556, "f8da670c5a2424644bc91e3adf96212283b0e9387d612a04b58759d5c253f993"]
+        }
+      },
+      {
+        "scope": "x64-G28",
+        "architecture": "x64",
+        "case": "G28",
+        "selected_test": "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2408, "306ffc0ab44ef903ae80492222f743d1fecc5584eb07dc21325a804261d2d567"],
+          "INTENT.json": [1194, "c1ce7694fd28267f3ed3d9acd8f0df11838109b61edd4d5a6dbf9635a52224be"],
+          "native.cmd": [1051, "9f89764bcbdcd519c7ba50922914338dfd7feabb2d9b3113552dc2bd6f3e19f1"],
+          "native.stdout": [843, "d03e34db7ed5111f93dd548f60fd2583cc6af5a69ce7493a957f7ac2e16f1fd3"],
+          "native.stderr": [1033, "7164b84d192f570879cde0a3a8867067e0453c3377a32419712496fd4d254fd0"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1654, "1c891c123335697ff8a75e7faf80d95cdb8022b353a8f4caecb6d5b9a3660ecc"]
+        }
+      },
+      {
+        "scope": "i686-G28",
+        "architecture": "i686",
+        "case": "G28",
+        "selected_test": "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "9e3d7e7b345f92008fafaa9bc26a8c76fabb9b8300c7bc82baaddd9ae441107d",
+        "raw_roles": {
+          "RESULT.json": [2414, "6e3428e4ef4f9415824036f28f46bec379e492943f3d94ca6895b4022f817c05"],
+          "INTENT.json": [1193, "b55854db48a8e37d333092d4dec0a4fa552c97acae3e4282d1d1acca0053a070"],
+          "native.cmd": [1056, "70816a5944ffd27ad60e537626d5dd03534647d263ff17715d4b62ef34045793"],
+          "native.stdout": [843, "7269d41f400fbd29f72ef7c1bd8a44e7f0991edf50f59dbccb933e76cbb8f253"],
+          "native.stderr": [1031, "6c518d0f35413a54db0469feb1c800cd7bb49ec1486c79221e0858541db2a8fe"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1652, "d4bfd5efc617f7556df3692569bc015895306b85f639e128020539dca3da0cc3"]
+        }
+      },
+      {
+        "scope": "x64-G45",
+        "architecture": "x64",
+        "case": "G45",
+        "selected_test": "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2408, "b3a7589adb0e9ef00a31aec600902898547710e47ee43ef0285367d6b7efb1ab"],
+          "INTENT.json": [1216, "abd892cece5730fd7b4973cd1ff7d108941d60505a51864ab3b329c7a25475a6"],
+          "native.cmd": [1073, "59d2ebbd14572d0ac1fde4bb9a4308aa3fda155bfbddf3229888d77716515d6f"],
+          "native.stdout": [2033, "22fa889a22045da002d445b97467fd1df7dbff11af1f8aa6339dcbba68b60f71"],
+          "native.stderr": [1033, "16266ebab37641096328707ca4bc0d303cd1aa1c3ae1901c4bfba7796bdd5cf7"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1653, "a83a358d1259597013fdb89e9ae1a7f9c5da6f9a1f63067e82aab8dc1d99e94b"]
+        }
+      },
+      {
+        "scope": "x64-G50",
+        "architecture": "x64",
+        "case": "G50",
+        "selected_test": "g50_the_channel_exists_only_in_an_extendable_run",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2407, "56a6f7f363e2a67cc6c7ff44eb04a85ec862703b97e6102960c45e0a2521853c"],
+          "INTENT.json": [1184, "55aee5de20b6b5630533966c93126d99d33ac53fe558a0a0a234952cefe4f5a7"],
+          "native.cmd": [1041, "521de3ecbc2d55b142c3a0c2a49b629cfd426787959f6ca9e3eff5da24ed3455"],
+          "native.stdout": [1403, "f5252e641f5664db6a2c62644fafb2998a8d996ba247d198266332c6b8319e81"],
+          "native.stderr": [872, "a6f8ea4e1bf0a0203cbdfae2f21c2cfd2f2d18e322777e61eb21ede6095576d1"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1653, "c6618a760d6c9adf4f37c8d0a4595bd6e9ed3a8ac76ed6004539fecdd7ea22a5"]
+        }
+      },
+      {
+        "scope": "x64-G51",
+        "architecture": "x64",
+        "case": "G51",
+        "selected_test": "g51_the_run_ends_at_the_latest_deadline_of_the_children_that_are_alive",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2408, "22cb0b65d76f512ee99d824f5e6a0f6cb59a092ad3ed4c238a708609d580f89a"],
+          "INTENT.json": [1206, "9a7cee37ab9e7f187fc331870f56a23aa0659ea9bbdd0a7d83cf6953dc4b36d2"],
+          "native.cmd": [1063, "fe27415d6f587d83c7811043d3399d55e95eaf10d6d5d5ed787b320c2307a5ab"],
+          "native.stdout": [3302, "da6695588e30c3ed43045bedacacc604b5e0e1760ae222876575a1bfe822611f"],
+          "native.stderr": [872, "a6f8ea4e1bf0a0203cbdfae2f21c2cfd2f2d18e322777e61eb21ede6095576d1"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1653, "42723eb9bcb300d08a1fe95e43da2c635f9c307047df6c63b6cf2deb6bdb680b"]
+        }
+      },
+      {
+        "scope": "x64-G56",
+        "architecture": "x64",
+        "case": "G56",
+        "selected_test": "g56_a_hold_ends_when_its_process_exits",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2409, "71f2c797774fc8b46409c80e5767c1d0ffd1b23bd8fd202f9e206fac0a1dc2ec"],
+          "INTENT.json": [1174, "61f30b7f1c8c4f15ffe03a590ef5485098f840b3206e11e04ab2d0f4df4911af"],
+          "native.cmd": [1031, "29494ac7bd8dc20b63bff3c07288bc7f25e2da0ecd733c7ecf3eaf9e480c3fbb"],
+          "native.stdout": [3982, "95e369eb81c0ee24fa0357c7b39041a7877734ae2c88e190e342f3dd230ce8f3"],
+          "native.stderr": [1033, "a256ac39eaa97598c490b3b5d0c290144e8ed274f7c37010bb135f74ca872af9"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1654, "d18e1ee217aa5c5fd510a4ad8b78b573a15d65747f60e053d0d678ae0157758c"]
+        }
+      },
+      {
+        "scope": "i686-G56",
+        "architecture": "i686",
+        "case": "G56",
+        "selected_test": "g56_a_hold_ends_when_its_process_exits",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "9e3d7e7b345f92008fafaa9bc26a8c76fabb9b8300c7bc82baaddd9ae441107d",
+        "raw_roles": {
+          "RESULT.json": [2415, "099bf276909b9255dd2d6b262319f1b2e252d3ea93890661ede797d6246bc6f7"],
+          "INTENT.json": [1173, "8b1ad273c4d6deba42737db148a357f8680fe2e88168bbd1b7cf67122285f0b2"],
+          "native.cmd": [1036, "cca86dbbdccc2034e248b4fa1815702e7f474ba8157a4ce5de4071833607315c"],
+          "native.stdout": [3982, "68a9a59eb85b5f32e0bff9dcb80986d4a88db13ffa315d44c752d6715ca6ac70"],
+          "native.stderr": [1031, "e94f96f92f9e58c851b7d0cd427a879a1394f652984367e873cb954f5333facc"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1654, "db4acf824a016d4b18526b9547d3b0eb5114769632444fcdf6978d93282c4f82"]
+        }
+      },
+      {
+        "scope": "x64-G76",
+        "architecture": "x64",
+        "case": "G76",
+        "selected_test": "g76_a_reply_that_the_client_does_not_take_in_time_withdraws_the_hold_it_granted",
+        "outer_native_exit": 0,
+        "native_exit": 0,
+        "original_joined": true,
+        "source_count": 1193,
+        "outer_seconds": 150,
+        "native_wait_ms": 120000,
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 83,
+        "environment_sha256": "e5627f5f2d995ccce770c423c75921057583ac42f60defd10ba4b19d66f0761a",
+        "raw_roles": {
+          "RESULT.json": [2408, "3527bd4ed7261de97d0efbe52d78305161b0dcc817b36f59987ab80fa4d1cdb2"],
+          "INTENT.json": [1215, "bfe87980bf81ae139a3c93c30b5a0caf7dec633dca622558979bd7efb9216793"],
+          "native.cmd": [1072, "6bedd20df6476785897bcd66b771fd3553adb74c257f43c96b1f5f07635c6eec"],
+          "native.stdout": [4827, "646aaf3262119722e7a514a0395b1639edd4ca8b7963e24d6bb974fee4cff124"],
+          "native.stderr": [872, "a6f8ea4e1bf0a0203cbdfae2f21c2cfd2f2d18e322777e61eb21ede6095576d1"],
+          "SOURCE-BEFORE.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "SOURCE-AFTER.json": [253664, "ba8fadf301af4bb8cf937294420c1a8139eec151f612a7fa7d12ec6d96489265"],
+          "ORIGINAL-OUTER-TERMINAL.event.jsonl": [1653, "4f6ef3644b9e381cf95bb61f8496cf475e0d06846a9a5c72d78c83a6ec388cd8"]
+        }
+      }
+    ]
+  },
+  "negative_control": {
+    "executed": false,
+    "disposition": "The proposed additional private native negative control remained unexecuted. Its existing source files are preserved.",
+    "static_discriminator": "An in-cap successful two-assigned/one-listed response would have returned the listed prefix in the old reader. The current focused test rejects that interpretation. The corrected reader passes an unavailable-census result to the exact-held fallback.",
+    "evidence_limit": "The static comparison establishes the expected distinction in source. There is no observed native failure from a counterfactual old reader."
+  },
+  "preserved_g52": {
+    "prior_evidence_name": "windows-rate-index-functional-20261126-summary.json",
+    "prior_evidence": {
+      "bytes": 43942,
+      "sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3"
+    },
+    "disposition": "The original x64 G52 failure remains failed and unqualified. Its cleanup query reported assigned 3, listed 2 and returned length 32, yielding guard 125, test 101 and outer exit 1.",
+    "relation": "This change qualifies the ordinary reaper's handling of incomplete replies. It leaves the cause of the original G52 census and the omitted identity unresolved."
+  },
+  "evidence": {
+    "qualified_packet": {
+      "bytes": 6074,
+      "sha256": "c8e16f43ff9da05d506b69996d3ac8f0c0fbb3ee6f9e16facc4dd02e2ee7b890"
+    },
+    "accepted_source_reviews": {
+      "abi": {
+        "bytes": 2543,
+        "sha256": "e6596dddbfa82c3c728e8bb8f1742e9d874e6e3a79bcc8202be1c357334af7fa"
+      },
+      "independent_startup": {
+        "bytes": 1202,
+        "sha256": "ef499ed10df6ed9a3473c5c70aaf366dbeb1540f8ece4386078c0d92ff7b4d70"
+      }
+    },
+    "source_snapshot_manifest": {
+      "bytes": 260012,
+      "sha256": "713bca2ba13287b18884df0382db383a9ea63b485a0ba43e67f96ed01a2f1223"
+    },
+    "canonical_apply": {
+      "bytes": 1384,
+      "sha256": "d1bcc236657fa969f65ccbe2b326e05f8cf5d52b3427518f54ec792e3ab7af7b"
+    },
+    "source_only_negative_comparison": {
+      "bytes": 2310,
+      "sha256": "5818bb37bdb9b825fd85ba900f55d47473fc0479f520df321b93da5106374b80"
+    },
+    "integration_outer_event_selection": {
+      "bytes": 4637,
+      "sha256": "59e1cb1b806d939e4348d859fb2db4497aa7b923c01d62243a458fe1166cca9a"
+    },
+    "original_custody": "All ten original outer command events and original native test receipts have terminal exit 0. The source snapshots matched before and after every covered run. Byte lengths and SHA-256 digests identify exact private evidence. Each raw_roles entry is [byte length, SHA-256]."
+  },
+  "limits": [
+    "Qualification covers these reviewed library and selected native integration outcomes.",
+    "Stock release, manual invocation, latency, competitive performance and full guard equivalence are outside the measured scope.",
+    "A later exact code review and lint, if published, have separate evidence."
+  ]
+}

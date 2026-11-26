@@ -149,9 +149,8 @@ impl State {
     /// Drop the holds that have run out, whose process has exited, or (when there is a
     /// `job` to ask) that are not in it: the backstop for a lost completion message.
     /// Every holder is polled, by its handle, whatever the port reported. Membership
-    /// is decided by the job's process list when the list was read — it is the same
-    /// fact, nested jobs included — and by asking the job directly only when the
-    /// list could not be read. A call at the tick of the last completed reap polls
+    /// is decided by a complete job process list, nested jobs included. An
+    /// unavailable or incomplete list uses the original held process directly. A call at the tick of the last completed reap polls
     /// nobody and asks nothing: it stands on that reap's answers (see the stamp
     /// check in the body). The deadline bookkeeping is not part of the reap and
     /// is not skipped: `expire` folds the hold list on every call, this one
@@ -191,37 +190,37 @@ impl State {
         // tests every hold, and the scan form paid holds times
         // members comparisons for answers the search gives in
         // logarithmic steps per hold.
-        let retain = |state: &mut State, listed: Option<&[usize]>| {
-            state.holds.retain(|hold| {
-                // Membership in the list the query already paid for
-                // is tested before the aliveness poll: the search is
-                // in place and makes no call, so a hold the list no
-                // longer names — a holder that has exited or left the
-                // job, the reap's ordinary quarry — is dropped on the
-                // search alone, without a `WaitForSingleObject` paid
-                // for a verdict the search already settled. The
-                // retained set is the same either way: the tests are
-                // a conjunction of queries the tree already treats
-                // as skippable (the poll is short-circuited away for
-                // a hold whose time has run out here, and in
-                // `started_before`), so their order decides only
-                // which calls are made, never which holds stand.
-                // When the list could not be read the fallback keeps
-                // its order: the poll first, and the per-hold job
-                // query only for a holder still alive.
-                hold.until > now && match listed {
-                    Some(ids) => ids.binary_search(&(hold.process.id as usize)).is_ok() && hold.process.alive(),
-                    None => hold.process.alive() && job.is_none_or(|job| hold.process.in_job(job)),
-                }
-            });
-        };
         match job {
-            Some(job) => crate::engine::with_job_process_ids_sorted(job, |listed| retain(self, listed)),
-            None => retain(self, None),
+            Some(job) => crate::engine::with_job_process_ids_sorted(job, |listed| self.retain_after_census(now, Some(job), listed)),
+            None => self.retain_after_census(now, None, None),
         }
-        // The reap ran in full: its answers are the ones a settle at
-        // this same tick stands on.
+        // A completed reap supplies the answers for another settle at this tick.
         self.release_stamp = Some(now);
+    }
+
+    pub(super) fn retain_after_census(&mut self, now: u64, job: Option<Handle>, listed: Option<&[usize]>) {
+        self.holds.retain(|hold| {
+            // Membership in the list the query already paid for
+            // is tested before the aliveness poll: the search is
+            // in place and makes no call, so a hold the list no
+            // longer names — a holder that has exited or left the
+            // job, the reap's ordinary quarry — is dropped on the
+            // search alone, without a `WaitForSingleObject` paid
+            // for a verdict the search already settled. The
+            // retained set is the same either way: the tests are
+            // a conjunction of queries the tree already treats
+            // as skippable (the poll is short-circuited away for
+            // a hold whose time has run out here, and in
+            // `started_before`), so their order decides only
+            // which calls are made, never which holds stand.
+            // When the list could not be read the fallback keeps
+            // its order: the poll first, and the per-hold job
+            // query only for a holder still alive.
+            hold.until > now && match listed {
+                Some(ids) => ids.binary_search(&(hold.process.id as usize)).is_ok() && hold.process.alive(),
+                None => hold.process.alive() && job.is_none_or(|job| hold.process.in_job(job)),
+            }
+        });
     }
 
     /// Release what no longer holds the run up and note that the deadline has passed.

@@ -644,6 +644,35 @@
             state.holds.push(Hold { process: Process::open(child.id()).expect("open the holder"), token: 0, until: 900_000 });
             state.release(1, Some(job));
             assert_eq!(state.holds.len(), 1, "a holder that is alive, in the job and listed keeps its hold");
+
+            let holder = child.id() as usize;
+            let header_bytes = 2 * std::mem::size_of::<u32>();
+            let id_bytes = std::mem::size_of::<usize>();
+            for (case, assigned, listed, returned, native_failure) in [
+                ("complete original holder", 1, 1, header_bytes + id_bytes, false),
+                ("successful partial omits live holder", 2, 1, header_bytes + 2 * id_bytes, false),
+                ("short byte count", 2, 2, header_bytes + id_bytes, false),
+                ("oversized returned length", 1, 1, header_bytes + 1025 * id_bytes, false),
+                ("hard native list error", 1, 1, header_bytes + id_bytes, true),
+            ] {
+                crate::engine::with_reaper_job_ids_for_test(|words, bytes| {
+                    assert_eq!(bytes as usize, std::mem::size_of_val(words));
+                    let header = words.as_mut_ptr().cast::<u32>();
+                    header.write(assigned);
+                    header.add(1).write(listed);
+                    words[header_bytes / id_bytes] = if case == "complete original holder" { holder } else { 1 };
+                    if native_failure { Err(5) } else { Ok(returned) }
+                }, |ids| {
+                    if case == "complete original holder" {
+                        assert_eq!(ids, Some(&[holder][..]), "{case}");
+                    } else {
+                        assert!(ids.is_none(), "{case} must not imply missing membership");
+                    }
+                    state.retain_after_census(1, Some(job), ids);
+                    assert_eq!(state.holds.len(), 1, "{case} keeps the exact live original holder");
+                });
+            }
+
             child.kill().expect("end the holder");
             child.wait().expect("reap the holder");
             // The backstop's next pass, at a later tick than the reap above: a pass at

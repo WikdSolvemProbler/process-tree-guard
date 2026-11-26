@@ -365,33 +365,32 @@ fn job_id_counts(buffer: &[usize]) -> (usize, usize) {
 fn with_job_process_ids_form<R>(job: Handle, sorted: bool, use_ids: impl FnOnce(Option<&[usize]>) -> R) -> R {
     JOB_ID_BUFFER.with(|buffer| {
         let mut buffer = buffer.borrow_mut();
-        // Grow the buffer until the whole list fits (the call fails with more data otherwise).
-        let mut capacity = 1024usize;
-        let mut ok;
-        loop {
-            if buffer.len() < JOB_ID_HEADER_WORDS + capacity {
-                buffer.resize(JOB_ID_HEADER_WORDS + capacity, 0);
-            }
-            ok = unsafe {
-                QueryInformationJobObject(job, PROCESS_ID_LIST_CLASS, buffer.as_mut_ptr() as *mut c_void,
-                    ((JOB_ID_HEADER_WORDS + capacity) * std::mem::size_of::<usize>()) as u32, std::ptr::null_mut())
-            };
-            let assigned = job_id_counts(&buffer).0;
-            if ok != 0 || assigned <= capacity || capacity >= 1 << 20 {
-                break;
-            }
-            capacity = (assigned + 256).next_power_of_two();
-        }
-        if ok == 0 {
-            return use_ids(None);
-        }
-        let count = job_id_counts(&buffer).1;
-        let listed = JOB_ID_HEADER_WORDS + count.min(capacity);
-        if sorted {
-            buffer[JOB_ID_HEADER_WORDS..listed].sort_unstable();
-        }
-        use_ids(Some(&buffer[JOB_ID_HEADER_WORDS..listed]))
+        use_complete_job_ids(&mut buffer, sorted, |words, bytes| query_job_process_ids(job, words, bytes), use_ids)
     })
+}
+
+fn use_complete_job_ids<R>(
+    buffer: &mut Vec<usize>, sorted: bool,
+    query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
+    use_ids: impl FnOnce(Option<&[usize]>) -> R,
+) -> R {
+    // A successful but incomplete reply has no negative membership authority.
+    // Unavailable lists use the reaper's existing exact-handle fallback.
+    let ids = read_complete_job_process_ids(buffer, || false, query).ok().map(|ids| {
+        if sorted {
+            ids.sort_unstable();
+        }
+        &*ids
+    });
+    use_ids(ids)
+}
+
+#[cfg(test)]
+pub(crate) fn with_reaper_job_ids_for_test<R>(
+    query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
+    use_ids: impl FnOnce(Option<&[usize]>) -> R,
+) -> R {
+    use_complete_job_ids(&mut Vec::new(), true, query, use_ids)
 }
 
 struct CleanupMemberHandles(HandleList);
@@ -506,16 +505,19 @@ pub(super) fn with_cleanup_job_process_ids<R>(
 ) -> R {
     JOB_ID_BUFFER.with(|buffer| {
         let mut buffer = buffer.borrow_mut();
-        let ids = cleanup_job_process_ids(&mut buffer, deadline, Instant::now, |words, buffer_bytes| {
-            let mut returned_bytes = 0;
-            let ok = unsafe {
-                QueryInformationJobObject(job, PROCESS_ID_LIST_CLASS, words.as_mut_ptr().cast(),
-                    buffer_bytes, &mut returned_bytes)
-            };
-            if ok == 0 { Err(unsafe { GetLastError() }) } else { Ok(returned_bytes as usize) }
-        });
+        let ids = cleanup_job_process_ids(&mut buffer, deadline, Instant::now,
+            |words, bytes| query_job_process_ids(job, words, bytes));
         use_ids(ids)
     })
+}
+
+fn query_job_process_ids(job: Handle, words: &mut [usize], buffer_bytes: u32) -> Result<usize, u32> {
+    let mut returned_bytes = 0;
+    let ok = unsafe {
+        QueryInformationJobObject(job, PROCESS_ID_LIST_CLASS, words.as_mut_ptr().cast(),
+            buffer_bytes, &mut returned_bytes)
+    };
+    if ok == 0 { Err(unsafe { GetLastError() }) } else { Ok(returned_bytes as usize) }
 }
 
 pub(super) const MAX_CLEANUP_JOB_IDS: usize = 1 << 20;
@@ -529,12 +531,19 @@ pub(super) fn bounded_cleanup_capacity(capacity: usize, assigned: usize) -> usiz
 /// counts precede the pointer-sized IDs. Size retries cannot exceed the cap.
 pub(super) fn cleanup_job_process_ids(
     buffer: &mut Vec<usize>, deadline: Instant, mut now: impl FnMut() -> Instant,
-    mut query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
+    query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
 ) -> Result<&[usize], MemberCaptureFailure> {
+    read_complete_job_process_ids(buffer, || now() >= deadline, query).map(|ids| &*ids)
+}
+
+fn read_complete_job_process_ids(
+    buffer: &mut Vec<usize>, mut budget_expired: impl FnMut() -> bool,
+    mut query: impl FnMut(&mut [usize], u32) -> Result<usize, u32>,
+) -> Result<&mut [usize], MemberCaptureFailure> {
     const WORD_BYTES: usize = std::mem::size_of::<usize>();
     let mut capacity = 1024;
     loop {
-        if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+        if budget_expired() { return Err(MemberCaptureFailure::BudgetExpired); }
         let capacity_error = MemberCaptureFailure::Capacity { assigned: capacity, capacity: MAX_CLEANUP_JOB_IDS };
         let words = JOB_ID_HEADER_WORDS.checked_add(capacity).ok_or(capacity_error)?;
         let byte_capacity = words.checked_mul(WORD_BYTES).ok_or(capacity_error)?;
@@ -545,7 +554,7 @@ pub(super) fn cleanup_job_process_ids(
             buffer.resize(words, 0);
         }
         buffer[..JOB_ID_HEADER_WORDS].fill(0);
-        if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+        if budget_expired() { return Err(MemberCaptureFailure::BudgetExpired); }
         let returned_bytes = match query(&mut buffer[..words], native_bytes) {
             Ok(bytes) => bytes,
             Err(ERROR_MORE_DATA) if capacity < MAX_CLEANUP_JOB_IDS => {
@@ -554,7 +563,7 @@ pub(super) fn cleanup_job_process_ids(
             }
             Err(win32_error) => return Err(MemberCaptureFailure::Query { win32_error }),
         };
-        if now() >= deadline { return Err(MemberCaptureFailure::BudgetExpired); }
+        if budget_expired() { return Err(MemberCaptureFailure::BudgetExpired); }
         let (assigned, listed) = job_id_counts(buffer);
         let incomplete = MemberCaptureFailure::IncompleteList { assigned, listed, returned_bytes };
         let used_words = JOB_ID_HEADER_WORDS.checked_add(listed).ok_or(incomplete)?;
@@ -572,7 +581,7 @@ pub(super) fn cleanup_job_process_ids(
         if assigned != listed {
             return Err(incomplete);
         }
-        return Ok(&buffer[JOB_ID_HEADER_WORDS..used_words]);
+        return Ok(&mut buffer[JOB_ID_HEADER_WORDS..used_words]);
     }
 }
 
