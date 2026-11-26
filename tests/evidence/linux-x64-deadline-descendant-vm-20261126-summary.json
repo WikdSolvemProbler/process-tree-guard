@@ -1,0 +1,322 @@
+{
+  "bounds": {
+    "emulator_seconds": 245,
+    "fallback_absolute_lease_seconds": 45,
+    "fallback_cancel_reserve_seconds": 8,
+    "guest_boot_kill_grace_seconds": 2,
+    "guest_boot_seconds": 98,
+    "guest_fallback_seconds": 27,
+    "guest_fallback_stop_grace_seconds": 4,
+    "guest_fixture_seconds": 85,
+    "guest_fixture_stop_grace_seconds": 4,
+    "inner_windows_job_seconds": 270,
+    "outer_windows_job_seconds": 300,
+    "product_deadline_seconds": 12
+  },
+  "custody": {
+    "independent_native_audits": {
+      "abi": {
+        "bytes": 6277,
+        "sha256": "d539a5929c22eb619decbe6b8dec43fec0bcc2ad579b535490333379c37d208c"
+      },
+      "startup": {
+        "bytes": 2385,
+        "sha256": "4b7053d48c9cc5041791f1754f97e074c66e3053170f59f26ba9839e08fee007"
+      }
+    },
+    "prepared_reviews": {
+      "abi": {
+        "bytes": 3848,
+        "sha256": "3906af2d85a3a4bb5cb28369b47ddb78cfe569ab5e12da6b45aae8c4dce16c6b"
+      },
+      "startup": {
+        "bytes": 1664,
+        "sha256": "df09849767d4d0e5a5aeb5bb2d5f21f9554fd2e404a28dbfbe40752198a5fc6e"
+      }
+    },
+    "prepared_writable_disk_before_boot": {
+      "bytes": 621284352,
+      "sha256": "04e8f2461a16a44e78a370284471f29616cdd9baf1893df25807b71f985b6c94"
+    },
+    "private_artifact_pins": {
+      "carrier": {
+        "bytes": 4113,
+        "sha256": "a647782a30503f63600e863f67f4584a624e87a2ae826ef0e32391ede30651f3"
+      },
+      "complete_serial": {
+        "bytes": 113103,
+        "sha256": "d4c2f9880ac1dca9f1c62e175a4303ff1fe8273b915b7405d4e6973b9f7dec21"
+      },
+      "guest_witness": {
+        "bytes": 55612,
+        "sha256": "d6d8b020950d37cfb13a768611e1c613efec04e463a867cbaaa4dbcdf4535439"
+      },
+      "host_replay": {
+        "bytes": 37862,
+        "sha256": "27c31a946e192fc86295a2afab7572f7264a99fb2e84d69c960bda9ab45c6211"
+      },
+      "inner_intent": {
+        "bytes": 867,
+        "sha256": "fd7829aa26c67e837fc4385f483ff24ea3bbdf5554eafd2da9a56224d8dc61cf"
+      },
+      "original_host_carrier": {
+        "bytes": 408,
+        "sha256": "1139cc79e67b9c88e729a063b05a2d8f89a0c725385b0e44adaa2ff24a723223"
+      },
+      "original_host_result": {
+        "bytes": 5965,
+        "sha256": "332425de62e6dedf69c1f36d2ecd80eea08ef7290c1e16b2f698266be854f31d"
+      },
+      "original_start": {
+        "bytes": 2660,
+        "sha256": "040388503431e19630dbb64be30212f95d02e75410b0dace38970eff32469e79"
+      },
+      "outer_completion": {
+        "bytes": 1278,
+        "sha256": "831cd5798a821ba518bff7ffede793cd63812dedad576cf9b8dd00e3a91fb94a"
+      },
+      "outer_event_selection": {
+        "bytes": 602,
+        "sha256": "03fb4f335851f3bad3ca67d678564b76ee1e291a9cfb14989f649427a4bf36a2"
+      },
+      "prepared": {
+        "bytes": 18406,
+        "sha256": "8d9e536f18432edd15bcbc80d3033880154c0456c27b455b52f5208001012af0"
+      },
+      "scoped_admission": {
+        "bytes": 808,
+        "sha256": "8322cae7b0d89c7f93879cbdfae561aa71e2e062dcd445f6a958b61ba06093bc"
+      },
+      "source_seal": {
+        "bytes": 2727,
+        "sha256": "2b16635d945e0d6c475136160794b68481e41eeeb2b466fcdef01b24f68f4c5d"
+      },
+      "static_checks": {
+        "bytes": 3035,
+        "sha256": "7f004f6214eec24f531e8bacd477032b7d3ca25ab0fd0222ad0c40630a145b12"
+      }
+    },
+    "seed": {
+      "bytes": 1474560,
+      "sha256": "de652440d1a1884f268f91ed097b01e2b84bcb66e6fdd9511c5f105e55ec4dca"
+    }
+  },
+  "emulator_diagnostics": {
+    "outcome": "The original emulator completed naturally with native exit 0 and the exact guest and host acceptance checks passed.",
+    "reported": [
+      "QEMU reported an error opening the kvmvapic.bin ROM file.",
+      "QEMU warned that it ignored a request for interrupt vector 0."
+    ],
+    "stderr": {
+      "bytes": 275,
+      "sha256": "85af1cea1efc1557ffff38f1e37cf7142d0f531fed1bc82cad6795222a443e8a"
+    }
+  },
+  "history": {
+    "003": {
+      "failure": "The guest refused the original pre-cancel timer gate. The independently armed fallback then settled. That attempt did not retain the failed pre-cancel scalar.",
+      "host_forced_emulator_stop": false,
+      "original_emulator_exit": 0,
+      "original_inner_exit": 1,
+      "original_outer_exit": 1,
+      "private_pins": {
+        "host_carrier": {
+          "bytes": 408,
+          "sha256": "8b79ff512abb9858ede8a8c6c8ac8629a580e209fc7a2978da71f14838da83db"
+        },
+        "host_result": {
+          "bytes": 1372,
+          "sha256": "3fc42d592278f28037ae07fff18c26c42c5be61c72be671caa164650c1cb6072"
+        },
+        "outer_completion": {
+          "bytes": 1276,
+          "sha256": "5df56d2b86837f27d532baf913c1a652c3e727df94d523c108e2782bfd3b3836"
+        },
+        "serial": {
+          "bytes": 110873,
+          "sha256": "ac0df6b3b95df44ca7f3a110bf7974257c9c4c9149f98d0ca1e7a83db24474ee"
+        }
+      },
+      "status": "FAILED_NATIVE_ATTEMPT"
+    },
+    "004": {
+      "failure": "The guest serial evidence ended early and the host stopped the original emulator at its finite cap. The boot command separately exited 120.",
+      "forensic_limit": "Recovered disk logs preserve original client exit 124, four terminal pidfd checks, deployment cleanup and fallback evidence. The first failing boot operation, errno and original serial flags remain unknown.",
+      "host_forced_emulator_stop": true,
+      "original_emulator_exit": 1,
+      "original_inner_exit": 1,
+      "original_outer_exit": 1,
+      "private_pins": {
+        "boot_exit_log": {
+          "bytes": 83368,
+          "sha256": "e884d58c4a1ad35c43e0ee109fdd7a2dc614b4e73b8cf076224c5f0d647c366c"
+        },
+        "fallback_intervention": {
+          "bytes": 451,
+          "sha256": "dcf606f9d3c565c91a46931acf9d75400357ce2413a63073a07fbd593ca58577"
+        },
+        "fallback_retirement": {
+          "bytes": 164,
+          "sha256": "e3d1d61704b344fa63a0be5edefe9280f9f86808e1725d55c0e41bc814cf05bf"
+        },
+        "host_carrier": {
+          "bytes": 408,
+          "sha256": "aefb412f9d3fb7fa88b3d66564f2c7f75ada5433bd1a60f321f5ef18f5fdaae7"
+        },
+        "host_result": {
+          "bytes": 968,
+          "sha256": "4dbfc3e25233181386b167a9eb8548b7c633fc89bc91ff8b661a0a3231432e1f"
+        },
+        "outer_completion": {
+          "bytes": 1276,
+          "sha256": "819b0ecea4665980333f5bb5453028ca9f176e85589e7b3db49ebd37f80f596c"
+        },
+        "recovered_fixture_tape": {
+          "bytes": 8234,
+          "sha256": "588ac1c4e5b9c62c3aab35339d25ef7f30557232c503a232e5abdd63e7daed2d"
+        },
+        "serial": {
+          "bytes": 91435,
+          "sha256": "82981688c36f59e7164d1a8a8fcd0177be7c01041e8c2908b52497d1c77de7bd"
+        }
+      },
+      "status": "FAILED_NATIVE_ATTEMPT"
+    },
+    "005": {
+      "native_vm_started": false,
+      "reasons": [
+        "The full old wrapper could reach serial before a late-write veto.",
+        "Global CR deletion could repair a damaged shutdown line."
+      ],
+      "source_seal": {
+        "bytes": 4137,
+        "sha256": "a3c668fac531701f68a7c8b45fc6fbe285482f902e0a1328adcc6a80e74ead14"
+      },
+      "status": "REFUSED_SOURCE_PREPARATION"
+    },
+    "006": {
+      "native_vm_started": false,
+      "reasons": [
+        "A midline wrapper suffix could claim an unattached commit byte.",
+        "Shutdown matching treated a lone CR as timestamp whitespace."
+      ],
+      "source_seal": {
+        "bytes": 2906,
+        "sha256": "a57b84c13dd341221303451f847407bc60dc7a315d2556f4f1d784c34a985693"
+      },
+      "status": "REFUSED_SOURCE_PREPARATION"
+    }
+  },
+  "limits": [
+    "The result applies to this one isolated fixture and configuration.",
+    "The recorded outer duration includes VM boot, observation and shutdown.",
+    "Default backend, additional configurations, broader protection, startup comparisons and comparative ranking require separate evidence."
+  ],
+  "lineage": {
+    "archived_artifact_receipt": {
+      "bytes": 1475,
+      "sha256": "c3f8a91c50e35a9fa9630a900a556224ac0053da9c5ed7f54f615d3ecd137003"
+    },
+    "archived_client_elf_sha256": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239",
+    "archived_linux_ci_commit": "8a0ffff8463b4474c5bf66ba96479d9094271b05",
+    "archived_root_service_elf_sha256": "c4cb8a73249ea68897f787c8a95db464acf7632af9b4beeb8493d7ac44f1c457",
+    "archived_source_custody": {
+      "bytes": 1748,
+      "sha256": "9c9592e9bd2b8361b85a2099834125afae8168a625b9573c86aaafe4f86440cf"
+    },
+    "checked_build_input_paths": [
+      "src",
+      "build.rs",
+      "Cargo.toml",
+      "Cargo.lock",
+      ".cargo",
+      "rust-toolchain",
+      "rust-toolchain.toml"
+    ],
+    "compared_canonical_commit": "e0ee39d6650be7f88114b6890b9b009b43dfcb0f",
+    "comparison": "The build-input tree delta is confined to the engine and extend modules gated to Windows. The guest used the archived Linux ELF pair from CI.",
+    "fresh_linux_build_for_compared_commit": false,
+    "stock_systemd_and_policy_inputs": {
+      "delegation.policy": "3b3b60da8aca10fa53503115dd66d96bde6e23dd68a239f79129b50e7fe95c8c",
+      "process-tree-guard.socket": "a935a247a3438fea27a993def7968edcbc8bf516424449b7faf7f681d5839516",
+      "process-tree-guard@.service": "191a66ea6c5a0e223830dc5b7d11d1fe74c5dad6e440698383d00e9d03d63d13",
+      "ref.rules": "4dd6c92905c0ecc84d5d8f752e293f07844bc37e27430e59d224fb90e288a46d"
+    }
+  },
+  "native_result": {
+    "emulator_exit": 0,
+    "guest_pre_stop_assistance": false,
+    "host_assistance": false,
+    "inner_exit": 0,
+    "natural_kernel_powerdown": true,
+    "original_emulator_retained_and_joined": true,
+    "original_inner_retained_and_joined": true,
+    "outer_event_duration_seconds": 182.0910177,
+    "outer_exit": 0,
+    "retries": 0
+  },
+  "observations": {
+    "absolute_fallback_expiry_same_across_both_reloads": true,
+    "both_original_cgroup_names_retired_with_held_events_enodev": true,
+    "client_exit": 124,
+    "client_stderr_exact": "PROCESS_TIMEOUT: original invocation deadline expired\n",
+    "client_stdout_empty": true,
+    "detached_session_and_process_group": true,
+    "fallback_never_triggered_and_canceled_before_expiry": true,
+    "first_original_terminal_polls": 4,
+    "first_poll_mask": "POLLIN",
+    "native_pidfd_roles": [
+      "client",
+      "payload",
+      "detached descendant",
+      "root service"
+    ],
+    "original_fixture_command_identity_joined": true,
+    "original_socket_activation_count": 1,
+    "owned_deployment_and_runtime_directory_retired": true,
+    "payload_and_detached_share_original_run_group": true,
+    "same_live_and_terminal_originals": true,
+    "same_stock_unit_terminal": {
+      "active_state": "failed",
+      "main_exit_status": 124,
+      "result": "exit-code",
+      "sub_state": "failed"
+    },
+    "settlement_observed_before_cleanup": true
+  },
+  "platform": {
+    "architecture": "x86_64",
+    "host_shared_filesystems": false,
+    "kernel": "6.8.0-147-generic",
+    "local_virtualization": "WHPX",
+    "network_disabled": true,
+    "standalone_root_disk": true,
+    "systemd_major": 255
+  },
+  "preparation_observer_correction": {
+    "event": "An observer imported the preparer while checking already sealed inputs. The first exclusive input write refused and the exception handler created one failure receipt.",
+    "followup": "Follow-up verified that sealed inputs stayed byte-identical. The observer launched no guest.",
+    "retained_failure_receipt": {
+      "bytes": 184,
+      "sha256": "6133a59538526f66c912a3a2ad2ee3560b348dc0a18eaf438d176bbadb644daf"
+    },
+    "retained_review_correction": {
+      "bytes": 1134,
+      "sha256": "dad77c495c6a540ef4303cca904989abe132ebee5ab213b58b0a44fb5435c740"
+    }
+  },
+  "schema": "ptg-linux-x64-deadline-descendant-vm-evidence-v1",
+  "scope": "One Linux x86-64 deadline case in the opt-in separate-service prototype with an ordinary payload and a descendant in a distinct session and process group.",
+  "status": "PASS_ONE_NATIVE_OFFLINE_CASE",
+  "transport": {
+    "attestation": "The pinned guest producer issues the byte after the held boot witness and native poweroff request both return 0. The pre-call cutoff governs issuance and the independent tree caps govern delivery.",
+    "canonical_frame_bytes": 12286,
+    "canonical_frame_sha256": "2797dbf118656dee691bf1a2615a131e7575613f38ddfced215fb46951561029",
+    "commit_hex": "1e",
+    "commit_position": "Immediately after the exact standalone wrapper line.",
+    "primary_rows": 4,
+    "protocol_rows": 24,
+    "separate_guest_driver_os_exit_receipt_available": false,
+    "serial_commit_count": 1
+  }
+}
