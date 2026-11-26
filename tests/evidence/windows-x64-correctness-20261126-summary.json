@@ -1,0 +1,267 @@
+{
+  "schema": "ptg-windows-x64-correctness-qualification-v1",
+  "source_commit": "a0bb8994c4484df6eb385e0633939e34f1366ab2",
+  "aggregate": "failed",
+  "scope": "One bounded AMD64 Windows correctness execution. Four unfiltered Cargo release integration harnesses with the testkit dependency selected the feature-free stock main. Explicit role fixtures retained their matching Cargo binaries. Python used the five stock role binaries and the separate testkit.",
+  "original_status": {
+    "whole_tree_cap_seconds": 4200,
+    "coordinator_cap_seconds": 4050,
+    "dispatch_allowance_seconds": 3900,
+    "lane_budget_seconds": 3750,
+    "launcher_exit": 1,
+    "coordinator_exit": 1,
+    "completed_native_lanes": 5
+  },
+  "rust": {
+    "passed": 178,
+    "failed": 0,
+    "ignored": 0,
+    "guard": 84,
+    "auto": 22,
+    "battery": 50,
+    "antigravity": 22,
+    "g52": "Both unchanged variants passed all ten assertions, including exit 124 and the fixture-marked process check."
+  },
+  "python": {
+    "run": 651,
+    "passed": 645,
+    "failed": 2,
+    "skipped": 4,
+    "native_exit": 1,
+    "runner_return": 1,
+    "failure": "Two documentation census assertions compared the stated Rust count of 485 with the recomputed 509.",
+    "failed_methods": [
+      "test_campaign_logic.CensusConsistencyTests.test_documents_printing_the_census_state_the_recomputed_totals",
+      "test_campaign_logic.Round25NeighbourTests.test_documents_next_ring_copies_recount"
+    ],
+    "skipped_methods": [
+      "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+      "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+      "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+      "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing"
+    ]
+  },
+  "console_limits": [
+    "G95 and G103 desktop prompt branches were disabled by the absent opt-in.",
+    "G87 redirected-stdin check stopped at earlier guarded-parent refusal.",
+    "G97 and G98 pseudo-console checks stopped at earlier guarded-parent refusal."
+  ],
+  "limitations": [
+    "All four Rust lanes passed. The complete five-lane attempt remains failed because the Python suite reported two failures.",
+    "The earlier experimental G52 failure remains failed. No natural API error reproduction, interactive desktop readiness, full-platform readiness, or universal descendant-settlement claim follows.",
+    "The Python evidence includes suite methods and their fixed helper fixtures. This record establishes no run against competitors, comparative speed, ranking, or acceptance. Private native identities remain private."
+  ],
+  "evidence": {
+    "packet": {
+      "bytes": 7751,
+      "sha256": "c7327f9594d009cc6caf62d5da21aef7b6263cc67ff97d466bd04852c1d007dc"
+    },
+    "launch": {
+      "bytes": 1534,
+      "sha256": "d92c3b1f7e2794e691ceec993152e0f80ec0c5a44dfa42670f44c5a01f25f5df"
+    },
+    "admission": {
+      "bytes": 641,
+      "sha256": "a64acb456e64a11dab2e78c628b9a86f4494d249b52f557d51b03c0d6179fe7f"
+    },
+    "original": {
+      "bytes": 2129,
+      "sha256": "e5dc802e2fec4156bcd27854717120ea3e80a92cc7b64c2fbcf5670c31475441"
+    },
+    "coordinator": {
+      "bytes": 9020,
+      "sha256": "805c641c5855cf0c3eb42f75f1f363b672c4e25b7de7d8b827a02363f3986b70"
+    },
+    "host": {
+      "bytes": 1070,
+      "sha256": "59716ed53a6bb2089854cf6e43920d0f47e69439e910f97c530c277435d1b7cb"
+    },
+    "source": {
+      "bytes": 267308,
+      "sha256": "1223ac106f8b6cdc0bc5bee21405944ac94a55e9075efe8321c8911f4ee40ee4"
+    },
+    "artifacts": {
+      "bytes": 12232,
+      "sha256": "bc6c8680b13d9125d42473a4a7b563c067dbb7e88a65bfb22c5080102d807bb0"
+    },
+    "discovery": {
+      "bytes": 88111,
+      "sha256": "a6c2ea67ee4a6e9e1b16e5d7a09fc0da221a87985a5c51ddc208c274c155684f"
+    },
+    "native_lanes": [
+      {
+        "name": "guard",
+        "native_exit": 0,
+        "result": {
+          "bytes": 6893,
+          "sha256": "e68bda0f1384b957d5be15a2c14e12b08265c7046dcffa0c53a68f0c79df4089"
+        },
+        "stdout": {
+          "bytes": 248423,
+          "sha256": "f8d3904862b73b97d5fff5d3e779bfdbefe2b2ff167c6fba87e58c16f673a7c3"
+        },
+        "stderr": {
+          "bytes": 6339,
+          "sha256": "eb6287321e549c38f4d436ec17da624a69512e05b4604f7ef63f707bfc74ad33"
+        }
+      },
+      {
+        "name": "auto",
+        "native_exit": 0,
+        "result": {
+          "bytes": 2257,
+          "sha256": "d383d83aa08931eddefc8c010b2c6a3801cdb1a80bc07f01d88c1bb05989652e"
+        },
+        "stdout": {
+          "bytes": 29893,
+          "sha256": "4cf5a7acca52ea826376db0e67e9a74c24c6ca3e0cd6210e94960f468323af21"
+        },
+        "stderr": {
+          "bytes": 191,
+          "sha256": "391aab29511a8f22e64182e0d3402b47d8a167b5f48db19a3639e6aa89c46811"
+        }
+      },
+      {
+        "name": "battery",
+        "native_exit": 0,
+        "result": {
+          "bytes": 2273,
+          "sha256": "4121705d3285cf908b3047a92198aea8aaca9415a8563b06336c49949aded44b"
+        },
+        "stdout": {
+          "bytes": 146045,
+          "sha256": "13e56e22dc613a892bfc24ba76bc6ae1e75dd2d33237b06c408326d7c1f9b8e3"
+        },
+        "stderr": {
+          "bytes": 191,
+          "sha256": "2130752ec586d73f0564e93ab21eac27a2040e4802e23677b6bb530f1ee83cbf"
+        }
+      },
+      {
+        "name": "plugins_antigravity",
+        "native_exit": 0,
+        "result": {
+          "bytes": 2332,
+          "sha256": "4c6b6c9347d0be076c0688c5f8d140f5998b418745e3520a36a164ae21e28a9f"
+        },
+        "stdout": {
+          "bytes": 72854,
+          "sha256": "404d68f8fa7fa0ac4130c98f2978c8c3bd49545ddceeafa88b62a894c97e1443"
+        },
+        "stderr": {
+          "bytes": 191,
+          "sha256": "bdca90579e9ec418e5e3bff3878eebd4ac9d7b3a110c6a69d1064eb2004a8f61"
+        }
+      },
+      {
+        "name": "python",
+        "native_exit": 1,
+        "result": {
+          "bytes": 262171,
+          "sha256": "6b6d9ffa806c6b087c8153110af3e2f53c30486722b62f2206d389e90a2c2fc2"
+        },
+        "stdout": {
+          "bytes": 218,
+          "sha256": "98a135f1eb38d9f964e0db4e714ed2cbecbf276c6735b281b672c5eee2795602"
+        },
+        "stderr": {
+          "bytes": 2065,
+          "sha256": "a4cd9de1ada778b2b032e2593584099c3a0cba98709c38f7d7f7aa8e9f3e8dd3"
+        }
+      }
+    ],
+    "python_methods": {
+      "bytes": 223805,
+      "sha256": "897ccba87ffca382cdbd654375960a0bbcdc535c6cd8bd2fc06d867d21743923"
+    },
+    "python_return": {
+      "bytes": 50,
+      "sha256": "ba1a5703b9d063807c4eed97a2f4a8450f00d4b310e0320249427c024669cc8f"
+    },
+    "python_certificate_index": {
+      "bytes": 1150,
+      "sha256": "7aa353628c7c98b4d8829feb59e653f1e57e3d7095b1f20b921cf211ee7bf847"
+    }
+  },
+  "focused_document_repair": {
+    "scope": "Two previously failing Python methods were executed against the corrected documentation. No other test was rerun in this focused execution.",
+    "original_aggregate_remains": "failed",
+    "native_exit": 0,
+    "launcher_exit": 0,
+    "original_native_handle_retained_and_joined": true,
+    "whole_tree_cap_seconds": 60,
+    "original_native_wait_seconds": 20,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "methods": [
+      "test_campaign_logic.CensusConsistencyTests.test_documents_printing_the_census_state_the_recomputed_totals",
+      "test_campaign_logic.Round25NeighbourTests.test_documents_next_ring_copies_recount"
+    ],
+    "counts": {
+      "stale": 485,
+      "recounted": 509,
+      "replacements": 3
+    },
+    "source_bridge": {
+      "original_full_run_tracked_inputs": 1200,
+      "identical_tracked_inputs": 1198,
+      "changed_documents": [
+        {
+          "file": "tests/FAILURE-TREE.md",
+          "before": {
+            "bytes": 65212,
+            "sha256": "b0daa48446f398bb47014ef705c0301588b0c3ac0e86878297322948374df163"
+          },
+          "after": {
+            "bytes": 65430,
+            "sha256": "5b7f851f587b41e7b77f9dadbb715ad17608cedac7a643a57e34cc00739e4987"
+          }
+        },
+        {
+          "file": "tests/README.md",
+          "before": {
+            "bytes": 55776,
+            "sha256": "e12dd21bc349ad9223b2636ff2979e8f17070935b48d8667416f825c1249c90b"
+          },
+          "after": {
+            "bytes": 56488,
+            "sha256": "8c28cc77c85cc221e59f8bc517fb663aeb30b8fde8d9f213656ebc7370aef49f"
+          }
+        }
+      ],
+      "code_and_test_source_changes": 0
+    },
+    "evidence": {
+      "docs_patch": {
+        "bytes": 3107,
+        "sha256": "a8730fe5acf5f006f052493c8947b69bf0d72abc4f9906849404b212582fb036"
+      },
+      "original_terminal": {
+        "bytes": 11361,
+        "sha256": "e9a61ab20968f674ffca24b461ad60e4fd485a7e546f5df550ef46ba62db45f5"
+      },
+      "intent": {
+        "bytes": 1407,
+        "sha256": "3d60dcf366f8c9682c0434c2adfe101195ef763e012410478951fe09a3ea4537"
+      },
+      "driver": {
+        "bytes": 707,
+        "sha256": "57ec94414aeb9eec73902a5b4c9740c9af810a8e259ea001ebd87b26ac9ea20b"
+      },
+      "result": {
+        "bytes": 987,
+        "sha256": "1f16b66699f4f44828a4eca1e470fa77e4d5e18d32d011c974cdf62963b4a5fb"
+      },
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 414,
+        "sha256": "9f3f499d6a5ef7dd4fd6514c358e3555faf13e1ef002d1ed44af797436b9a590"
+      }
+    },
+    "limit": "This focused result establishes the census repair. The earlier 178 Rust and 645 Python passes remain observations of the original fixed input and are carried forward only for the code and test sources that matched. No new full-suite result is stated."
+  }
+}

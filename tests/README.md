@@ -660,7 +660,7 @@ That size is the size of the corpus.
 The size is reported separately from the test count.
 Every case is compared, guard against an independent parsed-form reference.
 The comparison count is in 1,453 comparisons per Windows run.
-The guard's own in-tree Rust tests (485 counted once) belong to the tree.
+The guard's own in-tree Rust tests (509 counted once) belong to the tree.
 That is a current source recount, not a new execution receipt.
 This suite does not recount those tests.
 `FAILURE-TREE.md` states which failure branches have families.
