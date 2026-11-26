@@ -1,0 +1,130 @@
+{
+  "schema": "ptg-windows-g52-current-source-diagnostic-v1",
+  "tested_source": "ac54a1d2d5f1bb457364ec986f0d4d875802dee9",
+  "scope": "One current x86_64-pc-windows-msvc Cargo dev/test executable, built with the testkit dependency. The pinned harness ran directly with its previously built guard and separate testkit. Its parent launch geometry differs from the earlier Cargo-launched execution.",
+  "selector": "g52_a_hanging_child_holds_the_run_to_its_own_deadline",
+  "physical_whole_tree_cap_seconds": 150,
+  "original_native_wait_seconds": 120,
+  "original": {
+    "launcher_exit": 0,
+    "native_test_exit": 0,
+    "original_native_handle_retained_and_joined": true,
+    "source_equal_before_and_after": true,
+    "compiled_source_rows": 1198,
+    "sole_added_tracked_file": "tests/evidence/windows-hold-observation-20261126-summary.json",
+    "tests_passed": 1,
+    "tests_filtered": 83,
+    "assertions_passed": 10,
+    "variants": [
+      {
+        "fixture": "Nested guard with its own deadline",
+        "guard_exit": 124,
+        "timed_grant": true,
+        "lower_tight_upper_and_structural_bounds_passed": true,
+        "marked_descendant_dead_at_guard_return": true
+      },
+      {
+        "fixture": "Holding process with no deadline of its own",
+        "guard_exit": 124,
+        "timed_grant": true,
+        "lower_tight_upper_and_structural_bounds_passed": true,
+        "marked_descendant_dead_at_guard_return": true
+      }
+    ]
+  },
+  "duplicate": {
+    "launcher_exit": 1,
+    "disposition": "A second launcher execution with identical arguments refused because the exclusive evidence directory already existed. It did not start the test executable.",
+    "test_started": false
+  },
+  "historical_experimental_tree": {
+    "guard_exit": 125,
+    "native_test_exit": 101,
+    "launcher_exit": 1,
+    "disposition": "The earlier experimental BTreeMap G52 result remains failed. It is a separate observation and was neither replaced nor rescored."
+  },
+  "evidence": {
+    "packet": {
+      "bytes": 6712,
+      "sha256": "699717a242a110e5f8e892ade1bffdd32f2ea204da2f4d08af9cb431081207a9"
+    },
+    "carrier": {
+      "bytes": 4818,
+      "sha256": "f4f61b0be8ba733491b9debdd0cd57d91d28be0a5d91a5196af4d25087b20278"
+    },
+    "prospective_launch_intent": {
+      "bytes": 1851,
+      "sha256": "6201692710712af6a375632d8bb421b85bc8c7ec67a12a2d6e3bae51888ca395"
+    },
+    "admission": {
+      "bytes": 621,
+      "sha256": "2e0cce31c0889534c752f85e7552f6c15ae019302829c5541505ed2af5d6df02"
+    },
+    "launcher_original": {
+      "bytes": 1518,
+      "sha256": "39c5947373fcdc47cfa9c0a482134647b49c32ceebaf3ec2815f5f119441f1d2"
+    },
+    "launcher_duplicate": {
+      "bytes": 2286,
+      "sha256": "5f4ad3d8ca8c5c0794d945c4907a53f89a39f0fe1bd2ff8d04f56e9848b6f6d4"
+    },
+    "native_intent": {
+      "bytes": 671,
+      "sha256": "f73570886665fa62d2d8af6ad1d5c75c430a954cd285e2ce4b99ae530c639e00"
+    },
+    "native_result": {
+      "bytes": 4789,
+      "sha256": "1f7779601c360d3924333172d098e6972964650725ed31d84525cda565e378b1"
+    },
+    "native_stdout": {
+      "bytes": 4851,
+      "sha256": "37db0a43f89f82b1f15f3452a1d13c51d3ec616fce3ff840e5aa7afd83a5ee25"
+    },
+    "native_stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source_and_binary_pins": {
+      "source_manifest": {
+        "bytes": 261333,
+        "sha256": "bf7655736ad67a1c1e811aac74a0cd853c73791443a65b0a2342913392ce0f06"
+      },
+      "harness": {
+        "bytes": 3427840,
+        "sha256": "81472377c2beb2c024087eae482311b166070a787aa2585647fd32dd22729168"
+      },
+      "main": {
+        "bytes": 2737664,
+        "sha256": "256b1d374ccf0aed19b3d0d22b705d32ca1e90f5ac53f641912304bf20206e72"
+      },
+      "testkit": {
+        "bytes": 1689600,
+        "sha256": "e071c3c15caffc4c6eca1850ac3f3d6f4cd3a6c0e3485aeab5f2612bdbb18679"
+      },
+      "prior_packet": {
+        "bytes": 10821,
+        "sha256": "a5ad7bb82029db01115c3376bd59e3ef94727341c18b52bc720921f1b5da64b1"
+      },
+      "prior_result": {
+        "bytes": 2438,
+        "sha256": "073dea17c66595380aba9706cabc98d0ba805a9c1944ddcbeb8ff5602bb73678"
+      },
+      "prior_stderr": {
+        "bytes": 882,
+        "sha256": "36d084c92fa1de7639d8031c478e83c05a83c779015979d4388bca7cd0cc2287"
+      },
+      "prior_event": {
+        "bytes": 1662,
+        "sha256": "8c0301fad6ea9b16de007312bbd11a6e83facb9c18669247c81b0acd68169ee9"
+      },
+      "historical_G52": {
+        "bytes": 43942,
+        "sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3"
+      }
+    }
+  },
+  "limits": [
+    "The two variants checked grants, timeout code 124, elapsed-time bounds, and the fixture-marked descendant. This records the test assertions rather than a general proof of Windows descendant settlement.",
+    "This observation does not establish the cause of the historical incomplete Job list, stock release qualification, comparative speed, or full readiness. Private original logs retain machine identifiers."
+  ]
+}
