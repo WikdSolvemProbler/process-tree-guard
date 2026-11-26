@@ -1,0 +1,1071 @@
+{
+  "schema": "ptg-windows-rate-index-functional-v1",
+  "status": "UNQUALIFIED",
+  "scope": "Selected native Windows correctness gates for a private rate-index candidate. The candidate has an unresolved x64 G52 failure and was not adopted or admitted to further performance qualification by these records.",
+  "sources": {
+    "base_commit": "ad82d8a15a092b1e52ce65f9d68bd526c4e7fc83",
+    "compiled_input_bridges": [
+      {
+        "commit": "cb6c1f05273248671ac5cb62a526437421ca2c14",
+        "tracked_diff_on_compiled_input_paths": "empty"
+      },
+      {
+        "commit": "10c3d07b2aa8a7a186c34d339e4b3982f5022f1a",
+        "tracked_diff_on_compiled_input_paths": "empty"
+      }
+    ],
+    "audited_bridge_paths": [
+      "src",
+      "build.rs",
+      "Cargo.toml",
+      "Cargo.lock",
+      ".cargo",
+      "rust-toolchain",
+      "rust-toolchain.toml"
+    ],
+    "candidate_change": {
+      "path": "src/extend/state/rate.rs",
+      "control_index": "std::collections::HashMap<RateKey, usize>",
+      "candidate_index": "std::collections::BTreeMap<RateKey, usize>",
+      "control_sha256": "057f7179983d2db02acb24394713f3d550c97191fa1f355653de156bb42efd93",
+      "candidate_sha256": "7771c1dfc7aab542b1d93b68b2303bbb7b80d6e70b437cda170a9aeaeed62c25"
+    },
+    "frozen_base_archive": {
+      "bytes": 24698880,
+      "sha256": "df007faac864855540db404041a840f087d5b0c6749bf45816c457cb627b3982"
+    },
+    "frozen_build_inputs": {
+      "bytes": 261129,
+      "sha256": "4b2912acad3d6a2323d64431adbeca990b2e2ae0cb6c0ca6376fa7a09c2087a8"
+    },
+    "qualification_snapshots": "All eight recorded before and after source snapshots agree on 1,183 file hashes. Each differs from the frozen base input manifest solely at the rate index file. The A control uses a separately built A Main image with the same candidate-source test harness."
+  },
+  "release_build_context": {
+    "scope": "The two x64 feature-free release Main images. Test suites and fixture companions have their own recorded build or selection context.",
+    "target": "x86_64-pc-windows-msvc",
+    "rustc": "1.98.1",
+    "llvm": "22.1.8",
+    "msvc": "14.51.36231",
+    "sdk": "10.0.28000.0",
+    "features": [],
+    "jobs": 1,
+    "profile": {
+      "opt_level": 3,
+      "lto": true,
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": true
+    },
+    "selected_environment_sha256": "84ee99f5563d2fa2737ffa2eeb17a27cc7344ff3771a63f7b364d37c83aa92a9",
+    "toolchain_manifest": {
+      "bytes": 2215,
+      "sha256": "8322d08f884f2c0e0acc29811cc52b32d0c839203d53a4e5d2cb26a48861b2e4"
+    },
+    "control_a": {
+      "artifacts": {
+        "image": {
+          "bytes": 823296,
+          "sha256": "b18f6e9b1ce561cbce1aed43a8f2c2594372ba1ed3065b1678c9912d832e12e3"
+        },
+        "pdb": {
+          "bytes": 1232896,
+          "sha256": "59cf338f073c46d2fd425056dd5473955f0f41ba1bb220334f9151a849f55581"
+        }
+      },
+      "effective_environment_sha256": "84ee99f5563d2fa2737ffa2eeb17a27cc7344ff3771a63f7b364d37c83aa92a9",
+      "rate_sha256": "057f7179983d2db02acb24394713f3d550c97191fa1f355653de156bb42efd93",
+      "files": {
+        "INTENT.json": {
+          "bytes": 1000,
+          "sha256": "bfe7ada435e0cafb0468c7a99154d412a27da3b2e5a2ea519343b75c8a5e271d"
+        },
+        "native-build.cmd": {
+          "bytes": 1247,
+          "sha256": "ae7ace64acfb65109e28b63359315f2f532b04fe2fd817c62e93cb4b34bc06cf"
+        },
+        "native.stderr": {
+          "bytes": 4671,
+          "sha256": "8b9c4ada98797ad9e1a12b9537df69035ade42167730a5480c25488612465749"
+        },
+        "native.stdout": {
+          "bytes": 280,
+          "sha256": "820de96e0278cca0ee839ed2532ea05ab923c649236b23876c4283b1dc786eaf"
+        },
+        "RESULT.json": {
+          "bytes": 1952,
+          "sha256": "92c443d72e89b51fbc7c7dbb4f89c9c2207f8dfe904875bcd982654538981016"
+        }
+      }
+    },
+    "candidate_b": {
+      "artifacts": {
+        "image": {
+          "bytes": 828416,
+          "sha256": "2bf8a515dfd932fbd8d73f32a8606b16828ac608510dffe02bfa6aea8d295dae"
+        },
+        "pdb": {
+          "bytes": 1232896,
+          "sha256": "e007fb69a2a17148871fb7923805aa256a215f72758b4de56b2af2217b00ffc1"
+        }
+      },
+      "effective_environment_sha256": "84ee99f5563d2fa2737ffa2eeb17a27cc7344ff3771a63f7b364d37c83aa92a9",
+      "rate_sha256": "7771c1dfc7aab542b1d93b68b2303bbb7b80d6e70b437cda170a9aeaeed62c25",
+      "files": {
+        "INTENT.json": {
+          "bytes": 997,
+          "sha256": "6cb29570083109d871798b27b2fa035e67624c24f6238beea710d445a042fe21"
+        },
+        "native-build.cmd": {
+          "bytes": 1311,
+          "sha256": "f1c7c9e6b699556bb5ce26ab39a30981d12d301727380a1a0309bab457fa0859"
+        },
+        "native.stderr": {
+          "bytes": 4671,
+          "sha256": "9cf834a5f0d7faa71080aa28ba78b3a0ae38f089f92ab3bbd4efb5486c784790"
+        },
+        "native.stdout": {
+          "bytes": 280,
+          "sha256": "820de96e0278cca0ee839ed2532ea05ab923c649236b23876c4283b1dc786eaf"
+        },
+        "RESULT.json": {
+          "bytes": 1937,
+          "sha256": "5a9a7a94fcb31e39bbbe846fbb105bb6ee080ba837fade148cdc5f6931520527"
+        }
+      }
+    }
+  },
+  "scopes": [
+    {
+      "scope": "candidate-x64-library",
+      "architecture": "x86_64",
+      "guard_arm": "B",
+      "run_profile": "debug/test Rust library",
+      "disposition": "PASS. The first stdout counter is the nested run. The aggregate count is 316.",
+      "original_outer": {
+        "exit": 0,
+        "tree_cap_seconds": 300,
+        "event_status": "completed",
+        "decoded_command_sha256": "030683806fa0c08a395f9f6ecfa0b545532374943fd3a1505a16a7d9db1e4022",
+        "event": {
+          "bytes": 1613,
+          "sha256": "7fc04b8a5c293d2906d44de9ee7895cae3b4311ebc813d34675e55cca7d4ca5c"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "original_library_test": {
+        "exit": 0,
+        "handle_retained": true,
+        "joined": true
+      },
+      "raw_counters": {
+        "library": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 315
+          },
+          {
+            "outcome": "ok",
+            "passed": 316,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 0
+          }
+        ]
+      },
+      "raw_files": {
+        "INTENT.json": [699, "c929807c355d866d19498909362df692831159e34d42afa907c816541f66eda2"],
+        "native-unit.cmd": [377, "6751879aa50be0302e8fa02f06d1655a1d0695f3580f959c0d6f880a0d5bd010"],
+        "RESULT.json": [387, "4a0fb44615e3dddbaacc9c0e76f9c42d69bb590ff69a0c8cd38877b66a09ab65"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "unit.stderr": [5749, "bec8523107c3cbfaece4c8ee97bd493b877c01ce7e0444f5fc7155894d11fd66"],
+        "unit.stdout": [30051, "389f45ca0ceb69207c6a431e1cb5c58f00f1e6e2cef06e587f23fd8d8caa7ba9"]
+      }
+    },
+    {
+      "scope": "candidate-i686-library",
+      "architecture": "i686",
+      "guard_arm": "B",
+      "run_profile": "debug/test Rust library",
+      "disposition": "PASS. The first stdout counter is the nested run. The aggregate count is 316.",
+      "original_outer": {
+        "exit": 0,
+        "tree_cap_seconds": 300,
+        "event_status": "completed",
+        "decoded_command_sha256": "544267aad474027a1ce90ee0ead819d43fef26b27ca40b837dca0919b6ab1f05",
+        "event": {
+          "bytes": 1605,
+          "sha256": "6ad83426512c2951daa5ef0087fbb64851eddf5fb4ee1d08c0a77f29952810ec"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "original_library_test": {
+        "exit": 0,
+        "handle_retained": true,
+        "joined": true
+      },
+      "raw_counters": {
+        "library": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 315
+          },
+          {
+            "outcome": "ok",
+            "passed": 316,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 0
+          }
+        ]
+      },
+      "raw_files": {
+        "INTENT.json": [695, "01357f42c69c898537bd20661678196b52a21886b172838b53a72162fb463546"],
+        "native-unit.cmd": [382, "4d02db7c7a2d77597c38d73d398837e6fc17facfcb9932bd3eeae3b85d7616bf"],
+        "RESULT.json": [385, "bf01276b3d4bf9cfc70b12cb4cb197c6f001b6cd06c551564266e68f2ebafa7f"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "unit.stderr": [5747, "3a9e66c0f4c046d6bf1e11da9762536762a3f373367872ddb71b5f149a877dd7"],
+        "unit.stdout": [30051, "da65b45935fefeff03884abdbea2c89e007f0f2c3bb99839d468961ac0064c4a"]
+      }
+    },
+    {
+      "scope": "candidate-x64-stock-cli",
+      "architecture": "x86_64",
+      "guard_arm": "B",
+      "run_profile": "feature-free release Main override and existing integration-test harness",
+      "disposition": "PASS for the ten named cases with the recorded Main override.",
+      "original_outer": {
+        "exit": 0,
+        "tree_cap_seconds": 1500,
+        "event_status": "completed",
+        "decoded_command_sha256": "3c66cc49b3637e5b1a2beac92cde8eb84c3fb1152042a39fa6c32ffbcab9f287",
+        "event": {
+          "bytes": 1437,
+          "sha256": "2a8f3b4541630c0a8abc91ce2f7e0e997c89a90c25da4486005e1c7ea53ed647"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "planned": 10,
+      "attempted": 10,
+      "tests": [
+        {
+          "id": "G96",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G16",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G17",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G18",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G25",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G26",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G28",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G51",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G56",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G76",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        }
+      ],
+      "raw_counters": {
+        "G16": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G17": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G18": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G25": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G26": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G28": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G51": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G56": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G76": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G96": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ]
+      },
+      "main_image": {
+        "bytes": 828416,
+        "sha256": "2bf8a515dfd932fbd8d73f32a8606b16828ac608510dffe02bfa6aea8d295dae"
+      },
+      "raw_files": {
+        "g16_streams_exit_code_and_stdin.cmd": [436, "64455dfabd0b314020fd5c97b16adcfb61f84f90d6358f7ed265e7ae8e9d65ec"],
+        "g16_streams_exit_code_and_stdin.stderr": [861, "57786e414986ae5e32a27bbe537dac9c9f0833bf9c41adb75a3c145f4f33b6da"],
+        "g16_streams_exit_code_and_stdin.stdout": [157, "d00a8a66e1ee60770c5899e0e184527ea759039842d47b94552c27ff93be28b4"],
+        "g17_arguments_survive_quoting.cmd": [434, "b4c76858d7c0fea4c3ce8fe4ec88fe656af8e402af51c2ee3ada4ded8c3c6832"],
+        "g17_arguments_survive_quoting.stderr": [861, "60f85f0ca3f72466f128bf4020f43b861da9aba383acc4ff7c2f3426e1486eed"],
+        "g17_arguments_survive_quoting.stdout": [155, "4286cc05be1e3a21c38b45f66d6f7cde50b829368f70bc89f9c59703299638e9"],
+        "g18_timeout.cmd": [416, "2cd97fc46fb94ccec7b2db625c1b73954b347d1074d1e40fbc1d7339b11f77f2"],
+        "g18_timeout.stderr": [861, "eecee40d11cdd79c1779692b07b70ca7407d96d267e286815b10392a96bc0fc2"],
+        "g18_timeout.stdout": [137, "ef8f4f0d56667fc3c6e84110862d11c3ae9ad40d80fbe6f9be1cb6b5ba228a7e"],
+        "g25_immediate_owner_exit_kills_child.cmd": [441, "4ff2b266531a2f024e85124a07209fadef1da6e7541ab5d8e90b360ebd240fba"],
+        "g25_immediate_owner_exit_kills_child.stderr": [861, "15608d41c3a44c5f8dc938785253aed4284ad56a414001829172cecfb4bdc3cd"],
+        "g25_immediate_owner_exit_kills_child.stdout": [162, "97d8e691fb0d6ad67d2fe26a1dc97c194ea26fd95a16cae9d887f818a0c46116"],
+        "g26_child_cannot_break_away_from_job.cmd": [441, "2620353b6e48f0dc2682d2650fd19d8bd255a00c7949c246ee100907750e819e"],
+        "g26_child_cannot_break_away_from_job.stderr": [861, "eecee40d11cdd79c1779692b07b70ca7407d96d267e286815b10392a96bc0fc2"],
+        "g26_child_cannot_break_away_from_job.stdout": [162, "717710b31659be39835e2d761473afd2bfc42d894b54c0533bfd48ae23fa388e"],
+        "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns.cmd": [463, "281414203e1206ae1625c18dd6b42b89d6f0c009fc85f7313c4548357203ba75"],
+        "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns.stderr": [861, "41f03c1ec9339a92ee44bb7fd53acda1e8393939ea940b3534baa1bdb3d4f8d4"],
+        "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns.stdout": [552, "19b0358003ffbded0f68a59a24a55ce8392fb928f23a921047509e735fe99a4a"],
+        "g51_the_run_ends_at_the_latest_deadline_of_the_children_that_are_alive.cmd": [475, "da75ad3b7930ffccb98c1bb670762de8ccdccaa33b1c13a8278d641f85b69ed0"],
+        "g51_the_run_ends_at_the_latest_deadline_of_the_children_that_are_alive.stderr": [861, "eecee40d11cdd79c1779692b07b70ca7407d96d267e286815b10392a96bc0fc2"],
+        "g51_the_run_ends_at_the_latest_deadline_of_the_children_that_are_alive.stdout": [3011, "822d85d434370d8aca6d2724694330a7a22a97510261356bb97b95e2cbaa3cb5"],
+        "g56_a_hold_ends_when_its_process_exits.cmd": [443, "381e5382904616847461dea6bfc90ea7d10261994f55358a7f281ff811429377"],
+        "g56_a_hold_ends_when_its_process_exits.stderr": [861, "41f03c1ec9339a92ee44bb7fd53acda1e8393939ea940b3534baa1bdb3d4f8d4"],
+        "g56_a_hold_ends_when_its_process_exits.stdout": [3691, "942aad176a0638cc534055c631d94206c2654224eae4742833fd83f82f37c919"],
+        "g76_a_reply_that_the_client_does_not_take_in_time_withdraws_the_hold_it_granted.cmd": [484, "05d3b552f9a3d7b923c448ec7b4c1339f04dea1284cb26bfe7d66b2572c50fd1"],
+        "g76_a_reply_that_the_client_does_not_take_in_time_withdraws_the_hold_it_granted.stderr": [861, "9c8aaabc306f893fd45c79ffb641afe71af3bac0ad30677c7c3b336d19f1b88f"],
+        "g76_a_reply_that_the_client_does_not_take_in_time_withdraws_the_hold_it_granted.stdout": [4536, "5dc2dd428907b49382c2378453f86720217c57dc723a542449d95bab2a5da48b"],
+        "g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them.cmd": [497, "d8619b1a7073c1c88ef64eb9efb737cb1dcf6e3f3b6c870d593b2b4188066ff6"],
+        "g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them.stderr": [1008, "6892a8e9a194955c8477c0551c97eee39a96dfe679c120d3a44d577db468ec00"],
+        "g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them.stdout": [4773, "ae4b1253b823a41f189f645f37551acd05576fad3495ef69c2c153eda62bf3c2"],
+        "INTENT.json": [993, "a20f9a185f6101e17bd1e358c99f759eaa908e28c7ac5c812efd792f3035e067"],
+        "RESULT.json": [2481, "20bbc0c3a3c2bc13d66e84ee2f0b7e69dd2b7f27f157bca0d5e187711315dac8"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "STEPS.json": [2115, "3174734b8bfe4375504eb9ef3423ab6603e7ee7b9b40f3a93354fc4b0d5f5a54"]
+      }
+    },
+    {
+      "scope": "candidate-i686-empty-override",
+      "architecture": "i686",
+      "guard_arm": "B",
+      "run_profile": "existing integration-test harness with empty Main override for G56",
+      "disposition": "FAILED. G96 passed. G56 had no usable program path when the harness attempted to spawn the guard. G56 test exit 101 and outer exit 1 remain failures.",
+      "original_outer": {
+        "exit": 1,
+        "tree_cap_seconds": 1500,
+        "event_status": "failed",
+        "decoded_command_sha256": "172ca28362b26bbd09572dbcdfeff0089d607010c78534f02d9ad584decdfb4d",
+        "event": {
+          "bytes": 2034,
+          "sha256": "48177dd3ede889f8dfe54b21a9ddc7af0fa375eb4dca605980af63384b12ab98"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "planned": 2,
+      "attempted": 2,
+      "tests": [
+        {
+          "id": "G96",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        },
+        {
+          "id": "G56",
+          "original_test_exit": 101,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130
+        }
+      ],
+      "raw_counters": {
+        "G56": [
+          {
+            "outcome": "FAILED",
+            "passed": 0,
+            "failed": 1,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G96": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ]
+      },
+      "raw_files": {
+        "g56_a_hold_ends_when_its_process_exits.cmd": [448, "302dcaf580231ca5d0a3486d5fa5eff30ffad7dd558eec5c7841f60a540bddbe"],
+        "g56_a_hold_ends_when_its_process_exits.stderr": [1130, "7e50027c7cba861f8bb6056366dac2abe3e42f245e533ddb6f4669b19470828d"],
+        "g56_a_hold_ends_when_its_process_exits.stdout": [237, "8acbedc2636707b0d0ad8fa08a8de912429c7e4bcdfb87de1ff35efc83d2e6ac"],
+        "g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them.cmd": [502, "a9a2216814b7336f923eb02fc13adb8d4c7d3f00fb65ff010a55088debd1955a"],
+        "g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them.stderr": [1006, "b7e2d535980b8cb2fb82af7af506bff9c4a1ce2a0a66d2d8e79537e84921cc34"],
+        "g96_no_program_imports_the_libraries_of_the_prompt_so_a_run_under_the_cap_does_not_load_them.stdout": [4773, "694588865d866dea9cade512dcabd3846f0b6eff62bc308ce1fe63d802104ff9"],
+        "INTENT.json": [508, "7fbc6fc7a50bc66fe6a464d93d654461066bdea888f32a471b521b5c71f5a3af"],
+        "RESULT.json": [734, "4a8fb22a3c60d02f56952a630663b8587fe1698e0965477f3d9ffb5850ba4faf"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "STEPS.json": [463, "175e0b2a7504969184942fc519f2150265a0ff6da692b45218c9775c11e93dc3"]
+      }
+    },
+    {
+      "scope": "candidate-i686-selected-image-rejected",
+      "architecture": "i686",
+      "guard_arm": "B",
+      "run_profile": "existing integration-test harness with a test-build Main image whose identity check failed",
+      "disposition": "FAILED qualification. G56 emitted a native one-test pass with exit 0. The carrier rejected the text oracle and detected a changed selected binary identity. The other three planned cases were not dispatched.",
+      "original_outer": {
+        "exit": 1,
+        "tree_cap_seconds": 600,
+        "event_status": "failed",
+        "decoded_command_sha256": "06e98b07c0653b2758073666d987dec66ed46d9de5bf8320aef91482e2e3c440",
+        "event": {
+          "bytes": 2032,
+          "sha256": "f6bb9b89159dab659b23111a6dd022ffe9920d0521eb6cd5cc5dfc07533a9909"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "planned": 4,
+      "attempted": 1,
+      "tests": [
+        {
+          "id": "G56",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": false
+        }
+      ],
+      "raw_counters": {
+        "G56": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ]
+      },
+      "main_image": {
+        "recorded_sha256": "8e879befa5ed3d6a74293e58b1a1c6304689fa46c793f9b5f1b28bb78ba7af0c",
+        "retained_at_read": {
+          "bytes": 2510336,
+          "sha256": "07b0d964d70c9f752c9b461552b710f3872b3d81507b63f15963ed1a46a7680b"
+        },
+        "unchanged": false
+      },
+      "raw_files": {
+        "g56_a_hold_ends_when_its_process_exits.cmd": [653, "387bc0304c694c9364314b83e7afd84aafafb1a0b0da342e98d238737fc8e9cc"],
+        "g56_a_hold_ends_when_its_process_exits.stderr": [1007, "498a84ac0996d031b8107215626f4cba9dc0a186457b5257e011639965cd4f64"],
+        "g56_a_hold_ends_when_its_process_exits.stdout": [3691, "d6fba2a89ffece7accb57b9672b0412ab6debba7df0db1ba24772b81664a14e7"],
+        "PLANNED.json": [262, "4d842bc68203652050c5d5d3aafd5627241b1683368f2fc8896448554b2ef6fb"],
+        "RESULT.json": [909, "c827b12da6931a4e9a87e7012338fe866fc6a530f6abef329dea90b9f5fad585"],
+        "SELECTED-IMAGE.json": [327, "26d99da4d6903c909b9118be781f7cb744bc4a6384bb72c0ae30d0de3c92c154"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "STEPS.json": [221, "0091e32013bb8a7fa5c8c4ddace820b985b20abc9ef921eaa03afdcf3fa85259"]
+      }
+    },
+    {
+      "scope": "candidate-i686-fixed-images",
+      "architecture": "i686",
+      "guard_arm": "B",
+      "run_profile": "fixed test-build Main and companion images",
+      "disposition": "PASS for the four named tests with the fixed i686 image set.",
+      "original_outer": {
+        "exit": 0,
+        "tree_cap_seconds": 600,
+        "event_status": "completed",
+        "decoded_command_sha256": "65a74a20b216643e6f850af26d311ff62410c511a57d9b3d6d55e209860c0917",
+        "event": {
+          "bytes": 3582,
+          "sha256": "2f14335ea3fe97e2962336424dba049cbc7a3a804dbb1d0f1094d9b199e5a1ea"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "planned": 4,
+      "attempted": 4,
+      "tests": [
+        {
+          "id": "G56",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": true
+        },
+        {
+          "id": "G28",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": true
+        },
+        {
+          "id": "G45",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": true
+        },
+        {
+          "id": "G52",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": true
+        }
+      ],
+      "raw_counters": {
+        "G28": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G45": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G52": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G56": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ]
+      },
+      "main_image": {
+        "recorded_sha256": "07b0d964d70c9f752c9b461552b710f3872b3d81507b63f15963ed1a46a7680b",
+        "retained_at_read": {
+          "bytes": 2510336,
+          "sha256": "07b0d964d70c9f752c9b461552b710f3872b3d81507b63f15963ed1a46a7680b"
+        },
+        "unchanged": true
+      },
+      "fixed_input_images": [
+        {
+          "role": "process-tree-guard.exe",
+          "bytes": 2510336,
+          "sha256": "07b0d964d70c9f752c9b461552b710f3872b3d81507b63f15963ed1a46a7680b"
+        },
+        {
+          "role": "process-tree-guard-deadline.exe",
+          "bytes": 2510336,
+          "sha256": "554e434e05986210195f2c849c9cbe82a71cb410bc04b342f2b6c3b73ce31568"
+        },
+        {
+          "role": "process-tree-guard-gate.exe",
+          "bytes": 2510336,
+          "sha256": "2dcf15038468dbb51683f985c95113171a78fcd0722838888989fe3c579fc62b"
+        },
+        {
+          "role": "process-tree-guard-contain.exe",
+          "bytes": 2510336,
+          "sha256": "f2959e3fa29622383d56b4e8398c619b0b34f9f0894ffb3a294f57c6784051dc"
+        },
+        {
+          "role": "ptg.exe",
+          "bytes": 2510336,
+          "sha256": "b0214ff661167a4c1249de64bf9de8e0fdbac93d67046bb955bad373d6376491"
+        },
+        {
+          "role": "testkit.exe",
+          "bytes": 1514496,
+          "sha256": "faf04a716296beb524cc144339a4c1b1f6426c4dfd2a9e9f4424557f27b3cef0"
+        },
+        {
+          "role": "integration-test-driver",
+          "bytes": 3166208,
+          "sha256": "0604da27edc624384e53c493d60f3cea6a70e62e66fe44a919f85c0e1e784b9d"
+        }
+      ],
+      "raw_files": {
+        "FIXED-IMAGE-INPUTS.json": [3630, "a844412200d6220a13f8c1d7385a07b3a809c180a3ad1ea814a8207784dfea6a"],
+        "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns.cmd": [716, "6fe17cf8da62bacea79b5a72c58e4e8a84d9ddf91ea4867d3e78355f6689c7c5"],
+        "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g28_slow_to_exit_descendant_is_gone_when_the_guard_returns.stdout": [185, "c6a22ed74318322e79909d41e81f3e6ff31f0f61a6b48d083845a5e98dc61dcc"],
+        "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits.cmd": [738, "8a97fa1cba741c1a02b2818a9f099b54d93fdcd9fcd89ebde3ceafbaf0cc13cc"],
+        "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits.stdout": [206, "7a3f213d7b9a4f51d4a0da98e256a78852461d7f88a5fb6d4b921e769b6d0a02"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.cmd": [711, "3aa7bd325b97c1a9db19629b51198ffe611925c1a242732444b7282271b0a5ea"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.stdout": [180, "9272b04be85ee260371c2c0155a992cffe7adefd9120492c754c5c7fedb0d611"],
+        "g56_a_hold_ends_when_its_process_exits.cmd": [696, "1d6261bb4b50b5b1e427647a7cf0431906ad5384e4ea0b4e32ec8c152443087a"],
+        "g56_a_hold_ends_when_its_process_exits.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g56_a_hold_ends_when_its_process_exits.stdout": [165, "fa0467e135a6e4677d6fef4a273d3aa7d5990ed0208dd3e912dd75e56b9bbb84"],
+        "PLANNED.json": [262, "4d842bc68203652050c5d5d3aafd5627241b1683368f2fc8896448554b2ef6fb"],
+        "RESULT.json": [5484, "32ad1fb352b2d39da00217f23df858df948c762230237d6b9df7bc7fe3d33c77"],
+        "SELECTED-IMAGE.json": [327, "0279f12f613c6d362724f4837437e2d53ee9cfe05f6afcc8603af8d079f88e3b"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "STEPS.json": [1038, "54ffca44db2d3d77c8dd2538d24f6a445081e7b88939107d05818906a7cca3de"]
+      }
+    },
+    {
+      "scope": "candidate-x64-fixed-images",
+      "architecture": "x86_64",
+      "guard_arm": "B",
+      "run_profile": "feature-free release Main override, fixed companion images and existing harness",
+      "disposition": "FAILED. G45 passed. G52 failed with guard exit 125, test exit 101 and outer exit 1.",
+      "original_outer": {
+        "exit": 1,
+        "tree_cap_seconds": 360,
+        "event_status": "failed",
+        "decoded_command_sha256": "c0ea0aa9f999cbf6015dc8144c552c857604af471d9ab7d722422b7314692504",
+        "event": {
+          "bytes": 4052,
+          "sha256": "5afbab8591cd25795fcc4d2f282f29a1fe70abbac4b58c44e6256e65955f402e"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "planned": 2,
+      "attempted": 2,
+      "tests": [
+        {
+          "id": "G45",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": true
+        },
+        {
+          "id": "G52",
+          "original_test_exit": 101,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": false
+        }
+      ],
+      "raw_counters": {
+        "G45": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ],
+        "G52": [
+          {
+            "outcome": "FAILED",
+            "passed": 0,
+            "failed": 1,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ]
+      },
+      "main_image": {
+        "recorded_sha256": "2bf8a515dfd932fbd8d73f32a8606b16828ac608510dffe02bfa6aea8d295dae",
+        "retained_at_read": {
+          "bytes": 828416,
+          "sha256": "2bf8a515dfd932fbd8d73f32a8606b16828ac608510dffe02bfa6aea8d295dae"
+        },
+        "unchanged": true
+      },
+      "fixed_input_images": [
+        {
+          "role": "process-tree-guard.exe",
+          "bytes": 2755072,
+          "sha256": "14e74e535eee4368ccab51dab4fa1d6eb30a70540502f02f7261b8a6c567f940"
+        },
+        {
+          "role": "process-tree-guard-deadline.exe",
+          "bytes": 2755584,
+          "sha256": "3d85df736dba1cc6b547d35a30908d7775ed410d33fa4e45709ebd5fdf92b507"
+        },
+        {
+          "role": "process-tree-guard-gate.exe",
+          "bytes": 2755584,
+          "sha256": "db4a9d38bf2b8f15a0a747813c748e5b54f4fb578f336feabfaa665c60ed8800"
+        },
+        {
+          "role": "process-tree-guard-contain.exe",
+          "bytes": 2755584,
+          "sha256": "0a37975e6ffc61ea9d30e714a1151898d828da07442fe932d089cf1957f5db79"
+        },
+        {
+          "role": "ptg.exe",
+          "bytes": 2755072,
+          "sha256": "ce438d695b1a00dc7d5445f4d175202fc090ee96363babb45f22fd7303a21955"
+        },
+        {
+          "role": "testkit.exe",
+          "bytes": 1690112,
+          "sha256": "f760ddc1b3b0eb05df51ec76214b0c15a3ed9bca501f90062816da9725b19e0d"
+        },
+        {
+          "role": "integration-test-driver",
+          "bytes": 3427328,
+          "sha256": "18d42cfb9c12039ad6e6e24db1ad0c58faf9504963bb5492a188a3c06f010d77"
+        }
+      ],
+      "raw_files": {
+        "FIXED-IMAGE-INPUTS.json": [3658, "11321e70825708aae5200ef0baa153f2722605a7b39de29b9e9bf16ca20894b3"],
+        "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits.cmd": [712, "ce5a2a6381c1814bd0bdffd96393c21378af0a079c82029154b0f6e2b83184dd"],
+        "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g45_deadline_role_ends_the_tree_with_125_when_the_process_that_launched_it_exits.stdout": [206, "fd0e2f833b679c4cedb48b2946dc2f15cd03583afebd18930154e4f0dc83b1e1"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.cmd": [685, "63341945d03ec594011dfbfdf57dfee8c5dfafab7184ff687b13709f73ba16fb"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.stdout": [6639, "8bce0264631b25cc34287ae000abf34e6d24e1066d20c2a0e5ecdfeb611cede0"],
+        "PLANNED.json": [152, "a2c7b2c64a35b02af822299578c70d98c4c264deebfcde4fac0f1a0449bc163b"],
+        "RESULT.json": [5011, "1215ab48cd1e81017267b3d7139cbfca81cb855881a6cee726c2eb617bdb6e9e"],
+        "SELECTED-IMAGE.json": [315, "d2b465262ad9793517164e2145f619306960808ebc0f61fbf08d5682fa65be26"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "STEPS.json": [543, "d2d244eda2b19d0172d2394b502a822b142a2377d52d33ba028338f1e8882227"]
+      }
+    },
+    {
+      "scope": "control-x64-fixed-g52",
+      "architecture": "x86_64",
+      "guard_arm": "A",
+      "run_profile": "feature-free release Main override, fixed companion images and existing candidate-source test harness",
+      "disposition": "PASS for one G52 observation using the unchanged control Main image. The harness source snapshot matches the fixed candidate attempt.",
+      "original_outer": {
+        "exit": 0,
+        "tree_cap_seconds": 180,
+        "event_status": "completed",
+        "decoded_command_sha256": "d17fcef70acbe118afe201716b5ef0fe8f3fa219da305f17886f654f89779e49",
+        "event": {
+          "bytes": 3542,
+          "sha256": "eedbfe54a5057e137608b8310174c905bc956ca6620278853519b3e705ead159"
+        }
+      },
+      "source_snapshot": {
+        "files": 1183,
+        "before_and_after_equal": true
+      },
+      "planned": 1,
+      "attempted": 1,
+      "tests": [
+        {
+          "id": "G52",
+          "original_test_exit": 0,
+          "handle_retained": true,
+          "joined": true,
+          "tree_cap_seconds": 130,
+          "carrier_one_test_oracle": true
+        }
+      ],
+      "raw_counters": {
+        "G52": [
+          {
+            "outcome": "ok",
+            "passed": 1,
+            "failed": 0,
+            "ignored": 0,
+            "measured": 0,
+            "filtered": 83
+          }
+        ]
+      },
+      "main_image": {
+        "recorded_sha256": "b18f6e9b1ce561cbce1aed43a8f2c2594372ba1ed3065b1678c9912d832e12e3",
+        "retained_at_read": {
+          "bytes": 823296,
+          "sha256": "b18f6e9b1ce561cbce1aed43a8f2c2594372ba1ed3065b1678c9912d832e12e3"
+        },
+        "unchanged": true
+      },
+      "fixed_input_images": [
+        {
+          "role": "process-tree-guard.exe",
+          "bytes": 2755072,
+          "sha256": "14e74e535eee4368ccab51dab4fa1d6eb30a70540502f02f7261b8a6c567f940"
+        },
+        {
+          "role": "process-tree-guard-deadline.exe",
+          "bytes": 2755584,
+          "sha256": "3d85df736dba1cc6b547d35a30908d7775ed410d33fa4e45709ebd5fdf92b507"
+        },
+        {
+          "role": "process-tree-guard-gate.exe",
+          "bytes": 2755584,
+          "sha256": "db4a9d38bf2b8f15a0a747813c748e5b54f4fb578f336feabfaa665c60ed8800"
+        },
+        {
+          "role": "process-tree-guard-contain.exe",
+          "bytes": 2755584,
+          "sha256": "0a37975e6ffc61ea9d30e714a1151898d828da07442fe932d089cf1957f5db79"
+        },
+        {
+          "role": "ptg.exe",
+          "bytes": 2755072,
+          "sha256": "ce438d695b1a00dc7d5445f4d175202fc090ee96363babb45f22fd7303a21955"
+        },
+        {
+          "role": "testkit.exe",
+          "bytes": 1690112,
+          "sha256": "f760ddc1b3b0eb05df51ec76214b0c15a3ed9bca501f90062816da9725b19e0d"
+        },
+        {
+          "role": "integration-test-driver",
+          "bytes": 3427328,
+          "sha256": "18d42cfb9c12039ad6e6e24db1ad0c58faf9504963bb5492a188a3c06f010d77"
+        }
+      ],
+      "raw_files": {
+        "FIXED-IMAGE-INPUTS.json": [3651, "36d71ad49dd6e6497eca608950b3e7f4159bb87564d48b884ece3a743b6379d1"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.cmd": [687, "790a85bcc2300daa53af6f449f43b752ccc6917958c3b599ca1ad4edc895a8e1"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.stderr": [0, "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"],
+        "g52_a_hanging_child_holds_the_run_to_its_own_deadline.stdout": [180, "04365cfd21eacad0951d5535dcad3204e6a4cdd3bd9bf9f0e32600245eb0fd9b"],
+        "PLANNED.json": [57, "3e014a413ee6449bf2c5a4a99513ee99169a0cc0255ed30e9eb512712c11665c"],
+        "RESULT.json": [4654, "ecd9765bd5c60f1039ce3360361126a7a2784452c8c7ebcd2fd86ca7afd4cc3c"],
+        "SELECTED-IMAGE.json": [318, "1197cf51fa5aab220930f37d2d2bad1883b383964082abdb10edf3b633168266"],
+        "SOURCE-AFTER.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "SOURCE-BEFORE.json": [228137, "053b7839ac17882b9c33c43bfeaf5e704b0abde07d16e17e3117810dac9160f3"],
+        "STEPS.json": [235, "5b54227b3f9c86dfeaadb615d80f09ab8d99a6f23af4f0d525a72dc413726e12"]
+      }
+    },
+    {
+      "scope": "duplicate-candidate-x64-refusal",
+      "architecture": "x86_64",
+      "guard_arm": null,
+      "run_profile": "outer carrier only",
+      "disposition": "REFUSED before dispatch because the output already existed. Zero test cases were started by this invocation.",
+      "original_outer": {
+        "exit": 1,
+        "tree_cap_seconds": 360,
+        "event_status": "failed",
+        "decoded_command_sha256": "dc8cb40ed58acc57b0a5863954057d8f01dd2cb957d981c17757ed7d35d14618",
+        "event": {
+          "bytes": 2519,
+          "sha256": "ac4726b30d459bb01d3d7354151470d3bd1ac75ee80594d8fd94cd830b3a8607"
+        }
+      }
+    }
+  ],
+  "candidate_x64_g52": {
+    "test": "G52 existing own-deadline fixture, case 2",
+    "expected_guard_exit": 124,
+    "observed_guard_exit": 125,
+    "native_test_exit": 101,
+    "native_outer_exit": 1,
+    "member_query": {
+      "result": "IncompleteList",
+      "assigned": 3,
+      "listed": 2,
+      "returned_bytes": 32,
+      "initial_source_capacity_entries": 1024
+    },
+    "later_cleanup_receipt": {
+      "job_empty": true,
+      "original_child_wait": 0,
+      "original_child_wait_in_budget": true
+    },
+    "interpretation": "The retained Job-empty and original-child wait evidence leaves the original identity of the unlisted member unresolved. The guard surfaced the incomplete capture as a cleanup-confirmation failure. The cause of the incomplete census and the unlisted member's fate remain unverified.",
+    "control_limit": "One separate A G52 passed. Attribution of the B failure to the index change remains unresolved and the candidate gate remains failed.",
+    "native_structure_reference": "https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_basic_process_id_list"
+  },
+  "evidence_custody": {
+    "raw_file_encoding": "For each raw_files entry the values are byte length and SHA-256, in that order. Other identity objects use named fields.",
+    "original_event_index": {
+      "bytes": 3869,
+      "sha256": "4226ff3f2fb3fb8ef8ce5c5b61fa8084c35617c058b1db7b28ebe7299874ae35"
+    },
+    "outer_event_recovery": {
+      "bytes": 887,
+      "sha256": "421d4cb095156f067cdd2a66e662d14125005e189110244ccee113c8eb364002"
+    },
+    "original_event_verification": "Retained app-runtime command completion events match the recorded original invocation, native shell and process-guard command shape, decoded command digest, selected tree cap and terminal exit. The original test process handles and native exits are joined separately in the retained step receipts.",
+    "availability": "Original logs, source snapshots, command records, binaries and native events are retained privately. The published fingerprints identify the retained bytes."
+  },
+  "limitations": [
+    "Scope is limited to the named test outcomes. Candidate qualification, product adoption, safety equivalence and performance ranking remain outside these results.",
+    "The i686 empty-override and selected-image/text-oracle failures, the x64 G52 failure and the duplicate refusal remain distinct records with their original dispositions."
+  ]
+}
