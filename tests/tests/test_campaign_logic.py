@@ -2710,10 +2710,8 @@ class CensusConsistencyTests(unittest.TestCase):
         # census test while the JSON stayed fresh. The prose
         # coordinates join the held set now: every line number
         # item 4's prose states must be a coordinate the fresh
-        # battery record itself states, and the four headline
-        # coordinates (the Sleep(10) poll, vars_os, Console::finish
-        # and CreateIoCompletionPort) must appear in the prose at
-        # exactly the fresh record's lines.
+        # battery record itself states. The Case A coordinate now belongs
+        # to the historical source audit because the current poll changed.
         import re
         tree = os.path.normpath(os.path.join(HERE, "..", ".."))
         if not os.path.isdir(tree):
@@ -2736,6 +2734,7 @@ class CensusConsistencyTests(unittest.TestCase):
             text = handle.read()
         section = text.split("4. **Battery audit parts", 1)[1].split(
             "5. **Syntax", 1)[0]
+        section, historical_section = section.split("Historical source-only record.", 1)
         prose_lines = set()
         for group in re.findall(r"lines? ((?:\d+(?:, \d+)*))", section):
             prose_lines.update(int(n) for n in group.split(", "))
@@ -2745,21 +2744,31 @@ class CensusConsistencyTests(unittest.TestCase):
             f"VERIFICATION item 4 prose states line(s) "
             f"{sorted(prose_lines - fresh_lines)} that the fresh "
             f"battery record does not state")
-        # The headline coordinates, derived from the fresh
-        # record's own details (case a's poll line, case l's
-        # vars_os line, case n's Console::finish line, case o's
-        # CreateIoCompletionPort line).
+        case_a = next(report for report in fresh if report["case"] == "a")
+        poll = next(cond for cond in case_a["conditions"]
+                    if cond["condition"] == "baseline poll located in source")
+        self.assertEqual(case_a["verdict"], "FAIL")
+        self.assertEqual(poll["status"], "refuted")
+        self.assertIn("the comparison target has moved", poll["detail"])
+        self.assertIn("Case A is `FAIL`", section)
+        self.assertRegex(section, r"historical\s+`Sleep\(10\)` comparison target")
+
+        with open(os.path.join(HERE, "..", "evidence", "battery-linux.json"),
+                  encoding="utf-8") as handle:
+            historical_a = next(report for report in json.load(handle) if report["case"] == "a")
+        historical_poll = next(cond for cond in historical_a["conditions"]
+                               if cond["condition"] == "baseline poll located in source")
+        self.assertEqual(historical_a["verdict"], "BLOCKED-WINDOWS")
+        self.assertEqual(historical_poll["status"], "evidenced")
+        match = re.search(r"line (\d+): Sleep\(10\)", historical_poll["detail"])
+        self.assertIsNotNone(match)
+        self.assertIn(f"`wait_until_empty` at line {match.group(1)}", historical_section)
+
+        # The remaining headline coordinates must match the fresh report.
         details = {report["case"]: " ".join(
             condition.get("detail", "")
             for condition in report["conditions"]) for report in fresh}
-        # The headline sentences in the fresh record: a's
-        # "line N: Sleep(10)", l's "line N: environment_block
-        # builds from vars_os", n's "Console::finish, line N",
-        # o's "CreateIoCompletionPort at line N".
         expected_headlines = set()
-        match = re.search(r"line (\d+): Sleep\(10\)", details["a"])
-        self.assertIsNotNone(match)
-        expected_headlines.add(int(match.group(1)))
         match = re.search(
             r"line (\d+): environment_block builds from vars_os",
             details["l"])

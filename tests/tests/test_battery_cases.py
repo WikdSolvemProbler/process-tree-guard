@@ -1,11 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Peter Shiller
-"""Battery family: the five theory items. The source-audit parts run
-anywhere and must be evidenced; the Windows parts must be honestly
-blocked off Windows — a case that passed here would be a defect in
-the case, because its adoption conditions cannot be evidenced here.
-"""
+"""Check the battery's source audits, refusals and driver evidence rules."""
 
+import hashlib
 import json
 import os
 import re
@@ -51,23 +48,24 @@ class BatteryShapeTests(unittest.TestCase):
             rep = case.run(ctx)
             self.assertEqual(rep["verdict"], "BLOCKED-ERROR",
                              case.ident)
-        # The source-audit tier cannot establish a native driver pass.
+        # The source-only tier refuses stale Case A and blocks the other cases.
         for ident, rep in REPORTS.items():
-            self.assertEqual(rep["verdict"], "BLOCKED-WINDOWS", ident)
+            expected = "FAIL" if ident == "a" else "BLOCKED-WINDOWS"
+            self.assertEqual(rep["verdict"], expected, ident)
 
     def test_no_case_fails_on_its_audit_parts(self):
-        for ident, rep in REPORTS.items():
-            for cond in rep["conditions"]:
-                self.assertNotEqual(cond["status"], "refuted",
-                                    f"{ident}: {cond['condition']}")
+        refuted = [(ident, cond["condition"])
+                   for ident, rep in REPORTS.items()
+                   for cond in rep["conditions"] if cond["status"] == "refuted"]
+        self.assertEqual(refuted, [("a", "baseline poll located in source")])
 
 
 class CaseATests(unittest.TestCase):
     def test_baseline_poll_located(self):
         cond = conditions("a")["baseline poll located in source"]
-        self.assertEqual(cond["status"], "evidenced")
+        self.assertEqual(cond["status"], "refuted")
         self.assertIn("Sleep(10)", cond["detail"])
-        self.assertIn("5,000 ms", cond["detail"])
+        self.assertIn("the comparison target has moved", cond["detail"])
 
 
 class CaseLTests(unittest.TestCase):
@@ -214,14 +212,10 @@ def replace_in_function(root, rel, function, old, new):
 
 
 class FunctionScopedAuditTests(unittest.TestCase):
-    """Every audit is anchored to a function-scoped extraction:
-    the needle must occur inside the named function's body, and
-    the audit names file, function and line for its site."""
+    """Evidenced sites name the file, function and line of the marker."""
 
     def test_audits_name_file_function_and_line(self):
         expected = [
-            ("a", "baseline poll located in source",
-             "src/engine/wait.rs", "wait_until_empty"),
             ("l", "vars_os baseline located in source",
              "src/engine/environment.rs", "environment_block"),
             ("n", "verdict surface located in source",
@@ -234,6 +228,11 @@ class FunctionScopedAuditTests(unittest.TestCase):
             self.assertIn(rel, detail, ident)
             self.assertIn(func, detail, ident)
             self.assertRegex(detail, r"line \d+", ident)
+        stale = conditions("a")["baseline poll located in source"]
+        self.assertEqual(stale["status"], "refuted")
+        self.assertIn("src/engine/wait.rs", stale["detail"])
+        self.assertIn("wait_until_empty", stale["detail"])
+        self.assertNotRegex(stale["detail"], r"line \d+")
         detail = conditions("m")["per-site comparison audit (source)"]["detail"]
         for rel, func in (("src/cli_process/harden.rs", "harden_self"),
                           ("src/engine/owners.rs", "watched_owner_handles"),
@@ -259,8 +258,9 @@ class FunctionScopedAuditTests(unittest.TestCase):
                     ("n", "verdict surface located in source"),
                     ("o", "extendable precedent located in source")):
                 cond = run_case(ident, root)[cond_name]
-                self.assertEqual(cond["status"], "evidenced",
-                                 f"{ident}: {cond['detail']}")
+                self.assertEqual(cond, conditions(ident)[cond_name])
+                expected = "refuted" if ident == "a" else "evidenced"
+                self.assertEqual(cond["status"], expected, ident)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -288,19 +288,21 @@ class FunctionScopedAuditTests(unittest.TestCase):
             shutil.rmtree(root, ignore_errors=True)
 
     def test_sleep_relocated_to_unrelated_function_refutes_case_a(self):
-        def mutate(root):
-            replace_in_function(root, "src/engine/wait.rs",
-                                "wait_until_empty",
+        rel = "src/engine/wait.rs"
+        marker = "baseline poll located in source"
+        root = scratch_tree()
+        try:
+            # Restore the historical literal in this parser control only.
+            replace_in_function(root, rel, "wait_until_empty",
+                                "Sleep(milliseconds)", "Sleep(10)")
+            self.assertEqual(run_case("a", root)[marker]["status"], "evidenced")
+            replace_in_function(root, rel, "wait_until_empty",
                                 "Sleep(10)", "Sleep(11)")
-            path = os.path.join(root, "src/engine/wait.rs")
+            path = os.path.join(root, rel)
             with open(path, "a", encoding="utf-8") as handle:
                 handle.write("\nfn unrelated_relocated_poll() "
                              "{ unsafe { Sleep(10) }; }\n")
-        root = scratch_tree(mutate)
-        try:
-            cond = run_case("a", root)[
-                "baseline poll located in source"]
-            self.assertEqual(cond["status"], "refuted")
+            self.assertEqual(run_case("a", root)[marker]["status"], "refuted")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -343,10 +345,11 @@ class DriverTierTests(unittest.TestCase):
     def test_stub_good_variant_evidences_every_condition(self):
         for ident in ("a", "l", "m", "n", "o"):
             rep = run_case_full(ident, stub_ctx("good"))
-            self.assertEqual(rep["verdict"], "PASS", ident)
+            self.assertEqual(rep["verdict"], "FAIL" if ident == "a" else "PASS", ident)
             for cond in rep["conditions"]:
-                self.assertEqual(cond["status"], "evidenced",
-                                 f"{ident}: {cond['condition']}")
+                stale_poll = ident == "a" and cond["condition"] == "baseline poll located in source"
+                expected = "refuted" if stale_poll else "evidenced"
+                self.assertEqual(cond["status"], expected, f"{ident}: {cond['condition']}")
                 if "evidence" in cond:
                     self.assertGreater(cond["evidence"]["records"], 0)
 
@@ -392,7 +395,7 @@ class DriverTierTests(unittest.TestCase):
         try:
             rep = run_case_full(
                 "a", stub_ctx("good", results_dir=results))
-            self.assertEqual(rep["verdict"], "PASS")
+            self.assertEqual(rep["verdict"], "FAIL")
             path = os.path.join(results, "battery-case-a.json")
             with open(path, encoding="utf-8") as handle:
                 payload = json.load(handle)
@@ -802,11 +805,11 @@ class Round4ProbeTests(unittest.TestCase):
 
     # ---- (a) P7: tick-derived tolerance, same job
     def test_stub_noisy_case_a_still_evidences(self):
-        # +0.02 ms on the size-0 trial and +5 ms on a dying
-        # trial are inside one 10 ms poll tick: they may not
-        # refute the adoption.
+        # Both timing deltas stay inside the historical comparator's
+        # tolerance. The current source audit still refuses adoption.
         verdict, conds = verdict_and_conditions("a", "noisy")
-        self.assertEqual(verdict, "PASS")
+        self.assertEqual(verdict, "FAIL")
+        self.assertEqual(conds["baseline poll located in source"]["status"], "refuted")
         cond = conds["verdict equivalence + latency + budget"]
         self.assertEqual(cond["status"], "evidenced")
 
@@ -1082,22 +1085,27 @@ class ProbeWinLHandleTests(unittest.TestCase):
 
 
 class RecordedBatteryEvidenceTests(unittest.TestCase):
-    """Round-21 adjudication P2: the recorded battery evidence
-    is held to a fresh run against the current tree. The
-    battery's audits compute their source coordinates
-    dynamically, so the suite stayed current while the recorded
-    record — evidence/battery-linux.json, the file VERIFICATION
-    item 4 points to — went stale at the coordinate level when
-    the tree moved under it (four of five evidenced details
-    carrying superseded line numbers). The recorded record must
-    equal what the battery produces against the tree beside the
-    suite now, verdicts and coordinates alike."""
+    """Check the versioned current audit and the retained historical report."""
 
     def test_recorded_battery_evidence_matches_a_fresh_run(self):
-        with open(os.path.join(HERE, "..", "evidence",
-                               "battery-linux.json"),
+        evidence = os.path.join(HERE, "..", "evidence")
+        with open(os.path.join(evidence, "battery-linux.json"), "rb") as handle:
+            historical_sha = hashlib.sha256(handle.read().replace(b"\r\n", b"\n")).hexdigest()
+        with open(os.path.join(evidence, "battery-linux-current-v2.json"),
                   encoding="utf-8") as handle:
             recorded = json.load(handle)
+        self.assertEqual(recorded["schema"], "ptg-battery-linux-source-audit-2")
+        self.assertEqual(recorded["audit_context"],
+                         {"tree": ".", "platform": "linux", "driver_mode": "blocked"})
+        historical = {
+            "path": "battery-linux.json",
+            "source_commit": "24fd66ae0710035038d9060e0f8deb8b950325f9",
+            "normalized_lf_sha256": "1e4c71017c01eecbabc77ab4afc120709c71bfa366d54a07818e306e3c4993ae",
+        }
+        self.assertEqual(recorded["historical_report"], historical)
+        self.assertEqual(historical_sha, historical["normalized_lf_sha256"])
+        self.assertEqual([report["tree"] for report in recorded["reports"]],
+                         ["."] * len(battery_mod.CASES))
         # Replay the recorded Linux tier even when this suite runs on Windows.
         linux_context = {**AUDIT_CONTEXT, "platform": "linux"}
         fresh = [case.run(linux_context) for case in battery_mod.CASES]
@@ -1112,7 +1120,7 @@ class RecordedBatteryEvidenceTests(unittest.TestCase):
             return [{key: value for key, value in report.items()
                      if key != "tree"} for report in reports]
 
-        self.assertEqual(findings(recorded), findings(fresh))
+        self.assertEqual(findings(recorded["reports"]), findings(fresh))
 
 
 if __name__ == "__main__":

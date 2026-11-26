@@ -475,14 +475,15 @@ was run under finite deadlines. Raw outputs are in `evidence/`.
    own writes — this item states that provenance so a
    reader of the suite alone can learn it here, not only
    from the gauntlet's records.
-4. **Battery audit parts and driver tier** — `battery/battery.py`:
-   all five cases end BLOCKED-WINDOWS (their behavioural
-   conditions cannot be evidenced here), with every source-audit
-   condition evidenced and none refuted.
-   `evidence/battery-linux.json` holds the record. The audits are
-   function-scoped: each names its file, function and line —
-   `Sleep(10)` at `src/engine/wait.rs`, function
-   `wait_until_empty`, line 617. The `vars_os()` call is at
+4. **Battery audit parts and driver tier** — `battery/battery.py`.
+   Case A is `FAIL` because the source audit refutes the historical
+   `Sleep(10)` comparison target. Current cleanup retains member handles
+   and caps each accounting-poll sleep at the remaining shared deadline.
+   Cases L, M, N, and O are `BLOCKED-WINDOWS` with their source audits
+   evidenced. All five driver tiers are blocked in this audit.
+   `evidence/battery-linux-current-v2.json` records the current findings.
+   Each evidenced source site names its file, function, and line.
+   The `vars_os()` call is at
    `src/engine/environment.rs`, function `environment_block`,
    line 72. The audit enumerates the four pseudo-handle fetch
    sites in `harden_self` (lines 212, 219), `watched_owner_handles`
@@ -491,26 +492,24 @@ was run under finite deadlines. Raw outputs are in `evidence/`.
    and `TerminateProcess` line 277.
    `Console::finish` at `src/cli_process.rs` line 173; and
    `CreateIoCompletionPort` inside `Extension::start` at
-   `src/extend/server.rs` line 140. (Coordinates refreshed from the current source on 2026-11-20,
-   using the driver-blocked Linux audit context on Windows.
-   This replay checks source locations only; all five native
-   behavior verdicts remain BLOCKED-WINDOWS. The record is held
-   to a fresh source audit by its existing freshness control.)
-   Mutation controls against a scratch copy of the tree run
-   as suite tests: deleting the
-   counted owner fetch while the other `GetCurrentProcess()`
-   sites are kept, relocating `Sleep(10)` to an unrelated
-   function, and renaming `Console::finish` each turn the
-   corresponding audit "refuted"; the unmutated tree stays
-   "evidenced". The drivers' decision logic is exercised in the
-   stub tier: the good variant evidences every behavioural
-   condition of every case; the broken variants refute exactly
-   their charged conditions (case (a) with the measured
+   `src/extend/server.rs` line 144. The freshness control compares the
+   report with a new blocked-driver source audit.
+   The Case A mutation control first restores `Sleep(10)` inside the
+   target function in a scratch copy, then moves it to an unrelated
+   function to verify the refusal. Other controls delete the counted
+   owner fetch or rename `Console::finish`.
+   The good stub variant evidences the behavioural conditions, while the
+   Case A source refusal still makes that case `FAIL`. The broken variants
+   refute their charged conditions (case (a) with the measured
    latencies doubled to 10,000 ms; case (o) with the verdict
    taken from the packet; cases (l), (m), (n) likewise); a
    missing or renamed driver makes its case BLOCKED-ERROR,
    never PASS; and a stub run's evidence records (commands,
    exit codes, raw outputs) are preserved and asserted.
+   Historical source-only record. `evidence/battery-linux.json`
+   retains the report from commit `24fd66ae0710035038d9060e0f8deb8b950325f9`.
+   For that source, the Case A audit located `Sleep(10)` in
+   `wait_until_empty` at line 617 and all five cases were `BLOCKED-WINDOWS`.
    Round-3 probe discipline — every decided field computed
    from observations, never a probe-written constant the
    decider trusts — is exercised by fourteen further stub-tier
