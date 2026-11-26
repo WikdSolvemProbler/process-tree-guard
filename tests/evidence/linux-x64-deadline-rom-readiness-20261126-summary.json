@@ -1,0 +1,211 @@
+{
+  "schema": "ptg-linux-x64-deadline-rom-readiness-summary-v1",
+  "status": "PASS_ONE_NATIVE_OFFLINE_X86_64_DEADLINE_CASE",
+  "scope": "One native deadline case with a detached-session descendant on the opt-in Linux separate-service prototype. This follow-up checks the emulator firmware directory correction under the same case contract as 007.",
+  "firmware_delta": {
+    "change": "The existing QEMU firmware directory now contains the authenticated kvmvapic.bin member alongside the original EDK2 image. Preparation matched the installed ROM to the signed manifest, read back the copy, and sealed both directory members. Launch revalidated the exact directory before starting the emulator. A fresh guest seed distinguished the invocation.",
+    "member": "kvmvapic.bin",
+    "identity": {"bytes": 9216, "sha256": "cdf057a71b07e3b52b19cbe210bdefa59250d01a9810b960f7fe1f98eed95a27"},
+    "unchanged_edk2": {"bytes": 3653632, "sha256": "33090cc07675baa5190d9f1e84bf5176b33bcbfa9bacac522961150cdb6dbb2a"},
+    "vendor_package": "mingw-w64-ucrt-x86_64-qemu-11.1.3-1-any.pkg.tar.zst",
+    "package_archive": {"bytes": 61060715, "sha256": "72ba6064c81408a8f433859502405da7a93e012d2b9b9bcf7f66f07750882b34"},
+    "detached_signature": {"bytes": 566, "sha256": "1b2bfa16798a7f6dbaa1c46b2adff96c57ae8c4335764169b03384c02d6ca3ee"},
+    "signer_primary_fingerprint": "5F944B027F7FE2091985AA2EFA11531AA0AA7F57",
+    "original_signature_receipt_sha256": "48dc510ebb51052f448484642a9b0fff6750c163ee72732a89cf72d871417283",
+    "signature_status_sha256": "5fa016c9a8cb7237e067d32e1eb71c606ac409b0661701babc6e97b659b17692",
+    "signed_manifest_sha256": "f457fb810fd9fbf78131712aab20fb6bdeb5059781b84aaab8f01dca2e94edb4",
+    "authenticated_package_closure_sha256": "fe92120e667c64f8921cb59e2be89ec07784ab0b45e9c3282e786b51b9245962",
+    "unchanged_controls": "The guest witness, guard carrier source, emulator argument structure, product inputs, selected deadlines and acceptance checks matched case 007."
+  },
+  "emulator_diagnostics": {
+    "case_007": {
+      "missing_kvmvapic_rom_error": true,
+      "interrupt_vector_zero_warning": true,
+      "stderr": {"bytes": 275, "sha256": "85af1cea1efc1557ffff38f1e37cf7142d0f531fed1bc82cad6795222a443e8a"}
+    },
+    "case_008": {
+      "missing_kvmvapic_rom_error": false,
+      "interrupt_vector_zero_warning": true,
+      "only_stderr_diagnostic": "QEMU warned that it ignored a request for interrupt vector 0.",
+      "stderr": {"bytes": 170, "sha256": "92fba374b190bdc07e50234a0d517a315faf9194b3d42d90fe5295bf2845149c"}
+    }
+  },
+  "native_result": {
+    "original_native_attempts": 1,
+    "original_outer_exit": 0,
+    "original_inner_exit": 0,
+    "original_emulator_exit": 0,
+    "original_inner_and_emulator_retained_and_joined": true,
+    "emulator_any_job_membership_observed": true,
+    "emulator_job_membership_evidence": "The direct native creation and no-breakaway inheritance were reviewed. The any-Job query supplements that evidence and does not identify the exact unnamed Job.",
+    "natural_kernel_powerdown": true,
+    "host_forced_emulator_stop": false,
+    "guest_pre_stop_assistance": false,
+    "retries": 0
+  },
+  "observations": {
+    "original_client_exit": 124,
+    "exact_client_stderr": "PROCESS_TIMEOUT: original invocation deadline expired\n",
+    "four_retained_original_pidfd_first_poll_masks": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "same_original_manager_terminal": {
+      "active_state": "failed",
+      "sub_state": "failed",
+      "result": "exit-code",
+      "exec_main_code": 1,
+      "exec_main_status": 124,
+      "main_pid": 0,
+      "control_pid": 0
+    },
+    "same_original_socket_acceptances": 1,
+    "original_product_service_and_payload_cgroups_retired": true,
+    "held_cgroup_terminal_samples": [
+      "retired_enodev",
+      "retired_enodev"
+    ],
+    "owned_deployment_retired": true,
+    "absolute_fallback_timer_reload_rechecks": 2,
+    "same_absolute_timer_invocation_and_expiry_at_both_rechecks": true,
+    "fallback_triggered": false,
+    "original_fallback_cancellation_verified_before_eight_second_reserve": true
+  },
+  "bounds": {
+    "emulator_seconds": 245,
+    "fallback_absolute_lease_seconds": 45,
+    "fallback_cancel_reserve_seconds": 8,
+    "guest_boot_kill_grace_seconds": 2,
+    "guest_boot_seconds": 98,
+    "guest_fallback_seconds": 27,
+    "guest_fallback_stop_grace_seconds": 4,
+    "guest_fixture_seconds": 85,
+    "guest_fixture_stop_grace_seconds": 4,
+    "inner_windows_job_seconds": 270,
+    "outer_windows_job_seconds": 300,
+    "product_deadline_seconds": 12
+  },
+  "platform": {
+    "architecture": "x86_64",
+    "host_shared_filesystems": false,
+    "kernel": "6.8.0-147-generic",
+    "local_virtualization": "WHPX",
+    "network_disabled": true,
+    "standalone_root_disk": true,
+    "systemd_major": 255,
+    "guest_memory_mib": 1536,
+    "vcpu_count": 2
+  },
+  "transport": {
+    "canonical_frame_bytes": 12286,
+    "canonical_frame_sha256": "25b354a821a304732218feae6476f1d1e4ba5d351b147eb32f312ef06cce0e00",
+    "protocol_rows": 24,
+    "primary_rows": 4,
+    "serial_commit_count": 1,
+    "commit_hex": "1e",
+    "commit_position": "Immediately after the exact standalone wrapper line.",
+    "attestation": "The pinned guest producer issues the byte after the held boot witness and native poweroff request both return 0. The pre-call cutoff governs issuance and the independent tree caps govern delivery.",
+    "separate_guest_driver_os_exit_receipt_available": false,
+    "final_byte_delivery_time_measured": false
+  },
+  "lineage": {
+    "archived_artifact_receipt": {"bytes": 1475, "sha256": "c3f8a91c50e35a9fa9630a900a556224ac0053da9c5ed7f54f615d3ecd137003"},
+    "archived_client_elf_sha256": "4d81a4c10102bdef745ab6721ab732eb89687767d0db7919c8cbb17679237239",
+    "archived_linux_ci_commit": "8a0ffff8463b4474c5bf66ba96479d9094271b05",
+    "archived_root_service_elf_sha256": "c4cb8a73249ea68897f787c8a95db464acf7632af9b4beeb8493d7ac44f1c457",
+    "archived_source_custody": {"bytes": 1748, "sha256": "9c9592e9bd2b8361b85a2099834125afae8168a625b9573c86aaafe4f86440cf"},
+    "checked_build_input_paths": [
+      "src",
+      "build.rs",
+      "Cargo.toml",
+      "Cargo.lock",
+      ".cargo",
+      "rust-toolchain",
+      "rust-toolchain.toml"
+    ],
+    "compared_canonical_commit": "393974b39ce9c75fc86b2e709baae1838a9c7dd2",
+    "comparison": "The compared build-input delta falls entirely in the Windows-gated engine and extend modules. The guest used the archived Linux CI ELF pair.",
+    "fresh_linux_build_for_compared_commit": false,
+    "stock_systemd_and_policy_inputs": {
+      "delegation.policy": "3b3b60da8aca10fa53503115dd66d96bde6e23dd68a239f79129b50e7fe95c8c",
+      "process-tree-guard.socket": "a935a247a3438fea27a993def7968edcbc8bf516424449b7faf7f681d5839516",
+      "process-tree-guard@.service": "191a66ea6c5a0e223830dc5b7d11d1fe74c5dad6e440698383d00e9d03d63d13",
+      "ref.rules": "4dd6c92905c0ecc84d5d8f752e293f07844bc37e27430e59d224fb90e288a46d"
+    }
+  },
+  "history": {
+    "prior_public_summary": {
+      "filename": "linux-x64-deadline-descendant-vm-20261126-summary.json",
+      "bytes": 12604,
+      "sha256": "e56b5b1b1dce43cb62ae7a44c5592309732442a2198bef3a48c6a0e3f695f61c"
+    },
+    "003": "Preserved failed native attempt. The pre-cancel timer gate refused and the fallback settled.",
+    "004": "Preserved failed native attempt. The serial transcript ended early and the host stopped the original emulator at its finite cap. Boot command exit 120 and disk-only observations remain scoped to that failure.",
+    "005": "Source review withheld admission. No native attempt.",
+    "006": "Source review withheld admission. No native attempt.",
+    "007": {
+      "status": "PASS_ONE_NATIVE_OFFLINE_X86_64_DEADLINE_CASE",
+      "original_host_result": {"bytes": 5965, "sha256": "332425de62e6dedf69c1f36d2ecd80eea08ef7290c1e16b2f698266be854f31d"},
+      "independent_native_audit": {"bytes": 6277, "sha256": "d539a5929c22eb619decbe6b8dec43fec0bcc2ad579b535490333379c37d208c"},
+      "preparation_observer_correction": {
+        "event": "An observer imported the preparer while checking already sealed inputs. The first exclusive input write refused and the exception handler created one failure receipt.",
+        "followup": "Follow-up verified that sealed inputs stayed byte-identical. The observer launched no guest.",
+        "retained_failure_receipt": {"bytes": 184, "sha256": "6133a59538526f66c912a3a2ad2ee3560b348dc0a18eaf438d176bbadb644daf"},
+        "retained_review_correction": {"bytes": 1134, "sha256": "dad77c495c6a540ef4303cca904989abe132ebee5ab213b58b0a44fb5435c740"}
+      }
+    },
+    "008_preflight_refusal": {
+      "status": "REFUSED_BEFORE_BOOT_AUTHORITY",
+      "native_exit": 1,
+      "reason": "The preflight reader expected the prepared-packet digest at the top level of the Startup review receipt. The receipt held that digest in its nested prepared-packet pin.",
+      "emulator_launches": 0,
+      "inputs_changed": false,
+      "receipt": {"bytes": 293, "sha256": "4fa3dedd80c40e9056e9d728bf3e3888e5bcd5dffc29b7d6d7ba61b05cd54143"}
+    }
+  },
+  "custody": {
+    "source": {
+      "source_review": {"bytes": 3505, "sha256": "06eb11398d71e1bc5c0753b0abae7b4c2ab42f5290b6d295df8461c1cec75792"},
+      "source_review_abi": {"bytes": 2322, "sha256": "5afad723a0d01bf2021df47fa65f016b3128f2876626fdb1a6fa317f2adf930e"},
+      "source_review_startup": {"bytes": 1527, "sha256": "a70822f4071732d6d18a59a7536f15d0b610151dd65cced649b190015d23a703"},
+      "source_pins": {"bytes": 645, "sha256": "715ef85a0df81edda8b514392b338e93cbe6becb44c5597d26653fcbbe89016d"},
+      "exact_rom_change_diff": {"bytes": 13649, "sha256": "62478c6772732ea49bd34de6ec2e10d393d51d17353386558e7daf9aa9bd4300"},
+      "source_materializer": {"bytes": 14858, "sha256": "86fd7a5f89780f686c57d871ac5fd4cda0d76b2526cdf9d51f11d31e6cc3e30d"},
+      "guest_witness": {"bytes": 55612, "sha256": "d6d8b020950d37cfb13a768611e1c613efec04e463a867cbaaa4dbcdf4535439"},
+      "host_carrier_source": {"bytes": 4113, "sha256": "a647782a30503f63600e863f67f4584a624e87a2ae826ef0e32391ede30651f3"},
+      "emulator_launcher": {"bytes": 38317, "sha256": "a39af7cc98b7c2008d0cab91b0da0298b6ee6a2e764579f378e5b97cb0950acd"},
+      "asset_preparer": {"bytes": 17227, "sha256": "bb2d918426b78372f4b0e89da64c1b5558f18f70591bbde57202b2e5199631fa"},
+      "static_verifier": {"bytes": 18868, "sha256": "7580a7f301891331f4277bee8a8e16baa0657a2c37ae85f935ff8cdc6400c83b"},
+      "static_verifier_result": {"bytes": 3008, "sha256": "788ec1e847a3a683749dbbc5356e5a1ebbb7e5c16e6b3787f07bba0e604c5662"}
+    },
+    "admission": {
+      "prepared_packet": {"bytes": 19486, "sha256": "89a5efacd288d92fa9dee53b24308d5a4013f0517a02ad6e0b88270c7c2fe550"},
+      "prepared_review_abi": {"bytes": 2472, "sha256": "b33d29103be4ea58979250686f04c015a34a69a774a759211212620d012c9ec3"},
+      "prepared_review_startup": {"bytes": 1132, "sha256": "aa503be42c467e17c131c6b8725c40728f624fd2bc7267fcaf16e6316685fe1f"},
+      "boot_admission": {"bytes": 808, "sha256": "7f00279bdc607619d90d8ac6660847f228fdc5db2b9f1fe3f56b737fdebad707"},
+      "preflight_check": {"bytes": 382, "sha256": "425a339ff0c34d41f9671100eabea465de1b61c4fcc1a254c04ec976ee3fb820"}
+    },
+    "native": {
+      "outer_completion_event": {"bytes": 1279, "sha256": "dfa43410f37600639078d02626b19d3bdd35af33fe9c59e9156d210237b17389"},
+      "original_event_selection": {"bytes": 603, "sha256": "18db455e11ea0786c046703d4386348a50c6761a7ba4bf821e91b2015634bd22"},
+      "original_emulator_start": {"bytes": 2660, "sha256": "4d5fe55d19b810b6439d4be88668e912f3b52af822b467a1cc5840433125696c"},
+      "inner_intent": {"bytes": 867, "sha256": "6a42413b60c004c50d36258f2af823cd4d84f82a01eea2f3d8ca68c6dddce2c7"},
+      "host_carrier": {"bytes": 408, "sha256": "af8587ab9bc481ef55caed788334feffc461808c6db337b7891f6c27f0a76467"},
+      "host_result": {"bytes": 5965, "sha256": "407b6b9ffceca61450140bc01eb85f9cb2f2845bf3cf587b45c91d4704efd577"},
+      "raw_serial": {"bytes": 112975, "sha256": "7cfb3fe3eb34f6360d3dac2b4485a9a4100fa0fd687d9d54a88327bbd3e51879"},
+      "raw_emulator_stderr": {"bytes": 170, "sha256": "92fba374b190bdc07e50234a0d517a315faf9194b3d42d90fe5295bf2845149c"},
+      "original_local_stderr": {"bytes": 0, "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+      "independent_actual_abi": {"bytes": 6250, "sha256": "1970fd4defe5b959418425265b43eb5853a3e4c7805c10e4982390ad182acb78"},
+      "independent_actual_startup": {"bytes": 1689, "sha256": "caf9cac9b6a13a25ecb27f69721d3f08e1b01b79d644d6446ffb085983c9f2f5"}
+    }
+  },
+  "limits": [
+    "The missing-ROM diagnostic was absent on this one authenticated-data follow-up. Interrupt vector 0 still produced a warning. Its cause and effect remain unknown.",
+    "One packaged case supplies no repeatability estimate, performance result, or proof of a benefit from the firmware correction.",
+    "The archived ELF comparison is a source-input comparison. Linux was not rebuilt at the compared commit.",
+    "The case covers one opt-in separate-service invocation. Default Linux dispatch, ordinary caller-context module execution, broader Linux qualification, and competitive acceptance remain open.",
+    "Private originals remain available for evidence review. Published hashes and deidentified observations do not form a raw reproduction package."
+  ]
+}
