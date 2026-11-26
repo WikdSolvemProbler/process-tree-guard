@@ -1,0 +1,706 @@
+{
+  "custody": {
+    "independent_native_audits": {
+      "independent_raw_statistical_audit": {
+        "bytes": 3993,
+        "sha256": "f1171bbb33d32a000c25df5c7f130fac3655e203af4c5a6c9913a4532dd0936d"
+      },
+      "independent_replay_audit": {
+        "bytes": 3675,
+        "sha256": "08a7b265bc746301d8f23ecd4e63c51bdfcf12b0a15deacfa8be7ec38cbfe99a"
+      }
+    },
+    "private_artifact_pins": {
+      "frozen_schedule": {
+        "bytes": 16731,
+        "sha256": "938e6ed30426e5e7461c994ce4c176904b15c6c53f4517d9f82cb1a5a5fb67fa"
+      },
+      "independent_event_selection": {
+        "bytes": 627,
+        "sha256": "52c1c4c008e5b8364113c2322a1526e9ab9564ce035bed4369c4e98b0e615a3e"
+      },
+      "launch_derivation": {
+        "bytes": 1649,
+        "sha256": "6f1193d563acdf54426c42802c59d02a8e60f01b710e85c23f2f007eff5976d1"
+      },
+      "original_controller": {
+        "bytes": 1484,
+        "sha256": "1d64237765468ce914c8f69bcfd15a8f7c163d415b5ac94a217415e9bd2aa70c"
+      },
+      "original_outer_completion": {
+        "bytes": 1991,
+        "sha256": "e1a7699abd99fde3d989cbafa0377b7c2ff71bbe5127dff7fd985afbfec125f5"
+      },
+      "raw_capture": {
+        "bytes": 199829,
+        "sha256": "d1b6bf6ca23c14e3fe78aabdcd545399e9cab75d641c09cfedc216cfee047d98"
+      },
+      "raw_ledger": {
+        "bytes": 38142,
+        "sha256": "3330931d088d2cde7f27b5ff71f47a6ef40975a8985b201c8bd5e7ec5eaf1455"
+      },
+      "runtime_seal": {
+        "bytes": 17454,
+        "sha256": "ee1555b3818c7058769d53ad9abd7e1637aea0da2fd1b8f632f34e915099651f"
+      },
+      "scope_admission": {
+        "bytes": 1027,
+        "sha256": "5b72d21a9110a9fb9f2c78f7f7d57a304b632475fd371350c6806715c7a00c1c"
+      },
+      "strict_replay": {
+        "bytes": 13030,
+        "sha256": "ddd4eb6a4ade322aba7276f19a8c07329b56ac24759a90f7b0e904adf08e0abe"
+      }
+    }
+  },
+  "effects": {
+    "C-A": {
+      "all_live": {
+        "descriptive_95_percent_interval_us": [
+          -3466.2,
+          -2618.2
+        ],
+        "difference_sign_counts": {
+          "negative": 24,
+          "positive": 0,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "supported_negative_diagnostic",
+        "interval_twice_ticks": [
+          -69324,
+          -52364
+        ],
+        "median_difference_us": -3163.3,
+        "median_twice_ticks": -63266,
+        "paired_maximum_us": -1245.0,
+        "paired_minimum_us": -4614.2,
+        "positive_median_flag": false,
+        "split_medians_twice_ticks": {
+          "ABC": -56681,
+          "ACB": -53384,
+          "BAC": -57763,
+          "BCA": -53138,
+          "CAB": -69776,
+          "CBA": -70357,
+          "first_half": -67533,
+          "second_half": -52411
+        },
+        "split_medians_us": {
+          "ABC": -2834.05,
+          "ACB": -2669.2,
+          "BAC": -2888.15,
+          "BCA": -2656.9,
+          "CAB": -3488.8,
+          "CBA": -3517.85,
+          "first_half": -3376.65,
+          "second_half": -2620.55
+        }
+      },
+      "due": {
+        "descriptive_95_percent_interval_us": [
+          -2185.8,
+          -1514.1
+        ],
+        "difference_sign_counts": {
+          "negative": 24,
+          "positive": 0,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "supported_negative_diagnostic",
+        "interval_twice_ticks": [
+          -43716,
+          -30282
+        ],
+        "median_difference_us": -1731.9,
+        "median_twice_ticks": -34638,
+        "paired_maximum_us": -407.9,
+        "paired_minimum_us": -4641.2,
+        "positive_median_flag": false,
+        "split_medians_twice_ticks": {
+          "ABC": -44413,
+          "ACB": -47277,
+          "BAC": -32599,
+          "BCA": -31833,
+          "CAB": -30955,
+          "CBA": -32471,
+          "first_half": -34120,
+          "second_half": -34638
+        },
+        "split_medians_us": {
+          "ABC": -2220.65,
+          "ACB": -2363.85,
+          "BAC": -1629.95,
+          "BCA": -1591.65,
+          "CAB": -1547.75,
+          "CBA": -1623.55,
+          "first_half": -1706.0,
+          "second_half": -1731.9
+        }
+      },
+      "forced": {
+        "descriptive_95_percent_interval_us": [
+          -370.15,
+          613.5
+        ],
+        "difference_sign_counts": {
+          "negative": 12,
+          "positive": 12,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "unresolved",
+        "interval_twice_ticks": [
+          -7403,
+          12270
+        ],
+        "median_difference_us": 32.55,
+        "median_twice_ticks": 651,
+        "paired_maximum_us": 1325.2,
+        "paired_minimum_us": -1723.5,
+        "positive_median_flag": true,
+        "split_medians_twice_ticks": {
+          "ABC": -2265,
+          "ACB": 168,
+          "BAC": 10544,
+          "BCA": 17045,
+          "CAB": -10470,
+          "CBA": -11790,
+          "first_half": 5166,
+          "second_half": -3118
+        },
+        "split_medians_us": {
+          "ABC": -113.25,
+          "ACB": 8.4,
+          "BAC": 527.2,
+          "BCA": 852.25,
+          "CAB": -523.5,
+          "CBA": -589.5,
+          "first_half": 258.3,
+          "second_half": -155.9
+        }
+      },
+      "hot": {
+        "descriptive_95_percent_interval_us": [
+          4.9,
+          8.9
+        ],
+        "difference_sign_counts": {
+          "negative": 4,
+          "positive": 20,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "supported_positive_diagnostic",
+        "interval_twice_ticks": [
+          98,
+          178
+        ],
+        "median_difference_us": 7.15,
+        "median_twice_ticks": 143,
+        "paired_maximum_us": 24.5,
+        "paired_minimum_us": -11.5,
+        "positive_median_flag": true,
+        "split_medians_twice_ticks": {
+          "ABC": 159,
+          "ACB": 139,
+          "BAC": 175,
+          "BCA": 117,
+          "CAB": 106,
+          "CBA": 175,
+          "first_half": 138,
+          "second_half": 155
+        },
+        "split_medians_us": {
+          "ABC": 7.95,
+          "ACB": 6.95,
+          "BAC": 8.75,
+          "BCA": 5.85,
+          "CAB": 5.3,
+          "CBA": 8.75,
+          "first_half": 6.9,
+          "second_half": 7.75
+        }
+      },
+      "partly_dead": {
+        "descriptive_95_percent_interval_us": [
+          -2984.05,
+          -2288.9
+        ],
+        "difference_sign_counts": {
+          "negative": 24,
+          "positive": 0,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "supported_negative_diagnostic",
+        "interval_twice_ticks": [
+          -59681,
+          -45778
+        ],
+        "median_difference_us": -2608.4,
+        "median_twice_ticks": -52168,
+        "paired_maximum_us": -1171.3,
+        "paired_minimum_us": -4014.5,
+        "positive_median_flag": false,
+        "split_medians_twice_ticks": {
+          "ABC": -54824,
+          "ACB": -64584,
+          "BAC": -58440,
+          "BCA": -36838,
+          "CAB": -50097,
+          "CBA": -47111,
+          "first_half": -49669,
+          "second_half": -53850
+        },
+        "split_medians_us": {
+          "ABC": -2741.2,
+          "ACB": -3229.2,
+          "BAC": -2922.0,
+          "BCA": -1841.9,
+          "CAB": -2504.85,
+          "CBA": -2355.55,
+          "first_half": -2483.45,
+          "second_half": -2692.5
+        }
+      }
+    },
+    "C-B": {
+      "all_live": {
+        "descriptive_95_percent_interval_us": [
+          -157.8,
+          148.75
+        ],
+        "difference_sign_counts": {
+          "negative": 10,
+          "positive": 14,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "unresolved",
+        "interval_twice_ticks": [
+          -3156,
+          2975
+        ],
+        "median_difference_us": 49.65,
+        "median_twice_ticks": 993,
+        "paired_maximum_us": 454.6,
+        "paired_minimum_us": -770.2,
+        "positive_median_flag": true,
+        "split_medians_twice_ticks": {
+          "ABC": -5828,
+          "ACB": 3462,
+          "BAC": 4689,
+          "BCA": 1077,
+          "CAB": -3500,
+          "CBA": 1228,
+          "first_half": -1943,
+          "second_half": 2910
+        },
+        "split_medians_us": {
+          "ABC": -291.4,
+          "ACB": 173.1,
+          "BAC": 234.45,
+          "BCA": 53.85,
+          "CAB": -175.0,
+          "CBA": 61.4,
+          "first_half": -97.15,
+          "second_half": 145.5
+        }
+      },
+      "due": {
+        "descriptive_95_percent_interval_us": [
+          -80.5,
+          301.7
+        ],
+        "difference_sign_counts": {
+          "negative": 8,
+          "positive": 16,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "unresolved",
+        "interval_twice_ticks": [
+          -1610,
+          6034
+        ],
+        "median_difference_us": 121.7,
+        "median_twice_ticks": 2434,
+        "paired_maximum_us": 851.6,
+        "paired_minimum_us": -1027.2,
+        "positive_median_flag": true,
+        "split_medians_twice_ticks": {
+          "ABC": 431,
+          "ACB": 2077,
+          "BAC": 758,
+          "BCA": 5243,
+          "CAB": -1066,
+          "CBA": 7649,
+          "first_half": 953,
+          "second_half": 5228
+        },
+        "split_medians_us": {
+          "ABC": 21.55,
+          "ACB": 103.85,
+          "BAC": 37.9,
+          "BCA": 262.15,
+          "CAB": -53.3,
+          "CBA": 382.45,
+          "first_half": 47.65,
+          "second_half": 261.4
+        }
+      },
+      "forced": {
+        "descriptive_95_percent_interval_us": [
+          -317.25,
+          166.3
+        ],
+        "difference_sign_counts": {
+          "negative": 14,
+          "positive": 10,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "unresolved",
+        "interval_twice_ticks": [
+          -6345,
+          3326
+        ],
+        "median_difference_us": -137.15,
+        "median_twice_ticks": -2743,
+        "paired_maximum_us": 1510.6,
+        "paired_minimum_us": -917.7,
+        "positive_median_flag": false,
+        "split_medians_twice_ticks": {
+          "ABC": -3737,
+          "ACB": -3606,
+          "BAC": -181,
+          "BCA": 5429,
+          "CAB": -6932,
+          "CBA": 5284,
+          "first_half": -4223,
+          "second_half": 2343
+        },
+        "split_medians_us": {
+          "ABC": -186.85,
+          "ACB": -180.3,
+          "BAC": -9.05,
+          "BCA": 271.45,
+          "CAB": -346.6,
+          "CBA": 264.2,
+          "first_half": -211.15,
+          "second_half": 117.15
+        }
+      },
+      "hot": {
+        "descriptive_95_percent_interval_us": [
+          -74.9,
+          -68.2
+        ],
+        "difference_sign_counts": {
+          "negative": 24,
+          "positive": 0,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "supported_negative_diagnostic",
+        "interval_twice_ticks": [
+          -1498,
+          -1364
+        ],
+        "median_difference_us": -70.15,
+        "median_twice_ticks": -1403,
+        "paired_maximum_us": -52.8,
+        "paired_minimum_us": -177.5,
+        "positive_median_flag": false,
+        "split_medians_twice_ticks": {
+          "ABC": -1499,
+          "ACB": -1467,
+          "BAC": -1191,
+          "BCA": -1452,
+          "CAB": -1403,
+          "CBA": -1339,
+          "first_half": -1403,
+          "second_half": -1435
+        },
+        "split_medians_us": {
+          "ABC": -74.95,
+          "ACB": -73.35,
+          "BAC": -59.55,
+          "BCA": -72.6,
+          "CAB": -70.15,
+          "CBA": -66.95,
+          "first_half": -70.15,
+          "second_half": -71.75
+        }
+      },
+      "partly_dead": {
+        "descriptive_95_percent_interval_us": [
+          -234.1,
+          -44.5
+        ],
+        "difference_sign_counts": {
+          "negative": 16,
+          "positive": 8,
+          "zero": 0
+        },
+        "direction_for_this_diagnostic": "unresolved",
+        "interval_twice_ticks": [
+          -4682,
+          -890
+        ],
+        "median_difference_us": -88.65,
+        "median_twice_ticks": -1773,
+        "paired_maximum_us": 485.5,
+        "paired_minimum_us": -802.1,
+        "positive_median_flag": false,
+        "split_medians_twice_ticks": {
+          "ABC": -2335,
+          "ACB": 1538,
+          "BAC": -5500,
+          "BCA": 1361,
+          "CAB": -3956,
+          "CBA": 6876,
+          "first_half": -3155,
+          "second_half": 1744
+        },
+        "split_medians_us": {
+          "ABC": -116.75,
+          "ACB": 76.9,
+          "BAC": -275.0,
+          "BCA": 68.05,
+          "CAB": -197.8,
+          "CBA": 343.8,
+          "first_half": -157.75,
+          "second_half": 87.2
+        }
+      }
+    }
+  },
+  "functional_disposition": {
+    "recorded_failure_receipt": {
+      "bytes": 43942,
+      "sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3"
+    },
+    "recorded_original_b_x64_g52": "Failed with guard exit 125 after incomplete Job member capture."
+  },
+  "limits": [
+    "Synthetic keys, times and liveness exercise container bookkeeping in optimized test binaries.",
+    "The separate canonical Windows repair is outside these compiled inputs.",
+    "Stock timing, protection, whole-product speed, competitive ranking and product adoption require separate evidence."
+  ],
+  "method": {
+    "clock": {
+      "admission_available_memory_floor_gib": 4,
+      "entry_eligibility_seconds": 180,
+      "physical_outer_job_seconds": 210,
+      "qpc_frequency_hz": 10000000
+    },
+    "cohort": "All original subjects ran serially in fresh atomic Jobs. Each original joined at native 0 with one assigned process, no residual active processes, and no termination assistance. Each adapter's original image identity was held through the final join.",
+    "completion": {
+      "original_controller_exit": 0,
+      "original_outer_exit": 0,
+      "outer_native_duration_seconds": 9.702333
+    },
+    "coverage": {
+      "measured_observations": 360,
+      "measured_subjects": 72,
+      "measured_triplets": 24,
+      "original_subjects": 78,
+      "unattempted": 0,
+      "warmup_observations": 30,
+      "warmup_subjects": 6,
+      "warmup_triplets": 2
+    },
+    "descriptive_reproduction": {
+      "adjacent_triplets_per_block": 2,
+      "blocks_per_resample": 12,
+      "direction_rule": "Require both interval endpoints and all eight split medians to be strictly on the same side of zero. Any positive point estimate has a separate flag.",
+      "draw": "Append the decimal counter starting at 0 to ptg/rate-study/bootstrap/rate/20261126/. Interpret the first eight SHA-256 bytes as an unsigned big-endian integer. Increment the counter for every candidate. Reject values at or above floor(2^64 / 23) times 23. Use the accepted value modulo 23 as the first triplet in the block.",
+      "resamples": 10000,
+      "shared": "Both contrasts and all five outcomes use the same draws.",
+      "sorted_interval_indices_zero_based": [
+        249,
+        9749
+      ],
+      "splits": "Both 12-triplet halves and each of the six four-triplet order classes."
+    },
+    "estimands": "Within each measured triplet subtract B or A from C for each batch. Each point is the median of the 24 signed differences. Positive means C took longer. Warmups remain in the CSV and are excluded from the estimates.",
+    "orders": {
+      "bracket_order": "Within measured triplets the five brackets rotate left by triplet index modulo five.",
+      "measured_cycle": [
+        "ABC",
+        "ACB",
+        "BAC",
+        "BCA",
+        "CAB",
+        "CBA"
+      ],
+      "measured_repetitions": 4,
+      "warmup": [
+        "ABC",
+        "CBA"
+      ]
+    },
+    "workload": "Real Limiter operations with fixed synthetic keys, clock inputs and liveness decisions. Timed brackets measure the named batch. The adapter checks outcomes and inventory outside the timed work."
+  },
+  "observations": {
+    "bytes": 23476,
+    "file": "windows-rate-index-one-get-20261126-observations.csv",
+    "projection": "One row per timed bracket in original subject and bracket order. Numeric indices are relative to the frozen schedule. The file carries elapsed ticks, frequency and raw outcome counters.",
+    "rows": 390,
+    "sha256": "65aa946d6743b8a534794ec868b71eba949aee44146d6becee782fcd674df98e"
+  },
+  "prior_attempt": {
+    "cause": "The launch embedded a forward-slash carrier spelling. Strict replay required the exact native backslash spelling. The fresh plan derived the command directly from the same replay contract.",
+    "estimates_generated": false,
+    "native_outer_exit": 0,
+    "original_subjects_retained": 78,
+    "packet": "runtime plan 002",
+    "pooled_or_rescored": false,
+    "retained_private_artifact_pins": {
+      "capture": {
+        "bytes": 199825,
+        "sha256": "d3351b0e62b502aec005085ff60216b55f52ed3c0492b42ccebf6be6fab35be7"
+      },
+      "carrier": {
+        "bytes": 1484,
+        "sha256": "8042354f6ef6a40853f96193a0dbf029e0f3c4c9524313348fd2e4315dfa1464"
+      },
+      "failure_disposition": {
+        "bytes": 2355,
+        "sha256": "fa0066c464c8e8c8a96a2fe3481f316aca0d43beed228578d9496f16789639b1"
+      },
+      "ledger": {
+        "bytes": 38142,
+        "sha256": "1a163d6486b9512c9ef70f05124c488cb01d6691bea3dbdb0007e462a9c0fe3c"
+      },
+      "prior_seal": {
+        "bytes": 16322,
+        "sha256": "b8412ad16a1c80ab6d674c71f6950237843d47bccfb036ab1a3382be41a463a4"
+      },
+      "selector": {
+        "bytes": 1424,
+        "sha256": "4573312caa57a8c3223a4a122732149e02dfdd57e1938dc9d479df07cc9212ac"
+      },
+      "terminal": {
+        "bytes": 1992,
+        "sha256": "e529fed5e82150a4056cc23bd0aed36b80947928ccb6902b8a9cc5acbcb3e857"
+      }
+    },
+    "status": "failed exact outer command replay"
+  },
+  "schema": "ptg-windows-rate-index-one-get-component-diagnostic-v1",
+  "scope": "One private Windows rate-bookkeeping component observation for original HashMap A, Tree B and one-lookup Tree C.",
+  "sources": {
+    "adapter": {
+      "bytes": 13839,
+      "sha256": "4f7400369991124dcc6478a82c8db987fa311c05ef51b6acd226d54f2fe08348"
+    },
+    "arms": {
+      "A": {
+        "description": "Original HashMap index.",
+        "original_build_event": {
+          "bytes": 1943,
+          "sha256": "afed0199a6d069f4a4a929b0000944aad003a531ec818757565bb38ce9c5ccd5"
+        },
+        "original_build_receipt": {
+          "bytes": 2581,
+          "sha256": "6089481b6d7ddbf90e39ec4e97006540c521712e4738178a3445173555bac18a"
+        },
+        "rate_source": {
+          "bytes": 12346,
+          "sha256": "057f7179983d2db02acb24394713f3d550c97191fa1f355653de156bb42efd93"
+        },
+        "test_image": {
+          "bytes": 4121600,
+          "sha256": "fcfd3126bffe36a4b0d95c2752dd741440ad0b724d9da5252ff9ebe976b12283"
+        }
+      },
+      "B": {
+        "description": "BTreeMap index with the same surrounding logic.",
+        "original_build_event": {
+          "bytes": 1943,
+          "sha256": "d0b6e01ff17d546b4abc08d5623e88bd5716d5560d5b057b49dd1b3f94c661b9"
+        },
+        "original_build_receipt": {
+          "bytes": 2581,
+          "sha256": "9f98f5c5b5c1fed2f8777c031d6235005f56142ecd99b84550bbd398fe3ef4f9"
+        },
+        "rate_source": {
+          "bytes": 12347,
+          "sha256": "7771c1dfc7aab542b1d93b68b2303bbb7b80d6e70b437cda170a9aeaeed62c25"
+        },
+        "test_image": {
+          "bytes": 4130816,
+          "sha256": "7390d1bba7416d5f8263d12ec51d1a5b339ca567a2cc7cb0b9d58b6c1fd2bc1a"
+        }
+      },
+      "C": {
+        "description": "BTreeMap index with one position lookup in the admission path.",
+        "original_build_event": {
+          "bytes": 1942,
+          "sha256": "91404f309ab7299c75f98d2888bc8b43c6bd581bf2568f00dba5fb12b3e9736f"
+        },
+        "original_build_receipt": {
+          "bytes": 2581,
+          "sha256": "756a70bace3deedb2c120f20264fd943b29032952abb6514f98ede56168e02b5"
+        },
+        "rate_source": {
+          "bytes": 12369,
+          "sha256": "9c0f7b08206cca0408dd7a4af6f5b9712bb53340c7f3abc9a86f710bc8a22622"
+        },
+        "test_image": {
+          "bytes": 4130816,
+          "sha256": "3b817616783d1b34c193cf134a8d88687f7b9f04344f0033fbcd646345849412"
+        }
+      }
+    },
+    "build_method": {
+      "bytes": 3079,
+      "sha256": "cbe0b6563e2794109734619336b38b1b843b0f00fbd87f550e184424a072e6ae"
+    },
+    "build_seal": {
+      "bytes": 7521,
+      "sha256": "09be5350a992ee1884905e72dc4928a5768c621549ae6b42baccdf6f84f1e644"
+    },
+    "canonical_base": "ad82d8a15a092b1e52ce65f9d68bd526c4e7fc83",
+    "changed_production_file": "src/extend/state/rate.rs",
+    "compiled_source_manifest": {
+      "bytes": 775099,
+      "sha256": "c66022264fa08c97a996b36f9c0ed827ed8c448c0fe18cfa73586cef4b206e04"
+    },
+    "entries_per_arm": 1184,
+    "one_lookup_diff": {
+      "bytes": 1114,
+      "sha256": "ad6309f1c4ee68caddb08fe0091e1eba54a0740c96d79b83cb16795998e2fe92"
+    },
+    "profile": {
+      "architecture": "x86_64-pc-windows-msvc",
+      "cfg_test": true,
+      "explicit_feature_flags": [],
+      "fresh_targets": true,
+      "jobs": 1,
+      "locked_offline": true,
+      "opt_level": 3,
+      "resolved_cargo_features": [
+        "testkit"
+      ]
+    }
+  },
+  "status": "COMPLETE_COMPONENT_DIAGNOSTIC_ONLY",
+  "workloads": {
+    "all_live": {
+      "batch": "One absent-key admission attempt each across 64 full tables. Each returns Full.",
+      "label": "Full table, all original keys live"
+    },
+    "due": {
+      "batch": "One sweep each for 64 full 1,024-entry tables. The due half of each table retires.",
+      "label": "Due-only sweep"
+    },
+    "forced": {
+      "batch": "64 full 1,024-entry tables. All entries retire and the adapter checks queued summary order and count.",
+      "label": "Forced all-entry sweep"
+    },
+    "hot": {
+      "batch": "4,096 admit/refund cycles, or 8,192 method calls, in one 1,024-entry table.",
+      "label": "Existing-key admission and refund"
+    },
+    "partly_dead": {
+      "batch": "One absent-key admission each across 64 full tables. Every eighth original key is pruned and each absent key is admitted.",
+      "label": "Full table, some original keys dead"
+    }
+  }
+}
