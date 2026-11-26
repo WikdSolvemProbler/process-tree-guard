@@ -227,6 +227,8 @@ impl Extension {
         let mut state = self.shared.lock();
         let now = tick();
         let passed = state.expire(now, Some(self.shared.job as Handle));
+        // This pass already sees a reap that shortened provisional time.
+        state.take_reap_wake();
         for line in state.notices_lazy(now, false, &mut || unix_ms_now()) {
             self.shared.log.push(&line);
         }

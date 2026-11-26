@@ -536,26 +536,35 @@
 
     #[test]
     fn a_grant_whose_reply_was_not_taken_is_taken_back() {
-        let mut state = State::new(1_000, 3600.0);
+        let shared = shared_with_base(std::ptr::null_mut(), 0, 1_000);
+        let mut state = shared.lock();
         let me = this_process();
-        let back = |until: u64, previous: Option<u64>| Withdraw { id: me.id, created: me.created, token: 5, until, previous, pid: me.id, image: "client.exe".into(), seconds: 60.0 };
         // A first grant is removed.
-        let previous = state.hold_until(me.id, me.created, 5);
-        assert_eq!(previous, None);
-        assert_eq!(state.begin_grant(10, None, 60.0, this_process(), 5, None), Ok(None));
+        let back = reserve_in(&mut state, 10, 60.0, 5);
+        assert_eq!(back.previous(), None);
         assert_eq!(state.deadline(), 60_010);
-        assert!(state.finish_grant(&back(60_010, previous), false));
+        assert!(shared.publish_grant());
+        drop(state);
+        assert_eq!(finish_test_reply(&shared, back, false).disposition, GrantDisposition::Effective);
+        let mut state = shared.lock();
         assert!(state.holds.is_empty() && state.deadline() == 1_000, "the hold is gone");
         // A renewal goes back to the hold it replaced, which the client was told of.
         assert_eq!(state.grant(10, None, 20.0, this_process(), 5, None), Ok(None));
         let previous = state.hold_until(me.id, me.created, 5);
-        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 5, None), Ok(Some(20_010)));
-        assert!(state.finish_grant(&back(90_011, previous), false));
+        let back = reserve_in(&mut state, 11, 90.0, 5);
+        assert_eq!(back.previous(), previous);
+        let stale = back.duplicate_for_test(None);
+        drop(state);
+        assert_eq!(finish_test_reply(&shared, back, false).disposition, GrantDisposition::Effective);
+        let mut state = shared.lock();
         assert_eq!(state.deadline(), 20_010, "the earlier hold stands");
         // A hold that something else has changed since is not touched, and the other holds of the process stand.
-        assert_eq!(state.begin_grant(12, None, 5.0, this_process(), 6, None), Ok(None));
-        assert!(!state.finish_grant(&back(90_011, None), false), "it is no longer the grant that was made");
-        assert!(state.finish_grant(&Withdraw { token: 6, ..back(5_012, None) }, false), "the other hold is withdrawn by its own record");
+        let other = reserve_in(&mut state, 12, 5.0, 6);
+        assert_eq!(other.previous(), None);
+        assert_eq!(state.cancel_unsubmitted(stale).disposition, GrantDisposition::Absent,
+                   "it is no longer the grant that was made");
+        assert_eq!(state.cancel_unsubmitted(other).disposition,
+                   GrantDisposition::Effective, "the other hold is withdrawn by its own record");
         assert_eq!(state.holds.len(), 1);
     }
 
@@ -563,52 +572,62 @@
     fn an_overlapping_renewal_cannot_restore_an_undelivered_grant() {
         let mut state = State::new(1_000, 3600.0);
         let me = this_process();
-        let back = Withdraw { id: me.id, created: me.created, token: 0, until: 60_010, previous: None, pid: me.id, image: "client.exe".into(), seconds: 60.0 };
-        assert_eq!(state.begin_grant(10, None, 60.0, this_process(), 0, None), Ok(None));
-        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 0, None), Err(Refusal::Crowded.into()));
-        assert!(state.finish_grant(&back, false));
+        let back = reserve_in(&mut state, 10, 60.0, 0);
+        assert_eq!(back.previous(), None);
+        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 0, None).unwrap_err(), Refusal::Crowded.into());
+        assert_eq!(state.cancel_unsubmitted(back).disposition, GrantDisposition::Effective);
         assert_eq!(state.deadline(), 1_000, "no delivered grant can be restored");
 
         // Even release must not allow a second grant to reuse a pending reservation.
-        assert_eq!(state.begin_grant(10, None, 60.0, this_process(), 0, None), Ok(None));
+        let back = reserve_in(&mut state, 10, 60.0, 0);
+        assert_eq!(back.previous(), None);
         assert!(state.drop_hold(me.id, me.created, 0, false));
-        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 0, None), Err(Refusal::Crowded.into()));
-        assert!(!state.finish_grant(&back, false));
-        assert_eq!(state.begin_grant(12, None, 0.001, this_process(), 0, None), Ok(None));
+        assert_eq!(state.begin_grant(11, None, 90.0, this_process(), 0, None).unwrap_err(), Refusal::Crowded.into());
+        assert_eq!(state.cancel_unsubmitted(back).disposition, GrantDisposition::Absent);
+        let back = reserve_in(&mut state, 12, 0.001, 0);
+        assert_eq!(back.previous(), None);
         assert!(!state.expire(13, None));
         assert!(state.holds.is_empty());
-        assert_eq!(state.begin_grant(13, None, 90.0, this_process(), 0, None), Err(Refusal::Crowded.into()));
-        assert!(!state.finish_grant(&Withdraw { until: 13, seconds: 0.001, ..back }, false));
-        assert_eq!(state.begin_grant(14, None, 60.0, this_process(), 0, None), Ok(None));
+        assert_eq!(state.begin_grant(13, None, 90.0, this_process(), 0, None).unwrap_err(), Refusal::Crowded.into());
+        assert_eq!(state.cancel_unsubmitted(back).disposition,
+                   GrantDisposition::Absent);
+        assert_eq!(state.begin_grant(14, None, 60.0, this_process(), 0, None).unwrap().previous(), None);
     }
 
     #[test]
     fn a_provisional_grant_cannot_admit_another_after_the_delivered_deadline() {
-        let mut state = State::new(1_000, 3600.0);
-        let me = this_process();
-        let back = Withdraw { id: me.id, created: me.created, token: 0, until: 60_999, previous: None, pid: me.id, image: "client.exe".into(), seconds: 60.0 };
-        assert_eq!(state.begin_grant(999, None, 60.0, this_process(), 0, None), Ok(None));
+        let shared = shared_with_base(std::ptr::null_mut(), 0, 1_000);
+        let mut state = shared.lock();
+        let back = reserve_in(&mut state, 999, 60.0, 0);
+        assert_eq!(back.previous(), None);
         assert!(!state.expire(1_000, None), "the supervisor allows the first reply to finish");
-        assert_eq!(state.begin_grant(1_000, None, 90.0, this_process(), 1, None), Err(Refusal::Ended.into()));
+        assert_eq!(state.begin_grant(1_000, None, 90.0, this_process(), 1, None).unwrap_err(), Refusal::Ended.into());
         assert_eq!(state.holds.len(), 1, "the refused request did not create a hold");
-        assert!(state.finish_grant(&back, true));
-        assert_eq!(state.begin_grant(1_000, None, 90.0, this_process(), 1, None), Ok(None), "the delivered grant now admits a different token");
+        assert!(shared.publish_grant());
+        drop(state);
+        assert_eq!(finish_test_reply(&shared, back, true).disposition, GrantDisposition::Effective);
+        let mut state = shared.lock();
+        assert_eq!(state.begin_grant(1_000, None, 90.0, this_process(), 1, None).unwrap().previous(), None,
+                   "the delivered grant now admits a different token");
     }
 
     #[test]
     fn a_shorter_renewal_takes_effect_only_after_delivery() {
-        let mut state = State::new(1_000, 3600.0);
-        let me = this_process();
+        let shared = shared_with_base(std::ptr::null_mut(), 0, 1_000);
+        let mut state = shared.lock();
         assert_eq!(state.grant(10, None, 20.0, this_process(), 0, None), Ok(None));
-        let back = Withdraw { id: me.id, created: me.created, token: 0, until: 12, previous: Some(20_010), pid: me.id, image: "client.exe".into(), seconds: 0.001 };
-        assert_eq!(state.begin_grant(11, None, 0.001, this_process(), 0, None), Ok(Some(20_010)));
+        let back = reserve_in(&mut state, 11, 0.001, 0);
+        assert_eq!(back.previous(), Some(20_010));
         assert!(!state.expire(1_001, None), "the tentative shorter deadline cannot expire a delivered hold");
-        assert!(state.finish_grant(&back, false));
+        assert_eq!(state.cancel_unsubmitted(back).disposition, GrantDisposition::Effective);
         assert_eq!(state.deadline(), 20_010);
 
-        assert_eq!(state.begin_grant(1_002, None, 1.0, this_process(), 0, None), Ok(Some(20_010)));
-        assert!(state.finish_grant(&Withdraw { until: 2_002, seconds: 1.0, ..back }, true));
-        assert_eq!(state.deadline(), 2_002);
+        let back = reserve_in(&mut state, 1_002, 1.0, 0);
+        assert_eq!(back.previous(), Some(20_010));
+        assert!(shared.publish_grant());
+        drop(state);
+        assert_eq!(finish_test_reply(&shared, back, true).disposition, GrantDisposition::Effective);
+        assert_eq!(shared.lock().deadline(), 2_002);
     }
 
     #[test]
@@ -641,7 +660,7 @@
             use std::os::windows::io::AsRawHandle;
             assert_ne!(AssignProcessToJobObject(job, child.as_raw_handle() as Handle), 0, "put the holder in the job");
             let mut state = State::new(1_000_000, 3600.0);
-            state.holds.push(Hold { process: Process::open(child.id()).expect("open the holder"), token: 0, until: 900_000 });
+            state.holds.push(Hold::new(Process::open(child.id()).expect("open the holder"), 0, 900_000));
             state.release(1, Some(job));
             assert_eq!(state.holds.len(), 1, "a holder that is alive, in the job and listed keeps its hold");
 
@@ -680,11 +699,59 @@
             state.release(2, Some(job));
             assert!(state.holds.is_empty(), "the poll finds the holder gone");
             let mut late = State::new(1_000_000, 3600.0);
-            late.holds.push(Hold { process: this_process(), token: 0, until:500 });
+            late.holds.push(Hold::new(this_process(), 0, 500));
             late.release(501, None);
             assert!(late.holds.is_empty(), "a hold whose seconds ran out is released");
             CloseHandle(job);
         }
+    }
+
+    const FAILED_HOLD_POLL: ObservationFault =
+        ObservationFault::Wait { _status: u32::MAX, _last_error: Some(6) };
+
+    #[test]
+    fn an_inconclusive_reap_does_not_retire_or_admit_from_a_delivered_hold() {
+        let mut state = State::new(1_000, 3600.0);
+        let holder = this_process();
+        let holder_id = holder.id as usize;
+        state.holds.push(Hold::new(holder, 0, 3_000));
+        let job = Some(std::ptr::null_mut());
+
+        state.retain_after_census_with(2_000, job, Some(&[holder_id]), |_| Err(FAILED_HOLD_POLL),
+                                       |_, _| panic!("complete hit already proved membership"));
+        state.release_stamp = Some(2_000);
+        assert!(!state.expire(2_000, None));
+        assert_eq!(state.expire_deadline, 3_000);
+        assert_eq!(state.begin_grant(2_000, None, 1.0, this_process(), 1, None).unwrap_err(), Refusal::Unverified.into());
+        assert!(!state.take_reap_wake(), "keeping a delivered bound does not shorten it");
+
+        state.retain_after_census_with(2_001, job, None, |_| Err(FAILED_HOLD_POLL),
+                                       |_, _| panic!("unknown poll must not reach membership"));
+        assert_eq!(state.holds.len(), 1);
+        let membership_calls = std::cell::Cell::new(0);
+        state.retain_after_census_with(2_002, job, None, |_| Ok(true), |_, _| {
+            membership_calls.set(membership_calls.get() + 1);
+            Err(ObservationFault::Membership { _last_error: 5 })
+        });
+        assert_eq!(membership_calls.get(), 1);
+        assert_eq!(state.holds.len(), 1, "failed membership did not prove outside");
+
+        state.retain_after_census_with(2_003, job, None, |_| Ok(true), |_, _| Ok(true));
+        state.release_stamp = Some(2_003);
+        assert_eq!(state.begin_grant(2_003, None, 1.0, this_process(), 1, None).unwrap().previous(), None);
+        state.retain_after_census_with(2_004, job, None, |_| Ok(true), |_, _| Ok(false));
+        assert!(state.holds.is_empty(), "successful outside retires both holds");
+
+        for (until, list) in [(3_000, &[holder_id][..]), (4_000, &[][..])] {
+            state.holds.push(Hold::new(this_process(), 2, until));
+            state.retain_after_census_with(3_000, job, Some(list), |_| panic!("expiry or complete miss must precede polling"),
+                                           |_, _| panic!("no fallback"));
+            assert!(state.holds.is_empty());
+        }
+        state.holds.push(Hold::new(this_process(), 2, 4_000));
+        state.retain_after_census_with(3_000, job, Some(&[holder_id]), |_| Ok(false),
+                                       |_, _| panic!("complete hit already proved membership"));
+        assert!(state.holds.is_empty(), "signaled terminal observation retires");
     }
 
     #[test]
@@ -701,7 +768,7 @@
             use std::os::windows::io::AsRawHandle;
             assert_ne!(AssignProcessToJobObject(job, child.as_raw_handle() as Handle), 0, "put the holder in the job");
             let mut state = State::new(100_000, 3600.0);
-            state.holds.push(Hold { process: Process::open(child.id()).expect("open the holder"), token: 0, until: 900_000 });
+            state.holds.push(Hold::new(Process::open(child.id()).expect("open the holder"), 0, 900_000));
             // The settle the request makes when it arrives: a full reap, which keeps the
             // live holder (as the poll test above shows) and stamps its tick.
             assert!(!state.expire(1, Some(job)), "the run goes on");
@@ -745,7 +812,7 @@
             // when the hold is dropped at the end of the test.
             let holder = Process { handle: event, id: 4242, created: 1 };
             let mut state = State::new(100_000, 3600.0);
-            state.holds.push(Hold { process: holder, token: 0, until: 900_000 });
+            state.holds.push(Hold::new(holder, 0, 900_000));
             state.release(10, None);
             assert_eq!(state.holds.len(), 1, "the running holder is kept by the reap");
             assert_eq!(state.release_stamp, Some(10), "the completed reap is stamped with its tick");
@@ -1142,7 +1209,7 @@
         for n in 0..RATE_LIMIT as u64 - 1 {
             assert_eq!(counted.limiter.admit(key, (me.id, "w.exe"), n, &live), Admit::Allowed);
         }
-        counted.holds.push(Hold { process: this_process(), token: 0, until:900_000 });
+        counted.holds.push(Hold::new(this_process(), 0, 900_000));
         assert_eq!(counted.limiter.admit(key, (me.id, "w.exe"), RATE_LIMIT as u64, &live), Admit::Allowed, "the release arrives and is counted");
         assert!(counted.drop_hold(me.id, me.created, 0,false));
         assert_eq!(counted.limiter.admit(key, (me.id, "w.exe"), RATE_LIMIT as u64 + 1, &live), Admit::Allowed, "it was given back, so one more request fits");
@@ -1152,7 +1219,7 @@
         for n in 0..RATE_LIMIT as u64 {
             assert_eq!(full.limiter.admit(key, (me.id, "w.exe"), n, &live), Admit::Allowed);
         }
-        full.holds.push(Hold { process: this_process(), token: 0, until:900_000 });
+        full.holds.push(Hold::new(this_process(), 0, 900_000));
         assert_eq!(full.limiter.admit(key, (me.id, "w.exe"), 100, &live), Admit::First, "the release arrives over its share");
         assert!(full.drop_hold(me.id, me.created, 0,true));
         assert_eq!(full.limiter.admit(key, (me.id, "w.exe"), 101, &live), Admit::First, "and the refusal it was counted as is taken back: the next one is the first again");
@@ -1223,7 +1290,10 @@
     /// The shared state of a run with nothing serving: enough to decide a request.
     fn shared_run(job: Handle) -> Shared {
         let started = tick();
-        let base_deadline = started + 600_000;
+        shared_with_base(job, started, started + 600_000)
+    }
+
+    fn shared_with_base(job: Handle, started: u64, base_deadline: u64) -> Shared {
         Shared {
             state: Mutex::new(State::new(base_deadline, 3600.0)), cap_seconds: 3600.0, log: Log { sinks: Vec::new(), file_sink: None, blocked: Arc::new(AtomicBool::new(false)), only: None }, job: job as usize, wake: 0,
             base_deadline, prepublication_notices_due: AtomicU64::new(started.saturating_add(BACKSTOP_WAKE_MS)),
@@ -1238,12 +1308,174 @@
     }
 
     fn reserve_test_grant(shared: &Shared, now: u64) -> Withdraw {
-        let process = this_process();
-        let (id, created) = (process.id, process.created);
+        reserve_at(shared, now, 60.0, 5)
+    }
+
+    fn reserve_at(shared: &Shared, now: u64, seconds: f64, token: Token) -> Withdraw {
         let mut state = shared.lock();
-        let previous = state.begin_grant(now, None, 60.0, process, 5, None).unwrap();
+        let back = reserve_in(&mut state, now, seconds, token);
         assert!(shared.publish_grant());
-        Withdraw { id, created, token: 5, until: now + millis(60.0), previous, pid: id, image: "client.exe".into(), seconds: 60.0 }
+        back
+    }
+
+    fn reserve_in(state: &mut State, now: u64, seconds: f64, token: Token) -> Withdraw {
+        let process = this_process();
+        let id = process.id;
+        state.begin_grant(now, None, seconds, process, token, None).unwrap()
+            .for_client(id, "client.exe".into(), seconds)
+    }
+
+    fn finish_test_reply(shared: &Shared, back: Withdraw, delivered: bool) -> SettledGrant {
+        let ReplySubmission::Submitted(permit, delivered) = submit_reply(shared, Some(back), || delivered) else {
+            panic!("expected the exact submission to be permitted");
+        };
+        shared.lock().complete_grant(permit, delivered)
+    }
+
+    fn observe_test_reap(state: &mut State, now: u64,
+                         observe: impl FnMut(&Process) -> Result<bool, ObservationFault>) {
+        state.retain_after_census_with(now, None, None, observe, |_, _| panic!("no Job to ask"));
+        state.release_stamp = Some(now);
+    }
+
+    #[test]
+    fn uncertainty_before_permission_vetoes_fresh_and_all_renewal_lengths() {
+        for (prior, seconds, now, retained, wake) in [
+            (false, 90.0, 11, None, true),
+            (true, 90.0, 11, Some(20_010), true),
+            (true, 5.0, 11, Some(20_010), false),
+            (true, 20.0, 11, Some(20_010), false),
+            (true, 90.0, 20_010, None, true),
+        ] {
+            let shared = shared_with_base(std::ptr::null_mut(), 0, 40_000);
+            if prior {
+                install_test_hold(&shared, 10, 20.0, 5);
+            }
+            let back = reserve_at(&shared, 10, seconds, 5);
+            let key = back.key();
+            {
+                let mut state = shared.lock();
+                observe_test_reap(&mut state, now, |_| Err(FAILED_HOLD_POLL));
+                assert_eq!(state.hold_until(key.0, key.1, key.2), retained);
+                assert_eq!(state.retraction_fault_for_test(&back), Some(FAILED_HOLD_POLL));
+                assert_eq!(state.take_reap_wake(), wake, "only lost provisional time wakes the worker");
+                assert!(!state.take_reap_wake(), "the wake is consumed once");
+                observe_test_reap(&mut state, now + 1, |_| Ok(true));
+                assert_eq!(state.retraction_fault_for_test(&back), Some(FAILED_HOLD_POLL),
+                           "a positive reap cannot overwrite the original veto evidence");
+                assert_eq!(state.begin_grant(now + 1, None, 10.0, this_process(), 5, None).unwrap_err(), Refusal::Crowded.into());
+            }
+            let ReplySubmission::Unsubmitted(back, Refusal::Unverified) =
+                submit_reply(&shared, Some(back), || panic!("withdrawn grant submitted")) else {
+                    panic!("expected a sticky uncertainty veto even after a positive reap");
+                };
+            let settled = shared.lock().cancel_unsubmitted(back);
+            assert_eq!(settled.disposition, GrantDisposition::AlreadyRetracted);
+            assert!(withdrawn_before_reply_line(0, settled.details()).contains("decision=withdrawn"));
+            assert_eq!(shared.lock().hold_until(key.0, key.1, key.2), retained);
+        }
+    }
+
+    #[test]
+    fn release_and_observation_veto_preserve_their_original_order_and_audit() {
+        for veto_first in [false, true] {
+            let shared = shared_run(std::ptr::null_mut());
+            install_test_hold(&shared, 10, 20.0, 5);
+            let back = reserve_test_grant(&shared, 11);
+            let key = back.key();
+            {
+                let mut state = shared.lock();
+                if veto_first {
+                    observe_test_reap(&mut state, 12, |_| Err(FAILED_HOLD_POLL));
+                }
+                assert!(state.drop_hold(key.0, key.1, key.2, false));
+                observe_test_reap(&mut state, 13, |_| panic!("released holder must not be polled"));
+                assert!(!state.drop_hold(key.0, key.1, key.2, false), "release never refunds twice");
+            }
+            let ReplySubmission::Unsubmitted(back, actual) =
+                submit_reply(&shared, Some(back), || panic!("released grant submitted")) else {
+                    panic!("expected the original unsubmitted owner");
+                };
+            assert_eq!(actual, if veto_first { Refusal::Unverified } else { Refusal::NoHold });
+            let settled = shared.lock().cancel_unsubmitted(back);
+            assert_eq!(settled.disposition,
+                       if veto_first { GrantDisposition::AlreadyRetracted } else { GrantDisposition::Absent });
+            assert!(withdrawn_before_reply_line(0, settled.details()).contains("decision=withdrawn"));
+            assert!(shared.lock().holds.is_empty());
+        }
+
+        let shared = shared_run(std::ptr::null_mut());
+        let back = reserve_test_grant(&shared, 10);
+        observe_test_reap(&mut shared.lock(), 11, |_| Err(FAILED_HOLD_POLL));
+        let settled = shared.lock().cancel_unsubmitted(back);
+        assert_eq!(settled.disposition, GrantDisposition::AlreadyRetracted);
+        let line = unrecorded_line(0, settled.details(), RECORD_MS);
+        assert!(line.contains("decision=withdrawn") && line.contains("was not written"));
+    }
+
+    #[test]
+    fn uncertain_provisional_time_is_not_a_delivered_slice_for_another_grant() {
+        for (previous, expected) in [
+            (None, Refusal::Ended),
+            (Some(50), Refusal::Ended),
+            (Some(80), Refusal::Unverified),
+        ] {
+            let shared = shared_with_base(std::ptr::null_mut(), 0, 50);
+            if let Some(previous) = previous {
+                shared.lock().holds.push(Hold::new(this_process(), 5, previous));
+            }
+            let back = reserve_at(&shared, 40, 1.0, 5);
+            assert_eq!(back.previous(), previous);
+            let ReplySubmission::Submitted(permit, true) = submit_reply(&shared, Some(back), || {
+                let mut state = shared.lock();
+                observe_test_reap(&mut state, 60, |_| Err(FAILED_HOLD_POLL));
+                assert_eq!(state.deadline(), 1_040, "the prior permit owns this handoff");
+                assert!(!state.take_reap_wake(), "the permit's bound was not shortened");
+                assert_eq!(state.begin_grant(60, None, 1.0, this_process(), 6, None).unwrap_err(), expected.into());
+                true
+            }) else { panic!("expected the winning permit") };
+            let mut state = shared.lock();
+            assert_eq!(state.complete_grant(permit, true).disposition, GrantDisposition::Effective);
+            assert_eq!(state.begin_grant(60, None, 1.0, this_process(), 6, None).unwrap_err(), Refusal::Unverified.into());
+        }
+    }
+
+    #[test]
+    fn a_reserved_verified_holder_keeps_its_permit_when_its_old_support_becomes_uncertain() {
+        let shared = shared_with_base(std::ptr::null_mut(), 0, 50);
+        install_test_hold(&shared, 40, 1.0, 4);
+        let prior_handle = shared.lock().holds[0].process.handle;
+        let back = reserve_at(&shared, 55, 1.0, 5);
+        {
+            let mut state = shared.lock();
+            observe_test_reap(&mut state, 60, |process| {
+                if process.handle == prior_handle { Err(FAILED_HOLD_POLL) } else { Ok(true) }
+            });
+            assert_eq!(state.begin_grant(60, None, 1.0, this_process(), 6, None).unwrap_err(), Refusal::Unverified.into());
+        }
+        assert_eq!(finish_test_reply(&shared, back, true).disposition, GrantDisposition::Effective);
+        assert_eq!(shared.lock().begin_grant(60, None, 1.0, this_process(), 6, None).unwrap().previous(), None,
+                   "Q's verified delivery can now support R despite uncertain P");
+    }
+
+    #[test]
+    fn permitted_failed_renewal_restores_only_the_unexpired_original_row() {
+        for (now, retire, expected) in [(11, false, Some(20_010)), (20_010, false, None), (11, true, None)] {
+            let shared = shared_with_base(std::ptr::null_mut(), 0, 40_000);
+            install_test_hold(&shared, 10, 20.0, 5);
+            let back = reserve_at(&shared, 10, 90.0, 5);
+            let key = back.key();
+            let ReplySubmission::Submitted(permit, false) = submit_reply(&shared, Some(back), || {
+                observe_test_reap(&mut shared.lock(), now, |_| {
+                    if retire { Ok(false) } else { Err(FAILED_HOLD_POLL) }
+                });
+                false
+            }) else { panic!("expected the original permission and its failed write") };
+            let mut state = shared.lock();
+            let settled = state.complete_grant(permit, false);
+            assert_eq!(settled.disposition, if retire { GrantDisposition::Absent } else { GrantDisposition::Effective });
+            assert_eq!(state.hold_until(key.0, key.1, key.2), expected);
+        }
     }
 
     #[test]
@@ -1251,13 +1483,11 @@
         let shared = shared_run(std::ptr::null_mut());
         let base = shared.base_deadline;
         let mut state = shared.lock();
-        let process = this_process();
-        let key = (process.id, process.created, 5);
-        let previous = state.begin_grant(base - 1, None, 60.0, process, 5, None).unwrap();
+        let grant = state.begin_grant(base - 1, None, 60.0, this_process(), 5, None).unwrap();
         assert_eq!(shared.base_remaining(|| base - 1), BaseRemaining::Remaining(1));
         assert_eq!(shared.base_remaining(|| base), BaseRemaining::Expired);
         assert!(!shared.publish_grant());
-        assert!(state.finish_grant_for(key, base - 1 + millis(60.0), previous, false));
+        assert_eq!(state.cancel_unpublished(grant), GrantDisposition::Effective);
         assert!(state.holds.is_empty());
     }
 
@@ -1272,7 +1502,7 @@
         });
         assert_eq!(remaining, BaseRemaining::UseState);
         let back = reservation.unwrap();
-        assert!(shared.lock().finish_grant(&back, false));
+        assert_eq!(shared.lock().cancel_unsubmitted(back).disposition, GrantDisposition::Effective);
         assert!(shared.lock().holds.is_empty());
         assert_eq!(shared.base_remaining(|| base), BaseRemaining::UseState);
     }
@@ -1399,19 +1629,27 @@
         let shared = shared_run(std::ptr::null_mut());
         install_test_hold(&shared, 10, 20.0, 5);
         let back = reserve_test_grant(&shared, 11);
-        assert_eq!(back.previous, Some(20_010));
+        assert_eq!(back.previous(), Some(20_010));
         shared.seal_grants();
-        assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::Ended));
-        assert!(withdrawn_before_reply_line(0, &back).ends_with(
+        let ReplySubmission::Unsubmitted(back, Refusal::Ended) =
+            submit_reply(&shared, Some(back), || panic!("sealed grant submitted")) else {
+                panic!("expected the original cancellation authority");
+            };
+        let again = back.duplicate_for_test(None);
+        let settled = shared.lock().cancel_unsubmitted(back);
+        let back = settled.details();
+        assert!(withdrawn_before_reply_line(0, back).ends_with(
             " requested=60 granted=0 decision=withdrawn reason=\"the grant was withdrawn before its reply could be sent\""
         ));
-        assert!(withdrawn_line(0, &back, 17).ends_with(
+        assert!(withdrawn_line(0, back, 17).ends_with(
             " requested=60 granted=0 decision=withdrawn reason=\"the reply was not taken within 17 milliseconds; the hold was withdrawn\""
         ));
-        assert!(shared.lock().finish_grant(&back, false));
-        assert_eq!(shared.lock().hold_until(back.id, back.created, back.token), Some(20_010));
-        assert!(!shared.lock().finish_grant(&back, false), "withdrawal settles once");
-        assert_eq!(submit_reply(&shared, None, || ()), Ok(()), "a release ACK has no grant permit");
+        assert_eq!(settled.disposition, GrantDisposition::Effective);
+        let (id, created, token) = back.key();
+        assert_eq!(shared.lock().hold_until(id, created, token), Some(20_010));
+        assert_eq!(shared.lock().cancel_unsubmitted(again).disposition, GrantDisposition::Absent, "withdrawal settles once");
+        assert!(matches!(submit_reply(&shared, None, || true), ReplySubmission::Ungated(true)),
+                "a release ACK has no grant permit");
     }
 
     #[test]
@@ -1419,16 +1657,21 @@
         let shared = shared_run(std::ptr::null_mut());
         install_test_hold(&shared, 10, 20.0, 6);
         let back = reserve_test_grant(&shared, 10);
-        let wrong = Withdraw { until: back.until + 1, image: back.image.clone(), ..back };
-        assert_eq!(submit_reply(&shared, Some(&wrong), || ()), Err(Refusal::NoHold));
-        assert!(!shared.lock().finish_grant(&wrong, false), "another request cannot withdraw the reservation");
-        assert_eq!(submit_reply(&shared, Some(&back), || ()), Ok(()));
-        assert!(shared.lock().drop_hold(back.id, back.created, back.token, false));
-        assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::NoHold), "a released hold no longer backs a grant");
-        assert!(!shared.lock().finish_grant(&back, false));
+        let key = back.key();
+        let wrong = back.duplicate_for_test(Some(1));
+        assert!(matches!(submit_reply(&shared, Some(wrong), || panic!("wrong tuple submitted")),
+                         ReplySubmission::Stale(Refusal::NoHold)));
+        let duplicate = back.duplicate_for_test(None);
+        let ReplySubmission::Submitted(permit, true) = submit_reply(&shared, Some(back), || {
+            assert!(shared.lock().drop_hold(key.0, key.1, key.2, false));
+            assert!(matches!(submit_reply(&shared, Some(duplicate), || panic!("duplicate submitted")),
+                             ReplySubmission::Stale(Refusal::NoHold)));
+            true
+        }) else { panic!("expected the original permit") };
+        assert_eq!(shared.lock().complete_grant(permit, true).disposition, GrantDisposition::Absent);
         let state = shared.lock();
         assert!(!state.passed && !state.closed);
-        assert_eq!(state.hold_until(back.id, back.created, 6), Some(20_010));
+        assert_eq!(state.hold_until(key.0, key.1, 6), Some(20_010));
         drop(state);
         reserve_test_grant(&shared, 11);
     }
@@ -1437,13 +1680,21 @@
     fn only_submission_authorized_before_the_seal_can_overlap_it() {
         let shared = shared_run(std::ptr::null_mut());
         let back = reserve_test_grant(&shared, 10);
-        let sent = submit_reply(&shared, Some(&back), || {
+        let duplicate = back.duplicate_for_test(None);
+        let late = back.duplicate_for_test(None);
+        let original_key = back.key();
+        let ReplySubmission::Submitted(permit, true) = submit_reply(&shared, Some(back), || {
+            assert!(matches!(submit_reply(&shared, Some(duplicate), || panic!("duplicate submitted")),
+                             ReplySubmission::Stale(Refusal::NoHold)));
+            assert_eq!(shared.lock().cancel_unsubmitted(late.duplicate_for_test(None)).disposition,
+                       GrantDisposition::Absent, "a duplicate cannot settle the original permitted write");
             shared.seal_grants();
+            assert!(matches!(submit_reply(&shared, Some(late), || panic!("late duplicate submitted")),
+                             ReplySubmission::Stale(Refusal::Ended)));
             true
-        });
-        assert_eq!(sent, Ok(true));
-        assert!(shared.lock().finish_grant(&back, sent == Ok(true)));
-        assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::Ended));
+        }) else { panic!("the original permission is still valid") };
+        assert_eq!(shared.lock().complete_grant(permit, true).disposition, GrantDisposition::Effective);
+        assert_eq!(shared.lock().hold_until(original_key.0, original_key.1, original_key.2), Some(60_010));
 
         for passed in [false, true] {
             let shared = shared_run(std::ptr::null_mut());
@@ -1453,9 +1704,115 @@
                 state.passed = passed;
                 state.closed = !passed;
             }
-            assert_eq!(submit_reply(&shared, Some(&back), || ()), Err(Refusal::Ended));
-            assert!(shared.lock().finish_grant(&back, false));
+            let ReplySubmission::Unsubmitted(back, Refusal::Ended) =
+                submit_reply(&shared, Some(back), || panic!("ended grant submitted")) else {
+                    panic!("expected the original cancellation authority");
+                };
+            assert_eq!(shared.lock().cancel_unsubmitted(back).disposition, GrantDisposition::Effective);
         }
+    }
+
+    fn owned_test_event() -> std::os::windows::io::OwnedHandle {
+        use std::os::windows::io::{FromRawHandle, OwnedHandle};
+        let event = unsafe { CreateEventW(std::ptr::null_mut(), 1, 0, std::ptr::null()) };
+        assert!(!event.is_null());
+        unsafe { OwnedHandle::from_raw_handle(event) }
+    }
+
+    #[test]
+    fn a_stale_io_write_cannot_clear_the_original_completion_event() {
+        use crate::sys::windows::{WAIT_OBJECT_0, WaitForSingleObject};
+        use std::os::windows::io::AsRawHandle;
+        let event = owned_test_event();
+        let handle = event.as_raw_handle();
+        let io = Io { pipe: std::ptr::null_mut(), event: handle, stop: std::ptr::null_mut() };
+        let shared = shared_run(std::ptr::null_mut());
+        let back = reserve_test_grant(&shared, 10);
+        let duplicate = back.duplicate_for_test(None);
+        let sealed_duplicate = back.duplicate_for_test(None);
+        assert_ne!(unsafe { SetEvent(handle) }, 0);
+        let ReplySubmission::Submitted(permit, true) = io.submit_write(&shared, Some(back), || {
+            assert_eq!(unsafe { WaitForSingleObject(handle, 0) }, WAIT_TIMEOUT, "original reset before submission");
+            // Model completion of the winning write while its worker still
+            // owns settlement. The event and reset operation are real.
+            assert_ne!(unsafe { SetEvent(handle) }, 0);
+            assert!(matches!(io.submit_write(&shared, Some(duplicate), || -> bool { panic!("duplicate wrote") }),
+                             ReplySubmission::Stale(Refusal::NoHold)));
+            assert_eq!(unsafe { WaitForSingleObject(handle, 0) }, WAIT_OBJECT_0, "stale call did not reset the event");
+            shared.seal_grants();
+            assert!(matches!(io.submit_write(&shared, Some(sealed_duplicate), || -> bool { panic!("sealed duplicate wrote") }),
+                             ReplySubmission::Stale(Refusal::Ended)));
+            assert_eq!(unsafe { WaitForSingleObject(handle, 0) }, WAIT_OBJECT_0, "sealed call did not reset the event");
+            true
+        }) else { panic!("the original write was permitted") };
+        assert_eq!(shared.lock().complete_grant(permit, true).disposition, GrantDisposition::Effective);
+        assert!(matches!(io.submit_write(&shared, None, || unsafe { WaitForSingleObject(handle, 0) }),
+                         ReplySubmission::Ungated(WAIT_TIMEOUT)), "an ordinary release reply still resets its event");
+    }
+
+    thread_local! {
+        static WORKER_WAKE_COUNT: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+    }
+
+    fn observe_worker_wake(shared: &Shared) {
+        assert!(shared.state.try_lock().is_ok(), "the worker must release State before signaling");
+        WORKER_WAKE_COUNT.with(|count| count.set(count.get() + 1));
+    }
+
+    #[test]
+    fn worker_shortening_signals_once_after_unlock_at_the_real_decision_boundary() {
+        use crate::sys::windows::{WAIT_OBJECT_0, WaitForSingleObject};
+        use std::os::windows::io::AsRawHandle;
+        let previous = WORKER_WAKE_FOR_TEST.with(|observer| observer.replace(Some(observe_worker_wake)));
+        assert!(previous.is_none());
+        for (intake, shortening, grant, expected) in [
+            (true, false, false, 0),
+            (true, true, false, 1),
+            (false, false, false, 0),
+            (false, true, false, 1),
+            (false, true, true, 1),
+            (false, false, true, 1),
+        ] {
+            WORKER_WAKE_COUNT.with(|count| count.set(0));
+            let event = owned_test_event();
+            let mut shared = shared_run(std::ptr::null_mut());
+            shared.wake = event.as_raw_handle() as usize;
+            let retracted = shortening.then(|| {
+                let now = tick();
+                let back = reserve_test_grant(&shared, now);
+                observe_test_reap(&mut shared.lock(), now + 1, |_| Err(FAILED_HOLD_POLL));
+                back
+            });
+            let client = this_process();
+            if intake {
+                arrive(&shared, client.id);
+            } else {
+                let connected_at = client.created + 1;
+                let arrival = Arrival { id: client.id, image: "client.exe".into(), client: Some(client),
+                    in_job: true, shut: None, gone: false };
+                let seconds = if grant { 1.0 } else { 7_200.0 };
+                let request = Message::Bytes(MessageBytes::from_slice(&encode_request(Target::Caller, 6, seconds)));
+                let (reply, line) = evaluate(&shared, arrival, connected_at, &request);
+                // The worker returns the decision to the audit path only
+                // after the signal edge, with one signal if both reasons held.
+                assert_eq!(WORKER_WAKE_COUNT.with(|count| count.get()), expected);
+                if grant {
+                    assert!(matches!(reply, Reply::Granted { .. }));
+                    let Line::Granted(_, back) = line else { panic!("a published grant has one owner") };
+                    assert_eq!(shared.lock().cancel_unsubmitted(back).disposition, GrantDisposition::Effective);
+                } else {
+                    assert!(matches!(reply, Reply::Refused { refusal: Refusal::OverCap, .. }));
+                }
+            }
+            assert_eq!(WORKER_WAKE_COUNT.with(|count| count.get()), expected);
+            assert_eq!(unsafe { WaitForSingleObject(event.as_raw_handle(), 0) },
+                       if expected == 0 { WAIT_TIMEOUT } else { WAIT_OBJECT_0 });
+            assert!(!shared.lock().take_reap_wake(), "the worker consumed this reap notification");
+            if let Some(back) = retracted {
+                assert_eq!(shared.lock().cancel_unsubmitted(back).disposition, GrantDisposition::AlreadyRetracted);
+            }
+        }
+        WORKER_WAKE_FOR_TEST.with(|observer| observer.set(previous));
     }
 
     #[test]
@@ -1842,7 +2199,7 @@
             let (reply, line) = evaluate(&shared, arrival(), created + 1, &request);
             assert!(matches!(reply, Reply::Granted { .. }), "granted again once the file can be relied on");
             let Line::Granted(_, back) = line else { panic!("the granted reply has a reservation") };
-            assert!(shared.lock().finish_grant(&back, true));
+            assert_eq!(finish_test_reply(&shared, back, true).disposition, GrantDisposition::Effective);
             // A release only brings the deadline in, so it is let through while the file is blocked.
             shared.log.blocked.store(true, Ordering::SeqCst);
             let release = Message::Bytes(MessageBytes::from_slice(&encode_request(Target::Release, 0, 0.0)));

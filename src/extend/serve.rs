@@ -107,14 +107,25 @@ pub(super) struct Io {
     pub(super) stop: Handle,
 }
 
+pub(super) enum ReplySubmission<R> {
+    Ungated(R),
+    Submitted(PermittedGrant, R),
+    Unsubmitted(Withdraw, Refusal),
+    Stale(Refusal),
+}
+
 // The permission point is immediately before the submission. A successful
 // grant permit can overlap a later seal. Sealing never revokes an operation
 // that already won permission to submit.
-pub(super) fn submit_reply<R>(shared: &Shared, grant: Option<&Withdraw>, submit: impl FnOnce() -> R) -> Result<R, Refusal> {
-    if let Some(back) = grant {
-        shared.authorize_grant_reply(back)?;
+pub(super) fn submit_reply<R>(shared: &Shared, grant: Option<Withdraw>, submit: impl FnOnce() -> R) -> ReplySubmission<R> {
+    match grant {
+        None => ReplySubmission::Ungated(submit()),
+        Some(back) => match shared.authorize_grant_reply(back) {
+            GrantPermission::Permitted(permit) => ReplySubmission::Submitted(permit, submit()),
+            GrantPermission::Unsubmitted(back, refusal) => ReplySubmission::Unsubmitted(back, refusal),
+            GrantPermission::Stale(refusal) => ReplySubmission::Stale(refusal),
+        },
     }
-    Ok(submit())
 }
 
 /// Finish an overlapped operation on `pipe`: wait for it at most `timeout_ms`, the
@@ -174,16 +185,24 @@ impl Io {
     /// Send the reply and wait, at most `timeout_ms`, for the client to take it. The pipe has no
     /// outgoing buffer, so the write completes only when the client has read the message; one
     /// that is not read in time is cancelled, and nothing of it is left for the client to read.
-    /// True when the client took the reply. An error means the grant was
-    /// disallowed before submission, so no grant bytes were written.
-    fn write(&self, shared: &Shared, reply: &Reply, timeout_ms: u32, grant: Option<&Withdraw>) -> Result<bool, Refusal> {
+    /// A submitted reply reports whether the client took it. A refused
+    /// grant returns before writing, with only its own cancellation authority.
+    fn write(&self, shared: &Shared, reply: &Reply, timeout_ms: u32, grant: Option<Withdraw>) -> ReplySubmission<bool> {
         let bytes = encode_reply(reply);
         let mut overlapped = Overlapped::with_event(self.event);
-        unsafe { ResetEvent(self.event) };
         let mut written = 0u32;
-        submit_reply(shared, grant, || {
+        self.submit_write(shared, grant, || {
             let started = unsafe { WriteFile(self.pipe, bytes.as_ptr() as *const c_void, bytes.len() as u32, &mut written, &mut overlapped) } != 0;
             self.finish(&mut overlapped, started, written, timeout_ms) == Ok(bytes.len() as u32)
+        })
+    }
+
+    pub(super) fn submit_write<R>(&self, shared: &Shared, grant: Option<Withdraw>, write: impl FnOnce() -> R) -> ReplySubmission<R> {
+        submit_reply(shared, grant, || {
+            // A refused or stale attempt must not clear a winning write's
+            // completion event. Only the authorized submission prepares it.
+            unsafe { ResetEvent(self.event) };
+            write()
         })
     }
 }
@@ -484,10 +503,12 @@ pub(super) fn handle_client(shared: &Shared, io: &Io, connected_at: u64) {
                 // as at the silent-client budget above: the wake and
                 // the log queue run after the state lock is released,
                 // not under a condition-formed guard.
-                let withdrawn = shared.lock().finish_grant(&back, false);
-                if withdrawn {
+                let settled = shared.lock().cancel_unsubmitted(back);
+                if settled.disposition == GrantDisposition::Effective {
                     unsafe { SetEvent(shared.wake as Handle) };
-                    shared.log.push_decision_waited(&unrecorded_line(unix_ms_now(), &back, RECORD_MS), RECORD_MS);
+                }
+                if settled.disposition != GrantDisposition::Absent {
+                    shared.log.push_decision_waited(&unrecorded_line(unix_ms_now(), settled.details(), RECORD_MS), RECORD_MS);
                 }
                 // The cap is read from the shared copy that is
                 // fixed for the run's life (see `Shared`), the copy
@@ -501,24 +522,34 @@ pub(super) fn handle_client(shared: &Shared, io: &Io, connected_at: u64) {
             }
         }
     }
-    let submission = io.write(shared, &reply, take_ms, back.as_ref());
-    if let Some(back) = back {
-        let delivered = submission == Ok(true);
-        // Resolve the reservation on success and on failure, including shutdown.
-        // Until delivery a shorter renewal leaves the old deadline in effect.
-        let settled = shared.lock().finish_grant(&back, delivered);
-        if settled && (!delivered || back.previous.is_some_and(|until| until > back.until)) {
-            unsafe { SetEvent(shared.wake as Handle) };
+    match io.write(shared, &reply, take_ms, back) {
+        ReplySubmission::Submitted(permit, delivered) => {
+            // Until delivery a shorter renewal leaves the old deadline in effect.
+            let settled = shared.lock().complete_grant(permit, delivered);
+            let back = settled.details();
+            if settled.disposition == GrantDisposition::Effective {
+                if !delivered || back.shortens_on_delivery() {
+                    unsafe { SetEvent(shared.wake as Handle) };
+                }
+                if !delivered && !shared.stopping.load(Ordering::SeqCst) {
+                    shared.log.push_decision_waited(&withdrawn_line(unix_ms_now(), back, take_ms), RECORD_MS);
+                }
+            }
         }
-        if let Err(refusal) = submission {
+        ReplySubmission::Unsubmitted(back, refusal) => {
+            let settled = shared.lock().cancel_unsubmitted(back);
+            if settled.disposition == GrantDisposition::Effective {
+                unsafe { SetEvent(shared.wake as Handle) };
+            }
             // The audit accepted the provisional grant. Account for its
             // withdrawal even if the matching hold was already released.
-            let withdrawn = withdrawn_before_reply_line(unix_ms_now(), &back);
+            let withdrawn = withdrawn_before_reply_line(unix_ms_now(), settled.details());
             shared.log.push_decision_waited(&withdrawn, RECORD_MS);
             let refusal = Reply::Refused { refusal, cap: shared.cap_seconds };
             let _ = io.write(shared, &refusal, take_ms, None);
-        } else if settled && !delivered && !shared.stopping.load(Ordering::SeqCst) {
-            shared.log.push_decision_waited(&withdrawn_line(unix_ms_now(), &back, take_ms), RECORD_MS);
         }
+        // A stale attempt has no authority over the original connection.
+        ReplySubmission::Ungated(_delivered) => {}
+        ReplySubmission::Stale(_refusal) => {}
     }
 }

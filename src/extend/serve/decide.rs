@@ -79,6 +79,24 @@ pub(in crate::extend) fn client_gone(pipe: Handle) -> bool {
     unsafe { PeekNamedPipe(pipe, std::ptr::null_mut(), 0, std::ptr::null_mut(), &mut available, &mut left) == 0 }
 }
 
+#[cfg(test)]
+thread_local! {
+    pub(in crate::extend) static WORKER_WAKE_FOR_TEST: std::cell::Cell<Option<fn(&Shared)>> =
+        const { std::cell::Cell::new(None) };
+}
+
+// A shortening learned by a connection must reach the existing wake edge
+// after State is unlocked and before that connection prepares its audit.
+fn wake_worker(shared: &Shared) {
+    #[cfg(test)]
+    WORKER_WAKE_FOR_TEST.with(|observer| {
+        if let Some(observe) = observer.get() {
+            observe(shared);
+        }
+    });
+    unsafe { SetEvent(shared.wake as Handle) };
+}
+
 /// Open the client, find out whether it is in the job, and count the connection against
 /// its share of the rate: a client that is not in the job has no share of its own, all
 /// of them draw on one, so they cannot crowd out the processes in it.
@@ -96,10 +114,10 @@ pub(in crate::extend) fn arrive(shared: &Shared, id: u32) -> Arrival {
     // path, so it must not pay the query and the string for text that
     // is dropped unread.
     let mut image: Option<String> = None;
-    let shut = {
+    let (shut, reap_wake) = {
         let mut state = shared.lock();
         let now = shared.tick_after_prepublication_notices(&mut state);
-        if shared.grants_are_sealed() || state.ended(now, Some(job)) {
+        let shut = if shared.grants_are_sealed() || state.ended(now, Some(job)) {
             Some(Shut::Refusal(Refusal::Ended))
         } else {
             // `admit` reads its `who` only when it pushes a new rate
@@ -146,8 +164,12 @@ pub(in crate::extend) fn arrive(shared: &Shared, id: u32) -> Arrival {
                 Admit::Counted => Some(Shut::Counted),
                 Admit::Full => Some(Shut::Refusal(Refusal::Crowded)),
             }
-        }
+        };
+        (shut, state.take_reap_wake())
     };
+    if reap_wake {
+        wake_worker(shared);
+    }
     // Every outcome but the counted one is read by the decision, so
     // its image is resolved here when the admission did not resolve
     // it; a counted connection carries it unresolved, and `evaluate`
@@ -331,13 +353,11 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
         None => parent.image(),
     }));
     let parent_rate = holder.as_ref().zip(held.as_ref()).map(|(parent, (pid, name))| ((parent.id, parent.created), *pid, name.as_str()));
-    let process = holder.as_ref().unwrap_or(&client);
-    let (id_held, created_held) = (process.id, process.created);
     // The grant's own pass over the holds reads the deadline the
     // hold had before it, and it comes back with the grant's
     // success: a separate search of the same table for it, under
     // the same lock, paid a second full scan per granted request.
-    let (outcome, now) = {
+    let (outcome, now, reap_wake) = {
         let mut state = shared.lock();
         let now = shared.tick_after_prepublication_notices(&mut state);
         let outcome = if shared.grants_are_sealed() {
@@ -346,19 +366,22 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
             Err(Refusal::Unverified.into())
         } else {
             match state.begin_grant(now, Some(job), seconds, holder.unwrap_or(client), token, parent_rate) {
-                Ok(previous) if !shared.publish_grant() => {
+                Ok(grant) if !shared.publish_grant() => {
                     // The reservation is still private under this lock. If
                     // stop won, withdraw it before a deadline reader sees it.
-                    state.finish_grant_for((id_held, created_held, token), now + millis(seconds), previous, false);
+                    state.cancel_unpublished(grant);
                     Err(Refusal::Ended.into())
                 }
                 outcome => outcome,
             }
         };
-        (outcome, now)
+        (outcome, now, state.take_reap_wake())
     };
-    let previous = match outcome {
-        Ok(previous) => previous,
+    if reap_wake || outcome.is_ok() {
+        wake_worker(shared);
+    }
+    let grant = match outcome {
+        Ok(grant) => grant,
         Err(no) => {
             return match no {
                 Refused { refusal: Refusal::RateLimited, counted: true } => counted(),
@@ -366,8 +389,7 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
             };
         }
     };
-    unsafe { SetEvent(shared.wake as Handle) };
-    let until = now + millis(seconds);
+    let until = grant.until();
     // The reason of a caller grant is a fixed text: formatting it
     // built the string (and an empty second string for the absent
     // suffix) on every grant, for text the log line holds as well
@@ -387,6 +409,6 @@ pub(in crate::extend) fn evaluate(shared: &Shared, arrival: Arrival, connected_a
     // that could only disagree with the first by the time between.
     let unix_ms = unix_ms_now();
     let line = log_line(unix_ms, &Entry { pid: id, image: image.as_str(), requested: Some(seconds), granted: Some(seconds), reason });
-    let back = Withdraw { id: id_held, created: created_held, token, until, previous, pid: id, image: image.into_string(), seconds };
+    let back = grant.for_client(id, image.into_string(), seconds);
     (Reply::Granted { seconds, until_unix_ms: unix_ms + (until - now), held: held.map_or(0, |(pid, _)| pid) }, Line::Granted(line, back))
 }

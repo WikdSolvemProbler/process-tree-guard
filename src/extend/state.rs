@@ -20,6 +20,17 @@ pub(super) struct Hold {
     /// Which hold of the process this is (see `Token`).
     pub(super) token: Token,
     pub(super) until: u64,
+    uncertain: bool,
+}
+
+impl Hold {
+    pub(super) fn new(process: Process, token: Token, until: u64) -> Self {
+        Self { process, token, until, uncertain: false }
+    }
+
+    fn key(&self) -> HoldKey {
+        (self.process.id, self.process.created, self.token)
+    }
 }
 
 type HoldKey = (u32, u64, Token);
@@ -28,19 +39,96 @@ struct PendingGrant {
     key: HoldKey,
     until: u64,
     previous: Option<u64>,
+    stage: GrantStage,
 }
 
-/// What it takes to back out of a grant whose reply the client did not take: the hold, as it
-/// stood when granted and as it was before, and the client as the log names it.
+#[derive(Clone, Copy)]
+enum GrantStage {
+    Awaiting,
+    Permitted,
+    Vetoed { _observation: ObservationFault },
+}
+
+/// Created only by the successful reservation under State. The private
+/// fields keep an exact tuple from becoming a second cancellation owner.
+#[derive(Debug)]
+pub(super) struct UnsubmittedGrant {
+    key: HoldKey,
+    until: u64,
+    previous: Option<u64>,
+}
+
+impl UnsubmittedGrant {
+    pub(super) fn until(&self) -> u64 {
+        self.until
+    }
+
+    pub(super) fn for_client(self, pid: u32, image: String, seconds: f64) -> Withdraw {
+        Withdraw { grant: self, pid, image, seconds }
+    }
+
+    #[cfg(test)]
+    pub(super) fn previous(&self) -> Option<u64> {
+        self.previous
+    }
+}
+
+/// The one reservation and the client as the log names it.
 pub(super) struct Withdraw {
-    pub(super) id: u32,
-    pub(super) created: u64,
-    pub(super) token: Token,
-    pub(super) until: u64,
-    pub(super) previous: Option<u64>,
+    grant: UnsubmittedGrant,
     pub(super) pid: u32,
     pub(super) image: String,
     pub(super) seconds: f64,
+}
+
+impl Withdraw {
+    pub(super) fn shortens_on_delivery(&self) -> bool {
+        self.grant.previous.is_some_and(|until| until > self.grant.until)
+    }
+
+    #[cfg(test)]
+    pub(super) fn key(&self) -> (u32, u64, Token) {
+        self.grant.key
+    }
+
+    #[cfg(test)]
+    pub(super) fn previous(&self) -> Option<u64> {
+        self.grant.previous
+    }
+
+    #[cfg(test)]
+    pub(super) fn duplicate_for_test(&self, different_until: Option<u64>) -> Self {
+        let grant = &self.grant;
+        UnsubmittedGrant { key: grant.key, until: different_until.unwrap_or(grant.until), previous: grant.previous }
+            .for_client(self.pid, self.image.clone(), self.seconds)
+    }
+}
+
+/// Owned by the only connection whose exact submission won the seal RMW.
+pub(super) struct PermittedGrant(Withdraw);
+
+pub(super) enum GrantPermission {
+    Permitted(PermittedGrant),
+    Unsubmitted(Withdraw, Refusal),
+    Stale(Refusal),
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub(super) enum GrantDisposition {
+    Effective,
+    AlreadyRetracted,
+    Absent,
+}
+
+pub(super) struct SettledGrant {
+    back: Withdraw,
+    pub(super) disposition: GrantDisposition,
+}
+
+impl SettledGrant {
+    pub(super) fn details(&self) -> &Withdraw {
+        &self.back
+    }
 }
 
 
@@ -127,6 +215,9 @@ pub(super) struct State {
     /// full sets it — neither the no-holds return nor a skipped call
     /// does — so the first settle at any later tick reaps in full.
     pub(super) release_stamp: Option<u64>,
+    // An unknown row can protect existing time without authorizing new time.
+    reap_has_uncertain_hold: bool,
+    reap_shortened: bool,
     /// Whether a process of the rate table is still running; a field so a test can say.
     pub(super) alive: fn(RateKey) -> bool,
 }
@@ -138,7 +229,7 @@ pub(super) fn latest(base: u64, holds: impl Iterator<Item = u64>) -> u64 {
 
 impl State {
     pub(super) fn new(base: u64, cap_seconds: f64) -> State {
-        State { base, cap_seconds, holds: Vec::new(), pending: Vec::new(), limiter: Limiter::default(), budget: Budget::default(), closed: false, passed: false, expire_deadline: base, release_stamp: None, alive: process_alive }
+        State { base, cap_seconds, holds: Vec::new(), pending: Vec::new(), limiter: Limiter::default(), budget: Budget::default(), closed: false, passed: false, expire_deadline: base, release_stamp: None, reap_has_uncertain_hold: false, reap_shortened: false, alive: process_alive }
     }
 
     /// The latest of the run's own deadline and the holds of the live processes.
@@ -199,28 +290,57 @@ impl State {
     }
 
     pub(super) fn retain_after_census(&mut self, now: u64, job: Option<Handle>, listed: Option<&[usize]>) {
-        self.holds.retain(|hold| {
-            // Membership in the list the query already paid for
-            // is tested before the aliveness poll: the search is
-            // in place and makes no call, so a hold the list no
-            // longer names — a holder that has exited or left the
-            // job, the reap's ordinary quarry — is dropped on the
-            // search alone, without a `WaitForSingleObject` paid
-            // for a verdict the search already settled. The
-            // retained set is the same either way: the tests are
-            // a conjunction of queries the tree already treats
-            // as skippable (the poll is short-circuited away for
-            // a hold whose time has run out here, and in
-            // `started_before`), so their order decides only
-            // which calls are made, never which holds stand.
-            // When the list could not be read the fallback keeps
-            // its order: the poll first, and the per-hold job
-            // query only for a holder still alive.
-            hold.until > now && match listed {
-                Some(ids) => ids.binary_search(&(hold.process.id as usize)).is_ok() && hold.process.alive(),
-                None => hold.process.alive() && job.is_none_or(|job| hold.process.in_job(job)),
+        self.retain_after_census_with(now, job, listed, Process::observe_alive, Process::observe_in_job);
+    }
+
+    pub(super) fn retain_after_census_with(
+        &mut self, now: u64, job: Option<Handle>, listed: Option<&[usize]>,
+        mut poll: impl FnMut(&Process) -> Result<bool, ObservationFault>,
+        mut membership: impl FnMut(&Process, Handle) -> Result<bool, ObservationFault>,
+    ) {
+        let mut any_uncertain = false;
+        let mut shortened = false;
+        let pending = &mut self.pending;
+        self.holds.retain_mut(|hold| {
+            // A completed census miss or elapsed bound settles this row
+            // without a native poll. The fallback only asks about Job
+            // membership after a positive poll on the original handle.
+            if hold.until <= now || listed.is_some_and(|ids| ids.binary_search(&(hold.process.id as usize)).is_err()) {
+                return false;
+            }
+            let observation = match poll(&hold.process) {
+                Ok(true) if listed.is_none() => job.map_or(Ok(true), |job| membership(&hold.process, job)),
+                other => other,
+            };
+            match observation {
+                Ok(live) => {
+                    hold.uncertain = false;
+                    live
+                }
+                Err(observation) => {
+                    if let Some(entry) = pending.iter_mut().find(|entry| entry.key == hold.key()) {
+                        if matches!(entry.stage, GrantStage::Awaiting) {
+                            entry.stage = GrantStage::Vetoed { _observation: observation };
+                            let Some(previous) = entry.previous.filter(|&until| until > now) else {
+                                shortened = true;
+                                return false;
+                            };
+                            shortened |= previous < hold.until;
+                            hold.until = previous;
+                        }
+                    }
+                    hold.uncertain = true;
+                    any_uncertain = true;
+                    true
+                }
             }
         });
+        self.reap_has_uncertain_hold = any_uncertain;
+        self.reap_shortened |= shortened;
+    }
+
+    pub(super) fn take_reap_wake(&mut self) -> bool {
+        std::mem::take(&mut self.reap_shortened)
     }
 
     /// Release what no longer holds the run up and note that the deadline has passed.
@@ -247,17 +367,29 @@ impl State {
         self.expire(now, job) || self.closed
     }
 
-    /// A provisional hold can keep the supervisor alive while its reply is
-    /// in flight. Only the base deadline and delivered holds admit new grants.
-    fn delivered_deadline_open(&self, now: u64) -> bool {
-        now < self.base || self.holds.iter().any(|hold| {
-            let key = (hold.process.id, hold.process.created, hold.token);
-            let delivered_until = match self.pending.iter().find(|pending| pending.key == key) {
-                Some(pending) => pending.previous,
+    /// Only the base and still-observed delivered time can admit a new grant.
+    /// Provisional time can keep the supervisor alive for its own handoff.
+    fn require_delivered_deadline(&self, now: u64) -> Result<(), Refusal> {
+        if now < self.base {
+            return Ok(());
+        }
+        let mut uncertain = false;
+        for hold in &self.holds {
+            let delivered_until = match self.pending.iter().find(|pending| pending.key == hold.key()) {
+                Some(pending) => match pending.stage {
+                    GrantStage::Vetoed { .. } => pending.previous.filter(|&previous| hold.until == previous),
+                    _ => pending.previous.filter(|&previous| hold.until == pending.until.max(previous)),
+                },
                 None => Some(hold.until),
             };
-            delivered_until.is_some_and(|until| now < until)
-        })
+            if delivered_until.is_some_and(|until| now < until) {
+                if !hold.uncertain {
+                    return Ok(());
+                }
+                uncertain = true;
+            }
+        }
+        Err(if uncertain { Refusal::Unverified } else { Refusal::Ended })
     }
 
     /// Install an already delivered grant for tests of the run state and supervisor.
@@ -268,25 +400,28 @@ impl State {
 
     /// Reserve a grant while its audit line and reply are in flight. An older
     /// delivered deadline still stands until the client takes a shorter renewal.
-    pub(super) fn begin_grant(&mut self, now: u64, job: Option<Handle>, seconds: f64, process: Process, token: Token, parent: Option<(RateKey, u32, &str)>) -> Result<Option<u64>, Refused> {
+    pub(super) fn begin_grant(&mut self, now: u64, job: Option<Handle>, seconds: f64, process: Process, token: Token, parent: Option<(RateKey, u32, &str)>) -> Result<UnsubmittedGrant, Refused> {
         if !process.alive() {
             return Err(Refusal::Unverified.into());
         }
         let key = (process.id, process.created, token);
         let (index, previous) = self.apply_grant(now, job, seconds, process, token, parent)?;
         let until = self.holds[index].until;
-        self.pending.push(PendingGrant { key, until, previous });
+        self.pending.push(PendingGrant { key, until, previous, stage: GrantStage::Awaiting });
         if let Some(previous) = previous {
             self.holds[index].until = self.holds[index].until.max(previous);
         }
-        Ok(previous)
+        Ok(UnsubmittedGrant { key, until, previous })
     }
 
     /// Apply a grant and return its slot and previous deadline. A holder
     /// targeted by another process has its own share of the rate limit.
     fn apply_grant(&mut self, now: u64, job: Option<Handle>, seconds: f64, process: Process, token: Token, parent: Option<(RateKey, u32, &str)>) -> Result<(usize, Option<u64>), Refused> {
-        if self.ended(now, job) || (!self.pending.is_empty() && !self.delivered_deadline_open(now)) {
+        if self.ended(now, job) {
             return Err(Refusal::Ended.into());
+        }
+        if !self.pending.is_empty() || self.reap_has_uncertain_hold {
+            self.require_delivered_deadline(now)?;
         }
         if let Some((key, pid, image)) = parent {
             match self.limiter.admit(key, (pid, image), now, &self.alive) {
@@ -328,6 +463,9 @@ impl State {
         let previous = existing_index.map(|index| self.holds[index].until);
         let index = match existing_index {
             Some(index) => {
+                if self.holds[index].uncertain {
+                    return Err(Refusal::Unverified.into());
+                }
                 self.holds[index].until = until;
                 index
             }
@@ -338,7 +476,7 @@ impl State {
                 if self.holds.len() >= MAX_HOLDS {
                     return Err(Refusal::TooManyHolds.into());
                 }
-                self.holds.push(Hold { process, token, until });
+                self.holds.push(Hold::new(process, token, until));
                 self.holds.len() - 1
             }
         };
@@ -353,42 +491,68 @@ impl State {
         self.holds.iter().find(|hold| hold.process.id == id && hold.process.created == created && hold.token == token).map(|hold| hold.until)
     }
 
-    /// Settle an in-flight grant exactly once. A failed reply restores only the
-    /// prior delivered deadline, and never recreates an expired or released hold.
-    /// True when the reserved hold was still present.
-    pub(super) fn finish_grant(&mut self, back: &Withdraw, delivered: bool) -> bool {
-        let key = (back.id, back.created, back.token);
-        self.finish_grant_for(key, back.until, back.previous, delivered)
+    pub(super) fn cancel_unsubmitted(&mut self, back: Withdraw) -> SettledGrant {
+        let disposition = match self.pending_grant_index(&back.grant) {
+            Some(index) if !matches!(self.pending[index].stage, GrantStage::Permitted) =>
+                self.settle_reservation(index, false),
+            _ => GrantDisposition::Absent,
+        };
+        SettledGrant { back, disposition }
     }
 
-    fn pending_grant_index(&self, key: HoldKey, until: u64, previous: Option<u64>) -> Option<usize> {
-        self.pending.iter().position(|entry| entry.key == key && entry.until == until && entry.previous == previous)
+    pub(super) fn complete_grant(&mut self, permit: PermittedGrant, delivered: bool) -> SettledGrant {
+        let back = permit.0;
+        let disposition = match self.pending_grant_index(&back.grant) {
+            Some(index) if matches!(self.pending[index].stage, GrantStage::Permitted) =>
+                self.settle_reservation(index, delivered),
+            _ => GrantDisposition::Absent,
+        };
+        SettledGrant { back, disposition }
+    }
+
+    fn pending_grant_index(&self, grant: &UnsubmittedGrant) -> Option<usize> {
+        self.pending.iter().position(|entry| entry.key == grant.key && entry.until == grant.until && entry.previous == grant.previous)
+    }
+
+    #[cfg(test)]
+    pub(super) fn retraction_fault_for_test(&self, back: &Withdraw) -> Option<ObservationFault> {
+        match self.pending[self.pending_grant_index(&back.grant)?].stage {
+            GrantStage::Vetoed { _observation: fault } => Some(fault),
+            _ => None,
+        }
     }
 
     fn provisional_hold_index(&self, key: HoldKey, until: u64, previous: Option<u64>) -> Option<usize> {
-        let (id, created, token) = key;
         let effective_until = until.max(previous.unwrap_or(0));
-        self.holds.iter().position(|hold| hold.process.id == id && hold.process.created == created
-            && hold.token == token && hold.until == effective_until)
+        self.holds.iter().position(|hold| hold.key() == key && hold.until == effective_until)
     }
 
-    fn has_grant_reservation(&self, back: &Withdraw) -> bool {
-        let key = (back.id, back.created, back.token);
-        self.pending_grant_index(key, back.until, back.previous).is_some()
-            && self.provisional_hold_index(key, back.until, back.previous).is_some()
+    // A reservation that lost publication is still in its original
+    // awaiting stage under the decision lock. Consume its private owner.
+    pub(super) fn cancel_unpublished(&mut self, grant: UnsubmittedGrant) -> GrantDisposition {
+        match self.pending_grant_index(&grant) {
+            Some(index) if matches!(self.pending[index].stage, GrantStage::Awaiting) =>
+                self.settle_reservation(index, false),
+            _ => GrantDisposition::Absent,
+        }
     }
 
-    pub(super) fn finish_grant_for(&mut self, key: (u32, u64, Token), until: u64, previous: Option<u64>, delivered: bool) -> bool {
-        let Some(pending) = self.pending_grant_index(key, until, previous) else { return false };
-        self.pending.swap_remove(pending);
-        let Some(index) = self.provisional_hold_index(key, until, previous) else { return false };
-        match if delivered { Some(until) } else { previous } {
+    fn settle_reservation(&mut self, index: usize, delivered: bool) -> GrantDisposition {
+        let entry = self.pending.swap_remove(index);
+        if matches!(entry.stage, GrantStage::Vetoed { .. }) {
+            return GrantDisposition::AlreadyRetracted;
+        }
+        let Some(index) = self.provisional_hold_index(entry.key, entry.until, entry.previous) else {
+            return GrantDisposition::Absent;
+        };
+        let deadline = if delivered { Some(entry.until) } else { entry.previous };
+        match deadline.filter(|&until| self.release_stamp.is_none_or(|now| until > now)) {
             Some(until) => self.holds[index].until = until,
             None => {
                 self.holds.remove(index);
             }
         }
-        true
+        GrantDisposition::Effective
     }
 
     /// End the hold `token` of the process `id`, created at `created`, at its own request;
@@ -584,17 +748,34 @@ impl Shared {
         ).is_ok()
     }
 
-    pub(super) fn authorize_grant_reply(&self, back: &Withdraw) -> Result<(), Refusal> {
-        let state = self.lock();
-        if state.passed || state.closed {
-            return Err(Refusal::Ended);
+    pub(super) fn authorize_grant_reply(&self, back: Withdraw) -> GrantPermission {
+        let mut state = self.lock();
+        let grant = &back.grant;
+        let pending = state.pending_grant_index(grant);
+        let (can_cancel, refusal) = match pending.map(|index| (index, state.pending[index].stage)) {
+            Some((index, GrantStage::Awaiting)) => {
+                if !state.passed && !state.closed &&
+                    state.provisional_hold_index(grant.key, grant.until, grant.previous)
+                        .is_some_and(|index| !state.holds[index].uncertain)
+                {
+                    if self.authorize_grant() {
+                        state.pending[index].stage = GrantStage::Permitted;
+                        return GrantPermission::Permitted(PermittedGrant(back));
+                    }
+                    return GrantPermission::Unsubmitted(back, Refusal::Ended);
+                }
+                (true, Refusal::NoHold)
+            }
+            Some((_, GrantStage::Vetoed { .. })) => (true, Refusal::Unverified),
+            _ => (false, Refusal::NoHold),
+        };
+        // Refusal paths have no RMW. Observe the seal at their decision
+        // point, without adding a load to the healthy submission path.
+        let refusal = if state.passed || state.closed || self.grants_are_sealed() { Refusal::Ended } else { refusal };
+        if can_cancel {
+            GrantPermission::Unsubmitted(back, refusal)
+        } else {
+            GrantPermission::Stale(refusal)
         }
-        if !state.has_grant_reservation(back) {
-            return Err(Refusal::NoHold);
-        }
-        if !self.authorize_grant() {
-            return Err(Refusal::Ended);
-        }
-        Ok(())
     }
 }

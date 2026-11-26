@@ -8,13 +8,20 @@ use super::*;
 
 use crate::sys::windows::{
 
-    Bool, CloseHandle, GetProcessTimes, Handle, IsProcessInJob, NtQueryInformationProcess,
+    Bool, CloseHandle, GetLastError, GetProcessTimes, Handle, IsProcessInJob, NtQueryInformationProcess,
 
     OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION, ProcessBasicInformation,
 
-    QueryFullProcessImageNameW, SYNCHRONIZE, WAIT_TIMEOUT, WaitForSingleObject,
+    QueryFullProcessImageNameW, SYNCHRONIZE, WAIT_FAILED, WAIT_OBJECT_0, WAIT_TIMEOUT, WaitForSingleObject,
 
 };
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(in crate::extend) enum ObservationFault {
+    // Retain the original status and the error only where Win32 defines it.
+    Wait { _status: u32, _last_error: Option<u32> },
+    Membership { _last_error: u32 },
+}
+
 /// A process opened by handle, with the time it was created.
 pub(in crate::extend) struct Process {
     pub(in crate::extend) handle: Handle,
@@ -42,7 +49,16 @@ impl Process {
     }
 
     pub(in crate::extend) fn alive(&self) -> bool {
-        unsafe { WaitForSingleObject(self.handle, 0) == WAIT_TIMEOUT }
+        matches!(self.observe_alive(), Ok(true))
+    }
+
+    pub(in crate::extend) fn observe_alive(&self) -> Result<bool, ObservationFault> {
+        match unsafe { WaitForSingleObject(self.handle, 0) } {
+            WAIT_TIMEOUT => Ok(true),
+            WAIT_OBJECT_0 => Ok(false),
+            WAIT_FAILED => Err(ObservationFault::Wait { _status: WAIT_FAILED, _last_error: Some(unsafe { GetLastError() }) }),
+            status => Err(ObservationFault::Wait { _status: status, _last_error: None }),
+        }
     }
 
     /// True when the process is alive and began no later than `connected_at`, a time in
@@ -55,8 +71,15 @@ impl Process {
     }
 
     pub(in crate::extend) fn in_job(&self, job: Handle) -> bool {
+        matches!(self.observe_in_job(job), Ok(true))
+    }
+
+    pub(in crate::extend) fn observe_in_job(&self, job: Handle) -> Result<bool, ObservationFault> {
         let mut result: Bool = 0;
-        unsafe { IsProcessInJob(self.handle, job, &mut result) != 0 && result != 0 }
+        if unsafe { IsProcessInJob(self.handle, job, &mut result) } == 0 {
+            return Err(ObservationFault::Membership { _last_error: unsafe { GetLastError() } });
+        }
+        Ok(result != 0)
     }
 
     /// The path of the program the process runs, as Windows spells it.

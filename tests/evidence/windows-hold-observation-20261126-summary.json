@@ -1,0 +1,829 @@
+{
+  "behavior": [
+    "Inconclusive observations preserve a previously delivered, unexpired deadline bound and cannot supply new grant eligibility.",
+    "Unsubmitted fresh or renewal proposals can be withdrawn without restoring expired, released or definitively retired holds.",
+    "Cancellation and permitted completion belong to the original reservation. Refused duplicate submissions do not reset the winning event or write.",
+    "The actual worker decision boundary signals a shortening after releasing State and shares a single signal when it also publishes a grant."
+  ],
+  "limits": [
+    "Injected wait and membership results exercised the repaired behavior. No naturally occurring observation failure or old-code negative run was recorded.",
+    "Worker signaling used its real event in the native suites. The reply regression modeled completion with an actual event and a test closure, without a second native overlapped write.",
+    "This records selected correctness checks and repository-style lint. It establishes no full stock release qualification, whole manual speed acceptance, parity, ranking or comparative performance.",
+    "Full raw streams, source snapshots and original event selections stay private. The report supplies their byte counts and digests."
+  ],
+  "lint": {
+    "first_attempt": {
+      "primary_diagnostics_made_errors": 4,
+      "primary_errors_on_candidate_lines": 0,
+      "warnings_as_errors_mismatched_repository_recipe": true
+    },
+    "repo_flag_matched_attempt": {
+      "cargo_version": "1.98.1",
+      "inherited_rustflags_present_at_dispatch": false,
+      "primary_warning_locations_in_the_six_files": 2,
+      "primary_warning_locations_on_added_or_replaced_lines": 0,
+      "rustc_version": "1.98.1",
+      "warnings_retained": true
+    },
+    "repo_flag_matched_intent": {
+      "bytes": 8378,
+      "sha256": "f6e51ee4701f01675e3a1bae7cc2f068ee11ad2adca6f5d540e121aec02876bf"
+    },
+    "repo_flag_matched_launch": {
+      "bytes": 1270,
+      "sha256": "641c86f34719e70c44ac7673504e7f1024c399008eef1755c66db9b7354b6b01"
+    },
+    "reran_tests": false
+  },
+  "native_qualification": {
+    "added_library_cases": [
+      "a_reserved_verified_holder_keeps_its_permit_when_its_old_support_becomes_uncertain",
+      "a_stale_io_write_cannot_clear_the_original_completion_event",
+      "an_inconclusive_reap_does_not_retire_or_admit_from_a_delivered_hold",
+      "permitted_failed_renewal_restores_only_the_unexpired_original_row",
+      "release_and_observation_veto_preserve_their_original_order_and_audit",
+      "uncertain_provisional_time_is_not_a_delivered_slice_for_another_grant",
+      "uncertainty_before_permission_vetoes_fresh_and_all_renewal_lengths",
+      "worker_shortening_signals_once_after_unlock_at_the_real_decision_boundary"
+    ],
+    "full_native_library_expected_per_architecture": {
+      "i686": 324,
+      "x64": 324
+    },
+    "integration_scope": "Eight selected Windows Cargo dev and test cases, with no stock release override.",
+    "library_count_basis": "Prior complete runs plus eight added Windows unit tests. This count was confirmed in both current original runs.",
+    "original_executions": 12,
+    "original_selection_plan": {
+      "bytes": 14277,
+      "sha256": "a6bc634a0f31534c16ab3d91e36389c389696e42d1832555758fce82a5b7725d"
+    },
+    "originals": [
+      {
+        "architecture": "x64",
+        "case": null,
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 300,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1127,
+            "sha256": "d55f3e0902659c537e8d58764138ba82a4be5cb8c466b16c0eaf10cc7bcfa492"
+          },
+          "native_command": {
+            "bytes": 957,
+            "sha256": "ea4aa8be2f335237388ec5659942f5a803987c2e9602f6957aa70f49ca8030a4"
+          },
+          "outer_selection": {
+            "bytes": 755,
+            "sha256": "468698eac4e2dac977d4957dcf9b6d15e1ff3872ab1aa2d2d4609ad0dfe8cd66"
+          },
+          "outer_terminal": {
+            "bytes": 1622,
+            "sha256": "7bdf1595e5a4fdaa018a1679626c34eee3166afb63093f15d63c584e0c07cc71"
+          },
+          "result": {
+            "bytes": 3337,
+            "sha256": "f4fd166a2cfa45b01acbedc67d2f2bca3ebe445a0e16349e9f3793d89cf34681"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 6131,
+            "sha256": "fba51f3446d8cb0732b9192d137d17031898d39b7aa49cac34c5b25018c5f437"
+          },
+          "stdout": {
+            "bytes": 31115,
+            "sha256": "c338aa84f9c9b90033907bad6b92dabf505d963703a652297b9ff5207d60b0d5"
+          }
+        },
+        "scope": "units",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 0,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 324
+        },
+        "whole_tree_guard_seconds": 330
+      },
+      {
+        "architecture": "i686",
+        "case": null,
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 300,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1127,
+            "sha256": "4ac6b843c6682466c324b4efe99b588f773134ca73808d92973fa20d3a353840"
+          },
+          "native_command": {
+            "bytes": 962,
+            "sha256": "c050ea1bc9e98038602b356c2e89ae1b5358b930675e375cf2712cba2b04f1e3"
+          },
+          "outer_selection": {
+            "bytes": 756,
+            "sha256": "38ffceff2b4227a5fd7e3a018752fe005d36ee754db340876546376998a12eca"
+          },
+          "outer_terminal": {
+            "bytes": 1621,
+            "sha256": "8015665cd7b9b8c4740db3ef2e43295ef454a45d89ec28cd4f14eab97ecdeb69"
+          },
+          "result": {
+            "bytes": 3343,
+            "sha256": "1e68d9706fabb7d0892e79d8603fc3ac9892cddb6e68d901c3c2c1d35a62ecd5"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 6133,
+            "sha256": "dc072b43cd105be8a144c5f42eb2391b080b62c9156e15a4db082335dc8050e0"
+          },
+          "stdout": {
+            "bytes": 31115,
+            "sha256": "b62d7fd7845bde947a5cbc8491b0e17a618670cb899aaed26a9810cc17bb0a7f"
+          }
+        },
+        "scope": "units",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 0,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 324
+        },
+        "whole_tree_guard_seconds": 330
+      },
+      {
+        "architecture": "x64",
+        "case": "G28",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1244,
+            "sha256": "f968dd4aa7657f7a9e4c3e592c58d201c838914317d21874d52d8285d0e9fdd1"
+          },
+          "native_command": {
+            "bytes": 1051,
+            "sha256": "9f89764bcbdcd519c7ba50922914338dfd7feabb2d9b3113552dc2bd6f3e19f1"
+          },
+          "outer_selection": {
+            "bytes": 750,
+            "sha256": "30b2277fd6a8d10c3c0e9d62671ddf40415d82d38b3c7841ba596436acbebcb0"
+          },
+          "outer_terminal": {
+            "bytes": 1662,
+            "sha256": "48f7ecebe149563e35b479672b4078b4953cb64bca53719a8a8321721caa48f3"
+          },
+          "result": {
+            "bytes": 2438,
+            "sha256": "f5f24411eeedd7be1b5ea613ef06d10da4cd4bfae2b479e25d6db620ad8fb5f0"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 1048,
+            "sha256": "d960133101a2b310d8fc594d304c299cb8c4458b1a2d2da4ea4096ce118e08c4"
+          },
+          "stdout": {
+            "bytes": 843,
+            "sha256": "8c96888ac3070712f47852e6ee8072f9d5307233c7402c85cf64e18263eda27f"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "x64",
+        "case": "G56",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1224,
+            "sha256": "8aae213dc3e12cae6ff730c6391fb0def208b9e548a1d5a79233aef235884fbb"
+          },
+          "native_command": {
+            "bytes": 1031,
+            "sha256": "29494ac7bd8dc20b63bff3c07288bc7f25e2da0ecd733c7ecf3eaf9e480c3fbb"
+          },
+          "outer_selection": {
+            "bytes": 750,
+            "sha256": "4c61c9b0afd1be8780756698730699f596c70ce11602f850a0e6c3482b199b90"
+          },
+          "outer_terminal": {
+            "bytes": 1662,
+            "sha256": "8c0301fad6ea9b16de007312bbd11a6e83facb9c18669247c81b0acd68169ee9"
+          },
+          "result": {
+            "bytes": 2438,
+            "sha256": "073dea17c66595380aba9706cabc98d0ba805a9c1944ddcbeb8ff5602bb73678"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 882,
+            "sha256": "36d084c92fa1de7639d8031c478e83c05a83c779015979d4388bca7cd0cc2287"
+          },
+          "stdout": {
+            "bytes": 3982,
+            "sha256": "aa630b8918cd0ad6f854e9a40932e8424f2fb3d29cf2da7a2408d3540be828b6"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "x64",
+        "case": "G45",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1266,
+            "sha256": "15d4220853558882ebaddcb47327480b1bbadd4d7c8652c54b9b18e953e40dfc"
+          },
+          "native_command": {
+            "bytes": 1073,
+            "sha256": "59d2ebbd14572d0ac1fde4bb9a4308aa3fda155bfbddf3229888d77716515d6f"
+          },
+          "outer_selection": {
+            "bytes": 748,
+            "sha256": "6f565afe1b5228429b5d29ffc360a8b1d2fba859379d25cde97f288e610ec96e"
+          },
+          "outer_terminal": {
+            "bytes": 1661,
+            "sha256": "05ef28c9c8a8f5008319bdfe48528f687ff2202df81ced57c4b0b6a599607aec"
+          },
+          "result": {
+            "bytes": 2437,
+            "sha256": "18d821bc3aad715e27d1e1532536b887c9ffe4a0f66ca8da0bbb8258ab03be69"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 882,
+            "sha256": "36d084c92fa1de7639d8031c478e83c05a83c779015979d4388bca7cd0cc2287"
+          },
+          "stdout": {
+            "bytes": 2033,
+            "sha256": "5ce1bba03cdec82f16a9901de2bd63ead06353b5fb36790fc39ad6408ab1abfb"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "x64",
+        "case": "G50",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1234,
+            "sha256": "52935a32d9201951f278f2b5b4cd03c54e518f80934019602813f7159451faf8"
+          },
+          "native_command": {
+            "bytes": 1041,
+            "sha256": "521de3ecbc2d55b142c3a0c2a49b629cfd426787959f6ca9e3eff5da24ed3455"
+          },
+          "outer_selection": {
+            "bytes": 748,
+            "sha256": "26589bc96ab4a6b587f1fb39dd1addd881c6e3735a3d0542347f01b93e61245b"
+          },
+          "outer_terminal": {
+            "bytes": 1661,
+            "sha256": "8c5193d9d7efbdd4d843229740ef2c625de8cc1738ce2c6dac036814e4c5463a"
+          },
+          "result": {
+            "bytes": 2437,
+            "sha256": "70460d3eac2a64c3b9e7a8c7858a853beb8aa215b44127095189a59a7f7d6f62"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 882,
+            "sha256": "36d084c92fa1de7639d8031c478e83c05a83c779015979d4388bca7cd0cc2287"
+          },
+          "stdout": {
+            "bytes": 1403,
+            "sha256": "1d998332ddd5a26712f65f71f26223a1c91e1e210a86896f6fc45f0ac4ad4204"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "x64",
+        "case": "G51",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1256,
+            "sha256": "53f1ecd4cfbb9787092119f08e9d36ecd43b0130e1ffeed44ea7f79cc92e1eea"
+          },
+          "native_command": {
+            "bytes": 1063,
+            "sha256": "fe27415d6f587d83c7811043d3399d55e95eaf10d6d5d5ed787b320c2307a5ab"
+          },
+          "outer_selection": {
+            "bytes": 748,
+            "sha256": "822c49818e6b04fa82fb6ecde5293621ffa1256dd8af2718513fa8421eff2741"
+          },
+          "outer_terminal": {
+            "bytes": 1660,
+            "sha256": "421097b1a926f3e2f5a936d0a2b9337b686394391f0ce9c061123381d413f2df"
+          },
+          "result": {
+            "bytes": 2438,
+            "sha256": "b199ca6e3d93e80d6fdc29bdede5a60a5be714f5d90d5eec430368788cf31b58"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 882,
+            "sha256": "36d084c92fa1de7639d8031c478e83c05a83c779015979d4388bca7cd0cc2287"
+          },
+          "stdout": {
+            "bytes": 3302,
+            "sha256": "1d43894d86b8f7d71b69b9329055c8e723ff24961e658b9a1ae0d8fe4dd65c95"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "x64",
+        "case": "G76",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1265,
+            "sha256": "9f46c5357493f046d381d913ec07456388ae21b75145ef656ef7fc5a96f33b01"
+          },
+          "native_command": {
+            "bytes": 1072,
+            "sha256": "6bedd20df6476785897bcd66b771fd3553adb74c257f43c96b1f5f07635c6eec"
+          },
+          "outer_selection": {
+            "bytes": 750,
+            "sha256": "381673c90e4bde79dd6ffa17118cd0112df10c474fd7b72c25bd50d26e46083c"
+          },
+          "outer_terminal": {
+            "bytes": 1662,
+            "sha256": "e3d8d9a6b38e9945869dc8dc172f977e2fd0c24ee4e2e6ec1131777dab00625a"
+          },
+          "result": {
+            "bytes": 2438,
+            "sha256": "c249340481bab0e12fc8eccc951b598b29c23ba3ebc045edd88daa1b467d3a2c"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 882,
+            "sha256": "cd183d197be34f934d01af6b91938e1fa3b564619d296dc3a9c5c6c3695079b8"
+          },
+          "stdout": {
+            "bytes": 4839,
+            "sha256": "c03ef19c96faf034732ebb3493502b28fe0f7272cf0328e5ddc9686add5d9461"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "i686",
+        "case": "G28",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1244,
+            "sha256": "2e2b9c65448de4d5df2e3bf3942ebc74de0ec707f955ba25a1d3944ea8bb52c1"
+          },
+          "native_command": {
+            "bytes": 1056,
+            "sha256": "70816a5944ffd27ad60e537626d5dd03534647d263ff17715d4b62ef34045793"
+          },
+          "outer_selection": {
+            "bytes": 752,
+            "sha256": "1a17922280c7e607d38fa40430753c1d274e8bc2cf327ca15532dfb91474a827"
+          },
+          "outer_terminal": {
+            "bytes": 1662,
+            "sha256": "d52eb05c9b880fa2ae3403c92b92a1492dc6e494c4dae9cb42475a805bb2174f"
+          },
+          "result": {
+            "bytes": 2444,
+            "sha256": "f21b16e07838d7a0f4f110daa231451a87d5da1dbdfac6a9978b7ab71010252e"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 1047,
+            "sha256": "ebdaa6c380a2152c73285676e8cf3e0bd3a31cb89cd8f27b048e92b8d8ab468f"
+          },
+          "stdout": {
+            "bytes": 842,
+            "sha256": "11086ed45a8ec9994e48ad15a1e6c51c2bc093d89d6eb656be5f4b21ce165fe3"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "i686",
+        "case": "G56",
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 120,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1224,
+            "sha256": "3f1eccbb14841e8f97b8647e2b73baf8f8241c858e8bc831ca6f0a8b11c4d851"
+          },
+          "native_command": {
+            "bytes": 1036,
+            "sha256": "cca86dbbdccc2034e248b4fa1815702e7f474ba8157a4ce5de4071833607315c"
+          },
+          "outer_selection": {
+            "bytes": 752,
+            "sha256": "a66aa9a6201f1faf0d80ae57723a6dc789490eb108d1d71b459f9ee0617d0a64"
+          },
+          "outer_terminal": {
+            "bytes": 1662,
+            "sha256": "34d04ddffffefd57c606342382b343e709a5cb47f73af04c37e600f53f783399"
+          },
+          "result": {
+            "bytes": 2444,
+            "sha256": "2e923993b1c9f97d21aca0ff75b8c22263f2f82fabd8be08e880bdc8a3ea7c49"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 881,
+            "sha256": "8d658d71db0181f1ed27bfe31d27a9a953c6c1dfbdf0faf4573ee08d7040d0a4"
+          },
+          "stdout": {
+            "bytes": 3982,
+            "sha256": "82c3ea802ad6a9c7a8cfb9b71a594d376f9af1c1176dced5ddd1ca48aaab660e"
+          }
+        },
+        "scope": "integration",
+        "test_counts": {
+          "failed": 0,
+          "filtered": 83,
+          "ignored": 0,
+          "measured": 0,
+          "passed": 1
+        },
+        "whole_tree_guard_seconds": 150
+      },
+      {
+        "architecture": "x64",
+        "case": null,
+        "native_exit": 101,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 300,
+        "outer_exit": 1,
+        "private_artifact_identities": {
+          "intent": {
+            "bytes": 1162,
+            "sha256": "acbad9c7a3a2660e121e45fcc3b1131b9f840e0b0d429108a4370e913e206534"
+          },
+          "native_command": {
+            "bytes": 1047,
+            "sha256": "d147063f2896a878615490e7f25702a3b48376e3f771beb410045c245e486556"
+          },
+          "outer_selection": {
+            "bytes": 665,
+            "sha256": "16f53f438fc6080d17c20faa5762ec245c187e9c9c2443da962b7c83b02e99e5"
+          },
+          "outer_terminal": {
+            "bytes": 2234,
+            "sha256": "58e5ed8d737b76e872e1f992ea3a411a49b9e65190a9d369d3ea852ed20fcdd6"
+          },
+          "result": {
+            "bytes": 2444,
+            "sha256": "e30317972ff5516aedb109750c171ae0b5561bf09bb9913a19dabec80ed52a26"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 3717,
+            "sha256": "d92933a3057060c5b7bce966ea0b78bb2846a826d1c06e0da10c82d7efa0b01e"
+          },
+          "stdout": {
+            "bytes": 291,
+            "sha256": "589cfc4ef934c2a40a339510aaabc9898e31b08dff162c6ea6660dd27808af60"
+          }
+        },
+        "scope": "strict_clippy",
+        "whole_tree_guard_seconds": 330
+      },
+      {
+        "architecture": "x64",
+        "case": null,
+        "native_exit": 0,
+        "original_native_handle_retained_and_joined": true,
+        "original_native_wait_seconds": 300,
+        "outer_exit": 0,
+        "private_artifact_identities": {
+          "native_command": {
+            "bytes": 1210,
+            "sha256": "313e0424504c19f66e591ce73e6d4d74205365c50c0586cacb58504b75b24200"
+          },
+          "outer_selection": {
+            "bytes": 638,
+            "sha256": "763c8d2115007c092de93187d6448578e99c13a2ced7e9999019b5105930275e"
+          },
+          "outer_terminal": {
+            "bytes": 1518,
+            "sha256": "545ec637cbfe473890284cb28f596bc9587eb14367c97854d3693997256c29c5"
+          },
+          "result": {
+            "bytes": 2306,
+            "sha256": "f33cd4043f2ce663fc85278fd798b6a596d30535d8bed9bdf9139e89f9127980"
+          },
+          "source_after": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "source_before": {
+            "bytes": 254658,
+            "sha256": "d0c012acdbe1a41a13e106b9e5f99d3bc8a7260e1d44eb15a50033575bc8b7bf"
+          },
+          "stderr": {
+            "bytes": 79567,
+            "sha256": "c2567c5d8391d3b12098bd0de38ef4f3aa70ef96590c083b9db89caae18c6743"
+          },
+          "stdout": {
+            "bytes": 327,
+            "sha256": "63084031b04cd199f19a0b4e8832315407937fb8569c38b3d86d683ab1401591"
+          }
+        },
+        "scope": "repo_clippy",
+        "whole_tree_guard_seconds": 330
+      }
+    ],
+    "qualification_packet": {
+      "bytes": 10821,
+      "sha256": "a5ad7bb82029db01115c3376bd59e3ef94727341c18b52bc720921f1b5da64b1"
+    }
+  },
+  "preserved_history": {
+    "earlier_G52": {
+      "guard_exit": 125,
+      "native_test_exit": 101,
+      "outer_exit": 1,
+      "rerun_here": false,
+      "source_evidence": {
+        "bytes": 43942,
+        "sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3"
+      }
+    },
+    "failed_lint_and_preparation_records": "Retained separately from successful original runs. No outcome pooling or rescoring.",
+    "withheld_first_implementation": {
+      "diff": {
+        "bytes": 61710,
+        "sha256": "e4b91f61c288eef2c03ddffe58b009abc6bce7df5858a2f44bbe11f916fc6e3e"
+      },
+      "disposition": "Withheld before build for pre-permit event reset, cancellation capability and worker-wake coverage.",
+      "manifest": {
+        "bytes": 2350,
+        "sha256": "9c1f527ae0e0afe9f220b0a5a7e1ccbb3558ef1be230d8c5890e2a3d948c0e16"
+      },
+      "native_executions": 0
+    }
+  },
+  "schema": "ptg-windows-hold-observation-qualification-summary-v1",
+  "source": {
+    "application": {
+      "bytes": 1364,
+      "sha256": "0e781f62ae5aa7c70cd11ba5378ae22103217ae2f76c2e8c3ee731f79073e2a6"
+    },
+    "applied_implementation": {
+      "bytes": 2590,
+      "sha256": "8849e7fc1f41eeded99a714109cd6aa26b78ba2b7e899ac7f6e556b836e76b97"
+    },
+    "approved_design_sha256": "6010d76490c2e568fbc8329ca386936d904b499b5ec4990f96dfe49e954b3cef",
+    "base_commit": "300f78834c3737ea925c6cf074f110172de14c05",
+    "implementation_diff": {
+      "bytes": 76923,
+      "sha256": "f820988b2f09aa80c97056a04ae072197beef117ebd08ec0e2bbbcd69aee11e0"
+    },
+    "independent_exact_source_reviews": [
+      {
+        "bytes": 1710,
+        "sha256": "bca23f218af4a37053ff8b19eb55c95ef19b185ed7e894ebd49c7d4acab8e6c3"
+      },
+      {
+        "bytes": 2306,
+        "sha256": "d761a79f060e40ec4c3b8d3b8662849ace723a07207784a4ff90dbe6726bdc85"
+      }
+    ],
+    "six_source_roles": {
+      "connection_decisions": {
+        "after": {
+          "bytes": 21824,
+          "sha256": "9cb26a4fac1d2b02b50496909d3f3333ed617a2134ccc32e492c93d3cdccd5d2"
+        },
+        "before": {
+          "bytes": 21333,
+          "sha256": "f1ef6902ebf4a05ca922578cc359df36402cf16dab6dbc255366121c60dfd8a2"
+        }
+      },
+      "deadline_wake": {
+        "after": {
+          "bytes": 14135,
+          "sha256": "e32579dc60c333c9d394f7499d1a7fd56c0fa19144b5322d255fc518e70c7a8c"
+        },
+        "before": {
+          "bytes": 14027,
+          "sha256": "eb34aa23c5f1ea90848bb917341757c2084974fc8358a94066e475b273a716ca"
+        }
+      },
+      "extension_state": {
+        "after": {
+          "bytes": 34481,
+          "sha256": "5e346321ba8bff45f90b696976ac6181c3e84d1bdc36f91b057245acab4fae31"
+        },
+        "before": {
+          "bytes": 28213,
+          "sha256": "64d1d9ce3b4a9636f27480c1d996bd27afab192bea05ce11a3668cfdcfa3cc60"
+        }
+      },
+      "extension_unit_tests": {
+        "after": {
+          "bytes": 139089,
+          "sha256": "e3aa310ca90ef5496976c324330acc8aea1ab8c8b8c96570999cbcba31199492"
+        },
+        "before": {
+          "bytes": 119596,
+          "sha256": "82032b9278cdb0d45aa16d27531e74f1744d62eb1ebb9bf1eccb621ed67bdc00"
+        }
+      },
+      "pipe_submission": {
+        "after": {
+          "bytes": 26103,
+          "sha256": "c5678d7499582e6cff1751b6f7216f2d07c27188f7e75e2978cbf92dbe356f2c"
+        },
+        "before": {
+          "bytes": 24648,
+          "sha256": "4e726a900b5b2664dce93a9d2b1560fd0cb4c80648c5a2fa54364dcca15cc3a9"
+        }
+      },
+      "process_observations": {
+        "after": {
+          "bytes": 9196,
+          "sha256": "b7f2a414e9c259dce465eaf6e0aa2a15c1141cea9fab8dc7445878756b774911"
+        },
+        "before": {
+          "bytes": 8150,
+          "sha256": "beb1021babc4ae8ff2bffd66fba349d58077bb30a350aa4760490069644d9452"
+        }
+      }
+    },
+    "staged_source_inputs": {
+      "bytes": 261333,
+      "sha256": "bf7655736ad67a1c1e811aac74a0cd853c73791443a65b0a2342913392ce0f06"
+    },
+    "tracked_files": 1198
+  },
+  "status": "limited_windows_native_qualification"
+}
