@@ -1,0 +1,337 @@
+{
+  "schema": "ptg-windows-rate-index-crt-startup-diagnostic-v1",
+  "date": "2026-11-26",
+  "status": "ONE_REVIEWED_PRIVATE_PREMAIN_CAPTURE_COMPLETE",
+  "scope": "Descriptive successor comparison of two private instrumented Windows x86-64 images from the same source with one rate-index type changed.",
+  "source": {
+    "control_commit": "ad82d8a15a092b1e52ce65f9d68bd526c4e7fc83",
+    "compiled_input_bridge_commit": "cb6c1f05273248671ac5cb62a526437421ca2c14",
+    "compiled_input_bridge_paths": [
+      "src",
+      "build.rs",
+      "Cargo.toml",
+      "Cargo.lock",
+      ".cargo",
+      "rust-toolchain",
+      "rust-toolchain.toml"
+    ],
+    "compiled_input_bridge": "The listed build-input paths match across the two commits. This does not assert full checkout parity.",
+    "source_archive_entries": 1183,
+    "source_archive_sha256": "df007faac864855540db404041a840f087d5b0c6749bf45816c457cb627b3982",
+    "changed_path": "src/extend/state/rate.rs",
+    "control_rate_source_sha256": "057f7179983d2db02acb24394713f3d550c97191fa1f355653de156bb42efd93",
+    "control_rate_source_git_lf_sha256": "87a3dfa7da814a3049ba5a3e3f35b5fa725369a7a381e0db508561bfb49adaa8",
+    "control_rate_source_mapping": "The original rate source pin covers the retained CRLF bytes. The Git LF hash was verified by CRLF-to-LF normalization in memory. Neither original was changed.",
+    "candidate_rate_source_sha256": "7771c1dfc7aab542b1d93b68b2303bbb7b80d6e70b437cda170a9aeaeed62c25",
+    "intervention": "A is the unmodified control. B replaces only the Limiter index field's HashMap with BTreeMap. B is a private diagnostic candidate and was not shipped."
+  },
+  "build": {
+    "target": "x86_64-pc-windows-msvc",
+    "profile": {
+      "codegen-units": 1,
+      "lto": true,
+      "opt-level": 3,
+      "panic": "abort",
+      "strip": true
+    },
+    "rustc": "1.98.1 (48a229cea)",
+    "windows_sdk": "10.0.28000.0",
+    "vc_toolset": "14.51.36231",
+    "locked": true,
+    "offline": true,
+    "features": [],
+    "jobs": 1,
+    "same_selected_build_environment_sha256": "84ee99f5563d2fa2737ffa2eeb17a27cc7344ff3771a63f7b364d37c83aa92a9",
+    "same_absolute_private_build_paths": true,
+    "original_builds_joined_zero": 4,
+    "arms": {
+      "A": {
+        "stock": "b18f6e9b1ce561cbce1aed43a8f2c2594372ba1ed3065b1678c9912d832e12e3",
+        "stock_pdb": "59cf338f073c46d2fd425056dd5473955f0f41ba1bb220334f9151a849f55581",
+        "probe": "44b1023d51b3a98d00a372602ffee3f04e57f97d87f5827dd17bbed6b076cf7e",
+        "probe_pdb": "c8bf6376ab47395c3d099d0174ef5b02b6a6e3feebcbf7d0f5a14c70bd20f307",
+        "stock_build_receipt_sha256": "92c443d72e89b51fbc7c7dbb4f89c9c2207f8dfe904875bcd982654538981016",
+        "probe_build_receipt_sha256": "766a739429fb54114f36ce1353fdec0225980b824f6abab876405bfb910da785",
+        "stock_tls_template_bytes": 449,
+        "probe_tls_template_bytes": 449,
+        "stock_tls_callback_count": 0,
+        "probe_tls_callback_count": 0
+      },
+      "B": {
+        "stock": "2bf8a515dfd932fbd8d73f32a8606b16828ac608510dffe02bfa6aea8d295dae",
+        "stock_pdb": "e007fb69a2a17148871fb7923805aa256a215f72758b4de56b2af2217b00ffc1",
+        "probe": "4c1cd228025042c297d7a0595876729689931d016e3edf89fec84aaa867bfb6e",
+        "probe_pdb": "7ba56f266e9a9d1e2e972552d1a427d2757759677a8fef10f2dc2508dfad75c6",
+        "stock_build_receipt_sha256": "5a9a7a94fcb31e39bbbe846fbb105bb6ee080ba837fade148cdc5f6931520527",
+        "probe_build_receipt_sha256": "98ae3bb955f85e8d0a809e50c1363d21622986dc72c62f2dc145694f60b247da",
+        "stock_tls_template_bytes": 425,
+        "probe_tls_template_bytes": 425,
+        "stock_tls_callback_count": 0,
+        "probe_tls_callback_count": 0
+      }
+    },
+    "cross_arm_direct_import_removed": "bcryptprimitives.dll!ProcessPrng",
+    "other_direct_import_changes": 0,
+    "delay_import_changes": 0,
+    "image_differences": "TLS templates are 449 bytes in A and 425 bytes in B, with zero TLS callbacks in the inspected images. Entry, section and link layout also differ. The import change does not identify a specific DLL cost."
+  },
+  "runtime": {
+    "endpoint": "Parent QPC immediately before ResumeThread through the first child QPC in the same verified CRT initializer. The interval includes resume, scheduling, loader work and earlier CRT activity.",
+    "launch": "Each probe uses a detached suspended start, the exact atomic per-slot kill-on-close Job and the explicit mapping plus three standard handles. The same controller and callback object were used in both arms.",
+    "outer_guard_seconds": 300,
+    "aggregate_dispatch_eligibility_cutoff_seconds": 180,
+    "observation_eligibility_cutoff_seconds": 1.5,
+    "outer_original_native_exit": 0,
+    "controller_original_retained_join_zero": true,
+    "retry": false,
+    "controller_assistance_or_forced_cleanup_used": false,
+    "physical_enforcement": "The independent 300-second outer Job supplies the physical whole-tree cap. The 1.5-second observation and 180-second aggregate dispatch cutoffs are numerical eligibility and dispatch rules.",
+    "qpc_frequency_hz": 10000000,
+    "slot_count": 80,
+    "pair_count": 40,
+    "same_image_pairs_per_arm": 8,
+    "mixed_pair_count": 24,
+    "block_count": 8,
+    "includes_first_slot": true,
+    "single_preflight_available_ram_mib": 7239.4,
+    "single_preflight_cpu_load_percent": 6,
+    "preflight_scope": "One snapshot without resource reservation or favorable retry.",
+    "seals": {
+      "controller": "4f4b8559978a43a376f8e15f2f50bedd073159940db21c61131ada42183ba0a9",
+      "controller_source": "5f96d9a4e9178858b35330a489a873422b1d5818559804050ee0729713fa9f65",
+      "controller_compile_result": "f60a4a50b34b057b6acdf199679ba257e6db191cb8f333855dab3c2d357c6fcc",
+      "marker": "b36664d259c21e800f8c9612b63d67ab844a2a6abfe414ee578eb134516f9259",
+      "schedule": "8744072cb85aeec6208a88a03c05962273874f441601ab6e71bc95e1aa5bd2d3",
+      "common": "025f2d61000331bcff05e3e7ffc8f25df5334520ebeff1a2a6284aa71397a5ad",
+      "replay": "e86d1954acfbba604c259c7ddfe1b684e49d1bb067360e2f8a3d297a384514ce",
+      "analysis": "ac833b44667ab4f4bb21ea3d05a121f6a309aed8efc13c503a52d2a3556cd9a4",
+      "evidence": "e9766df442cf7065c6dd6f8373cc8faf1788687a81947e1c0a94b42f6d50db7c"
+    }
+  },
+  "observations": {
+    "path": "tests/evidence/windows-rate-index-startup-20261126-observations.csv",
+    "bytes": 2184,
+    "sha256": "a15d39dc4dbf3df0705f819e1d15a36e318c730cfd79580da5910c593efd37b4",
+    "rows": 80,
+    "columns": [
+      "slot",
+      "pair",
+      "block",
+      "half",
+      "arm",
+      "elapsed_ticks",
+      "frequency"
+    ]
+  },
+  "descriptive_results": {
+    "mixed_b_minus_a": {
+      "n": 24,
+      "min_ticks": -32610,
+      "max_ticks": 12989,
+      "median_twice_ticks": -3751,
+      "negative": 16,
+      "zero": 0,
+      "positive": 8
+    },
+    "mixed_median_microseconds": -187.55,
+    "mixed_by_half": {
+      "half_1": {
+        "n": 12,
+        "min_ticks": -32610,
+        "max_ticks": 1156,
+        "median_twice_ticks": -3310,
+        "negative": 9,
+        "zero": 0,
+        "positive": 3
+      },
+      "half_2": {
+        "n": 12,
+        "min_ticks": -19382,
+        "max_ticks": 12989,
+        "median_twice_ticks": -4160,
+        "negative": 7,
+        "zero": 0,
+        "positive": 5
+      }
+    },
+    "mixed_by_order": {
+      "AB": {
+        "n": 12,
+        "min_ticks": -15811,
+        "max_ticks": 2026,
+        "median_twice_ticks": -3249,
+        "negative": 8,
+        "zero": 0,
+        "positive": 4
+      },
+      "BA": {
+        "n": 12,
+        "min_ticks": -32610,
+        "max_ticks": 12989,
+        "median_twice_ticks": -4591,
+        "negative": 8,
+        "zero": 0,
+        "positive": 4
+      }
+    },
+    "mixed_by_half_and_order": {
+      "1/AB": {
+        "n": 6,
+        "min_ticks": -15811,
+        "max_ticks": 908,
+        "median_twice_ticks": -2779,
+        "negative": 4,
+        "zero": 0,
+        "positive": 2
+      },
+      "1/BA": {
+        "n": 6,
+        "min_ticks": -32610,
+        "max_ticks": 1156,
+        "median_twice_ticks": -4591,
+        "negative": 5,
+        "zero": 0,
+        "positive": 1
+      },
+      "2/AB": {
+        "n": 6,
+        "min_ticks": -6291,
+        "max_ticks": 2026,
+        "median_twice_ticks": -4160,
+        "negative": 4,
+        "zero": 0,
+        "positive": 2
+      },
+      "2/BA": {
+        "n": 6,
+        "min_ticks": -19382,
+        "max_ticks": 12989,
+        "median_twice_ticks": -1503,
+        "negative": 3,
+        "zero": 0,
+        "positive": 3
+      }
+    },
+    "same_image_calibration": {
+      "A": {
+        "signed_second_minus_first": {
+          "n": 8,
+          "min_ticks": -1247763,
+          "max_ticks": 17168,
+          "median_twice_ticks": -3378,
+          "negative": 5,
+          "zero": 0,
+          "positive": 3
+        },
+        "absolute_second_minus_first": {
+          "n": 8,
+          "min_ticks": 469,
+          "max_ticks": 1247763,
+          "median_twice_ticks": 6610,
+          "negative": 0,
+          "zero": 0,
+          "positive": 8
+        }
+      },
+      "B": {
+        "signed_second_minus_first": {
+          "n": 8,
+          "min_ticks": -13586,
+          "max_ticks": 971,
+          "median_twice_ticks": -511,
+          "negative": 5,
+          "zero": 0,
+          "positive": 3
+        },
+        "absolute_second_minus_first": {
+          "n": 8,
+          "min_ticks": 87,
+          "max_ticks": 13586,
+          "median_twice_ticks": 1261,
+          "negative": 0,
+          "zero": 0,
+          "positive": 8
+        }
+      }
+    },
+    "retained_largest_aa_absolute_pair_difference": {
+      "pair": 26,
+      "slots": [
+        51,
+        52
+      ],
+      "ticks": 1247763,
+      "milliseconds": 124.7763
+    }
+  },
+  "custody_hashes": {
+    "capture_raw": {
+      "bytes": 206943,
+      "sha256": "28e9b83fb71616876cdaf24e232c5fb9f097eed863d5d92615bd6642fe3513c8"
+    },
+    "strict_replay_result": {
+      "bytes": 33946,
+      "sha256": "e4871e6d01b9e17867e7c5c49afdf94c1e86f9e66656a0d34357743be2abe201"
+    },
+    "package_seal": {
+      "bytes": 17860,
+      "sha256": "792b33830dc927316b7e94df05ca1f6d32e95a5fe7686ca96c2d8b8444bb9ae8"
+    },
+    "root_admission": {
+      "bytes": 878,
+      "sha256": "9b2ba1f2c6673ae6e7744aaf33b0d9d1dbba346d450e9ac1a85ab82c0275463c"
+    },
+    "root_launch": {
+      "bytes": 1708,
+      "sha256": "39bb728ee7161a52db5becce0a109cad957a89258d6e62a076f81c79d522d75e"
+    },
+    "original_outer_event": {
+      "bytes": 1995,
+      "sha256": "2249142b733cee5f4ba9a7d35a1e6c4d3f3feecd0427592f5392a7f3f8d822ae"
+    },
+    "original_event_selection": {
+      "bytes": 409,
+      "sha256": "5c3578e361100daa73090b95739fa33acbc0afcecba1a57ae34f76b32b5d193e"
+    },
+    "original_controller_result": {
+      "bytes": 1314,
+      "sha256": "c6fba2e4411141056682821e0c0ff01abd4e4fabff3330cb223471f1520f1871"
+    },
+    "build_inputs": {
+      "bytes": 261129,
+      "sha256": "4b2912acad3d6a2323d64431adbeca990b2e2ae0cb6c0ca6376fa7a09c2087a8"
+    },
+    "artifact_proof": {
+      "bytes": 62418,
+      "sha256": "e3a29559b4080718345c206e9f0a06519818f18fe8fd38b447fefc18eebeab43"
+    },
+    "stock_import_gate": {
+      "bytes": 42142,
+      "sha256": "8b2e32120b59f18728856546f754799061cab99474157cc251b86e108adfc311"
+    },
+    "probe_import_gate": {
+      "bytes": 44992,
+      "sha256": "b3155fa442a175ba3627b7bdebe342f2bebe4a078d03e89bb9d2eee9a1e45581"
+    },
+    "preserved_probe_reader_failure": {
+      "bytes": 1280,
+      "sha256": "6181e42e273091f9b4cef5e4e2328bf5b280f66b6b3580d37dc2cca6906a3888"
+    },
+    "preserved_artifact_proof_failure": {
+      "bytes": 1418,
+      "sha256": "78353d05ea303df203bf7aa71047aabaa80230bcf800d583456291565d42c862"
+    }
+  },
+  "preservation": [
+    "The historical 9c6-versus-0788 80-slot diagnostic remains a separate capture. Its repaired 9c6 reference failed G28 and remains ineligible.",
+    "The initial probe import reader and first successor artifact proof had preserved metadata failures. The corrections used the same existing artifacts and did not repeat the native builds or the successor launch.",
+    "The incomplete A013 attempt remains failed. There is no replacement, stitching, pooling or subtraction from a historical result."
+  ],
+  "limits": [
+    "The timings are point summaries for this one instrumented comparison. The signed differences and same-image variation do not establish an individual DLL cause, an equivalence margin or a stock speed result.",
+    "The procedure is specific to the recorded Windows x86-64 MSVC artifacts and launch context. No general Windows, other-platform, stock manual, extendable-traffic or protection result follows.",
+    "Build and local capture custody do not constitute candidate CI or release acceptance. Native rate and cleanup protection and stock manual and extendable performance gates remain separate.",
+    "This is not a product ranking, historical parity result or authorization to deploy the candidate. The full matched comparison still needs a qualified historical reference and unchanged protection oracles.",
+    "Public observations use ordinal slot identities and relative elapsed ticks. Raw frames, absolute clocks, private paths and native process or device identifiers remain private."
+  ]
+}
