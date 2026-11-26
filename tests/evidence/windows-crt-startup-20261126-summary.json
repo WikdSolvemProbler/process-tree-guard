@@ -1,0 +1,230 @@
+{
+  "schema": "ptg-historical-windows-crt-startup-diagnostic-v1",
+  "date": "2026-11-26",
+  "status": "HISTORICAL_INSTRUMENTED_CAPTURE_COMPLETE",
+  "arms": {
+    "A": {
+      "source_commit": "9c6f0df93cee92dcaca0e89ebc3f09134eeab53d",
+      "stock_exe_sha256": "f693aab02cfb4f7c2e3ce2c148aa53ae8b31d5efb19e2b6e3c4fbaea5df2dc00",
+      "stock_pdb_sha256": "104eaacffe95884ce7eca5e6721cf854365377cb55bf9f6fc58a212c8a261cb3",
+      "probe_exe_sha256": "75d17075ad4fa8f3f38ab0aad9a4907466cad607eb3165274bf20f51c445ea46",
+      "probe_pdb_sha256": "0524b5aa1d223dc973357ff7bb140c1384c4c54d6088f19e92f9fbc227a7f3bf",
+      "original_probe_build_receipt_sha256": "aeef04e0a32c753557b8be79cdc658c85f707d7fc5f9898f13db5f0659f6f80a",
+      "status": "The original repaired reference failed G28 and remains ineligible for guarded-run acceptance."
+    },
+    "B": {
+      "source_commit": "0788c87cf7a1c01193b22b69127efc93a6309e44",
+      "stock_exe_sha256": "8d42279c9d663d385176a1b2833b9abf5c08cec2b65c3f9de0b344cc0f3e6142",
+      "stock_pdb_sha256": "e3e3232d295e61f95a104db123bd6e6f7865d7f2051be298c1933370d201d84f",
+      "probe_exe_sha256": "2b3ad99fcfa98cde1289fd4e77a506408c8c98652c93c082fd551acffce88eb3",
+      "probe_pdb_sha256": "c43ccf4cd323b389ce6affc4fa5ba87151cb1afda9783cba2316adea1ba9ff43",
+      "original_probe_build_receipt_sha256": "dd05ad09ce8d56a3645ce2b0cc4c1ea93cabe0bea71285e3233f2eb149e173a2",
+      "status": "Historical feature-free x64 release endpoint. Its stock effective SDK and full linker arguments were not archived."
+    }
+  },
+  "public_artifacts": {
+    "observations": {
+      "path": "tests/evidence/windows-crt-startup-20261126-observations.csv",
+      "bytes": 2182,
+      "sha256": "40d11d9bebbabd96986b3d6e5ac3ea2328033f5cbc6a7a31dc048a36c5df5788",
+      "rows": 80,
+      "includes_first_launch": true
+    },
+    "generic_c_sources": [
+      {
+        "path": "tests/windows/crt-startup/crt_controller.c",
+        "bytes": 34258,
+        "sha256": "5f96d9a4e9178858b35330a489a873422b1d5818559804050ee0729713fa9f65"
+      },
+      {
+        "path": "tests/windows/crt-startup/crt_marker.c",
+        "bytes": 4888,
+        "sha256": "43b2ff3c055bc5fc5ef5149930d5afe4099468e889362db673e9e2eaddc97f18"
+      },
+      {
+        "path": "tests/windows/crt-startup/crt_probe_frame.h",
+        "bytes": 2731,
+        "sha256": "ba73ab9a7994deb0abb591d9b2f929eb4cc83914266bcd37369831c79af0b2ea"
+      }
+    ]
+  },
+  "method": {
+    "platform": "Windows x86-64",
+    "endpoint": "Elapsed ticks from the parent QueryPerformanceCounter sample immediately before ResumeThread to the first QueryPerformanceCounter sample in the child CRT callback.",
+    "launch": "One original suspended, detached probe per slot. An atomic Job list binds the probe to a private kill-on-close Job, and an explicit handle list supplies only the one-page reply mapping and three standard handles. Both arms use the same launcher and callback object.",
+    "observation_validation": "The original probe must signal and exit zero with matching PID and creation epoch. The Job must report one total process and zero active processes. Both output streams must be closed and empty. The committed frame must match the request identity, nonce, native frequency and checksum without assistance.",
+    "fixed_schedule": {
+      "slots": 80,
+      "adjacent_pairs": 40,
+      "blocks": 8,
+      "mixed_pairs": 24,
+      "aa_pairs": 8,
+      "bb_pairs": 8,
+      "discarded_warmups": 0
+    },
+    "observation_cutoff_seconds": 1.5,
+    "aggregate_eligibility_cutoff_seconds": 180,
+    "independent_outer_job_deadline_seconds": 300,
+    "callback_artifact_review": "Each instrumented image retained one additional CRT initializer from the same object and made QueryPerformanceCounter its first external call after the compiler prologue. Both probes added the ExitProcess and MapViewOfFile imports and had disclosed layout changes."
+  },
+  "native_result": {
+    "accepted_slots": 80,
+    "rejected_slots": 0,
+    "outer_native_exit": 0,
+    "original_controller_native_exit": 0,
+    "original_controller_joined": true,
+    "all_original_probe_exits_zero": true,
+    "all_original_probe_jobs_total_one_active_zero": true,
+    "all_probe_stdout_stderr_empty": true,
+    "assisted_slots": 0,
+    "repeated_native_captures": 0
+  },
+  "descriptive_ticks": {
+    "frequency": 10000000,
+    "mixed_b_minus_a": {
+      "overall": {
+        "n": 24,
+        "min_ticks": -28647,
+        "max_ticks": 21613,
+        "median_ticks": 3267,
+        "median_twice_ticks": 6534
+      },
+      "by_half": {
+        "1": {
+          "n": 12,
+          "min_ticks": -28647,
+          "max_ticks": 7651,
+          "median_ticks": 2817,
+          "median_twice_ticks": 5634
+        },
+        "2": {
+          "n": 12,
+          "min_ticks": -3535,
+          "max_ticks": 21613,
+          "median_ticks": 3610.5,
+          "median_twice_ticks": 7221
+        }
+      },
+      "by_order": {
+        "AB": {
+          "n": 12,
+          "min_ticks": -3535,
+          "max_ticks": 21613,
+          "median_ticks": 3097.5,
+          "median_twice_ticks": 6195
+        },
+        "BA": {
+          "n": 12,
+          "min_ticks": -28647,
+          "max_ticks": 6183,
+          "median_ticks": 3453.5,
+          "median_twice_ticks": 6907
+        }
+      },
+      "by_half_and_order": {
+        "1/AB": {
+          "n": 6,
+          "min_ticks": 1804,
+          "max_ticks": 7651,
+          "median_ticks": 3430,
+          "median_twice_ticks": 6860
+        },
+        "1/BA": {
+          "n": 6,
+          "min_ticks": -28647,
+          "max_ticks": 6183,
+          "median_ticks": 2802,
+          "median_twice_ticks": 5604
+        },
+        "2/AB": {
+          "n": 6,
+          "min_ticks": -3535,
+          "max_ticks": 21613,
+          "median_ticks": 3097.5,
+          "median_twice_ticks": 6195
+        },
+        "2/BA": {
+          "n": 6,
+          "min_ticks": 1731,
+          "max_ticks": 5224,
+          "median_ticks": 4012.5,
+          "median_twice_ticks": 8025
+        }
+      },
+      "negative": 3,
+      "zero": 0,
+      "positive": 21
+    },
+    "same_image_calibration": {
+      "A": {
+        "pair_order": "AA",
+        "signed_second_minus_first_ticks": {
+          "n": 8,
+          "min_ticks": -2605,
+          "max_ticks": 11106,
+          "median_ticks": 1546,
+          "median_twice_ticks": 3092
+        },
+        "absolute_difference_ticks": {
+          "n": 8,
+          "min_ticks": 301,
+          "max_ticks": 11106,
+          "median_ticks": 2416,
+          "median_twice_ticks": 4832
+        }
+      },
+      "B": {
+        "pair_order": "BB",
+        "signed_second_minus_first_ticks": {
+          "n": 8,
+          "min_ticks": -14148,
+          "max_ticks": 6639,
+          "median_ticks": 1016.5,
+          "median_twice_ticks": 2033
+        },
+        "absolute_difference_ticks": {
+          "n": 8,
+          "min_ticks": 627,
+          "max_ticks": 14148,
+          "median_ticks": 2337.5,
+          "median_twice_ticks": 4675
+        }
+      }
+    },
+    "one_tick_ambiguous_endpoints": 0,
+    "mixed_median_microseconds": 326.7
+  },
+  "private_receipt_sha256": {
+    "protocol_004": "27631e0a222350589b349a19c298368dc686e6a7a660669f4ed9dc29a2464498",
+    "fixed_schedule": "8744072cb85aeec6208a88a03c05962273874f441601ab6e71bc95e1aa5bd2d3",
+    "exact_execution_package": "6020b0774d26e01e257b0430926fad374710964b398f1a2d30257938179dda4e",
+    "exact_root_launch": "40a15c35dd1c69f8a27488b03fca687352f5fb6d22d665c7e8180918be163e31",
+    "run_admission": "4b1dda8563ebfa23d202833e2b13ce75770265854439b477c177f64e94c26f90",
+    "selected_original_outer_event": "0f4ecfbe6ec3d62e2ee6cd315485f565cc6388d5c3f7e883fbcce9804738bfb3",
+    "selected_original_outer_raw_line": "f6967a6abd33eea97feb9c75717457d8ccb05b6c02241408c9178e12268885b6",
+    "run_intent": "597f98f94c3ff99048de1867eb905c82d7123a76da40566915363aa17ac13bba",
+    "run_result": "517de047a497f70e5bd9a4f36068d951ac00befb12aed8a6e56234d57d8aad61",
+    "raw_capture": "609618519ef1f7091888aa6146c81ae7b9e95eee04ac55a573bb611072c033d5",
+    "native_replay": "9740687acd31646571190d703129a50afa4cd5c331150203613463fe033c9a65",
+    "first_refused_replay": "0cf706e0c414135efdd69e3900890ebe1601e3fc74be71d8e2c16ef61a46e090",
+    "offline_parser_controls": "36b0a21c28ce5d4efd551e06845a6ab6f5e15488d9e6fd9a87c86732e0bd7a25",
+    "paired_analysis_source": "ac833b44667ab4f4bb21ea3d05a121f6a309aed8efc13c503a52d2a3556cd9a4",
+    "controller_exe": "4f4b8559978a43a376f8e15f2f50bedd073159940db21c61131ada42183ba0a9",
+    "controller_compile_receipt": "f60a4a50b34b057b6acdf199679ba257e6db191cb8f333855dab3c2d357c6fcc",
+    "marker_object": "b36664d259c21e800f8c9612b63d67ab844a2a6abfe414ee578eb134516f9259",
+    "postlink_crt_pe_pdb": "79979b417f9ff3e9e61694c47b20b211c4beff1a7dfdb59643e6d293d797899f",
+    "stock_probe_artifact_delta": "1e76bff5b2153b05a3515fc64e2b580ad22644c8aeb4fa65bd3264e3b353da87"
+  },
+  "retained_attempts": {
+    "first_replay": "The first replay refused a mistyped original execution identifier before decoding the native slots.",
+    "accepted_replay": "The second replay used the retained original event identifiers and the same unchanged native capture. It did not launch an additional probe.",
+    "preparation": "Early compile and disassembly range attempts failed and remain in the private record. Later bounded compilation and corrected offline inspections supplied the accepted artifact evidence."
+  },
+  "limits": [
+    "The interval includes scheduling and loader, TLS and CRT work before the instrumented callback. The probe layouts and added imports can affect it.",
+    "The current main branch was outside the capture. These historical observations cannot establish current-product performance, parity, ranking or acceptance.",
+    "The eight same-image pairs per arm describe variation on this host during this capture. They supply no equivalence margin or variability correction.",
+    "The recorded marker does not identify an individual DLL cause or measure whole-command startup.",
+    "Only derived elapsed ticks and generic C source are published. Raw process identifiers, timestamps, frame credentials, handles and host paths remain private."
+  ]
+}
