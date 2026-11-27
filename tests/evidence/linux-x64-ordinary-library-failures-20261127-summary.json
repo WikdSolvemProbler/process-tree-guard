@@ -1,0 +1,82 @@
+{
+  "schema": "ptg-linux-x64-ordinary-library-witness-v1",
+  "scope": "Private ordinary Linux library/backend prototype in isolated offline x86-64 WHPX guests. Both one-case attempts failed. This evidence establishes neither a supported installation nor a successful ordinary backend path, release readiness, performance, or parity.",
+  "sources": {
+    "native_c_source_index_sha256": "e94cb8affe302acd4035380446e511d88490bc4bfc39a9b489c43ea51bdcc731",
+    "rust_source_index_sha256": "e1f5d05b9914c12384da5bfeb1dc4588ec9ac75656818ace782e444d711fe675",
+    "rust_fixture_sha256": "33618c61ebf883570c3bdfb835e5dc5f096c80bc4346945c1797b5c93622307a"
+  },
+  "artifacts": {
+    "caller_fixture": {
+      "bytes": 1421432,
+      "sha256": "68e23bf7291a3fd51912a56f52579c714df3dc5084d789a4e92044ca42c097b2"
+    },
+    "ordinary_helper": {
+      "bytes": 1168368,
+      "sha256": "3f76c7100899ed4af762a640d605cc8657ef85e3d53cfe007bebe26ab5ac3f14"
+    }
+  },
+  "build_and_revalidation": {
+    "linked_attempt": "The original Rust LTO link command returned 0 and exported artifact bytes. The aggregate linked attempt failed an after-link authority check that expected a root-owned file for a user-owned Rust host library and rejected it before the post-link hash read and remains failed.",
+    "linked_original_outer_exit": 1,
+    "linked_original_outer_sha256": "1579c5bf6940dd9ec8324d47d0c8809cd8b9f1e1956e8ae99fcb1b92131e9e11",
+    "linked_result_sha256": "8906e62772e7ec81a9f7d6f50b0453c9e7e87855f020d5b46cf063ffb272b6ef",
+    "read_only_followup": "A later independent read-only check matched both retained ELF byte sequences and two scoped compiler-library files. It did not rerun the link or change the failed original.",
+    "revalidation_original_outer_exit": 0,
+    "revalidation_outer_sha256": "67c3862402ce52d3edcc981f2d7faf59a8b721bdf2339580cd2cb5fdd97d31ee",
+    "revalidation_result_sha256": "b63e945095740ef294d67c6674b2cad649cc3afb65894a844c81fa1181513673"
+  },
+  "attempts": [
+    {
+      "attempt": "003",
+      "status": "failed",
+      "outer_exit": 1,
+      "inner_exit": 1,
+      "emulator_exit": 0,
+      "host_forced_emulator_stop": false,
+      "source_pins_sha256": "52ca14298861c1b70650dc98fdbbd3aa699df6e0079ad7a62835b87f2c263c7b",
+      "outer_event_sha256": "1501578d54e6dcb315880cb6047f4b4947fcfc00e42e5f3c97f0adaf786ea4be",
+      "host_result_sha256": "dd187c7adf674568533dcfd9fcaad377d20424fe7318b73065be77750a4fde10",
+      "physical_evidence_sha256": "6c022a1286d7b0f11260854b1063af08c548cf5fabe7fb0d864789fad5e3541a",
+      "observed": "Payload readiness bytes survived. The guest fixture failed and fallback reported retirement. No qualifying serial frame or verified native outcome survived. The old witness combined a requirement for group 0 with a live-population check and recorded neither conjunct independently, leaving its original failure branch unproven."
+    },
+    {
+      "attempt": "004",
+      "status": "failed",
+      "outer_exit": 1,
+      "inner_exit": 1,
+      "emulator_exit": 0,
+      "host_forced_emulator_stop": false,
+      "source_pins_sha256": "680796775cfd1b4c2025f55de5eae1a0fe73191f298a07ae81fbfa2c75755cb2",
+      "outer_event_sha256": "1dfcc894dc7b935e0fefa27b21b8a323a57bb10c9eeaf89f3def42c9f0e63e12",
+      "host_result_sha256": "0fc49fb2187521eee0aa9b44606451b15b5146aea1ce708c52b681bf4babaeb3",
+      "physical_evidence_sha256": "841287318181c1085206d0f1d7d6eef9b297b91555052300ff0623d0ff2fe09c",
+      "observed": "The corrected witness accepted the original live leaf after checking root ownership, group equality to the held original watchdog and caller, no group or other write bits, and one populated-1 row. The containing cgroup kept the stricter root ownership and group rule. The host received the explicit failure transport. Fallback retirement was separately reported, with no qualified unassisted pass.",
+      "original_waits": {
+        "caller_A": {
+          "exit": 125,
+          "native_signal": 17,
+          "native_code": 1
+        },
+        "bootstrap_B": {
+          "exit": 0
+        },
+        "watchdog_W": {
+          "exit": 125
+        },
+        "readable_original_actor_pidfds_on_first_independent_poll": 5
+      },
+      "native_receipt": {
+        "bytes": 1488,
+        "sha256": "d2faf872f0e201060ba8c72318b071f84c80eff58dc436ed6b27a1d409013aa2",
+        "version": 1,
+        "outcome": "unconfirmed",
+        "value": 71,
+        "errno_name": "EPROTO",
+        "accepted_stop_payload_reap_and_leaf_retirement_proof": false
+      }
+    }
+  ],
+  "diagnosis": "A reachable source race can prevent delivery of a valid kernel-generated SCM_PIDFD if the watchdog consumes the original reaper wait before the caller receives the queued retirement packet. The retained failed receipt cannot identify the exact rejected branch. A proposed acknowledgment before consuming the original wait has design review only at this evidence point.",
+  "evidence_limit": "The retained raw evidence remains private. Physical excerpts are bound to the original image and byte offsets without asserting a filesystem filename mapping. A complete public reproduction package remains open."
+}
