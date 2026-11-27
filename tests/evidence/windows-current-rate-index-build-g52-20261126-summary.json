@@ -1,0 +1,197 @@
+{
+  "schema": "ptg-windows-current-rate-index-build-and-g52-summary-v1",
+  "scope": "Compile-only comparison of two private Windows AMD64 release main images and one subsequent, separately bounded G52 test of stock B.",
+  "canonical_source_commit": "f18cc4fcba699ee5371e7afa194b9a6e63fb6b22",
+  "source_inputs": 1201,
+  "source_difference": "A is the unmodified pinned source, and B changes only the index field type in src/extend/state/rate.rs from HashMap to BTreeMap.",
+  "source_manifest": {
+    "bytes": 267524,
+    "sha256": "16ee75e5874eea753c84a9225763fd07680701a664eade1f4d55a3c9660d3232"
+  },
+  "build_packet": {
+    "bytes": 5865,
+    "sha256": "646102d6599a62851716062abaca4264d674709c281fdbc94ef5e5de83579093"
+  },
+  "build_carrier": {
+    "bytes": 9983,
+    "sha256": "fcee9459a864357bb03ed205287b912085c061114477cf81067b8bacd11dac76"
+  },
+  "build_recipe": "Both Cargo builds used the same private absolute source and active target paths, sequential fresh outputs, a shared dedicated Cargo home, selected tool pins, target x86_64-pc-windows-msvc, no enabled crate features, optimization level 3, and no test profile. Both emitted successful Cargo build-finished records.",
+  "deadline_seconds": {
+    "outer_per_build": 180,
+    "original_native_wait_per_build": 165
+  },
+  "arms": {
+    "A": {
+      "source": "Unmodified HashMap rate index",
+      "outer_exit": 0,
+      "original_build_driver_exit": 0,
+      "original_build_driver_joined": true,
+      "source_equal_before": true,
+      "source_equal_after": true,
+      "selected_tool_pins_equal_after": true,
+      "selected_environment_sha256": "e272cb51c5b0c8eaad862edbfb9cecea4a19c7f83c7a9cb47ff8715b30cfea0c",
+      "rate_source": {
+        "bytes": 12346,
+        "sha256": "057f7179983d2db02acb24394713f3d550c97191fa1f355653de156bb42efd93"
+      },
+      "executable": {
+        "bytes": 826368,
+        "sha256": "e9746c031147ce025c605582687a0496006ab8c4541dc0914ccd61fe8a3a3fb0"
+      },
+      "pdb": {
+        "bytes": 1232896,
+        "sha256": "924c08e6c20a31e8494a0bf42d9f8ecf1cd7147f420337fb67d489c83f4bb208"
+      },
+      "native_command": {
+        "bytes": 1020,
+        "sha256": "7a5abbf1274ccd9632b3ce6973549206b28d8f3a3ec1fa79f7fda444197905e8"
+      },
+      "native_stdout": {
+        "bytes": 4911,
+        "sha256": "80dd42eaccb5ee38954a293e29ccc6115614215a1cce0691c391fe4b36572694"
+      },
+      "native_stderr": {
+        "bytes": 4971,
+        "sha256": "6311c0198f2877fe1bf1676cb1e3fc5bd637a6004d9d1b9b85d1079f3ebe5983"
+      },
+      "outer_terminal": {
+        "bytes": 1574,
+        "sha256": "ed03be241abecda5385339fc0d6e3089a55ce721632732e370eeb351871d6c38"
+      },
+      "build_result": {
+        "bytes": 2918,
+        "sha256": "72e3d7c46824824515d817b81fec99aacfe6232c6d87088d156665d99870475b"
+      }
+    },
+    "B": {
+      "source": "Private BTreeMap rate-index field replacement",
+      "outer_exit": 0,
+      "original_build_driver_exit": 0,
+      "original_build_driver_joined": true,
+      "source_equal_before": true,
+      "source_equal_after": true,
+      "selected_tool_pins_equal_after": true,
+      "selected_environment_sha256": "e272cb51c5b0c8eaad862edbfb9cecea4a19c7f83c7a9cb47ff8715b30cfea0c",
+      "rate_source": {
+        "bytes": 12347,
+        "sha256": "7771c1dfc7aab542b1d93b68b2303bbb7b80d6e70b437cda170a9aeaeed62c25"
+      },
+      "executable": {
+        "bytes": 830976,
+        "sha256": "1012fa93ceca43d64ec3c3cff2242494db6ae1acedaaf8c0988d705a16611c6e"
+      },
+      "pdb": {
+        "bytes": 1232896,
+        "sha256": "fba8cef92ee5640070d66f33fa1de367271ae7ac2a375ba4b448b56f11b734a0"
+      },
+      "native_command": {
+        "bytes": 1020,
+        "sha256": "7a5abbf1274ccd9632b3ce6973549206b28d8f3a3ec1fa79f7fda444197905e8"
+      },
+      "native_stdout": {
+        "bytes": 4911,
+        "sha256": "80dd42eaccb5ee38954a293e29ccc6115614215a1cce0691c391fe4b36572694"
+      },
+      "native_stderr": {
+        "bytes": 4971,
+        "sha256": "5bca4625e2cbcc8e870f4ecadddfc2acb86e630038864b5e60505edc1729bac4"
+      },
+      "outer_terminal": {
+        "bytes": 1574,
+        "sha256": "b9c6be5e61ecddf1dc151d518b609e2311aaff12067d92aba671db0d4e28d961"
+      },
+      "build_result": {
+        "bytes": 3541,
+        "sha256": "6149ac709a033fb6732c08a2f3c919b54cfb399e99ab83ad555e721137708b90"
+      }
+    }
+  },
+  "static_pe_comparison": {
+    "format": "AMD64 PE32+",
+    "sole_removed_direct_dll": "bcryptprimitives.dll",
+    "entry_rva": [
+      692384,
+      698208
+    ],
+    "tls_directory_rva": [
+      791168,
+      795904
+    ],
+    "tls_directory_bytes": [
+      40,
+      40
+    ],
+    "text_raw_bytes": [
+      704000,
+      708608
+    ],
+    "array_order": "A, B"
+  },
+  "limits": [
+    "No guard or contender was timed for performance in this study.",
+    "The direct import and image layout both changed. These artifacts provide no DLL-specific latency attribution.",
+    "The earlier experimental B G52 observation remains failed. The current G52 pass applies to the exact current stock B and retained fixtures only. It cannot isolate the cause of the historical failure or qualify full runtime protection, comparative speed, or promotion of B.",
+    "The build carrier verified selected tools and matched selected environment evidence. This is not a whole-host or SDK attestation."
+  ],
+  "stock_b_g52": {
+    "status": "passed",
+    "selector": "g52_a_hanging_child_holds_the_run_to_its_own_deadline",
+    "selection": "The unchanged Windows AMD64 release-test harness and separately compiled testkit executable were compiled from the ordinary HashMap code with the testkit feature. PROCESS_TREE_GUARD_EXE explicitly selected the retained, feature-free experimental stock B image for all guard calls in this test.",
+    "original_opportunities": 1,
+    "outer_exit": 0,
+    "retained_original_harness_exit": 0,
+    "source_equal_before": true,
+    "source_equal_after": true,
+    "harness_sha256": "992ced81a10bcd994f72e61d630519e19891b856926792e7ac127040668f2915",
+    "fixture_sha256": "874f473fd1e031658520d3ace6b5bd09c2bc45cd477ad7b51bbe8ef2c43cdca8",
+    "stock_b_sha256": "1012fa93ceca43d64ec3c3cff2242494db6ae1acedaaf8c0988d705a16611c6e",
+    "outer_cap_seconds": 150,
+    "original_wait_cap_seconds": 120,
+    "suite": {
+      "passed": 1,
+      "failed": 0,
+      "filtered_out": 83
+    },
+    "observed": {
+      "variants": 2,
+      "assertions_passed": 10,
+      "guard_exit_codes": [
+        124,
+        124
+      ],
+      "per_variant": [
+        "18-second extension grant found",
+        "deadline exit 124 at or above the lower bound",
+        "tight upper bound",
+        "structural upper bound",
+        "marked child no longer alive when the guard returns"
+      ]
+    },
+    "packet": {
+      "bytes": 5567,
+      "sha256": "c830c1931d83326465316abcc818f44de8e90806a953bc6ab4b198fd3af218e7"
+    },
+    "intent": {
+      "bytes": 893,
+      "sha256": "a0fa1e632389bae00a8f41af7900a3f48399fb3741d1840611b7faeecacd940f"
+    },
+    "result": {
+      "bytes": 4940,
+      "sha256": "fc0c3a91e56a447ef3e837894616894c7307cc494ea97d1363ac21fd0a5e3f91"
+    },
+    "outer_terminal": {
+      "bytes": 1616,
+      "sha256": "062d64512215db37cf39c4859ac379b3534d32ce66720e8e147dc4639d12eed4"
+    },
+    "stdout": {
+      "bytes": 4851,
+      "sha256": "dd496770ad7222119d0c8132b091aee77470a3936d0e5b01e76be3e8bbe822a9"
+    },
+    "stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "historical_failure_evidence_sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3"
+  }
+}
