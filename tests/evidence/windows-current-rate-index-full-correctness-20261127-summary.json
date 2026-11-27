@@ -1,0 +1,255 @@
+{
+  "schema": "ptg-current-b-windows-full-correctness-summary-v1",
+  "scope": "One completed Windows x64 correctness invocation on the private one-field BTreeMap rate-index candidate. No Windows timing result or main-branch promotion.",
+  "candidate": {
+    "base_commit": "f18cc4fcba699ee5371e7afa194b9a6e63fb6b22",
+    "code_commit": "87969ef92501467059daf3de7c4bd3b4e3acaaf2",
+    "raw_source_snapshot_commit": "7fa0ae2c85ceccee49ab58ffc567db23a5986394",
+    "source_manifest": {
+      "bytes": 267524,
+      "sha256": "4f0cb10ad9103e8479c0045d4c0b594357fc0dc21e32c7c32ed07ec5085ec8f6"
+    },
+    "source_files": 1201,
+    "note": "The code commit changes one field. The archive snapshot preserves 894 line-ending representations and verifies the exact input bytes; Python certificates identify the real archive snapshot commit."
+  },
+  "profiles": {
+    "stock": "Feature-free AMD64 opt3 main, alias and three role images. The previously bound B main is unchanged.",
+    "test_harnesses": "Candidate-built AMD64 release opt3 with testkit. Rust tests use the stock external main where the fixture selects it; embedded Cargo role paths retain their candidate test-support binaries. Python stock fixture uses the five exact stock images and matched, separately compiled testkit."
+  },
+  "stock_artifacts": {
+    "ptg": {
+      "bytes": 830976,
+      "sha256": "b09082c38defca27d2c119a145268cb5d6ab610c80541ca59ecf34a4dd117d08"
+    },
+    "process-tree-guard-gate": {
+      "bytes": 328704,
+      "sha256": "04ecb09729f2817cd3456bb764ca36760fd07d2b37b6efd2dd4b49a244acf991"
+    },
+    "process-tree-guard-deadline": {
+      "bytes": 729088,
+      "sha256": "9d1aa0b3bdef418fb6d42e93dce84d53bf10788da3d443eec8401592bbdd9bde"
+    },
+    "process-tree-guard-contain": {
+      "bytes": 376832,
+      "sha256": "02e596a68ecf0b74e36dc0b889c677db056baf8d0305a35e367d0ba79ef2a1b5"
+    },
+    "process-tree-guard": {
+      "bytes": 830976,
+      "sha256": "1012fa93ceca43d64ec3c3cff2242494db6ae1acedaaf8c0988d705a16611c6e"
+    }
+  },
+  "actual": {
+    "outer_exit": 0,
+    "coordinator_exit": 0,
+    "whole_tree_cap_seconds": 4200,
+    "coordinator_cap_seconds": 4050,
+    "dispatch_horizon_seconds": 3900,
+    "coordinator_status": "passed",
+    "passed_rust_tests": 178,
+    "python_methods": 651,
+    "passed_python_methods": 647,
+    "skipped_python_methods": 4,
+    "python_main_return": 0,
+    "fixture_observer_markers": 4,
+    "python_skip_ids": [
+      "test_campaign_logic.BatteryExitContractTests.test_real_battery_blocked_windows_exits_zero",
+      "test_campaign_logic.CensusConsistencyTests.test_recorded_split_matches_the_derived_split",
+      "test_campaign_logic.Round26LandingTests.test_runner_non_unicode_shape_names_its_presentation_limit_here",
+      "test_guard_families.NegativeControlTests.test_missing_binary_raises_binary_missing"
+    ],
+    "unasserted_console_subcases": [
+      "G87 real standard input",
+      "G95 desktop window-station prompt",
+      "G97 real pseudo-console prompt",
+      "G98 real console branch",
+      "G103 desktop window-station prompt"
+    ],
+    "console_limit": "The guard stood above the suite, so specific branches were refused before the console or stdin condition was reached. Two real desktop-prompt branches remained opt-in. The suite retained all five notices.",
+    "lanes": {
+      "guard": {
+        "original_native_exit": 0,
+        "original_handle_retained": true,
+        "original_joined": true,
+        "source_equal_after": true,
+        "counts": {
+          "passed": 84,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        "result": {
+          "bytes": 6737,
+          "sha256": "21b7d4031ce36c50a9933a148489fa56f3f400af8225c11bc60b875981ce34ab"
+        },
+        "native_stdout": {
+          "bytes": 247376,
+          "sha256": "fb547bb70c41feffb198083e0679a0b7865c250d5abc9196f6794515e6031ba4"
+        },
+        "native_stderr": {
+          "bytes": 6341,
+          "sha256": "33a2ebed126354e7554d3d334e66a1357fe9471c64f193f726699015e2729a96"
+        }
+      },
+      "auto": {
+        "original_native_exit": 0,
+        "original_handle_retained": true,
+        "original_joined": true,
+        "source_equal_after": true,
+        "counts": {
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        "result": {
+          "bytes": 2100,
+          "sha256": "a298bf76fdee104f28d0f141e197a322f810f8e0655bab74d3c5ea6337dffe24"
+        },
+        "native_stdout": {
+          "bytes": 29137,
+          "sha256": "21a8064cc5b728e7b4d911d15d0c071fa1bc7b160dd6818dbc016184a6b5e636"
+        },
+        "native_stderr": {
+          "bytes": 191,
+          "sha256": "f65413106485e48db0ca95aa6d9f9d1888c8464ed734d7ba06b5b2e9a8e4c316"
+        }
+      },
+      "battery": {
+        "original_native_exit": 0,
+        "original_handle_retained": true,
+        "original_joined": true,
+        "source_equal_after": true,
+        "counts": {
+          "passed": 50,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        "result": {
+          "bytes": 2118,
+          "sha256": "c6919d2464f7815b1f4bb5983842d7805e76b6a6635fa0c5a5e95204147fbc7f"
+        },
+        "native_stdout": {
+          "bytes": 144334,
+          "sha256": "ad56259f597017832a75ded75ee6b603beef29a02e1f1078bbebdd18b003049d"
+        },
+        "native_stderr": {
+          "bytes": 191,
+          "sha256": "5ab6acfaaffa7e4534e7fd643d9d19f82d2f0289d652e154262df7674a267222"
+        }
+      },
+      "plugins_antigravity": {
+        "original_native_exit": 0,
+        "original_handle_retained": true,
+        "original_joined": true,
+        "source_equal_after": true,
+        "counts": {
+          "passed": 22,
+          "failed": 0,
+          "ignored": 0,
+          "filtered": 0
+        },
+        "result": {
+          "bytes": 2175,
+          "sha256": "3a69a543b9ddb03115db5dc42c38c7c56ee3ed74cd7b3b88c215fb8d14c5a12d"
+        },
+        "native_stdout": {
+          "bytes": 64250,
+          "sha256": "6cee86113008dde135a8a605f08d441014825833f529bde58001e3efe442176b"
+        },
+        "native_stderr": {
+          "bytes": 191,
+          "sha256": "a47b69fdfbb4cb246efdc143bd0832cada323b2cb72252658f73b9dcdb299e7c"
+        }
+      },
+      "python": {
+        "original_native_exit": 0,
+        "original_handle_retained": true,
+        "original_joined": true,
+        "source_equal_after": true,
+        "counts": {
+          "methods": 651,
+          "passed": 647,
+          "skipped": 4,
+          "failed": 0,
+          "errors": 0
+        },
+        "result": {
+          "bytes": 241688,
+          "sha256": "4ce69fc06daf8e944544b9e08f94dc82c73af759563c9bf7b6bbc22305f25b84"
+        },
+        "native_stdout": {
+          "bytes": 218,
+          "sha256": "a5a46640767c3a86a7f19dabbe70b5bc8088357aea625aa80d539228704d2339"
+        },
+        "native_stderr": {
+          "bytes": 770,
+          "sha256": "2d30a0037cb33605a29f2c00478ada307d15c8af9d455191ffe2a6cd8f55f700"
+        }
+      }
+    }
+  },
+  "evidence": {
+    "packet": {
+      "bytes": 9790,
+      "sha256": "b9ec1a9134f0f97b196f81f6689e691f4c40d259c3dc84c151a7275153ff15c4"
+    },
+    "launch": {
+      "bytes": 1697,
+      "sha256": "f40b80c1664da2d10a36f074f1720e3e3c1509785ce96e6fa781bd847b9e1747"
+    },
+    "outer_terminal": {
+      "bytes": 1436,
+      "sha256": "50186311de6763a7d4c07796913b1d0f2cafc81e64091058b6503688e9bf7366"
+    },
+    "host_result": {
+      "bytes": 1219,
+      "sha256": "b6c1acbf26b897b01e89f22765ec44f199ae66ed722894c47e5cec68c2d4af43"
+    },
+    "coordinator_result": {
+      "bytes": 8378,
+      "sha256": "c657dc62d15c38e672547c3f5dfc275aa595faba016bcc505e0d55ca746d7df7"
+    },
+    "artifact_index": {
+      "bytes": 6573,
+      "sha256": "3debdd2d3788b4072a12049ea3ce49bb7eb24316fe168583055aedcae5ca602d"
+    },
+    "discovery_bridge": {
+      "bytes": 82806,
+      "sha256": "db052ab21faaf70b8e2c0679be6dc7c048d36d7497f145704519a2a8b0c26dc2"
+    },
+    "python_cert_index": {
+      "bytes": 1134,
+      "sha256": "d5905f5e667635547f278217cb3fadfd104f1e146b16cf9dac7d80087a5ce648"
+    },
+    "python_methods": {
+      "bytes": 223805,
+      "sha256": "f56fce6b91a16cb90352512d74d5c7bff17812d7bd72671241a7afd0335c96f8"
+    },
+    "python_main_return": {
+      "bytes": 50,
+      "sha256": "133b132954a633c7011fc5082eb70e7c255e7d308974b49896b498e14b167c04"
+    }
+  },
+  "historical": {
+    "canonical_A_correctness": "The older canonical A full batch remains failed on two documentation census checks. A separate focused repair passed those two checks and retains the original failure.",
+    "canonical_A_evidence": {
+      "bytes": 10084,
+      "sha256": "d3c7314ea31ec69000317b2e385ecb803ecb98cb974ea6256f8c67923fd3c2aa"
+    },
+    "candidate_old_G52": "An older experimental B G52 failure remains a failed observation. This full current-B pass does not change that earlier result.",
+    "candidate_older_evidence": {
+      "bytes": 43942,
+      "sha256": "3e17bedf16ce0fff93ab028645488a080e617b615e8fa890cc5491dbf1f1b7f3"
+    },
+    "current_candidate_prior_units": {
+      "bytes": 9419,
+      "sha256": "ca48d71fb02c2b980e430ac238d70e8adc1b56f4d8a35bd6114c78ad7f423877"
+    }
+  },
+  "limits": [
+    "This is correctness evidence for the exact candidate inputs and admitted Windows x64 harness opportunities. The four expected Python skips and five unasserted console subcases remain limitations.",
+    "The result does not establish matched-stock A/B timing or performance parity, universal protection, or feature-readiness outside this tested profile. The candidate was not promoted to main by this run.",
+    "This is separate from the earlier x64/i686 candidate unit qualification. Full i686 integration, historical comparator eligibility and exact-image timing admission remain separate."
+  ]
+}
