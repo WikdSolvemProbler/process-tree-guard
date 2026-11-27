@@ -1,0 +1,274 @@
+{
+  "schema": "ptg-current-b-compile-discovery-unit-summary-v1",
+  "scope": "Private current BTreeMap rate-index investigational source. Compile-only evidence for 22 Windows release test-support artifacts followed by 10 list-only and 2 unit test originals. No candidate promotion.",
+  "source": "Pinned f18cc4f source tree with one field change from HashMap to BTreeMap; the following 9fe11a2 commit adds only the prior public build/G52 evidence. Both compiled lanes used the same private 1,201-input tree.",
+  "artifacts": {
+    "bytes": 15437,
+    "sha256": "b6aed323a803928127e04b05622bde622e9458c9b7a3b50f110c406f46c1d863"
+  },
+  "source_manifest": {
+    "bytes": 267524,
+    "sha256": "4f0cb10ad9103e8479c0045d4c0b594357fc0dc21e32c7c32ed07ec5085ec8f6"
+  },
+  "profile": "MSVC windows x64 and i686 release opt3; feature testkit; 11 retained roles per architecture, including five libtest executables and six support bins. Test support mains are not the stock images.",
+  "compile_history": [
+    {
+      "name": "initial LNK1123/CVT1101",
+      "outer_exit": 1,
+      "x64_exit": 101,
+      "i686_attempted": false,
+      "result": {
+        "bytes": 2178,
+        "sha256": "eca587d4d19fc3a87a0975db863e3635fe4273ea96220026542bd5a1fa62620e"
+      }
+    },
+    {
+      "name": "short target/TMP batch",
+      "outer_exit": 1,
+      "x64_exit": 0,
+      "i686_exit": 101,
+      "i686_error": "Rust host build script linker had an empty file stem setting",
+      "result": {
+        "bytes": 4445,
+        "sha256": "d86522d5d2976bca9302dd9ada17cb35a113c4a2bf3471e094cc29d870b3c1d5"
+      },
+      "outer": {
+        "bytes": 1985,
+        "sha256": "da99790c3735598a7be7db14a601ddc5692667eda954f668fdb4aebefa12aaf4"
+      }
+    },
+    {
+      "name": "single i686 continuation with absent host linker setting",
+      "outer_exit": 0,
+      "i686_exit": 0,
+      "result": {
+        "bytes": 2341,
+        "sha256": "ae38eb8e7f17737376fb84747852ce935ca2358113db91fdb45296b1c3b2e488"
+      },
+      "outer": {
+        "bytes": 1424,
+        "sha256": "a7b3784180806739254bedac679e36827c4ccf52e746ad1e3eb16de0fc73dc84"
+      }
+    }
+  ],
+  "actual": {
+    "outer_exit": 0,
+    "physical_outer_seconds": 300,
+    "source_equal_before": true,
+    "source_equal_after": true,
+    "list_originals": 10,
+    "unit_originals": 2,
+    "listed_architecture_ids_agreed": true,
+    "unit_passed": 648,
+    "unit_failed": 0,
+    "result": {
+      "bytes": 102313,
+      "sha256": "f2d5cc88be79ca4406787127bcdf207a1005067e91830daf9ad539377137e15f"
+    },
+    "outer": {
+      "bytes": 1456,
+      "sha256": "44378c5b52e75d9ffddb40735d4ce0fcd39df98e84330432c5be6a664796c815"
+    },
+    "lanes": [
+      {
+        "arch": "x64",
+        "role": "process_tree_guard",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 28576,
+          "sha256": "feb6d68a18e2246f5c86194736b303d4142f3610e9e06ccb2ed09fc5aef5aacd"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 324
+      },
+      {
+        "arch": "x64",
+        "role": "guard",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 6125,
+          "sha256": "27cf0c2292f199e159b6142700b35eda096a8c1c2f6d34aa24ec495de1660675"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 84
+      },
+      {
+        "arch": "x64",
+        "role": "auto",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 1274,
+          "sha256": "83741d6509597b6323668a062edbd88087648d9b84c3be64a05435243cfc26f2"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 22
+      },
+      {
+        "arch": "x64",
+        "role": "battery",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 3174,
+          "sha256": "030132eb0f4ade02db26b83bc8ad86edea9cb9f2cc4f7dbfbd4bdcddd253524c"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 50
+      },
+      {
+        "arch": "x64",
+        "role": "plugins_antigravity",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 1151,
+          "sha256": "cb7bde3057e6a69b7561fdc0f5ae4ebc06eb46f4e57bc77ce4e13c965df3d089"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 22
+      },
+      {
+        "arch": "i686",
+        "role": "process_tree_guard",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 28576,
+          "sha256": "feb6d68a18e2246f5c86194736b303d4142f3610e9e06ccb2ed09fc5aef5aacd"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 324
+      },
+      {
+        "arch": "i686",
+        "role": "guard",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 6125,
+          "sha256": "27cf0c2292f199e159b6142700b35eda096a8c1c2f6d34aa24ec495de1660675"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 84
+      },
+      {
+        "arch": "i686",
+        "role": "auto",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 1274,
+          "sha256": "83741d6509597b6323668a062edbd88087648d9b84c3be64a05435243cfc26f2"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 22
+      },
+      {
+        "arch": "i686",
+        "role": "battery",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 3174,
+          "sha256": "030132eb0f4ade02db26b83bc8ad86edea9cb9f2cc4f7dbfbd4bdcddd253524c"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 50
+      },
+      {
+        "arch": "i686",
+        "role": "plugins_antigravity",
+        "mode": "list",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 1151,
+          "sha256": "cb7bde3057e6a69b7561fdc0f5ae4ebc06eb46f4e57bc77ce4e13c965df3d089"
+        },
+        "stderr": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "listed_tests": 22
+      },
+      {
+        "arch": "x64",
+        "role": "process_tree_guard",
+        "mode": "unit",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 30824,
+          "sha256": "b2b1be9bef317c10f6c8bd498f33448bcd1158cbf55f4fefaba4c22b5ae90081"
+        },
+        "stderr": {
+          "bytes": 5087,
+          "sha256": "718b5ce12366d77d37be0635942aba4f3e4b6d8c0c340d84c895408499ff4fe3"
+        },
+        "passed": 324,
+        "nested_fixture_counted_in_parent_suite": true
+      },
+      {
+        "arch": "i686",
+        "role": "process_tree_guard",
+        "mode": "unit",
+        "original_native_exit": 0,
+        "retained_original_joined": true,
+        "stdout": {
+          "bytes": 30824,
+          "sha256": "fba2fa4186e893b08eb6f7969c6d0c62e0b9d66bc1709f14745b0f9d0f48b80a"
+        },
+        "stderr": {
+          "bytes": 5090,
+          "sha256": "bb8563770e67dd389e1aac456ce39d0a4cba6af7d6947d450f7f4a124710f4b1"
+        },
+        "passed": 324,
+        "nested_fixture_counted_in_parent_suite": true
+      }
+    ]
+  },
+  "limits": [
+    "Failed compile batches remain failed. Retained x64 artifacts came from the zero x64 stage in its failed aggregate; i686 came from the separate successful continuation.",
+    "The earlier historical experimental B G52 failure remains unchanged. This is neither full integration/Python protection qualification nor comparative performance evidence.",
+    "List-only harness execution did not execute its integration tests. The nested child footer inside each unit suite is not another independently credited pass."
+  ]
+}
