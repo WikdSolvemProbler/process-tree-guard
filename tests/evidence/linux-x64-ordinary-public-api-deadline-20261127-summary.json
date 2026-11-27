@@ -1,0 +1,221 @@
+{
+  "schema": "ptg-linux-x64-ordinary-public-api-deadline-v1",
+  "scope": "One successful x86-64 GNU/Linux public-API deadline and detached-descendant case in a fresh QEMU/WHPX VM.",
+  "source_and_artifacts": {
+    "compiled_source_commit": "d978c327b0e1cc6f0f226fec007b3868a0eac7a1",
+    "feature": "linux-ordinary-library",
+    "public_entry": "ordinary_linux::run_manual",
+    "extracted_package_build_summary": {
+      "bytes": 4811,
+      "sha256": "f5960cb1e34805030d473c7774fa130ee890fab66d08c6cfc5b64e1f2e20c5eb"
+    },
+    "crate": {
+      "bytes": 624770,
+      "sha256": "400064f9f72db835c35c696080b350a1acad0375110d36c56413ccd54c049910"
+    },
+    "caller_elf": {
+      "bytes": 2932056,
+      "sha256": "a2d1fe48d476e0961883c469204f5df644eb318dee3127368e920745e3dfd917"
+    },
+    "helper_elf": {
+      "bytes": 1215288,
+      "sha256": "f9742b50a53c470103c1080613530ee2abf28233b0d28e2968cbc20021f7326a"
+    },
+    "source_plan": {
+      "bytes": 16272,
+      "sha256": "e1f02168f90aa48f0828f7f29ff3c437c689bd51bd01d3abc93331e9391a7f4f"
+    },
+    "guest_witness": {
+      "bytes": 59200,
+      "sha256": "15918286f16c76b8ee3683f7e8efe3ec817866ae064972edbec48e049e6903f2"
+    },
+    "payload_workload": {
+      "bytes": 1444,
+      "sha256": "324855402d2a975d5adbb8960996b34c040793204b4a608794772ecdf66d59af"
+    },
+    "host_reader": {
+      "bytes": 27132,
+      "sha256": "568e30ee96710a152abd877b1a09c9fc8b5103a6d5eaaafdec1603e7e1eda1ec"
+    },
+    "original_host_reader": {
+      "bytes": 26842,
+      "sha256": "d09ab452c611d8163f22c46fc681520bfda2aa89a3905e727bbad617d576ee9c"
+    },
+    "host_framing_diff": {
+      "bytes": 1684,
+      "sha256": "b97500b69d77718ae784fa780bb7acf04e2e4672faa08affba9e951be6ec2bca"
+    },
+    "offline_framing_replay": {
+      "bytes": 1903,
+      "sha256": "df6375fae2846e6991ba4546d066a521b5fb6ae9c806fafe0da660d53af1fb4b"
+    },
+    "boot_seed": {
+      "bytes": 2949120,
+      "sha256": "7f6224dce4228237afedfe9844479a459ec123801d14a3418b2d0a3e55a0aa96"
+    }
+  },
+  "case": {
+    "command": "A cooperative enrolled caller launches a workload with an ordinary child that creates a separate session.",
+    "configuration": "Two virtual CPUs, 1536 MiB, no network interface, interactive display, or host share. The helper was provisioned only inside this disposable guest.",
+    "requested_deadline_seconds": 12,
+    "host_job_bounds_seconds": {
+      "outer": 300,
+      "inner": 270,
+      "emulator": 245,
+      "retained_inner_join": 280
+    },
+    "external_release_to_join_window_seconds": {
+      "inclusive_lower": 12,
+      "exclusive_upper": 17
+    },
+    "external_release_to_first_held_ns": 53522600,
+    "external_release_to_original_caller_join_ns": 12002293900,
+    "reported_public_outcome": "Outcome::TimedOut",
+    "original_caller_native_wait": {
+      "code": "CLD_EXITED",
+      "status": 124
+    },
+    "first_independent_pidfd_poll": {
+      "roles": [
+        "caller",
+        "watchdog",
+        "reaper",
+        "payload",
+        "detached"
+      ],
+      "event": "POLLIN",
+      "native_event_mask": 1
+    },
+    "same_held_cgroup": {
+      "initially_populated": true,
+      "name_removed": true,
+      "retained_events_read": "ENODEV",
+      "native_errno": 19
+    },
+    "fallback_timer_disarmed_without_trigger": true,
+    "pre_stop_assistance_used": false,
+    "deployment_retired": true,
+    "natural_guest_poweroff": true
+  },
+  "fresh_original": {
+    "attempts_in_this_namespace": 1,
+    "overall": "passed",
+    "outer_exit": 0,
+    "inner_exit": 0,
+    "emulator_exit": 0,
+    "original_inner_and_emulator_joined": true,
+    "forced_host_stop": false,
+    "app_reported_duration_ns": 183356651800,
+    "records": {
+      "original_outer_event": {
+        "bytes": 1311,
+        "sha256": "f7709b6848c839b22bcceaaba405d9ab7b1d44955169a991da159b9e27942646"
+      },
+      "original_outer_selector": {
+        "bytes": 290,
+        "sha256": "c879dbb0606c8ff94b04e7302dfd89ded4cd092e536e72306a7b457c4d738de7"
+      },
+      "actual_host_carrier": {
+        "bytes": 408,
+        "sha256": "95cfb207cfa56492e7d4bb70730f1cb84bbd4aa9a4d142640fccf73a03c8ecbd"
+      },
+      "actual_host_result": {
+        "bytes": 8896,
+        "sha256": "abd4382b0d986d3afd5f8439f0055128136cb4301ab64a63d6a7667d3a720db2"
+      },
+      "emulator_start": {
+        "bytes": 2748,
+        "sha256": "e262bd076e1e391cfeb86a60ab183a094dbabbbb048bd9443e544e5637d6d78a"
+      },
+      "raw_serial": {
+        "bytes": 110704,
+        "sha256": "9d8c17a69a9dfba428c127999e5308804d351ea7672f64ef8b48f5804b2cdd51"
+      },
+      "boot_plan": {
+        "bytes": 8298,
+        "sha256": "5dd678af31f082815e03c7932d01bf560e386be8b232ece1fef0ca0e15ad731e"
+      },
+      "materialized_inputs": {
+        "bytes": 19249,
+        "sha256": "511a9bc77f8fafada16649ee4ba9603e812380e8cc46aa658b79f9a2d75fb497"
+      },
+      "original_materialization_event": {
+        "bytes": 4643,
+        "sha256": "c6927c2eb0b05c4973759710b58b5fc9329dbf1a28f99edcf5a3d70a1358d3c3"
+      }
+    },
+    "digest_bound_guest_transcript": {
+      "bytes": 11690,
+      "sha256": "bb3524bfc5edf00645ae848d3e1376853671fb0166247e3a46fd00e732491431"
+    },
+    "unframed_console_lines_between_wrapper_and_commit": 0
+  },
+  "preceding_original": {
+    "attempts_in_this_namespace": 1,
+    "overall": "failed",
+    "outer_exit": 1,
+    "inner_exit": 1,
+    "emulator_exit": 0,
+    "original_inner_and_emulator_joined": true,
+    "forced_host_stop": false,
+    "app_reported_duration_ns": 183504251100,
+    "records": {
+      "original_outer_event": {
+        "bytes": 1308,
+        "sha256": "787b73e15c2634b4cf9c8e31aeada57a63369547162c316501f803b5a8e6156f"
+      },
+      "original_outer_selector": {
+        "bytes": 284,
+        "sha256": "5371db38f2ec039fe44833f3d8395525ffc222ec85df95013d0a2f4058dad227"
+      },
+      "actual_host_carrier": {
+        "bytes": 408,
+        "sha256": "ee8f604b3427ce669c0db7219da7f8b764697b9c9002339f2da69b236eb441f9"
+      },
+      "actual_host_result": {
+        "bytes": 1341,
+        "sha256": "425f9c1f44a025037204ce5b7cac603751c84a19cec75ab4f631a8572d264739"
+      },
+      "emulator_start": {
+        "bytes": 2748,
+        "sha256": "ca69c0982bc7cdbdffc963592ce28dff8868cbc6028cf30d6882894081b2827b"
+      },
+      "raw_serial": {
+        "bytes": 111004,
+        "sha256": "1230c0951c52871a3d7b10fdf02b5b8f9cdee1a98db6e930897ef3c35b8d093f"
+      },
+      "boot_plan": {
+        "bytes": 7808,
+        "sha256": "e403363ed87696d581fe76aadab6200a06896e65ff5a259ab7f9d85ae308982a"
+      },
+      "materialized_inputs": {
+        "bytes": 19249,
+        "sha256": "b893618e57d597d5885f4de57f37c5c7d10577fdb8c0ce0a855e061ab59bd7bb"
+      },
+      "original_materialization_event": {
+        "bytes": 4643,
+        "sha256": "e7e20ead7e6ffc3e22f53f7f4a5416205e18522700885fa3eb54ff69a871eb98"
+      }
+    },
+    "failure_stage": "host serial framing",
+    "original_error": "exact terminal commit is absent, repeated, or outside the wrapper boundary"
+  },
+  "framing_revision": {
+    "change": "The host reader accepts one line-leading terminal commit byte after the successful wrapper and at or before the exact kernel poweroff line. The host strips the single commit byte before checking marker counts. Frame size, digest, and guest outcome checks are unchanged.",
+    "preceding_console_lines_between_wrapper_and_commit": 22,
+    "preceding_digest_bound_guest_transcript": {
+      "bytes": 11690,
+      "sha256": "b10c9ab7f8359b9aa2ad94de3d5f75b5892ef5b5f1d8d20277f622e5053aab65"
+    },
+    "preceding_saved_serial_corrected_reader_replay": "Diagnostic only. The first attempt remains failed.",
+    "malformed_serial_controls_refused_offline": 14,
+    "new_native_cases_during_offline_controls": 0,
+    "observation": "In the fresh passing run the terminal commit followed the wrapper on the next line. The delayed-console variant was reproduced from the first run's saved serial."
+  },
+  "limits": [
+    "The timing values use the independent fixture's release and join observations. They do not establish the library's exact internal deadline or an independent no-early-return bound.",
+    "This result covers only the selected public outcome and observation of the original caller, descendants, and cgroup retirement. It does not expose internal settlement or ACK evidence.",
+    "Other workloads, owner loss, other Linux configurations, default dispatch, generic helper deployment, and performance are outside this one-case scope.",
+    "Original host and guest records remain private. The digest records identify their bytes."
+  ]
+}

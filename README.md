@@ -386,12 +386,14 @@ covers compilation, downstream linkage, emitted-code inspection and package
 contents. A [separate extracted-package build](tests/evidence/linux-ordinary-cargo-package-20261127-summary.json)
 used the published source. It packaged with `--no-verify`, then verified the
 archive contents, rebuilt the extracted library offline with the lockfile, and
-linked an unexecuted public API consumer. Native execution of this public entry
-point, installation and performance remain unqualified.
+linked a public API consumer without executing it. A [separate native case](tests/evidence/linux-x64-ordinary-public-api-deadline-20261127-summary.json)
+then used that consumer in a fresh offline x86-64 GNU/Linux VM with an explicitly
+enrolled caller. Its Manual deadline expired with a detached descendant, and
+the original caller reported `Outcome::TimedOut`. The fixture verified
+termination of the original processes and retirement of the held cgroup.
 The [earlier single Manual deadline case](tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json)
-used a different caller build and does not transfer runtime qualification to
-this entry point. General library integration and the comprehensive benchmark
-remain open.
+used a different caller build. Broader runtime contexts, general helper
+installation, default Linux dispatch and performance remain unqualified.
 
 ## Results
 
