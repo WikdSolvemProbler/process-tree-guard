@@ -21,10 +21,12 @@ SOURCE-MANIFEST.json identifies every code member and the canonical header
 and Rust dependency pins. The snapshot-local Git attributes preserve exact
 bytes; committed blobs are verified against the manifest.
 
-This is a partial reproduction archive. The two Rust fixture files, their
-source overlays, complete build and guest recipes, and public raw evidence
-are not supplied by this snapshot. The numerical result and evidence hashes
-are in tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json.
+The [reconstruction package](reproduction/README.md) includes the exact Rust
+fixtures and a script that reproduces both historical source bundles from
+the pinned Git trees. This remains a partial reproduction archive: complete
+build and guest recipes and public raw execution evidence are separate.
+The numerical result and evidence hashes are in
+tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json.
 Earlier failed attempts retain their original outcomes. Installation,
 owner-loss, fault, wider escape and platform qualification, default support,
 and comparative performance remain open.
