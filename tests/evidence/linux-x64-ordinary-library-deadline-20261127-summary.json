@@ -1,0 +1,158 @@
+{
+  "build": {
+    "c_translation_units": 15,
+    "native_elfs": {
+      "native_helper": {
+        "bytes": 1213760,
+        "sha256": "9ab1a34946577b4f004d9bfeec4ac3d7a5030b3727f303d465721c07de89f387"
+      },
+      "rust_caller": {
+        "bytes": 1425688,
+        "sha256": "517ee6e76a77627d8f1acc77bc9ab4c1c3938ab94c692078f6679ec3c4017e22"
+      }
+    },
+    "retained_rust_link_audit_streams": 35,
+    "rust_caller_donor_objects": 14,
+    "rust_link_native_commands": 17,
+    "source_and_build_evidence": {
+      "binary_export_receipt": {
+        "bytes": 11522,
+        "sha256": "a23556da74561e7e6863b1c76dda57ae03ac4fb0341f0d670d71490dc1b6b074"
+      },
+      "c_input_bundle": {
+        "bytes": 269981,
+        "sha256": "93e0221d36fde430b83d1f13c853f474f15f90160a70c7d3c636d48fd697f4fc"
+      },
+      "native_compile_original_completion": {
+        "bytes": 3710,
+        "sha256": "c61a34858df24d325b64bdfeb3d7c865f8ca7acb99b725fbfcd45595f2d2f7a2"
+      },
+      "native_compile_result": {
+        "bytes": 1226227,
+        "sha256": "e2cd2ee9b8b722d5fa93caf459639c1173094977e7a25f4a812a28b2bcb1538a"
+      },
+      "native_emitted_review_abi": {
+        "bytes": 7589,
+        "sha256": "fe2ebe39e6270b770b5b2857978daedb8e73cb8b6aec382b7ef95d5b3d68a411"
+      },
+      "native_emitted_review_startup": {
+        "bytes": 3147,
+        "sha256": "9cf72e0f90b0909ae772f7e01052774abfa0b3aa44e40c375cfb7414722f4851"
+      },
+      "native_source_index": {
+        "bytes": 10264,
+        "sha256": "ce746f85ca9dd86e34b8d1726c7a9a3e9067d9570e90c4657ed5979cb9511a44"
+      },
+      "rust_caller_adapter": {
+        "bytes": 3910,
+        "sha256": "57b8f62bc04cf5662bb407a72b0d3982e72d223d345edf8fad611a07002f24ac"
+      },
+      "rust_link_input_bundle": {
+        "bytes": 651406,
+        "sha256": "e1f5d05b9914c12384da5bfeb1dc4588ec9ac75656818ace782e444d711fe675"
+      },
+      "rust_link_original_completion": {
+        "bytes": 3713,
+        "sha256": "d7f0fc92887758afd468bb6131283a1ea2d97404d59bba27f9b15b45ab366a73"
+      },
+      "rust_link_result": {
+        "bytes": 2395018,
+        "sha256": "6dbbcd9347f99f207610d6c1133d97cbd4a201f060e9ef84889a1750e9105b77"
+      },
+      "rust_link_review_abi": {
+        "bytes": 7220,
+        "sha256": "1c2b88b1d7f91316ee78a73c458f98340fcd20c7c1b6653a5a73aa4cc86fca46"
+      },
+      "rust_link_review_startup": {
+        "bytes": 2214,
+        "sha256": "bad6f53e7be47c5e4b4d3cc921ca50c50584514bbd51292da117d1920c67d0b9"
+      }
+    },
+    "source_candidate": "implementation-007",
+    "static_compile_audit_native_commands": 66
+  },
+  "configured_product_deadline_seconds": 12,
+  "kernel": "6.8.0-147-generic",
+  "limits": "This one case used an already enrolled cooperative caller and a per-call helper. The independent VM fixture provided observation and bounded emergency cleanup. The evidence does not qualify ordinary install or default support, generic returning caller contexts, Auto, owner loss, natural exit, fault or timeout coverage beyond this case, other platforms, or performance parity. Windows behavior was unchanged. Raw native records and host-specific artifacts remain private.",
+  "native_outcome": {
+    "first_original_pidfd_sample": {
+      "pollin": 5,
+      "roles": 5,
+      "terminal": 5
+    },
+    "held_leaf_terminal_read": "ENODEV",
+    "leaf_and_deployment_retired": true,
+    "original_caller_exit": 124,
+    "original_payload_termination": "Native killed wait with signal 9.",
+    "placement": "The payload and its new-session descendant were held live in the same original populated cgroup leaf before the deadline.",
+    "pre_stop_assistance_used": false,
+    "retirement_handshake": "The sealed record joined authenticated caller retirement acknowledgment, the watchdog's original nonconsuming reaper wait, and its matching consuming wait within the original settlement cutoff.",
+    "roles": [
+      "caller",
+      "watchdog",
+      "reaper",
+      "payload",
+      "detached descendant"
+    ],
+    "sealed_receipt": {
+      "bytes": 1880,
+      "sha256": "38deca8e72c89aad6c4d022ab66bd65b6dcc51fb97249ca71ee40330ed6a9e68",
+      "version": 2
+    }
+  },
+  "original_joins": {
+    "emulator_native_exit": 0,
+    "forced_host_stop": false,
+    "inner_guard_native_exit": 0,
+    "natural_guest_poweroff": true,
+    "outer_native_exit": 0,
+    "retry": false
+  },
+  "prior_attempts": {
+    "older_link_attempt": "Remains an aggregate failure. The current successful build and export are separate originals.",
+    "source_change": "The reviewed repair holds the original reaper wait until its retirement message is authenticated and acknowledged. The failed fourth attempt did not prove which receive branch failed.",
+    "whpx003": "Failed. The recorded fixture leaf predicate did not isolate the failing conjunct, so the product outcome remained unverified.",
+    "whpx004": "Failed. The original caller exited 125 with an unconfirmed result. Fallback retirement remained separate."
+  },
+  "qualified_cases": 1,
+  "raw_artifact_identity": {
+    "guest_witness": {
+      "bytes": 61110,
+      "sha256": "944616421d87016d0e13a26cb916952b31745eb9a14383f37bf7ce3148851bcd"
+    },
+    "host_replay": {
+      "bytes": 49234,
+      "sha256": "0d611461d56bba60f2416545f2b5426b80a1ab506290cafbfb976f7c2b42bb98"
+    },
+    "host_result": {
+      "bytes": 12565,
+      "sha256": "bd4c046b29f80304ac822849047411710439fb236dbbcd70266ead8eb3233453"
+    },
+    "inner_guard_join": {
+      "bytes": 408,
+      "sha256": "441e0fa3a58fc83aa91d31ea848d2081a923b66f7671baa8fcb5c1e20571ab9a"
+    },
+    "original_boot_completion": {
+      "bytes": 1287,
+      "sha256": "8cbe18f5e09fac136cf3bbe3936d07f4fceb93a996c28cf31fcd9992518188ff"
+    },
+    "original_preparation_completion": {
+      "bytes": 4579,
+      "sha256": "3e80b256ed665c63d6bf2ecd2dcb694379f4d718e828837d7ed7b4e3e668d9e8"
+    },
+    "prepared_inputs": {
+      "bytes": 20579,
+      "sha256": "5e9bc3cfc0dbec7e603c62d39963fedfb7496d1e3bab759696b78c657aea02bc"
+    },
+    "prospective_boot_plan": {
+      "bytes": 9213,
+      "sha256": "a802042cd3a62ae204d1a1dd4d0a9328714ac19e25d120111a4f44d738a606cb"
+    },
+    "serial_transcript": {
+      "bytes": 117214,
+      "sha256": "184b16fcc99af8c1104f5cb42bf3c157ed8ccd0f6f83119388cf2c55c715bbca"
+    }
+  },
+  "schema": "ptg-linux-ordinary-x64-deadline-native-v2",
+  "scope": "One successful Manual deadline case with the experimental ordinary Rust library caller in a fresh offline x86-64 Linux WHPX guest."
+}

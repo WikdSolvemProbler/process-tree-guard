@@ -1,0 +1,195 @@
+{
+  "schema": "ptg-experimental-ordinary-linux-code-snapshot-v1",
+  "scope": "Exact33 code inputs for the one observed native x86_64 Manual deadline case; inert source publication, outside Cargo package, no default/backend enablement.",
+  "original_source_index_sha256": "ce746f85ca9dd86e34b8d1726c7a9a3e9067d9570e90c4657ed5979cb9511a44",
+  "code_members": [
+    {
+      "bytes": 8304,
+      "name": "bootstrap_raw.c",
+      "sha256": "d4592b66a2b4d9ff8d39b9fb376783c57abd018fbee4dfc591afc6737a51eea1"
+    },
+    {
+      "bytes": 711,
+      "name": "bootstrap_raw.h",
+      "sha256": "04369f75203d23cb7574ff06d2650c2fa50be6da9fab0bd28227f5b5fac898b2"
+    },
+    {
+      "bytes": 2338,
+      "name": "bootstrap_steps.h",
+      "sha256": "c218766ec93edbb81a2fd188be03fc1facd2c1cc0aa058980a07d8a8b4bfb9f2"
+    },
+    {
+      "bytes": 6710,
+      "name": "bootstrap_wire_primitives.h",
+      "sha256": "a47629610b67333deda49118c1e9e6a7ad81aae3fab3ca30034d032e5d1b71a8"
+    },
+    {
+      "bytes": 2518,
+      "name": "bootstrap_wire.c",
+      "sha256": "29806e00ad4505d2b9c0948ac74bb13504a9333ab107122a002009318f3103bb"
+    },
+    {
+      "bytes": 2555,
+      "name": "bootstrap_wire.h",
+      "sha256": "28956fccf400af2469cd489f847fe595c141d7d2cae3cff7df076b1deab1304c"
+    },
+    {
+      "bytes": 12682,
+      "name": "bootstrap.c",
+      "sha256": "a250f1d8161e3381e8885edc7716738336126d7afd3deb57a21da5c07dd199c8"
+    },
+    {
+      "bytes": 1252,
+      "name": "bootstrap.h",
+      "sha256": "66dcebb68d1c312112a46752e2be9de14a15fcfc604ba05d477ada9821106eb8"
+    },
+    {
+      "bytes": 3910,
+      "name": "caller_adapter.rs",
+      "sha256": "57b8f62bc04cf5662bb407a72b0d3982e72d223d345edf8fad611a07002f24ac"
+    },
+    {
+      "bytes": 18934,
+      "name": "caller.c",
+      "sha256": "c3d6dd004afe19bcc494a9c4f21f025133c1b7dce75af0d916f90ae59de347c2"
+    },
+    {
+      "bytes": 4440,
+      "name": "credentials.c",
+      "sha256": "50853cf05933fbe0598dae49f954b537723f772e50758b97b17ec3551becbffa"
+    },
+    {
+      "bytes": 594,
+      "name": "credentials.h",
+      "sha256": "f9a6e091efc63cc55b54e66096b4a5bbcc9cc055474c58807eef69918cda5d3c"
+    },
+    {
+      "bytes": 8238,
+      "name": "descriptors.c",
+      "sha256": "1826943a25aece91493991bb720309dac8ae89329d32139c4d02179c54794f97"
+    },
+    {
+      "bytes": 567,
+      "name": "descriptors.h",
+      "sha256": "30f8e6306f90959b63b304ed06be2243d6eb7d29741fe64870961f115a8d659d"
+    },
+    {
+      "bytes": 17982,
+      "name": "enrollment.c",
+      "sha256": "ccbe97fd8b9219fc51528abe4ea3cae567ef05113e8a3885cb3fe469150be9a4"
+    },
+    {
+      "bytes": 502,
+      "name": "enrollment.h",
+      "sha256": "55b161b33d6fb14c4ccc496c9aa02824232dbba72f9e33ca2fc03a5918cda1a1"
+    },
+    {
+      "bytes": 1444,
+      "name": "evidence.c",
+      "sha256": "87f30005b945b450606f2088d9199ec258fb89fdf509547256e642901eb7d6df"
+    },
+    {
+      "bytes": 3555,
+      "name": "evidence.h",
+      "sha256": "aa0d21f342cce7cf29dcde48390ca0d73ee6b3c9d422a81c6279b1c904d42f54"
+    },
+    {
+      "bytes": 976,
+      "name": "helper_main.c",
+      "sha256": "d5ece450a1f7f984da581f2af9ee63ab429d1503d6a60ecd7035455ef6abc111"
+    },
+    {
+      "bytes": 8668,
+      "name": "helper_startup.c",
+      "sha256": "e2ad889318b3011b80533d711e86c125769e7e6923f4023b3c77bce53a80dc7a"
+    },
+    {
+      "bytes": 824,
+      "name": "helper_startup.h",
+      "sha256": "91b3feb52612c7555405a1116603c4a373b8878db3334ff5d39a1ccda6d31d93"
+    },
+    {
+      "bytes": 15265,
+      "name": "lease.c",
+      "sha256": "b69a5d6bedf40878fc7e92b5f3e5adaeb6fb04e17deac5ba187414f6c2c95590"
+    },
+    {
+      "bytes": 2798,
+      "name": "lease.h",
+      "sha256": "cd337ed0e135afdd8f607b1bcd6b327572c0bb5781a721cea1670dbecae2d162"
+    },
+    {
+      "bytes": 33493,
+      "name": "lifecycle.c",
+      "sha256": "63c79b9ebbd12faa8320589fbe8998b6f404be154a7e278e0f83838c84c1f0ef"
+    },
+    {
+      "bytes": 1117,
+      "name": "lifecycle.h",
+      "sha256": "8c0868c72ea352bbe8f1db915b6867edc6d52911e769d6aeb3bb2c6d05540591"
+    },
+    {
+      "bytes": 10891,
+      "name": "native_control_primitives.h",
+      "sha256": "31f7bdea32bc1e44c6f0f63d9a688722116a167b5f4ba4c3065ec8382fae14e5"
+    },
+    {
+      "bytes": 8064,
+      "name": "native_control.c",
+      "sha256": "6f3d24511ed550a82bfd345fb3856b438a90669aa0a5206b7b1b41d7532cd867"
+    },
+    {
+      "bytes": 3165,
+      "name": "native_control.h",
+      "sha256": "4c0f19a2ef5aa4c061aff797a80e480cfa6e0814ae6379db646c8de685e858e9"
+    },
+    {
+      "bytes": 715,
+      "name": "native_syscall.h",
+      "sha256": "72d68171ea77d9cfde37a576bd82cfad914dcbedcc58e773e60ce3f6ed05464c"
+    },
+    {
+      "bytes": 5422,
+      "name": "owners.c",
+      "sha256": "5a41723cf214cde8d959e670eccb07f6828b14f9b57e0b316cc29e42f165415e"
+    },
+    {
+      "bytes": 754,
+      "name": "owners.h",
+      "sha256": "d1433b40cc128deb58c15a49b9901a54759be37fa85bd680aba6d1564e91a3b5"
+    },
+    {
+      "bytes": 8557,
+      "name": "request.c",
+      "sha256": "ff3f2fcfe20dfa411e0a0a8dcddf833bd51a8e800687da833ccf7f6ea7d1e90c"
+    },
+    {
+      "bytes": 746,
+      "name": "request.h",
+      "sha256": "134bd7439c98ddcb355a74dd50c5fa6de6133813be3c3976650c4984f9524b93"
+    }
+  ],
+  "canonical_dependency_pins": [
+    {
+      "name": "src/sys/linux/waitid_bridge.h",
+      "sha256": "4b3562bd4e0e8fe9540f7986fbd125859906e0462a136075e32baf6c10ffb851"
+    },
+    {
+      "name": "src/sys/linux/owner_watch.h",
+      "sha256": "0f6795ae591096680847dd955c00f606377a810681afdd512cb56e4d0715beee"
+    },
+    {
+      "name": "src/sys/linux/invocation.rs",
+      "sha256": "931a73e2e4de7c88f09d8e77d0f1cef4f0ad427a707edada9a80c82411e127e5"
+    },
+    {
+      "name": "src/deadline.rs",
+      "sha256": "56252eb28270b4743d73e17e05ae933d3fad8168e7b4ba34405e859be9c85c53"
+    }
+  ],
+  "enabled_backend": false,
+  "complete_reproduction_package": false,
+  "qualification": "tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json",
+  "dependency_pin_scope": "Exact compiler input bytes. These pins do not assert raw Git blob equality; the historical deadline.rs input has 34 CRLF-terminated lines.",
+  "canonical_rust_base": "b8bfa00cd24e2eaf1f8733d2d46b28b9bd9f23af"
+}
