@@ -1,0 +1,127 @@
+{
+  "artifact_pins": {
+    "diagnostic_final_linker_arguments": {
+      "bytes": 1879,
+      "sha256": "659b34051958a88806343cfdcada25e3ecd97c7d2c08dd8e552059c142388174"
+    },
+    "diagnostic_image": {
+      "bytes": 825856,
+      "sha256": "43744423f8527a82107753021cab7aa19c3902b57bd240885e3fbc2294d66b29"
+    },
+    "diagnostic_map": {
+      "bytes": 591134,
+      "sha256": "0f8b21d7e7cda09381fd5733d30dd6d8b4b8b5c3cdc6e32af2b25bbdc46a83bc"
+    },
+    "diagnostic_native_stderr": {
+      "bytes": 11615,
+      "sha256": "d4dbd07285d87f642e95b3116f29c2813ecaa5260f55b2a6c0d484b5978fc65b"
+    },
+    "diagnostic_native_stdout": {
+      "bytes": 3907,
+      "sha256": "e761ee6570b410d0230fb95516ac4d610ceb73bab18d6dfa60b4c748abe82d64"
+    },
+    "diagnostic_original_native_receipt": {
+      "bytes": 230,
+      "sha256": "03e900054144c1c1242ed3ac1c6975bc02594ba1aef6c569bef14f4f4eb62aef"
+    },
+    "diagnostic_original_outer_event": {
+      "bytes": 1477,
+      "sha256": "e5e83fe2ae528bf5f632f03fcaeccb055366ff4c73981a7cdb766731e69559c7"
+    },
+    "diagnostic_pdb": {
+      "bytes": 11579392,
+      "sha256": "5eafab02e9da2a6afe97bc089dd6956cbdcb4640eb0589018f6b23de9a76a7cb"
+    },
+    "diagnostic_result": {
+      "bytes": 3696,
+      "sha256": "0910ebd542e34fb686e0319e1ea2267621778125b4641816c53fbd639af4a58e"
+    },
+    "retained_stock_image": {
+      "bytes": 826368,
+      "sha256": "95b2e4b681d6a7eceb0bd5c690bab0d6a383870133afa52af2a7c499f0482623"
+    },
+    "retained_stock_pdb": {
+      "bytes": 1232896,
+      "sha256": "f894cee1191c9d957dec1c6d3b5ccc71bbaa8667027a798836f7a31ef009217b"
+    }
+  },
+  "build": {
+    "app_duration_ns": 31992268900,
+    "codegen_units": 1,
+    "compiler_commit": "48a229ceaefd4985c50990b14116b6d856af0985",
+    "diagnostic_debug_level": 2,
+    "diagnostic_rust_strip": "none",
+    "features": [],
+    "lto": "fat",
+    "msvc_debug": "FULL",
+    "msvc_incremental": false,
+    "msvc_map_written": true,
+    "msvc_ref_and_icf_enabled": true,
+    "msvc_version": "14.51.36231",
+    "no_default_features_requested": true,
+    "opt_level": 3,
+    "original_native_command_exit": 0,
+    "original_outer_exit": 0,
+    "outer_bound_seconds": 180,
+    "panic": "abort",
+    "retained_native_wait_bound_seconds": 165,
+    "selected_build_environment_sha256": "484c7633fbdf7740bff4faa260ad9bdb7bfb8e2ad06e10a787992ea1a82f9a47",
+    "target": "x86_64-pc-windows-msvc",
+    "target_executed": false,
+    "tests_or_benchmarks_run": false,
+    "windows_sdk": "10.0.28000.0"
+  },
+  "limits": [
+    "This scope covers the stock and diagnostic images identified by their digests. The diagnostic executable was never run.",
+    "The static comparison does not establish which build setting changed a particular instruction or region.",
+    "These data do not support a startup or performance claim, runtime causation, an attribution to one DLL, or a stock source-family size breakdown.",
+    "Private original streams and local paths remain private. Digest records identify the retained bytes."
+  ],
+  "schema": "ptg-windows-x64-static-symbol-diagnostic-v1",
+  "scope": "One optimized feature-free x64 MSVC diagnostic build and static comparison against its retained stock Windows image.",
+  "sources": {
+    "frozen_build_source_files": 1251,
+    "relationship": "The diagnostic used the retained exact source snapshot and the same absolute source and target paths. The recorded Git source comparison permits textual CRLF-to-LF normalization.",
+    "source_bridge": {
+      "bytes": 143859,
+      "sha256": "e59defe0acde01cc6242f91b1988d1fe1c9fcb7496825409ab5ade9780d288af"
+    },
+    "source_manifest": {
+      "bytes": 541143,
+      "sha256": "db1b273735e54bab14501782753545115dc0305aea13c7b01faea7090ceaf400"
+    },
+    "source_paths_compared_to_git_bytes_or_line_endings": 132,
+    "source_reference_commit": "97a892b2c6fee9464c03c5bd6848e13ff15dc161",
+    "stock_build_result": {
+      "bytes": 3041,
+      "sha256": "2476a8ea84f5a9c9e415faa3d5a9a9c290f77e02f548a5b28e51fd6aa573b0d2"
+    },
+    "stock_original_event": {
+      "bytes": 1430,
+      "sha256": "abcd582d7f1b3c2429cd102fdcd734d0a953b71ff5507aad99ba3c0817af44b2"
+    }
+  },
+  "static_comparison": {
+    "decision": "Executable coordinates and mapped code differ. Unwind data and relocation metadata also differ. Diagnostic debug ranges cannot be attributed to the retained stock image from these artifacts.",
+    "diagnostic_entry_rva": 692064,
+    "diagnostic_exception_table_entries": 927,
+    "exception_directory_bytes_equal": false,
+    "map_identity": "The linker map matched the diagnostic executable's timestamp, preferred base, entry point and code section extent.",
+    "mapped_rdata_bytes_equal": false,
+    "mapped_text": {
+      "diagnostic_mapped_bytes": 703358,
+      "diagnostic_mapped_sha256": "b7cbeac56ac1e6288acff5045ab8fa63cf986cdb5b74686727f1cb2145606bec",
+      "first_difference_rva": 4117,
+      "rva": 4096,
+      "stock_mapped_bytes": 703934,
+      "stock_mapped_sha256": "a5a969700a721af4f4f863fdfbf0b8191650fc6019ad880441f43d941fd86827",
+      "unequal_positions_in_common_mapped_extent": 610982
+    },
+    "pdb_identity": "Each executable's RSDS identity matched its own PDB Info GUID and age. The PDB's AMD64 DBI section coordinates also matched.",
+    "relocation_directory_bytes_equal": false,
+    "same_preferred_image_base": true,
+    "stock_entry_rva": 692384,
+    "stock_exception_table_entries": 928,
+    "stock_symbol_transfer": "withheld"
+  }
+}
