@@ -1,0 +1,696 @@
+{
+  "schema": "ptg-windows-stock-manual-rate-index-summary-v1",
+  "scope": "One descriptive paired Windows x86-64 stock manual-launch diagnostic. No historical-baseline comparison, competitive ranking, rate-index promotion, or general protection or timing-readiness conclusion.",
+  "source": {
+    "control_git_commit": "f18cc4fcba699ee5371e7afa194b9a6e63fb6b22",
+    "candidate_code_git_commit": "87969ef92501467059daf3de7c4bd3b4e3acaaf2",
+    "candidate_raw_snapshot_git_commit": "7fa0ae2c85ceccee49ab58ffc567db23a5986394",
+    "candidate_change": "One rate-index field changes from HashMap to BTreeMap. Both measured main images are feature-free opt-level 3 stock builds staged at the same build path."
+  },
+  "pre_dispatch_checks": "Both arms passed 324 library tests on each of x86-64 and i686 and the fixed matrix of 12 x86-64 and five i686 cases per arm. The i686 debug artifacts were qualification inputs only.",
+  "method": {
+    "pairs": 40,
+    "launches": 80,
+    "order": "Alternating AB and BA, starting AB. All scheduled observations retained.",
+    "endpoint": "Monotonic clock immediately before CreateProcessW through the first observed successful wait on the retained original process handle. The endpoint includes suspended creation and resume, and ends before independent cleanup verification.",
+    "fixture": "Same frozen manual fixture and per-pair command token. Ordinary redirected files, exact expected stdout, empty stderr.",
+    "limits_seconds": {
+      "fixture": 2,
+      "per_launch": 3,
+      "inner_guard": 180,
+      "outer_guard": 300
+    },
+    "duration_clock_frequency_hz": 10000000,
+    "resource_admission": {
+      "minimum_available_physical_bytes": 4294967296,
+      "observed_available_physical_bytes": 7449894912,
+      "ac_power": true,
+      "cpu_context_observations": 41
+    },
+    "bootstrap": "10,000 replicates. Each draw samples 20 contiguous two-pair blocks with replacement from the 39 nonwrapping starts. The same draw is used for both marginal quantile contrasts. Integer nearest-rank quantiles, B minus A. Interval endpoints are bootstrap ranks 250 and 9750. Direction requires concordant signs in the interval and all four reported splits."
+  },
+  "completion": {
+    "accepted": 80,
+    "failed": 0,
+    "unattempted": 0,
+    "assisted": 0,
+    "outer_exit": 0,
+    "retained_inner_exit": 0,
+    "all_original_subjects_joined_and_cleanup_verified": true
+  },
+  "previous_attempt": "Prior timing attempt refused the full sanitized environment digest before subject creation. Zero of 80 subjects were attempted and no estimates issued. Four geometries within one tool call subsequently agreed. In a separate two-call diagnostic, only CODEX_TOOL_CALL_ID differed across the two observed snapshots. The original pair of rejected digests was not reproduced. This attempt used the same guarded PowerShell process for independent preflight and dispatch, retained the unchanged environment policy, and checked the full digest before dispatch.",
+  "estimates_ns": {
+    "p50": {
+      "point_ns": -226700,
+      "split_ns": {
+        "first_half": 120400,
+        "second_half": 135600,
+        "AB": -729800,
+        "BA": 561800
+      },
+      "interval_ns": [
+        -1510000,
+        696000
+      ],
+      "direction": "unresolved",
+      "investigate_positive": false
+    },
+    "p90": {
+      "point_ns": -1597600,
+      "split_ns": {
+        "first_half": -1760300,
+        "second_half": -3661000,
+        "AB": -4822300,
+        "BA": 13600
+      },
+      "interval_ns": [
+        -5298200,
+        1181900
+      ],
+      "direction": "unresolved",
+      "investigate_positive": false
+    }
+  },
+  "arm_quantiles_ns": {
+    "p50": {
+      "A": 41922200,
+      "B": 41695500
+    },
+    "p90": {
+      "A": 46901200,
+      "B": 45303600
+    }
+  },
+  "signed_pair_differences_ns": [
+    -186400,
+    684500,
+    -1029500,
+    5011200,
+    -10448300,
+    -256000,
+    1240900,
+    -2650400,
+    -5220000,
+    3366200,
+    -55400,
+    -1751900,
+    -478900,
+    -1110800,
+    -5890100,
+    -4083100,
+    2055600,
+    -1186700,
+    321600,
+    -2495600,
+    -1777100,
+    1509200,
+    -288700,
+    -1870100,
+    -1911600,
+    8051300,
+    -5552500,
+    1398200,
+    -1158300,
+    -315000,
+    -9371200,
+    -618700,
+    -947100,
+    2665000,
+    2347600,
+    -3661000,
+    -3646000,
+    -487700,
+    240400,
+    2015800
+  ],
+  "observations": [
+    {
+      "slot": 1,
+      "pair": 1.0,
+      "arm": "A",
+      "elapsed_ns": 44157400
+    },
+    {
+      "slot": 2,
+      "pair": 1.0,
+      "arm": "B",
+      "elapsed_ns": 43971000
+    },
+    {
+      "slot": 3,
+      "pair": 2.0,
+      "arm": "B",
+      "elapsed_ns": 43803600
+    },
+    {
+      "slot": 4,
+      "pair": 2.0,
+      "arm": "A",
+      "elapsed_ns": 43119100
+    },
+    {
+      "slot": 5,
+      "pair": 3.0,
+      "arm": "A",
+      "elapsed_ns": 47795400
+    },
+    {
+      "slot": 6,
+      "pair": 3.0,
+      "arm": "B",
+      "elapsed_ns": 46765900
+    },
+    {
+      "slot": 7,
+      "pair": 4.0,
+      "arm": "B",
+      "elapsed_ns": 44357700
+    },
+    {
+      "slot": 8,
+      "pair": 4.0,
+      "arm": "A",
+      "elapsed_ns": 39346500
+    },
+    {
+      "slot": 9,
+      "pair": 5.0,
+      "arm": "A",
+      "elapsed_ns": 55751900
+    },
+    {
+      "slot": 10,
+      "pair": 5.0,
+      "arm": "B",
+      "elapsed_ns": 45303600
+    },
+    {
+      "slot": 11,
+      "pair": 6.0,
+      "arm": "B",
+      "elapsed_ns": 46035100
+    },
+    {
+      "slot": 12,
+      "pair": 6.0,
+      "arm": "A",
+      "elapsed_ns": 46291100
+    },
+    {
+      "slot": 13,
+      "pair": 7.0,
+      "arm": "A",
+      "elapsed_ns": 42341400
+    },
+    {
+      "slot": 14,
+      "pair": 7.0,
+      "arm": "B",
+      "elapsed_ns": 43582300
+    },
+    {
+      "slot": 15,
+      "pair": 8.0,
+      "arm": "B",
+      "elapsed_ns": 42799900
+    },
+    {
+      "slot": 16,
+      "pair": 8.0,
+      "arm": "A",
+      "elapsed_ns": 45450300
+    },
+    {
+      "slot": 17,
+      "pair": 9.0,
+      "arm": "A",
+      "elapsed_ns": 48946800
+    },
+    {
+      "slot": 18,
+      "pair": 9.0,
+      "arm": "B",
+      "elapsed_ns": 43726800
+    },
+    {
+      "slot": 19,
+      "pair": 10.0,
+      "arm": "B",
+      "elapsed_ns": 48280700
+    },
+    {
+      "slot": 20,
+      "pair": 10.0,
+      "arm": "A",
+      "elapsed_ns": 44914500
+    },
+    {
+      "slot": 21,
+      "pair": 11.0,
+      "arm": "A",
+      "elapsed_ns": 44179900
+    },
+    {
+      "slot": 22,
+      "pair": 11.0,
+      "arm": "B",
+      "elapsed_ns": 44124500
+    },
+    {
+      "slot": 23,
+      "pair": 12.0,
+      "arm": "B",
+      "elapsed_ns": 45149300
+    },
+    {
+      "slot": 24,
+      "pair": 12.0,
+      "arm": "A",
+      "elapsed_ns": 46901200
+    },
+    {
+      "slot": 25,
+      "pair": 13.0,
+      "arm": "A",
+      "elapsed_ns": 42209400
+    },
+    {
+      "slot": 26,
+      "pair": 13.0,
+      "arm": "B",
+      "elapsed_ns": 41730500
+    },
+    {
+      "slot": 27,
+      "pair": 14.0,
+      "arm": "B",
+      "elapsed_ns": 38325600
+    },
+    {
+      "slot": 28,
+      "pair": 14.0,
+      "arm": "A",
+      "elapsed_ns": 39436400
+    },
+    {
+      "slot": 29,
+      "pair": 15.0,
+      "arm": "A",
+      "elapsed_ns": 46349100
+    },
+    {
+      "slot": 30,
+      "pair": 15.0,
+      "arm": "B",
+      "elapsed_ns": 40459000
+    },
+    {
+      "slot": 31,
+      "pair": 16.0,
+      "arm": "B",
+      "elapsed_ns": 38605100
+    },
+    {
+      "slot": 32,
+      "pair": 16.0,
+      "arm": "A",
+      "elapsed_ns": 42688200
+    },
+    {
+      "slot": 33,
+      "pair": 17.0,
+      "arm": "A",
+      "elapsed_ns": 39794100
+    },
+    {
+      "slot": 34,
+      "pair": 17.0,
+      "arm": "B",
+      "elapsed_ns": 41849700
+    },
+    {
+      "slot": 35,
+      "pair": 18.0,
+      "arm": "B",
+      "elapsed_ns": 42150200
+    },
+    {
+      "slot": 36,
+      "pair": 18.0,
+      "arm": "A",
+      "elapsed_ns": 43336900
+    },
+    {
+      "slot": 37,
+      "pair": 19.0,
+      "arm": "A",
+      "elapsed_ns": 40353000
+    },
+    {
+      "slot": 38,
+      "pair": 19.0,
+      "arm": "B",
+      "elapsed_ns": 40674600
+    },
+    {
+      "slot": 39,
+      "pair": 20.0,
+      "arm": "B",
+      "elapsed_ns": 40966300
+    },
+    {
+      "slot": 40,
+      "pair": 20.0,
+      "arm": "A",
+      "elapsed_ns": 43461900
+    },
+    {
+      "slot": 41,
+      "pair": 21.0,
+      "arm": "A",
+      "elapsed_ns": 40718300
+    },
+    {
+      "slot": 42,
+      "pair": 21.0,
+      "arm": "B",
+      "elapsed_ns": 38941200
+    },
+    {
+      "slot": 43,
+      "pair": 22.0,
+      "arm": "B",
+      "elapsed_ns": 41085000
+    },
+    {
+      "slot": 44,
+      "pair": 22.0,
+      "arm": "A",
+      "elapsed_ns": 39575800
+    },
+    {
+      "slot": 45,
+      "pair": 23.0,
+      "arm": "A",
+      "elapsed_ns": 40695800
+    },
+    {
+      "slot": 46,
+      "pair": 23.0,
+      "arm": "B",
+      "elapsed_ns": 40407100
+    },
+    {
+      "slot": 47,
+      "pair": 24.0,
+      "arm": "B",
+      "elapsed_ns": 39408000
+    },
+    {
+      "slot": 48,
+      "pair": 24.0,
+      "arm": "A",
+      "elapsed_ns": 41278100
+    },
+    {
+      "slot": 49,
+      "pair": 25.0,
+      "arm": "A",
+      "elapsed_ns": 40389000
+    },
+    {
+      "slot": 50,
+      "pair": 25.0,
+      "arm": "B",
+      "elapsed_ns": 38477400
+    },
+    {
+      "slot": 51,
+      "pair": 26.0,
+      "arm": "B",
+      "elapsed_ns": 48083100
+    },
+    {
+      "slot": 52,
+      "pair": 26.0,
+      "arm": "A",
+      "elapsed_ns": 40031800
+    },
+    {
+      "slot": 53,
+      "pair": 27.0,
+      "arm": "A",
+      "elapsed_ns": 46260500
+    },
+    {
+      "slot": 54,
+      "pair": 27.0,
+      "arm": "B",
+      "elapsed_ns": 40708000
+    },
+    {
+      "slot": 55,
+      "pair": 28.0,
+      "arm": "B",
+      "elapsed_ns": 40430800
+    },
+    {
+      "slot": 56,
+      "pair": 28.0,
+      "arm": "A",
+      "elapsed_ns": 39032600
+    },
+    {
+      "slot": 57,
+      "pair": 29.0,
+      "arm": "A",
+      "elapsed_ns": 40306600
+    },
+    {
+      "slot": 58,
+      "pair": 29.0,
+      "arm": "B",
+      "elapsed_ns": 39148300
+    },
+    {
+      "slot": 59,
+      "pair": 30.0,
+      "arm": "B",
+      "elapsed_ns": 38862800
+    },
+    {
+      "slot": 60,
+      "pair": 30.0,
+      "arm": "A",
+      "elapsed_ns": 39177800
+    },
+    {
+      "slot": 61,
+      "pair": 31.0,
+      "arm": "A",
+      "elapsed_ns": 50601800
+    },
+    {
+      "slot": 62,
+      "pair": 31.0,
+      "arm": "B",
+      "elapsed_ns": 41230600
+    },
+    {
+      "slot": 63,
+      "pair": 32.0,
+      "arm": "B",
+      "elapsed_ns": 41745900
+    },
+    {
+      "slot": 64,
+      "pair": 32.0,
+      "arm": "A",
+      "elapsed_ns": 42364600
+    },
+    {
+      "slot": 65,
+      "pair": 33.0,
+      "arm": "A",
+      "elapsed_ns": 41922200
+    },
+    {
+      "slot": 66,
+      "pair": 33.0,
+      "arm": "B",
+      "elapsed_ns": 40975100
+    },
+    {
+      "slot": 67,
+      "pair": 34.0,
+      "arm": "B",
+      "elapsed_ns": 42865800
+    },
+    {
+      "slot": 68,
+      "pair": 34.0,
+      "arm": "A",
+      "elapsed_ns": 40200800
+    },
+    {
+      "slot": 69,
+      "pair": 35.0,
+      "arm": "A",
+      "elapsed_ns": 38844800
+    },
+    {
+      "slot": 70,
+      "pair": 35.0,
+      "arm": "B",
+      "elapsed_ns": 41192400
+    },
+    {
+      "slot": 71,
+      "pair": 36.0,
+      "arm": "B",
+      "elapsed_ns": 42360500
+    },
+    {
+      "slot": 72,
+      "pair": 36.0,
+      "arm": "A",
+      "elapsed_ns": 46021500
+    },
+    {
+      "slot": 73,
+      "pair": 37.0,
+      "arm": "A",
+      "elapsed_ns": 41423600
+    },
+    {
+      "slot": 74,
+      "pair": 37.0,
+      "arm": "B",
+      "elapsed_ns": 37777600
+    },
+    {
+      "slot": 75,
+      "pair": 38.0,
+      "arm": "B",
+      "elapsed_ns": 40831400
+    },
+    {
+      "slot": 76,
+      "pair": 38.0,
+      "arm": "A",
+      "elapsed_ns": 41319100
+    },
+    {
+      "slot": 77,
+      "pair": 39.0,
+      "arm": "A",
+      "elapsed_ns": 41455100
+    },
+    {
+      "slot": 78,
+      "pair": 39.0,
+      "arm": "B",
+      "elapsed_ns": 41695500
+    },
+    {
+      "slot": 79,
+      "pair": 40.0,
+      "arm": "B",
+      "elapsed_ns": 41880900
+    },
+    {
+      "slot": 80,
+      "pair": 40.0,
+      "arm": "A",
+      "elapsed_ns": 39865100
+    }
+  ],
+  "evidence": {
+    "MANIFEST.json": {
+      "bytes": 17414,
+      "sha256": "454c6d000f4e0bce269c6041dc92f0aefb2478970d53a6515c2dd0e214c3ca49"
+    },
+    "PLAN.json": {
+      "bytes": 10454,
+      "sha256": "dc049999479abf84b22592ca99878fa67e545bf67d28999f3f9baa8b3a477cfc"
+    },
+    "MANUAL.py": {
+      "bytes": 14642,
+      "sha256": "38609b69e6b9058a0bd663c577b8b5e9b668ad412d5bcd5cd45b41b2e5047174"
+    },
+    "REPLAY.py": {
+      "bytes": 27333,
+      "sha256": "b686e58585b6ad8c3ee38beb96ce8af293cd31487d68e625e5f0744d42c53d76"
+    },
+    "ROOT-SETUP.ps1": {
+      "bytes": 7488,
+      "sha256": "81df3f31aab38e647b041afbc10a3cc64c45b644c02b200cdd23af902690d8d2"
+    },
+    "CURRENT-FUNCTIONAL-EVIDENCE.json": {
+      "bytes": 12215,
+      "sha256": "ba4dad6169b7e122ab39f7c872bd67c987b148b19a2e1940017e1d60119b5d9b"
+    },
+    "RESOURCE-ADMISSION.json": {
+      "bytes": 513,
+      "sha256": "ad4276714ecd59dd94871421657989d4b7631b0c64ec382cfa3a70b1d2fc668a"
+    },
+    "RESULT.json": {
+      "bytes": 607102,
+      "sha256": "9169f94b1a036457f713d07b351b236207c11b416e162e29edce1ce5d2685073"
+    },
+    "LAUNCH-RESULT.json": {
+      "bytes": 805,
+      "sha256": "a569c35ba18004a7c83d2389de915729c729b65f000c5fa85a5a83ccf2af1e64"
+    },
+    "ORIGINAL-OUTER-COMPLETION.jsonl": {
+      "bytes": 2065,
+      "sha256": "d8947bbe8b9796af50e48bf557c3120077b2a3bc1fc690145f547fff732cea2f"
+    },
+    "ROOT-ORIGINAL-SELECTION.json": {
+      "bytes": 291,
+      "sha256": "1d77d2e231827b3fc24d584334b574945521db7e809e225de4a1638e71a35bea"
+    },
+    "ROOT-REPLAY.json": {
+      "bytes": 1390,
+      "sha256": "5dd6126c08cc7abb67ff181332501bf3fc7c8b80112fccdc5ff1df5380578c2e"
+    }
+  },
+  "image_and_lineage_pins": {
+    "A": {
+      "bytes": 826368,
+      "sha256": "e9746c031147ce025c605582687a0496006ab8c4541dc0914ccd61fe8a3a3fb0"
+    },
+    "B": {
+      "bytes": 830976,
+      "sha256": "1012fa93ceca43d64ec3c3cff2242494db6ae1acedaaf8c0988d705a16611c6e"
+    },
+    "current_source_inputs": {
+      "bytes": 267524,
+      "sha256": "16ee75e5874eea753c84a9225763fd07680701a664eade1f4d55a3c9660d3232"
+    },
+    "control_rate": {
+      "bytes": 12346,
+      "sha256": "057f7179983d2db02acb24394713f3d550c97191fa1f355653de156bb42efd93"
+    },
+    "tree_rate": {
+      "bytes": 12347,
+      "sha256": "7771c1dfc7aab542b1d93b68b2303bbb7b80d6e70b437cda170a9aeaeed62c25"
+    },
+    "prior_timing_result": {
+      "bytes": 27287,
+      "sha256": "ec7b29075599d074f998c7edb723f142d064dd30b7f0131f4333e01e6a1c719d"
+    },
+    "same_call_diagnostic": {
+      "bytes": 2695,
+      "sha256": "cdeb6e54a4e7083a1f261871304599c75294a5ca05123a22d6ce0696e652ae1a"
+    },
+    "cross_call_first": {
+      "bytes": 636,
+      "sha256": "26c7277b2a76e8c3a6533858f02aa4f2755bc144fb75fc2c68c2e749b9d232d7"
+    },
+    "cross_call_second": {
+      "bytes": 768,
+      "sha256": "21f1f2f349cfce8ca4bcdb0c2cdccc405537dc30f907c188048adafb4ee66f1d"
+    }
+  }
+}
