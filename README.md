@@ -383,9 +383,12 @@ reuse that context merely because the Rust return value is `Ok`.
 
 The [Cargo build evidence](tests/evidence/linux-ordinary-cargo-build-20261127-summary.json)
 covers compilation, downstream linkage, emitted-code inspection and package
-contents. Packaging used `--no-verify`; an extracted-package rebuild, native
-execution of this public entry point, installation and performance remain
-unqualified. The [earlier single Manual deadline case](tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json)
+contents. A [separate extracted-package build](tests/evidence/linux-ordinary-cargo-package-20261127-summary.json)
+used the published source. It packaged with `--no-verify`, then verified the
+archive contents, rebuilt the extracted library offline with the lockfile, and
+linked an unexecuted public API consumer. Native execution of this public entry
+point, installation and performance remain unqualified.
+The [earlier single Manual deadline case](tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json)
 used a different caller build and does not transfer runtime qualification to
 this entry point. General library integration and the comprehensive benchmark
 remain open.
