@@ -1,0 +1,144 @@
+{
+  "schema": "ptg-renderer-build-and-unit-progress-v1",
+  "status": "partial evidence",
+  "canonical_commit": "6d3c801057421235c18540f825d871b950418797",
+  "experiment": {
+    "factor": "Source experiment intended to share the executable UTF-16 traversal while preserving the explicit application and mutable command-line buffers; Arm B runtime behavior is not yet qualified.",
+    "arms": {
+      "A": "canonical Windows implementation",
+      "B": "three-file private renderer patch"
+    },
+    "files_differ": 3,
+    "source_files_per_arm": 1257,
+    "stock_build": {
+      "triple": "x86_64-pc-windows-msvc",
+      "rust": "1.98.1",
+      "features": [],
+      "opt_level": 3,
+      "lto": "fat",
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "symbols",
+      "same_absolute_source_and_target": true,
+      "same_native_command": true,
+      "matching_recorded_fingerprints": [
+        "child input environment",
+        "selected native build environment"
+      ]
+    }
+  },
+  "stock": {
+    "A": {
+      "original_exit": 0,
+      "original_joined": true,
+      "source_equal_before": true,
+      "source_equal_after": true,
+      "image": {
+        "bytes": 826368,
+        "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+      },
+      "pdb": {
+        "bytes": 1232896,
+        "sha256": "ec6597be6e2caf8319eb2b6691a09d9dc596625a6316ab7a6e07d7d373a6740d"
+      },
+      "result": {
+        "bytes": 3611,
+        "sha256": "129c2151d703b52226611eac0ee1fbf8830fae605dbd7239e5e5b21b4fd4efd7"
+      },
+      "outer": {
+        "bytes": 1430,
+        "sha256": "1a58c88f83acf13a595ee30dd98fb61d2358ffe831ef27f0b11b7ac20b5f4458"
+      }
+    },
+    "B": {
+      "original_exit": 0,
+      "original_joined": true,
+      "source_equal_before": true,
+      "source_equal_after": true,
+      "image": {
+        "bytes": 826880,
+        "sha256": "21cfe3f3702b14520aa8c5715cc051490bc50681505e160e6f28e4d3e4063ee5"
+      },
+      "pdb": {
+        "bytes": 1232896,
+        "sha256": "126548802f1bc90922a1aec580efb6c3307962b8f522081317346e2e191c0414"
+      },
+      "result": {
+        "bytes": 4770,
+        "sha256": "84bd54a2c9f5cbc6fec1ffe42992efe7cea5c239892c9aeb36985ffed99afdf4"
+      },
+      "outer": {
+        "bytes": 1430,
+        "sha256": "50fdddd0538795aef13cb126e70576fa9ad9cdb734ee9f7e0b670f5572f64aaf"
+      }
+    }
+  },
+  "unit": {
+    "arm": "A",
+    "architecture": "x64",
+    "original_exit": 0,
+    "outer_exit": 0,
+    "passed": 324,
+    "failed": 0,
+    "ignored": 0,
+    "nested_result_already_counted": 1,
+    "renderer_parity_passed": true,
+    "source_equal_before_and_after": true,
+    "current_input_rehash": {
+      "present": 16,
+      "expected": 17,
+      "unavailable": "mandatory installed outer guard"
+    },
+    "result": {
+      "bytes": 1746,
+      "sha256": "f8e88df6f9eeab006fd7eb745182a6339bb0789b7e12f92d5117936a19fd4f8a"
+    },
+    "outer": {
+      "bytes": 1430,
+      "sha256": "ce88505a55b0269cfbb97ae18c611b848ba1f7a40d109bc5dc0010cca3675a00"
+    },
+    "executable": {
+      "bytes": 6550016,
+      "sha256": "cfae6f8855536ff84abb7cca4f000c999bf6c408152cf14be52ff4a48cdade94"
+    },
+    "build": {
+      "kind": "separate development library-test executable",
+      "features": [
+        "testkit"
+      ],
+      "opt_level": 0,
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true,
+      "qualifies_stock_release_cli": false
+    },
+    "full_renderer_qualification_replay": "not performed",
+    "review_receipts": [
+      {
+        "bytes": 13514,
+        "sha256": "d17091afaa4e66ef3b9e73153e94738a0ce313e4fd563c8321bb810ed7ab7de9"
+      },
+      {
+        "bytes": 1719,
+        "sha256": "0524fa14e4e1517ceae81cc1f6d7ccaa19753c72d8c9948e79240cf1c4be2e4e"
+      }
+    ]
+  },
+  "qualification": {
+    "A_x64_cli": "unattempted",
+    "B_x64_units": "unattempted",
+    "B_x64_cli": "unattempted",
+    "A_i686": "unattempted",
+    "B_i686": "unattempted",
+    "performance": "unattempted",
+    "primary_speed_acceptance": "not established by this experiment; zero timing slots",
+    "overall_speed_requirement": "remains unmet"
+  },
+  "limits": [
+    "Build success and one unit lane do not qualify either arm for performance or adoption.",
+    "Each stock image is bound only to its own PDB; code layout differs.",
+    "No historical guard or previous run supplies new-arm correctness or timing credit.",
+    "Two independent file-only unit audits checked the retained original, all 1257 source files, eight executable pins and raw outcomes. Each could rehash 16 of 17 current packet roles; the installed guard was unavailable. The full renderer qualification replay remains pending."
+  ]
+}
