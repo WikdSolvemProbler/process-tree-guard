@@ -81,7 +81,7 @@ pub(in crate::extend) struct Limiter {
     /// repair of a pushed entry in `arrive` changes the last entry's
     /// image alone. The final sweep of a shutdown empties the table
     /// through the retaining pass, and the index empties with it.
-    pub(in crate::extend) index: std::collections::HashMap<RateKey, usize>,
+    pub(in crate::extend) index: std::collections::BTreeMap<RateKey, usize>,
     pub(in crate::extend) summaries: Vec<Summary>,
     /// When a pass over a full table last forgot nobody.
     pub(in crate::extend) unproductive: Option<u64>,
