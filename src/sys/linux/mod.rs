@@ -14,9 +14,9 @@ mod delegation;
 pub(crate) type SeparateService=delegation::SeparateService;
 #[path="invocation.rs"]
 mod invocation;
-pub(crate) use invocation::OriginalInvocation;
-#[derive(Clone,Copy,Debug,PartialEq,Eq)]
-pub(crate) enum OwnerMode {Manual,Auto}
+pub(crate) use invocation::{OriginalInvocation,OwnerMode};
+mod invocation_native;
+use invocation_native::{fcntl,poll,syscall,PollFd,POLLIN};
 
 // Original-deadline origin is retained before integer exit-code erasure.
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
@@ -67,8 +67,6 @@ const O_DIRECTORY: c_int = 0o40_000;
 #[cfg(target_arch="x86_64")]
 const O_DIRECTORY: c_int = 0o200_000;
 const FD_CLOEXEC: c_int = 1;
-const POLLIN: c_short = 1;
-const SYS_PIDFD_OPEN: c_long = 434;
 // SCM_MAX_FD253: CMSG_SPACE(253*4)=1032, credentials32, optionalPIDFD24=1088.
 const CONTROL_WORDS: usize = 136;
 const CONTROL_BYTES: usize = CONTROL_WORDS * size_of::<u64>();
@@ -99,14 +97,6 @@ struct Credentials {
     gid: u32,
 }
 
-#[repr(C)]
-#[derive(Clone,Copy)]
-struct PollFd {
-    fd: c_int,
-    events: c_short,
-    revents: c_short,
-}
-
 const _: () = {
     assert!(size_of::<IoVec>() == 16);
     assert!(size_of::<Message>() == 56);
@@ -121,9 +111,6 @@ unsafe extern "C" {
     fn setsockopt(fd: c_int, level: c_int, opt: c_int, value: *const c_int, len: u32) -> c_int;
     fn recvmsg(fd: c_int, message: *mut Message, flags: c_int) -> isize;
     fn sendmsg(fd: c_int, message: *const Message, flags: c_int) -> isize;
-    fn syscall(number: c_long, ...) -> c_long;
-    fn fcntl(fd: c_int, command: c_int, ...) -> c_int;
-    fn poll(fds: *mut PollFd, count: usize, timeout: c_int) -> c_int;
     fn getuid() -> u32;
     fn geteuid() -> u32;
     fn getgid() -> u32;
@@ -347,10 +334,19 @@ fn ancillary(mut bytes: &[u8]) -> Result<Ancillary> {
     Ok(packet)
 }
 
+fn pidfd_error(error: invocation_native::PidfdError) -> Refusal {
+    use invocation_native::PidfdError;
+    match error {
+        PidfdError::Os(code) => Refusal::Os(code),
+        PidfdError::NotCloseOnExec => Refusal::NotCloseOnExec,
+        PidfdError::NotPidfd => Refusal::NotPidfd,
+        PidfdError::WrongPidfd => Refusal::WrongPidfd,
+        PidfdError::DeadPidfd => Refusal::DeadPidfd,
+    }
+}
+
 fn pidfd_for(pid: c_int) -> Result<OwnedFd> {
-    let fd = os_result(unsafe { syscall(SYS_PIDFD_OPEN, pid, 0 as c_int) } as isize)? as RawFd;
-    // pidfd_open returns a new owned descriptor on success.
-    Ok(unsafe { OwnedFd::from_raw_fd(fd) })
+    invocation_native::pidfd_for(pid).map_err(pidfd_error)
 }
 
 #[derive(Debug, Default)]
@@ -368,37 +364,17 @@ struct NativeReceipt {
     pidfd_revents: Option<c_short>,
 }
 
-fn validate_pidfd(
-    descriptor: &OwnedFd,
-    pid: c_int,
-    receipt: &mut NativeReceipt,
-) -> Result<()> {
-    let fd = descriptor.as_raw_fd();
-    close_on_exec(fd)?;
-    receipt.pidfd_cloexec = true;
-    if fs::read_link(format!("/proc/self/fd/{fd}"))?.as_os_str() != "anon_inode:[pidfd]" {
-        return Err(Refusal::NotPidfd);
-    }
-    let information = fs::read_to_string(format!("/proc/self/fdinfo/{fd}"))?;
-    let observed_pid = information
-        .lines()
-        .find_map(|line| line.strip_prefix("Pid:"))
-        .and_then(|field| field.trim().parse().ok());
-    receipt.pidfd_pid = observed_pid;
-    if observed_pid != Some(pid) {
-        return Err(Refusal::WrongPidfd);
-    }
-    let mut watched = PollFd {
-        fd,
-        events: POLLIN,
-        revents: 0,
+fn validate_pidfd(descriptor: &OwnedFd, pid: c_int, receipt: &mut NativeReceipt) -> Result<()> {
+    let mut observed = invocation_native::PidfdObservation {
+        cloexec: receipt.pidfd_cloexec,
+        pid: receipt.pidfd_pid,
+        revents: receipt.pidfd_revents,
     };
-    let ready = os_result(unsafe { poll(&mut watched, 1, 0) } as isize)?;
-    receipt.pidfd_revents = Some(watched.revents);
-    if ready != 0 {
-        return Err(Refusal::DeadPidfd);
-    }
-    Ok(())
+    let result = invocation_native::validate_pidfd(descriptor, pid, &mut observed);
+    receipt.pidfd_cloexec = observed.cloexec;
+    receipt.pidfd_pid = observed.pid;
+    receipt.pidfd_revents = observed.revents;
+    result.map_err(pidfd_error)
 }
 
 #[derive(Debug)]

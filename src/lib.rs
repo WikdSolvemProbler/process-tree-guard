@@ -176,8 +176,11 @@ pub use extend::{Grant, CHANNEL_VARIABLE, DEFAULT_MAX_EXTENSION};
 pub(crate) use dispatch::{entry_contain, entry_deadline, entry_full, entry_gate};
 use std::fmt;
 
-#[cfg(windows)]
+#[cfg(any(windows, all(target_os = "linux", target_arch = "x86_64", target_env = "gnu", ptg_linux_ordinary_build)))]
 mod deadline;
+
+#[cfg(all(target_os = "linux", target_arch = "x86_64", target_env = "gnu", ptg_linux_ordinary_build))]
+pub use sys::ordinary_linux;
 #[cfg(windows)]
 pub use deadline::MAX_SECONDS;
 

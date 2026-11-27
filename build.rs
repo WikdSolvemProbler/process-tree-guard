@@ -192,10 +192,124 @@ fn build_linux_native() {
     println!("cargo:rustc-link-search=native={}", directive_path(&out));
 }
 
+// The candidate custody directory contains the exact source of the audited ELF.
+const ORDINARY_SOURCE: &str = "tests/linux/ordinary/implementation-007";
+const ORDINARY_C: [&str; 15] = [
+    "bootstrap", "bootstrap_raw", "bootstrap_wire", "caller", "credentials", "descriptors",
+    "enrollment", "evidence", "helper_main", "helper_startup", "lease", "lifecycle",
+    "native_control", "owners", "request",
+];
+const ORDINARY_HEADERS: [&str; 17] = [
+    "bootstrap.h", "bootstrap_raw.h", "bootstrap_steps.h", "bootstrap_wire.h",
+    "bootstrap_wire_primitives.h", "credentials.h", "descriptors.h", "enrollment.h",
+    "evidence.h", "helper_startup.h", "lease.h", "lifecycle.h", "native_control.h",
+    "native_control_primitives.h", "native_syscall.h", "owners.h", "request.h",
+];
+
+fn ordinary_tool_output(tool: &std::path::Path, arg: &str) -> String {
+    let result = std::process::Command::new(tool).arg(arg).output().expect("inspect ordinary Linux tool");
+    assert!(result.status.success(), "ordinary Linux tool query failed: {} {arg}", tool.display());
+    String::from_utf8(result.stdout).expect("ordinary Linux tool identity must be UTF-8")
+}
+
+fn build_linux_ordinary() {
+    let target = env::var("TARGET").expect("TARGET");
+    let host = env::var("HOST").expect("HOST");
+    assert_eq!(target, "x86_64-unknown-linux-gnu",
+        "linux-ordinary-library requires an x86_64-unknown-linux-gnu Cargo target");
+    let cross = host != target;
+    assert!(!cross || host == "aarch64-unknown-linux-gnu",
+        "linux-ordinary-library requires a native x86_64 or aarch64 GNU Linux Cargo host");
+    let manifest = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+    let source = manifest.join(ORDINARY_SOURCE);
+    let shared = manifest.join("src/sys/linux");
+    let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR"));
+    assert!(out.is_absolute() && out.is_dir(), "OUT_DIR must be an existing absolute directory");
+    const CC: &str = "PTG_ORDINARY_CC";
+    const AR: &str = "PTG_ORDINARY_AR";
+    println!("cargo:rerun-if-env-changed={CC}");
+    println!("cargo:rerun-if-env-changed={AR}");
+    let explicit_tool = |name: &str, value: std::ffi::OsString| {
+        let path = PathBuf::from(value);
+        assert!(path.is_absolute() && path.is_file(),
+            "{name} must name an absolute existing program");
+        println!("cargo:rerun-if-changed={}", directive_path(&path));
+        path
+    };
+    let (gcc, ar) = match (env::var_os(CC), env::var_os(AR)) {
+        (None, None) if !cross => (native_tool("gcc"), native_tool("ar")),
+        (Some(cc), Some(ar)) => (explicit_tool(CC, cc), explicit_tool(AR, ar)),
+        _ => panic!("{CC} and {AR} must both be set for an explicit or cross toolchain"),
+    };
+    assert_eq!(ordinary_tool_output(&gcc, "-dumpmachine").trim(), "x86_64-linux-gnu",
+        "linux-ordinary-library requires GCC targeting x86-64 GNU Linux");
+    assert_eq!(ordinary_tool_output(&gcc, "-dumpfullversion").trim(), "13.3.0",
+        "linux-ordinary-library requires the scoped GCC 13.3.0 toolchain");
+    assert!(ordinary_tool_output(&ar, "--version").starts_with("GNU ar "),
+        "linux-ordinary-library requires GNU ar");
+    let linker_name = ordinary_tool_output(&gcc, "-print-prog-name=ld");
+    let linker = PathBuf::from(linker_name.trim());
+    assert!(!cross || (linker.is_absolute() && linker.is_file()),
+        "the cross compiler must identify its absolute existing GNU linker");
+    let linker = if linker.is_absolute() { linker }
+        else { native_tool(linker.to_str().expect("linker name must be UTF-8")) };
+    assert!(ordinary_tool_output(&linker, "--version").starts_with("GNU ld "),
+        "linux-ordinary-library requires the GCC-selected GNU ld");
+
+    for asset in ORDINARY_C.iter().map(|name| source.join(format!("{name}.c")))
+        .chain(ORDINARY_HEADERS.iter().map(|name| source.join(name)))
+        .chain(["owner_watch.h", "waitid_bridge.h"].iter().map(|name| shared.join(name))) {
+        assert!(asset.is_file(), "missing ordinary Linux source asset: {}", asset.display());
+        println!("cargo:rerun-if-changed={}", directive_path(&asset));
+    }
+    println!("cargo:rerun-if-env-changed=PATH");
+
+    let objects = out.join("ptg-ordinary-objects");
+    fs::create_dir_all(&objects).expect("create ordinary Linux object directory");
+    let mut caller = Vec::with_capacity(ORDINARY_C.len() - 1);
+    let mut helper = Vec::with_capacity(ORDINARY_C.len());
+    for name in ORDINARY_C {
+        let object = objects.join(format!("{name}.o"));
+        let mut compile = std::process::Command::new(&gcc);
+        compile.args(["-m64", "-std=c11", "-O2", "-g", "-Wall", "-Wextra", "-Werror", "-fno-lto"]);
+        if name == "bootstrap_raw" {
+            compile.args(["-ffreestanding", "-fno-stack-protector", "-fno-tree-loop-distribute-patterns", "-fstack-usage"]);
+        } else {
+            compile.arg("-fstack-protector-strong");
+        }
+        let status = compile.arg("-I").arg(&shared).arg("-c").arg(source.join(format!("{name}.c")))
+            .arg("-o").arg(&object).status().expect("compile ordinary Linux object");
+        assert!(status.success(), "ordinary Linux compiler failed for {name}: {status}");
+        if name != "helper_main" {
+            caller.push(object.clone());
+        }
+        helper.push(object);
+    }
+    let archive = out.join("libptg_ordinary_caller.a");
+    if archive.exists() {
+        fs::remove_file(&archive).expect("replace prior ordinary Linux caller archive");
+    }
+    let status = std::process::Command::new(&ar).arg("rcs").arg(&archive).args(&caller)
+        .status().expect("archive ordinary Linux caller objects");
+    assert!(status.success(), "ordinary Linux caller archive failed: {status}");
+    let helper_path = out.join("ordinary-linux-helper");
+    let status = std::process::Command::new(&gcc)
+        .args(["-m64", "-static", "-no-pie", "-fno-lto", "-fno-use-linker-plugin", "-Wl,--fatal-warnings"])
+        .args(&helper).arg("-o").arg(&helper_path)
+        .status().expect("link independent ordinary Linux helper");
+    assert!(status.success(), "ordinary Linux helper link failed: {status}");
+    println!("cargo:rustc-link-search=native={}", directive_path(&out));
+}
+
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rustc-check-cfg=cfg(ptg_linux_separate_service_build)");
     let is_windows = env::var("CARGO_CFG_TARGET_OS").is_ok_and(|os| os == "windows");
+    println!("cargo:rustc-check-cfg=cfg(ptg_linux_ordinary_build)");
+    if !is_windows && env::var_os("CARGO_FEATURE_LINUX_ORDINARY_LIBRARY").is_some() {
+        build_linux_ordinary();
+        println!("cargo:rustc-cfg=ptg_linux_ordinary_build");
+    }
     if !is_windows && env::var_os("CARGO_FEATURE_LINUX_SEPARATE_SERVICE").is_some() {
         let target = env::var("TARGET").expect("TARGET");
         let host = env::var("HOST").expect("HOST");

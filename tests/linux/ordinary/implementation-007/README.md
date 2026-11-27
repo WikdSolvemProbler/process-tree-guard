@@ -11,9 +11,13 @@ retirement and acknowledges it inside the existing cutoff. It then consumes
 the same native wait record. The first stop and original cutoff remain intact;
 missing or invalid acknowledgment cannot produce success.
 
-This directory is an inert source archive, excluded from the Cargo package.
-It does not enable a Linux backend, install a helper, change Windows execution,
-or qualify a general returning-library context. The observed caller was
+The Cargo package includes the 33 flat component source files in this directory
+regardless of feature selection. Only the experimental
+`linux-ordinary-library` feature compiles these inputs for the supported Linux
+target. The reconstruction fixtures remain outside the Cargo package. See the
+[ordinary component requirements](../../../../README.md#opt-in-linux-ordinary-component).
+This does not enable the default Linux backend, install a helper, or qualify
+a general returning-library context. The observed caller was
 cooperative, enrolled and prepared as a single-threaded subreaper. The helper
 and watchdog were per invocation; no product daemon was used.
 

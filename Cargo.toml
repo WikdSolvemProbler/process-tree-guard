@@ -28,7 +28,10 @@ include = ["/src/**/*.rs", "/build.rs", "/Cargo.toml", "/Cargo.lock", "/README.m
     "/src/sys/linux/terminal_bridge.c",
     "/src/sys/linux/terminal_bridge.h",
     "/src/sys/linux/waitid_bridge.c",
-    "/src/sys/linux/waitid_bridge.h"
+    "/src/sys/linux/waitid_bridge.h",
+    "/tests/linux/ordinary/implementation-007/*.c",
+    "/tests/linux/ordinary/implementation-007/*.h",
+    "/tests/linux/ordinary/implementation-007/caller_adapter.rs"
 ]
 build = "build.rs"
 autobins = false
@@ -86,6 +89,7 @@ test = true
 [features]
 testkit = []
 linux-separate-service = []
+linux-ordinary-library = []
 
 [dev-dependencies]
 process-tree-guard = { path = ".", features = ["testkit"] }

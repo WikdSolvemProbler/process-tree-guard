@@ -29,19 +29,11 @@ fn fd_from_call(value: c_int) -> Probe<OwnedFd> {
     Ok(unsafe { OwnedFd::from_raw_fd(fd) })
 }
 
-const CLOCK_BOOTTIME: c_int = 7;
+use super::invocation_native::{clock_gettime,CLOCK_BOOTTIME,NS_PER_SECOND,Timespec};
+pub(super) use super::invocation_native::boottime_ns;
 const TFD_TIMER_ABSTIME: c_int = 1;
 const POLLHUP: c_short = 0x10;
 const F_DUPFD_CLOEXEC: c_int = 1030;
-const NS_PER_SECOND: u64 = 1_000_000_000;
-
-#[repr(C)]
-#[derive(Default)]
-struct Timespec {
-    seconds: i64,
-    nanoseconds: i64,
-}
-
 #[repr(C)]
 struct ItimerSpec {
     interval: Timespec,
@@ -49,7 +41,6 @@ struct ItimerSpec {
 }
 
 unsafe extern "C" {
-    fn clock_gettime(clock: c_int, time: *mut Timespec) -> c_int;
     fn timerfd_create(clock: c_int, flags: c_int) -> c_int;
     fn timerfd_settime(
         fd: c_int,
@@ -58,20 +49,6 @@ unsafe extern "C" {
         old: *mut ItimerSpec,
     ) -> c_int;
     fn pipe2(fds: *mut c_int, flags: c_int) -> c_int;
-}
-
-pub(super) fn boottime_ns() -> Probe<u64> {
-    let mut time = Timespec::default();
-    native(os_result(
-        unsafe { clock_gettime(CLOCK_BOOTTIME, &mut time) } as isize,
-    ))?;
-    let seconds = u64::try_from(time.seconds).map_err(|_| "negative boot time")?;
-    let nanoseconds = u64::try_from(time.nanoseconds).map_err(|_| "negative boot fraction")?;
-    check(nanoseconds < NS_PER_SECOND, "invalid boot fraction")?;
-    seconds
-        .checked_mul(NS_PER_SECOND)
-        .and_then(|value| value.checked_add(nanoseconds))
-        .ok_or_else(|| "boot time overflow".into())
 }
 
 // Own a receiver-private, absolute timer. The sender never supplies timer authority.

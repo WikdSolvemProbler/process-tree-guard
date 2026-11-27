@@ -345,6 +345,51 @@ cargo test --locked --release --features linux-separate-service --bin process-tr
 
 This build path requires existing `cc` and `ar` tools and `HOST == TARGET`; it does not support cross-compilation or non-GNU targets. Select these two binaries rather than a bare feature-enabled build, which also selects the Windows programs. The executables do not install protected service files, configure an account or policy, or enable a socket. [Linux deployment requirements](src/sys/linux/README.md) still apply. On ARM64 GNU Linux with Rust 1.99, the selected-bin build, the same 12 existing component tests, source packaging and a fresh rebuild from the extracted package passed. The default no-feature library check produced the exact unsupported-backend refusal without native outputs. On ARM64 GNU Linux, Rust 1.88 also built both selected release binaries and passed all 12 existing client tests. [Rust 1.88 evidence](tests/evidence/linux-rust-1-88-arm64-20261118-summary.json). Native GNU Linux x86-64 CI built both release binaries and passed all 12 existing client tests with Rust 1.88. [Native x86-64 CI](https://github.com/WikdSolvemProbler/process-tree-guard/actions/runs/44432517131/job/135253169938). See the [Linux runtime results](src/sys/linux/README.md) for the tested lifecycle cases. Default Linux execution and transparent library execution are still open.
 
+### Opt-in Linux ordinary component
+
+The experimental `linux-ordinary-library` feature exposes the unsafe
+`ordinary_linux::run_manual` entry point. Build only the library with
+`--lib --features linux-ordinary-library --target x86_64-unknown-linux-gnu`
+inside your finite process-tree supervision. Rust 1.88 is the crate minimum
+and the version used in the recorded build. The component requires GCC 13.3.0,
+GNU ar and GNU ld. Native x86-64 GNU Linux builds can
+use existing tools; the reviewed ARM64 GNU Linux cross-build requires both
+absolute `PTG_ORDINARY_CC` and `PTG_ORDINARY_AR` tool paths.
+
+This is an experimental Manual component. It requires administrative enrollment
+of the protected cgroup-v2 parent and a separately deployed trusted native
+helper with the matching ABI. Current native checks require the initial user,
+PID and cgroup namespaces and `fs.suid_dumpable=0`. The Cargo package
+includes the 33 retained component source files regardless of feature
+selection. Cargo compiles those inputs and the separate helper only when the
+feature is enabled for the supported Linux target. Build and packaging leave
+helper deployment, caller enrollment and host settings to the administrator.
+The default Linux backend remains disabled.
+
+The caller must remain cooperative and single-threaded, already be a child
+subreaper, start without existing children, retain exclusive child-wait custody,
+and use default SIGCHLD handling. Signal handlers and callbacks must not create,
+reap or transfer children during the call. The caller must retain the required
+enrollment, policy and descriptor context. Only conditions actually observed by
+the implementation can be refused; the caller must uphold the dynamic safety
+obligations.
+
+`Ok(Outcome::Unconfirmed(_))` reports that the component could not
+establish a complete native outcome. It does not
+establish that descendants and helper actors retired or that the caller has
+recovered exclusive reusable child custody. Keep the surrounding finite owned
+supervision and cleanup context until independent settlement. Do not retry or
+reuse that context merely because the Rust return value is `Ok`.
+
+The [Cargo build evidence](tests/evidence/linux-ordinary-cargo-build-20261127-summary.json)
+covers compilation, downstream linkage, emitted-code inspection and package
+contents. Packaging used `--no-verify`; an extracted-package rebuild, native
+execution of this public entry point, installation and performance remain
+unqualified. The [earlier single Manual deadline case](tests/evidence/linux-x64-ordinary-library-deadline-20261127-summary.json)
+used a different caller build and does not transfer runtime qualification to
+this entry point. General library integration and the comprehensive benchmark
+remain open.
+
 ## Results
 
 Results of the release test run for 0.5.0, Wednesday, 04NOV2026. The logs are attached to the v0.5.0 release.

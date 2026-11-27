@@ -1,0 +1,213 @@
+{
+  "schema": "ptg-linux-ordinary-cargo-build-package-scope-v1",
+  "scope": "One original successful Cargo compile, downstream link, emitted static check, package member inspection and evidence export for the opt-in experimental ordinary Linux library.",
+  "baseline_git_commit": "a261ceaf814368486fb42c49e4b3b596fa138de7",
+  "candidate_source_review": {
+    "bytes": 2751,
+    "sha256": "465ca46adf77c58d146a842ea7982c268b870c02162885df89f534a25c3468a8"
+  },
+  "build": {
+    "host": "aarch64-unknown-linux-gnu",
+    "target": "x86_64-unknown-linux-gnu",
+    "cargo_and_rust": "1.88.0",
+    "target_gcc": "13.3.0",
+    "features": [
+      "linux-ordinary-library"
+    ],
+    "profile": {
+      "debug_assertions": false,
+      "debuginfo": 0,
+      "opt_level": "3",
+      "overflow_checks": false,
+      "test": false
+    },
+    "locked": true,
+    "offline": true,
+    "source_rows": 178,
+    "source_unchanged_before_after": true
+  },
+  "original": {
+    "outer_exit": 0,
+    "ssh_exit": 0,
+    "managed_worker_exit": 0,
+    "joined_native_commands": 49,
+    "all_joined_native_exit_zero": true,
+    "owned_scope_retired": true,
+    "terminal_scope_event_errno": 19,
+    "timed_out": false,
+    "candidate_executed": false
+  },
+  "artifacts": {
+    "c_objects": 15,
+    "caller_archive_objects": 14,
+    "archive": {
+      "bytes": 873206,
+      "sha256": "7da0a2c016b72b1375c7dfbe86e13f90b86dcb2dde0fcfda0bb15b7a3d8feede"
+    },
+    "library": {
+      "bytes": 1195058,
+      "sha256": "d0105bb53656d274cdd312017dd0a47688d1b1349c22dd15dce397aea386639b"
+    },
+    "helper": {
+      "bytes": 1215088,
+      "sha256": "84abb2dff2049fd6471bf71603641cb03338b4622ee661bd801f4ef4057e0c43"
+    },
+    "downstream": {
+      "bytes": 2907232,
+      "sha256": "17225a55dc7969897174a8dd01cb019927b7df4d400a6b4542bbf2a3081741c1"
+    },
+    "retained_export": {
+      "bytes": 6441950,
+      "expanded_wire_bytes": 23326955,
+      "members": 135,
+      "sha256": "343e3b9c44aab706b17c637df0bcb9d9d756ea1d445519103415dc8bb45f1675"
+    }
+  },
+  "emitted": {
+    "helper_and_downstream": "ELF64 x86-64 ET_EXEC with no program interpreter, non-executable stack and GNU RELRO. No separate-service symbols were present.",
+    "raw_bootstrap": "Raw bootstrap had no undefined external symbol or observed TLS, stack-protector or indirect control transfer in emitted object instructions. Both final clone paths referenced their raw children and emitted no-return traps.",
+    "public_api": "The separate compile-only downstream source uses ordinary_linux::run_manual. The linked executable retained the downstream call function and the native entry."
+  },
+  "package": {
+    "cargo_package_native_exit": 0,
+    "cargo_package_used_no_verify": true,
+    "artifact": {
+      "bytes": 625661,
+      "sha256": "4c1c40dae81f3d3342cca1b3680422ebfd1ef6173d6a06baef0bf37bacf837fd"
+    },
+    "members": 150,
+    "flat_native_component_source_members": 33,
+    "downstream_probe_source_included": false,
+    "manifest": {
+      "bytes": 3282,
+      "sha256": "0604752550939cb6d3e49f8a1dc33ca1593ba482e310ac0d720288fe7923ccbd"
+    },
+    "original_manifest": {
+      "bytes": 3336,
+      "sha256": "57c5a37065504ab161504d7598fed36bfce2ba1ddbcfc5483b05c6e68204bc56"
+    },
+    "lockfile": {
+      "bytes": 162,
+      "sha256": "b2cfe3afd598c38e476a31be336579072e21cbad66513ec77ec185983d009cee"
+    }
+  },
+  "original_004": {
+    "aggregate": "failed",
+    "original_outer_exit": 1,
+    "cargo_package_native_exit": 0,
+    "original_package_census_failed": true,
+    "original_inline_export_cap_exceeded": true,
+    "original_retained_gzip_bytes": 5808895,
+    "retained": {
+      "RESULT.json": {
+        "bytes": 168414,
+        "sha256": "768e5e407e302f405860a8f6926ceb14e9fd6dafe98161be28ac6b5775fefcd0"
+      },
+      "ORIGINAL-OUTER-COMPLETION.jsonl": {
+        "bytes": 3596,
+        "sha256": "9769104ee66da5135b7fb7c16a2af4f0beddf61effc92155d9a841f71adef292"
+      },
+      "SEAL.json": {
+        "bytes": 96838,
+        "sha256": "dff4c9874ac2d192f2a5920df02f8052541bd840d015d6521cb755bee79dca1e"
+      },
+      "LAUNCH.json": {
+        "bytes": 1779,
+        "sha256": "f6fe44642a19116b8cb5805fc330e1fcf891fd0c2ca64a5ed3ace8731c090256"
+      },
+      "SSH.stdout": {
+        "bytes": 127506,
+        "sha256": "245260301e8ec036afe797930aae959a8eca43c4e3aafda5abed3d5e06f139e8"
+      },
+      "SSH.stderr": {
+        "bytes": 8084,
+        "sha256": "41fb299b519a6adc2f1e3880d292ac0b9df27ee9ca7e5af16ef2d4faddbfad90"
+      }
+    }
+  },
+  "retained": {
+    "SEAL.json": {
+      "bytes": 100967,
+      "sha256": "e1885670082ba526f5014cd3720b22effca8bf3027639922f44c01c6eea93ccc"
+    },
+    "LAUNCH.json": {
+      "bytes": 1779,
+      "sha256": "42cb8e40ecd3819e575a03f4b86db9eb457401bb76742dcc0efd755a89629af1"
+    },
+    "CARGO-SOURCES.bin": {
+      "bytes": 537488,
+      "sha256": "813534d346bff39ba4fee0a04ef64553f35544a69588773cddf5a7187229a09a"
+    },
+    "RESULT.json": {
+      "bytes": 8797685,
+      "sha256": "866344afafe0ecd3da8254a485496e0bd8f106e46dc449a23db643abadc9ce20"
+    },
+    "ORIGINAL-OUTER-COMPLETION.jsonl": {
+      "bytes": 3633,
+      "sha256": "0f16ea96edaf863f4bad104727548b84fd3857b86f86a3499d14f062251aacc8"
+    },
+    "SSH.stdout": {
+      "bytes": 8749691,
+      "sha256": "f6e1448488456d694e60f22e2dfc528f265237b147fb045bcf6bd585b2efda94"
+    },
+    "SSH.stderr": {
+      "bytes": 8084,
+      "sha256": "41fb299b519a6adc2f1e3880d292ac0b9df27ee9ca7e5af16ef2d4faddbfad90"
+    },
+    "ROOT-ORIGINAL-SELECTION.json": {
+      "bytes": 290,
+      "sha256": "d3885e3603dd660c4bc8599a2c3c3daee27eef00ecdbafcae79a476dba799b59"
+    }
+  },
+  "limits": "The package was inspected as data after Cargo packaging with --no-verify. An extracted package was not rebuilt. No current public API execution, helper installation, default backend, generalized containment, or performance qualification is established. All earlier aggregate failures remain failed. Raw build, route and execution records remain private.",
+  "publication_line_endings": {
+    "scope": "Ten implementation-file postimages. The original build and package evidence refers to the archived 178-member source packet.",
+    "reconstruction": "For each listed path, replace every LF byte in the published Git blob with CRLF to recover the exact compiled bytes. The six other implementation postimages are byte-identical.",
+    "files": {
+      "Cargo.toml": {
+        "compiled_crlf": {
+          "bytes": 3336,
+          "sha256": "57c5a37065504ab161504d7598fed36bfce2ba1ddbcfc5483b05c6e68204bc56"
+        },
+        "publication_lf": {
+          "bytes": 3230,
+          "sha256": "4aa19a553f786f260653150f8cbdaf0227f13c6ac216efad63c3edc7a1c01388"
+        },
+        "line_endings": 106
+      },
+      "build.rs": {
+        "compiled_crlf": {
+          "bytes": 17741,
+          "sha256": "63326bbd6ebdb6e8b7a616fd78ae95d67a5fa3696a44e6ad334c79a62b4214fa"
+        },
+        "publication_lf": {
+          "bytes": 17403,
+          "sha256": "f6cf20960ae73f39f6cb3c799af225ad5990ec2e07a24abf8a2af5872858d26c"
+        },
+        "line_endings": 338
+      },
+      "src/lib.rs": {
+        "compiled_crlf": {
+          "bytes": 20690,
+          "sha256": "d087f23c8ada4138b3f1509707c535e42a9acdbdb5dfd567fadf5aff61597cba"
+        },
+        "publication_lf": {
+          "bytes": 20237,
+          "sha256": "64deeddb7ac80f45f95720b44d3684949c3e9ce7aa7c681c074c5d326da9314a"
+        },
+        "line_endings": 453
+      },
+      "src/sys/mod.rs": {
+        "compiled_crlf": {
+          "bytes": 704,
+          "sha256": "9bd92eadb00a21cbfd971811b31fe96f0357580f8d462a3e9dd6db0ec76d8d7b"
+        },
+        "publication_lf": {
+          "bytes": 690,
+          "sha256": "95f4bfa91504030839d9ceec77d517b0661ce2fba346379f8dd755f49d2033c5"
+        },
+        "line_endings": 14
+      }
+    }
+  }
+}
