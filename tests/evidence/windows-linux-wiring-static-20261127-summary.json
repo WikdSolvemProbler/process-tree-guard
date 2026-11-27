@@ -1,0 +1,210 @@
+{
+  "schema": "ptg-windows-opt-in-linux-wiring-static-comparison-v1",
+  "scope": "Two matched Windows x86-64 main CLI release builds using --no-default-features, with resolved features empty, and static PE comparison. Neither executable was run for this comparison.",
+  "baseline_git_commit": "a261ceaf814368486fb42c49e4b3b596fa138de7",
+  "candidate": "Isolated Linux Cargo proposal 004, applied as exactly ten reviewed source postimages. The Windows build enables no optional features.",
+  "build": {
+    "architecture": "x86_64-pc-windows-msvc",
+    "profile": {
+      "debug_assertions": false,
+      "debuginfo": 0,
+      "opt_level": "3",
+      "overflow_checks": false,
+      "test": false
+    },
+    "features": [],
+    "cargo_feature_flag": "--no-default-features",
+    "locked": true,
+    "offline": true,
+    "vctools_version": "14.51.36231",
+    "windows_sdk_version": "10.0.28000.0",
+    "same_source_target_working_and_temporary_directories": true,
+    "matched_effective_build_environment_sha256": "484c7633fbdf7740bff4faa260ad9bdb7bfb8e2ad06e10a787992ea1a82f9a47",
+    "physical_cap_seconds_per_arm": 180,
+    "native_driver_wait_max_seconds": 165
+  },
+  "arms": {
+    "A": {
+      "staged_source_files": 1248,
+      "original_outer_exit": 0,
+      "native_build_driver_exit": 0,
+      "native_build_driver_joined": true,
+      "original_outer": {
+        "bytes": 1430,
+        "sha256": "9fd93addf3aacfb4ff14f2795c269cd0137632de371bf8c8076519f320947e9c"
+      },
+      "original_result": {
+        "bytes": 2530,
+        "sha256": "d11ce7e68ef833ed59f3d24726a3d518c2cd306fd98272cb092a28fc30a83037"
+      },
+      "retained": {
+        "command": {
+          "bytes": 1020,
+          "sha256": "7a5abbf1274ccd9632b3ce6973549206b28d8f3a3ec1fa79f7fda444197905e8"
+        },
+        "image": {
+          "bytes": 826368,
+          "sha256": "e481fb41b661f31120c019ad3abb823f809ac239a13bad6d75621f76f3d7ba52"
+        },
+        "pdb": {
+          "bytes": 1232896,
+          "sha256": "0eef67afea2bb805a25d4b655d3ba35388189e3916f0b0965a153b563ef74563"
+        },
+        "stderr": {
+          "bytes": 4311,
+          "sha256": "0379b2a0f44c427079ab171e2c5f69a45fcdddccdffcdda9e1f869f1fe80862f"
+        },
+        "stdout": {
+          "bytes": 3907,
+          "sha256": "a1625f5a94a8edec69f5de7ed4a85f04d6984e825ebbfd5fbe014b2013dc3aff"
+        }
+      }
+    },
+    "B": {
+      "staged_source_files": 1251,
+      "original_outer_exit": 0,
+      "native_build_driver_exit": 0,
+      "native_build_driver_joined": true,
+      "original_outer": {
+        "bytes": 1430,
+        "sha256": "abcd582d7f1b3c2429cd102fdcd734d0a953b71ff5507aad99ba3c0817af44b2"
+      },
+      "original_result": {
+        "bytes": 3041,
+        "sha256": "2476a8ea84f5a9c9e415faa3d5a9a9c290f77e02f548a5b28e51fd6aa573b0d2"
+      },
+      "retained": {
+        "command": {
+          "bytes": 1020,
+          "sha256": "7a5abbf1274ccd9632b3ce6973549206b28d8f3a3ec1fa79f7fda444197905e8"
+        },
+        "image": {
+          "bytes": 826368,
+          "sha256": "95b2e4b681d6a7eceb0bd5c690bab0d6a383870133afa52af2a7c499f0482623"
+        },
+        "pdb": {
+          "bytes": 1232896,
+          "sha256": "f894cee1191c9d957dec1c6d3b5ccc71bbaa8667027a798836f7a31ef009217b"
+        },
+        "stderr": {
+          "bytes": 4479,
+          "sha256": "c3d6b69b60fd6ea98fb057aa54324754bec505ec564b3c387d745344823e58b7"
+        },
+        "stdout": {
+          "bytes": 3907,
+          "sha256": "a1625f5a94a8edec69f5de7ed4a85f04d6984e825ebbfd5fbe014b2013dc3aff"
+        }
+      }
+    }
+  },
+  "static": {
+    "complete_exe_byte_identity": false,
+    "different_bytes": 24,
+    "field_offsets": [
+      {
+        "differing_bytes": 2,
+        "field": "coff_timestamp",
+        "offset": 264,
+        "width": 4
+      },
+      {
+        "differing_bytes": 2,
+        "field": "debug_directory_2_timestamp",
+        "offset": 787476,
+        "width": 4
+      },
+      {
+        "differing_bytes": 2,
+        "field": "debug_directory_12_timestamp",
+        "offset": 787504,
+        "width": 4
+      },
+      {
+        "differing_bytes": 2,
+        "field": "debug_directory_13_timestamp",
+        "offset": 787532,
+        "width": 4
+      },
+      {
+        "differing_bytes": 16,
+        "field": "codeview_rsds_guid",
+        "offset": 787820,
+        "width": 16
+      }
+    ],
+    "normalization": "Only the four parsed timestamp fields and the parsed CodeView RSDS GUID are masked, using their exact format-defined widths. The bytewise scan compares the entire executable outside those fields.",
+    "normalized_image": {
+      "bytes": 826368,
+      "sha256": "7656ff703e59c414327390f3c885c5ea85b5db5426ae60cfc04a5bd8a7ea9f75"
+    },
+    "sections": [
+      {
+        "bytes_equal": true,
+        "name": ".text",
+        "raw_bytes": 704000,
+        "raw_offset": 1024
+      },
+      {
+        "bytes_equal": false,
+        "name": ".rdata",
+        "raw_bytes": 106496,
+        "raw_offset": 705024
+      },
+      {
+        "bytes_equal": true,
+        "name": ".data",
+        "raw_bytes": 1024,
+        "raw_offset": 811520
+      },
+      {
+        "bytes_equal": true,
+        "name": ".pdata",
+        "raw_bytes": 11264,
+        "raw_offset": 812544
+      },
+      {
+        "bytes_equal": true,
+        "name": ".rsrc",
+        "raw_bytes": 1024,
+        "raw_offset": 823808
+      },
+      {
+        "bytes_equal": true,
+        "name": ".reloc",
+        "raw_bytes": 1536,
+        "raw_offset": 824832
+      }
+    ],
+    "unchanged": [
+      "entire code section",
+      "imports and IAT",
+      "delay-import directory",
+      "TLS",
+      "load configuration",
+      "section layout",
+      "version resources",
+      "exception data",
+      "base relocations"
+    ],
+    "matched_executable_pdb_guid_and_age": true
+  },
+  "evidence": {
+    "packet": {
+      "bytes": 8079,
+      "sha256": "9c8f2c51d78fc742306700826eec40ceece16cc5d835b6e14bff6278e795e2be"
+    },
+    "source_manifest": {
+      "bytes": 541143,
+      "sha256": "db1b273735e54bab14501782753545115dc0305aea13c7b01faea7090ceaf400"
+    },
+    "candidate_source_review": {
+      "bytes": 2751,
+      "sha256": "465ca46adf77c58d146a842ea7982c268b870c02162885df89f534a25c3468a8"
+    },
+    "static_comparison": {
+      "bytes": 24361,
+      "sha256": "bd9e4098f149de74a9946604836d14e27ca3252c5adceb4902cad9f51b082869"
+    }
+  },
+  "limits": "Whole executable hashes differ. Static equality outside named fields does not establish runtime, protection, or speed parity. Raw originals and build materials remain private."
+}

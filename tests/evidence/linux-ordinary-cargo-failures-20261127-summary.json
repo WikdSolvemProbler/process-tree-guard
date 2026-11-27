@@ -1,0 +1,208 @@
+{
+  "schema": "ptg-linux-ordinary-cargo-cross-attempts-v1",
+  "scope": "Compile, link and package qualification attempts for the experimental opt-in ordinary Linux library component. Three aggregate attempts failed. No compiled candidate was run.",
+  "baseline_git_commit": "a261ceaf814368486fb42c49e4b3b596fa138de7",
+  "candidate_source_review": {
+    "bytes": 2751,
+    "sha256": "465ca46adf77c58d146a842ea7982c268b870c02162885df89f534a25c3468a8"
+  },
+  "common_cargo_inputs": {
+    "bytes": 537488,
+    "sha256": "813534d346bff39ba4fee0a04ef64553f35544a69588773cddf5a7187229a09a"
+  },
+  "build": {
+    "host": "aarch64-unknown-linux-gnu",
+    "target": "x86_64-unknown-linux-gnu",
+    "features": [
+      "linux-ordinary-library"
+    ],
+    "cargo_and_rust": "1.88.0",
+    "target_gcc": "13.3.0",
+    "locked": true,
+    "offline": true,
+    "release": true,
+    "physical_outer_seconds": 270
+  },
+  "attempts": [
+    {
+      "attempt": "001",
+      "aggregate_status": "failed",
+      "outer_exit": 1,
+      "recorded_original_native_commands": 14,
+      "observed": "The original Cargo build exited 101 after its build script failed the target-linker version query. No downstream link or package stage started.",
+      "stages": {
+        "cargo-component": {
+          "state": "joined",
+          "native_exit": 101,
+          "original_terminal_confirmed": true,
+          "stdout": {
+            "bytes": 1321,
+            "sha256": "5ad9557a470bd77ea2e056e8b62ccb117cf09211c7b992af87e6a8aee265d877"
+          },
+          "stderr": {
+            "bytes": 7408,
+            "sha256": "202cffd5f01e3173f5fd256a555291eb4d8c272ea6be7d082ddba90aa75f5935"
+          }
+        },
+        "downstream-rust-link": {
+          "state": "unattempted"
+        },
+        "cargo-package": {
+          "state": "unattempted"
+        }
+      },
+      "retained_raw": {
+        "SEAL.json": {
+          "bytes": 84452,
+          "sha256": "fd666c577935aefe28415a67cf7af9206a48f2c7747385e58f3d08ca3e127342"
+        },
+        "LAUNCH.json": {
+          "bytes": 1779,
+          "sha256": "78311e06cf282bce8d8af2fd7a9632186f12b388b3787c78b06a45fdc3fbc1e2"
+        },
+        "RESULT.json": {
+          "bytes": 116427,
+          "sha256": "5f0bb727deedf588dddbf25cc06a541ed0d0855fc6dba399ddb616d6253f6b25"
+        },
+        "ORIGINAL-OUTER-COMPLETION.jsonl": {
+          "bytes": 3596,
+          "sha256": "09b89a4f525cee4ad193fa9439e227e01e2dec9840edbe8f3afb132d20fa0467"
+        },
+        "SSH.stdout": {
+          "bytes": 93229,
+          "sha256": "eb40979dbd189999c875ba3d5166932b586aa18d1982c33400f6b418b115cb1f"
+        },
+        "SSH.stderr": {
+          "bytes": 8084,
+          "sha256": "41fb299b519a6adc2f1e3880d292ac0b9df27ee9ca7e5af16ef2d4faddbfad90"
+        }
+      }
+    },
+    {
+      "attempt": "002",
+      "aggregate_status": "failed",
+      "outer_exit": 1,
+      "recorded_original_native_commands": 15,
+      "observed": "The original Cargo build exited 0. The worker then rejected genuine verbose build-script rows mixed with Cargo JSON because its parser expected all rows to be JSON. No downstream link or package stage started.",
+      "stages": {
+        "cargo-component": {
+          "state": "joined",
+          "native_exit": 0,
+          "original_terminal_confirmed": true,
+          "stdout": {
+            "bytes": 7958,
+            "sha256": "71d146bcd7b0eb8f021b9a4a0e8fbf614b9d9953cc9c26179da4f3707979af1a"
+          },
+          "stderr": {
+            "bytes": 6525,
+            "sha256": "f748c0b4ac2dfee4752a19f24ff80e73edcc92e398e3ab2e15aa46fafc30ad85"
+          }
+        },
+        "downstream-rust-link": {
+          "state": "unattempted"
+        },
+        "cargo-package": {
+          "state": "unattempted"
+        }
+      },
+      "retained_raw": {
+        "SEAL.json": {
+          "bytes": 89069,
+          "sha256": "5283520773f83b3f07d6927f5f6e7ed8c320dca896821f18929c5d6cd4fa2ad2"
+        },
+        "LAUNCH.json": {
+          "bytes": 1779,
+          "sha256": "68bff3b985242012dde4afee46e80c93d234f9d91a60e6ffcf0798b84383b0d5"
+        },
+        "RESULT.json": {
+          "bytes": 121782,
+          "sha256": "33d18b06875f568cc9527d13692e4a54721d952bdb3f63ddb52873b2704f091b"
+        },
+        "ORIGINAL-OUTER-COMPLETION.jsonl": {
+          "bytes": 3595,
+          "sha256": "fae430d13c316c5b15495b20b9b5cf72ab9768dc1562ba5000448e6aeba27808"
+        },
+        "SSH.stdout": {
+          "bytes": 98147,
+          "sha256": "70fb49ea6e3c03cb84eba096553e718db0968f474542d8319a8c5347105bc244"
+        },
+        "SSH.stderr": {
+          "bytes": 8084,
+          "sha256": "41fb299b519a6adc2f1e3880d292ac0b9df27ee9ca7e5af16ef2d4faddbfad90"
+        }
+      }
+    },
+    {
+      "attempt": "003",
+      "aggregate_status": "failed",
+      "outer_exit": 1,
+      "recorded_original_native_commands": 16,
+      "observed": "The original Cargo build and downstream link exited 0. The worker accounted for four JSON events and 44 verbose directives joined to retained build-script output. The link-map input path check then failed before emitted qualification or Cargo package inspection.",
+      "stages": {
+        "cargo-component": {
+          "state": "joined",
+          "native_exit": 0,
+          "original_terminal_confirmed": true,
+          "stdout": {
+            "bytes": 7958,
+            "sha256": "248a39f7d9e8577ab7eb30a95a49503a57a9472c20313626c43d2e7eeb2f4029"
+          },
+          "stderr": {
+            "bytes": 6525,
+            "sha256": "776f19b10cc4a7aa34ef8bbec597b14641371d35383aa6182098a3aa27f2d6cf"
+          }
+        },
+        "downstream-rust-link": {
+          "state": "joined",
+          "native_exit": 0,
+          "original_terminal_confirmed": true,
+          "stdout": {
+            "bytes": 1888,
+            "sha256": "a212fde3cf9abdedc1c7013d1e8af2dc97b0c2458a0077ab5050d3c5217e8a9a"
+          },
+          "stderr": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        "cargo-package": {
+          "state": "unattempted"
+        }
+      },
+      "retained_raw": {
+        "SEAL.json": {
+          "bytes": 92869,
+          "sha256": "a013af78c9c82c2fefff8779e3b16f4269e24c1c21df9f5b4a2a6ac8188424bf"
+        },
+        "LAUNCH.json": {
+          "bytes": 1779,
+          "sha256": "9a7be84fe2821ebfd9873f06bc3131f19bb4a384893fe60b3975a0fd9e5a5296"
+        },
+        "RESULT.json": {
+          "bytes": 1365455,
+          "sha256": "bd470d9378b701394fdcfd15653e411b8a8e97f44ba50daeb3a728483112aac1"
+        },
+        "ORIGINAL-OUTER-COMPLETION.jsonl": {
+          "bytes": 3597,
+          "sha256": "0dae11bc5238f25606fa60f0534bb5d68b4c4166bc6ccd78e2ff8c52552af46a"
+        },
+        "SSH.stdout": {
+          "bytes": 1338627,
+          "sha256": "ed2004440b1652d4224fe3a3962886465d4c09a429ef3f54522b698b8d1171e5"
+        },
+        "SSH.stderr": {
+          "bytes": 8084,
+          "sha256": "41fb299b519a6adc2f1e3880d292ac0b9df27ee9ca7e5af16ef2d4faddbfad90"
+        }
+      },
+      "cargo_stdout_framing": {
+        "compiler_diagnostics": 0,
+        "json_events": 4,
+        "verbose_bytes": 4704,
+        "verbose_directives": 44,
+        "verbose_sha256": "bc9df208bf26239056e9069fe42482f494d0a9d40d9da918a261161b6226613e"
+      }
+    }
+  ],
+  "limits": "A successful nested command does not convert its original failed attempt into a pass. No package verification, emitted-code qualification for these Cargo outputs, installation, default behavior, runtime protection or performance is claimed here. Raw streams and originals remain private."
+}
