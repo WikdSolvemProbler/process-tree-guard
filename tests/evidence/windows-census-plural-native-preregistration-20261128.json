@@ -1,0 +1,47 @@
+{
+  "schema": "ptg-windows-native-plural-census-witness-preregistration-v1",
+  "scope": "Prospective bounded native control and its separate read-only replay. This record covers the plural final-sample observer rule on Windows.",
+  "code_commit": "b3aa6f629493f10a06cc36840f35b44dba4d7834",
+  "method": {
+    "published_policy_sha256": "4861325bb7ee724f7d3f07e61607692e05111ddbd77a27aa58ed9604eb600c60",
+    "design_sha256": "546ef71c67b307f8592ef5060d37868f0f77fb0fc2368aabf4dce4e3e11f99de",
+    "sealed_witness_sha256": "ed34287da4bb3c471803dd174ac49a07315f71788e3d982950bd1285caf7a6a0",
+    "exact_vector_sha256": "0ec64a94577b18ae8c6c26e9df377c4db7d22b6351e9d9c4d27abd4e617e3a74",
+    "positive_owned_originals": 2,
+    "max_replacement_snapshots": 1,
+    "negative_live_veto_controls": 1,
+    "absolute_barrier_seconds": 1,
+    "real_native_error": 87
+  },
+  "objective": "Observe two distinct held originals in the same complete first snapshot. Retire the owned originals naturally and release their references within the same request. Require two real pre-handle native error rows, one complete clean replacement without either numeric ID, and the original ACK bound to that request and its native send completion. The separate still-live pinned outside veto must reach its post-append policy refusal within its original request without replacement or ACK.",
+  "limits": [
+    "Error 87 and numeric identifiers do not establish identity, death or ownership by themselves. The witness proves only its separately held original generations. The replacement establishes a later sampled boundary; continuous absence remains unobserved.",
+    "Preserve all earlier failed runs, any new failure and dependent skipped controls. No reclassification, retry or pooling. Any owned forced cleanup receives no natural success credit.",
+    "No candidate or competitor score, product protection qualification, campaign admission, or results are asserted. No successor campaign allocation is granted."
+  ],
+  "selected_seconds": {
+    "prior_consumed_readiness": 1775,
+    "subsequent_offline_source_verification": 120,
+    "subsequent_source_publication": 60,
+    "prior_explicit_total": 1955,
+    "prospective_preregistration_publication": 60,
+    "prospective_combined_native_witness": 300,
+    "prospective_read_only_replay": 45,
+    "fresh_transaction_total": 405,
+    "cumulative_if_all_selected": 2360,
+    "prior_unused_transfer": false,
+    "historical_aggregate_compliance_claim": false
+  },
+  "native_caps": {
+    "outer_guard_seconds": 300,
+    "retained_primary_seconds": 280,
+    "host_wait_seconds": 290,
+    "internal_case_ceiling_seconds": 250,
+    "independent_replay_outer_seconds": 45
+  },
+  "status": {
+    "executed": false,
+    "qualified": false,
+    "authorized": false
+  }
+}
