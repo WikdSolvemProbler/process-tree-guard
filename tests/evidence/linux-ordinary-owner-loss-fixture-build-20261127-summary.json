@@ -1,0 +1,137 @@
+{
+  "schema": "ptg-experimental-linux-ordinary-owner-loss-fixture-build-evidence-v1",
+  "status": "completed_compile_link_and_static_review_only",
+  "scope": "One original extracted-package build and downstream compile/link for a private x86-64 GNU/Linux fixture whose source calls the public experimental Manual API and expects OwnerEnded.",
+  "source": {
+    "public_git_commit": "d978c327b0e1cc6f0f226fec007b3868a0eac7a1",
+    "verified_git_input_blobs": 177,
+    "additional_private_consumer_files": 1,
+    "consumer_source": {
+      "bytes": 2004,
+      "sha256": "021bb5f77b631d73e463bdcfe0a91b5d0dbec0a37c09641c80aabc48c800fa5e"
+    },
+    "cargo_feature": "linux-ordinary-library",
+    "retained_published_source_package": {
+      "bytes": 624770,
+      "sha256": "400064f9f72db835c35c696080b350a1acad0375110d36c56413ccd54c049910",
+      "members_checked": 150,
+      "exact_bytes_identical_to_prior_package": true
+    },
+    "source_bytes_unchanged_during_build": true,
+    "extracted_package_bytes_unchanged_during_build": true
+  },
+  "original": {
+    "outer_native_status": 0,
+    "outer_wall_seconds": 79.7810777,
+    "transport_native_status": 0,
+    "managed_worker_native_status": 0,
+    "held_native_commands_joined_zero": 48,
+    "native_command_streams_verified": 96,
+    "build_scope_retired": true,
+    "terminal_build_scope_cgroup_errno": 19
+  },
+  "exported_build_outputs": {
+    "exact_archive": {
+      "bytes": 6453819,
+      "sha256": "ed462ed7fc6a8c9e64641f2f8acee12899f6cbd2cd35663e64d1f34b75b63dcc",
+      "members_checked": 133,
+      "expanded_wire_bytes": 23389997
+    },
+    "owner_loss_consumer_elf": {
+      "bytes": 2932024,
+      "sha256": "dbbbf58f847e4c81b95009a22e284d1c82df7c3a43424cb62b9a111ee5c695f2"
+    },
+    "co_produced_helper_elf": {
+      "bytes": 1215256,
+      "sha256": "87ba35db7326f71cd6a62dce2c3ebac880159c2690a6555478bbf49336857a25"
+    },
+    "ordinary_library_rlib": {
+      "bytes": 1193802,
+      "sha256": "82b93155889c39759bc571f21af39dd7021412054c01dcba686ebec4112f976f"
+    },
+    "native_caller_archive": {
+      "bytes": 873782,
+      "sha256": "42365731b34650c59385b3bc35f2592afeacd46aaf8539b2de4d8941e373be7b",
+      "objects": 14
+    },
+    "native_object_files_compiled": 15
+  },
+  "static_observations": {
+    "linked_pair_format": "x86-64 ELF ET_EXEC",
+    "both_have_no_elf_interpreter_or_dynamic_segment": true,
+    "both_have_nonexecutable_stack_and_no_writable_executable_load_segment": true,
+    "consumer_contains_direct_call_to_ordinary_native_entry": true,
+    "previous_helper": {
+      "bytes": 1215288,
+      "sha256": "f9742b50a53c470103c1080613530ee2abf28233b0d28e2968cbc20021f7326a",
+      "executable_sections_equal_to_co_produced_helper": true,
+      "allocated_section_content_difference": ".note.gnu.build-id"
+    }
+  },
+  "retained_preparation_history": {
+    "first_local_generation_native_status": 1,
+    "disposition": "Local source generation refused before creating outputs because a status literal rendered differently. A corrected local source generation completed before the single original build. The refusal was retained.",
+    "corrected_local_generation_native_status": 0,
+    "record": {
+      "bytes": 758,
+      "sha256": "15921fcf202ce87e6645017d42e6a8de9ece2cfa17e754134496c6582c9b444c"
+    }
+  },
+  "private_evidence_digests": {
+    "build_seal": {
+      "bytes": 109636,
+      "sha256": "fdaccf66ff154faa1f44ff5f115b11a4dde0b1d13fe1ed193ad352d0fa4713aa"
+    },
+    "exact_launch": {
+      "bytes": 1875,
+      "sha256": "f59fe4fceacb559de2adf8e0898938c3313947c55ed910076a609dc2eff65225"
+    },
+    "git_source_manifest": {
+      "bytes": 38431,
+      "sha256": "fd50a9b2a57cda473e433085a89f06eb24992fbf00daff464a68e201d8ad5501"
+    },
+    "complete_input_bundle": {
+      "bytes": 536692,
+      "sha256": "e26a816d225daf8a43ae36ac66d77755895da778caf728bd72898c3aa7bd0c22"
+    },
+    "original_outer_terminal_event": {
+      "bytes": 3823,
+      "sha256": "cc80d434ddb78d3a76b61085cee1fc6e4d50a5b22cfcc0c34bd4d61b0e94b061"
+    },
+    "original_outer_event_selection": {
+      "bytes": 290,
+      "sha256": "e847268dbb787f724206af22a41eded5c400a91ef6f7992946b15562f7b4639b"
+    },
+    "build_result": {
+      "bytes": 8812730,
+      "sha256": "6af664e59e08ca40d090770049659a9452555bca9427bcde0308599a761a2fc8"
+    },
+    "transport_stdout": {
+      "bytes": 8765081,
+      "sha256": "2dc1ad25d4168db35fbd654d3733f54f54ac2f5b50330448c7696a86ad29919b"
+    },
+    "transport_stderr": {
+      "bytes": 8084,
+      "sha256": "41fb299b519a6adc2f1e3880d292ac0b9df27ee9ca7e5af16ef2d4faddbfad90"
+    },
+    "independent_static_reviews": [
+      {
+        "bytes": 4348,
+        "sha256": "2993825eceb6ffff36ca11444e5dbbc2a1c44e6edb76e0b1085c2027bd425702"
+      },
+      {
+        "bytes": 6324,
+        "sha256": "458d70240356e7360e8ab8be9f0f9ff5b82e312616e6cd6be1b3e9e71ded340c"
+      }
+    ]
+  },
+  "qualification_limits": {
+    "executed_target_images": 0,
+    "owner_loss_runtime_observed": false,
+    "payload_or_descendant_cleanup_observed": false,
+    "product_deadline_behavior_observed": false,
+    "default_linux_dispatch_changed": false,
+    "supported_backend_or_performance_qualification": false,
+    "interpretation": "Build-scope retirement is compiler containment evidence. This record qualifies compile/link and static artifact custody for the exact pair. Owner-loss behavior and descendant cleanup require a separate native witness."
+  }
+}
