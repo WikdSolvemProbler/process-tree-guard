@@ -1,0 +1,36 @@
+{
+  "schema": "ptg-laptop-182-001-memory-recovery-preregistration-v1",
+  "authority": false,
+  "source_commit": "6d3c801057421235c18540f825d871b950418797",
+  "stock_a_sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384",
+  "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e",
+  "measurement_sha256": "79ff9e118c7821fdd0ea5ca02b13a0f82bd3af2ba69148f0723b7046d1ce2874",
+  "recovery_amendment_sha256": "3db2869d67dda2b60c5fc23bb87729f0bc7397486b6d47dccf9dcf8c450ce9df",
+  "prior_attempt": {
+    "status": "failed and preserved",
+    "settled": 560,
+    "measured": 300,
+    "pricing": 0,
+    "observed_available_physical_bytes": 998957056,
+    "physical_floor_bytes": 1073741824
+  },
+  "population": {
+    "slots": 1940,
+    "groups": 512,
+    "pricing_rows": 54,
+    "pricing_pairs": 27,
+    "checkpoint_groups": 1,
+    "total_groups": 540
+  },
+  "allocation": {
+    "prior_listed_selected_seconds": 18465,
+    "readiness_seconds": 1605,
+    "readiness_ceiling_seconds": 1800,
+    "unallocated_readiness_seconds": 195,
+    "listed_after_readiness": 20070,
+    "listed_after_one_full": 26990,
+    "listed_if_complete_and_separate_offline": 27350,
+    "management_seconds_separate": 60
+  },
+  "scope": "One first available separately authorized native resource-recovery opportunity after fresh bound readiness. Any new control, admission or capture failure consumes the opportunity. Both earlier full attempts retain their failed dispositions. No resource-window selection, historical ranking or campaign authority flows from preregistration."
+}
