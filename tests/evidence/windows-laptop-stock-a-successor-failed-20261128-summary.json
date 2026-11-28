@@ -1,0 +1,123 @@
+{
+  "schema": "ptg-windows-laptop-stock-a-successor-failed-evidence-v1",
+  "status": "failed_incomplete",
+  "scope": "One preregistered successor Part A attempt on Windows using the retained stock A image and the published plural census observer policy.",
+  "identity": {
+    "stock_a_source_commit": "6d3c801057421235c18540f825d871b950418797",
+    "stock_a_image": {
+      "bytes": 826368,
+      "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+    },
+    "observer_policy_commit": "b3aa6f629493f10a06cc36840f35b44dba4d7834",
+    "preregistration": {
+      "bytes": 1492,
+      "sha256": "6aaf41705c1fe1043747c5d615ba01446e2656ff574a669647b08c7c0d0e990b"
+    },
+    "measurement_sha256": "edffda927b12f0260bb18c209a69caa9117244a1a99a82cb0c3cc8ffc0e4f1f7",
+    "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e"
+  },
+  "original_execution": {
+    "status": "failed",
+    "outer_exit_code": 1,
+    "retained_primary_exit_code": 1,
+    "elapsed_wall_seconds": 930.1039127
+  },
+  "stop": {
+    "phase": "during",
+    "schedule_group": 167,
+    "reason": "emergency_physical_memory",
+    "available_physical_bytes": 998957056,
+    "minimum_available_physical_bytes": 1073741824,
+    "shortfall_bytes": 74784768,
+    "shortfall_mib": 71.3203125,
+    "completed_prior_group_grants": 167,
+    "failed_group_enumeration_started": false,
+    "failed_group_acknowledged": false,
+    "description": "The observer applied the preregistered 1 GiB floor to the available-physical-memory value reported by Windows. It refused the group before process enumeration and sent no acknowledgment. The retained samples establish the threshold crossing. Which process or allocation caused it is undetermined."
+  },
+  "population": {
+    "planned": {
+      "floor": 36,
+      "warmup": 224,
+      "measured": 1680,
+      "total": 1940,
+      "separate_pricing": 54,
+      "groups": 540
+    },
+    "settled_prefix": {
+      "floor": 36,
+      "warmup": 224,
+      "measured": 300,
+      "total": 560,
+      "pricing": 0,
+      "last_zero_based_ordinal": 559
+    },
+    "unattempted": {
+      "measured": 1380,
+      "pricing": 54
+    }
+  },
+  "phase_job_abort": {
+    "observed_active_before": 1,
+    "observed_active_after": 0,
+    "forced_harness_drain": true,
+    "remaining_member_identity_established": false,
+    "scope": "This is the harness drain of the one owned phase Job. It supplies zero product-cleanup credit. Machine-wide process state was unverified."
+  },
+  "analysis": {
+    "capture_status": "incomplete",
+    "provisional": true,
+    "benchmark_score": null,
+    "ranking": null,
+    "parity_conclusion": null,
+    "standing_loss_count": null,
+    "freeze_gate_fail_count": null,
+    "full_offline_replay": "unrun"
+  },
+  "selected_seconds": {
+    "successor_readiness": 1605,
+    "full_outer_cap_charged": 6920,
+    "retained_primary_cap": 6900,
+    "during_cap": 6600,
+    "unused_full_cap_refunded": false,
+    "known_listed_through_full_attempt_excluding_separate_management": 17805,
+    "offline_replay_selected": 0,
+    "opportunity": "consumed",
+    "retry_authorized": false
+  },
+  "evidence": {
+    "failed_original": {
+      "bytes": 3087,
+      "sha256": "f10228b5615d28d6538b38a2b5864edeb6c348c87b2caebca0f402f86c8a5a8f"
+    },
+    "original_selector": {
+      "bytes": 545,
+      "sha256": "2d2d64462e0c43414a73f5b4d96cd05aa613a3707fe4be3908b5cc3e87697118"
+    },
+    "root_one_use_intent": {
+      "bytes": 1513,
+      "sha256": "24c2eb3a26077db6b312c074690f59b3c8d16b71e92162b67770110c1ab9ca8f"
+    },
+    "ready_manifest": {
+      "bytes": 17248,
+      "sha256": "39eaf1ea437310bbb1b5f95ecb8c8e8123700f71b6be9ab6721c302a13559b4d"
+    },
+    "capture_terminal": {
+      "bytes": 398,
+      "sha256": "11100ab36b2235eb2c184664016aa9f5d81ec9863ba635f9d336cdc9420281f6"
+    },
+    "refused_census_raw_line": {
+      "bytes": 891,
+      "sha256": "eb4b509b950dc1d0f9bce0ae931cd4603183189d31c5aa35232ffcb6c913aad2"
+    },
+    "independent_actual_review_core": {
+      "bytes": 164684,
+      "sha256": "6cdfea533977d629edc0b039160b23c317991d8df5dc79179e98042da95e29c4"
+    },
+    "independent_actual_review_abi": {
+      "bytes": 8408,
+      "sha256": "a5b1bccbffb2d22c29620252b7c5769361f606f6f62b95eeed1a9de5d5c13428"
+    }
+  },
+  "evidence_availability": "Original records, raw captures, and both independent audits are retained privately. The published digests identify those records."
+}
