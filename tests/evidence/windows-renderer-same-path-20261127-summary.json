@@ -1,0 +1,491 @@
+{
+  "schema": "ptg-windows-manual-renderer-contrast-summary-v1",
+  "scope": "One prespecified x64 Windows feature-free stock release manual startup contrast for an equivalent UTF-16 executable and first-argument renderer change.",
+  "stock_lineage": {
+    "base_commit": "6d3c801057421235c18540f825d871b950418797",
+    "arms": {
+      "A": {
+        "stock_pe": {
+          "bytes": 826368,
+          "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+        },
+        "build_result": {
+          "bytes": 3611,
+          "sha256": "129c2151d703b52226611eac0ee1fbf8830fae605dbd7239e5e5b21b4fd4efd7"
+        },
+        "build_original_outer": {
+          "bytes": 1430,
+          "sha256": "1a58c88f83acf13a595ee30dd98fb61d2358ffe831ef27f0b11b7ac20b5f4458"
+        }
+      },
+      "B": {
+        "stock_pe": {
+          "bytes": 826880,
+          "sha256": "21cfe3f3702b14520aa8c5715cc051490bc50681505e160e6f28e4d3e4063ee5"
+        },
+        "build_result": {
+          "bytes": 4770,
+          "sha256": "84bd54a2c9f5cbc6fec1ffe42992efe7cea5c239892c9aeb36985ffed99afdf4"
+        },
+        "build_original_outer": {
+          "bytes": 1430,
+          "sha256": "50fdddd0538795aef13cb126e70576fa9ad9cdb734ee9f7e0b670f5572f64aaf"
+        }
+      }
+    },
+    "description": "A is the current renderer control; B is the sole reviewed alternate renderer. Each arm is a separately retained stock release image from the same build procedure. A remains selected."
+  },
+  "qualification": {
+    "native_fixed_cli_cases": 34,
+    "dev_testkit_unit_lanes": 4,
+    "offline_gate_replayed": true,
+    "separate_functional_subject_exposures": 2,
+    "separate_exposure_order": [
+      "A",
+      "B"
+    ],
+    "preflight_scored": false,
+    "same_subject_path_within_each_phase": true,
+    "distinct_subject_paths_across_phases": true,
+    "subject_path_utf16_units_each": 115,
+    "same_fixture_and_neutral_working_directory": true,
+    "measured_identities_independently_verified": true
+  },
+  "measurement": {
+    "original_outer_exit": 0,
+    "held_inner_exit": 0,
+    "expected_slots": 80,
+    "verified_slots": 80,
+    "excluded_slots": 0,
+    "expected_pairs": 40,
+    "retained_pairs": 40,
+    "outer_seconds": 300,
+    "inner_seconds": 180,
+    "slot_seconds": 3,
+    "fixture_timeout_seconds": 2,
+    "elapsed_unit": "nanoseconds",
+    "endpoint": "Immediately before suspended CreateProcessW through the first observed successful wait on its retained original subject handle. A symmetric suspended-subject image-path verification is inside that interval for both arms.",
+    "schedule": "40 adjacent A/B pairs alternating AB and BA. Each slot uses the same absolute subject pathname within measurement and is checked for exact original success, natural Job drain, exact streams, and retirement under the same custody policy."
+  },
+  "statistics": {
+    "contrast": "B minus A for each arm-wise nearest-rank quantile, with signed pair differences reported separately.",
+    "bootstrap": "10,000 paired moving-block resamples. Each replicate draws 20 length-two blocks with replacement from the 39 overlapping contiguous starts. The same prespecified SHA-256 counter stream drives both endpoints.",
+    "draw_attempts": 200000,
+    "interval_method": {
+      "family": [
+        "p50",
+        "p90"
+      ],
+      "nominal_family_coverage": 0.95,
+      "nominal_per_endpoint_coverage": 0.975,
+      "zero_based_draw_indices": [
+        124,
+        9874
+      ]
+    },
+    "direction_rule": "An endpoint requires the interval, overall point and all four split contrasts to agree strictly in sign. Otherwise its direction remains unresolved.",
+    "estimates": {
+      "p50": {
+        "point_ns": 447400,
+        "split_ns": {
+          "first_half": 166000,
+          "second_half": 714000,
+          "AB": 1032400,
+          "BA": 143200
+        },
+        "interval_ns": [
+          -392200,
+          1426400
+        ],
+        "direction": "unresolved"
+      },
+      "p90": {
+        "point_ns": 2569500,
+        "split_ns": {
+          "first_half": -788600,
+          "second_half": 3906300,
+          "AB": 2026700,
+          "BA": 2569500
+        },
+        "interval_ns": [
+          -110122800,
+          4669900
+        ],
+        "direction": "unresolved"
+      }
+    },
+    "family_direction": "unresolved"
+  },
+  "elapsed_pairs": [
+    {
+      "pair": 1,
+      "order": "AB",
+      "a_ns": 183020000,
+      "b_ns": 100830900,
+      "b_minus_a_ns": -82189100
+    },
+    {
+      "pair": 2,
+      "order": "BA",
+      "a_ns": 42152100,
+      "b_ns": 41761900,
+      "b_minus_a_ns": -390200
+    },
+    {
+      "pair": 3,
+      "order": "AB",
+      "a_ns": 41973100,
+      "b_ns": 47729600,
+      "b_minus_a_ns": 5756500
+    },
+    {
+      "pair": 4,
+      "order": "BA",
+      "a_ns": 41144800,
+      "b_ns": 42965000,
+      "b_minus_a_ns": 1820200
+    },
+    {
+      "pair": 5,
+      "order": "AB",
+      "a_ns": 41444600,
+      "b_ns": 40262900,
+      "b_minus_a_ns": -1181700
+    },
+    {
+      "pair": 6,
+      "order": "BA",
+      "a_ns": 43059700,
+      "b_ns": 39945600,
+      "b_minus_a_ns": -3114100
+    },
+    {
+      "pair": 7,
+      "order": "AB",
+      "a_ns": 41111600,
+      "b_ns": 41090400,
+      "b_minus_a_ns": -21200
+    },
+    {
+      "pair": 8,
+      "order": "BA",
+      "a_ns": 42174900,
+      "b_ns": 43123400,
+      "b_minus_a_ns": 948500
+    },
+    {
+      "pair": 9,
+      "order": "AB",
+      "a_ns": 43790800,
+      "b_ns": 43157200,
+      "b_minus_a_ns": -633600
+    },
+    {
+      "pair": 10,
+      "order": "BA",
+      "a_ns": 44392900,
+      "b_ns": 41675800,
+      "b_minus_a_ns": -2717100
+    },
+    {
+      "pair": 11,
+      "order": "AB",
+      "a_ns": 41462800,
+      "b_ns": 42477000,
+      "b_minus_a_ns": 1014200
+    },
+    {
+      "pair": 12,
+      "order": "BA",
+      "a_ns": 42725400,
+      "b_ns": 43237000,
+      "b_minus_a_ns": 511600
+    },
+    {
+      "pair": 13,
+      "order": "AB",
+      "a_ns": 42029600,
+      "b_ns": 43930600,
+      "b_minus_a_ns": 1901000
+    },
+    {
+      "pair": 14,
+      "order": "BA",
+      "a_ns": 48884900,
+      "b_ns": 43456000,
+      "b_minus_a_ns": -5428900
+    },
+    {
+      "pair": 15,
+      "order": "AB",
+      "a_ns": 38697900,
+      "b_ns": 42055200,
+      "b_minus_a_ns": 3357300
+    },
+    {
+      "pair": 16,
+      "order": "BA",
+      "a_ns": 42041100,
+      "b_ns": 41388800,
+      "b_minus_a_ns": -652300
+    },
+    {
+      "pair": 17,
+      "order": "AB",
+      "a_ns": 40023400,
+      "b_ns": 43850000,
+      "b_minus_a_ns": 3826600
+    },
+    {
+      "pair": 18,
+      "order": "BA",
+      "a_ns": 42286900,
+      "b_ns": 40567700,
+      "b_minus_a_ns": -1719200
+    },
+    {
+      "pair": 19,
+      "order": "AB",
+      "a_ns": 44305700,
+      "b_ns": 39911400,
+      "b_minus_a_ns": -4394300
+    },
+    {
+      "pair": 20,
+      "order": "BA",
+      "a_ns": 44719200,
+      "b_ns": 42318100,
+      "b_minus_a_ns": -2401100
+    },
+    {
+      "pair": 21,
+      "order": "AB",
+      "a_ns": 40814800,
+      "b_ns": 44741400,
+      "b_minus_a_ns": 3926600
+    },
+    {
+      "pair": 22,
+      "order": "BA",
+      "a_ns": 41834400,
+      "b_ns": 40143300,
+      "b_minus_a_ns": -1691100
+    },
+    {
+      "pair": 23,
+      "order": "AB",
+      "a_ns": 157754000,
+      "b_ns": 41810700,
+      "b_minus_a_ns": -115943300
+    },
+    {
+      "pair": 24,
+      "order": "BA",
+      "a_ns": 41934000,
+      "b_ns": 42521400,
+      "b_minus_a_ns": 587400
+    },
+    {
+      "pair": 25,
+      "order": "AB",
+      "a_ns": 41807400,
+      "b_ns": 41461000,
+      "b_minus_a_ns": -346400
+    },
+    {
+      "pair": 26,
+      "order": "BA",
+      "a_ns": 41763600,
+      "b_ns": 47631200,
+      "b_minus_a_ns": 5867600
+    },
+    {
+      "pair": 27,
+      "order": "AB",
+      "a_ns": 41192200,
+      "b_ns": 41411000,
+      "b_minus_a_ns": 218800
+    },
+    {
+      "pair": 28,
+      "order": "BA",
+      "a_ns": 44527000,
+      "b_ns": 46414900,
+      "b_minus_a_ns": 1887900
+    },
+    {
+      "pair": 29,
+      "order": "AB",
+      "a_ns": 42593900,
+      "b_ns": 42912400,
+      "b_minus_a_ns": 318500
+    },
+    {
+      "pair": 30,
+      "order": "BA",
+      "a_ns": 40431800,
+      "b_ns": 43762700,
+      "b_minus_a_ns": 3330900
+    },
+    {
+      "pair": 31,
+      "order": "AB",
+      "a_ns": 40491900,
+      "b_ns": 44703700,
+      "b_minus_a_ns": 4211800
+    },
+    {
+      "pair": 32,
+      "order": "BA",
+      "a_ns": 42168200,
+      "b_ns": 41966000,
+      "b_minus_a_ns": -202200
+    },
+    {
+      "pair": 33,
+      "order": "AB",
+      "a_ns": 39923100,
+      "b_ns": 40854700,
+      "b_minus_a_ns": 931600
+    },
+    {
+      "pair": 34,
+      "order": "BA",
+      "a_ns": 42273000,
+      "b_ns": 48432600,
+      "b_minus_a_ns": 6159600
+    },
+    {
+      "pair": 35,
+      "order": "AB",
+      "a_ns": 41296500,
+      "b_ns": 43430800,
+      "b_minus_a_ns": 2134300
+    },
+    {
+      "pair": 36,
+      "order": "BA",
+      "a_ns": 42344900,
+      "b_ns": 39260100,
+      "b_minus_a_ns": -3084800
+    },
+    {
+      "pair": 37,
+      "order": "AB",
+      "a_ns": 40513400,
+      "b_ns": 46332400,
+      "b_minus_a_ns": 5819000
+    },
+    {
+      "pair": 38,
+      "order": "BA",
+      "a_ns": 43190200,
+      "b_ns": 47096500,
+      "b_minus_a_ns": 3906300
+    },
+    {
+      "pair": 39,
+      "order": "AB",
+      "a_ns": 42683600,
+      "b_ns": 41894700,
+      "b_minus_a_ns": -788900
+    },
+    {
+      "pair": 40,
+      "order": "BA",
+      "a_ns": 41207700,
+      "b_ns": 41389500,
+      "b_minus_a_ns": 181800
+    }
+  ],
+  "disposition": "Both p50 and p90 remain unresolved. This run does not establish B as an improvement, does not establish equivalence, and does not change the selected implementation. No favorable rerun is authorized by this record.",
+  "limits": [
+    "One manual short-unquoted startup workload. The result does not establish the cause of a historical slowdown, behavior on alternate executable geometry, performance across broader paths or environments, or standing campaign readiness.",
+    "Elapsed observations include the common startup instrumentation. The preflight checked functioning under separate path custody and contributes no measured observation. All measured path and process identities were verified independently.",
+    "Complete raw operational records were retained privately. Public hashes identify those records, but the raw identities, commands, paths and clocks are omitted."
+  ],
+  "evidence": {
+    "measured_manifest": {
+      "bytes": 18990,
+      "sha256": "022d0461a7f72bbea4b527124ee37ff1d2d5424a209871676b0150e47aba52bc"
+    },
+    "plan": {
+      "bytes": 10454,
+      "sha256": "dc049999479abf84b22592ca99878fa67e545bf67d28999f3f9baa8b3a477cfc"
+    },
+    "scorer": {
+      "bytes": 2995,
+      "sha256": "1fad8ec2deaff07286c0b6d6c05feb9892f4ef6c0b9b33b5bd9d1894729fa8dc"
+    },
+    "protocol": {
+      "bytes": 9074,
+      "sha256": "808ab11f6a9053aa08a31ec8e7b08a0789b175c59d2fd9b021bd5de1ae91a67f"
+    },
+    "measured_original": {
+      "bytes": 2345,
+      "sha256": "324f38e869b00fa46fc5886bd8f0cddfee928786f3a9dc61b49a58e346941775"
+    },
+    "measured_selector": {
+      "bytes": 290,
+      "sha256": "b6c01a559c628f733fe9fda99d73574ae2fedad8a32a761947e86afc45ee5c95"
+    },
+    "raw_journal": {
+      "bytes": 787796,
+      "sha256": "ba1c06838b738de4bd19644b5d78b374fa780cc6895cb393acb5fea51422a7a4"
+    },
+    "held_inner": {
+      "bytes": 917,
+      "sha256": "037897ff82bf3f5193474c2364161787f44894f3292c4e32a7e2316ed21f474c"
+    },
+    "raw_audit_abi": {
+      "bytes": 4295,
+      "sha256": "ce5e01c1f21f64bd8f5bbfea3e85b6545784fe23914cd36f431a2a0599a9d205"
+    },
+    "raw_audit_core": {
+      "bytes": 95022,
+      "sha256": "acb201172003784ae6dca00e1f687576991533fd40a9a74eaf3300ce462d204b"
+    },
+    "offline_forecast": {
+      "bytes": 18199,
+      "sha256": "5a2063b1a6c0104182daffc57c749c74db9c95effc4b676f43e028d55a8088c4"
+    },
+    "offline_score": {
+      "bytes": 1586,
+      "sha256": "7c9eef1c6af4454a79d6c17a2832c5cf928efaa844340f4a4a2f2b709b779e8c"
+    },
+    "functional_preflight": {
+      "bytes": 599,
+      "sha256": "b958a48ad4eacaea2fdf7b25f5337bb8e8cc548ebef9d3be10b7ee0008d8f188"
+    },
+    "functional_preflight_original": {
+      "bytes": 2345,
+      "sha256": "033995cd5a748916d58fef7835b68c7bac96ff554045cb26f51050f5681ae13c"
+    },
+    "functional_preflight_review_abi": {
+      "bytes": 5768,
+      "sha256": "9600d4806fb05ba66f6ad9f98d4ce0a4197216c9d0f1f15f0801ceb77c2be86d"
+    },
+    "functional_preflight_review_core": {
+      "bytes": 9241,
+      "sha256": "102b35d51344536029a0ba25b9ab704f6f342aa39457973ed88713ea3d66e724"
+    },
+    "fixed_gate_replay": {
+      "bytes": 998,
+      "sha256": "d6b488c2e3259b9a1bc660aab4fa9258beb5adacfe3b81e82ca7df7374f9c52e"
+    },
+    "offline_original": {
+      "bytes": 15179,
+      "sha256": "2dd381fc80d2a29614a3facf8936dd4af6a9d653ad2acc85eceb7b5a49c8fea0"
+    },
+    "offline_selector": {
+      "bytes": 290,
+      "sha256": "0543f5c3b2fbf4626ebdd623a4686d8311e659a3464446b10bb442c1b339ca01"
+    }
+  },
+  "offline_replay": {
+    "original_exit": 0,
+    "outer_seconds": 60,
+    "verified_original_command_and_neutral_working_directory": true,
+    "source_execution": "One offline replay validated the 80 retained slots and then scored them. No subject process was launched by the replay."
+  }
+}
