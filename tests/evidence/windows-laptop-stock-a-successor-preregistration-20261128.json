@@ -1,0 +1,41 @@
+{
+  "schema": "ptg-laptop-182-001-successor-preregistration-draft-v1",
+  "authority": false,
+  "candidate_commit": "6d3c801057421235c18540f825d871b950418797",
+  "candidate_sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384",
+  "policy_commit": "b3aa6f629493f10a06cc36840f35b44dba4d7834",
+  "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e",
+  "pending_measurement_sha256": "edffda927b12f0260bb18c209a69caa9117244a1a99a82cb0c3cc8ffc0e4f1f7",
+  "witness_evidence": {
+    "bytes": 3566,
+    "sha256": "f9f50f8d6e7f8e5c611a9206363af02b62e91ec16599e626a160fc7f05d47285"
+  },
+  "planned_population": {
+    "population_rows": 1940,
+    "population_groups": 512,
+    "separate_pricing_rows": 54,
+    "pricing_pairs": 27,
+    "checkpoint_groups": 1,
+    "total_groups": 540
+  },
+  "prospective_readiness": {
+    "selected_seconds": 1605,
+    "ceiling_seconds": 1800,
+    "unallocated_seconds": 195,
+    "ordered_caps_seconds": [
+      30,
+      60,
+      30,
+      340,
+      45,
+      340,
+      45,
+      640,
+      45,
+      30
+    ],
+    "previous_transactions_selected_seconds": 2360,
+    "listed_projected_cumulative_seconds": 3965
+  },
+  "scope": "The prior opportunity ended before measured or pricing rows and remains failed. Fresh positive, negative and A/A controls and independent read-only reviews are prerequisites for any later readiness claim. This allocation opens no campaign opportunity and transfers no unused budget."
+}

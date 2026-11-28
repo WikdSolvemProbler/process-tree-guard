@@ -1,0 +1,92 @@
+{
+  "schema": "ptg-laptop-native-census-cohort-evidence-v1",
+  "policy_commit": "b3aa6f629493f10a06cc36840f35b44dba4d7834",
+  "overall_original_exit": 0,
+  "read_only_replay_exit": 0,
+  "cases": [
+    {
+      "case": "eligible_plural_no_handle",
+      "initial_eligible_rows": 2,
+      "open_process_error": 87,
+      "acquired_handles": 0,
+      "complete_censuses": 2,
+      "replacement_censuses": 1,
+      "suspect_numbers_absent_from_complete_replacement": 2,
+      "original_owned_fixtures_natural_exit_zero": 2,
+      "natural_empty_jobs": 2,
+      "original_worker_acknowledgements": 1,
+      "request_to_native_ack_send_settled_ms": 81.1196,
+      "request_to_client_release_after_ack_ms": 81.3114
+    },
+    {
+      "case": "live_outside_veto",
+      "complete_censuses": 1,
+      "replacement_censuses": 0,
+      "original_worker_acknowledgements": 0,
+      "request_to_post_append_policy_refusal_ms": 37.3107,
+      "request_to_client_return_after_timeout_ms": 1000.1573,
+      "typed_post_durable_append_policy_refusal": true,
+      "client_received_denial": false,
+      "held_sleeper_natural_termination_observed_separately": true
+    }
+  ],
+  "census_request_deadline_ms": 1000,
+  "separate_selected_caps_seconds": {
+    "preregistration": 60,
+    "witness": 300,
+    "replay": 45,
+    "total": 405
+  },
+  "evidence": {
+    "seal": {
+      "bytes": 7184,
+      "sha256": "ed34287da4bb3c471803dd174ac49a07315f71788e3d982950bd1285caf7a6a0"
+    },
+    "native_original": {
+      "bytes": 4826,
+      "sha256": "5959e99f2e1bd5bfebdb5834ca7925a267e3f6245b076a396d04f98771c8fb17"
+    },
+    "native_selector": {
+      "bytes": 597,
+      "sha256": "b8cd5bd7a9b00e3537cb1e8b0322b12e8ff7a52948a0db76b24234a1a90bd37f"
+    },
+    "top_capture": {
+      "bytes": 4772,
+      "sha256": "8f3ee41705cb7e5cd16e85195e61a6f420f86d6f8303b4dd55220ed968150602"
+    },
+    "positive_case": {
+      "bytes": 3627,
+      "sha256": "8a9a91a27b3682f3d30fe0d6705201b62e5854bae945aed34306d6a7dbc48067"
+    },
+    "negative_case": {
+      "bytes": 2815,
+      "sha256": "4de4597d98ccfa6b5298ed590a8d72269c38e5ce83ab44cf01b468196195940a"
+    },
+    "replay_original": {
+      "bytes": 6476,
+      "sha256": "4818e3921f2e3456bc88f7b51487f66b5f1f10d85bbef2fb2f1a1ad139b55fb7"
+    },
+    "replay_selector": {
+      "bytes": 547,
+      "sha256": "2e4712efd4dc74f13dcb57f27470eedfd257a4a5a49314590609c4fd32b9db81"
+    },
+    "actual_native_review_abi": {
+      "bytes": 6222,
+      "sha256": "1f3f6d9dc78dc28fde57ea80db1d1dccd2b2d426100cf1064e4e83c007f02240"
+    },
+    "actual_native_review_core": {
+      "bytes": 20649,
+      "sha256": "180bc2f2690fef832074730fee18b040538c088f8b73117a25d321e61d78c686"
+    },
+    "actual_replay_review_abi": {
+      "bytes": 2855,
+      "sha256": "0bbdfd0fe7b3d46cffbfa8d29a94d3e37bd522730bb69e21dfc8ee4281029120"
+    },
+    "actual_replay_review_core": {
+      "bytes": 3762,
+      "sha256": "cac67d5432734f416f82373f71d35825713e4be592b577301778477a04ce352f"
+    }
+  },
+  "scope": "One Windows native positive cohort and one separate live-veto refusal. Original fixture handles and naturally empty jobs were observed separately from the no-handle census rows. WinError 87 and numeric ancestry do not prove death or identity. The second census establishes absence of the two suspect numeric PIDs at that snapshot. These cases do not establish general protection, comparative speed or successor campaign readiness. The earlier full attempt remains failed and preserved. Original evidence is retained privately.",
+  "read_only_replay_subjects": 0
+}
