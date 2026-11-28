@@ -14,3 +14,11 @@ The reconstruction uses a CRLF byte conversion only for the historical deadline 
 | `RUST-SOURCES.json` | 23 | 651406 | `e1f5d05b9914c12384da5bfeb1dc4588ec9ac75656818ace782e444d711fe675` |
 
 This package covers source input reconstruction. Toolchain provisioning, native object and ELF reproduction, guest setup, and raw execution evidence are separate. The reconstructor only reads bounded source files and writes the two checked JSON bundles.
+
+### Natural exit 124 consumer
+
+`ordinary_natural_exit_124.rs` is a build-only source fixture for the experimental ordinary API. It uses the retained Cargo package built from published source and accepts only the typed outcome `Outcome::Exited(124)`. An external exit status of 124 alone cannot distinguish that branch from a timeout. The built consumer contains the typed marker, but it has not produced a live outcome.
+
+For source/build verification, hash the fixture and compare it to the linked build summary. Check the retained crate digest, then use the existing bounded release, locked, offline x86-64 GNU/Linux build with Rust 1.88 and the pinned GCC 13.3.0/GNU toolchain. The reviewed cross-build used an ARM64 GNU/Linux compiler host and one Cargo build job. In the same source scope, build the feature-enabled library plus its co-produced helper and link the fixture as a downstream consumer. Verify both ELF digests, x86-64 class, no dynamic interpreter, non-executable stack, and the exact typed marker as data. The reported ELF hashes identify the observed build; differences in build environments or link paths require their own receipt. Keep compiler output and the original process-tree receipt. Do not execute an artifact to reproduce this build evidence.
+
+The earlier admitted native deadline and owner-loss cases are separate. This fixture needs an explicitly enrolled caller and independent retained process/cgroup evidence before any native natural-exit claim. See [build-only evidence](../../../../evidence/linux-ordinary-public-api-natural124-build-20261128-summary.json).

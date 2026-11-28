@@ -1,0 +1,89 @@
+{
+  "schema": "ptg-linux-ordinary-natural124-build-evidence-v1",
+  "scope": "Compile-only public API consumer and matching per-invocation helper from the retained Cargo package built from published source for x86-64 GNU/Linux. Target images were not executed.",
+  "published_crate_source": "d978c327b0e1cc6f0f226fec007b3868a0eac7a1",
+  "feature": "linux-ordinary-library",
+  "build": {
+    "host_arch": "aarch64",
+    "target": "x86_64-unknown-linux-gnu",
+    "rust_version": "1.88.0",
+    "target_gcc": "13.3.0",
+    "cargo_release": true,
+    "offline": true,
+    "locked": true,
+    "jobs": 1,
+    "extracted_package_members": 150,
+    "package_before_after_equal": true,
+    "worker_joined": true,
+    "native_commands_joined_zero": 48,
+    "retained_command_streams": 96,
+    "outer_seconds": 270,
+    "actual_wall_seconds": 19.0346295,
+    "outer_exit": 0,
+    "ssh_exit": 0,
+    "worker_scope_retired": true,
+    "retired_events_errno": 19
+  },
+  "pinned_inputs": {
+    "private_consumer": {
+      "bytes": 2017,
+      "sha256": "76b2d11ef0979466a6026fcd01d83ced0bb4d71afb7d345cf1003a91fe729203"
+    },
+    "consumer_source_destination": "tests/linux/ordinary/implementation-007/reproduction/ordinary_natural_exit_124.rs",
+    "crate": {
+      "bytes": 624770,
+      "sha256": "400064f9f72db835c35c696080b350a1acad0375110d36c56413ccd54c049910"
+    }
+  },
+  "emitted": {
+    "consumer": {
+      "bytes": 2933576,
+      "sha256": "9fdc1948e43cc95266ba3b862c69c1e9853ce4687bd908ce23e25c4db444dbd6",
+      "gnu_stack_flags": 6,
+      "elf_type": 2,
+      "interpreter_present": false
+    },
+    "co_produced_helper": {
+      "bytes": 1215344,
+      "sha256": "9062c1bce67a3120930a9dda227626fcf3e6d8c5807bc34d3ae5565d7aa26654",
+      "gnu_stack_flags": 6,
+      "elf_type": 2,
+      "interpreter_present": false
+    },
+    "exact_typed_success_marker_embedded": true,
+    "success_marker": "PTG220_PUBLIC_OUTCOME={\"outcome\":\"exited\",\"status\":124}\n"
+  },
+  "evidence": {
+    "original": {
+      "bytes": 3830,
+      "sha256": "6903f807ef2884bd5e76fe957d31921d42d2d646e79fe642042927bf5bc5d138"
+    },
+    "selector": {
+      "bytes": 547,
+      "sha256": "cdf60dc720aa3586a6b6ba382b2735d320b744277cd7505d2feb41ee7fc8e1a6"
+    },
+    "result": {
+      "bytes": 8823609,
+      "sha256": "c0e6ace1fd34e6f7eaecf9546434da78e72b030bdd1ffdda934014a972c0efd5"
+    },
+    "seal": {
+      "bytes": 111483,
+      "sha256": "c033bfd52ab5b31c38961d68d8aed7d27919e6b179aa5cf32b6d3139777bfb67"
+    },
+    "export": {
+      "bytes": 6460794,
+      "expanded_wire_bytes": 23419845,
+      "members": 133,
+      "sha256": "95cf65e83aa7ef58bf3efdee35080f9b547535573c4341aa4c92f720457bb984"
+    },
+    "export_verified": {
+      "bytes": 20863,
+      "sha256": "7d80f545bddcc51011a551fd8a124ff58236ff2f88d6021c775705194407c2da"
+    }
+  },
+  "limits": [
+    "No native observation of Exited(124), descendant settlement, or cgroup retirement by this consumer. The cgroup observation is the enclosing build scope only.",
+    "The marker is a static ELF-byte observation. It is not a captured API outcome.",
+    "No supported default Linux backend, new service, live deployment, performance, or platform-floor claim. Raw machine and route evidence is retained privately."
+  ]
+}
