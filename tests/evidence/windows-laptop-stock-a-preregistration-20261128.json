@@ -1,0 +1,53 @@
+{
+  "schema": "ptg-laptop-as-used-preregistration-v1",
+  "scope": "Prospective one-opportunity Part A on the supplied native Windows laptop with the existing four-arm protocol. This record grants no launch authority and makes no correctness or performance claim.",
+  "source": {
+    "stock_A_commit": "6d3c801057421235c18540f825d871b950418797",
+    "stock_A_executable_sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384",
+    "stock_A_executable_bytes": 826368,
+    "stock_A_raw_source_manifest_sha256": "628119d08a23c00d97cc54aeed3cca8ebb6e4518a4dcbbaf7e66dcaec11d3674",
+    "stock_A_raw_source_members": 1257,
+    "protocol_sha256": "67f14e04a8750ab9ed8e7b1ec6c3b02f22dff8a7a51774444f263672044587fe",
+    "qualification_source_forecast_sha256": "3e01b9b98d2b0f04066b3c5409b939a173e3d6896c061987ff435e930a4d507e",
+    "readiness_proposal_sha256": "6f93f0705a9dd9bcb61bd710e2bbcafbef9c0393082135c52ac25c750ca00c8d",
+    "measurement_sha256": "3353cd29375a522e6399b054235ce86b5378af043dfa3f8ca7cbd849a563a8f5",
+    "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e"
+  },
+  "populations": {
+    "campaign_population": 1940,
+    "campaign_groups": 512,
+    "floor_controls": 36,
+    "warmup_slots": 224,
+    "measured_slots": 1680,
+    "separate_pricing_rows": 54,
+    "separate_pricing_groups": 27,
+    "tail_checkpoints": 1,
+    "total_groups": 540,
+    "qualification_a_a_pairs": {
+      "relay": 60,
+      "long": 12
+    }
+  },
+  "bounds": {
+    "selected_setup_and_qualification_seconds": 1800,
+    "already_selected_seconds": 200,
+    "qualification_and_replay_seconds": 1455,
+    "planned_read_only_file_identity_seconds": 30,
+    "campaign_during_seconds": 6600,
+    "campaign_capture_guard_seconds": 6900,
+    "campaign_outer_guard_seconds": 6920,
+    "reserved_publication_seconds": 60,
+    "reserved_metadata_binding_seconds_if_needed": 30,
+    "projected_total_with_all_reservations_seconds": 1775,
+    "uncommitted_seconds": 25
+  },
+  "opportunity": "Start once at the next explicitly recorded available opportunity after verified prerequisite reviews, original same-measurement native qualification and separate Root admission. Keep the laptop as used. Do not select by load, memory, AC or result. A refusal or abort consumes the opportunity.",
+  "gates": "Preserve the two independent floors and their five percent agreement rule. Record ordinary power, RAM, load and census effects as context. Keep inherited emergency, native-resource, clock, whole-tree, output, and original-handle proof. Record each selected cap before its command and retain every failure and raw omission. File-only work has no new selected process-tree cap.",
+  "history": "The previous attempt remains failed on its existing emergency memory observation and supplies no pooled rows. The prior source-archive verification failure remains preserved. This proposal carries over no old readiness allocation and does not settle historical accounting.",
+  "status": {
+    "qualified": false,
+    "measurement_started": false,
+    "certificate": false,
+    "authorized": false
+  }
+}
