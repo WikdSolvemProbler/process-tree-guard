@@ -77,6 +77,12 @@ pub enum Outcome {
 /// signal handler or other callback that creates, reaps, or transfers child
 /// custody while this call owns it. The caller must retain the enrolled policy
 /// and descriptor context until the call returns.
+///
+/// Neither `Ok(Outcome::Unconfirmed(_))` nor `Err` alone establishes
+/// complete cleanup. In either case, keep the surrounding finite owned
+/// supervision and cleanup context until settlement is established
+/// independently. Do not retry or reuse the child-wait context merely
+/// because this call returned.
 pub unsafe fn run_manual(program: &Path, argv: &[OsString], seconds: f64) -> Result<Outcome, GuardError> {
     if !program.is_absolute() {
         return Err(GuardError("ordinary Linux requires an absolute executable path".into()));
