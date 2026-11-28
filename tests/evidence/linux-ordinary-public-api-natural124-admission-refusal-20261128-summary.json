@@ -1,0 +1,126 @@
+{
+  "schema": "ptg-linux-ordinary-natural124-resource-admission-evidence-v1",
+  "scope": "One selected functional opportunity for the experimental x86-64 GNU/Linux ordinary public API. The original preparation refused at the host resource gate before asset materialization, VM start or API execution.",
+  "disposition": {
+    "failed": true,
+    "consumed_opportunities": 1,
+    "retries": 0,
+    "assets_materialized": false,
+    "vm_booted": false,
+    "api_executed": false,
+    "original_preparation_handle_retained": true,
+    "original_preparation_joined": true,
+    "original_preparation_exit": 1,
+    "outer_exit": 1,
+    "selected_outer_seconds": 450,
+    "selected_inner_seconds": 420,
+    "outer_elapsed_seconds": 2.1233341
+  },
+  "admission": {
+    "physical": {
+      "observed_bytes": 2559188992,
+      "floor_bytes": 3221225472,
+      "passed": false
+    },
+    "global_commit": {
+      "observed_bytes": 10431672320,
+      "floor_bytes": 3221225472,
+      "passed": true
+    },
+    "destination_free": {
+      "observed_bytes": 68329132032,
+      "floor_bytes": 2147483648,
+      "passed": true
+    },
+    "observations": 1,
+    "admitted": false
+  },
+  "previous_build_only": {
+    "target": "x86_64-unknown-linux-gnu",
+    "consumer": {
+      "bytes": 2933576,
+      "sha256": "9fdc1948e43cc95266ba3b862c69c1e9853ce4687bd908ce23e25c4db444dbd6"
+    },
+    "helper": {
+      "bytes": 1215344,
+      "sha256": "9062c1bce67a3120930a9dda227626fcf3e6d8c5807bc34d3ae5565d7aa26654"
+    },
+    "typed_outcome_observed": false
+  },
+  "evidence": {
+    "superseded_forecast": {
+      "bytes": 3700,
+      "sha256": "2d6856946d467ab16d21fecf5fc99d68f759fb8650476c926f263e4394eaf896"
+    },
+    "actual_forecast": {
+      "bytes": 4716,
+      "sha256": "df031ca794a86d92599ef4efa511d2741635843069ce2c18b49201345d9c12df"
+    },
+    "seal": {
+      "bytes": 4235,
+      "sha256": "e20d2f734a6d6b93690c3ae3a7db5f2d4316503592628fc8a1409eed8f6da920"
+    },
+    "compile_only_syntax_result": {
+      "bytes": 1175,
+      "sha256": "3de98976915d58df1c3194008e7a958ab813a1610a0ad838ccd4d77d43f5842a"
+    },
+    "admission_sample": {
+      "bytes": 662,
+      "sha256": "8ef7fc36f8c76206f88c6d1c964a0e14d884985037c03af5b380630804d8a984"
+    },
+    "combined_result": {
+      "bytes": 942,
+      "sha256": "cb738b612f42a7d92a4eaa7fc5c4d1c720e9b9c6ae1ea3073b24d8a5dc09f3a6"
+    },
+    "preparation_stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "preparation_stderr": {
+      "bytes": 852,
+      "sha256": "5f8a25730ad942bd033f5175e533db6f64c5b7aa84939725491f8a3b12d123d4"
+    },
+    "original_outer": {
+      "bytes": 2164,
+      "sha256": "37df67e1585ed57d246d5378418c17c42927b540fc90c78f47096527b66c179d"
+    },
+    "original_selection": {
+      "bytes": 515,
+      "sha256": "102dd127ea4971cd825624d1ddbd94974fb245c7c56de2da363236fa6d77b978"
+    },
+    "independent_actual_reviews": {
+      "core": {
+        "bytes": 6249,
+        "sha256": "c4dc5434c26171b1396a6a511dfbaa31748cd72a094d593055df61fd1b4b1b37"
+      },
+      "abi": {
+        "bytes": 4175,
+        "sha256": "fc5c230f8d61bd2d73cb991564221f65db4862e166483e32a06bfe1de177e2b2"
+      }
+    },
+    "syntax_original": {
+      "bytes": 2407,
+      "sha256": "c519da298c5e6d4204021ef0f72345afa6099292a18391a35268665857322443"
+    },
+    "syntax_selection": {
+      "bytes": 518,
+      "sha256": "41752a1e687819b1b33a459afe35d351f2e5330f4c981ae6ec002f5b2fa736e0"
+    },
+    "original_selection_qualification": {
+      "bytes": 487,
+      "sha256": "4c91fabe251f98759330cc24f93232a87421152ba518c376610abea5b23c5601"
+    }
+  },
+  "limits": [
+    "Caps record selected deadlines rather than observed wall time.",
+    "The resource observation establishes the refusal only. It does not identify the cause of available memory, future eligibility, or performance.",
+    "Prior private drafts and all actual observations are retained. No default Linux, broader lifecycle, or platform qualification follows.",
+    "Exact raw records are retained privately. Public digests and independent reviews do not make this reproducible runtime evidence or a completed benchmark package."
+  ],
+  "syntax_check": {
+    "roles_compiled": 6,
+    "roles_executed": 0,
+    "outer_exit": 0,
+    "outer_elapsed_seconds": 1.1521785
+  }
+}
