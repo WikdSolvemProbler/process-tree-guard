@@ -123,15 +123,17 @@ def validate_census(rounds, *, phase, requested_ns, observer_pid, worker_identit
         require(len(rounds) == 1, "replacement attempted after a clear first census")
         return {"decision": "admit", "replacement_pid": None, "ancestry_admissions": admissions}
 
-    require(phase == "during" and len(blockers) == 1, "first census contains a veto")
-    row = blockers[0]
-    pid = row["pid"]
-    require(set(row) == OPEN_ERROR_KEYS and row["state"] == "membership_unverified"
-            and row["error"] == "OSError" and row["operation"] == "open_process"
-            and row["handle_acquired"] is False and type(row["winerror"]) is int
-            and row["winerror"] == 87 and type(row["reason"]) is str and bool(row["reason"])
-            and row["name"] not in compilers and pid not in roles | {worker_identity["pid"]},
-            "first census veto does not permit replacement")
+    require(phase == "during", "first census contains a veto")
+    pids = []
+    for row in blockers:
+        pid = row["pid"]
+        require(set(row) == OPEN_ERROR_KEYS and row["state"] == "membership_unverified"
+                and row["error"] == "OSError" and row["operation"] == "open_process"
+                and row["handle_acquired"] is False and type(row["winerror"]) is int
+                and row["winerror"] == 87 and type(row["reason"]) is str and bool(row["reason"])
+                and row["name"] not in compilers and pid not in roles | {worker_identity["pid"]},
+                "first census veto does not permit replacement")
+        pids.append(pid)
     decision = "replacement_required"
     if len(rounds) == 2:
         second = rounds[1]
@@ -139,7 +141,8 @@ def validate_census(rounds, *, phase, requested_ns, observer_pid, worker_identit
         require(first["finished_ns"] <= second["begin_ns"]
                 and first["snapshot_upper_ticks"] <= second["snapshot_upper_ticks"],
                 "replacement census clocks overlap or reverse")
-        require(pid not in second_pids, "unverified PID is present in replacement snapshot")
+        require(not second_pids.intersection(pids), "unverified PID is present in replacement snapshot")
         require(not second_blockers, "replacement census contains a veto")
         decision = "admit"
-    return {"decision": decision, "replacement_pid": pid, "ancestry_admissions": admissions}
+    target = {"replacement_pid": pids[0]} if len(pids) == 1 else {"replacement_pids": sorted(pids)}
+    return {"decision": decision, **target, "ancestry_admissions": admissions}

@@ -1,0 +1,102 @@
+{
+  "schema": "ptg-laptop-stock-a-failed-part-a-summary-v1",
+  "status": "failed_incomplete",
+  "scope": "One first-opportunity native Windows Part A attempt on the laptop as used, using the prospectively preregistered stock A image and unchanged four-arm campaign.",
+  "sources": {
+    "preregistration_commit": "0b5557d4069781948ab6144f62f62c98b9f9a654",
+    "stock_A_commit": "6d3c801057421235c18540f825d871b950418797",
+    "stock_A_sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+  },
+  "outcome": {
+    "attempts": 1,
+    "relaunched": false,
+    "opportunity_consumed": true,
+    "outer_exit": 1,
+    "retained_primary_exit": 1,
+    "accepted": false,
+    "duration_seconds": 424.4224491,
+    "planned_population": 1940,
+    "settled": 248,
+    "control_slots": 36,
+    "warmup_slots": 212,
+    "measured_slots": 0,
+    "pricing_rows": 0,
+    "comparison": "Unavailable"
+  },
+  "failure": {
+    "last_settled_group": 88,
+    "first_rejected_group": 89,
+    "rejected_before_group_launch": true,
+    "first_census_rounds_recorded": 1,
+    "unverified_snapshot_entries": 20,
+    "operation": "OpenProcess",
+    "winerror": 87,
+    "acquired_handles_for_those_entries": 0,
+    "replacement_snapshot_taken": false,
+    "policy": "The existing rule permits one independently eligible unresolved row before requesting a replacement. The number of unresolved rows made this barrier ineligible.",
+    "limits": "The error and numeric snapshot identifiers establish neither death, membership nor process generation. The expected enclosing role was separately verified and allowed. No later observation replaces the failed boundary."
+  },
+  "last_settled_warmup": {
+    "arm": "nuewframe",
+    "kind": "scale",
+    "observed_outcome": "descendant-survived",
+    "owned_slot_job_before_forced_harness_drain": 144,
+    "owned_slot_job_after_forced_harness_drain": 0,
+    "product_cleanup_credit": false,
+    "ranking_credit": false
+  },
+  "phase_abort": {
+    "owned_phase_job_active_before": 1,
+    "owned_phase_job_active_after": 0,
+    "forced": true,
+    "harness_cleanup_only": true
+  },
+  "readiness_accounting": {
+    "selected_seconds_already_spent": 1775,
+    "original_ceiling_seconds": 1800,
+    "uncommitted_at_original_admission": 25,
+    "carryover": false
+  },
+  "limits": [
+    "A warmup classification is retained as an observation and supplies no competitive ranking or acquired product-cleanup credit. There are no measured or pricing rows, no pooling, and no score.",
+    "Raw operational records remain private. Public hashes identify the preserved originals; process identities, snapshots, commands, paths, account and machine metadata are omitted."
+  ],
+  "evidence": {
+    "original": {
+      "bytes": 3088,
+      "sha256": "aea786c7f1ecc4e9a85db6d45191760577a431421544603f03dd4ba578ddfd6e"
+    },
+    "selection": {
+      "bytes": 284,
+      "sha256": "3036414b86b1f3f63ac0e03ac117b89bb273ad335f6d4481dbc3c4fab2b5a4b0"
+    },
+    "private_partial": {
+      "bytes": 852,
+      "sha256": "489904dd9e2228c81e66d49a1bcb2ba248a510e0f0417dbd9786a6aa9ffec925"
+    },
+    "independent_actual": {
+      "bytes": 86558,
+      "sha256": "4df80c2ea2f9958a9839f4d70acf38a71b31de67170470437592881bf1edda50"
+    },
+    "raw_inventory": {
+      "bytes": 2322895,
+      "sha256": "fd55276cfcc372b1c46e31e2318c5fd21488811aeffd0b47a021f28b6acbff6a"
+    },
+    "raw_worker": {
+      "bytes": 104992,
+      "sha256": "a9a392536f58a1ff62fbb34f58dd159f45cc3a5212aaec5acdae502eaeae3833"
+    },
+    "terminal": {
+      "bytes": 439,
+      "sha256": "d08dc8531cc89c1cb6812d20090e9189427438e4278947bc6c55c1de29036bc1"
+    },
+    "ready_manifest": {
+      "bytes": 16941,
+      "sha256": "0ce7154c12179de0dba19431c6109f777d24793cda831df6db2f30f2485648db"
+    },
+    "preregistration": {
+      "bytes": 3122,
+      "sha256": "5fc7c2cf29e8ded1fbf28290ae747fd7ffe51dde8b65fe0b1d3da72d251e4e36"
+    }
+  }
+}

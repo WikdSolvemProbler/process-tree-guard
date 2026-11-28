@@ -87,7 +87,8 @@ class CensusTests(unittest.TestCase):
         first["entries"].append({key: another[key] for key in ("pid", "parent_pid", "name")})
         first["rows"].append(another)
         first["entry_count"] += 1
-        with self.assertRaisesRegex(ValueError, "first census contains a veto"):
+        another["winerror"] = 5
+        with self.assertRaisesRegex(ValueError, "first census veto does not permit replacement"):
             validate_census([first, second], **arguments)
         arguments, first, second = fixture()
         veto = dict(second["rows"][-1], image_sha256="a" * 64,
@@ -97,6 +98,57 @@ class CensusTests(unittest.TestCase):
         first["entry_count"] += 1
         with self.assertRaises(ValueError):
             validate_census([first, second], **arguments)
+
+    def test_plural_replacement_requires_all_eligible_and_all_absent(self):
+        arguments, first, second = fixture()
+        entries = ("pid", "parent_pid", "name")
+        unknown = dict(first["rows"][-1], pid=51)
+        first["entries"].append({key: unknown[key] for key in entries})
+        first["rows"].append(unknown)
+        first["entry_count"] += 1
+        saved = deepcopy(first)
+
+        initial = validate_census([first], **arguments)
+        self.assertEqual(initial["decision"], "replacement_required")
+        self.assertEqual(initial["replacement_pids"], [50, 51])
+        self.assertNotIn("replacement_pid", initial)
+        settled = validate_census([first, second], **arguments)
+        self.assertEqual(settled["decision"], "admit")
+        self.assertEqual(settled["replacement_pids"], [50, 51])
+        self.assertEqual(first, saved)
+
+        for change in ("still present under irrelevant name", "new unknown", "known external",
+                       "incomplete", "late", "reversed clocks", "worker generation"):
+            with self.subTest(change=change):
+                bad = deepcopy(second)
+                if change == "still present under irrelevant name":
+                    bad["entries"].append(dict(pid=51, parent_pid=0, name="new.exe"))
+                    bad["entry_count"] += 1
+                elif change == "new unknown":
+                    row = dict(unknown, pid=99, snapshot_upper_ticks=110)
+                    bad["entries"].append({key: row[key] for key in entries})
+                    bad["rows"].append(row)
+                    bad["entry_count"] += 1
+                elif change == "known external":
+                    bad["rows"][-1].update(state="pinned_workload_outside_job", image_sha256="a" * 64)
+                elif change == "incomplete":
+                    bad["end_error"] = 5
+                elif change == "late":
+                    bad["finished_ns"] = 1_000_000_101
+                elif change == "reversed clocks":
+                    bad["begin_ns"] = first["finished_ns"] - 1
+                else:
+                    bad["rows"][2]["created_ticks"] -= 1
+                with self.assertRaises(ValueError):
+                    validate_census([first, bad], **arguments)
+
+        for error in ({"winerror": 5}, {"operation": "job_membership"}, {"handle_acquired": True}):
+            with self.subTest(error=error):
+                bad = deepcopy(first)
+                bad["rows"][-1].update(error)
+                with self.assertRaises(ValueError):
+                    validate_census([bad, second], **arguments)
+        self.assertEqual(first, saved)
 
     def test_incomplete_replacement_or_reused_pid_stops(self):
         arguments, first, second = fixture()
