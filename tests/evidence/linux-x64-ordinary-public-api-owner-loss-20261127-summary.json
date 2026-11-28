@@ -1,0 +1,169 @@
+{
+  "schema": "ptg-experimental-linux-ordinary-public-api-owner-loss-case-v1",
+  "scope": "One separately enrolled x86-64 GNU/Linux case in a disposable offline WHPX VM. The fixture calls the unsafe experimental public Manual API with its exact co-produced helper.",
+  "source_and_artifacts": {
+    "public_git_commit": "d978c327b0e1cc6f0f226fec007b3868a0eac7a1",
+    "cargo_feature": "linux-ordinary-library",
+    "public_compile_only_evidence": {
+      "bytes": 5459,
+      "sha256": "8a1d44f3019c98bf6ae176039720ae756336ebd66e1fa3314ddd90cc52d9fba6"
+    },
+    "consumer_elf": {
+      "bytes": 2932024,
+      "sha256": "dbbbf58f847e4c81b95009a22e284d1c82df7c3a43424cb62b9a111ee5c695f2"
+    },
+    "co_produced_helper_elf": {
+      "bytes": 1215256,
+      "sha256": "87ba35db7326f71cd6a62dce2c3ebac880159c2690a6555478bbf49336857a25"
+    },
+    "guest_witness": {
+      "bytes": 64718,
+      "sha256": "169d91d8aa988318eed1aaf40322e324ac5fc886beeca3df4eed6e92d68654dc"
+    },
+    "host_reader": {
+      "bytes": 29731,
+      "sha256": "58a2cd52e4bef69274505589bbee739b7e933a352efbec2670dbd83a94d0376c"
+    }
+  },
+  "original": {
+    "attempts": 1,
+    "outer_native_exit": 0,
+    "outer_wall_seconds": 192.1480465,
+    "inner_guard_joined_exit": 0,
+    "emulator_original_joined_exit": 0,
+    "forced_host_stop": false,
+    "retry": false,
+    "natural_guest_poweroff": true,
+    "emulator_diagnostic": "The original emulator stderr contains one interrupt-vector-zero warning."
+  },
+  "native_case": {
+    "deliberate_stimulus": "The subreaper observer sent one SIGKILL through the held pidfd of the original Manual owner. It sent no signal to the caller or descendants.",
+    "original_owner_wait": {
+      "code": "CLD_KILLED",
+      "signal": 9
+    },
+    "adopted_original_caller_wait": {
+      "code": "CLD_EXITED",
+      "exit": 126
+    },
+    "typed_public_outcome": "OwnerEnded",
+    "first_original_pidfd_polls": [
+      "POLLIN",
+      "POLLIN",
+      "POLLIN",
+      "POLLIN",
+      "POLLIN"
+    ],
+    "held_containment_leaf": {
+      "initial_populated": 1,
+      "terminal_event_errno": 19,
+      "terminal_event": "ENODEV",
+      "name_absent": true
+    },
+    "protected_parent": "The witness verified the same protected parent cgroup was empty and removed it, then retired the temporary fixture deployment.",
+    "fallback": {
+      "absolute_offset_seconds": 45,
+      "disarm_reserve_seconds": 8,
+      "ever_fired": false,
+      "verified_disarmed": true,
+      "cleanup_assistance_used": false
+    },
+    "external_boottime_from_gate_ns": {
+      "owner_signal_issue_bracket_start": 142358200,
+      "original_owner_join": 143354600,
+      "adopted_original_caller_join": 144619200,
+      "containment_and_fixture_retired": 154308200,
+      "observed_gate_to_retirement_ms": 154.3082
+    },
+    "external_case_window_seconds": 12
+  },
+  "serial": {
+    "transcript": {
+      "bytes": 12158,
+      "sha256": "bfa0066c77e986364f3ea5e9c0327576c7dceb42dacdc6252611cb0e52c237ce"
+    },
+    "ordered_protocol_rows": 24,
+    "wrapper_exit": 0,
+    "one_terminal_commit_after_wrapper": true,
+    "exact_kernel_powerdown_after_commit": true
+  },
+  "historical_separate_case": {
+    "scope": "Earlier public Manual deadline case, separate from this owner-loss run.",
+    "published_deadline_case_evidence": {
+      "bytes": 8616,
+      "sha256": "000be00e1a8706e82c45f7ff34e0059d61cbafc462cace426a2f6c41ad4ef800"
+    },
+    "preceding_framing_original": {
+      "overall": "failed",
+      "outer_exit": 1,
+      "emulator_exit": 0,
+      "failure_stage": "host serial framing",
+      "exact_original": {
+        "bytes": 1308,
+        "sha256": "787b73e15c2634b4cf9c8e31aeada57a63369547162c316501f803b5a8e6156f"
+      },
+      "raw_serial": {
+        "bytes": 111004,
+        "sha256": "1230c0951c52871a3d7b10fdf02b5b8f9cdee1a98db6e930897ef3c35b8d093f"
+      }
+    },
+    "disposition": "The historical host-framing failure remains failed. This owner-loss case neither reran nor reclassified it."
+  },
+  "private_evidence_digests": {
+    "boot_plan": {
+      "bytes": 11612,
+      "sha256": "f1fda34791bc7c8a73b20bb327f48fc52b6824e97c85ae80b706650e915afc81"
+    },
+    "prepared_assets": {
+      "bytes": 19246,
+      "sha256": "ffe941c261aef3061a5ac8383b1f523449198929608a111cf5beaf41319dd5a1"
+    },
+    "original_materialization_event": {
+      "bytes": 1749,
+      "sha256": "ed184b71c9c4d8f12c0c5f57f6951922b3b59fd7cc9a2f71f2d6bc8e5d014efc"
+    },
+    "original_boot_event": {
+      "bytes": 1529,
+      "sha256": "7db8ac5b3cf2eff005ee0118eaba2be3352d2c59ef3ce1d59e3f5515dcbcde70"
+    },
+    "original_boot_selection": {
+      "bytes": 290,
+      "sha256": "ce5aea6870e5013da31628d1536b0fced54df5ff1785f6fecba0f51fc87e688b"
+    },
+    "original_emulator_launch": {
+      "bytes": 3115,
+      "sha256": "930d8bb39bcf58826825e5cc404a95ce4a58b07fc4822530d11a5574971a1a22"
+    },
+    "original_host_carrier": {
+      "bytes": 408,
+      "sha256": "efad565d5bf9c9e57864acc59926eabebcd688a4937920b17cb7c582d65f3a91"
+    },
+    "original_host_result": {
+      "bytes": 9709,
+      "sha256": "2e10139090258bd0b34982b60857684f6e46ce7ada3d3a91918fe4648b08dfb5"
+    },
+    "raw_serial": {
+      "bytes": 112093,
+      "sha256": "0602dd211d674a24729ac8e043e00d3fa4ce074b611ffceea2b760f60bfc95fc"
+    },
+    "original_emulator_stderr": {
+      "bytes": 187,
+      "sha256": "9b5b0b6915c70db0e62cbb6bfb56761fcd68aa8961d78c27f69e2522eb581245"
+    },
+    "independent_actual_reviews": [
+      {
+        "bytes": 4065,
+        "sha256": "5b30a4b90c90b118a1909c1b697517ae5aa7abeac990514982474a59596d35c0"
+      },
+      {
+        "bytes": 6017,
+        "sha256": "cdee2bee466bb4e5fcd236557da177d31c37012eb290c94a59103abda14bd713"
+      }
+    ]
+  },
+  "limits": [
+    "The external clock window describes this one observed owner-loss case. It does not expose an internal stop or reaping time.",
+    "This result does not qualify other modes, workloads, platforms, default Linux dispatch, general helper deployment, or performance.",
+    "Host, account, original numeric process identifiers, file paths, addresses, and wall-clock timestamps remain private."
+  ]
+}

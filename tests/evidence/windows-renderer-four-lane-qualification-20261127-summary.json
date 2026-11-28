@@ -1,0 +1,375 @@
+{
+  "schema": "ptg-windows-renderer-four-lane-functional-qualification-v1",
+  "status": "completed_functional_qualification",
+  "scope": "Controlled Windows renderer source comparison. These records qualify the selected build outputs, native unit suites, and fixed CLI cases for both arms.",
+  "source": {
+    "canonical_commit": "6d3c801057421235c18540f825d871b950418797",
+    "arms": {
+      "A": "unchanged release source at the listed commit",
+      "B": "same archived source with the three reviewed renderer postimages"
+    },
+    "changed_compilation_input_count": 3,
+    "complete_source_files_per_archive": 1257,
+    "source_before_and_after_matched": true,
+    "stock_build_plan": {
+      "bytes": 7646,
+      "sha256": "f432251475d19962ffb12428a8c2e6287cbd963114f2b80cb3f78989e4b73e46"
+    },
+    "treatment_postimage_sha256": {
+      "src_engine.rs": "31f9363c1063516b03c610873f8d3d832b998fae29e6ea45818bdb02ca0e24c1",
+      "src_engine_resolve.rs": "d9f81285f4e2218e9fcd2c7abc6921a9dac295c45c4646280a91a6c04270e535",
+      "src_engine_tests.rs": "e57cc46fe6e4b183e5a6a85805596a6d9a6d4ef207420f86815b52633dffd391"
+    }
+  },
+  "stock_release_builds": {
+    "count": 2,
+    "target": "x86_64-pc-windows-msvc",
+    "selected_cargo_features": [],
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": false,
+      "overflow_checks": false,
+      "test": false
+    },
+    "native_exit_all_zero": true,
+    "matched_toolchain_and_recorded_environment_fingerprints": true,
+    "recorded_environment_fingerprint_scopes": [
+      "Normalized UTF-16LE child-input environment block before native dispatch, after removing the per-call transport identifier.",
+      "Selected effective native build fields covering PATH, INCLUDE, LIB, LIBPATH, VC and Windows SDK/UCRT settings, selected Cargo settings, Rust compiler and linker paths, and RUSTFLAGS."
+    ],
+    "images": {
+      "A": {
+        "bytes": 826368,
+        "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+      },
+      "B": {
+        "bytes": 826880,
+        "sha256": "21cfe3f3702b14520aa8c5715cc051490bc50681505e160e6f28e4d3e4063ee5"
+      }
+    },
+    "original_digests": {
+      "A": {
+        "outer_event": {
+          "bytes": 1430,
+          "sha256": "1a58c88f83acf13a595ee30dd98fb61d2358ffe831ef27f0b11b7ac20b5f4458"
+        },
+        "root_selection": {
+          "bytes": 290,
+          "sha256": "3586938d72f276091009f098fa7ffc86ed7a3efeb796511779b416f32d32cfba"
+        },
+        "result": {
+          "bytes": 3611,
+          "sha256": "129c2151d703b52226611eac0ee1fbf8830fae605dbd7239e5e5b21b4fd4efd7"
+        }
+      },
+      "B": {
+        "outer_event": {
+          "bytes": 1430,
+          "sha256": "50fdddd0538795aef13cb126e70576fa9ad9cdb734ee9f7e0b670f5572f64aaf"
+        },
+        "root_selection": {
+          "bytes": 290,
+          "sha256": "3c91e064a7fc7247467911606de686df545d50d90006767b94707ada27eff643"
+        },
+        "result": {
+          "bytes": 4770,
+          "sha256": "84bd54a2c9f5cbc6fec1ffe42992efe7cea5c239892c9aeb36985ffed99afdf4"
+        }
+      }
+    }
+  },
+  "qualification_compiles": {
+    "count": 4,
+    "selected_cargo_features": [
+      "testkit"
+    ],
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true
+    },
+    "private_targets": true,
+    "cargo_profile_test_by_role": {
+      "unit": true,
+      "cli_harness": true,
+      "binary_peers": false
+    },
+    "x64_stock_override_scope": "On x64, the matched stock release main is supplied as an override. Cases that explicitly request Cargo-built roles, including G45 and G96, use those Cargo builds."
+  },
+  "qualification_lanes": [
+    {
+      "arm": "A",
+      "architecture": "x86_64-pc-windows-msvc",
+      "compile_native_exit": 0,
+      "fresh_cargo_executables": 8,
+      "source_manifest": {
+        "bytes": 272076,
+        "sha256": "aecb8aab4b1ae160db78e9b8b185131b85a891d6a5cf0b1d0231f2c26829c6a5"
+      },
+      "unit_native_exit": 0,
+      "library_passes": 324,
+      "nested_case_already_included": true,
+      "cli_originals": 12,
+      "cli_original_native_exit_all_zero": true,
+      "selected_cli_role": "matched stock release main",
+      "selected_cli_image": {
+        "bytes": 826368,
+        "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+      },
+      "strict_g28_assertions": 6,
+      "strict_g52_assertions_by_variant": [
+        5,
+        5
+      ],
+      "original_digests": {
+        "compile_outer": {
+          "bytes": 1422,
+          "sha256": "4eed618a1ca7f80f19482f588008922c4dc76679d1c44ecbcb600e1bf6949e28"
+        },
+        "units_outer": {
+          "bytes": 1430,
+          "sha256": "ce88505a55b0269cfbb97ae18c611b848ba1f7a40d109bc5dc0010cca3675a00"
+        },
+        "cli_outer": {
+          "bytes": 1635,
+          "sha256": "46cd55f9aa8707aeecacdd49ea44e2155ad4ae5b25b3e0176c5a8b3f26bd9ef6"
+        },
+        "full_individual_proof": {
+          "bytes": 27000,
+          "sha256": "3699946ab7f3ff81f8a2891e5b1db5f5fc013f526400f75d78bf08416a3a01fc"
+        }
+      },
+      "buffer_equality_unit_case_passed": true
+    },
+    {
+      "arm": "B",
+      "architecture": "x86_64-pc-windows-msvc",
+      "compile_native_exit": 0,
+      "fresh_cargo_executables": 8,
+      "source_manifest": {
+        "bytes": 272076,
+        "sha256": "c01493ae0dbf630ea099b53fc75ecfb2629a035aeb02219be6ea5f67728f62e6"
+      },
+      "unit_native_exit": 0,
+      "library_passes": 324,
+      "nested_case_already_included": true,
+      "cli_originals": 12,
+      "cli_original_native_exit_all_zero": true,
+      "selected_cli_role": "matched stock release main",
+      "selected_cli_image": {
+        "bytes": 826880,
+        "sha256": "21cfe3f3702b14520aa8c5715cc051490bc50681505e160e6f28e4d3e4063ee5"
+      },
+      "strict_g28_assertions": 6,
+      "strict_g52_assertions_by_variant": [
+        5,
+        5
+      ],
+      "original_digests": {
+        "compile_outer": {
+          "bytes": 1624,
+          "sha256": "b1a8fcec99773bb801dd642f058a5015b145e91bb9af37eff2d5a82c2d0e6362"
+        },
+        "units_outer": {
+          "bytes": 1630,
+          "sha256": "994ad958221c0e6ec7c64c67330d7995d5fa3e4cefc27a7acdf73133383b8a07"
+        },
+        "cli_outer": {
+          "bytes": 1634,
+          "sha256": "1b8815f9e90ac59276501bacb8fe0870dc9d2d3f02cefc123b6bab8e7f833f80"
+        },
+        "full_individual_proof": {
+          "bytes": 26761,
+          "sha256": "17b038310fc9c01c843d471ee28a536d84af38c87d1dd0426632a95e522b814c"
+        }
+      },
+      "buffer_equality_unit_case_passed": true
+    },
+    {
+      "arm": "A",
+      "architecture": "i686-pc-windows-msvc",
+      "compile_native_exit": 0,
+      "fresh_cargo_executables": 8,
+      "source_manifest": {
+        "bytes": 272076,
+        "sha256": "aecb8aab4b1ae160db78e9b8b185131b85a891d6a5cf0b1d0231f2c26829c6a5"
+      },
+      "unit_native_exit": 0,
+      "library_passes": 324,
+      "nested_case_already_included": true,
+      "cli_originals": 5,
+      "cli_original_native_exit_all_zero": true,
+      "selected_cli_role": "same-arm i686 Cargo dev/testkit main",
+      "selected_cli_image": {
+        "bytes": 2496000,
+        "sha256": "a48f6e7076e9f533e3df9220707f80676b3cf471c4a86c2f975f7acd50be3571"
+      },
+      "strict_g28_assertions": 6,
+      "strict_g52_assertions_by_variant": [
+        5,
+        5
+      ],
+      "original_digests": {
+        "compile_outer": {
+          "bytes": 1624,
+          "sha256": "1051d9b3b0856fc000f04284ce8370912de3f1e0dcf699f180d5691696174c51"
+        },
+        "units_outer": {
+          "bytes": 1632,
+          "sha256": "d4aebeb368bb07b51dc83528d7ca7c21a4882ba96d5d611a06aff046612b11a2"
+        },
+        "cli_outer": {
+          "bytes": 1632,
+          "sha256": "82410eeb64c22baed07414a93ac8d56c61a3996aa30cdb6dcc93f31ab18f31d5"
+        },
+        "full_individual_proof": {
+          "bytes": 16656,
+          "sha256": "ef4c81ddb6058c7b99ddad33050757a339573a1cc1f24bc99811f4f5fa66f265"
+        }
+      },
+      "buffer_equality_unit_case_passed": true
+    },
+    {
+      "arm": "B",
+      "architecture": "i686-pc-windows-msvc",
+      "compile_native_exit": 0,
+      "fresh_cargo_executables": 8,
+      "source_manifest": {
+        "bytes": 272076,
+        "sha256": "c01493ae0dbf630ea099b53fc75ecfb2629a035aeb02219be6ea5f67728f62e6"
+      },
+      "unit_native_exit": 0,
+      "library_passes": 324,
+      "nested_case_already_included": true,
+      "cli_originals": 5,
+      "cli_original_native_exit_all_zero": true,
+      "selected_cli_role": "same-arm i686 Cargo dev/testkit main",
+      "selected_cli_image": {
+        "bytes": 2500608,
+        "sha256": "25f6376baa6d6b73fcd5ec11f6676da54cb406499577114fcdfb83fa93ae761c"
+      },
+      "strict_g28_assertions": 6,
+      "strict_g52_assertions_by_variant": [
+        5,
+        5
+      ],
+      "original_digests": {
+        "compile_outer": {
+          "bytes": 1624,
+          "sha256": "3810dbbeaf386795084319a4502bb650c53f2e7e0efc599f430319c852601d46"
+        },
+        "units_outer": {
+          "bytes": 1632,
+          "sha256": "d663c11facc39fa70917497188bac77600368447fd4f490ba1f8e75581ad88c7"
+        },
+        "cli_outer": {
+          "bytes": 1632,
+          "sha256": "1b841759f977fc0fe167fb510ce4ebe4cf1a21846840ff9b3c38c38e771b1009"
+        },
+        "full_individual_proof": {
+          "bytes": 16656,
+          "sha256": "253675912c75e8a05c03959c2806043b4aed4553679e4cbfecd15f0e588c5e12"
+        }
+      },
+      "buffer_equality_unit_case_passed": true
+    }
+  ],
+  "offline_replay": {
+    "native_exit": 0,
+    "total_wall_seconds": 2.9299842,
+    "stock_originals": 2,
+    "compile_originals": 4,
+    "unit_originals": 4,
+    "fixed_cli_originals": 34,
+    "new_subject_processes": 0,
+    "unified_combined_capture": true,
+    "separately_captured_native_stdout": false,
+    "separately_captured_native_stderr": false,
+    "original_event": {
+      "bytes": 9067,
+      "sha256": "363d76ea0481e169c49685b10031ce10e9489cafee7ba8f9c237c67e57c1da75"
+    },
+    "root_selection": {
+      "bytes": 290,
+      "sha256": "2fe73b6091455cf23d321f9e300381b354e6e299a1251cff8e14e60836bd9a1a"
+    },
+    "combined_output": {
+      "bytes": 622,
+      "sha256": "2cd94a2713d1a3fd05617e9ec3f056cd3cbe66d2f574bc844a54b41551e62730"
+    },
+    "output_record": {
+      "bytes": 998,
+      "sha256": "d6b488c2e3259b9a1bc660aab4fa9258beb5adacfe3b81e82ca7df7374f9c52e"
+    },
+    "full_actual_review": {
+      "bytes": 3958,
+      "sha256": "d8368ae63296ee3e359f789d3dcabdf0a5ae9f886c319eb2349fe2f5ff472a3a"
+    },
+    "gate_source": {
+      "bytes": 25780,
+      "sha256": "43e9fff8875300732ad36655f2568e580773f29fec0915b47e6ca66a7ba32026"
+    },
+    "exact_independent_evidence_originals": {
+      "core": {
+        "bytes": 32183,
+        "sha256": "67d9d3c0d1d97b0b99f0ecf90ece098d96725aeb70aa5206362d3148f53fca44"
+      },
+      "abi": {
+        "bytes": 32183,
+        "sha256": "67d9d3c0d1d97b0b99f0ecf90ece098d96725aeb70aa5206362d3148f53fca44"
+      },
+      "byte_equal": true
+    },
+    "manifest_scope": "Each original lane is bound to the manifest it used. The two manifests for each arm contain identical bytes."
+  },
+  "file_only_custody": {
+    "status": "completed_file_only_custody",
+    "order": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "retired_slots": 4,
+    "sharing_violation_32_controls": 8,
+    "original_masters_exact_links": 2,
+    "working_files_exact_links": 1,
+    "no_subject_processes_started": true,
+    "current_proof": {
+      "outer_event": {
+        "bytes": 1653,
+        "sha256": "2488f8d060e55150bb7d21875139b17e0c61bb8bb8a9730b8bc3aa1b29348431"
+      },
+      "witness": {
+        "bytes": 9438,
+        "sha256": "d1820c1b7f84833d767eb1f5239cc1ca9820cedcc6d3fb34a497479b7a63be7a"
+      },
+      "full_actual_review": {
+        "bytes": 7177,
+        "sha256": "7761da5cb5f4b9ba7cad435c8a405c6785fea981cceb7983afd932532d113cd5"
+      }
+    },
+    "preserved_earlier_refusal": {
+      "reason": "multiple hard links refused",
+      "outer_native_exit": 1,
+      "witness_native_exit": 1,
+      "slots_unattempted": 4,
+      "original_event": {
+        "bytes": 2241,
+        "sha256": "5d9ceed7c44d8bed0c07a79709205de0c1a94906e7fa75f0f82c9cfa1f145b10"
+      },
+      "witness": {
+        "bytes": 831,
+        "sha256": "6c8c18f723f8a77c26d8cf5d7e3c7379dc5a9d8d5a513e95c180d478fe6ab58b"
+      }
+    }
+  },
+  "limits": {
+    "performance_samples": 0,
+    "timing_started": false,
+    "renderer_promotion_authorized": false,
+    "qualification_applies_only_to_listed_matrix": true
+  }
+}
