@@ -1,0 +1,286 @@
+{
+  "schema": "ptg-windows-stock-manual-stage-trace-summary-v1",
+  "scope": "One fixed four-slot Windows x64 stock CLI stage-trace diagnostic. Arms A and B reuse the qualified stock images. A remains selected.",
+  "arms": {
+    "A": {
+      "bytes": 826368,
+      "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+    },
+    "B": {
+      "bytes": 826880,
+      "sha256": "21cfe3f3702b14520aa8c5715cc051490bc50681505e160e6f28e4d3e4063ee5"
+    }
+  },
+  "admission": {
+    "order": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "original_outer_exit": 0,
+    "original_inner_exit": 0,
+    "held_original_native_exits": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "natural_empty_jobs": 4,
+    "verified_retirements": 4,
+    "exact_fixture_stdout": 4,
+    "exact_trace_rows_each": 7,
+    "outer_seconds": 300,
+    "inner_seconds": 180,
+    "slot_seconds": 3,
+    "fixture_timeout_seconds": 2,
+    "deferred_writer_grace_ms": 500
+  },
+  "trace": {
+    "stage_order": [
+      "start",
+      "run",
+      "resolved executable",
+      "job ready, owners opened",
+      "child started",
+      "child finished",
+      "job empty"
+    ],
+    "decimal_tick_ms": 0.01,
+    "strict_nomination_margin_ticks": 2,
+    "visible_interval_candidate": [
+      "child started",
+      "child finished"
+    ],
+    "observations": [
+      {
+        "slot": 1,
+        "arm": "A",
+        "stage_ticks": [
+          0,
+          7,
+          7,
+          16,
+          549,
+          1349,
+          1353
+        ],
+        "interval_ticks": [
+          7,
+          0,
+          9,
+          533,
+          800,
+          4
+        ]
+      },
+      {
+        "slot": 2,
+        "arm": "B",
+        "stage_ticks": [
+          0,
+          8,
+          9,
+          19,
+          622,
+          1263,
+          1265
+        ],
+        "interval_ticks": [
+          8,
+          1,
+          10,
+          603,
+          641,
+          2
+        ]
+      },
+      {
+        "slot": 3,
+        "arm": "B",
+        "stage_ticks": [
+          0,
+          4,
+          5,
+          12,
+          454,
+          1098,
+          1099
+        ],
+        "interval_ticks": [
+          4,
+          1,
+          7,
+          442,
+          644,
+          1
+        ]
+      },
+      {
+        "slot": 4,
+        "arm": "A",
+        "stage_ticks": [
+          0,
+          5,
+          5,
+          13,
+          631,
+          1261,
+          1263
+        ],
+        "interval_ticks": [
+          5,
+          0,
+          8,
+          618,
+          630,
+          2
+        ]
+      }
+    ]
+  },
+  "interpretation": "The interval from child started to child finished was the largest visible interval in all four traced originals, by more than the prespecified two-tick rounding margin. This locates a visible interval for follow-up. The interval can include child startup, execution, scheduling, and observation delays.",
+  "limits": [
+    "The trace starts after any unobserved native loader or Rust startup work. It is buffered and written through the stock deferred writer after cleanup.",
+    "These four instrumented records supply no score, stock speed comparison, parity inference, historical cause, or renderer CPU attribution.",
+    "Original identities were bound through the held process and original redirect. Raw operational evidence remains private. Public digests identify the retained evidence without exposing identities or paths."
+  ],
+  "preceding_preparations": [
+    {
+      "revision": 1,
+      "executed": false,
+      "disposition": "Withheld because the receipt reader admitted uniform CRLF and numeric type aliases."
+    },
+    {
+      "revision": 2,
+      "executed": false,
+      "disposition": "Withheld because the durable per-slot trace mirror still used structural equality without an explicit type check."
+    }
+  ],
+  "evidence": {
+    "manifest": {
+      "bytes": 21340,
+      "sha256": "12d21f124e5c78a2d8be74c5babd8eaf7d3890a1643cbddf76a1250f4a1d98fe"
+    },
+    "forecast": {
+      "bytes": 6101,
+      "sha256": "a243acda627784e58ac725bab1b4252bf77867f9bb0d025972ce08463fe4ffdd"
+    },
+    "actual_original": {
+      "bytes": 2345,
+      "sha256": "c2491cc5b72650aa387b38d4d5444b591dbfa7672f1869dfb1a16e6bb699b0d1"
+    },
+    "original_selector": {
+      "bytes": 290,
+      "sha256": "a2f58423b9e99cf606a2b6d97a1d4ff1c0dc33f031cd1e7c7291423eb5fa6de7"
+    },
+    "controller_result": {
+      "bytes": 139646,
+      "sha256": "d51b8be30fc57c4fd75835b1915e5df8152e895deff7793fd13d4410eefb8df4"
+    },
+    "carrier_result": {
+      "bytes": 917,
+      "sha256": "2c832e848ab2685a98e628f58299b0e0d8f84f2f0ba170cf323c7642f0f993a5"
+    },
+    "trace_replay_result": {
+      "bytes": 3274,
+      "sha256": "131133aa76de2e37ab085379e92ccf1d99ec34be458a749d710427e3842e5b91"
+    },
+    "controls_result": {
+      "bytes": 2642,
+      "sha256": "3cbf78d73fa7367ae5b7851dba8a8aec15955a7bc4f2bc4178707cbd4d313ce4"
+    },
+    "controls_combined": {
+      "bytes": 66,
+      "sha256": "e2bc656f56f7c6dc5e3cb894c88a7070db7870d830d6ae5b561912bdb0a4a5f5"
+    },
+    "parser": {
+      "bytes": 3035,
+      "sha256": "2a1d52156d8d2196e61baf38296ae2c372e8945956cacdc8565eec4967fca6a9"
+    },
+    "plan": {
+      "bytes": 491,
+      "sha256": "06cd2a84cc514d6ea465924ca3ad0404d3bc7b82e4a3df4c839bbcc7146a5034"
+    },
+    "blocked_source_001": {
+      "bytes": 8256,
+      "sha256": "2311b5485e5d9ada59763bf2147e682878289cc69047c3643bd8af2b7aa3c9a1"
+    },
+    "blocked_source_002": {
+      "bytes": 9273,
+      "sha256": "cba301118b4b0df8da9039450009dfb6f898244d0bacaec29584036e34ffa6bc"
+    },
+    "raw_slots": {
+      "1": {
+        "stdout": {
+          "bytes": 55,
+          "sha256": "3e5373939b40f3456b5e52fc73e00d390b1f09f0795206472b090d83c2b894b8"
+        },
+        "trace": {
+          "bytes": 318,
+          "sha256": "4302da121a6cab6506e171fea2a17ad0f12270a8ada916973a4871c129e00747"
+        },
+        "slot_receipt": {
+          "bytes": 8774,
+          "sha256": "99b16bd00674597df017f91047c1fae41f0845a2a7baa3a01522641cf2dc5a6f"
+        }
+      },
+      "2": {
+        "stdout": {
+          "bytes": 55,
+          "sha256": "3e5373939b40f3456b5e52fc73e00d390b1f09f0795206472b090d83c2b894b8"
+        },
+        "trace": {
+          "bytes": 318,
+          "sha256": "b92adbef1d7f42ab1970ec00b9ebd8e7c112c052e9baaff645564aeb4e69e6fe"
+        },
+        "slot_receipt": {
+          "bytes": 8775,
+          "sha256": "c74b8b6ee19bcb585dddc211b5cd6e2b970778b218585e2531ed5a40d5087e73"
+        }
+      },
+      "3": {
+        "stdout": {
+          "bytes": 55,
+          "sha256": "674fda9245fe9a9cefa7134f21ece5c9183675d2d8e2ac4da655a744e9c6303d"
+        },
+        "trace": {
+          "bytes": 318,
+          "sha256": "3e5c8fa2f67e0a4eb533b5ca712890cd75cbc4d65f56d860d1ad3e1c39fb2c30"
+        },
+        "slot_receipt": {
+          "bytes": 8743,
+          "sha256": "77a9f7dbfce58cabe89a92305f1e23c80623cef33d11d2191bc9a37e2343b571"
+        }
+      },
+      "4": {
+        "stdout": {
+          "bytes": 55,
+          "sha256": "674fda9245fe9a9cefa7134f21ece5c9183675d2d8e2ac4da655a744e9c6303d"
+        },
+        "trace": {
+          "bytes": 318,
+          "sha256": "8185c79b6058015daeb68541723b441ff93b694976bcc673ea97c9355c0b20b3"
+        },
+        "slot_receipt": {
+          "bytes": 8773,
+          "sha256": "1ded3fe009e6676b1f47661b02452dd42ace658641dd2e006b2331f9c4dcce06"
+        }
+      }
+    },
+    "offline_replay_original": {
+      "bytes": 9422,
+      "sha256": "f4836cca00101209282cd1b1fd3bb311ef8888ae4247b7a19dbf99b82b272ed6"
+    },
+    "offline_replay_selection": {
+      "bytes": 284,
+      "sha256": "ababdd0dd7313b9dba4b9c4ce39e8c8cb5b8a35876fb8ad83d228715125cc17c"
+    }
+  },
+  "offline_validation": {
+    "original_exit": 0,
+    "verified_workload_command_and_neutral_working_directory": true,
+    "replayed_trace_subjects": 4,
+    "launched_subjects": 0
+  }
+}
