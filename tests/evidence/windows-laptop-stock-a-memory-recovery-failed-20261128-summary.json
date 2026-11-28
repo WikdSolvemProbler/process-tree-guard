@@ -1,0 +1,129 @@
+{
+  "schema": "ptg-windows-laptop-stock-a-final-memory-recovery-failed-evidence-v1",
+  "status": "failed_incomplete",
+  "scope": "The final preregistered recovery opportunity for exploratory Part A on the supplied native Windows laptop. It used the same stock A image, outside runners, schedule, and safety gates. Both earlier full attempts remain failed.",
+  "identity": {
+    "stock_a_source_commit": "6d3c801057421235c18540f825d871b950418797",
+    "stock_a_image": {
+      "bytes": 826368,
+      "sha256": "c1597d589dbf4c59e533ddb93f3c69cf4a3627a038f5f0b23151eef630062384"
+    },
+    "preregistration_commit": "d4e8c62976cee896437ced564a6ceb088a3add2d",
+    "recovery_amendment": {
+      "bytes": 3076,
+      "sha256": "3db2869d67dda2b60c5fc23bb87729f0bc7397486b6d47dccf9dcf8c450ce9df"
+    },
+    "public_preregistration": {
+      "bytes": 1599,
+      "sha256": "04e9e9ed64655066036847c1d9594786b8747d337b0f0dbb45446ce6a9c213e0"
+    },
+    "measurement_sha256": "79ff9e118c7821fdd0ea5ca02b13a0f82bd3af2ba69148f0723b7046d1ce2874",
+    "schedule_sha256": "da7eb8ac14bbf6b5add7cf4f544586923c2f225f2087c3602c294c5ff5da221e"
+  },
+  "original_execution": {
+    "status": "failed",
+    "outer_exit_code": 1,
+    "retained_primary_exit_code": 1,
+    "elapsed_wall_seconds": 373.3904079
+  },
+  "stop": {
+    "phase": "during",
+    "schedule_group": 83,
+    "reason": "emergency_physical_memory",
+    "available_physical_bytes": 1047179264,
+    "minimum_available_physical_bytes": 1073741824,
+    "shortfall_bytes": 26562560,
+    "shortfall_mib": 25.33203125,
+    "completed_prior_group_grants": 83,
+    "failed_group_enumeration_started": false,
+    "failed_group_acknowledged": false,
+    "description": "Windows reported physical memory below the unchanged 1 GiB floor. The observer refused the group before process enumeration. The source of the depletion is undetermined."
+  },
+  "population": {
+    "planned": {
+      "floor": 36,
+      "warmup": 224,
+      "measured": 1680,
+      "total": 1940,
+      "separate_pricing": 54,
+      "groups": 540
+    },
+    "settled_prefix": {
+      "floor": 36,
+      "warmup": 188,
+      "measured": 0,
+      "total": 224,
+      "pricing": 0,
+      "last_zero_based_ordinal": 223
+    },
+    "unattempted": {
+      "warmup": 36,
+      "measured": 1680,
+      "pricing": 54
+    }
+  },
+  "phase_job_abort": {
+    "observed_active_before": 1,
+    "observed_active_after": 0,
+    "forced_harness_drain": true,
+    "remaining_member_identity_established": false,
+    "scope": "The harness drained the owned phase Job. The observation gives zero product-cleanup credit and does not establish machine-wide process state."
+  },
+  "analysis": {
+    "capture_status": "incomplete",
+    "all_partial_observations_provisional": true,
+    "benchmark_score": null,
+    "ranking": null,
+    "parity_conclusion": null,
+    "standing_loss_count": null,
+    "freeze_gate_fail_count": null,
+    "full_offline_replay": "unrun"
+  },
+  "selected_seconds": {
+    "recovery_readiness": 1605,
+    "full_outer_cap_charged": 6920,
+    "retained_primary_cap": 6900,
+    "during_cap": 6600,
+    "unused_full_cap_refunded": false,
+    "known_listed_through_full_attempt": 26990,
+    "management_seconds_separate": 60,
+    "offline_replay_selected": 0,
+    "recovery_opportunity": "consumed",
+    "further_automatic_attempt_authorized": false
+  },
+  "evidence": {
+    "failed_original": {
+      "bytes": 3088,
+      "sha256": "1846ccd18fca56e35fbf68d1b28f2212a5bf71583bfc6ecb363f891897b49ede"
+    },
+    "original_selector": {
+      "bytes": 546,
+      "sha256": "f8af18fd856c60edb98c0ecf69b521ad61d2ce4d34d7e23bdddf28fe3213796d"
+    },
+    "root_one_use_intent": {
+      "bytes": 1456,
+      "sha256": "5fe0cd8c749133df9c856bd7644bf953e4d5588abf7f5b0dd15da0041b56afe8"
+    },
+    "ready_manifest": {
+      "bytes": 17537,
+      "sha256": "d5ebb76513bd57c8dac4d6b3a1a39f9e94fb6f24279aad8904ca972e3b8bd1e4"
+    },
+    "capture_terminal": {
+      "bytes": 398,
+      "sha256": "14cd5cac5f9482b85dca27357ecdf261dbdabb849ec525abb5cfbd8cae561f31"
+    },
+    "refused_census_raw_line": {
+      "bytes": 897,
+      "sha256": "403e320d03550c2fcbe39ee23f8a5ac4f3f576d377f5263dddef60cf473c0086"
+    },
+    "independent_actual_review_core": {
+      "bytes": 106559,
+      "sha256": "674a5e9837c80f5f2903ca3785d0bf4d8af4aee89d2f89d54177503312035841"
+    },
+    "independent_actual_review_abi": {
+      "bytes": 42909,
+      "sha256": "350f117bc7c141db4fefa7f3207e7b198674b99fe018a5c5d3433d6e533adf45"
+    }
+  },
+  "evidence_availability": "Original records, raw captures, and both independent reviews are retained privately. The published digests identify those records."
+}
